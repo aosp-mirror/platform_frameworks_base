@@ -18,207 +18,180 @@ package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.store.MutableMapK
 import com.android.systemui.kairos.internal.store.SingletonMapK
+import com.android.systemui.kairos.internal.store.asSingle
 import com.android.systemui.kairos.internal.store.singleOf
-import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.internal.util.launchImmediate
-import com.android.systemui.kairos.internal.util.mapParallel
+import com.android.systemui.kairos.internal.util.LogIndent
+import com.android.systemui.kairos.internal.util.hashString
+import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.None
 import com.android.systemui.kairos.util.just
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 
-private typealias MuxPromptMovingResult<W, K, V> = Pair<MuxResult<W, K, V>, MuxResult<W, K, V>?>
-
-internal class MuxPromptMovingNode<W, K, V>(
-    lifecycle: MuxLifecycle<MuxPromptMovingResult<W, K, V>>,
-    private val spec: MuxActivator<MuxPromptMovingResult<W, K, V>>,
+internal class MuxPromptNode<W, K, V>(
+    val name: String?,
+    lifecycle: MuxLifecycle<W, K, V>,
+    private val spec: MuxActivator<W, K, V>,
     factory: MutableMapK.Factory<W, K>,
-) :
-    MuxNode<W, K, V, MuxPromptMovingResult<W, K, V>>(lifecycle, factory),
-    Key<MuxPromptMovingResult<W, K, V>> {
+) : MuxNode<W, K, V>(lifecycle, factory) {
 
-    @Volatile var patchData: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = null
-    @Volatile var patches: PatchNode? = null
+    var patchData: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = null
+    var patches: PatchNode? = null
 
-    @Volatile private var reEval: MuxPromptMovingResult<W, K, V>? = null
+    override fun visit(logIndent: Int, evalScope: EvalScope) {
+        check(epoch < evalScope.epoch) { "node unexpectedly visited multiple times in transaction" }
+        logDuration(logIndent, "MuxPrompt.visit") {
+            val patch: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = patchData
+            patchData = null
 
-    override suspend fun visit(evalScope: EvalScope) {
-        val preSwitchNotEmpty = upstreamData.isNotEmpty()
-        val preSwitchResults: MuxResult<W, K, V> = upstreamData.readOnlyCopy()
-        upstreamData.clear()
-
-        val patch: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = patchData
-        patchData = null
-
-        val (reschedule, evalResult) =
-            reEval?.let { false to it }
-                ?: if (preSwitchNotEmpty || patch != null) {
-                    doEval(preSwitchNotEmpty, preSwitchResults, patch, evalScope)
-                } else {
-                    false to null
-                }
-        reEval = null
-
-        if (reschedule || depthTracker.dirty_depthIncreased()) {
-            reEval = evalResult
-            // Can't schedule downstream yet, need to compact first
-            if (depthTracker.dirty_depthIncreased()) {
-                depthTracker.schedule(evalScope.compactor, node = this)
-            }
-            schedule(evalScope)
-        } else {
-            val compactDownstream = depthTracker.isDirty()
-            if (evalResult != null || compactDownstream) {
-                coroutineScope {
-                    mutex.withLock {
-                        if (compactDownstream) {
-                            adjustDownstreamDepths(evalScope, coroutineScope = this)
-                        }
-                        if (evalResult != null) {
-                            epoch = evalScope.epoch
-                            evalScope.setResult(this@MuxPromptMovingNode, evalResult)
-                            if (!scheduleAll(downstreamSet, evalScope)) {
-                                evalScope.scheduleDeactivation(this@MuxPromptMovingNode)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private suspend fun doEval(
-        preSwitchNotEmpty: Boolean,
-        preSwitchResults: MuxResult<W, K, V>,
-        patch: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>?,
-        evalScope: EvalScope,
-    ): Pair<Boolean, MuxPromptMovingResult<W, K, V>?> {
-        val newlySwitchedIn: MuxResult<W, K, V>? =
+            // If there's a patch, process it.
             patch?.let {
-                // We have a patch, process additions/updates and removals
-                val adds = mutableListOf<Pair<K, TFlowImpl<V>>>()
-                val removes = mutableListOf<K>()
-                patch.forEach { (k, newUpstream) ->
-                    when (newUpstream) {
-                        is Just -> adds.add(k to newUpstream.value)
-                        None -> removes.add(k)
+                val needsReschedule = processPatch(patch, evalScope)
+                // We may need to reschedule if newly-switched-in nodes have not yet been
+                // visited within this transaction.
+                val depthIncreased = depthTracker.dirty_depthIncreased()
+                if (needsReschedule || depthIncreased) {
+                    if (depthIncreased) {
+                        depthTracker.schedule(evalScope.compactor, this@MuxPromptNode)
                     }
-                }
-
-                val additionsAndUpdates = mutableListOf<Pair<K, PullNode<V>>>()
-                val severed = mutableListOf<NodeConnection<*>>()
-
-                coroutineScope {
-                    // remove and sever
-                    removes.forEach { k ->
-                        switchedIn.remove(k)?.let { branchNode: BranchNode ->
-                            val conn: NodeConnection<V> = branchNode.upstream
-                            severed.add(conn)
-                            launchImmediate {
-                                conn.removeDownstream(downstream = branchNode.schedulable)
-                            }
-                            depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
-                        }
+                    if (name != null) {
+                        logLn(
+                            "[${this@MuxPromptNode}] rescheduling (reschedule=$needsReschedule, depthIncrease=$depthIncreased)"
+                        )
                     }
-
-                    // add or replace
-                    adds
-                        .mapParallel { (k, newUpstream: TFlowImpl<V>) ->
-                            val branchNode = BranchNode(k)
-                            k to
-                                newUpstream.activate(evalScope, branchNode.schedulable)?.let {
-                                    (conn, _) ->
-                                    branchNode.apply { upstream = conn }
-                                }
-                        }
-                        .forEach { (k, newBranch: BranchNode?) ->
-                            // remove old and sever, if present
-                            switchedIn.remove(k)?.let { oldBranch: BranchNode ->
-                                val conn: NodeConnection<V> = oldBranch.upstream
-                                severed.add(conn)
-                                launchImmediate {
-                                    conn.removeDownstream(downstream = oldBranch.schedulable)
-                                }
-                                depthTracker.removeDirectUpstream(
-                                    conn.depthTracker.snapshotDirectDepth
-                                )
-                            }
-
-                            // add new
-                            newBranch?.let {
-                                switchedIn[k] = newBranch
-                                additionsAndUpdates.add(k to newBranch.upstream.directUpstream)
-                                val branchDepthTracker = newBranch.upstream.depthTracker
-                                if (branchDepthTracker.snapshotIsDirect) {
-                                    depthTracker.addDirectUpstream(
-                                        oldDepth = null,
-                                        newDepth = branchDepthTracker.snapshotDirectDepth,
-                                    )
-                                } else {
-                                    depthTracker.addIndirectUpstream(
-                                        oldDepth = null,
-                                        newDepth = branchDepthTracker.snapshotIndirectDepth,
-                                    )
-                                    depthTracker.updateIndirectRoots(
-                                        additions = branchDepthTracker.snapshotIndirectRoots,
-                                        butNot = null,
-                                    )
-                                }
-                            }
-                        }
+                    schedule(evalScope)
+                    return
                 }
-
-                coroutineScope {
-                    for (severedNode in severed) {
-                        launch { severedNode.scheduleDeactivationIfNeeded(evalScope) }
-                    }
-                }
-
-                val resultStore = storeFactory.create<PullNode<V>>(additionsAndUpdates.size)
-                for ((k, node) in additionsAndUpdates) {
-                    resultStore[k] = node
-                }
-                resultStore.takeIf { it.isNotEmpty() }?.asReadOnly()
             }
+            val results = upstreamData.readOnlyCopy().also { upstreamData.clear() }
 
-        return if (preSwitchNotEmpty || newlySwitchedIn != null) {
-            (newlySwitchedIn != null) to (preSwitchResults to newlySwitchedIn)
-        } else {
-            false to null
+            // If we don't need to reschedule, or there wasn't a patch at all, then we proceed
+            // with merging pre-switch and post-switch results
+            val hasResult = results.isNotEmpty()
+            val compactDownstream = depthTracker.isDirty()
+            if (hasResult || compactDownstream) {
+                if (compactDownstream) {
+                    adjustDownstreamDepths(evalScope)
+                }
+                if (hasResult) {
+                    transactionCache.put(evalScope, results)
+                    if (!scheduleAll(currentLogIndent, downstreamSet, evalScope)) {
+                        evalScope.scheduleDeactivation(this@MuxPromptNode)
+                    }
+                }
+            }
         }
     }
 
-    private fun adjustDownstreamDepths(evalScope: EvalScope, coroutineScope: CoroutineScope) {
+    // side-effect: this will populate `upstreamData` with any immediately available results
+    private fun LogIndent.processPatch(
+        patch: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>,
+        evalScope: EvalScope,
+    ): Boolean {
+        var needsReschedule = false
+        // We have a patch, process additions/updates and removals
+        val adds = mutableListOf<Pair<K, TFlowImpl<V>>>()
+        val removes = mutableListOf<K>()
+        patch.forEach { (k, newUpstream) ->
+            when (newUpstream) {
+                is Just -> adds.add(k to newUpstream.value)
+                None -> removes.add(k)
+            }
+        }
+
+        val severed = mutableListOf<NodeConnection<*>>()
+
+        // remove and sever
+        removes.forEach { k ->
+            switchedIn.remove(k)?.let { branchNode: BranchNode ->
+                if (name != null) {
+                    logLn("[${this@MuxPromptNode}] removing $k")
+                }
+                val conn: NodeConnection<V> = branchNode.upstream
+                severed.add(conn)
+                conn.removeDownstream(downstream = branchNode.schedulable)
+                depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
+            }
+        }
+
+        // add or replace
+        adds.forEach { (k, newUpstream: TFlowImpl<V>) ->
+            // remove old and sever, if present
+            switchedIn.remove(k)?.let { oldBranch: BranchNode ->
+                if (name != null) {
+                    logLn("[${this@MuxPromptNode}] replacing $k")
+                }
+                val conn: NodeConnection<V> = oldBranch.upstream
+                severed.add(conn)
+                conn.removeDownstream(downstream = oldBranch.schedulable)
+                depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
+            }
+
+            // add new
+            val newBranch = BranchNode(k)
+            newUpstream.activate(evalScope, newBranch.schedulable)?.let { (conn, needsEval) ->
+                newBranch.upstream = conn
+                if (name != null) {
+                    logLn("[${this@MuxPromptNode}] switching in $k")
+                }
+                switchedIn[k] = newBranch
+                if (needsEval) {
+                    upstreamData[k] = newBranch.upstream.directUpstream
+                } else {
+                    needsReschedule = true
+                }
+                val branchDepthTracker = newBranch.upstream.depthTracker
+                if (branchDepthTracker.snapshotIsDirect) {
+                    depthTracker.addDirectUpstream(
+                        oldDepth = null,
+                        newDepth = branchDepthTracker.snapshotDirectDepth,
+                    )
+                } else {
+                    depthTracker.addIndirectUpstream(
+                        oldDepth = null,
+                        newDepth = branchDepthTracker.snapshotIndirectDepth,
+                    )
+                    depthTracker.updateIndirectRoots(
+                        additions = branchDepthTracker.snapshotIndirectRoots,
+                        butNot = null,
+                    )
+                }
+            }
+        }
+
+        for (severedNode in severed) {
+            severedNode.scheduleDeactivationIfNeeded(evalScope)
+        }
+
+        return needsReschedule
+    }
+
+    private fun adjustDownstreamDepths(evalScope: EvalScope) {
         if (depthTracker.dirty_depthIncreased()) {
             // schedule downstream nodes on the compaction scheduler; this scheduler is drained at
             // the end of this eval depth, so that all depth increases are applied before we advance
             // the eval step
-            depthTracker.schedule(evalScope.compactor, node = this@MuxPromptMovingNode)
+            depthTracker.schedule(evalScope.compactor, node = this@MuxPromptNode)
         } else if (depthTracker.isDirty()) {
             // schedule downstream nodes on the eval scheduler; this is more efficient and is only
             // safe if the depth hasn't increased
             depthTracker.applyChanges(
-                coroutineScope,
                 evalScope.scheduler,
                 downstreamSet,
-                muxNode = this@MuxPromptMovingNode,
+                muxNode = this@MuxPromptNode,
             )
         }
     }
 
-    override suspend fun getPushEvent(evalScope: EvalScope): MuxPromptMovingResult<W, K, V> =
-        evalScope.getCurrentValue(key = this)
-
-    override suspend fun doDeactivate() {
-        // Update lifecycle
-        lifecycle.mutex.withLock {
-            if (lifecycle.lifecycleState !is MuxLifecycleState.Active) return@doDeactivate
-            lifecycle.lifecycleState = MuxLifecycleState.Inactive(spec)
+    override fun getPushEvent(logIndent: Int, evalScope: EvalScope): MuxResult<W, K, V> =
+        logDuration(logIndent, "MuxPrompt.getPushEvent") {
+            transactionCache.getCurrentValue(evalScope)
         }
+
+    override fun doDeactivate() {
+        // Update lifecycle
+        if (lifecycle.lifecycleState !is MuxLifecycleState.Active) return
+        lifecycle.lifecycleState = MuxLifecycleState.Inactive(spec)
         // Process branch nodes
         switchedIn.forEach { (_, branchNode) ->
             branchNode.upstream.removeDownstreamAndDeactivateIfNeeded(
@@ -231,30 +204,29 @@ internal class MuxPromptMovingNode<W, K, V>(
         }
     }
 
-    suspend fun removeIndirectPatchNode(
+    fun removeIndirectPatchNode(
         scheduler: Scheduler,
         oldDepth: Int,
         indirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
-        mutex.withLock {
-            patches = null
-            if (
-                depthTracker.removeIndirectUpstream(oldDepth) or
-                    depthTracker.updateIndirectRoots(removals = indirectSet)
-            ) {
-                depthTracker.schedule(scheduler, this)
-            }
+        patches = null
+        if (
+            depthTracker.removeIndirectUpstream(oldDepth) or
+                depthTracker.updateIndirectRoots(removals = indirectSet)
+        ) {
+            depthTracker.schedule(scheduler, this)
         }
     }
 
-    suspend fun removeDirectPatchNode(scheduler: Scheduler, depth: Int) {
-        mutex.withLock {
-            patches = null
-            if (depthTracker.removeDirectUpstream(depth)) {
-                depthTracker.schedule(scheduler, this)
-            }
+    fun removeDirectPatchNode(scheduler: Scheduler, depth: Int) {
+        patches = null
+        if (depthTracker.removeDirectUpstream(depth)) {
+            depthTracker.schedule(scheduler, this)
         }
     }
+
+    override fun toString(): String =
+        "${this::class.simpleName}@$hashString${name?.let { "[$it]" }.orEmpty()}"
 
     inner class PatchNode : SchedulableNode {
 
@@ -262,26 +234,24 @@ internal class MuxPromptMovingNode<W, K, V>(
 
         lateinit var upstream: NodeConnection<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>
 
-        override suspend fun schedule(evalScope: EvalScope) {
-            patchData = upstream.getPushEvent(evalScope)
-            this@MuxPromptMovingNode.schedule(evalScope)
+        override fun schedule(logIndent: Int, evalScope: EvalScope) {
+            logDuration(logIndent, "MuxPromptPatchNode.schedule") {
+                patchData = upstream.getPushEvent(currentLogIndent, evalScope)
+                this@MuxPromptNode.schedule(evalScope)
+            }
         }
 
-        override suspend fun adjustDirectUpstream(
-            scheduler: Scheduler,
-            oldDepth: Int,
-            newDepth: Int,
-        ) {
-            this@MuxPromptMovingNode.adjustDirectUpstream(scheduler, oldDepth, newDepth)
+        override fun adjustDirectUpstream(scheduler: Scheduler, oldDepth: Int, newDepth: Int) {
+            this@MuxPromptNode.adjustDirectUpstream(scheduler, oldDepth, newDepth)
         }
 
-        override suspend fun moveIndirectUpstreamToDirect(
+        override fun moveIndirectUpstreamToDirect(
             scheduler: Scheduler,
             oldIndirectDepth: Int,
             oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
             newDirectDepth: Int,
         ) {
-            this@MuxPromptMovingNode.moveIndirectUpstreamToDirect(
+            this@MuxPromptNode.moveIndirectUpstreamToDirect(
                 scheduler,
                 oldIndirectDepth,
                 oldIndirectSet,
@@ -289,14 +259,14 @@ internal class MuxPromptMovingNode<W, K, V>(
             )
         }
 
-        override suspend fun adjustIndirectUpstream(
+        override fun adjustIndirectUpstream(
             scheduler: Scheduler,
             oldDepth: Int,
             newDepth: Int,
             removals: Set<MuxDeferredNode<*, *, *>>,
             additions: Set<MuxDeferredNode<*, *, *>>,
         ) {
-            this@MuxPromptMovingNode.adjustIndirectUpstream(
+            this@MuxPromptNode.adjustIndirectUpstream(
                 scheduler,
                 oldDepth,
                 newDepth,
@@ -305,13 +275,13 @@ internal class MuxPromptMovingNode<W, K, V>(
             )
         }
 
-        override suspend fun moveDirectUpstreamToIndirect(
+        override fun moveDirectUpstreamToIndirect(
             scheduler: Scheduler,
             oldDirectDepth: Int,
             newIndirectDepth: Int,
             newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
         ) {
-            this@MuxPromptMovingNode.moveDirectUpstreamToIndirect(
+            this@MuxPromptNode.moveDirectUpstreamToIndirect(
                 scheduler,
                 oldDirectDepth,
                 newIndirectDepth,
@@ -319,98 +289,70 @@ internal class MuxPromptMovingNode<W, K, V>(
             )
         }
 
-        override suspend fun removeDirectUpstream(scheduler: Scheduler, depth: Int) {
-            this@MuxPromptMovingNode.removeDirectPatchNode(scheduler, depth)
+        override fun removeDirectUpstream(scheduler: Scheduler, depth: Int) {
+            this@MuxPromptNode.removeDirectPatchNode(scheduler, depth)
         }
 
-        override suspend fun removeIndirectUpstream(
+        override fun removeIndirectUpstream(
             scheduler: Scheduler,
             depth: Int,
             indirectSet: Set<MuxDeferredNode<*, *, *>>,
         ) {
-            this@MuxPromptMovingNode.removeIndirectPatchNode(scheduler, depth, indirectSet)
+            this@MuxPromptNode.removeIndirectPatchNode(scheduler, depth, indirectSet)
         }
     }
-}
-
-internal class MuxPromptEvalNode<W, K, V>(
-    private val movingNode: PullNode<MuxPromptMovingResult<W, K, V>>,
-    private val factory: MutableMapK.Factory<W, K>,
-) : PullNode<MuxResult<W, K, V>> {
-    override suspend fun getPushEvent(evalScope: EvalScope): MuxResult<W, K, V> =
-        movingNode.getPushEvent(evalScope).let { (preSwitchResults, newlySwitchedIn) ->
-            newlySwitchedIn?.let {
-                factory
-                    .create(preSwitchResults)
-                    .also { store ->
-                        newlySwitchedIn.forEach { k, pullNode -> store[k] = pullNode }
-                    }
-                    .asReadOnly()
-            } ?: preSwitchResults
-        }
 }
 
 internal inline fun <A> switchPromptImplSingle(
-    crossinline getStorage: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline getPatches: suspend EvalScope.() -> TFlowImpl<TFlowImpl<A>>,
-): TFlowImpl<A> =
-    mapImpl({
+    crossinline getStorage: EvalScope.() -> TFlowImpl<A>,
+    crossinline getPatches: EvalScope.() -> TFlowImpl<TFlowImpl<A>>,
+): TFlowImpl<A> {
+    val switchPromptImpl =
         switchPromptImpl(
             getStorage = { singleOf(getStorage()).asIterable() },
             getPatches = {
-                mapImpl(getPatches) { newFlow -> singleOf(just(newFlow)).asIterable() }
+                mapImpl(getPatches) { newFlow, _ -> singleOf(just(newFlow)).asIterable() }
             },
             storeFactory = SingletonMapK.Factory(),
         )
-    }) { map ->
-        map.getValue(Unit).getPushEvent(this)
+    return mapImpl({ switchPromptImpl }) { map, logIndent ->
+        map.asSingle().getValue(Unit).getPushEvent(logIndent, this)
     }
-
-internal fun <W, K, V> switchPromptImpl(
-    getStorage: suspend EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
-    getPatches: suspend EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
-    storeFactory: MutableMapK.Factory<W, K>,
-): TFlowImpl<MuxResult<W, K, V>> {
-    val moving = MuxLifecycle(MuxPromptActivator(getStorage, storeFactory, getPatches))
-    val eval = TFlowCheap { downstream ->
-        moving.activate(evalScope = this, downstream)?.let { (connection, needsEval) ->
-            val evalNode = MuxPromptEvalNode(connection.directUpstream, storeFactory)
-            ActivationResult(
-                connection = NodeConnection(evalNode, connection.schedulerUpstream),
-                needsEval = needsEval,
-            )
-        }
-    }
-    return eval.cached()
 }
 
+internal fun <W, K, V> switchPromptImpl(
+    name: String? = null,
+    getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
+    getPatches: EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
+    storeFactory: MutableMapK.Factory<W, K>,
+): TFlowImpl<MuxResult<W, K, V>> =
+    MuxLifecycle(MuxPromptActivator(name, getStorage, storeFactory, getPatches))
+
 private class MuxPromptActivator<W, K, V>(
-    private val getStorage: suspend EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
+    private val name: String?,
+    private val getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
     private val storeFactory: MutableMapK.Factory<W, K>,
-    private val getPatches:
-        suspend EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
-) : MuxActivator<MuxPromptMovingResult<W, K, V>> {
-    override suspend fun activate(
+    private val getPatches: EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
+) : MuxActivator<W, K, V> {
+    override fun activate(
         evalScope: EvalScope,
-        lifecycle: MuxLifecycle<MuxPromptMovingResult<W, K, V>>,
-    ): MuxNode<W, *, *, MuxPromptMovingResult<W, K, V>>? {
+        lifecycle: MuxLifecycle<W, K, V>,
+    ): Pair<MuxNode<W, K, V>, (() -> Unit)?>? {
         // Initialize mux node and switched-in connections.
         val movingNode =
-            MuxPromptMovingNode(lifecycle, this, storeFactory).apply {
-                coroutineScope {
-                    launch { initializeUpstream(evalScope, getStorage, storeFactory) }
-                    // Setup patches connection
-                    val patchNode = PatchNode()
-                    getPatches(evalScope)
-                        .activate(evalScope = evalScope, downstream = patchNode.schedulable)
-                        ?.let { (conn, needsEval) ->
-                            patchNode.upstream = conn
-                            patches = patchNode
-                            if (needsEval) {
-                                patchData = conn.getPushEvent(evalScope)
-                            }
+            MuxPromptNode(name, lifecycle, this, storeFactory).apply {
+                initializeUpstream(evalScope, getStorage, storeFactory)
+                // Setup patches connection
+                val patchNode = PatchNode()
+                getPatches(evalScope)
+                    .activate(evalScope = evalScope, downstream = patchNode.schedulable)
+                    ?.let { (conn, needsEval) ->
+                        patchNode.upstream = conn
+                        patches = patchNode
+                        if (needsEval) {
+                            patchData = conn.getPushEvent(0, evalScope)
                         }
-                }
+                    }
                 // Update depth based on all initial switched-in nodes.
                 initializeDepth()
                 // Update depth based on patches node.
@@ -441,6 +383,10 @@ private class MuxPromptActivator<W, K, V>(
             movingNode.schedule(evalScope)
         }
 
-        return movingNode.takeUnless { it.patches == null && it.switchedIn.isEmpty() }
+        return if (movingNode.patches == null && movingNode.switchedIn.isEmpty()) {
+            null
+        } else {
+            movingNode to null
+        }
     }
 }

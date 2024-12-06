@@ -42,7 +42,7 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 
 /** A function that modifies the FrpNetwork. */
-typealias FrpSpec<A> = suspend FrpBuildScope.() -> A
+typealias FrpSpec<A> = FrpBuildScope.() -> A
 
 /**
  * Constructs an [FrpSpec]. The passed [block] will be invoked with an [FrpBuildScope] that can be
@@ -51,7 +51,7 @@ typealias FrpSpec<A> = suspend FrpBuildScope.() -> A
  */
 @ExperimentalFrpApi
 @Suppress("NOTHING_TO_INLINE")
-inline fun <A> frpSpec(noinline block: suspend FrpBuildScope.() -> A): FrpSpec<A> = block
+inline fun <A> frpSpec(noinline block: FrpBuildScope.() -> A): FrpSpec<A> = block
 
 /** Applies the [FrpSpec] within this [FrpBuildScope]. */
 @ExperimentalFrpApi
@@ -63,11 +63,14 @@ inline operator fun <A> FrpBuildScope.invoke(block: FrpBuildScope.() -> A) = run
 interface FrpBuildScope : FrpStateScope {
 
     /** TODO: Javadoc */
-    @ExperimentalFrpApi
-    fun <R> deferredBuildScope(block: suspend FrpBuildScope.() -> R): FrpDeferredValue<R>
+    val frpNetwork: FrpNetwork
 
     /** TODO: Javadoc */
-    @ExperimentalFrpApi fun deferredBuildScopeAction(block: suspend FrpBuildScope.() -> Unit)
+    @ExperimentalFrpApi
+    fun <R> deferredBuildScope(block: FrpBuildScope.() -> R): FrpDeferredValue<R>
+
+    /** TODO: Javadoc */
+    @ExperimentalFrpApi fun deferredBuildScopeAction(block: FrpBuildScope.() -> Unit)
 
     /**
      * Returns a [TFlow] containing the results of applying [transform] to each value of the
@@ -81,8 +84,7 @@ interface FrpBuildScope : FrpStateScope {
      * (or a downstream) [TFlow] is observed separately, [transform] will not be invoked, and no
      * internal side-effects will occur.
      */
-    @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.mapBuild(transform: suspend FrpBuildScope.(A) -> B): TFlow<B>
+    @ExperimentalFrpApi fun <A, B> TFlow<A>.mapBuild(transform: FrpBuildScope.(A) -> B): TFlow<B>
 
     /**
      * Invokes [block] whenever this [TFlow] emits a value, allowing side-effects to be safely
@@ -100,7 +102,7 @@ interface FrpBuildScope : FrpStateScope {
     @ExperimentalFrpApi
     fun <A> TFlow<A>.observe(
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
-        block: suspend FrpEffectScope.(A) -> Unit = {},
+        block: FrpEffectScope.(A) -> Unit = {},
     ): Job
 
     /**
@@ -133,7 +135,8 @@ interface FrpBuildScope : FrpStateScope {
      * tFlow { ... }.apply { observe() }
      * ```
      */
-    @ExperimentalFrpApi fun <T> tFlow(builder: suspend FrpProducerScope<T>.() -> Unit): TFlow<T>
+    @ExperimentalFrpApi
+    fun <T> tFlow(name: String? = null, builder: suspend FrpProducerScope<T>.() -> Unit): TFlow<T>
 
     /**
      * Creates an instance of a [TFlow] with elements that are emitted from [builder].
@@ -197,7 +200,7 @@ interface FrpBuildScope : FrpStateScope {
      * @see observe
      */
     @ExperimentalFrpApi
-    fun <A> TFlow<A>.observeBuild(block: suspend FrpBuildScope.(A) -> Unit = {}): Job =
+    fun <A> TFlow<A>.observeBuild(block: FrpBuildScope.(A) -> Unit = {}): Job =
         mapBuild(block).observe()
 
     /**
@@ -320,9 +323,8 @@ interface FrpBuildScope : FrpStateScope {
      * [observers][observe] are unregistered, and any pending [effects][effect] are cancelled).
      */
     @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.flatMapLatestBuild(
-        transform: suspend FrpBuildScope.(A) -> TFlow<B>
-    ): TFlow<B> = mapCheap { frpSpec { transform(it) } }.applyLatestSpec().flatten()
+    fun <A, B> TFlow<A>.flatMapLatestBuild(transform: FrpBuildScope.(A) -> TFlow<B>): TFlow<B> =
+        mapCheap { frpSpec { transform(it) } }.applyLatestSpec().flatten()
 
     /**
      * Returns a [TState] by applying [transform] to the value held by the original [TState].
@@ -333,9 +335,8 @@ interface FrpBuildScope : FrpStateScope {
      * cancelled).
      */
     @ExperimentalFrpApi
-    fun <A, B> TState<A>.flatMapLatestBuild(
-        transform: suspend FrpBuildScope.(A) -> TState<B>
-    ): TState<B> = mapLatestBuild { transform(it) }.flatten()
+    fun <A, B> TState<A>.flatMapLatestBuild(transform: FrpBuildScope.(A) -> TState<B>): TState<B> =
+        mapLatestBuild { transform(it) }.flatten()
 
     /**
      * Returns a [TState] that transforms the value held inside this [TState] by applying it to the
@@ -347,7 +348,7 @@ interface FrpBuildScope : FrpStateScope {
      * cancelled).
      */
     @ExperimentalFrpApi
-    fun <A, B> TState<A>.mapLatestBuild(transform: suspend FrpBuildScope.(A) -> B): TState<B> =
+    fun <A, B> TState<A>.mapLatestBuild(transform: FrpBuildScope.(A) -> B): TState<B> =
         mapCheapUnsafe { frpSpec { transform(it) } }.applyLatestSpec()
 
     /**
@@ -391,7 +392,7 @@ interface FrpBuildScope : FrpStateScope {
      * cancelled).
      */
     @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.mapLatestBuild(transform: suspend FrpBuildScope.(A) -> B): TFlow<B> =
+    fun <A, B> TFlow<A>.mapLatestBuild(transform: FrpBuildScope.(A) -> B): TFlow<B> =
         mapCheap { frpSpec { transform(it) } }.applyLatestSpec()
 
     /**
@@ -407,7 +408,7 @@ interface FrpBuildScope : FrpStateScope {
     @ExperimentalFrpApi
     fun <A, B> TFlow<A>.mapLatestBuild(
         initialValue: A,
-        transform: suspend FrpBuildScope.(A) -> B,
+        transform: FrpBuildScope.(A) -> B,
     ): Pair<TFlow<B>, FrpDeferredValue<B>> =
         mapLatestBuildDeferred(deferredOf(initialValue), transform)
 
@@ -424,7 +425,7 @@ interface FrpBuildScope : FrpStateScope {
     @ExperimentalFrpApi
     fun <A, B> TFlow<A>.mapLatestBuildDeferred(
         initialValue: FrpDeferredValue<A>,
-        transform: suspend FrpBuildScope.(A) -> B,
+        transform: FrpBuildScope.(A) -> B,
     ): Pair<TFlow<B>, FrpDeferredValue<B>> =
         mapCheap { frpSpec { transform(it) } }
             .applyLatestSpec(initialSpec = frpSpec { transform(initialValue.get()) })
@@ -519,12 +520,12 @@ interface FrpBuildScope : FrpStateScope {
     fun <K, A, B> TFlow<Map<K, Maybe<A>>>.mapLatestBuildForKey(
         initialValues: FrpDeferredValue<Map<K, A>>,
         numKeys: Int? = null,
-        transform: suspend FrpBuildScope.(A) -> B,
+        transform: FrpBuildScope.(K, A) -> B,
     ): Pair<TFlow<Map<K, Maybe<B>>>, FrpDeferredValue<Map<K, B>>> =
-        map { patch -> patch.mapValues { (_, v) -> v.map { frpSpec { transform(it) } } } }
+        map { patch -> patch.mapValues { (k, v) -> v.map { frpSpec { transform(k, it) } } } }
             .applyLatestSpecForKey(
                 deferredBuildScope {
-                    initialValues.get().mapValues { (_, v) -> frpSpec { transform(v) } }
+                    initialValues.get().mapValues { (k, v) -> frpSpec { transform(k, v) } }
                 },
                 numKeys = numKeys,
             )
@@ -546,7 +547,7 @@ interface FrpBuildScope : FrpStateScope {
     fun <K, A, B> TFlow<Map<K, Maybe<A>>>.mapLatestBuildForKey(
         initialValues: Map<K, A>,
         numKeys: Int? = null,
-        transform: suspend FrpBuildScope.(A) -> B,
+        transform: FrpBuildScope.(K, A) -> B,
     ): Pair<TFlow<Map<K, Maybe<B>>>, FrpDeferredValue<Map<K, B>>> =
         mapLatestBuildForKey(deferredOf(initialValues), numKeys, transform)
 
@@ -565,7 +566,7 @@ interface FrpBuildScope : FrpStateScope {
     @ExperimentalFrpApi
     fun <K, A, B> TFlow<Map<K, Maybe<A>>>.mapLatestBuildForKey(
         numKeys: Int? = null,
-        transform: suspend FrpBuildScope.(A) -> B,
+        transform: FrpBuildScope.(K, A) -> B,
     ): TFlow<Map<K, Maybe<B>>> = mapLatestBuildForKey(emptyMap(), numKeys, transform).first
 
     /** Returns a [Deferred] containing the next value to be emitted from this [TFlow]. */
@@ -585,7 +586,8 @@ interface FrpBuildScope : FrpStateScope {
     }
 
     /** Returns a [TFlow] that emits whenever this [Flow] emits. */
-    @ExperimentalFrpApi fun <A> Flow<A>.toTFlow(): TFlow<A> = tFlow { collect { emit(it) } }
+    @ExperimentalFrpApi
+    fun <A> Flow<A>.toTFlow(name: String? = null): TFlow<A> = tFlow(name) { collect { emit(it) } }
 
     /**
      * Shorthand for:
@@ -626,7 +628,7 @@ interface FrpBuildScope : FrpStateScope {
      * cancelled).
      */
     @ExperimentalFrpApi
-    fun <A> TFlow<A>.observeLatestBuild(block: suspend FrpBuildScope.(A) -> Unit = {}): Job =
+    fun <A> TFlow<A>.observeLatestBuild(block: FrpBuildScope.(A) -> Unit = {}): Job =
         mapLatestBuild { block(it) }.observe()
 
     /**
@@ -636,7 +638,7 @@ interface FrpBuildScope : FrpStateScope {
      * With each invocation of [block], running effects from the previous invocation are cancelled.
      */
     @ExperimentalFrpApi
-    fun <A> TFlow<A>.observeLatest(block: suspend FrpEffectScope.(A) -> Unit = {}): Job {
+    fun <A> TFlow<A>.observeLatest(block: FrpEffectScope.(A) -> Unit = {}): Job {
         var innerJob: Job? = null
         return observeBuild {
             innerJob?.cancel()
@@ -651,14 +653,13 @@ interface FrpBuildScope : FrpStateScope {
      * With each invocation of [block], running effects from the previous invocation are cancelled.
      */
     @ExperimentalFrpApi
-    fun <A> TState<A>.observeLatest(block: suspend FrpEffectScope.(A) -> Unit = {}): Job =
-        launchScope {
-            var innerJob = effect { block(sample()) }
-            stateChanges.observeBuild {
-                innerJob.cancel()
-                innerJob = effect { block(it) }
-            }
+    fun <A> TState<A>.observeLatest(block: FrpEffectScope.(A) -> Unit = {}): Job = launchScope {
+        var innerJob = effect { block(sample()) }
+        stateChanges.observeBuild {
+            innerJob.cancel()
+            innerJob = effect { block(it) }
         }
+    }
 
     /**
      * Applies [block] to the value held by this [TState]. [block] receives an [FrpBuildScope] that
@@ -670,17 +671,16 @@ interface FrpBuildScope : FrpStateScope {
      * [observers][observe] are unregistered, and any pending [side-effects][effect] are cancelled).
      */
     @ExperimentalFrpApi
-    fun <A> TState<A>.observeLatestBuild(block: suspend FrpBuildScope.(A) -> Unit = {}): Job =
-        launchScope {
-            var innerJob: Job = launchScope { block(sample()) }
-            stateChanges.observeBuild {
-                innerJob.cancel()
-                innerJob = launchScope { block(it) }
-            }
+    fun <A> TState<A>.observeLatestBuild(block: FrpBuildScope.(A) -> Unit = {}): Job = launchScope {
+        var innerJob: Job = launchScope { block(sample()) }
+        stateChanges.observeBuild {
+            innerJob.cancel()
+            innerJob = launchScope { block(it) }
         }
+    }
 
     /** Applies the [FrpSpec] within this [FrpBuildScope]. */
-    @ExperimentalFrpApi suspend fun <A> FrpSpec<A>.applySpec(): A = this()
+    @ExperimentalFrpApi fun <A> FrpSpec<A>.applySpec(): A = this()
 
     /**
      * Applies the [FrpSpec] within this [FrpBuildScope], returning the result as an
@@ -695,11 +695,10 @@ interface FrpBuildScope : FrpStateScope {
      * [effect].
      */
     @ExperimentalFrpApi
-    fun <A> TState<A>.observeBuild(block: suspend FrpBuildScope.(A) -> Unit = {}): Job =
-        launchScope {
-            block(sample())
-            stateChanges.observeBuild(block)
-        }
+    fun <A> TState<A>.observeBuild(block: FrpBuildScope.(A) -> Unit = {}): Job = launchScope {
+        block(sample())
+        stateChanges.observeBuild(block)
+    }
 
     /**
      * Invokes [block] with the current value of this [TState], re-invoking whenever it changes,
@@ -714,7 +713,7 @@ interface FrpBuildScope : FrpStateScope {
      * otherwise, it will be invoked with the [current][sample] value.
      */
     @ExperimentalFrpApi
-    fun <A> TState<A>.observe(block: suspend FrpEffectScope.(A) -> Unit = {}): Job =
+    fun <A> TState<A>.observe(block: FrpEffectScope.(A) -> Unit = {}): Job =
         now.map { sample() }.mergeWith(stateChanges) { _, new -> new }.observe { block(it) }
 }
 
@@ -753,7 +752,10 @@ fun <A> FrpBuildScope.asyncTFlow(block: suspend () -> A): TFlow<A> =
  * ```
  */
 @ExperimentalFrpApi
-fun FrpBuildScope.effect(block: suspend FrpEffectScope.() -> Unit): Job = now.observe { block() }
+fun FrpBuildScope.effect(
+    context: CoroutineContext = EmptyCoroutineContext,
+    block: FrpEffectScope.() -> Unit,
+): Job = now.observe(context) { block() }
 
 /**
  * Launches [block] in a new coroutine, returning a [Job] bound to the coroutine.

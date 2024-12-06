@@ -23,7 +23,6 @@ import com.android.systemui.kairos.internal.util.awaitCancellationAndThen
 import com.android.systemui.kairos.internal.util.childScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -53,7 +52,7 @@ interface FrpNetwork {
      * If the network is cancelled while the caller of [transact] is suspended, then the call will
      * be cancelled.
      */
-    @ExperimentalFrpApi suspend fun <R> transact(block: suspend FrpTransactionScope.() -> R): R
+    @ExperimentalFrpApi suspend fun <R> transact(block: FrpTransactionScope.() -> R): R
 
     /**
      * Activates [spec] in a transaction, suspending indefinitely. While suspended, all observers
@@ -133,22 +132,36 @@ internal class LocalFrpNetwork(
     private val scope: CoroutineScope,
     private val endSignal: TFlow<Any>,
 ) : FrpNetwork {
-    override suspend fun <R> transact(block: suspend FrpTransactionScope.() -> R): R =
+    override suspend fun <R> transact(block: FrpTransactionScope.() -> R): R =
         network.transaction("FrpNetwork.transact") { runInTransactionScope { block() } }.await()
 
     override suspend fun activateSpec(spec: FrpSpec<*>) {
+        val stopEmitter =
+            CoalescingMutableTFlow(
+                name = "activateSpec",
+                coalesce = { _, _: Unit -> },
+                network = network,
+                getInitialValue = {},
+            )
         val job =
             network
                 .transaction("FrpNetwork.activateSpec") {
                     val buildScope =
                         BuildScopeImpl(
-                            stateScope = StateScopeImpl(evalScope = this, endSignal = endSignal),
+                            stateScope =
+                                StateScopeImpl(
+                                    evalScope = this,
+                                    endSignal = mergeLeft(stopEmitter, endSignal),
+                                ),
                             coroutineScope = scope,
                         )
                     buildScope.runInBuildScope { launchScope(spec) }
                 }
                 .await()
-        awaitCancellationAndThen { job.cancel() }
+        awaitCancellationAndThen {
+            stopEmitter.emit(Unit)
+            job.cancel()
+        }
     }
 
     override fun <In, Out> coalescingMutableTFlow(

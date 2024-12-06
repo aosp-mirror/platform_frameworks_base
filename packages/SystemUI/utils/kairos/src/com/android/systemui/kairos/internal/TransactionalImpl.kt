@@ -16,31 +16,25 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.internal.util.Key
 import com.android.systemui.kairos.internal.util.hashString
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
 
 internal sealed class TransactionalImpl<out A> {
-    data class Const<out A>(val value: Deferred<A>) : TransactionalImpl<A>()
+    data class Const<out A>(val value: Lazy<A>) : TransactionalImpl<A>()
 
-    class Impl<A>(val block: suspend EvalScope.() -> A) : TransactionalImpl<A>(), Key<Deferred<A>> {
+    class Impl<A>(val block: EvalScope.() -> A) : TransactionalImpl<A>() {
+        val cache = TransactionCache<Lazy<A>>()
+
         override fun toString(): String = "${this::class.simpleName}@$hashString"
     }
 }
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun <A> transactionalImpl(
-    noinline block: suspend EvalScope.() -> A
-): TransactionalImpl<A> = TransactionalImpl.Impl(block)
+internal inline fun <A> transactionalImpl(noinline block: EvalScope.() -> A): TransactionalImpl<A> =
+    TransactionalImpl.Impl(block)
 
-internal fun <A> TransactionalImpl<A>.sample(evalScope: EvalScope): Deferred<A> =
+internal fun <A> TransactionalImpl<A>.sample(evalScope: EvalScope): Lazy<A> =
     when (this) {
         is TransactionalImpl.Const -> value
         is TransactionalImpl.Impl ->
-            evalScope.transactionStore
-                .getOrPut(this) {
-                    evalScope.deferAsync(start = CoroutineStart.LAZY) { evalScope.block() }
-                }
-                .also { it.start() }
+            cache.getOrPut(evalScope) { evalScope.deferAsync { evalScope.block() } }
     }

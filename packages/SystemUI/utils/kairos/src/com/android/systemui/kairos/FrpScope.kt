@@ -16,13 +16,8 @@
 
 package com.android.systemui.kairos
 
+import com.android.systemui.kairos.internal.CompletableLazy
 import kotlin.coroutines.RestrictsSuspension
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** Denotes [FrpScope] interfaces as [DSL markers][DslMarker]. */
 @DslMarker annotation class FrpScopeMarker
@@ -37,13 +32,7 @@ interface FrpScope {
     /**
      * Returns the value held by the [FrpDeferredValue], suspending until available if necessary.
      */
-    @ExperimentalFrpApi
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun <A> FrpDeferredValue<A>.get(): A = suspendCancellableCoroutine { k ->
-        unwrapped.invokeOnCompletion { ex ->
-            ex?.let { k.resumeWithException(ex) } ?: k.resume(unwrapped.getCompleted())
-        }
-    }
+    @ExperimentalFrpApi fun <A> FrpDeferredValue<A>.get(): A = unwrapped.value
 }
 
 /**
@@ -53,7 +42,7 @@ interface FrpScope {
  * @see FrpScope.get
  */
 @ExperimentalFrpApi
-class FrpDeferredValue<out A> internal constructor(internal val unwrapped: Deferred<A>)
+class FrpDeferredValue<out A> internal constructor(internal val unwrapped: Lazy<A>)
 
 /**
  * Returns the value held by this [FrpDeferredValue], or throws [IllegalStateException] if it is not
@@ -64,10 +53,8 @@ class FrpDeferredValue<out A> internal constructor(internal val unwrapped: Defer
  *
  * @see FrpScope.get
  */
-@ExperimentalFrpApi
-@OptIn(ExperimentalCoroutinesApi::class)
-fun <A> FrpDeferredValue<A>.getUnsafe(): A = unwrapped.getCompleted()
+@ExperimentalFrpApi fun <A> FrpDeferredValue<A>.getUnsafe(): A = unwrapped.value
 
 /** Returns an already-available [FrpDeferredValue] containing [value]. */
 @ExperimentalFrpApi
-fun <A> deferredOf(value: A): FrpDeferredValue<A> = FrpDeferredValue(CompletableDeferred(value))
+fun <A> deferredOf(value: A): FrpDeferredValue<A> = FrpDeferredValue(CompletableLazy(value))

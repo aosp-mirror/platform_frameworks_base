@@ -20,29 +20,22 @@ import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
 import com.android.systemui.kairos.internal.store.MutableArrayMapK
 import com.android.systemui.kairos.internal.store.MutableMapK
 import com.android.systemui.kairos.internal.store.StoreEntry
-import com.android.systemui.kairos.internal.util.Key
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.internal.util.launchImmediate
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 import java.util.concurrent.atomic.AtomicLong
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
 
 internal sealed interface TStateImpl<out A> {
     val name: String?
     val operatorName: String
     val changes: TFlowImpl<A>
 
-    suspend fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long>
+    fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long>
 }
 
-internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) :
-    TStateImpl<A>, Key<Deferred<Pair<A, Long>>> {
+internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) : TStateImpl<A> {
 
     @Volatile
     var invalidatedEpoch = Long.MIN_VALUE
@@ -52,12 +45,12 @@ internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) :
     protected var cache: Any? = EmptyCache
         private set
 
-    override suspend fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long> =
-        evalScope.transactionStore
-            .getOrPut(this) { evalScope.deferAsync(CoroutineStart.LAZY) { pull(evalScope) } }
-            .await()
+    private val transactionCache = TransactionCache<Lazy<Pair<A, Long>>>()
 
-    suspend fun pull(evalScope: EvalScope): Pair<A, Long> {
+    override fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long> =
+        transactionCache.getOrPut(evalScope) { evalScope.deferAsync { pull(evalScope) } }.value
+
+    fun pull(evalScope: EvalScope): Pair<A, Long> {
         @Suppress("UNCHECKED_CAST")
         return recalc(evalScope)?.also { (a, epoch) -> setCache(a, epoch) }
             ?: ((cache as A) to invalidatedEpoch)
@@ -75,7 +68,7 @@ internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) :
         return if (cache == EmptyCache) none else just(cache as A)
     }
 
-    protected abstract suspend fun recalc(evalScope: EvalScope): Pair<A, Long>?
+    protected abstract fun recalc(evalScope: EvalScope): Pair<A, Long>?
 
     private data object EmptyCache
 }
@@ -83,7 +76,7 @@ internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) :
 internal class TStateSource<A>(
     override val name: String?,
     override val operatorName: String,
-    init: Deferred<A>,
+    init: Lazy<A>,
     override val changes: TFlowImpl<A>,
 ) : TStateImpl<A> {
     constructor(
@@ -91,33 +84,34 @@ internal class TStateSource<A>(
         operatorName: String,
         init: A,
         changes: TFlowImpl<A>,
-    ) : this(name, operatorName, CompletableDeferred(init), changes)
+    ) : this(name, operatorName, CompletableLazy(init), changes)
 
     lateinit var upstreamConnection: NodeConnection<A>
 
     // Note: Don't need to synchronize; we will never interleave reads and writes, since all writes
     // are performed at the end of a network step, after any reads would have taken place.
 
-    @Volatile private var _current: Deferred<A> = init
+    @Volatile private var _current: Lazy<A> = init
+
     @Volatile
     var writeEpoch = 0L
         private set
 
-    override suspend fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long> =
-        _current.await() to writeEpoch
+    override fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long> =
+        _current.value to writeEpoch
 
     /** called by network after eval phase has completed */
-    suspend fun updateState(evalScope: EvalScope) {
+    fun updateState(logIndent: Int, evalScope: EvalScope) {
         // write the latch
-        _current = CompletableDeferred(upstreamConnection.getPushEvent(evalScope))
+        // TODO: deferAsync?
+        _current = CompletableLazy(upstreamConnection.getPushEvent(logIndent, evalScope))
         writeEpoch = evalScope.epoch
     }
 
     override fun toString(): String = "TStateImpl(changes=$changes, current=$_current)"
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getStorageUnsafe(): Maybe<A> =
-        if (_current.isCompleted) just(_current.getCompleted()) else none
+    fun getStorageUnsafe(): Maybe<A> = if (_current.isInitialized()) just(_current.value) else none
 }
 
 internal fun <A> constS(name: String?, operatorName: String, init: A): TStateImpl<A> =
@@ -127,8 +121,8 @@ internal inline fun <A> activatedTStateSource(
     name: String?,
     operatorName: String,
     evalScope: EvalScope,
-    crossinline getChanges: suspend EvalScope.() -> TFlowImpl<A>,
-    init: Deferred<A>,
+    crossinline getChanges: EvalScope.() -> TFlowImpl<A>,
+    init: Lazy<A>,
 ): TStateImpl<A> {
     lateinit var state: TStateSource<A>
     val calm: TFlowImpl<A> =
@@ -167,19 +161,25 @@ private inline fun <A> TFlowImpl<A>.calm(
 internal fun <A, B> TStateImpl<A>.mapCheap(
     name: String?,
     operatorName: String,
-    transform: suspend EvalScope.(A) -> B,
+    transform: EvalScope.(A) -> B,
 ): TStateImpl<B> =
-    DerivedMapCheap(name, operatorName, this, mapImpl({ changes }) { transform(it) }, transform)
+    DerivedMapCheap(
+        name,
+        operatorName,
+        this,
+        mapImpl({ changes }) { it, _ -> transform(it) },
+        transform,
+    )
 
 internal class DerivedMapCheap<A, B>(
     override val name: String?,
     override val operatorName: String,
     val upstream: TStateImpl<A>,
     override val changes: TFlowImpl<B>,
-    private val transform: suspend EvalScope.(A) -> B,
+    private val transform: EvalScope.(A) -> B,
 ) : TStateImpl<B> {
 
-    override suspend fun getCurrentWithEpoch(evalScope: EvalScope): Pair<B, Long> {
+    override fun getCurrentWithEpoch(evalScope: EvalScope): Pair<B, Long> {
         val (a, epoch) = upstream.getCurrentWithEpoch(evalScope)
         return evalScope.transform(a) to epoch
     }
@@ -190,10 +190,10 @@ internal class DerivedMapCheap<A, B>(
 internal fun <A, B> TStateImpl<A>.map(
     name: String?,
     operatorName: String,
-    transform: suspend EvalScope.(A) -> B,
+    transform: EvalScope.(A) -> B,
 ): TStateImpl<B> {
     lateinit var state: TStateDerived<B>
-    val mappedChanges = mapImpl({ changes }) { transform(it) }.cached().calm { state }
+    val mappedChanges = mapImpl({ changes }) { it, _ -> transform(it) }.cached().calm { state }
     state = DerivedMap(name, operatorName, transform, this, mappedChanges)
     return state
 }
@@ -201,13 +201,13 @@ internal fun <A, B> TStateImpl<A>.map(
 internal class DerivedMap<A, B>(
     override val name: String?,
     override val operatorName: String,
-    private val transform: suspend EvalScope.(A) -> B,
+    private val transform: EvalScope.(A) -> B,
     val upstream: TStateImpl<A>,
     changes: TFlowImpl<B>,
 ) : TStateDerived<B>(changes) {
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 
-    override suspend fun recalc(evalScope: EvalScope): Pair<B, Long>? {
+    override fun recalc(evalScope: EvalScope): Pair<B, Long>? {
         val (a, epoch) = upstream.getCurrentWithEpoch(evalScope)
         return if (epoch > invalidatedEpoch) {
             evalScope.transform(a) to epoch
@@ -219,12 +219,13 @@ internal class DerivedMap<A, B>(
 
 internal fun <A> TStateImpl<TStateImpl<A>>.flatten(name: String?, operator: String): TStateImpl<A> {
     // emits the current value of the new inner state, when that state is emitted
-    val switchEvents = mapImpl({ changes }) { newInner -> newInner.getCurrentWithEpoch(this).first }
+    val switchEvents =
+        mapImpl({ changes }) { newInner, _ -> newInner.getCurrentWithEpoch(this).first }
     // emits the new value of the new inner state when that state is emitted, or
     // falls back to the current value if a new state is *not* being emitted this
     // transaction
     val innerChanges =
-        mapImpl({ changes }) { newInner ->
+        mapImpl({ changes }) { newInner, _ ->
             mergeNodes({ switchEvents }, { newInner.changes }) { _, new -> new }
         }
     val switchedChanges: TFlowImpl<A> =
@@ -243,7 +244,7 @@ internal class DerivedFlatten<A>(
     val upstream: TStateImpl<TStateImpl<A>>,
     changes: TFlowImpl<A>,
 ) : TStateDerived<A>(changes) {
-    override suspend fun recalc(evalScope: EvalScope): Pair<A, Long> {
+    override fun recalc(evalScope: EvalScope): Pair<A, Long> {
         val (inner, epoch0) = upstream.getCurrentWithEpoch(evalScope)
         val (a, epoch1) = inner.getCurrentWithEpoch(evalScope)
         return a to maxOf(epoch0, epoch1)
@@ -256,7 +257,7 @@ internal class DerivedFlatten<A>(
 internal inline fun <A, B> TStateImpl<A>.flatMap(
     name: String?,
     operatorName: String,
-    noinline transform: suspend EvalScope.(A) -> TStateImpl<B>,
+    noinline transform: EvalScope.(A) -> TStateImpl<B>,
 ): TStateImpl<B> = map(null, operatorName, transform).flatten(name, operatorName)
 
 internal fun <A, B, Z> zipStates(
@@ -264,7 +265,7 @@ internal fun <A, B, Z> zipStates(
     operatorName: String,
     l1: TStateImpl<A>,
     l2: TStateImpl<B>,
-    transform: suspend EvalScope.(A, B) -> Z,
+    transform: EvalScope.(A, B) -> Z,
 ): TStateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B)
@@ -276,7 +277,7 @@ internal fun <A, B, C, Z> zipStates(
     l1: TStateImpl<A>,
     l2: TStateImpl<B>,
     l3: TStateImpl<C>,
-    transform: suspend EvalScope.(A, B, C) -> Z,
+    transform: EvalScope.(A, B, C) -> Z,
 ): TStateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2, l3)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B, it[2] as C)
@@ -289,7 +290,7 @@ internal fun <A, B, C, D, Z> zipStates(
     l2: TStateImpl<B>,
     l3: TStateImpl<C>,
     l4: TStateImpl<D>,
-    transform: suspend EvalScope.(A, B, C, D) -> Z,
+    transform: EvalScope.(A, B, C, D) -> Z,
 ): TStateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2, l3, l4)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B, it[2] as C, it[3] as D)
@@ -303,7 +304,7 @@ internal fun <A, B, C, D, E, Z> zipStates(
     l3: TStateImpl<C>,
     l4: TStateImpl<D>,
     l5: TStateImpl<E>,
-    transform: suspend EvalScope.(A, B, C, D, E) -> Z,
+    transform: EvalScope.(A, B, C, D, E) -> Z,
 ): TStateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2, l3, l4, l5)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST")
@@ -333,11 +334,7 @@ internal fun <V> zipStateList(
             name = name,
             operatorName = operatorName,
             numStates = states.size,
-            states =
-                states
-                    .asSequence()
-                    .mapIndexed { index, tStateImpl -> StoreEntry(index, tStateImpl) }
-                    .asIterable(),
+            states = states.asIterableWithIndex(),
             storeFactory = MutableArrayMapK.Factory(),
         )
     // Like mapCheap, but with caching (or like map, but without the calm changes, as they are not
@@ -347,7 +344,7 @@ internal fun <V> zipStateList(
         operatorName = operatorName,
         transform = { arrayStore -> arrayStore.values.toList() },
         upstream = zipped,
-        changes = mapImpl({ zipped.changes }) { arrayStore -> arrayStore.values.toList() },
+        changes = mapImpl({ zipped.changes }) { arrayStore, _ -> arrayStore.values.toList() },
     )
 }
 
@@ -364,26 +361,22 @@ internal fun <W, K, A> zipStates(
     val stateChanges = states.asSequence().map { (k, v) -> StoreEntry(k, v.changes) }.asIterable()
     lateinit var state: DerivedZipped<W, K, A>
     // No need for calm; invariant ensures that changes will only emit when there's a difference
+    val switchDeferredImpl =
+        switchDeferredImpl(
+            getStorage = { stateChanges },
+            getPatches = { neverImpl },
+            storeFactory = storeFactory,
+        )
     val changes =
-        mapImpl({
-                switchDeferredImpl(
-                    getStorage = { stateChanges },
-                    getPatches = { neverImpl },
-                    storeFactory = storeFactory,
-                )
-            }) { patch ->
+        mapImpl({ switchDeferredImpl }) { patch, logIndent ->
                 val store = storeFactory.create<A>(numStates)
-                coroutineScope {
-                    states.forEach { (k, state) ->
-                        launchImmediate {
-                            store[k] =
-                                if (patch.contains(k)) {
-                                    patch.getValue(k).getPushEvent(evalScope = this@mapImpl)
-                                } else {
-                                    state.getCurrentWithEpoch(evalScope = this@mapImpl).first
-                                }
+                states.forEach { (k, state) ->
+                    store[k] =
+                        if (patch.contains(k)) {
+                            patch.getValue(k).getPushEvent(logIndent, evalScope = this@mapImpl)
+                        } else {
+                            state.getCurrentWithEpoch(evalScope = this@mapImpl).first
                         }
-                    }
                 }
                 store.also { state.setCache(it, epoch) }
             }
@@ -408,17 +401,13 @@ internal class DerivedZipped<W, K, A>(
     changes: TFlowImpl<MutableMapK<W, K, A>>,
     private val storeFactory: MutableMapK.Factory<W, K>,
 ) : TStateDerived<MutableMapK<W, K, A>>(changes) {
-    override suspend fun recalc(evalScope: EvalScope): Pair<MutableMapK<W, K, A>, Long> {
+    override fun recalc(evalScope: EvalScope): Pair<MutableMapK<W, K, A>, Long> {
         val newEpoch = AtomicLong()
         val store = storeFactory.create<A>(upstreamSize)
-        coroutineScope {
-            for ((key, value) in upstream) {
-                launchImmediate {
-                    val (a, epoch) = value.getCurrentWithEpoch(evalScope)
-                    newEpoch.accumulateAndGet(epoch, ::maxOf)
-                    store[key] = a
-                }
-            }
+        for ((key, value) in upstream) {
+            val (a, epoch) = value.getCurrentWithEpoch(evalScope)
+            newEpoch.accumulateAndGet(epoch, ::maxOf)
+            store[key] = a
         }
         return store to newEpoch.get()
     }

@@ -35,14 +35,14 @@ fun <A> TFlow<Transactional<A>>.sampleTransactionals(): TFlow<A> = map { it.samp
 @ExperimentalFrpApi
 fun <A, B, C> TFlow<A>.sample(
     state: TState<B>,
-    transform: suspend FrpTransactionScope.(A, B) -> C,
+    transform: FrpTransactionScope.(A, B) -> C,
 ): TFlow<C> = map { transform(it, state.sample()) }
 
 /** @see FrpTransactionScope.sample */
 @ExperimentalFrpApi
 fun <A, B, C> TFlow<A>.sample(
     transactional: Transactional<B>,
-    transform: suspend FrpTransactionScope.(A, B) -> C,
+    transform: FrpTransactionScope.(A, B) -> C,
 ): TFlow<C> = map { transform(it, transactional.sample()) }
 
 /**
@@ -57,7 +57,7 @@ fun <A, B, C> TFlow<A>.sample(
 @ExperimentalFrpApi
 fun <A, B, C> TFlow<A>.samplePromptly(
     state: TState<B>,
-    transform: suspend FrpTransactionScope.(A, B) -> C,
+    transform: FrpTransactionScope.(A, B) -> C,
 ): TFlow<C> =
     sample(state) { a, b -> These.thiz<Pair<A, B>, B>(a to b) }
         .mergeWith(state.stateChanges.map { These.that(it) }) { thiz, that ->
@@ -189,7 +189,7 @@ fun interface FrpBuildMode<out A> {
      * Invoked when this mode is enabled. Returns a value and a [TFlow] that signals a switch to a
      * new mode.
      */
-    suspend fun FrpBuildScope.enableMode(): Pair<A, TFlow<FrpBuildMode<A>>>
+    fun FrpBuildScope.enableMode(): Pair<A, TFlow<FrpBuildMode<A>>>
 }
 
 /**
@@ -229,7 +229,7 @@ fun interface FrpStatefulMode<out A> {
      * Invoked when this mode is enabled. Returns a value and a [TFlow] that signals a switch to a
      * new mode.
      */
-    suspend fun FrpStateScope.enableMode(): Pair<A, TFlow<FrpStatefulMode<A>>>
+    fun FrpStateScope.enableMode(): Pair<A, TFlow<FrpStatefulMode<A>>>
 }
 
 /**

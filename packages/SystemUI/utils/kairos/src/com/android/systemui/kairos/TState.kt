@@ -16,6 +16,7 @@
 
 package com.android.systemui.kairos
 
+import com.android.systemui.kairos.internal.CompletableLazy
 import com.android.systemui.kairos.internal.DerivedMapCheap
 import com.android.systemui.kairos.internal.Init
 import com.android.systemui.kairos.internal.InitScope
@@ -39,10 +40,6 @@ import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.zipStateMap
 import com.android.systemui.kairos.internal.zipStates
 import kotlin.reflect.KProperty
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 
 /**
  * A time-varying value with discrete changes. Essentially, a combination of a [Transactional] that
@@ -63,11 +60,11 @@ fun <A> tStateOf(value: A): TState<A> {
 
 /** TODO */
 @ExperimentalFrpApi
-fun <A> FrpDeferredValue<TState<A>>.defer(): TState<A> = deferInline { unwrapped.await() }
+fun <A> FrpDeferredValue<TState<A>>.defer(): TState<A> = deferInline { unwrapped.value }
 
 /** TODO */
 @ExperimentalFrpApi
-fun <A> deferTState(block: suspend FrpScope.() -> TState<A>): TState<A> = deferInline {
+fun <A> deferTState(block: FrpScope.() -> TState<A>): TState<A> = deferInline {
     NoScope.runInFrpScope(block)
 }
 
@@ -76,7 +73,7 @@ fun <A> deferTState(block: suspend FrpScope.() -> TState<A>): TState<A> = deferI
  * original [TState].
  */
 @ExperimentalFrpApi
-fun <A, B> TState<A>.map(transform: suspend FrpScope.(A) -> B): TState<B> {
+fun <A, B> TState<A>.map(transform: FrpScope.(A) -> B): TState<B> {
     val operatorName = "map"
     val name = operatorName
     return TStateInit(
@@ -98,7 +95,7 @@ fun <A, B> TState<A>.map(transform: suspend FrpScope.(A) -> B): TState<B> {
  * observable change to the returned [TState].
  */
 @ExperimentalFrpApi
-fun <A, B> TState<A>.mapCheapUnsafe(transform: suspend FrpScope.(A) -> B): TState<B> {
+fun <A, B> TState<A>.mapCheapUnsafe(transform: FrpScope.(A) -> B): TState<B> {
     val operatorName = "map"
     val name = operatorName
     return TStateInit(
@@ -115,10 +112,8 @@ fun <A, B> TState<A>.mapCheapUnsafe(transform: suspend FrpScope.(A) -> B): TStat
  * the given function [transform].
  */
 @ExperimentalFrpApi
-fun <A, B, C> TState<A>.combineWith(
-    other: TState<B>,
-    transform: suspend FrpScope.(A, B) -> C,
-): TState<C> = combine(this, other, transform)
+fun <A, B, C> TState<A>.combineWith(other: TState<B>, transform: FrpScope.(A, B) -> C): TState<C> =
+    combine(this, other, transform)
 
 /**
  * Splits a [TState] of pairs into a pair of [TFlows][TState], where each returned [TState] holds
@@ -181,7 +176,7 @@ fun <K, A> Map<K, TState<A>>.combine(): TState<Map<K, A>> {
  * @see TState.combineWith
  */
 @ExperimentalFrpApi
-fun <A, B> Iterable<TState<A>>.combine(transform: suspend FrpScope.(List<A>) -> B): TState<B> =
+fun <A, B> Iterable<TState<A>>.combine(transform: FrpScope.(List<A>) -> B): TState<B> =
     combine().map(transform)
 
 /**
@@ -199,10 +194,8 @@ fun <A> combine(vararg states: TState<A>): TState<List<A>> = states.asIterable()
  * @see TState.combineWith
  */
 @ExperimentalFrpApi
-fun <A, B> combine(
-    vararg states: TState<A>,
-    transform: suspend FrpScope.(List<A>) -> B,
-): TState<B> = states.asIterable().combine(transform)
+fun <A, B> combine(vararg states: TState<A>, transform: FrpScope.(List<A>) -> B): TState<B> =
+    states.asIterable().combine(transform)
 
 /**
  * Returns a [TState] whose value is generated with [transform] by combining the current values of
@@ -214,22 +207,16 @@ fun <A, B> combine(
 fun <A, B, Z> combine(
     stateA: TState<A>,
     stateB: TState<B>,
-    transform: suspend FrpScope.(A, B) -> Z,
+    transform: FrpScope.(A, B) -> Z,
 ): TState<Z> {
     val operatorName = "combine"
     val name = operatorName
     return TStateInit(
         init(name) {
-            coroutineScope {
-                val dl1: Deferred<TStateImpl<A>> = async {
-                    stateA.init.connect(evalScope = this@init)
-                }
-                val dl2: Deferred<TStateImpl<B>> = async {
-                    stateB.init.connect(evalScope = this@init)
-                }
-                zipStates(name, operatorName, dl1.await(), dl2.await()) { a, b ->
-                    NoScope.runInFrpScope { transform(a, b) }
-                }
+            val dl1 = stateA.init.connect(evalScope = this@init)
+            val dl2 = stateB.init.connect(evalScope = this@init)
+            zipStates(name, operatorName, dl1, dl2) { a, b ->
+                NoScope.runInFrpScope { transform(a, b) }
             }
         }
     )
@@ -246,25 +233,17 @@ fun <A, B, C, Z> combine(
     stateA: TState<A>,
     stateB: TState<B>,
     stateC: TState<C>,
-    transform: suspend FrpScope.(A, B, C) -> Z,
+    transform: FrpScope.(A, B, C) -> Z,
 ): TState<Z> {
     val operatorName = "combine"
     val name = operatorName
     return TStateInit(
         init(name) {
-            coroutineScope {
-                val dl1: Deferred<TStateImpl<A>> = async {
-                    stateA.init.connect(evalScope = this@init)
-                }
-                val dl2: Deferred<TStateImpl<B>> = async {
-                    stateB.init.connect(evalScope = this@init)
-                }
-                val dl3: Deferred<TStateImpl<C>> = async {
-                    stateC.init.connect(evalScope = this@init)
-                }
-                zipStates(name, operatorName, dl1.await(), dl2.await(), dl3.await()) { a, b, c ->
-                    NoScope.runInFrpScope { transform(a, b, c) }
-                }
+            val dl1 = stateA.init.connect(evalScope = this@init)
+            val dl2 = stateB.init.connect(evalScope = this@init)
+            val dl3 = stateC.init.connect(evalScope = this@init)
+            zipStates(name, operatorName, dl1, dl2, dl3) { a, b, c ->
+                NoScope.runInFrpScope { transform(a, b, c) }
             }
         }
     )
@@ -282,32 +261,18 @@ fun <A, B, C, D, Z> combine(
     stateB: TState<B>,
     stateC: TState<C>,
     stateD: TState<D>,
-    transform: suspend FrpScope.(A, B, C, D) -> Z,
+    transform: FrpScope.(A, B, C, D) -> Z,
 ): TState<Z> {
     val operatorName = "combine"
     val name = operatorName
     return TStateInit(
         init(name) {
-            coroutineScope {
-                val dl1: Deferred<TStateImpl<A>> = async {
-                    stateA.init.connect(evalScope = this@init)
-                }
-                val dl2: Deferred<TStateImpl<B>> = async {
-                    stateB.init.connect(evalScope = this@init)
-                }
-                val dl3: Deferred<TStateImpl<C>> = async {
-                    stateC.init.connect(evalScope = this@init)
-                }
-                val dl4: Deferred<TStateImpl<D>> = async {
-                    stateD.init.connect(evalScope = this@init)
-                }
-                zipStates(name, operatorName, dl1.await(), dl2.await(), dl3.await(), dl4.await()) {
-                    a,
-                    b,
-                    c,
-                    d ->
-                    NoScope.runInFrpScope { transform(a, b, c, d) }
-                }
+            val dl1 = stateA.init.connect(evalScope = this@init)
+            val dl2 = stateB.init.connect(evalScope = this@init)
+            val dl3 = stateC.init.connect(evalScope = this@init)
+            val dl4 = stateD.init.connect(evalScope = this@init)
+            zipStates(name, operatorName, dl1, dl2, dl3, dl4) { a, b, c, d ->
+                NoScope.runInFrpScope { transform(a, b, c, d) }
             }
         }
     )
@@ -326,39 +291,19 @@ fun <A, B, C, D, E, Z> combine(
     stateC: TState<C>,
     stateD: TState<D>,
     stateE: TState<E>,
-    transform: suspend FrpScope.(A, B, C, D, E) -> Z,
+    transform: FrpScope.(A, B, C, D, E) -> Z,
 ): TState<Z> {
     val operatorName = "combine"
     val name = operatorName
     return TStateInit(
         init(name) {
-            coroutineScope {
-                val dl1: Deferred<TStateImpl<A>> = async {
-                    stateA.init.connect(evalScope = this@init)
-                }
-                val dl2: Deferred<TStateImpl<B>> = async {
-                    stateB.init.connect(evalScope = this@init)
-                }
-                val dl3: Deferred<TStateImpl<C>> = async {
-                    stateC.init.connect(evalScope = this@init)
-                }
-                val dl4: Deferred<TStateImpl<D>> = async {
-                    stateD.init.connect(evalScope = this@init)
-                }
-                val dl5: Deferred<TStateImpl<E>> = async {
-                    stateE.init.connect(evalScope = this@init)
-                }
-                zipStates(
-                    name,
-                    operatorName,
-                    dl1.await(),
-                    dl2.await(),
-                    dl3.await(),
-                    dl4.await(),
-                    dl5.await(),
-                ) { a, b, c, d, e ->
-                    NoScope.runInFrpScope { transform(a, b, c, d, e) }
-                }
+            val dl1 = stateA.init.connect(evalScope = this@init)
+            val dl2 = stateB.init.connect(evalScope = this@init)
+            val dl3 = stateC.init.connect(evalScope = this@init)
+            val dl4 = stateD.init.connect(evalScope = this@init)
+            val dl5 = stateE.init.connect(evalScope = this@init)
+            zipStates(name, operatorName, dl1, dl2, dl3, dl4, dl5) { a, b, c, d, e ->
+                NoScope.runInFrpScope { transform(a, b, c, d, e) }
             }
         }
     )
@@ -366,7 +311,7 @@ fun <A, B, C, D, E, Z> combine(
 
 /** Returns a [TState] by applying [transform] to the value held by the original [TState]. */
 @ExperimentalFrpApi
-fun <A, B> TState<A>.flatMap(transform: suspend FrpScope.(A) -> TState<B>): TState<B> {
+fun <A, B> TState<A>.flatMap(transform: FrpScope.(A) -> TState<B>): TState<B> {
     val operatorName = "flatMap"
     val name = operatorName
     return TStateInit(
@@ -453,10 +398,10 @@ internal constructor(
 
 /** TODO */
 @ExperimentalFrpApi
-class MutableTState<T>
-internal constructor(internal val network: Network, initialValue: Deferred<T>) : TState<T>() {
+class MutableTState<T> internal constructor(internal val network: Network, initialValue: Lazy<T>) :
+    TState<T>() {
 
-    private val input: CoalescingMutableTFlow<Deferred<T>, Deferred<T>?> =
+    private val input: CoalescingMutableTFlow<Lazy<T>, Lazy<T>?> =
         CoalescingMutableTFlow(
             name = null,
             coalesce = { _, new -> new },
@@ -469,8 +414,9 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
         val name = null
         val operatorName = "MutableTState"
         lateinit var state: TStateSource<T>
+        val mapImpl = mapImpl(upstream = { changes.activated() }) { it, _ -> it!!.value }
         val calm: TFlowImpl<T> =
-            filterImpl({ mapImpl(upstream = { changes.activated() }) { it!!.await() } }) { new ->
+            filterImpl({ mapImpl }) { new ->
                     new != state.getCurrentWithEpoch(evalScope = this).first
                 }
                 .cached()
@@ -489,7 +435,7 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
     }
 
     /** TODO */
-    @ExperimentalFrpApi fun setValue(value: T) = input.emit(CompletableDeferred(value))
+    @ExperimentalFrpApi fun setValue(value: T) = input.emit(CompletableLazy(value))
 
     @ExperimentalFrpApi
     fun setValueDeferred(value: FrpDeferredValue<T>) = input.emit(value.unwrapped)
@@ -501,17 +447,18 @@ class TStateLoop<A> : TState<A>() {
 
     private val name: String? = null
 
-    private val deferred = CompletableDeferred<TState<A>>()
+    private val deferred = CompletableLazy<TState<A>>()
 
     internal val init: Init<TStateImpl<A>> =
-        init(name) { deferred.await().init.connect(evalScope = this) }
+        init(name) { deferred.value.init.connect(evalScope = this) }
 
     /** The [TState] this [TStateLoop] will forward to. */
     @ExperimentalFrpApi
     var loopback: TState<A>? = null
         set(value) {
             value?.let {
-                check(deferred.complete(value)) { "TStateLoop.loopback has already been set." }
+                check(!deferred.isInitialized()) { "TStateLoop.loopback has already been set." }
+                deferred.setValue(value)
                 field = value
             }
         }
@@ -540,6 +487,5 @@ internal val <A> TState<A>.init: Init<TStateImpl<A>>
             is MutableTState -> tState.init
         }
 
-private inline fun <A> deferInline(
-    crossinline block: suspend InitScope.() -> TState<A>
-): TState<A> = TStateInit(init(name = null) { block().init.connect(evalScope = this) })
+private inline fun <A> deferInline(crossinline block: InitScope.() -> TState<A>): TState<A> =
+    TStateInit(init(name = null) { block().init.connect(evalScope = this) })

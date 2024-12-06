@@ -16,8 +16,6 @@
 
 package com.android.systemui.kairos.internal.util
 
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.yield
@@ -32,7 +30,7 @@ internal suspend inline fun <K, A, B : Any, M : MutableMap<K, B>> Map<K, A>
     destination.also {
         coroutineScope {
                 mapValues {
-                    async {
+                    asyncImmediate {
                         yield()
                         block(it)
                     }
@@ -53,7 +51,7 @@ internal inline fun <K, A, B : Any, M : MutableMap<K, B>> Map<K, A>.mapValuesNot
 
 internal suspend fun <A, B> Iterable<A>.mapParallel(transform: suspend (A) -> B): List<B> =
     coroutineScope {
-        map { async(start = CoroutineStart.LAZY) { transform(it) } }.awaitAll()
+        map { asyncImmediate { transform(it) } }.awaitAll()
     }
 
 internal suspend fun <K, A, B, M : MutableMap<K, B>> Map<K, A>.mapValuesParallelTo(

@@ -30,25 +30,16 @@ import com.android.systemui.kairos.emptyTFlow
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
 import com.android.systemui.kairos.internal.store.ConcurrentHashMapK
-import com.android.systemui.kairos.internal.util.mapValuesParallel
 import com.android.systemui.kairos.mapCheap
 import com.android.systemui.kairos.merge
 import com.android.systemui.kairos.switch
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.map
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.startCoroutine
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.completeWith
-import kotlinx.coroutines.job
 
 internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: TFlow<Any>) :
     StateScope, EvalScope by evalScope {
 
-    private val endSignalOnce: TFlow<Any> = endSignal.nextOnlyInternal("StateScope.endSignal")
+    override val endSignalOnce: TFlow<Any> = endSignal.nextOnlyInternal("StateScope.endSignal")
 
     private fun <A> TFlow<A>.truncateToScope(operatorName: String): TFlow<A> =
         if (endSignalOnce === emptyTFlow) {
@@ -70,11 +61,11 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         }
 
     private fun <A> TFlow<A>.toTStateInternal(operatorName: String, init: A): TState<A> =
-        toTStateInternalDeferred(operatorName, CompletableDeferred(init))
+        toTStateInternalDeferred(operatorName, CompletableLazy(init))
 
     private fun <A> TFlow<A>.toTStateInternalDeferred(
         operatorName: String,
-        init: Deferred<A>,
+        init: Lazy<A>,
     ): TState<A> {
         val changes = this@toTStateInternalDeferred
         val name = operatorName
@@ -89,7 +80,7 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         return TStateInit(constInit(name, impl))
     }
 
-    private fun <R> deferredInternal(block: suspend FrpStateScope.() -> R): FrpDeferredValue<R> =
+    private fun <R> deferredInternal(block: FrpStateScope.() -> R): FrpDeferredValue<R> =
         FrpDeferredValue(deferAsync { runInStateScope(block) })
 
     private fun <A> TFlow<A>.toTStateDeferredInternal(
@@ -102,30 +93,27 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
     }
 
     private fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyInternal(
-        storage: TState<Map<K, TFlow<V>>>
+        name: String?,
+        storage: TState<Map<K, TFlow<V>>>,
     ): TFlow<Map<K, V>> {
-        val name = "mergeIncrementally"
+        val patches =
+            mapImpl({ init.connect(this) }) { patch, _ ->
+                patch.mapValues { (_, m) -> m.map { flow -> flow.init.connect(this) } }.asIterable()
+            }
         return TFlowInit(
             constInit(
                 name,
                 switchDeferredImpl(
+                        name = name,
                         getStorage = {
                             storage.init
                                 .connect(this)
                                 .getCurrentWithEpoch(this)
                                 .first
-                                .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
+                                .mapValues { (_, flow) -> flow.init.connect(this) }
                                 .asIterable()
                         },
-                        getPatches = {
-                            mapImpl({ init.connect(this) }) { patch ->
-                                patch
-                                    .mapValuesParallel { (_, m) ->
-                                        m.map { flow -> flow.init.connect(this) }
-                                    }
-                                    .asIterable()
-                            }
-                        },
+                        getPatches = { patches },
                         storeFactory = ConcurrentHashMapK.Factory(),
                     )
                     .awaitValues(),
@@ -134,30 +122,27 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
     }
 
     private fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptInternal(
-        storage: TState<Map<K, TFlow<V>>>
+        storage: TState<Map<K, TFlow<V>>>,
+        name: String?,
     ): TFlow<Map<K, V>> {
-        val name = "mergeIncrementallyPrompt"
+        val patches =
+            mapImpl({ init.connect(this) }) { patch, _ ->
+                patch.mapValues { (_, m) -> m.map { flow -> flow.init.connect(this) } }.asIterable()
+            }
         return TFlowInit(
             constInit(
                 name,
                 switchPromptImpl(
+                        name = name,
                         getStorage = {
                             storage.init
                                 .connect(this)
                                 .getCurrentWithEpoch(this)
                                 .first
-                                .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
+                                .mapValues { (_, flow) -> flow.init.connect(this) }
                                 .asIterable()
                         },
-                        getPatches = {
-                            mapImpl({ init.connect(this) }) { patch ->
-                                patch
-                                    .mapValuesParallel { (_, m) ->
-                                        m.map { flow -> flow.init.connect(this) }
-                                    }
-                                    .asIterable()
-                            }
-                        },
+                        getPatches = { patches },
                         storeFactory = ConcurrentHashMapK.Factory(),
                     )
                     .awaitValues(),
@@ -170,9 +155,9 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         numKeys: Int?,
     ): Pair<TFlow<Map<K, Maybe<A>>>, FrpDeferredValue<Map<K, B>>> {
         val eventsByKey: GroupedTFlow<K, Maybe<FrpStateful<A>>> = groupByKey(numKeys)
-        val initOut: Deferred<Map<K, B>> = deferAsync {
-            init.unwrapped.await().mapValuesParallel { (k, stateful) ->
-                val newEnd = with(frpScope) { eventsByKey[k].skipNext() }
+        val initOut: Lazy<Map<K, B>> = deferAsync {
+            init.unwrapped.value.mapValues { (k, stateful) ->
+                val newEnd = with(frpScope) { eventsByKey[k] }
                 val newScope = childStateScope(newEnd)
                 newScope.runInStateScope(stateful)
             }
@@ -180,8 +165,8 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
         val changesNode: TFlowImpl<Map<K, Maybe<A>>> =
             mapImpl(
                 upstream = { this@applyLatestStatefulForKeyInternal.init.connect(evalScope = this) }
-            ) { upstreamMap ->
-                upstreamMap.mapValuesParallel { (k: K, ma: Maybe<FrpStateful<A>>) ->
+            ) { upstreamMap, _ ->
+                upstreamMap.mapValues { (k: K, ma: Maybe<FrpStateful<A>>) ->
                     reenterStateScope(this@StateScopeImpl).run {
                         ma.map { stateful ->
                             val newEnd = with(frpScope) { eventsByKey[k].skipNext() }
@@ -205,7 +190,7 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
                 name,
                 mapImpl(
                         upstream = { this@observeStatefulsInternal.init.connect(evalScope = this) }
-                    ) { stateful ->
+                    ) { stateful, _ ->
                         reenterStateScope(outerScope = this@StateScopeImpl)
                             .runInStateScope(stateful)
                     }
@@ -219,25 +204,26 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
     private inner class FrpStateScopeImpl :
         FrpStateScope, FrpTransactionScope by evalScope.frpScope {
 
-        override fun <A> deferredStateScope(
-            block: suspend FrpStateScope.() -> A
-        ): FrpDeferredValue<A> = deferredInternal(block)
+        override fun <A> deferredStateScope(block: FrpStateScope.() -> A): FrpDeferredValue<A> =
+            deferredInternal(block)
 
         override fun <A> TFlow<A>.holdDeferred(initialValue: FrpDeferredValue<A>): TState<A> =
             toTStateDeferredInternal(initialValue)
 
         override fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
-            initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
+            name: String?,
+            initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>,
         ): TFlow<Map<K, V>> {
             val storage: TState<Map<K, TFlow<V>>> = foldMapIncrementally(initialTFlows)
-            return mergeIncrementallyInternal(storage)
+            return mergeIncrementallyInternal(name, storage)
         }
 
         override fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
-            initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
+            initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>,
+            name: String?,
         ): TFlow<Map<K, V>> {
             val storage: TState<Map<K, TFlow<V>>> = foldMapIncrementally(initialTFlows)
-            return mergeIncrementallyPromptInternal(storage)
+            return mergeIncrementallyPromptInternal(storage, name)
         }
 
         override fun <K, A, B> TFlow<Map<K, Maybe<FrpStateful<A>>>>.applyLatestStatefulForKey(
@@ -250,21 +236,7 @@ internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: 
             observeStatefulsInternal()
     }
 
-    override suspend fun <R> runInStateScope(block: suspend FrpStateScope.() -> R): R {
-        val complete = CompletableDeferred<R>(parent = coroutineContext.job)
-        block.startCoroutine(
-            frpScope,
-            object : Continuation<R> {
-                override val context: CoroutineContext
-                    get() = EmptyCoroutineContext
-
-                override fun resumeWith(result: Result<R>) {
-                    complete.completeWith(result)
-                }
-            },
-        )
-        return complete.await()
-    }
+    override fun <R> runInStateScope(block: FrpStateScope.() -> R): R = frpScope.block()
 
     override fun childStateScope(newEnd: TFlow<Any>) =
         StateScopeImpl(evalScope, merge(newEnd, endSignal))

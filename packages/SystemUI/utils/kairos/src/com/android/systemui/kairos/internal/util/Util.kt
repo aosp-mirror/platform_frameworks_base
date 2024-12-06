@@ -18,8 +18,13 @@
 
 package com.android.systemui.kairos.internal.util
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.DurationUnit
+import kotlin.time.measureTimedValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -30,6 +35,62 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newCoroutineContext
+
+private const val LogEnabled = false
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun logLn(indent: Int = 0, message: Any?) {
+    if (!LogEnabled) return
+    log(indent, message)
+    println()
+}
+
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun log(indent: Int = 0, message: Any?) {
+    if (!LogEnabled) return
+    printIndent(indent)
+    print(message)
+}
+
+@JvmInline
+internal value class LogIndent(val currentLogIndent: Int) {
+    @OptIn(ExperimentalContracts::class)
+    inline fun <R> logDuration(prefix: String, start: Boolean = true, block: LogIndent.() -> R): R {
+        contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
+        return logDuration(currentLogIndent, prefix, start, block)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun logLn(message: Any?) = logLn(currentLogIndent, message)
+}
+
+@OptIn(ExperimentalContracts::class)
+internal inline fun <R> logDuration(
+    indent: Int,
+    prefix: String,
+    start: Boolean = true,
+    block: LogIndent.() -> R,
+): R {
+    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
+    if (!LogEnabled) return LogIndent(0).block()
+    if (start) {
+        logLn(indent, prefix)
+    }
+    val (result, duration) = measureTimedValue { LogIndent(indent + 1).block() }
+
+    printIndent(indent)
+    print(prefix)
+    print(": ")
+    println(duration.toString(DurationUnit.MICROSECONDS))
+    return result
+}
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun printIndent(indent: Int) {
+    for (i in 0 until indent) {
+        print("  ")
+    }
+}
 
 internal fun <A> CoroutineScope.asyncImmediate(
     start: CoroutineStart = CoroutineStart.UNDISPATCHED,

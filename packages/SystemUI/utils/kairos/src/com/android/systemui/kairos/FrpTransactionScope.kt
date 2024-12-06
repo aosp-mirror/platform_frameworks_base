@@ -44,9 +44,7 @@ interface FrpTransactionScope : FrpScope {
 
     /** TODO */
     @ExperimentalFrpApi
-    fun <A> deferredTransactionScope(
-        block: suspend FrpTransactionScope.() -> A
-    ): FrpDeferredValue<A>
+    fun <A> deferredTransactionScope(block: FrpTransactionScope.() -> A): FrpDeferredValue<A>
 
     /** A [TFlow] that emits once, within this transaction, and then never again. */
     @ExperimentalFrpApi val now: TFlow<Unit>
@@ -55,11 +53,11 @@ interface FrpTransactionScope : FrpScope {
      * Returns the current value held by this [TState]. Guaranteed to be consistent within the same
      * transaction.
      */
-    @ExperimentalFrpApi suspend fun <A> TState<A>.sample(): A = sampleDeferred().get()
+    @ExperimentalFrpApi fun <A> TState<A>.sample(): A = sampleDeferred().get()
 
     /**
      * Returns the current value held by this [Transactional]. Guaranteed to be consistent within
      * the same transaction.
      */
-    @ExperimentalFrpApi suspend fun <A> Transactional<A>.sample(): A = sampleDeferred().get()
+    @ExperimentalFrpApi fun <A> Transactional<A>.sample(): A = sampleDeferred().get()
 }

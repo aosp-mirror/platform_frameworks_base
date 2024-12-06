@@ -16,6 +16,7 @@
 
 package com.android.systemui.kairos
 
+import com.android.systemui.kairos.internal.CompletableLazy
 import com.android.systemui.kairos.internal.DemuxImpl
 import com.android.systemui.kairos.internal.Init
 import com.android.systemui.kairos.internal.InitScope
@@ -47,7 +48,6 @@ import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.toMaybe
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KProperty
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -73,17 +73,18 @@ sealed class TFlow<out A> {
  */
 @ExperimentalFrpApi
 class TFlowLoop<A> : TFlow<A>() {
-    private val deferred = CompletableDeferred<TFlow<A>>()
+    private val deferred = CompletableLazy<TFlow<A>>()
 
     internal val init: Init<TFlowImpl<A>> =
-        init(name = null) { deferred.await().init.connect(evalScope = this) }
+        init(name = null) { deferred.value.init.connect(evalScope = this) }
 
     /** The [TFlow] this reference is referring to. */
     @ExperimentalFrpApi
     var loopback: TFlow<A>? = null
         set(value) {
             value?.let {
-                check(deferred.complete(value)) { "TFlowLoop.loopback has already been set." }
+                check(!deferred.isInitialized()) { "TFlowLoop.loopback has already been set." }
+                deferred.setValue(value)
                 field = value
             }
         }
@@ -102,11 +103,11 @@ class TFlowLoop<A> : TFlow<A>() {
 
 /** TODO */
 @ExperimentalFrpApi
-fun <A> FrpDeferredValue<TFlow<A>>.defer(): TFlow<A> = deferInline { unwrapped.await() }
+fun <A> FrpDeferredValue<TFlow<A>>.defer(): TFlow<A> = deferInline { unwrapped.value }
 
 /** TODO */
 @ExperimentalFrpApi
-fun <A> deferTFlow(block: suspend FrpScope.() -> TFlow<A>): TFlow<A> = deferInline {
+fun <A> deferTFlow(block: FrpScope.() -> TFlow<A>): TFlow<A> = deferInline {
     NoScope.runInFrpScope(block)
 }
 
@@ -122,7 +123,7 @@ val <A> TState<A>.stateChanges: TFlow<A>
  * @see mapNotNull
  */
 @ExperimentalFrpApi
-fun <A, B> TFlow<A>.mapMaybe(transform: suspend FrpTransactionScope.(A) -> Maybe<B>): TFlow<B> =
+fun <A, B> TFlow<A>.mapMaybe(transform: FrpTransactionScope.(A) -> Maybe<B>): TFlow<B> =
     map(transform).filterJust()
 
 /**
@@ -132,10 +133,9 @@ fun <A, B> TFlow<A>.mapMaybe(transform: suspend FrpTransactionScope.(A) -> Maybe
  * @see mapMaybe
  */
 @ExperimentalFrpApi
-fun <A, B> TFlow<A>.mapNotNull(transform: suspend FrpTransactionScope.(A) -> B?): TFlow<B> =
-    mapMaybe {
-        transform(it).toMaybe()
-    }
+fun <A, B> TFlow<A>.mapNotNull(transform: FrpTransactionScope.(A) -> B?): TFlow<B> = mapMaybe {
+    transform(it).toMaybe()
+}
 
 /** Returns a [TFlow] containing only values of the original [TFlow] that are not null. */
 @ExperimentalFrpApi
@@ -155,9 +155,11 @@ fun <A> TFlow<Maybe<A>>.filterJust(): TFlow<A> =
  * [TFlow].
  */
 @ExperimentalFrpApi
-fun <A, B> TFlow<A>.map(transform: suspend FrpTransactionScope.(A) -> B): TFlow<B> {
+fun <A, B> TFlow<A>.map(transform: FrpTransactionScope.(A) -> B): TFlow<B> {
     val mapped: TFlowImpl<B> =
-        mapImpl({ init.connect(evalScope = this) }) { a -> runInTransactionScope { transform(a) } }
+        mapImpl({ init.connect(evalScope = this) }) { a, _ ->
+            runInTransactionScope { transform(a) }
+        }
     return TFlowInit(constInit(name = null, mapped.cached()))
 }
 
@@ -168,11 +170,11 @@ fun <A, B> TFlow<A>.map(transform: suspend FrpTransactionScope.(A) -> B): TFlow<
  * @see map
  */
 @ExperimentalFrpApi
-fun <A, B> TFlow<A>.mapCheap(transform: suspend FrpTransactionScope.(A) -> B): TFlow<B> =
+fun <A, B> TFlow<A>.mapCheap(transform: FrpTransactionScope.(A) -> B): TFlow<B> =
     TFlowInit(
         constInit(
             name = null,
-            mapImpl({ init.connect(evalScope = this) }) { a ->
+            mapImpl({ init.connect(evalScope = this) }) { a, _ ->
                 runInTransactionScope { transform(a) }
             },
         )
@@ -192,7 +194,7 @@ fun <A, B> TFlow<A>.mapCheap(transform: suspend FrpTransactionScope.(A) -> B): T
  * [FrpBuildScope.toSharedFlow] or [FrpBuildScope.observe].
  */
 @ExperimentalFrpApi
-fun <A> TFlow<A>.onEach(action: suspend FrpTransactionScope.(A) -> Unit): TFlow<A> = map {
+fun <A> TFlow<A>.onEach(action: FrpTransactionScope.(A) -> Unit): TFlow<A> = map {
     action(it)
     it
 }
@@ -202,7 +204,7 @@ fun <A> TFlow<A>.onEach(action: suspend FrpTransactionScope.(A) -> Unit): TFlow<
  * [predicate].
  */
 @ExperimentalFrpApi
-fun <A> TFlow<A>.filter(predicate: suspend FrpTransactionScope.(A) -> Boolean): TFlow<A> {
+fun <A> TFlow<A>.filter(predicate: FrpTransactionScope.(A) -> Boolean): TFlow<A> {
     val pulse =
         filterImpl({ init.connect(evalScope = this) }) { runInTransactionScope { predicate(it) } }
     return TFlowInit(constInit(name = null, pulse))
@@ -236,10 +238,12 @@ fun <A, B> TFlow<Pair<A, B>>.unzip(): Pair<TFlow<A>, TFlow<B>> {
 @ExperimentalFrpApi
 fun <A> TFlow<A>.mergeWith(
     other: TFlow<A>,
-    transformCoincidence: suspend FrpTransactionScope.(A, A) -> A = { a, _ -> a },
+    name: String? = null,
+    transformCoincidence: FrpTransactionScope.(A, A) -> A = { a, _ -> a },
 ): TFlow<A> {
     val node =
         mergeNodes(
+            name = name,
             getPulse = { init.connect(evalScope = this) },
             getOther = { other.init.connect(evalScope = this) },
         ) { a, b ->
@@ -355,7 +359,7 @@ fun <K, A> TFlow<Map<K, A>>.groupByKey(numKeys: Int? = null): GroupedTFlow<K, A>
 @ExperimentalFrpApi
 fun <K, A> TFlow<A>.groupBy(
     numKeys: Int? = null,
-    extractKey: suspend FrpTransactionScope.(A) -> K,
+    extractKey: FrpTransactionScope.(A) -> K,
 ): GroupedTFlow<K, A> = map { mapOf(extractKey(it) to it) }.groupByKey(numKeys)
 
 /**
@@ -367,7 +371,7 @@ fun <K, A> TFlow<A>.groupBy(
  */
 @ExperimentalFrpApi
 fun <A> TFlow<A>.partition(
-    predicate: suspend FrpTransactionScope.(A) -> Boolean
+    predicate: FrpTransactionScope.(A) -> Boolean
 ): Pair<TFlow<A>, TFlow<A>> {
     val grouped: GroupedTFlow<Boolean, A> = groupBy(numKeys = 2, extractKey = predicate)
     return Pair(grouped.eventsForKey(true), grouped.eventsForKey(false))
@@ -418,22 +422,22 @@ class GroupedTFlow<in K, out A> internal constructor(internal val impl: DemuxImp
  * that takes effect immediately, see [switchPromptly].
  */
 @ExperimentalFrpApi
-fun <A> TState<TFlow<A>>.switch(): TFlow<A> =
-    TFlowInit(
+fun <A> TState<TFlow<A>>.switch(name: String? = null): TFlow<A> {
+    val patches =
+        mapImpl({ init.connect(this).changes }) { newFlow, _ -> newFlow.init.connect(this) }
+    return TFlowInit(
         constInit(
             name = null,
             switchDeferredImplSingle(
+                name = name,
                 getStorage = {
                     init.connect(this).getCurrentWithEpoch(this).first.init.connect(this)
                 },
-                getPatches = {
-                    mapImpl({ init.connect(this).changes }) { newFlow ->
-                        newFlow.init.connect(this)
-                    }
-                },
+                getPatches = { patches },
             ),
         )
     )
+}
 
 /**
  * Returns a [TFlow] that switches to the [TFlow] contained within this [TState] whenever it
@@ -444,22 +448,21 @@ fun <A> TState<TFlow<A>>.switch(): TFlow<A> =
  */
 // TODO: parameter to handle coincidental emission from both old and new
 @ExperimentalFrpApi
-fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> =
-    TFlowInit(
+fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> {
+    val patches =
+        mapImpl({ init.connect(this).changes }) { newFlow, _ -> newFlow.init.connect(this) }
+    return TFlowInit(
         constInit(
             name = null,
             switchPromptImplSingle(
                 getStorage = {
                     init.connect(this).getCurrentWithEpoch(this).first.init.connect(this)
                 },
-                getPatches = {
-                    mapImpl({ init.connect(this).changes }) { newFlow ->
-                        newFlow.init.connect(this)
-                    }
-                },
+                getPatches = { patches },
             ),
         )
     )
+}
 
 /**
  * A mutable [TFlow] that provides the ability to [emit] values to the flow, handling backpressure
@@ -559,5 +562,5 @@ internal val <A> TFlow<A>.init: Init<TFlowImpl<A>>
             is MutableTFlow -> constInit(name, impl.activated())
         }
 
-private inline fun <A> deferInline(crossinline block: suspend InitScope.() -> TFlow<A>): TFlow<A> =
+private inline fun <A> deferInline(crossinline block: InitScope.() -> TFlow<A>): TFlow<A> =
     TFlowInit(init(name = null) { block().init.connect(evalScope = this) })

@@ -21,8 +21,8 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 internal class Output<A>(
     val context: CoroutineContext = EmptyCoroutineContext,
-    val onDeath: suspend () -> Unit = {},
-    val onEmit: suspend EvalScope.(A) -> Unit,
+    val onDeath: () -> Unit = {},
+    val onEmit: EvalScope.(A) -> Unit,
 ) {
 
     val schedulable = Schedulable.O(this)
@@ -33,23 +33,24 @@ internal class Output<A>(
     private object NoResult
 
     // invoked by network
-    suspend fun visit(evalScope: EvalScope) {
+    fun visit(evalScope: EvalScope) {
         val upstreamResult = result
         check(upstreamResult !== NoResult) { "output visited with null upstream result" }
         result = NoResult
         @Suppress("UNCHECKED_CAST") evalScope.onEmit(upstreamResult as A)
     }
 
-    suspend fun kill() {
+    fun kill() {
         onDeath()
     }
 
-    suspend fun schedule(evalScope: EvalScope) {
+    fun schedule(logIndent: Int, evalScope: EvalScope) {
         result =
-            checkNotNull(upstream) { "output scheduled with null upstream" }.getPushEvent(evalScope)
+            checkNotNull(upstream) { "output scheduled with null upstream" }
+                .getPushEvent(logIndent, evalScope)
         evalScope.scheduleOutput(this)
     }
 }
 
-internal inline fun OneShot(crossinline onEmit: suspend EvalScope.() -> Unit): Output<Unit> =
+internal inline fun OneShot(crossinline onEmit: EvalScope.() -> Unit): Output<Unit> =
     Output<Unit>(onEmit = { onEmit() }).apply { result = Unit }

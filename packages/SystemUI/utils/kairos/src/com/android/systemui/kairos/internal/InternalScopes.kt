@@ -20,8 +20,6 @@ import com.android.systemui.kairos.FrpBuildScope
 import com.android.systemui.kairos.FrpStateScope
 import com.android.systemui.kairos.FrpTransactionScope
 import com.android.systemui.kairos.TFlow
-import com.android.systemui.kairos.internal.util.HeteroMap
-import com.android.systemui.kairos.internal.util.Key
 
 internal interface InitScope {
     val networkId: Any
@@ -30,23 +28,25 @@ internal interface InitScope {
 internal interface EvalScope : NetworkScope, DeferScope {
     val frpScope: FrpTransactionScope
 
-    suspend fun <R> runInTransactionScope(block: suspend FrpTransactionScope.() -> R): R
+    fun <R> runInTransactionScope(block: FrpTransactionScope.() -> R): R
 }
 
 internal interface StateScope : EvalScope {
     override val frpScope: FrpStateScope
 
-    suspend fun <R> runInStateScope(block: suspend FrpStateScope.() -> R): R
+    fun <R> runInStateScope(block: FrpStateScope.() -> R): R
 
     val endSignal: TFlow<Any>
 
     fun childStateScope(newEnd: TFlow<Any>): StateScope
+
+    val endSignalOnce: TFlow<Any>
 }
 
 internal interface BuildScope : StateScope {
     override val frpScope: FrpBuildScope
 
-    suspend fun <R> runInBuildScope(block: suspend FrpBuildScope.() -> R): R
+    fun <R> runInBuildScope(block: FrpBuildScope.() -> R): R
 }
 
 internal interface NetworkScope : InitScope {
@@ -57,7 +57,7 @@ internal interface NetworkScope : InitScope {
     val compactor: Scheduler
     val scheduler: Scheduler
 
-    val transactionStore: HeteroMap
+    val transactionStore: TransactionStore
 
     fun scheduleOutput(output: Output<*>)
 
@@ -69,12 +69,3 @@ internal interface NetworkScope : InitScope {
 
     fun scheduleDeactivation(output: Output<*>)
 }
-
-internal fun <A> NetworkScope.setResult(node: Key<A>, result: A) {
-    transactionStore[node] = result
-}
-
-internal fun <A> NetworkScope.getCurrentValue(key: Key<A>): A =
-    transactionStore.getOrError(key) { "No value for $key in transaction $epoch" }
-
-internal fun NetworkScope.hasCurrentValue(key: Key<*>): Boolean = transactionStore.contains(key)

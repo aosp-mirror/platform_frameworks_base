@@ -28,21 +28,13 @@ import com.android.systemui.kairos.emptyTFlow
 import com.android.systemui.kairos.init
 import com.android.systemui.kairos.mapCheap
 import com.android.systemui.kairos.switch
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.startCoroutine
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.completeWith
-import kotlinx.coroutines.job
 
 internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope) :
     EvalScope, NetworkScope by networkScope, DeferScope by deferScope {
 
-    private suspend fun <A> Transactional<A>.sample(): A =
-        impl.sample().sample(this@EvalScopeImpl).await()
+    private fun <A> Transactional<A>.sample(): A = impl.sample().sample(this@EvalScopeImpl).value
 
-    private suspend fun <A> TState<A>.sample(): A =
+    private fun <A> TState<A>.sample(): A =
         init.connect(evalScope = this@EvalScopeImpl).getCurrentWithEpoch(this@EvalScopeImpl).first
 
     private val <A> Transactional<A>.deferredValue: FrpDeferredValue<A>
@@ -62,7 +54,7 @@ internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope)
                             "now",
                             this,
                             { result.mapCheap { emptyTFlow }.init.connect(evalScope = this) },
-                            CompletableDeferred(
+                            CompletableLazy(
                                 TFlowInit(
                                     constInit(
                                         "now",
@@ -82,25 +74,10 @@ internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope)
         result
     }
 
-    private fun <R> deferredInternal(
-        block: suspend FrpTransactionScope.() -> R
-    ): FrpDeferredValue<R> = FrpDeferredValue(deferAsync { runInTransactionScope(block) })
+    private fun <R> deferredInternal(block: FrpTransactionScope.() -> R): FrpDeferredValue<R> =
+        FrpDeferredValue(deferAsync { runInTransactionScope(block) })
 
-    override suspend fun <R> runInTransactionScope(block: suspend FrpTransactionScope.() -> R): R {
-        val complete = CompletableDeferred<R>(parent = coroutineContext.job)
-        block.startCoroutine(
-            frpScope,
-            object : Continuation<R> {
-                override val context: CoroutineContext
-                    get() = EmptyCoroutineContext
-
-                override fun resumeWith(result: Result<R>) {
-                    complete.completeWith(result)
-                }
-            },
-        )
-        return complete.await()
-    }
+    override fun <R> runInTransactionScope(block: FrpTransactionScope.() -> R): R = frpScope.block()
 
     override val frpScope: FrpTransactionScope = FrpTransactionScopeImpl()
 
@@ -110,7 +87,7 @@ internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope)
         override fun <A> TState<A>.sampleDeferred(): FrpDeferredValue<A> = deferredValue
 
         override fun <R> deferredTransactionScope(
-            block: suspend FrpTransactionScope.() -> R
+            block: FrpTransactionScope.() -> R
         ): FrpDeferredValue<R> = deferredInternal(block)
 
         override val now: TFlow<Unit>

@@ -18,8 +18,6 @@ package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.util.Bag
 import java.util.TreeMap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * Tracks all upstream connections for Mux nodes.
@@ -86,7 +84,7 @@ internal class DepthTracker {
     @Volatile private var dirty_depthIsDirect = true
     @Volatile private var dirty_isIndirectRoot = false
 
-    fun schedule(scheduler: Scheduler, node: MuxNode<*, *, *, *>) {
+    fun schedule(scheduler: Scheduler, node: MuxNode<*, *, *>) {
         if (dirty_depthIsDirect) {
             scheduler.schedule(dirty_directDepth, node)
         } else {
@@ -192,30 +190,27 @@ internal class DepthTracker {
         return remainder
     }
 
-    suspend fun propagateChanges(scheduler: Scheduler, muxNode: MuxNode<*, *, *, *>) {
+    fun propagateChanges(scheduler: Scheduler, muxNode: MuxNode<*, *, *>) {
         if (isDirty()) {
             schedule(scheduler, muxNode)
         }
     }
 
     fun applyChanges(
-        coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         downstreamSet: DownstreamSet,
-        muxNode: MuxNode<*, *, *, *>,
+        muxNode: MuxNode<*, *, *>,
     ) {
         when {
             dirty_depthIsDirect -> {
                 if (snapshotIsDirect) {
                     downstreamSet.adjustDirectUpstream(
-                        coroutineScope,
                         scheduler,
                         oldDepth = snapshotDirectDepth,
                         newDepth = dirty_directDepth,
                     )
                 } else {
                     downstreamSet.moveIndirectUpstreamToDirect(
-                        coroutineScope,
                         scheduler,
                         oldIndirectDepth = snapshotIndirectDepth,
                         oldIndirectSet =
@@ -233,7 +228,6 @@ internal class DepthTracker {
             dirty_hasIndirectUpstream() || dirty_isIndirectRoot -> {
                 if (snapshotIsDirect) {
                     downstreamSet.moveDirectUpstreamToIndirect(
-                        coroutineScope,
                         scheduler,
                         oldDirectDepth = snapshotDirectDepth,
                         newIndirectDepth = dirty_indirectDepth,
@@ -247,7 +241,6 @@ internal class DepthTracker {
                     )
                 } else {
                     downstreamSet.adjustIndirectUpstream(
-                        coroutineScope,
                         scheduler,
                         oldDepth = snapshotIndirectDepth,
                         newDepth = dirty_indirectDepth,
@@ -274,14 +267,9 @@ internal class DepthTracker {
                 muxNode.lifecycle.lifecycleState = MuxLifecycleState.Dead
 
                 if (snapshotIsDirect) {
-                    downstreamSet.removeDirectUpstream(
-                        coroutineScope,
-                        scheduler,
-                        depth = snapshotDirectDepth,
-                    )
+                    downstreamSet.removeDirectUpstream(scheduler, depth = snapshotDirectDepth)
                 } else {
                     downstreamSet.removeIndirectUpstream(
-                        coroutineScope,
                         scheduler,
                         depth = snapshotIndirectDepth,
                         indirectSet =
@@ -374,125 +362,92 @@ internal class DownstreamSet {
         }
     }
 
-    fun adjustDirectUpstream(
-        coroutineScope: CoroutineScope,
-        scheduler: Scheduler,
-        oldDepth: Int,
-        newDepth: Int,
-    ) =
-        coroutineScope.run {
-            for (node in nodes) {
-                launch { node.adjustDirectUpstream(scheduler, oldDepth, newDepth) }
-            }
+    fun adjustDirectUpstream(scheduler: Scheduler, oldDepth: Int, newDepth: Int) {
+        for (node in nodes) {
+            node.adjustDirectUpstream(scheduler, oldDepth, newDepth)
         }
+    }
 
     fun moveIndirectUpstreamToDirect(
-        coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         oldIndirectDepth: Int,
         oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
         newDirectDepth: Int,
-    ) =
-        coroutineScope.run {
-            for (node in nodes) {
-                launch {
-                    node.moveIndirectUpstreamToDirect(
-                        scheduler,
-                        oldIndirectDepth,
-                        oldIndirectSet,
-                        newDirectDepth,
-                    )
-                }
-            }
-            for (mover in muxMovers) {
-                launch {
-                    mover.moveIndirectPatchNodeToDirect(scheduler, oldIndirectDepth, oldIndirectSet)
-                }
-            }
+    ) {
+        for (node in nodes) {
+            node.moveIndirectUpstreamToDirect(
+                scheduler,
+                oldIndirectDepth,
+                oldIndirectSet,
+                newDirectDepth,
+            )
         }
+        for (mover in muxMovers) {
+            mover.moveIndirectPatchNodeToDirect(scheduler, oldIndirectDepth, oldIndirectSet)
+        }
+    }
 
     fun adjustIndirectUpstream(
-        coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
         removals: Set<MuxDeferredNode<*, *, *>>,
         additions: Set<MuxDeferredNode<*, *, *>>,
-    ) =
-        coroutineScope.run {
-            for (node in nodes) {
-                launch {
-                    node.adjustIndirectUpstream(scheduler, oldDepth, newDepth, removals, additions)
-                }
-            }
-            for (mover in muxMovers) {
-                launch {
-                    mover.adjustIndirectPatchNode(
-                        scheduler,
-                        oldDepth,
-                        newDepth,
-                        removals,
-                        additions,
-                    )
-                }
-            }
+    ) {
+        for (node in nodes) {
+            node.adjustIndirectUpstream(scheduler, oldDepth, newDepth, removals, additions)
         }
+        for (mover in muxMovers) {
+            mover.adjustIndirectPatchNode(scheduler, oldDepth, newDepth, removals, additions)
+        }
+    }
 
     fun moveDirectUpstreamToIndirect(
-        coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         oldDirectDepth: Int,
         newIndirectDepth: Int,
         newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
-    ) =
-        coroutineScope.run {
-            for (node in nodes) {
-                launch {
-                    node.moveDirectUpstreamToIndirect(
-                        scheduler,
-                        oldDirectDepth,
-                        newIndirectDepth,
-                        newIndirectSet,
-                    )
-                }
-            }
-            for (mover in muxMovers) {
-                launch {
-                    mover.moveDirectPatchNodeToIndirect(scheduler, newIndirectDepth, newIndirectSet)
-                }
-            }
+    ) {
+        for (node in nodes) {
+            node.moveDirectUpstreamToIndirect(
+                scheduler,
+                oldDirectDepth,
+                newIndirectDepth,
+                newIndirectSet,
+            )
         }
+        for (mover in muxMovers) {
+            mover.moveDirectPatchNodeToIndirect(scheduler, newIndirectDepth, newIndirectSet)
+        }
+    }
 
     fun removeIndirectUpstream(
-        coroutineScope: CoroutineScope,
         scheduler: Scheduler,
         depth: Int,
         indirectSet: Set<MuxDeferredNode<*, *, *>>,
-    ) =
-        coroutineScope.run {
-            for (node in nodes) {
-                launch { node.removeIndirectUpstream(scheduler, depth, indirectSet) }
-            }
-            for (mover in muxMovers) {
-                launch { mover.removeIndirectPatchNode(scheduler, depth, indirectSet) }
-            }
-            for (output in outputs) {
-                launch { output.kill() }
-            }
+    ) {
+        for (node in nodes) {
+            node.removeIndirectUpstream(scheduler, depth, indirectSet)
         }
+        for (mover in muxMovers) {
+            mover.removeIndirectPatchNode(scheduler, depth, indirectSet)
+        }
+        for (output in outputs) {
+            output.kill()
+        }
+    }
 
-    fun removeDirectUpstream(coroutineScope: CoroutineScope, scheduler: Scheduler, depth: Int) =
-        coroutineScope.run {
-            for (node in nodes) {
-                launch { node.removeDirectUpstream(scheduler, depth) }
-            }
-            for (mover in muxMovers) {
-                launch { mover.removeDirectPatchNode(scheduler) }
-            }
-            for (output in outputs) {
-                launch { output.kill() }
-            }
+    fun removeDirectUpstream(scheduler: Scheduler, depth: Int) {
+        for (node in nodes) {
+            node.removeDirectUpstream(scheduler, depth)
         }
+        for (mover in muxMovers) {
+            mover.removeDirectPatchNode(scheduler)
+        }
+        for (output in outputs) {
+            output.kill()
+        }
+    }
 
     fun clear() {
         outputs.clear()
@@ -518,13 +473,14 @@ internal fun DownstreamSet.isEmpty() =
 
 @Suppress("NOTHING_TO_INLINE") internal inline fun DownstreamSet.isNotEmpty() = !isEmpty()
 
-internal fun CoroutineScope.scheduleAll(
+internal fun scheduleAll(
+    logIndent: Int,
     downstreamSet: DownstreamSet,
     evalScope: EvalScope,
 ): Boolean {
-    downstreamSet.nodes.forEach { launch { it.schedule(evalScope) } }
-    downstreamSet.muxMovers.forEach { launch { it.scheduleMover(evalScope) } }
-    downstreamSet.outputs.forEach { launch { it.schedule(evalScope) } }
+    downstreamSet.nodes.forEach { it.schedule(logIndent, evalScope) }
+    downstreamSet.muxMovers.forEach { it.scheduleMover(logIndent, evalScope) }
+    downstreamSet.outputs.forEach { it.schedule(logIndent, evalScope) }
     downstreamSet.stateWriters.forEach { evalScope.schedule(it) }
     return downstreamSet.isNotEmpty()
 }

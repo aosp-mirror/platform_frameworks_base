@@ -16,13 +16,13 @@
 
 package com.android.systemui.kairos
 
+import com.android.systemui.kairos.internal.CompletableLazy
 import com.android.systemui.kairos.internal.InitScope
 import com.android.systemui.kairos.internal.NoScope
 import com.android.systemui.kairos.internal.TransactionalImpl
 import com.android.systemui.kairos.internal.init
 import com.android.systemui.kairos.internal.transactionalImpl
 import com.android.systemui.kairos.internal.util.hashString
-import kotlinx.coroutines.CompletableDeferred
 
 /**
  * A time-varying value. A [Transactional] encapsulates the idea of some continuous state; each time
@@ -40,12 +40,12 @@ class Transactional<out A> internal constructor(internal val impl: TState<Transa
 /** A constant [Transactional] that produces [value] whenever it is sampled. */
 @ExperimentalFrpApi
 fun <A> transactionalOf(value: A): Transactional<A> =
-    Transactional(tStateOf(TransactionalImpl.Const(CompletableDeferred(value))))
+    Transactional(tStateOf(TransactionalImpl.Const(CompletableLazy(value))))
 
 /** TODO */
 @ExperimentalFrpApi
 fun <A> FrpDeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInline {
-    unwrapped.await()
+    unwrapped.value
 }
 
 /** TODO */
@@ -53,13 +53,12 @@ fun <A> FrpDeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInli
 
 /** TODO */
 @ExperimentalFrpApi
-fun <A> deferTransactional(block: suspend FrpScope.() -> Transactional<A>): Transactional<A> =
-    deferInline {
-        NoScope.runInFrpScope(block)
-    }
+fun <A> deferTransactional(block: FrpScope.() -> Transactional<A>): Transactional<A> = deferInline {
+    NoScope.runInFrpScope(block)
+}
 
 private inline fun <A> deferInline(
-    crossinline block: suspend InitScope.() -> Transactional<A>
+    crossinline block: InitScope.() -> Transactional<A>
 ): Transactional<A> =
     Transactional(TStateInit(init(name = null) { block().impl.init.connect(evalScope = this) }))
 
@@ -68,5 +67,5 @@ private inline fun <A> deferInline(
  * transaction; any subsequent sampling within the same transaction will receive a cached value.
  */
 @ExperimentalFrpApi
-fun <A> transactionally(block: suspend FrpTransactionScope.() -> A): Transactional<A> =
+fun <A> transactionally(block: FrpTransactionScope.() -> A): Transactional<A> =
     Transactional(tStateOf(transactionalImpl { runInTransactionScope(block) }))

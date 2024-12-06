@@ -30,7 +30,7 @@ import com.android.systemui.kairos.util.partitionEithers
 import com.android.systemui.kairos.util.zipWith
 import kotlin.coroutines.RestrictsSuspension
 
-typealias FrpStateful<R> = suspend FrpStateScope.() -> R
+typealias FrpStateful<R> = FrpStateScope.() -> R
 
 /**
  * Returns a [FrpStateful] that, when [applied][FrpStateScope.applyStateful], invokes [block] with
@@ -39,7 +39,7 @@ typealias FrpStateful<R> = suspend FrpStateScope.() -> R
 // TODO: caching story? should each Scope have a cache of applied FrpStateful instances?
 @ExperimentalFrpApi
 @Suppress("NOTHING_TO_INLINE")
-inline fun <A> statefully(noinline block: suspend FrpStateScope.() -> A): FrpStateful<A> = block
+inline fun <A> statefully(noinline block: FrpStateScope.() -> A): FrpStateful<A> = block
 
 /**
  * Operations that accumulate state within the FRP network.
@@ -55,7 +55,7 @@ interface FrpStateScope : FrpTransactionScope {
     /** TODO */
     @ExperimentalFrpApi
     // TODO: wish this could just be `deferred` but alas
-    fun <A> deferredStateScope(block: suspend FrpStateScope.() -> A): FrpDeferredValue<A>
+    fun <A> deferredStateScope(block: FrpStateScope.() -> A): FrpDeferredValue<A>
 
     /**
      * Returns a [TState] that holds onto the most recently emitted value from this [TFlow], or
@@ -86,7 +86,8 @@ interface FrpStateScope : FrpTransactionScope {
      */
     @ExperimentalFrpApi
     fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
-        initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
+        name: String? = null,
+        initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>,
     ): TFlow<Map<K, V>>
 
     /**
@@ -108,7 +109,8 @@ interface FrpStateScope : FrpTransactionScope {
      */
     @ExperimentalFrpApi
     fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
-        initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
+        initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>,
+        name: String? = null,
     ): TFlow<Map<K, V>>
 
     // TODO: everything below this comment can be made into extensions once we have context params
@@ -132,8 +134,9 @@ interface FrpStateScope : FrpTransactionScope {
      */
     @ExperimentalFrpApi
     fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
-        initialTFlows: Map<K, TFlow<V>> = emptyMap()
-    ): TFlow<Map<K, V>> = mergeIncrementally(deferredOf(initialTFlows))
+        name: String? = null,
+        initialTFlows: Map<K, TFlow<V>> = emptyMap(),
+    ): TFlow<Map<K, V>> = mergeIncrementally(name, deferredOf(initialTFlows))
 
     /**
      * Returns a [TFlow] that emits from a merged, incrementally-accumulated collection of [TFlow]s
@@ -154,11 +157,12 @@ interface FrpStateScope : FrpTransactionScope {
      */
     @ExperimentalFrpApi
     fun <K, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
-        initialTFlows: Map<K, TFlow<V>> = emptyMap()
-    ): TFlow<Map<K, V>> = mergeIncrementallyPromptly(deferredOf(initialTFlows))
+        initialTFlows: Map<K, TFlow<V>> = emptyMap(),
+        name: String? = null,
+    ): TFlow<Map<K, V>> = mergeIncrementallyPromptly(deferredOf(initialTFlows), name)
 
     /** Applies the [FrpStateful] within this [FrpStateScope]. */
-    @ExperimentalFrpApi suspend fun <A> FrpStateful<A>.applyStateful(): A = this()
+    @ExperimentalFrpApi fun <A> FrpStateful<A>.applyStateful(): A = this()
 
     /**
      * Applies the [FrpStateful] within this [FrpStateScope], returning the result as an
@@ -198,7 +202,7 @@ interface FrpStateScope : FrpTransactionScope {
      * original [TFlow].
      */
     @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.mapStateful(transform: suspend FrpStateScope.(A) -> B): TFlow<B> =
+    fun <A, B> TFlow<A>.mapStateful(transform: FrpStateScope.(A) -> B): TFlow<B> =
         mapPure { statefully { transform(it) } }.applyStatefuls()
 
     /**
@@ -224,7 +228,7 @@ interface FrpStateScope : FrpTransactionScope {
      * invocation of [transform], state accumulation from previous invocation is stopped.
      */
     @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.mapLatestStateful(transform: suspend FrpStateScope.(A) -> B): TFlow<B> =
+    fun <A, B> TFlow<A>.mapLatestStateful(transform: FrpStateScope.(A) -> B): TFlow<B> =
         mapPure { statefully { transform(it) } }.applyLatestStateful()
 
     /**
@@ -235,9 +239,8 @@ interface FrpStateScope : FrpTransactionScope {
      * invocation of [transform], state accumulation from previous invocation is stopped.
      */
     @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.flatMapLatestStateful(
-        transform: suspend FrpStateScope.(A) -> TFlow<B>
-    ): TFlow<B> = mapLatestStateful(transform).flatten()
+    fun <A, B> TFlow<A>.flatMapLatestStateful(transform: FrpStateScope.(A) -> TFlow<B>): TFlow<B> =
+        mapLatestStateful(transform).flatten()
 
     /**
      * Returns a [TFlow] containing the results of applying each [FrpStateful] emitted from the
@@ -394,7 +397,7 @@ interface FrpStateScope : FrpTransactionScope {
     fun <K, A, B> TFlow<Map<K, Maybe<A>>>.mapLatestStatefulForKey(
         initialValues: FrpDeferredValue<Map<K, A>>,
         numKeys: Int? = null,
-        transform: suspend FrpStateScope.(A) -> B,
+        transform: FrpStateScope.(A) -> B,
     ): Pair<TFlow<Map<K, Maybe<B>>>, FrpDeferredValue<Map<K, B>>> =
         mapPure { patch -> patch.mapValues { (_, v) -> v.map { statefully { transform(it) } } } }
             .applyLatestStatefulForKey(
@@ -419,7 +422,7 @@ interface FrpStateScope : FrpTransactionScope {
     fun <K, A, B> TFlow<Map<K, Maybe<A>>>.mapLatestStatefulForKey(
         initialValues: Map<K, A>,
         numKeys: Int? = null,
-        transform: suspend FrpStateScope.(A) -> B,
+        transform: FrpStateScope.(A) -> B,
     ): Pair<TFlow<Map<K, Maybe<B>>>, FrpDeferredValue<Map<K, B>>> =
         mapLatestStatefulForKey(deferredOf(initialValues), numKeys, transform)
 
@@ -436,7 +439,7 @@ interface FrpStateScope : FrpTransactionScope {
     @ExperimentalFrpApi
     fun <K, A, B> TFlow<Map<K, Maybe<A>>>.mapLatestStatefulForKey(
         numKeys: Int? = null,
-        transform: suspend FrpStateScope.(A) -> B,
+        transform: FrpStateScope.(A) -> B,
     ): TFlow<Map<K, Maybe<B>>> = mapLatestStatefulForKey(emptyMap(), numKeys, transform).first
 
     /**
@@ -447,12 +450,12 @@ interface FrpStateScope : FrpTransactionScope {
      * even emitted from the result [TFlow].
      */
     @ExperimentalFrpApi
-    fun <A> TFlow<A>.nextOnly(): TFlow<A> =
+    fun <A> TFlow<A>.nextOnly(name: String? = null): TFlow<A> =
         if (this === emptyTFlow) {
             this
         } else {
             TFlowLoop<A>().also {
-                it.loopback = it.mapCheap { emptyTFlow }.hold(this@nextOnly).switch()
+                it.loopback = it.mapCheap { emptyTFlow }.hold(this@nextOnly).switch(name)
             }
         }
 
@@ -501,7 +504,7 @@ interface FrpStateScope : FrpTransactionScope {
      * emitted that satisfies [predicate].
      */
     @ExperimentalFrpApi
-    fun <A> TFlow<A>.takeUntil(predicate: suspend FrpTransactionScope.(A) -> Boolean): TFlow<A> =
+    fun <A> TFlow<A>.takeUntil(predicate: FrpTransactionScope.(A) -> Boolean): TFlow<A> =
         takeUntil(filter(predicate))
 
     /**
@@ -515,7 +518,7 @@ interface FrpStateScope : FrpTransactionScope {
     @ExperimentalFrpApi
     fun <A, B> TFlow<A>.fold(
         initialValue: B,
-        transform: suspend FrpTransactionScope.(A, B) -> B,
+        transform: FrpTransactionScope.(A, B) -> B,
     ): TState<B> {
         lateinit var state: TState<B>
         return mapPure { a -> transform(a, state.sample()) }.hold(initialValue).also { state = it }
@@ -532,7 +535,7 @@ interface FrpStateScope : FrpTransactionScope {
     @ExperimentalFrpApi
     fun <A, B> TFlow<A>.foldDeferred(
         initialValue: FrpDeferredValue<B>,
-        transform: suspend FrpTransactionScope.(A, B) -> B,
+        transform: FrpTransactionScope.(A, B) -> B,
     ): TState<B> {
         lateinit var state: TState<B>
         return mapPure { a -> transform(a, state.sample()) }
@@ -657,7 +660,7 @@ interface FrpStateScope : FrpTransactionScope {
      * ```
      */
     @ExperimentalFrpApi
-    fun <A, B> TFlow<A>.mapIndexed(transform: suspend FrpTransactionScope.(Int, A) -> B): TFlow<B> {
+    fun <A, B> TFlow<A>.mapIndexed(transform: FrpTransactionScope.(Int, A) -> B): TFlow<B> {
         val index = fold(0) { _, i -> i + 1 }
         return sample(index) { a, idx -> transform(idx, a) }
     }
@@ -679,7 +682,7 @@ interface FrpStateScope : FrpTransactionScope {
     @ExperimentalFrpApi
     fun <A, B, C> TFlow<A>.sample(
         other: TFlow<B>,
-        transform: suspend FrpTransactionScope.(A, B) -> C,
+        transform: FrpTransactionScope.(A, B) -> C,
     ): TFlow<C> {
         val state = other.mapCheap { just(it) }.hold(none)
         return sample(state) { a, b -> b.map { transform(a, it) } }.filterJust()
@@ -700,7 +703,7 @@ interface FrpStateScope : FrpTransactionScope {
      * given function [transform].
      */
     @ExperimentalFrpApi
-    fun <A, B> TState<A>.map(transform: suspend FrpTransactionScope.(A) -> B): TState<B> =
+    fun <A, B> TState<A>.map(transform: FrpTransactionScope.(A) -> B): TState<B> =
         mapPure { transactionally { transform(it) } }.sampleTransactionals()
 
     /**
@@ -713,10 +716,27 @@ interface FrpStateScope : FrpTransactionScope {
     fun <A, B, Z> combine(
         stateA: TState<A>,
         stateB: TState<B>,
-        transform: suspend FrpTransactionScope.(A, B) -> Z,
+        transform: FrpTransactionScope.(A, B) -> Z,
     ): TState<Z> =
         com.android.systemui.kairos
             .combine(stateA, stateB) { a, b -> transactionally { transform(a, b) } }
+            .sampleTransactionals()
+
+    /**
+     * Returns a [TState] whose value is generated with [transform] by combining the current values
+     * of each given [TState].
+     *
+     * @see TState.combineWithTransactionally
+     */
+    @ExperimentalFrpApi
+    fun <A, B, C, Z> combine(
+        stateA: TState<A>,
+        stateB: TState<B>,
+        stateC: TState<C>,
+        transform: FrpTransactionScope.(A, B, C) -> Z,
+    ): TState<Z> =
+        com.android.systemui.kairos
+            .combine(stateA, stateB, stateC) { a, b, c -> transactionally { transform(a, b, c) } }
             .sampleTransactionals()
 
     /**
@@ -731,7 +751,7 @@ interface FrpStateScope : FrpTransactionScope {
         stateB: TState<B>,
         stateC: TState<C>,
         stateD: TState<D>,
-        transform: suspend FrpTransactionScope.(A, B, C, D) -> Z,
+        transform: FrpTransactionScope.(A, B, C, D) -> Z,
     ): TState<Z> =
         com.android.systemui.kairos
             .combine(stateA, stateB, stateC, stateD) { a, b, c, d ->
@@ -741,9 +761,8 @@ interface FrpStateScope : FrpTransactionScope {
 
     /** Returns a [TState] by applying [transform] to the value held by the original [TState]. */
     @ExperimentalFrpApi
-    fun <A, B> TState<A>.flatMap(
-        transform: suspend FrpTransactionScope.(A) -> TState<B>
-    ): TState<B> = mapPure { transactionally { transform(it) } }.sampleTransactionals().flatten()
+    fun <A, B> TState<A>.flatMap(transform: FrpTransactionScope.(A) -> TState<B>): TState<B> =
+        mapPure { transactionally { transform(it) } }.sampleTransactionals().flatten()
 
     /**
      * Returns a [TState] whose value is generated with [transform] by combining the current values
@@ -754,7 +773,7 @@ interface FrpStateScope : FrpTransactionScope {
     @ExperimentalFrpApi
     fun <A, Z> combine(
         vararg states: TState<A>,
-        transform: suspend FrpTransactionScope.(List<A>) -> Z,
+        transform: FrpTransactionScope.(List<A>) -> Z,
     ): TState<Z> = combinePure(*states).map(transform)
 
     /**
@@ -765,7 +784,7 @@ interface FrpStateScope : FrpTransactionScope {
      */
     @ExperimentalFrpApi
     fun <A, Z> Iterable<TState<A>>.combine(
-        transform: suspend FrpTransactionScope.(List<A>) -> Z
+        transform: FrpTransactionScope.(List<A>) -> Z
     ): TState<Z> = combinePure().map(transform)
 
     /**
@@ -775,6 +794,6 @@ interface FrpStateScope : FrpTransactionScope {
     @ExperimentalFrpApi
     fun <A, B, C> TState<A>.combineWith(
         other: TState<B>,
-        transform: suspend FrpTransactionScope.(A, B) -> C,
+        transform: FrpTransactionScope.(A, B) -> C,
     ): TState<C> = combine(this, other, transform)
 }

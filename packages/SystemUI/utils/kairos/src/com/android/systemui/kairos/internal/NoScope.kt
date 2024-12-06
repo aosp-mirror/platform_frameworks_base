@@ -17,31 +17,9 @@
 package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.FrpScope
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.coroutineContext
-import kotlin.coroutines.startCoroutine
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.completeWith
-import kotlinx.coroutines.job
 
 internal object NoScope {
     private object FrpScopeImpl : FrpScope
 
-    suspend fun <R> runInFrpScope(block: suspend FrpScope.() -> R): R {
-        val complete = CompletableDeferred<R>(coroutineContext.job)
-        block.startCoroutine(
-            FrpScopeImpl,
-            object : Continuation<R> {
-                override val context: CoroutineContext
-                    get() = EmptyCoroutineContext
-
-                override fun resumeWith(result: Result<R>) {
-                    complete.completeWith(result)
-                }
-            },
-        )
-        return complete.await()
-    }
+    fun <R> runInFrpScope(block: FrpScope.() -> R): R = FrpScopeImpl.block()
 }
