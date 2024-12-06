@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.Flags
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
@@ -293,6 +294,10 @@ constructor(
     }
 
     override fun onLongClick() {
+        if (Flags.glanceableHubDirectEditMode()) {
+            onOpenWidgetEditor(false)
+            return
+        }
         setCurrentPopupType(PopupType.CustomizeWidgetButton)
     }
 
