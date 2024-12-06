@@ -81,11 +81,6 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         stateWrites.add(state)
     }
 
-    // TODO: weird that we have this *and* scheduler exposed
-    override suspend fun schedule(node: MuxNode<*, *, *>) {
-        scheduler.schedule(node.depthTracker.dirty_directDepth, node)
-    }
-
     override fun scheduleDeactivation(node: PushNode<*>) {
         deactivations.add(node)
     }
