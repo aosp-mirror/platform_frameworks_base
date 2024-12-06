@@ -42,6 +42,6 @@ var Kosmos.sensitiveContentCoordinator: SensitiveContentCoordinator by
             sensitiveNotificationProtectionController,
             deviceEntryInteractor,
             sceneInteractor,
-            testScope,
+            testScope.backgroundScope,
         )
     }
