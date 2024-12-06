@@ -24,12 +24,12 @@ import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_E
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.appfunctions.AppFunctionException;
 import android.app.appfunctions.AppFunctionManager;
 import android.app.appfunctions.AppFunctionManagerHelper;
 import android.app.appfunctions.AppFunctionRuntimeMetadata;
 import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
-import android.app.appfunctions.AppFunctionException;
 import android.app.appfunctions.IAppFunctionEnabledCallback;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
@@ -158,8 +158,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         } catch (SecurityException exception) {
             safeExecuteAppFunctionCallback.onError(
                     new AppFunctionException(
-                            AppFunctionException.ERROR_DENIED,
-                            exception.getMessage()));
+                            AppFunctionException.ERROR_DENIED, exception.getMessage()));
             return null;
         }
 
@@ -195,12 +194,12 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
             @NonNull IBinder callerBinder) {
         UserHandle targetUser = requestInternal.getUserHandle();
-        // TODO(b/354956319): Add and honor the new enterprise policies.
-        if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
+        UserHandle callingUser = UserHandle.getUserHandleForUid(callingUid);
+        if (!mCallerValidator.verifyEnterprisePolicyIsAllowed(callingUser, targetUser)) {
             safeExecuteAppFunctionCallback.onError(
-                    new AppFunctionException(AppFunctionException.ERROR_SYSTEM_ERROR,
-                            "Cannot run on a device with a device owner or from the managed"
-                                    + " profile."));
+                    new AppFunctionException(
+                            AppFunctionException.ERROR_ENTERPRISE_POLICY_DISALLOWED,
+                            "Cannot run on a user with a restricted enterprise policy"));
             return;
         }
 
@@ -442,7 +441,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         if (!bindServiceResult) {
             Slog.e(TAG, "Failed to bind to the AppFunctionService");
             safeExecuteAppFunctionCallback.onError(
-                    new AppFunctionException(AppFunctionException.ERROR_SYSTEM_ERROR,
+                    new AppFunctionException(
+                            AppFunctionException.ERROR_SYSTEM_ERROR,
                             "Failed to bind the AppFunctionService."));
         }
     }
@@ -495,8 +495,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             return;
         }
         FutureGlobalSearchSession futureGlobalSearchSession =
-                new FutureGlobalSearchSession(
-                        perUserAppSearchManager, AppFunctionExecutors.THREAD_POOL_EXECUTOR);
+                new FutureGlobalSearchSession(perUserAppSearchManager, THREAD_POOL_EXECUTOR);
         AppFunctionMetadataObserver appFunctionMetadataObserver =
                 new AppFunctionMetadataObserver(
                         user.getUserHandle(),

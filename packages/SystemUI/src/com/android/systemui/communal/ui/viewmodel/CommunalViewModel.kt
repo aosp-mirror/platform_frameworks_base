@@ -90,7 +90,7 @@ constructor(
     private val keyguardIndicationController: KeyguardIndicationController,
     communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
-    communalSettingsInteractor: CommunalSettingsInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
@@ -371,6 +371,9 @@ constructor(
     /** The type of background to use for the hub. */
     val communalBackground: Flow<CommunalBackgroundType> =
         communalSettingsInteractor.communalBackground
+
+    /** See [CommunalSettingsInteractor.isV2FlagEnabled] */
+    fun v2FlagEnabled(): Boolean = communalSettingsInteractor.isV2FlagEnabled()
 
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L

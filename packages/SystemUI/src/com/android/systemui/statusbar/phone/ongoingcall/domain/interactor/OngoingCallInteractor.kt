@@ -90,6 +90,7 @@ class OngoingCallInteractor @Inject constructor(
                                     startTimeMs = model.whenTime,
                                     notificationIconView = model.statusBarChipIconView,
                                     intent = model.contentIntent,
+                                    notificationKey = model.key,
                                 )
                             }
                         }

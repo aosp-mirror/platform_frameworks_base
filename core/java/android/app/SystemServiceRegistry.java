@@ -42,8 +42,7 @@ import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.contextualsearch.ContextualSearchManager;
 import android.app.ecm.EnhancedConfirmationFrameworkInitializer;
 import android.app.job.JobSchedulerFrameworkInitializer;
-import android.app.ondeviceintelligence.IOnDeviceIntelligenceManager;
-import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceFrameworkInitializer;
 import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleFrameworkInitializer;
@@ -1692,19 +1691,6 @@ public final class SystemServiceRegistry {
                         throw new ServiceNotFoundException(Context.WEARABLE_SENSING_SERVICE);
                     }});
 
-        registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
-                new CachedServiceFetcher<OnDeviceIntelligenceManager>() {
-                    @Override
-                    public OnDeviceIntelligenceManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        IBinder iBinder = ServiceManager.getServiceOrThrow(
-                                Context.ON_DEVICE_INTELLIGENCE_SERVICE);
-                        IOnDeviceIntelligenceManager manager =
-                                IOnDeviceIntelligenceManager.Stub.asInterface(iBinder);
-                        return new OnDeviceIntelligenceManager(ctx.getOuterContext(), manager);
-                    }
-                });
-
         registerService(Context.GRAMMATICAL_INFLECTION_SERVICE, GrammaticalInflectionManager.class,
                 new CachedServiceFetcher<GrammaticalInflectionManager>() {
                     @Override
@@ -1849,6 +1835,7 @@ public final class SystemServiceRegistry {
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
             NearbyFrameworkInitializer.registerServiceWrappers();
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
+            OnDeviceIntelligenceFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();

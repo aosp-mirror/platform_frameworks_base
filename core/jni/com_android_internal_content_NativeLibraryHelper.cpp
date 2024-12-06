@@ -532,7 +532,12 @@ static inline bool app_compat_16kb_enabled() {
     static const size_t kPageSize = getpagesize();
 
     // App compat is only applicable on 16kb-page-size devices.
-    return kPageSize == 0x4000;
+    if (kPageSize != 0x4000) {
+        return false;
+    }
+
+    // Explicit disabled status for app compat
+    return !android::base::GetBoolProperty("pm.16kb.app_compat.disabled", false);
 }
 
 static jint

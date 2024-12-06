@@ -49,8 +49,10 @@ import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.Overlay
 import com.android.compose.animation.scene.content.Scene
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.effect.GestureEffect
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** The type for the content of movable elements. */
 internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
@@ -133,6 +135,18 @@ internal class SceneTransitionLayoutImpl(
                 ?: SnapshotStateMap<ElementKey, MovableElementContent>().also {
                     _movableContents = it
                 }
+
+    internal var horizontalOverscrollableContent =
+        OverscrollableContent(
+            animationScope = animationScope,
+            overscrollEffect = { content(it).scope.horizontalOverscrollGestureEffect },
+        )
+
+    internal var verticalOverscrollableContent =
+        OverscrollableContent(
+            animationScope = animationScope,
+            overscrollEffect = { content(it).scope.verticalOverscrollGestureEffect },
+        )
 
     /**
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
@@ -559,5 +573,25 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
         }
 
         return layout(width, height) { placeable.place(0, 0) }
+    }
+}
+
+internal class OverscrollableContent(
+    private val animationScope: CoroutineScope,
+    private val overscrollEffect: (ContentKey) -> GestureEffect,
+) {
+    private var currentContent: ContentKey? = null
+    var currentOverscrollEffect: GestureEffect? = null
+
+    fun applyOverscrollEffectOn(contentKey: ContentKey): GestureEffect {
+        if (currentContent == contentKey) return currentOverscrollEffect!!
+
+        currentOverscrollEffect?.apply { animationScope.launch { ensureApplyToFlingIsCalled() } }
+
+        // We are wrapping the overscroll effect.
+        val overscrollEffect = overscrollEffect(contentKey)
+        currentContent = contentKey
+        currentOverscrollEffect = overscrollEffect
+        return overscrollEffect
     }
 }

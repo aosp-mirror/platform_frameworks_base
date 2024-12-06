@@ -267,7 +267,9 @@ public class AlertController {
         return Flags.useWearMaterial3Ui()
                 && CompatChanges.isChangeEnabled(WEAR_MATERIAL3_ALERTDIALOG)
                 && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
-                && context.getThemeResId() == com.android.internal.R.style.Theme_DeviceDefault;
+                && (context.getThemeResId() == com.android.internal.R.style.Theme_DeviceDefault
+                    || context.getThemeResId()
+                        == com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert);
     }
 
     static boolean canTextInput(View v) {

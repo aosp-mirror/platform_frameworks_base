@@ -393,6 +393,7 @@ LIBANDROID {
     APerformanceHint_createSessionUsingConfig; # introduced=36
     APerformanceHint_notifyWorkloadIncrease; # introduced=36
     APerformanceHint_notifyWorkloadReset; # introduced=36
+    APerformanceHint_notifyWorkloadSpike; # introduced=36
     APerformanceHint_borrowSessionFromJava; # introduced=36
     APerformanceHint_setNativeSurfaces; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream

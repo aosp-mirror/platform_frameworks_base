@@ -10042,6 +10042,12 @@ public final class Settings {
                 "minimal_post_processing_allowed";
 
         /**
+         * Whether to mirror the built-in display on all connected displays.
+         * @hide
+         */
+        public static final String MIRROR_BUILT_IN_DISPLAY = "mirror_built_in_display";
+
+        /**
          * No mode switching will happen.
          *
          * @see #MATCH_CONTENT_FRAME_RATE

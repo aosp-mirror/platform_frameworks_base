@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.ondeviceintelligence.InferenceInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 import android.util.Base64;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -38,6 +37,8 @@ import java.util.List;
 public class InferenceInfoStoreTest {
     InferenceInfoStore inferenceInfoStore;
 
+    public static final String INFERENCE_INFO_BUNDLE_KEY = "inference_info";
+
     @Before
     public void setUp() {
         inferenceInfoStore = new InferenceInfoStore(1000);
@@ -46,7 +47,7 @@ public class InferenceInfoStoreTest {
     @Test
     public void testInferenceInfoParsesFromBundleSuccessfully() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putByteArray(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putByteArray(INFERENCE_INFO_BUNDLE_KEY,
                 getInferenceInfoBytes(1, 1, 100));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
         List<InferenceInfo> inferenceInfos = inferenceInfoStore.getLatestInferenceInfo(0);
@@ -59,7 +60,7 @@ public class InferenceInfoStoreTest {
     @Test
     public void testInferenceInfoParsesFromPersistableBundleSuccessfully() throws Exception {
         PersistableBundle bundle = new PersistableBundle();
-        bundle.putString(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putString(INFERENCE_INFO_BUNDLE_KEY,
                 Base64.encodeToString(getInferenceInfoBytes(1, 1, 100), Base64.DEFAULT));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
         List<InferenceInfo> inferenceInfos = inferenceInfoStore.getLatestInferenceInfo(0);
@@ -74,11 +75,11 @@ public class InferenceInfoStoreTest {
     public void testEvictionAfterMaxAge() throws Exception {
         PersistableBundle bundle = new PersistableBundle();
         long testStartTime = System.currentTimeMillis();
-        bundle.putString(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putString(INFERENCE_INFO_BUNDLE_KEY,
                 Base64.encodeToString(getInferenceInfoBytes(1,  testStartTime - 10,
                         testStartTime + 100), Base64.DEFAULT));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
-        bundle.putString(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putString(INFERENCE_INFO_BUNDLE_KEY,
                 Base64.encodeToString(getInferenceInfoBytes(1, testStartTime - 5,
                         testStartTime + 100), Base64.DEFAULT));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);

@@ -214,6 +214,7 @@ public:
     int sendHints(std::vector<hal::SessionHint>& hints, int64_t now, const char* debugName);
     int notifyWorkloadIncrease(bool cpu, bool gpu, const char* debugName);
     int notifyWorkloadReset(bool cpu, bool gpu, const char* debugName);
+    int notifyWorkloadSpike(bool cpu, bool gpu, const char* debugName);
     int setThreads(const int32_t* threadIds, size_t size);
     int getThreadIds(int32_t* const threadIds, size_t* size);
     int setPreferPowerEfficiency(bool enabled);
@@ -328,7 +329,7 @@ APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintMa
 
 bool APerformanceHintManager::canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) {
     mHintBudget =
-            std::max(kMaxLoadHintsPerInterval,
+            std::min(kMaxLoadHintsPerInterval,
                      mHintBudget +
                              static_cast<double>(now - mLastBudgetReplenish) * kReplenishRate);
     mLastBudgetReplenish = now;
@@ -595,6 +596,19 @@ int APerformanceHintSession::notifyWorkloadReset(bool cpu, bool gpu, const char*
     }
     if (gpu) {
         hints.push_back(hal::SessionHint::GPU_LOAD_RESET);
+    }
+    int64_t now = ::android::uptimeNanos();
+    return sendHints(hints, now, debugName);
+}
+
+int APerformanceHintSession::notifyWorkloadSpike(bool cpu, bool gpu, const char* debugName) {
+    std::vector<hal::SessionHint> hints(2);
+    hints.clear();
+    if (cpu) {
+        hints.push_back(hal::SessionHint::CPU_LOAD_SPIKE);
+    }
+    if (gpu) {
+        hints.push_back(hal::SessionHint::GPU_LOAD_SPIKE);
     }
     int64_t now = ::android::uptimeNanos();
     return sendHints(hints, now, debugName);
@@ -1140,6 +1154,16 @@ int APerformanceHint_notifyWorkloadIncrease(APerformanceHintSession* session, bo
 }
 
 int APerformanceHint_notifyWorkloadReset(APerformanceHintSession* session, bool cpu, bool gpu,
+                                         const char* debugName) {
+    VALIDATE_PTR(session)
+    VALIDATE_PTR(debugName)
+    if (!useNewLoadHintBehavior()) {
+        return ENOTSUP;
+    }
+    return session->notifyWorkloadReset(cpu, gpu, debugName);
+}
+
+int APerformanceHint_notifyWorkloadSpike(APerformanceHintSession* session, bool cpu, bool gpu,
                                          const char* debugName) {
     VALIDATE_PTR(session)
     VALIDATE_PTR(debugName)

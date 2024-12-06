@@ -33,6 +33,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -634,7 +636,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         releaseBackGesture();
         mShellExecutor.flushAll();
 
-        verify(mAppCallback).setHandoffHandler(any());
+        verify(mAppCallback).setHandoffHandler(notNull());
     }
 
     @Test
@@ -654,7 +656,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         releaseBackGesture();
         mShellExecutor.flushAll();
 
-        verify(mAppCallback, never()).setHandoffHandler(any());
+        verify(mAppCallback).setHandoffHandler(isNull());
     }
 
     @Test

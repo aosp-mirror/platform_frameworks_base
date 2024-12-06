@@ -30,6 +30,8 @@ import android.content.ComponentName;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.Vibrator;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.view.HapticFeedbackConstants;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -45,6 +47,8 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
@@ -54,14 +58,13 @@ import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.shared.flag.DualShade;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
-
-import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +74,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.Optional;
+
+import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -105,6 +110,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private ActivityStarter mActivityStarter;
     @Mock private EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
     @Mock private KeyguardInteractor mKeyguardInteractor;
+    @Mock private QSPanelController mQSPanelController;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -150,6 +156,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mRemoteInputQuickSettingsDisabler.adjustDisableFlags(anyInt()))
                 .thenAnswer((Answer<Integer>) invocation -> invocation.getArgument(0));
+        when(mCentralSurfaces.getQSPanelController()).thenReturn(mQSPanelController);
     }
 
     @Test
@@ -229,5 +236,46 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
         mSbcqCallbacks.addQsTileToFrontOrEnd(c, false);
 
         verify(mQSHost).addTile(c, false);
+    }
+
+    @Test
+    @DisableFlags(value = {QSComposeFragment.FLAG_NAME, DualShade.FLAG_NAME})
+    public void clickQsTile_flagsDisabled_callsQSPanelController() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.clickTile(c);
+        verify(mQSPanelController).clickTile(c);
+    }
+
+    @Test
+    @DisableFlags(DualShade.FLAG_NAME)
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    public void clickQsTile_onlyQSComposeFlag_callsQSHost() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.clickTile(c);
+        verify(mQSPanelController, never()).clickTile(c);
+        verify(mQSHost).clickTile(c);
+    }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
+    public void clickQsTile_onlyDualShadeFlag_callsQSHost() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.clickTile(c);
+        verify(mQSPanelController, never()).clickTile(c);
+        verify(mQSHost).clickTile(c);
+    }
+
+    @Test
+    @EnableFlags(value = {QSComposeFragment.FLAG_NAME, DualShade.FLAG_NAME})
+    public void clickQsTile_qsComposeAndDualShadeFlags_callsQSHost() {
+        ComponentName c = new ComponentName("testpkg", "testcls");
+
+        mSbcqCallbacks.clickTile(c);
+        verify(mQSPanelController, never()).clickTile(c);
+        verify(mQSHost).clickTile(c);
     }
 }

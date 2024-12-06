@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.viewmodel
 
 import android.os.UserHandle
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -36,6 +37,10 @@ interface QSTileViewModel {
 
     /** Specifies whether this device currently supports this tile. */
     val isAvailable: StateFlow<Boolean>
+
+    /** Specifies the [TileDetailsViewModel] for constructing the corresponding details view. */
+    val detailsViewModel: TileDetailsViewModel?
+        get() = null
 
     /**
      * Notifies about the user change. Implementations should avoid using 3rd party userId sources
