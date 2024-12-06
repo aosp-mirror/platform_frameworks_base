@@ -233,12 +233,6 @@ public class ServiceState implements Parcelable {
     public static final int  RIL_RADIO_TECHNOLOGY_NR = 20;
 
     /**
-     * 3GPP NB-IOT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
-     * @hide
-     */
-    public static final int RIL_RADIO_TECHNOLOGY_NB_IOT_NTN = 21;
-
-    /**
      * RIL Radio Annotation
      * @hide
      */
@@ -264,16 +258,14 @@ public class ServiceState implements Parcelable {
         ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA,
         ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN,
         ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA,
-        ServiceState.RIL_RADIO_TECHNOLOGY_NR,
-        ServiceState.RIL_RADIO_TECHNOLOGY_NB_IOT_NTN
-    })
+        ServiceState.RIL_RADIO_TECHNOLOGY_NR})
     public @interface RilRadioTechnology {}
 
 
     /**
      * The number of the radio technologies.
      */
-    private static final int NEXT_RIL_RADIO_TECHNOLOGY = 22;
+    private static final int NEXT_RIL_RADIO_TECHNOLOGY = 21;
 
     /** @hide */
     public static final int RIL_RADIO_CDMA_TECHNOLOGY_BITMASK =
@@ -1133,9 +1125,6 @@ public class ServiceState implements Parcelable {
             case RIL_RADIO_TECHNOLOGY_NR:
                 rtString = "NR_SA";
                 break;
-            case RIL_RADIO_TECHNOLOGY_NB_IOT_NTN:
-                rtString = "NB_IOT_NTN";
-                break;
             default:
                 rtString = "Unexpected";
                 Rlog.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
@@ -1679,8 +1668,6 @@ public class ServiceState implements Parcelable {
                 return TelephonyManager.NETWORK_TYPE_LTE_CA;
             case RIL_RADIO_TECHNOLOGY_NR:
                 return TelephonyManager.NETWORK_TYPE_NR;
-            case RIL_RADIO_TECHNOLOGY_NB_IOT_NTN:
-                return TelephonyManager.NETWORK_TYPE_NB_IOT_NTN;
             default:
                 return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
@@ -1710,7 +1697,6 @@ public class ServiceState implements Parcelable {
                 return AccessNetworkType.CDMA2000;
             case RIL_RADIO_TECHNOLOGY_LTE:
             case RIL_RADIO_TECHNOLOGY_LTE_CA:
-            case RIL_RADIO_TECHNOLOGY_NB_IOT_NTN:
                 return AccessNetworkType.EUTRAN;
             case RIL_RADIO_TECHNOLOGY_NR:
                 return AccessNetworkType.NGRAN;
@@ -1771,8 +1757,6 @@ public class ServiceState implements Parcelable {
                 return RIL_RADIO_TECHNOLOGY_LTE_CA;
             case TelephonyManager.NETWORK_TYPE_NR:
                 return RIL_RADIO_TECHNOLOGY_NR;
-            case TelephonyManager.NETWORK_TYPE_NB_IOT_NTN:
-                return RIL_RADIO_TECHNOLOGY_NB_IOT_NTN;
             default:
                 return RIL_RADIO_TECHNOLOGY_UNKNOWN;
         }
@@ -1882,8 +1866,7 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_TD_SCDMA
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_IWLAN
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_NB_IOT_NTN;
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
 
     }
 
@@ -1903,8 +1886,7 @@ public class ServiceState implements Parcelable {
     public static boolean isPsOnlyTech(int radioTechnology) {
         return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_NB_IOT_NTN;
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
     }
 
     /** @hide */
