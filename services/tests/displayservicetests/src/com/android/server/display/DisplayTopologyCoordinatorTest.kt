@@ -18,6 +18,7 @@ package com.android.server.display
 
 import android.hardware.display.DisplayTopology
 import android.hardware.display.DisplayTopology.pxToDp
+import android.util.SparseArray
 import android.view.Display
 import android.view.DisplayInfo
 import com.google.common.truth.Truth.assertThat
@@ -37,9 +38,11 @@ class DisplayTopologyCoordinatorTest {
     private val displayInfo = DisplayInfo()
     private val topologyChangeExecutor = Runnable::run
 
+    private val mockTopologyStore = mock<DisplayTopologyStore>()
     private val mockTopology = mock<DisplayTopology>()
     private val mockTopologyCopy = mock<DisplayTopology>()
     private val mockIsExtendedDisplayEnabled = mock<() -> Boolean>()
+    private val mockTopologySavedCallback = mock<() -> Unit>()
     private val mockTopologyChangedCallback = mock<(DisplayTopology) -> Unit>()
 
     @Before
@@ -51,11 +54,17 @@ class DisplayTopologyCoordinatorTest {
 
         val injector = object : DisplayTopologyCoordinator.Injector() {
             override fun getTopology() = mockTopology
+            override fun createTopologyStore(
+                displayIdToUniqueId: SparseArray<String>,
+                uniqueIdToDisplayId: MutableMap<String, Int>
+            ) =
+                mockTopologyStore
         }
         whenever(mockIsExtendedDisplayEnabled()).thenReturn(true)
         whenever(mockTopology.copy()).thenReturn(mockTopologyCopy)
         coordinator = DisplayTopologyCoordinator(injector, mockIsExtendedDisplayEnabled,
-            mockTopologyChangedCallback, topologyChangeExecutor, DisplayManagerService.SyncRoot())
+            mockTopologyChangedCallback, topologyChangeExecutor, DisplayManagerService.SyncRoot(),
+            mockTopologySavedCallback)
     }
 
     @Test
@@ -66,6 +75,7 @@ class DisplayTopologyCoordinatorTest {
         val heightDp = pxToDp(displayInfo.logicalHeight.toFloat(), displayInfo.logicalDensityDpi)
         verify(mockTopology).addDisplay(displayInfo.displayId, widthDp, heightDp)
         verify(mockTopologyChangedCallback).invoke(mockTopologyCopy)
+        verify(mockTopologyStore).restoreTopology(mockTopology)
     }
 
     @Test
@@ -76,6 +86,7 @@ class DisplayTopologyCoordinatorTest {
 
         verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
         verify(mockTopologyChangedCallback, never()).invoke(any())
+        verify(mockTopologyStore, never()).restoreTopology(any())
     }
 
     @Test
@@ -86,6 +97,7 @@ class DisplayTopologyCoordinatorTest {
 
         verify(mockTopology, never()).addDisplay(anyInt(), anyFloat(), anyFloat())
         verify(mockTopologyChangedCallback, never()).invoke(any())
+        verify(mockTopologyStore, never()).restoreTopology(any())
     }
 
     @Test
@@ -115,6 +127,7 @@ class DisplayTopologyCoordinatorTest {
         coordinator.onDisplayRemoved(Display.DEFAULT_DISPLAY)
 
         verify(mockTopologyChangedCallback).invoke(mockTopologyCopy)
+        verify(mockTopologyStore).restoreTopology(mockTopology)
     }
 
     @Test
@@ -124,6 +137,7 @@ class DisplayTopologyCoordinatorTest {
         coordinator.onDisplayRemoved(Display.DEFAULT_DISPLAY)
 
         verify(mockTopologyChangedCallback, never()).invoke(any())
+        verify(mockTopologyStore, never()).restoreTopology(any())
     }
 
     @Test
@@ -136,10 +150,12 @@ class DisplayTopologyCoordinatorTest {
         val topology = mock<DisplayTopology>()
         val topologyCopy = mock<DisplayTopology>()
         whenever(topology.copy()).thenReturn(topologyCopy)
-
+        whenever(mockTopologyStore.saveTopology(topology)).thenReturn(true)
         coordinator.topology = topology
 
         verify(topology).normalize()
         verify(mockTopologyChangedCallback).invoke(topologyCopy)
+        verify(mockTopologyStore).saveTopology(topology)
+        verify(mockTopologySavedCallback).invoke()
     }
 }

@@ -69,6 +69,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.backup.BackupManager;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
@@ -673,9 +674,10 @@ public final class DisplayManagerService extends SystemService {
                 mExternalDisplayStatsService);
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
         if (mFlags.isDisplayTopologyEnabled()) {
-            mDisplayTopologyCoordinator =
-                    new DisplayTopologyCoordinator(this::isExtendedDisplayEnabled,
-                            this::deliverTopologyUpdate, new HandlerExecutor(mHandler), mSyncRoot);
+            final var backupManager = new BackupManager(mContext);
+            mDisplayTopologyCoordinator = new DisplayTopologyCoordinator(
+                    this::isExtendedDisplayEnabled, this::deliverTopologyUpdate,
+                    new HandlerExecutor(mHandler), mSyncRoot, backupManager::dataChanged);
         } else {
             mDisplayTopologyCoordinator = null;
         }
@@ -755,6 +757,11 @@ public final class DisplayManagerService extends SystemService {
     }
 
     @Override
+    public void onUserUnlocked(@NonNull final TargetUser to) {
+        scheduleTopologiesReload(to.getUserIdentifier(), /*isUserSwitching=*/ true);
+    }
+
+    @Override
     public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         final int newUserId = to.getUserIdentifier();
         final int userSerial = getUserManager().getUserSerialNumber(newUserId);
@@ -792,6 +799,11 @@ public final class DisplayManagerService extends SystemService {
 
             if (mFlags.isDisplayContentModeManagementEnabled()) {
                 updateMirrorBuiltInDisplaySettingLocked();
+            }
+
+            final UserManager userManager = getUserManager();
+            if (null != userManager && userManager.isUserUnlockingOrUnlocked(mCurrentUserId)) {
+                scheduleTopologiesReload(mCurrentUserId, /*isUserSwitching=*/ true);
             }
         }
     }
@@ -870,6 +882,8 @@ public final class DisplayManagerService extends SystemService {
 
         mSmallAreaDetectionController = (mFlags.isSmallAreaDetectionEnabled())
                 ? SmallAreaDetectionController.create(mContext) : null;
+
+        scheduleTopologiesReload(mCurrentUserId, /*isUserSwitching=*/ false);
     }
 
     @VisibleForTesting
@@ -920,6 +934,15 @@ public final class DisplayManagerService extends SystemService {
 
     DisplayNotificationManager getDisplayNotificationManager() {
         return mDisplayNotificationManager;
+    }
+
+    private void scheduleTopologiesReload(final int userId, final boolean isUserSwitching) {
+        if (mDisplayTopologyCoordinator != null) {
+            // Need background thread due to xml files read operations not allowed on Display thread
+            BackgroundThread.getHandler().post(() ->
+                    mDisplayTopologyCoordinator.reloadTopologies(
+                            userId, isUserSwitching));
+        }
     }
 
     private void loadStableDisplayValuesLocked() {
@@ -5900,6 +5923,14 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public boolean isDisplayReadyForMirroring(int displayId) {
             return mExternalDisplayPolicy.isDisplayReadyForMirroring(displayId);
+        }
+
+        @Override
+        public void reloadTopologies(final int userId) {
+            // Reload topologies only if the userId matches the current user id.
+            if (userId == mCurrentUserId) {
+                scheduleTopologiesReload(mCurrentUserId, /*isUserSwitching=*/ false);
+            }
         }
     }
 
