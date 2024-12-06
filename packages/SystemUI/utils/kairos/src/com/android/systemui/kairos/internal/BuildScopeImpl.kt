@@ -34,7 +34,6 @@ import com.android.systemui.kairos.TFlowInit
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
 import com.android.systemui.kairos.internal.util.childScope
-import com.android.systemui.kairos.internal.util.launchOnCancel
 import com.android.systemui.kairos.internal.util.mapValuesParallel
 import com.android.systemui.kairos.launchEffect
 import com.android.systemui.kairos.util.Just
@@ -49,7 +48,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
@@ -164,7 +162,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         val subRef = AtomicReference<Maybe<Output<A>>>(null)
         val childScope = coroutineScope.childScope()
         // When our scope is cancelled, deactivate this observer.
-        childScope.launchOnCancel(CoroutineName("TFlow.observeEffect")) {
+        childScope.coroutineContext.job.invokeOnCompletion {
             subRef.getAndSet(None)?.let { output ->
                 if (output is Just) {
                     @Suppress("DeferredResultUnused")
@@ -215,7 +213,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                     } else if (needsEval) {
                         outputNode.schedule(evalScope = stateScope.evalScope)
                     }
-                } ?: childScope.cancel()
+                } ?: run { childScope.cancel() }
         }
         return childScope.coroutineContext.job
     }
@@ -229,10 +227,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                 "mapBuild",
                 mapImpl({ init.connect(evalScope = this) }) { spec ->
                         reenterBuildScope(outerScope = this@BuildScopeImpl, childScope)
-                            .runInBuildScope {
-                                val (result, _) = asyncScope { transform(spec) }
-                                result.get()
-                            }
+                            .runInBuildScope { transform(spec) }
                     }
                     .cached(),
             )
