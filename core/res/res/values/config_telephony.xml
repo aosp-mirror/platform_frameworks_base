@@ -496,4 +496,8 @@
          not connected state. -->
     <bool name="config_satellite_allow_check_message_in_not_connected">false</bool>
     <java-symbol type="bool" name="config_satellite_allow_check_message_in_not_connected" />
+
+    <!-- Whether to allow TN scanning during satellite session. -->
+    <bool name="config_satellite_allow_tn_scanning_during_satellite_session">true</bool>
+    <java-symbol type="bool" name="config_satellite_allow_tn_scanning_during_satellite_session" />
 </resources>

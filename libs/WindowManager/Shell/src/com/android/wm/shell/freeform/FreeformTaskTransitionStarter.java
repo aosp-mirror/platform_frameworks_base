@@ -51,4 +51,13 @@ public interface FreeformTaskTransitionStarter {
      * @return the started transition
      */
     IBinder startRemoveTransition(WindowContainerTransaction wct);
+
+    /**
+     * Starts PiP transition
+     *
+     * @param wct the {@link WindowContainerTransaction} that launches the PiP
+     *
+     * @return the started transition
+     */
+    IBinder startPipTransition(WindowContainerTransaction wct);
 }

@@ -4489,7 +4489,7 @@ class Task extends TaskFragment {
     }
 
     void onPictureInPictureParamsChanged() {
-        if (inPinnedWindowingMode()) {
+        if (inPinnedWindowingMode() || Flags.enableDesktopWindowingPip()) {
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
     }

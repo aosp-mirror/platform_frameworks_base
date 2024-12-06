@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.launcher3.Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL;
+import static com.android.launcher3.Flags.FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
@@ -250,7 +250,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 t3.taskId, -1);
     }
 
-    @EnableFlags(FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    @EnableFlags(FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK)
     @Test
     public void testGetRecentTasks_removesDesktopWallpaperActivity() {
         RecentTaskInfo t1 = makeTaskInfo(1);

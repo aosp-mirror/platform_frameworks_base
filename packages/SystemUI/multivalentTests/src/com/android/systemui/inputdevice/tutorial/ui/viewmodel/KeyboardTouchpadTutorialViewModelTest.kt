@@ -16,10 +16,8 @@
 
 package com.android.systemui.inputdevice.tutorial.ui.viewmodel
 
-import androidx.lifecycle.Lifecycle.Event
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -55,7 +53,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
 import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,9 +68,6 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
     private var tutorialScope = INTENT_TUTORIAL_SCOPE_TOUCHPAD
     private val viewModel by lazy { createViewModel(tutorialScope) }
 
-    // createUnsafe so its methods don't have to be called on Main thread
-    private val lifecycle = LifecycleRegistry.createUnsafe(mock(LifecycleOwner::class.java))
-
     @get:Rule val mainDispatcherRule = MainDispatcherRule(kosmos.testDispatcher)
 
     private fun createViewModel(
@@ -88,7 +82,6 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
                 mock<InputDeviceTutorialLogger>(),
                 SavedStateHandle(mapOf(INTENT_TUTORIAL_SCOPE_KEY to scope)),
             )
-        lifecycle.addObserver(viewModel)
         return viewModel
     }
 
@@ -279,7 +272,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
             collectValues(viewModel.screen) // just to initialize viewModel
             peripheralsState(touchpadConnected = true)
 
-            lifecycle.handleLifecycleEvent(Event.ON_START)
+            viewModel.onStart(TestLifecycleOwner())
 
             assertGesturesDisabled()
         }
@@ -291,8 +284,8 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
             collectValues(viewModel.screen)
             peripheralsState(touchpadConnected = true)
 
-            lifecycle.handleLifecycleEvent(Event.ON_START)
-            lifecycle.handleLifecycleEvent(Event.ON_STOP)
+            viewModel.onStart(TestLifecycleOwner())
+            viewModel.onStop(TestLifecycleOwner())
 
             assertGesturesNotDisabled()
         }

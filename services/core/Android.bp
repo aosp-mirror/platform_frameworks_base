@@ -127,6 +127,7 @@ java_library_static {
         "android.hardware.power-java_shared",
         "latest_android_hardware_broadcastradio_java_static",
         "services_crashrecovery_stubs_conditionally",
+        "ondeviceintelligence_conditionally",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -157,6 +158,7 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V3-java",
+        "androidx.annotation_annotation",
         "app-compat-annotations",
         "art_exported_aconfig_flags_lib",
         "framework-tethering.stubs.module_lib",

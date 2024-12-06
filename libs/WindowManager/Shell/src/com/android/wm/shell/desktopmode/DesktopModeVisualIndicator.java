@@ -53,6 +53,7 @@ import android.view.animation.DecelerateInterpolator;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.SystemBarUtils;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -245,9 +246,17 @@ public class DesktopModeVisualIndicator {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         final Resources resources = mContext.getResources();
         final DisplayMetrics metrics = resources.getDisplayMetrics();
-        final int screenWidth = metrics.widthPixels;
-        final int screenHeight = metrics.heightPixels;
-
+        final int screenWidth;
+        final int screenHeight;
+        if (Flags.enableBugFixesForSecondaryDisplay()) {
+            final DisplayLayout displayLayout =
+                    mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+            screenWidth = displayLayout.width();
+            screenHeight = displayLayout.height();
+        } else {
+            screenWidth = metrics.widthPixels;
+            screenHeight = metrics.heightPixels;
+        }
         mView = new View(mContext);
         final SurfaceControl.Builder builder = new SurfaceControl.Builder();
         mRootTdaOrganizer.attachToDisplayArea(mTaskInfo.displayId, builder);

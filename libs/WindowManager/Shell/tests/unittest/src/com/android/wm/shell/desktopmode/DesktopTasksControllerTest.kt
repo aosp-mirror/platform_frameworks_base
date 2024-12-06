@@ -21,6 +21,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
 import android.app.KeyguardManager
 import android.app.PendingIntent
+import android.app.PictureInPictureParams
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -1721,6 +1722,34 @@ class DesktopTasksControllerTest : ShellTestCase() {
     captor.value.hierarchyOps.none { hop ->
       hop.type == HIERARCHY_OP_TYPE_REMOVE_TASK && hop.container == wallpaperToken.asBinder()
     }
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_pipTask_autoEnterEnabled_startPipTransition() {
+    val task = setUpPipTask(autoEnterEnabled = true)
+    val handler = mock(TransitionHandler::class.java)
+    whenever(freeformTaskTransitionStarter.startPipTransition(any()))
+      .thenReturn(Binder())
+    whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
+      .thenReturn(android.util.Pair(handler, WindowContainerTransaction())
+    )
+
+    controller.minimizeTask(task)
+
+    verify(freeformTaskTransitionStarter).startPipTransition(any())
+    verify(freeformTaskTransitionStarter, never()).startMinimizedModeTransition(any())
+  }
+
+  @Test
+  fun onDesktopWindowMinimize_pipTask_autoEnterDisabled_startMinimizeTransition() {
+    val task = setUpPipTask(autoEnterEnabled = false)
+    whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
+      .thenReturn(Binder())
+
+    controller.minimizeTask(task)
+
+    verify(freeformTaskTransitionStarter).startMinimizedModeTransition(any())
+    verify(freeformTaskTransitionStarter, never()).startPipTransition(any())
   }
 
   @Test
@@ -4226,6 +4255,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
       runningTasks.add(task)
     }
     return task
+  }
+
+  private fun setUpPipTask(autoEnterEnabled: Boolean): RunningTaskInfo {
+    return setUpFreeformTask().apply {
+      pictureInPictureParams = PictureInPictureParams.Builder()
+        .setAutoEnterEnabled(autoEnterEnabled)
+        .build()
+    }
   }
 
   private fun setUpHomeTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {

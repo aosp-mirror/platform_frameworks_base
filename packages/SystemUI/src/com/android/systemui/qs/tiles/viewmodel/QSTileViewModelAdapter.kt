@@ -27,6 +27,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
@@ -152,6 +153,10 @@ constructor(
 
     override fun userSwitch(currentUser: Int) {
         qsTileViewModel.onUserChanged(UserHandle.of(currentUser))
+    }
+
+    override fun getDetailsViewModel(): TileDetailsViewModel? {
+        return qsTileViewModel.detailsViewModel
     }
 
     @Deprecated(

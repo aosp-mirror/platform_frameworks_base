@@ -43,25 +43,8 @@ public class SecurityLogSource implements DataSource {
         mDataAggregator = dataAggregator;
         mDpm = context.getSystemService(DevicePolicyManager.class);
         mExecutor = Executors.newSingleThreadExecutor();
-    }
-
-    @Override
-    public boolean initialize() {
-        // Confirm caller is system and the device is managed. Otherwise logs will
-        // be redacted.
-        try {
-            if (!mDpm.isDeviceManaged()) {
-                Slog.e(TAG, "Caller does not have device owner permissions");
-                return false;
-            }
-        } catch (SecurityException e) {
-            Slog.e(TAG, "Security exception in initialize: ", e);
-            return false;
-        }
         mEventCallback = new SecurityEventCallback();
-        return true;
     }
-
 
     @Override
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
@@ -99,6 +82,10 @@ public class SecurityLogSource implements DataSource {
 
         @Override
         public void accept(List<SecurityEvent> events) {
+            if (events.size() == 0) {
+                Slog.w(TAG, "No events received; caller may not be authorized");
+                return;
+            }
             List<IntrusionDetectionEvent> intrusionDetectionEvents =
                     events.stream()
                             .filter(event -> event != null)

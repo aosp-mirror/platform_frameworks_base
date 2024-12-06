@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.chips.notification.domain.model.Notificati
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -50,7 +51,14 @@ constructor(
     /** Converts the notification to the [OngoingActivityChipModel] object. */
     private fun NotificationChipModel.toActivityChipModel(): OngoingActivityChipModel.Shown {
         StatusBarNotifChips.assertInNewMode()
-        val icon = OngoingActivityChipModel.ChipIcon.StatusBarView(this.statusBarChipIconView)
+        val icon =
+            if (this.statusBarChipIconView != null) {
+                StatusBarConnectedDisplays.assertInLegacyMode()
+                OngoingActivityChipModel.ChipIcon.StatusBarView(this.statusBarChipIconView)
+            } else {
+                StatusBarConnectedDisplays.assertInNewMode()
+                OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(this.key)
+            }
         // TODO(b/364653005): Use the notification color if applicable.
         val colors = ColorsModel.Themed
         val onClickListener =

@@ -25,6 +25,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import com.intellij.psi.PsiParameter
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.getContainingUFile
 
@@ -40,14 +41,8 @@ class ShadeDisplayAwareDetector : Detector(), SourceCodeScanner {
                     if (!isInRelevantShadePackage(node)) continue
                     if (IGNORED_PACKAGES.contains(node.qualifiedName)) continue
 
-                    // Check the any context-dependent parameter to see if it has @ShadeDisplayAware
-                    // annotation
                     for (parameter in constructor.parameterList.parameters) {
-                        val shouldReport =
-                            CONTEXT_DEPENDENT_SHADE_CLASSES.contains(
-                                parameter.type.canonicalText
-                            ) && !parameter.hasAnnotation(SHADE_DISPLAY_AWARE_ANNOTATION)
-                        if (shouldReport) {
+                        if (parameter.shouldReport()) {
                             context.report(
                                 issue = ISSUE,
                                 scope = parameter.declarationScope,
@@ -62,19 +57,34 @@ class ShadeDisplayAwareDetector : Detector(), SourceCodeScanner {
 
     companion object {
         private const val INJECT_ANNOTATION = "javax.inject.Inject"
+        private const val APPLICATION_ANNOTATION =
+            "com.android.systemui.dagger.qualifiers.Application"
+        private const val GLOBAL_CONFIG_ANNOTATION = "com.android.systemui.common.ui.GlobalConfig"
         private const val SHADE_DISPLAY_AWARE_ANNOTATION =
             "com.android.systemui.shade.ShadeDisplayAware"
 
+        private const val CONTEXT = "android.content.Context"
+        private const val WINDOW_MANAGER = "android.view.WindowManager"
+        private const val LAYOUT_INFLATER = "android.view.LayoutInflater"
+        private const val RESOURCES = "android.content.res.Resources"
+        private const val CONFIG_STATE = "com.android.systemui.common.ui.ConfigurationState"
+        private const val CONFIG_CONTROLLER =
+            "com.android.systemui.statusbar.policy.ConfigurationController"
+        private const val CONFIG_INTERACTOR =
+            "com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor"
+
         private val CONTEXT_DEPENDENT_SHADE_CLASSES =
             setOf(
-                "android.content.Context",
-                "android.view.WindowManager",
-                "android.view.LayoutInflater",
-                "android.content.res.Resources",
-                "com.android.systemui.common.ui.ConfigurationState",
-                "com.android.systemui.statusbar.policy.ConfigurationController",
-                "com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor",
+                CONTEXT,
+                WINDOW_MANAGER,
+                LAYOUT_INFLATER,
+                RESOURCES,
+                CONFIG_STATE,
+                CONFIG_CONTROLLER,
+                CONFIG_INTERACTOR,
             )
+
+        private val CONFIG_CLASSES = setOf(CONFIG_STATE, CONFIG_CONTROLLER, CONFIG_INTERACTOR)
 
         private val SHADE_WINDOW_PACKAGES =
             listOf(
@@ -93,6 +103,22 @@ class ShadeDisplayAwareDetector : Detector(), SourceCodeScanner {
                 "com.android.systemui.qs.customize.TileAdapter",
             )
 
+        private fun PsiParameter.shouldReport(): Boolean {
+            val className = type.canonicalText
+
+            // check if the parameter is a context-dependent class relevant to shade
+            if (className !in CONTEXT_DEPENDENT_SHADE_CLASSES) return false
+            // check if it has @ShadeDisplayAware
+            if (hasAnnotation(SHADE_DISPLAY_AWARE_ANNOTATION)) return false
+            // check if its a @Application-annotated Context
+            if (className == CONTEXT && hasAnnotation(APPLICATION_ANNOTATION)) return false
+            // check if its a @GlobalConfig-annotated ConfigurationState, ConfigurationController
+            // or ConfigurationInteractor
+            if (className in CONFIG_CLASSES && hasAnnotation(GLOBAL_CONFIG_ANNOTATION)) return false
+
+            return true
+        }
+
         private fun isInRelevantShadePackage(node: UClass): Boolean {
             val packageName = node.getContainingUFile()?.packageName
             if (packageName.isNullOrBlank()) return false
@@ -102,15 +128,15 @@ class ShadeDisplayAwareDetector : Detector(), SourceCodeScanner {
         }
 
         private fun reportMsg(className: String) =
-            """UI elements of the shade window
-              |should use ShadeDisplayAware-annotated $className, as the shade might move between windows, and only
-              |@ShadeDisplayAware resources are updated with the new configuration correctly. Failures to do so
-              |might result in wrong dimensions for shade window classes (e.g. using the wrong density or theme).
-              |If the usage of $className is not related to display specific configuration or UI, then there is
-              |technically no need to use the annotation, and you can annotate the class with
-              |@SuppressLint("ShadeDisplayAwareContextChecker")/@Suppress("ShadeDisplayAwareContextChecker")
-              |"""
-                .trimMargin()
+            "UI elements of the shade window should use " +
+                "ShadeDisplayAware-annotated $className, as the shade might move between windows, " +
+                "and only @ShadeDisplayAware resources are updated with the new configuration " +
+                "correctly. Failures to do so might result in wrong dimensions for shade window " +
+                "classes (e.g. using the wrong density or theme). If the usage of $className is " +
+                "not related to display specific configuration or UI, then there is technically " +
+                "no need to use the annotation, and you can annotate the class with " +
+                "@SuppressLint(\"ShadeDisplayAwareContextChecker\")/" +
+                "@Suppress(\"ShadeDisplayAwareContextChecker\")".trimMargin()
 
         @JvmField
         val ISSUE: Issue =

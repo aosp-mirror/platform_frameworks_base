@@ -38,6 +38,7 @@ import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.qs.panels.ui.viewmodel.setConfigurationForMediaInRow
 import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
@@ -433,6 +434,28 @@ class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() 
 
                 assertThat(underTest.qqsMediaHost.disappearParameters).isEqualTo(disappearParamsRow)
                 assertThat(underTest.qsMediaHost.disappearParameters).isEqualTo(disappearParamsRow)
+            }
+        }
+
+    @Test
+    fun qsVisibleAndAnyShadeVisible() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                underTest.isQsVisible = false
+                fakeShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(false)
+                assertThat(underTest.isQsVisibleAndAnyShadeExpanded).isFalse()
+
+                underTest.isQsVisible = true
+                fakeShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(false)
+                assertThat(underTest.isQsVisibleAndAnyShadeExpanded).isFalse()
+
+                underTest.isQsVisible = false
+                fakeShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(true)
+                assertThat(underTest.isQsVisibleAndAnyShadeExpanded).isFalse()
+
+                underTest.isQsVisible = true
+                fakeShadeRepository.setLegacyExpandedOrAwaitingInputTransfer(true)
+                assertThat(underTest.isQsVisibleAndAnyShadeExpanded).isTrue()
             }
         }
 

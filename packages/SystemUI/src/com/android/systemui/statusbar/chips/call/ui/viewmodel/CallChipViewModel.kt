@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -67,8 +68,16 @@ constructor(
                                 Flags.statusBarCallChipNotificationIcon() &&
                                     state.notificationIconView != null
                             ) {
+                                StatusBarConnectedDisplays.assertInLegacyMode()
                                 OngoingActivityChipModel.ChipIcon.StatusBarView(
                                     state.notificationIconView
+                                )
+                            } else if (
+                                StatusBarConnectedDisplays.isEnabled &&
+                                    Flags.statusBarCallChipNotificationIcon()
+                            ) {
+                                OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(
+                                    state.notificationKey
                                 )
                             } else {
                                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(phoneIcon)

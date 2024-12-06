@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 
 import android.os.instrumentation.MethodDescriptor;
+import android.os.instrumentation.MethodDescriptorParser;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -37,7 +38,7 @@ import java.lang.reflect.Method;
 
 /**
  * Test class for
- * {@link DynamicInstrumentationManagerService#parseMethodDescriptor(ClassLoader,
+ * {@link MethodDescriptorParser#parseMethodDescriptor(ClassLoader,
  * MethodDescriptor)}.
  * <p>
  * Build/Install/Run:
@@ -119,13 +120,13 @@ public class ParseMethodDescriptorTest {
     }
 
     private Method parseMethodDescriptor(String fqcn, String methodName) {
-        return DynamicInstrumentationManagerService.parseMethodDescriptor(
+        return MethodDescriptorParser.parseMethodDescriptor(
                 getClass().getClassLoader(),
                 getMethodDescriptor(fqcn, methodName, new String[]{}));
     }
 
     private Method parseMethodDescriptor(String fqcn, String methodName, String[] fqParameters) {
-        return DynamicInstrumentationManagerService.parseMethodDescriptor(
+        return MethodDescriptorParser.parseMethodDescriptor(
                 getClass().getClassLoader(),
                 getMethodDescriptor(fqcn, methodName, fqParameters));
     }

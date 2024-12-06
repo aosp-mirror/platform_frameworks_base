@@ -1,10 +1,4 @@
 // Baseline format: 1.0
-ActionValue: android.view.contentcapture.ViewNode.ViewStructureImpl#EXTRA_VIRTUAL_STRUCTURE_TYPE:
-    Inconsistent extra value; expected `android.view.contentcapture.extra.VIRTUAL_STRUCTURE_TYPE`, was `android.view.ViewStructure.extra.VIRTUAL_STRUCTURE_TYPE`
-ActionValue: android.view.contentcapture.ViewNode.ViewStructureImpl#EXTRA_VIRTUAL_STRUCTURE_VERSION_NUMBER:
-    Inconsistent extra value; expected `android.view.contentcapture.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER`, was `android.view.ViewStructure.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER`
-
-
 BannedThrow: android.os.vibrator.persistence.VibrationXmlSerializer#serialize(android.os.VibrationEffect, java.io.Writer):
     Methods must not throw unchecked exceptions
 
