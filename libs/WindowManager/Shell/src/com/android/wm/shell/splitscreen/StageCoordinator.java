@@ -1776,6 +1776,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         outBottomOrRightBounds.set(mSplitLayout.getBottomRightBounds());
     }
 
+    void getRefStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        outTopOrLeftBounds.set(mSplitLayout.getTopLeftRefBounds());
+        outBottomOrRightBounds.set(mSplitLayout.getBottomRightRefBounds());
+    }
+
     private void runForActiveStages(Consumer<StageTaskListener> consumer) {
         mStageOrderOperator.getActiveStages().forEach(consumer);
     }
