@@ -36,7 +36,6 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.ConditionVariable;
-import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
@@ -82,9 +81,8 @@ public class BatteryUsageStatsProviderTest {
                     .setAveragePower(PowerProfile.POWER_BATTERY_CAPACITY, 4000.0);
 
     private MockClock mMockClock = mStatsRule.getMockClock();
-    private MonotonicClock mMonotonicClock = mStatsRule.getMonotonicClock();
+    private MonotonicClock mMonotonicClock = new MonotonicClock(666777, mMockClock);
     private Context mContext;
-    private PowerStatsStore mPowerStatsStore;
 
     @Before
     public void setup() throws IOException {
@@ -95,9 +93,6 @@ public class BatteryUsageStatsProviderTest {
         } else {
             mContext = InstrumentationRegistry.getContext();
         }
-        mPowerStatsStore = spy(new PowerStatsStore(
-                new File(mStatsRule.getHistoryDir(), getClass().getSimpleName()),
-                mStatsRule.getHandler()));
     }
 
     @Test
@@ -279,7 +274,10 @@ public class BatteryUsageStatsProviderTest {
         powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT,
                 true);
 
-        BatteryUsageStatsProvider provider = createBatteryUsageStatsProvider(0);
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext,
+                powerAttributor, mStatsRule.getPowerProfile(),
+                mStatsRule.getCpuScalingPolicies(), mock(PowerStatsStore.class), 0, mMockClock,
+                mMonotonicClock);
 
         return provider.getBatteryUsageStats(batteryStats, BatteryUsageStatsQuery.DEFAULT);
     }
@@ -333,30 +331,30 @@ public class BatteryUsageStatsProviderTest {
         BatteryStats.HistoryItem item;
 
         assertThat(item = iterator.next()).isNotNull();
-        assertHistoryItem(batteryStats, item,
+        assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_RESET, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 1_000_000);
 
         assertThat(item = iterator.next()).isNotNull();
-        assertHistoryItem(batteryStats, item,
+        assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 1_000_000);
         assertThat(item.states & BatteryStats.HistoryItem.STATE_CPU_RUNNING_FLAG).isNotEqualTo(0);
 
         assertThat(item = iterator.next()).isNotNull();
-        assertHistoryItem(batteryStats, item,
+        assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE, BatteryStats.HistoryItem.EVENT_NONE,
                 null, 0, 3_600_000, 90, 2_000_000);
         assertThat(item.states & BatteryStats.HistoryItem.STATE_CPU_RUNNING_FLAG).isEqualTo(0);
 
         assertThat(item = iterator.next()).isNotNull();
-        assertHistoryItem(batteryStats, item,
+        assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE,
                 BatteryStats.HistoryItem.EVENT_ALARM | BatteryStats.HistoryItem.EVENT_FLAG_START,
                 "foo", APP_UID, 3_600_000, 90, 3_000_000);
 
         assertThat(item = iterator.next()).isNotNull();
-        assertHistoryItem(batteryStats, item,
+        assertHistoryItem(item,
                 BatteryStats.HistoryItem.CMD_UPDATE,
                 BatteryStats.HistoryItem.EVENT_ALARM | BatteryStats.HistoryItem.EVENT_FLAG_FINISH,
                 "foo", APP_UID, 3_600_000, 90, 3_001_000);
@@ -443,15 +441,14 @@ public class BatteryUsageStatsProviderTest {
             assertThat(item.eventTag.string).startsWith(uid + " ");
             assertThat(item.batteryChargeUah).isEqualTo(3_600_000);
             assertThat(item.batteryLevel).isEqualTo(90);
-            assertThat(item.time).isEqualTo(batteryStats.getMonotonicStartTime() + 1_000_000);
+            assertThat(item.time).isEqualTo((long) 1_000_000);
         }
 
         assertThat(expectedUid).isEqualTo(200);
     }
 
-    private void assertHistoryItem(MockBatteryStatsImpl batteryStats, BatteryStats.HistoryItem item,
-            int command, int eventCode, String tag, int uid, int batteryChargeUah, int batteryLevel,
-            long elapsedTimeMs) {
+    private void assertHistoryItem(BatteryStats.HistoryItem item, int command, int eventCode,
+            String tag, int uid, int batteryChargeUah, int batteryLevel, long elapsedTimeMs) {
         assertThat(item.cmd).isEqualTo(command);
         assertThat(item.eventCode).isEqualTo(eventCode);
         if (tag == null) {
@@ -463,7 +460,7 @@ public class BatteryUsageStatsProviderTest {
         assertThat(item.batteryChargeUah).isEqualTo(batteryChargeUah);
         assertThat(item.batteryLevel).isEqualTo(batteryLevel);
 
-        assertThat(item.time).isEqualTo(batteryStats.getMonotonicStartTime() + elapsedTimeMs);
+        assertThat(item.time).isEqualTo(elapsedTimeMs);
     }
 
     @Test
@@ -569,66 +566,38 @@ public class BatteryUsageStatsProviderTest {
 
         assertThat(stats.getStatsStartTimestamp()).isEqualTo(5 * MINUTE_IN_MS);
         assertThat(stats.getStatsEndTimestamp()).isEqualTo(55 * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, 180.0, (10 + 20) * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, APP_UID, 180.0, (10 + 20) * MINUTE_IN_MS);
+        assertThat(stats.getAggregateBatteryConsumer(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
+                .isWithin(0.0001)
+                .of(180.0);  // 360 mA * 0.5 hours
+        assertThat(stats.getAggregateBatteryConsumer(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
+                .isEqualTo((10 + 20) * MINUTE_IN_MS);
+        final UidBatteryConsumer uidBatteryConsumer = stats.getUidBatteryConsumers().stream()
+                .filter(uid -> uid.getUid() == APP_UID).findFirst().get();
+        assertThat(uidBatteryConsumer
+                .getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
+                .isWithin(0.1)
+                .of(180.0);
 
         stats.close();
     }
 
     @Test
     public void accumulateBatteryUsageStats() throws Throwable {
-        MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
-        accumulateBatteryUsageStats(batteryStats, 10000000, 0);
+        accumulateBatteryUsageStats(10000000, 1);
         // Accumulate every 200 bytes of battery history
-        accumulateBatteryUsageStats(batteryStats, 200, 2);
-        accumulateBatteryUsageStats(batteryStats, 50, 4);
+        accumulateBatteryUsageStats(200, 2);
+        accumulateBatteryUsageStats(50, 5);
         // Accumulate on every invocation of accumulateBatteryUsageStats
-        accumulateBatteryUsageStats(batteryStats, 0, 7);
+        accumulateBatteryUsageStats(0, 7);
     }
 
-    @Test
-    public void getAccumulatedBatteryUsageStats() throws Throwable {
-        MockBatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
-
-        // Only accumulate the first 25 minutes
-        accumulateBatteryUsageStats(batteryStats, 200, 1);
-
-        BatteryUsageStatsProvider batteryUsageStatsProvider = createBatteryUsageStatsProvider(200);
-
-        // At this point the last stored accumulated stats are `115 - 30 = 85` minutes old
-        BatteryUsageStats stats = batteryUsageStatsProvider.getBatteryUsageStats(batteryStats,
-                new BatteryUsageStatsQuery.Builder()
-                        .accumulated()
-                        .setMaxStatsAgeMs(90 * MINUTE_IN_MS)
-                        .build());
-
-        assertThat(stats.getStatsStartTimestamp()).isEqualTo(5 * MINUTE_IN_MS);
-        assertThat(stats.getStatsEndTimestamp()).isEqualTo(30 * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, 60.0, 10 * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, APP_UID, 60.0, 10 * MINUTE_IN_MS);
-
-        stats.close();
-
-        // Now force the usage stats to catch up to the current time
-        stats = batteryUsageStatsProvider.getBatteryUsageStats(batteryStats,
-                new BatteryUsageStatsQuery.Builder()
-                        .accumulated()
-                        .setMaxStatsAgeMs(5 * MINUTE_IN_MS)
-                        .build());
-
-        assertThat(stats.getStatsStartTimestamp()).isEqualTo(5 * MINUTE_IN_MS);
-        assertThat(stats.getStatsEndTimestamp()).isEqualTo(115 * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, 360.0, 60 * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, APP_UID, 360.0, 60 * MINUTE_IN_MS);
-
-        stats.close();
-    }
-
-    private void accumulateBatteryUsageStats(MockBatteryStatsImpl batteryStatsImpl,
-            int accumulatedBatteryUsageStatsSpanSize, int expectedNumberOfUpdates)
-            throws Throwable {
-        Handler handler = mStatsRule.getHandler();
-        MockBatteryStatsImpl batteryStats = spy(batteryStatsImpl);
+    private void accumulateBatteryUsageStats(int accumulatedBatteryUsageStatsSpanSize,
+            int expectedNumberOfUpdates) throws Throwable {
+        BatteryStatsImpl batteryStats = spy(mStatsRule.getBatteryStats());
         // Note - these two are in microseconds
         when(batteryStats.computeBatteryTimeRemaining(anyLong())).thenReturn(111_000L);
         when(batteryStats.computeChargeTimeRemaining(anyLong())).thenReturn(777_000L);
@@ -641,76 +610,82 @@ public class BatteryUsageStatsProviderTest {
             batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
 
-        mPowerStatsStore.reset();
+        PowerStatsStore powerStatsStore = spy(new PowerStatsStore(
+                new File(mStatsRule.getHistoryDir(), getClass().getSimpleName()),
+                mStatsRule.getHandler()));
+        powerStatsStore.reset();
 
         int[] count = new int[1];
         doAnswer(inv -> {
             count[0]++;
-            return inv.callRealMethod();
-        }).when(mPowerStatsStore).storePowerStatsSpan(any(PowerStatsSpan.class));
+            return null;
+        }).when(powerStatsStore).storePowerStatsSpan(any(PowerStatsSpan.class));
 
-        BatteryUsageStatsProvider batteryUsageStatsProvider = createBatteryUsageStatsProvider(
-                accumulatedBatteryUsageStatsSpanSize);
+        MultiStatePowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
+                powerStatsStore, mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(),
+                () -> 3500);
+        for (int powerComponentId = 0; powerComponentId < BatteryConsumer.POWER_COMPONENT_COUNT;
+                powerComponentId++) {
+            powerAttributor.setPowerComponentSupported(powerComponentId, true);
+        }
+        powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_ANY, true);
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext,
+                powerAttributor, mStatsRule.getPowerProfile(),
+                mStatsRule.getCpuScalingPolicies(), powerStatsStore,
+                accumulatedBatteryUsageStatsSpanSize, mMockClock, mMonotonicClock);
 
-        setTime(10 * MINUTE_IN_MS);
+        provider.accumulateBatteryUsageStatsAsync(batteryStats, mStatsRule.getHandler());
+
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
                     10 * MINUTE_IN_MS, 10 * MINUTE_IN_MS);
         }
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        provider.accumulateBatteryUsageStatsAsync(batteryStats, mStatsRule.getHandler());
 
-        setTime(20 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
         }
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        provider.accumulateBatteryUsageStatsAsync(batteryStats, mStatsRule.getHandler());
 
-        setTime(30 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
                     30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
         }
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        provider.accumulateBatteryUsageStatsAsync(batteryStats, mStatsRule.getHandler());
 
-        // Make sure the accumulated stats are computed and saved before generating more history
-        mStatsRule.waitForBackgroundThread();
-
-        setTime(50 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
         }
         setTime(55 * MINUTE_IN_MS);
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        provider.accumulateBatteryUsageStatsAsync(batteryStats, mStatsRule.getHandler());
 
         // This section has not been saved yet, but should be added to the accumulated totals
-        setTime(80 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
                     80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
         }
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        provider.accumulateBatteryUsageStatsAsync(batteryStats, mStatsRule.getHandler());
 
-        setTime(110 * MINUTE_IN_MS);
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOffLocked(APP_UID,
                     110 * MINUTE_IN_MS, 110 * MINUTE_IN_MS);
         }
         setTime(115 * MINUTE_IN_MS);
 
-        batteryUsageStatsProvider.accumulateBatteryUsageStatsAsync(batteryStats, handler);
+        // Pick up the remainder of battery history that has not yet been accumulated
+        provider.accumulateBatteryUsageStats(batteryStats);
 
         mStatsRule.waitForBackgroundThread();
 
-        BatteryUsageStats stats = batteryUsageStatsProvider.getBatteryUsageStats(batteryStats,
+        BatteryUsageStats stats = provider.getBatteryUsageStats(batteryStats,
                 new BatteryUsageStatsQuery.Builder().accumulated().build());
 
         assertThat(stats.getStatsStartTimestamp()).isEqualTo(5 * MINUTE_IN_MS);
@@ -721,55 +696,29 @@ public class BatteryUsageStatsProviderTest {
         assertThat(stats.getBatteryCapacity()).isEqualTo(4000);  // from PowerProfile
 
         // Total: 10 + 20 + 30 = 60
-        assertBatteryConsumer(stats, 360.0, 60 * MINUTE_IN_MS);
-        assertBatteryConsumer(stats, APP_UID, 360.0, 60 * MINUTE_IN_MS);
-        stats.close();
-
-        mStatsRule.waitForBackgroundThread();
-
-        assertThat(count[0]).isEqualTo(expectedNumberOfUpdates);
-    }
-
-    private BatteryUsageStatsProvider createBatteryUsageStatsProvider(
-            int accumulatedBatteryUsageStatsSpanSize) {
-        MultiStatePowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
-                mPowerStatsStore, mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(),
-                () -> 3500);
-        for (int powerComponentId = 0; powerComponentId < BatteryConsumer.POWER_COMPONENT_COUNT;
-                powerComponentId++) {
-            powerAttributor.setPowerComponentSupported(powerComponentId, true);
-        }
-        powerAttributor.setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_ANY, true);
-
-        return new BatteryUsageStatsProvider(mContext, powerAttributor,
-                mStatsRule.getPowerProfile(), mStatsRule.getCpuScalingPolicies(), mPowerStatsStore,
-                accumulatedBatteryUsageStatsSpanSize, mMockClock, mMonotonicClock);
-    }
-
-    private static void assertBatteryConsumer(BatteryUsageStats stats, double expectedPowerMah,
-            long expectedDurationMs) {
-        AggregateBatteryConsumer aggregatedConsumer = stats.getAggregateBatteryConsumer(
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
-        assertThat(aggregatedConsumer
+        assertThat(stats.getAggregateBatteryConsumer(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isWithin(0.0001)
-                .of(expectedPowerMah);
-        assertThat(aggregatedConsumer
+                .of(360.0);  // 360 mA * 1.0 hour
+        assertThat(stats.getAggregateBatteryConsumer(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
-                .isEqualTo(expectedDurationMs);
-    }
+                .isEqualTo(60 * MINUTE_IN_MS);
 
-    private static void assertBatteryConsumer(BatteryUsageStats stats, int uid,
-            double expectedPowerMah, long expectedDurationMs) {
         final UidBatteryConsumer uidBatteryConsumer = stats.getUidBatteryConsumers().stream()
-                .filter(u -> u.getUid() == uid).findFirst().get();
+                .filter(uid -> uid.getUid() == APP_UID).findFirst().get();
         assertThat(uidBatteryConsumer
                 .getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
                 .isWithin(0.1)
-                .of(expectedPowerMah);
+                .of(360.0);
         assertThat(uidBatteryConsumer
                 .getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
-                .isEqualTo(expectedDurationMs);
+                .isEqualTo(60 * MINUTE_IN_MS);
+
+        assertThat(count[0]).isEqualTo(expectedNumberOfUpdates);
+
+        stats.close();
     }
 
     private void setTime(long timeMs) {
