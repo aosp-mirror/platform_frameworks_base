@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlin.properties.Delegates
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,165 +45,131 @@ import org.junit.runner.RunWith
 class OffsetOverscrollEffectTest {
     @get:Rule val rule = createComposeRule()
 
-    private fun expectedOffset(currentOffset: Dp, density: Density): Dp {
-        return with(density) {
-            OffsetOverscrollEffect.computeOffset(this, currentOffset.toPx()).toDp()
+    private val BOX_TAG = "box"
+
+    private data class LayoutInfo(val layoutSize: Dp, val touchSlop: Float, val density: Density) {
+        fun expectedOffset(currentOffset: Dp): Dp {
+            return with(density) {
+                OffsetOverscrollEffect.computeOffset(this, currentOffset.toPx()).toDp()
+            }
         }
+    }
+
+    private fun setupOverscrollableBox(
+        scrollableOrientation: Orientation,
+        overscrollEffectOrientation: Orientation = scrollableOrientation,
+    ): LayoutInfo {
+        val layoutSize: Dp = 200.dp
+        var touchSlop: Float by Delegates.notNull()
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        lateinit var density: Density
+        rule.setContent {
+            density = LocalDensity.current
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            val overscrollEffect = rememberOffsetOverscrollEffect(overscrollEffectOrientation)
+
+            Box(
+                Modifier.overscroll(overscrollEffect)
+                    // A scrollable that does not consume the scroll gesture.
+                    .scrollable(
+                        state = rememberScrollableState { 0f },
+                        orientation = scrollableOrientation,
+                        overscrollEffect = overscrollEffect,
+                    )
+                    .size(layoutSize)
+                    .testTag(BOX_TAG)
+            )
+        }
+        return LayoutInfo(layoutSize, touchSlop, density)
     }
 
     @Test
     fun applyVerticalOffset_duringVerticalOverscroll() {
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-        lateinit var density: Density
-        val layoutSize = 200.dp
+        val info = setupOverscrollableBox(scrollableOrientation = Orientation.Vertical)
 
-        rule.setContent {
-            density = LocalDensity.current
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            val overscrollEffect = rememberOffsetOverscrollEffect(Orientation.Vertical)
-
-            Box(
-                Modifier.overscroll(overscrollEffect)
-                    // A scrollable that does not consume the scroll gesture.
-                    .scrollable(
-                        state = rememberScrollableState { 0f },
-                        orientation = Orientation.Vertical,
-                        overscrollEffect = overscrollEffect,
-                    )
-                    .size(layoutSize)
-                    .testTag("box")
-            )
-        }
-
-        val onBox = rule.onNodeWithTag("box")
-
-        onBox.assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag(BOX_TAG).assertTopPositionInRootIsEqualTo(0.dp)
 
         rule.onRoot().performTouchInput {
             down(center)
-            moveBy(Offset(0f, touchSlop + layoutSize.toPx()), delayMillis = 1_000)
+            moveBy(Offset(0f, info.touchSlop + info.layoutSize.toPx()), delayMillis = 1_000)
         }
 
-        onBox.assertTopPositionInRootIsEqualTo(expectedOffset(layoutSize, density))
+        rule
+            .onNodeWithTag(BOX_TAG)
+            .assertTopPositionInRootIsEqualTo(info.expectedOffset(info.layoutSize))
     }
 
     @Test
     fun applyNoOffset_duringHorizontalOverscroll() {
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-        val layoutSize = 200.dp
-
-        rule.setContent {
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            val overscrollEffect = rememberOffsetOverscrollEffect(Orientation.Vertical)
-
-            Box(
-                Modifier.overscroll(overscrollEffect)
-                    // A scrollable that does not consume the scroll gesture.
-                    .scrollable(
-                        state = rememberScrollableState { 0f },
-                        orientation = Orientation.Horizontal,
-                        overscrollEffect = overscrollEffect,
-                    )
-                    .size(layoutSize)
-                    .testTag("box")
+        val info =
+            setupOverscrollableBox(
+                scrollableOrientation = Orientation.Vertical,
+                overscrollEffectOrientation = Orientation.Horizontal,
             )
-        }
 
-        val onBox = rule.onNodeWithTag("box")
-
-        onBox.assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag(BOX_TAG).assertTopPositionInRootIsEqualTo(0.dp)
 
         rule.onRoot().performTouchInput {
             down(center)
-            moveBy(Offset(touchSlop + layoutSize.toPx(), 0f), delayMillis = 1_000)
+            moveBy(Offset(info.touchSlop + info.layoutSize.toPx(), 0f), delayMillis = 1_000)
         }
 
-        onBox.assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag(BOX_TAG).assertTopPositionInRootIsEqualTo(0.dp)
     }
 
     @Test
     fun backToZero_afterOverscroll() {
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-        lateinit var density: Density
-        val layoutSize = 200.dp
-
-        rule.setContent {
-            density = LocalDensity.current
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            val overscrollEffect = rememberOffsetOverscrollEffect(Orientation.Vertical)
-
-            Box(
-                Modifier.overscroll(overscrollEffect)
-                    // A scrollable that does not consume the scroll gesture.
-                    .scrollable(
-                        state = rememberScrollableState { 0f },
-                        orientation = Orientation.Vertical,
-                        overscrollEffect = overscrollEffect,
-                    )
-                    .size(layoutSize)
-                    .testTag("box")
-            )
-        }
-
-        val onBox = rule.onNodeWithTag("box")
+        val info = setupOverscrollableBox(scrollableOrientation = Orientation.Vertical)
 
         rule.onRoot().performTouchInput {
             down(center)
-            moveBy(Offset(0f, touchSlop + layoutSize.toPx()), delayMillis = 1_000)
+            moveBy(Offset(0f, info.touchSlop + info.layoutSize.toPx()), delayMillis = 1_000)
         }
 
-        onBox.assertTopPositionInRootIsEqualTo(expectedOffset(layoutSize, density))
+        rule
+            .onNodeWithTag(BOX_TAG)
+            .assertTopPositionInRootIsEqualTo(info.expectedOffset(info.layoutSize))
 
         rule.onRoot().performTouchInput { up() }
 
-        onBox.assertTopPositionInRootIsEqualTo(0.dp)
+        rule.onNodeWithTag(BOX_TAG).assertTopPositionInRootIsEqualTo(0.dp)
     }
 
     @Test
     fun offsetOverscroll_followTheTouchPointer() {
-        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
-        // detected as a drag event.
-        var touchSlop = 0f
-        lateinit var density: Density
-        val layoutSize = 200.dp
+        val info = setupOverscrollableBox(scrollableOrientation = Orientation.Vertical)
 
-        rule.setContent {
-            density = LocalDensity.current
-            touchSlop = LocalViewConfiguration.current.touchSlop
-            val overscrollEffect = rememberOffsetOverscrollEffect(Orientation.Vertical)
-
-            Box(
-                Modifier.overscroll(overscrollEffect)
-                    // A scrollable that does not consume the scroll gesture.
-                    .scrollable(
-                        state = rememberScrollableState { 0f },
-                        orientation = Orientation.Vertical,
-                        overscrollEffect = overscrollEffect,
-                    )
-                    .size(layoutSize)
-                    .testTag("box")
-            )
-        }
-
-        val onBox = rule.onNodeWithTag("box")
-
+        // First gesture, drag down.
         rule.onRoot().performTouchInput {
             down(center)
             // A full screen scroll.
-            moveBy(Offset(0f, touchSlop + layoutSize.toPx()), delayMillis = 1_000)
+            moveBy(Offset(0f, info.touchSlop + info.layoutSize.toPx()), delayMillis = 1_000)
         }
-        onBox.assertTopPositionInRootIsEqualTo(expectedOffset(layoutSize, density))
+        rule
+            .onNodeWithTag(BOX_TAG)
+            .assertTopPositionInRootIsEqualTo(info.expectedOffset(info.layoutSize))
 
         rule.onRoot().performTouchInput {
             // Reduced by half.
-            moveBy(Offset(0f, -layoutSize.toPx() / 2), delayMillis = 1_000)
+            moveBy(Offset(0f, -info.layoutSize.toPx() / 2), delayMillis = 1_000)
         }
-        onBox.assertTopPositionInRootIsEqualTo(expectedOffset(layoutSize / 2, density))
+        rule
+            .onNodeWithTag(BOX_TAG)
+            .assertTopPositionInRootIsEqualTo(info.expectedOffset(info.layoutSize / 2))
+
+        rule.onRoot().performTouchInput { up() }
+        // Animate back to 0.
+        rule.onNodeWithTag(BOX_TAG).assertTopPositionInRootIsEqualTo(0.dp)
+
+        // Second gesture, drag up.
+        rule.onRoot().performTouchInput {
+            down(center)
+            // A full screen scroll.
+            moveBy(Offset(0f, -info.touchSlop - info.layoutSize.toPx()), delayMillis = 1_000)
+        }
+        rule
+            .onNodeWithTag(BOX_TAG)
+            .assertTopPositionInRootIsEqualTo(info.expectedOffset(-info.layoutSize))
     }
 }
