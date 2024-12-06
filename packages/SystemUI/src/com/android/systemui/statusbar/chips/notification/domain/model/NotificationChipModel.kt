@@ -21,6 +21,6 @@ import com.android.systemui.statusbar.StatusBarIconView
 /** Modeling all the data needed to render a status bar notification chip. */
 data class NotificationChipModel(
     val key: String,
-    val statusBarChipIconView: StatusBarIconView,
+    val statusBarChipIconView: StatusBarIconView?,
     val whenTime: Long,
 )

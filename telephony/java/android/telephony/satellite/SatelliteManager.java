@@ -560,6 +560,8 @@ public final class SatelliteManager {
      * There is no valid satellite subscription selected.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final int SATELLITE_RESULT_NO_VALID_SATELLITE_SUBSCRIPTION = 30;
 
     /** @hide */
@@ -2393,8 +2395,9 @@ public final class SatelliteManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void requestSatelliteAccessConfigurationForCurrentLocation(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<SatelliteAccessConfiguration, SatelliteException> callback) {
@@ -2507,7 +2510,7 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
      *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
-     *                 will return the time after which the satellite will be visible.
+     *                 will return the selected NB IOT satellite subscription ID.
      *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
      *                 will return a {@link SatelliteException} with the {@link SatelliteResult}.
      *
@@ -2515,6 +2518,8 @@ public final class SatelliteManager {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     public void requestSelectedNbIotSatelliteSubscriptionId(
             @NonNull @CallbackExecutor Executor executor,
@@ -2574,6 +2579,8 @@ public final class SatelliteManager {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteResult public int registerForSelectedNbIotSatelliteSubscriptionChanged(
             @NonNull @CallbackExecutor Executor executor,
@@ -2619,6 +2626,8 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     public void unregisterForSelectedNbIotSatelliteSubscriptionChanged(
             @NonNull SelectedNbIotSatelliteSubscriptionCallback callback) {
@@ -2897,27 +2906,22 @@ public final class SatelliteManager {
     /**
      * Returns list of disallowed reasons of satellite.
      *
-     * @return list of disallowed reasons of satellite.
+     * @return Integer array of disallowed reasons.
      *
      * @throws SecurityException     if caller doesn't have required permission.
      * @throws IllegalStateException if Telephony process isn't available.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteDisallowedReason
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @NonNull
-    public List<Integer> getSatelliteDisallowedReasons() {
+    public int[] getSatelliteDisallowedReasons() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                int[] receivedArray = telephony.getSatelliteDisallowedReasons();
-                if (receivedArray.length == 0) {
-                    logd("receivedArray is empty, create empty list");
-                    return new ArrayList<>();
-                } else {
-                    return Arrays.stream(receivedArray).boxed().collect(Collectors.toList());
-                }
+                return telephony.getSatelliteDisallowedReasons();
             } else {
                 throw new IllegalStateException("Telephony service is null.");
             }
@@ -2925,7 +2929,7 @@ public final class SatelliteManager {
             loge("getSatelliteDisallowedReasons() RemoteException: " + ex);
             ex.rethrowAsRuntimeException();
         }
-        return new ArrayList<>();
+        return new int[0];
     }
 
     /**
@@ -2938,8 +2942,9 @@ public final class SatelliteManager {
      * @throws IllegalStateException if Telephony process is not available.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void registerForSatelliteDisallowedReasonsChanged(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteDisallowedReasonsCallback callback) {
@@ -2981,8 +2986,9 @@ public final class SatelliteManager {
      * @throws IllegalStateException if Telephony process is not available.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public void unregisterForSatelliteDisallowedReasonsChanged(
             @NonNull SatelliteDisallowedReasonsCallback callback) {
         Objects.requireNonNull(callback);
@@ -3606,8 +3612,8 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
      *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
-     *                 will return display name of the satellite feature in string format. Defaults
-     *                 to satellite. If the request is not successful,
+     *                 will return display name of the satellite feature in string format. Default
+     *                 display name is "Satellite". If the request is not successful,
      *                 {@link OutcomeReceiver#onError(Throwable)} will return an error with
      *                 a SatelliteException.
      *
@@ -3615,10 +3621,12 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     public void requestSatelliteDisplayName(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OutcomeReceiver<String, SatelliteException> callback) {
+            @NonNull OutcomeReceiver<CharSequence, SatelliteException> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
@@ -3630,7 +3638,7 @@ public final class SatelliteManager {
                     protected void onReceiveResult(int resultCode, Bundle resultData) {
                         if (resultCode == SATELLITE_RESULT_SUCCESS) {
                             if (resultData.containsKey(KEY_SATELLITE_DISPLAY_NAME)) {
-                                String satelliteDisplayName =
+                                CharSequence satelliteDisplayName =
                                         resultData.getString(KEY_SATELLITE_DISPLAY_NAME);
                                 executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                         callback.onResult(satelliteDisplayName)));

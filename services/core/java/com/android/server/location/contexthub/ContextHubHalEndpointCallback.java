@@ -68,7 +68,7 @@ public class ContextHubHalEndpointCallback
         }
         HubEndpointInfo[] endpointInfos = new HubEndpointInfo[halEndpointInfos.length];
         for (int i = 0; i < halEndpointInfos.length; i++) {
-            endpointInfos[i++] = new HubEndpointInfo(halEndpointInfos[i]);
+            endpointInfos[i] = new HubEndpointInfo(halEndpointInfos[i]);
         }
         mEndpointLifecycleCallback.onEndpointStarted(endpointInfos);
     }

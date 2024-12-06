@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.zIndex
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
@@ -59,7 +60,7 @@ constructor(
                     Box(modifier = Modifier.fillMaxSize()) {
                         with(communalPopupSection) { Popup() }
                         with(ambientStatusBarSection) {
-                            AmbientStatusBar(modifier = Modifier.fillMaxWidth())
+                            AmbientStatusBar(modifier = Modifier.fillMaxWidth().zIndex(1f))
                         }
                         CommunalHub(
                             viewModel = viewModel,

@@ -44,7 +44,6 @@ import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
-import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -188,7 +187,7 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Blank,
             userActions =
-                if (communalHubOnMobile()) emptyMap()
+                if (viewModel.v2FlagEnabled()) emptyMap()
                 else mapOf(Swipe.Start(fromSource = Edge.End) to CommunalScenes.Communal),
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
@@ -198,7 +197,8 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Communal,
             userActions =
-                if (communalHubOnMobile()) emptyMap() else mapOf(Swipe.End to CommunalScenes.Blank),
+                if (viewModel.v2FlagEnabled()) emptyMap()
+                else mapOf(Swipe.End to CommunalScenes.Blank),
         ) {
             CommunalScene(
                 backgroundType = backgroundType,

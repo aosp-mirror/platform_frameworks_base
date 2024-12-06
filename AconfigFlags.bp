@@ -636,6 +636,11 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "aconfig_hardware_flags_c_lib",
+    aconfig_declarations: "android.hardware.flags-aconfig",
+}
+
 // Widget
 aconfig_declarations {
     name: "android.widget.flags-aconfig",
@@ -800,21 +805,6 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.media.tv.flags-aconfig-java",
     aconfig_declarations: "android.media.tv.flags-aconfig",
-    defaults: ["framework-minus-apex-aconfig-java-defaults"],
-}
-
-// OnDeviceIntelligence
-aconfig_declarations {
-    name: "android.app.ondeviceintelligence-aconfig",
-    exportable: true,
-    package: "android.app.ondeviceintelligence.flags",
-    container: "system",
-    srcs: ["core/java/android/app/ondeviceintelligence/flags/ondevice_intelligence.aconfig"],
-}
-
-java_aconfig_library {
-    name: "android.app.ondeviceintelligence-aconfig-java",
-    aconfig_declarations: "android.app.ondeviceintelligence-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
@@ -1474,6 +1464,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.appwidget.flags-aconfig-java",
     aconfig_declarations: "android.appwidget.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.appwidget.flags-aconfig-java-host",
+    aconfig_declarations: "android.appwidget.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

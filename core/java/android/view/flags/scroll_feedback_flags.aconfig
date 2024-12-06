@@ -17,10 +17,10 @@ flag {
 }
 
 flag {
-    namespace: "toolkit"
-    name: "enable_touch_scroll_feedback"
+    namespace: "wear_frameworks"
+    name: "enable_scroll_feedback_for_touch"
     description: "Enables touchscreen haptic scroll feedback"
-    bug: "331830899"
+    bug: "382135785"
     is_fixed_read_only: true
 }
 

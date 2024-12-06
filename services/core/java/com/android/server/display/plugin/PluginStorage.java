@@ -25,6 +25,7 @@ import com.android.tools.r8.keepanno.annotations.KeepForApi;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,6 +40,8 @@ public class PluginStorage {
     private final Map<PluginType<?>, Object> mValues = new HashMap<>();
     @GuardedBy("mLock")
     private final Map<PluginType<?>, ListenersContainer<?>> mListeners = new HashMap<>();
+    @GuardedBy("mLock")
+    private final PluginEventStorage mPluginEventStorage = new PluginEventStorage();
 
     /**
      * Updates value in storage and forwards it to corresponding listeners.
@@ -50,6 +53,7 @@ public class PluginStorage {
         Set<PluginManager.PluginChangeListener<T>> localListeners;
         synchronized (mLock) {
             mValues.put(type, value);
+            mPluginEventStorage.onValueUpdated(type);
             ListenersContainer<T> container = getListenersContainerForTypeLocked(type);
             localListeners = new LinkedHashSet<>(container.mListeners);
         }
@@ -91,13 +95,19 @@ public class PluginStorage {
         Map<PluginType<?>, Object> localValues;
         @SuppressWarnings("rawtypes")
         Map<PluginType, Set> localListeners = new HashMap<>();
+        List<PluginEventStorage.TimeFrame> timeFrames;
         synchronized (mLock) {
+            timeFrames = mPluginEventStorage.getTimeFrames();
             localValues = new HashMap<>(mValues);
             mListeners.forEach((type, container) -> localListeners.put(type, container.mListeners));
         }
         pw.println("PluginStorage:");
         pw.println("values=" + localValues);
         pw.println("listeners=" + localListeners);
+        pw.println("PluginEventStorage:");
+        for (PluginEventStorage.TimeFrame timeFrame: timeFrames) {
+            timeFrame.dump(pw);
+        }
     }
 
     @GuardedBy("mLock")

@@ -154,6 +154,10 @@ public final class DeviceId implements Parcelable {
 
     /**
      * A builder for {@link DeviceId}
+     *
+     * <p>Calling apps must provide at least one of the following to identify
+     * the device: a custom ID using {@link #setCustomId(String)}, or a MAC address using
+     * {@link #setMacAddress(MacAddress)}.</p>
      */
     public static final class Builder extends OneTimeUseBuilder<DeviceId> {
         private String mCustomId;

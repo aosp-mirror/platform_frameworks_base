@@ -18,7 +18,6 @@ package com.android.systemui.dreams;
 
 import static android.service.dreams.Flags.dreamWakeRedirect;
 
-import static com.android.systemui.Flags.communalHubOnMobile;
 import static com.android.systemui.Flags.glanceableHubAllowKeyguardWhenDreaming;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
@@ -60,6 +59,7 @@ import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor;
 import com.android.systemui.communal.shared.log.CommunalUiEvent;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys;
@@ -171,6 +171,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private final SceneInteractor mSceneInteractor;
     private final CommunalInteractor mCommunalInteractor;
+    private final CommunalSettingsInteractor mCommunalSettingsInteractor;
 
     private boolean mCommunalAvailable;
 
@@ -383,6 +384,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ScrimManager scrimManager,
             CommunalInteractor communalInteractor,
+            CommunalSettingsInteractor communalSettingsInteractor,
             SceneInteractor sceneInteractor,
             SystemDialogsCloser systemDialogsCloser,
             UiEventLogger uiEventLogger,
@@ -411,6 +413,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mDreamOverlayCallbackController = dreamOverlayCallbackController;
         mWindowTitle = windowTitle;
         mCommunalInteractor = communalInteractor;
+        mCommunalSettingsInteractor = communalSettingsInteractor;
         mSceneInteractor = sceneInteractor;
         mSystemDialogsCloser = systemDialogsCloser;
         mGestureInteractor = gestureInteractor;
@@ -488,7 +491,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         final ArrayList<TouchHandler> touchHandlers = new ArrayList<>(
                 List.of(dreamComplicationComponent.getHideComplicationTouchHandler()));
-        if (!communalHubOnMobile()) {
+        if (!mCommunalSettingsInteractor.isV2FlagEnabled()) {
             // Do not add the communal touch handler for glanceable hub v2 since there is no dream
             // to hub swipe gesture.
             touchHandlers.add(dreamOverlayComponent.getCommunalTouchHandler());
@@ -575,7 +578,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         } else {
             mCommunalInteractor.changeScene(CommunalScenes.Communal,
                     "dream wake requested",
-                    communalHubOnMobile() ? CommunalTransitionKeys.INSTANCE.getSimpleFade() : null);
+                    mCommunalSettingsInteractor.isV2FlagEnabled()
+                            ? CommunalTransitionKeys.INSTANCE.getSimpleFade() : null);
         }
     }
 

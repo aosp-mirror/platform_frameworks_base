@@ -1230,13 +1230,6 @@ flag {
 }
 
 flag {
-  name: "communal_hub_on_mobile"
-  namespace: "systemui"
-  description: "Brings the glanceable hub experience to mobile phones"
-  bug: "375689917"
-}
-
-flag {
   name: "glanceable_hub_v2"
   namespace: "systemui"
   description: "Gates the refreshed glanceable hub experience that also brings the glanceable hub to mobile phones"

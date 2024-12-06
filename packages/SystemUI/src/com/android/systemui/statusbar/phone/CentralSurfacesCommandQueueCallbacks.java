@@ -53,6 +53,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -209,10 +210,16 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void clickTile(ComponentName tile) {
-        // Can't inject this because it changes with the QS fragment
-        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
-        if (qsPanelController != null) {
-            qsPanelController.clickTile(tile);
+        if (QsInCompose.isEnabled()) {
+            if (tile != null) {
+                mQSHost.clickTile(tile);
+            }
+        } else {
+            // Can't inject this because it changes with the QS fragment
+            QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
+            if (qsPanelController != null) {
+                qsPanelController.clickTile(tile);
+            }
         }
     }
 

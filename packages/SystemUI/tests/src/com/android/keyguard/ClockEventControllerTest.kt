@@ -529,6 +529,8 @@ class ClockEventControllerTest : SysuiTestCase() {
     fun listenForDnd_onDndChange_updatesClockZenMode() =
         testScope.runTest {
             underTest.listenForDnd(testScope.backgroundScope)
+            runCurrent()
+            clearInvocations(events)
 
             zenModeRepository.activateMode(dndModeId)
             runCurrent()
@@ -537,7 +539,6 @@ class ClockEventControllerTest : SysuiTestCase() {
                 .onZenDataChanged(
                     eq(ZenData(ZenMode.IMPORTANT_INTERRUPTIONS, R.string::dnd_is_on.name))
                 )
-            clearInvocations(events)
 
             zenModeRepository.deactivateMode(dndModeId)
             runCurrent()
