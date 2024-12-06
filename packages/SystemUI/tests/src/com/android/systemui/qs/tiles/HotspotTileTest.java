@@ -38,6 +38,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -144,7 +145,7 @@ public class HotspotTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_off));
+                .isEqualTo(createExpectedIcon(R.drawable.qs_hotspot_icon_off));
     }
 
     @Test
@@ -156,7 +157,7 @@ public class HotspotTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_search));
+                .isEqualTo(createExpectedIcon(R.drawable.qs_hotspot_icon_search));
     }
 
     @Test
@@ -168,6 +169,14 @@ public class HotspotTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertThat(state.icon)
-                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_hotspot_icon_on));
+                .isEqualTo(createExpectedIcon(R.drawable.qs_hotspot_icon_on));
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 }
