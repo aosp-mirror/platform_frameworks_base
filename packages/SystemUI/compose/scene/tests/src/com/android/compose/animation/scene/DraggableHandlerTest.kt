@@ -42,7 +42,6 @@ import com.android.compose.animation.scene.content.state.TransitionState.Transit
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
-import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -917,6 +916,28 @@ class DraggableHandlerTest {
             onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
             expectedConsumedVelocity = -velocityThreshold,
         )
+        assertIdle(SceneA)
+    }
+
+    @Test
+    fun blockTransition_animated() = runGestureTest {
+        assertIdle(SceneA)
+        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
+
+        // Swipe up to scene B. Overscroll 50%.
+        val dragController = onDragStarted(overSlop = up(1.5f), expectedConsumedOverSlop = up(1.0f))
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB, progress = 1f)
+
+        // Block the transition when the user release their finger.
+        canChangeScene = { false }
+        val velocityConsumed =
+            dragController.onDragStoppedAnimateLater(velocity = -velocityThreshold)
+
+        // Start an animation: overscroll and from 1f to 0f.
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB, progress = 1f)
+
+        val consumed = velocityConsumed.await()
+        assertThat(consumed).isEqualTo(-velocityThreshold)
         assertIdle(SceneA)
     }
 
