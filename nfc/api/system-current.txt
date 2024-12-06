@@ -200,9 +200,11 @@ package android.nfc {
     method @Nullable @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @WorkerThread public android.nfc.T4tNdefNfceeCcFileInfo readCcfile();
     method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @WorkerThread public byte[] readData(@IntRange(from=0, to=65535) int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @WorkerThread public int writeData(@IntRange(from=0, to=65535) int, @NonNull byte[]);
+    field public static final int CLEAR_DATA_FAILED_DEVICE_BUSY = -1; // 0xffffffff
     field public static final int CLEAR_DATA_FAILED_INTERNAL = 0; // 0x0
     field public static final int CLEAR_DATA_SUCCESS = 1; // 0x1
     field public static final int WRITE_DATA_ERROR_CONNECTION_FAILED = -6; // 0xfffffffa
+    field public static final int WRITE_DATA_ERROR_DEVICE_BUSY = -9; // 0xfffffff7
     field public static final int WRITE_DATA_ERROR_EMPTY_PAYLOAD = -7; // 0xfffffff9
     field public static final int WRITE_DATA_ERROR_INTERNAL = -1; // 0xffffffff
     field public static final int WRITE_DATA_ERROR_INVALID_FILE_ID = -4; // 0xfffffffc
@@ -217,21 +219,14 @@ package android.nfc {
     method public int describeContents();
     method @IntRange(from=15, to=32767) public int getCcFileLength();
     method @IntRange(from=0xffffffff, to=65535) public int getFileId();
-    method @IntRange(from=15, to=65535) public int getMaxReadLength();
     method @IntRange(from=5, to=32767) public int getMaxSize();
-    method @IntRange(from=13, to=65535) public int getMaxWriteLength();
-    method public int getReadAccess();
     method public int getVersion();
-    method public int getWriteAccess();
+    method public boolean isReadAllowed();
+    method public boolean isWriteAllowed();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.nfc.T4tNdefNfceeCcFileInfo> CREATOR;
-    field public static final int READ_ACCESS_GRANTED_RESTRICTED = 128; // 0x80
-    field public static final int READ_ACCESS_GRANTED_UNRESTRICTED = 0; // 0x0
     field public static final int VERSION_2_0 = 32; // 0x20
     field public static final int VERSION_3_0 = 48; // 0x30
-    field public static final int WRITE_ACCESS_GRANTED_RESTRICTED = 128; // 0x80
-    field public static final int WRITE_ACCESS_GRANTED_UNRESTRICTED = 0; // 0x0
-    field public static final int WRITE_ACCESS_NOT_GRANTED = 255; // 0xff
   }
 
 }
