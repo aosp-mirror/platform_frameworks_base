@@ -250,6 +250,7 @@ package android.nfc.cardemulation {
     field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID = 1; // 0x1
     field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED = 3; // 0x3
     field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_SUCCESS = 0; // 0x0
+    field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_UNKNOWN = -1; // 0xffffffff
   }
 
 }
