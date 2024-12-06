@@ -46,6 +46,7 @@ import android.app.servertransaction.WindowContextInfoChangeItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -54,7 +55,12 @@ import android.window.WindowTokenClient;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
+
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -64,6 +70,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 
 /**
  * Build/Install/Run:
@@ -85,6 +92,9 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
     private WindowProcessController mWpc;
     private WindowContainer<?> mContainer;
+
+    @Rule
+    public final Expect mExpect = Expect.create();
 
     @Before
     public void setUp() {
@@ -339,6 +349,30 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
         assertThat(clientToken.mConfiguration).isEqualTo(config1);
         assertThat(clientToken.mDisplayId).isEqualTo(mDisplayContent.mDisplayId);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void assertCallerCanReparentListener_returnsTrueWhenExpected() {
+        mController.registerWindowContainerListener(mWpc, mClientToken, mContainer,
+                TYPE_APPLICATION_OVERLAY, null /*  options */);
+
+        // Here there are several checks in one test as wm tests are expensive.
+
+        // Correct conditions -> returns true
+        mExpect.that(mController.assertCallerCanReparentListener(mClientToken,
+                /* callerCanManageAppTokens= */ true,
+                /* callingUid= */ mWpc.mUid,
+                /* displayId= */ DEFAULT_DISPLAY + 1
+        )).isTrue();
+
+        // sameDisplayId (so, container already attached) -> returnsFalse
+        mExpect.that(mController.assertCallerCanReparentListener(
+                mClientToken,
+                /* callerCanManageAppTokens= */ true,
+                /* callingUid= */ mWpc.mUid,
+                /* displayId= */ DEFAULT_DISPLAY // <- same display ID
+        )).isFalse();
     }
 
     private static class TestWindowTokenClient extends WindowTokenClient {
