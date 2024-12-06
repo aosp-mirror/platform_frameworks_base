@@ -529,10 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Aby otworzyć aplikację za pomocą widżetu, musisz potwierdzić swoją tożsamość. Pamiętaj też, że każdy będzie mógł wyświetlić widżety nawet wtedy, gdy tablet będzie zablokowany. Niektóre widżety mogą nie być przeznaczone do umieszczenia na ekranie blokady i ich dodanie w tym miejscu może być niebezpieczne."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widżety"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Aby dodać skrót „Widżety”, upewnij się, że opcja „Pokaż widżety na ekranie blokady” jest włączona w ustawieniach."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Ustawienia"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wszystkie aplikacje i dane w tej sesji zostaną usunięte."</string>
@@ -593,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Powiadomienia"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Rozmowy"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Usuń wszystkie ciche powiadomienia"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Powiadomienia wstrzymane przez tryb Nie przeszkadzać"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Brak powiadomień}=1{Powiadomienia są wstrzymane przez tryb {mode}}=2{Powiadomienia są wstrzymane przez tryb {mode} i 1 inny tryb}few{Powiadomienia są wstrzymane przez tryb {mode} i # inne tryby}many{Powiadomienia są wstrzymane przez tryb {mode} i # innych trybów}other{Powiadomienia są wstrzymane przez tryb {mode} i # innego trybu}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Rozpocznij teraz"</string>
@@ -707,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Śledzenie głowy"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Kliknij, aby zmienić tryb dzwonka"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"tryb dzwonka"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"wycisz"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"wyłącz wyciszenie"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"włącz wibracje"</string>
@@ -1426,12 +1428,10 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Skróty klawiszowe"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Dostosuj skróty klawiszowe"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Usunąć skrót?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Zresetować do ustawień domyślnych?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Naciśnij klawisz, aby przypisać skrót"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Spowoduje to trwałe usunięcie skrótu niestandardowego."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Spowoduje to trwałe usunięcie wszystkich skrótów niestandardowych."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Skróty do wyszukiwania"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Brak wyników wyszukiwania"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona zwijania"</string>
@@ -1449,8 +1449,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Ustawienia klawiatury"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Ustaw skrót"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Usuń"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Tak, zresetuj"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Anuluj"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Naciśnij klawisz"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinacja klawiszy jest już używana. Użyj innego klawisza."</string>
@@ -1482,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Naciśnij klawisz działania na klawiaturze"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Brawo!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Znasz już gest wyświetlania wszystkich aplikacji"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Podświetlenie klawiatury"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Poziom %1$d z %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Sterowanie domem"</string>
