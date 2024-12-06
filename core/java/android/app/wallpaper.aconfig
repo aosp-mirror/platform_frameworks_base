@@ -1,0 +1,42 @@
+package: "android.app"
+container: "system"
+
+flag {
+  name: "remove_next_wallpaper_component"
+  namespace: "systemui"
+  description: "Remove deprecated field WallpaperData#nextWallpaperComponent. Only effective after rebooting."
+  bug: "365991991"
+}
+
+flag {
+  name: "fix_wallpaper_changed"
+  namespace: "systemui"
+  description: "Fixes timing of wallpaper changed notification and adds extra information. Only effective after rebooting."
+  bug: "369814294"
+}
+
+flag {
+  name: "live_wallpaper_content_handling"
+  namespace: "systemui"
+  description: "Support for user-generated content in live wallpapers. Only effective after rebooting."
+  bug: "347235611"
+  is_exported: true
+}
+
+flag {
+    name: "customization_packs_apis"
+    is_exported: true
+    namespace: "systemui"
+    description: "Move APIs related to bitmap and crops to @SystemApi."
+    bug: "372344184"
+}
+
+flag {
+  name: "accurate_wallpaper_downsampling"
+  namespace: "systemui"
+  description: "Accurate downsampling of wallpaper bitmap for high resolution images"
+  bug: "355665230"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

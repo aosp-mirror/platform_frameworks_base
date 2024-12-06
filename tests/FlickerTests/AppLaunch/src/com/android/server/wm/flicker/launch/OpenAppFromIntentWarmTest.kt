@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized
 /**
  * Test warm launching an app from launcher
  *
- * To run this test: `atest FlickerTests:OpenAppWarmTest`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenAppFromIntentWarmTest`
  *
  * Actions:
  * ```

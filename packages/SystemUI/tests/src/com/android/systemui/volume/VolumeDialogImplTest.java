@@ -20,7 +20,6 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
-import static com.android.systemui.Flags.FLAG_HAPTIC_VOLUME_SLIDER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.DYNAMIC_STREAM_BROADCAST;
@@ -51,7 +50,6 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.SystemClock;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.TestableLooper;
@@ -94,6 +92,7 @@ import com.android.systemui.volume.domain.interactor.VolumePanelNavigationIntera
 import com.android.systemui.volume.panel.shared.flag.VolumePanelFlag;
 import com.android.systemui.volume.ui.navigation.VolumeNavigator;
 
+import com.google.android.msdl.domain.MSDLPlayer;
 import com.google.common.collect.ImmutableList;
 
 import dagger.Lazy;
@@ -171,6 +170,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     private VibratorHelper mVibratorHelper;
 
+    @Mock
+    private MSDLPlayer mMSDLPlayer;
+
     private int mLongestHideShowAnimationDuration = 250;
     private FakeSettings mSecureSettings;
 
@@ -224,6 +226,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mDumpManager,
                 mLazySecureSettings,
                 mVibratorHelper,
+                mMSDLPlayer,
                 new FakeSystemClock(),
                 mVolumeDialogInteractor);
         mDialog.init(0, null);
@@ -285,23 +288,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
-    public void addSliderHaptics_withHapticsDisabled_doesNotDeliverOnProgressChangedHaptics() {
-        // GIVEN that the slider haptics flag is disabled and we try to add haptics to volume rows
-        mDialog.addSliderHapticsToRows();
-
-        // WHEN haptics try to be delivered to a volume stream
-        boolean canDeliverHaptics =
-                mDialog.canDeliverProgressHapticsToStream(AudioSystem.STREAM_MUSIC, true, 50);
-
-        // THEN the result is that haptics are not successfully delivered
-        assertFalse(canDeliverHaptics);
-    }
-
-    @Test
-    @EnableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
-    public void addSliderHaptics_withHapticsEnabled_canDeliverOnProgressChangedHaptics() {
-        // GIVEN that the slider haptics flag is enabled and we try to add haptics to volume rows
+    public void addSliderHaptics_canDeliverOnProgressChangedHaptics() {
+        // GIVEN that the slider haptics are added to rows
         mDialog.addSliderHapticsToRows();
 
         // WHEN haptics try to be delivered to a volume stream

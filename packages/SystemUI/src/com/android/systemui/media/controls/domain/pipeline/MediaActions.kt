@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.controls.domain.pipeline
 
+import android.annotation.WorkerThread
 import android.app.ActivityOptions
 import android.app.BroadcastOptions
 import android.app.Notification
@@ -50,6 +51,7 @@ private const val TAG = "MediaActions"
  * @return a Pair consisting of a list of media actions, and a list of ints representing which of
  *   those actions should be shown in the compact player
  */
+@WorkerThread
 fun createActionsFromState(
     context: Context,
     packageName: String,
@@ -69,7 +71,7 @@ fun createActionsFromState(
                 context.getString(R.string.controls_media_button_connecting),
                 context.getDrawable(R.drawable.ic_media_connecting_container),
                 // Specify a rebind id to prevent the spinner from restarting on later binds.
-                com.android.internal.R.drawable.progress_small_material
+                com.android.internal.R.drawable.progress_small_material,
             )
         } else if (isPlayingState(state.state)) {
             getStandardAction(context, controller, state.actions, PlaybackState.ACTION_PAUSE)
@@ -128,7 +130,7 @@ fun createActionsFromState(
         nextCustomAction(),
         nextCustomAction(),
         reserveNext,
-        reservePrev
+        reservePrev,
     )
 }
 
@@ -146,7 +148,7 @@ private fun getStandardAction(
     context: Context,
     controller: MediaController,
     stateActions: Long,
-    @PlaybackState.Actions action: Long
+    @PlaybackState.Actions action: Long,
 ): MediaAction? {
     if (!includesAction(stateActions, action)) {
         return null
@@ -158,7 +160,7 @@ private fun getStandardAction(
                 context.getDrawable(R.drawable.ic_media_play),
                 { controller.transportControls.play() },
                 context.getString(R.string.controls_media_button_play),
-                context.getDrawable(R.drawable.ic_media_play_container)
+                context.getDrawable(R.drawable.ic_media_play_container),
             )
         }
         PlaybackState.ACTION_PAUSE -> {
@@ -166,7 +168,7 @@ private fun getStandardAction(
                 context.getDrawable(R.drawable.ic_media_pause),
                 { controller.transportControls.pause() },
                 context.getString(R.string.controls_media_button_pause),
-                context.getDrawable(R.drawable.ic_media_pause_container)
+                context.getDrawable(R.drawable.ic_media_pause_container),
             )
         }
         PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
@@ -174,7 +176,7 @@ private fun getStandardAction(
                 MediaControlDrawables.getPrevIcon(context),
                 { controller.transportControls.skipToPrevious() },
                 context.getString(R.string.controls_media_button_prev),
-                null
+                null,
             )
         }
         PlaybackState.ACTION_SKIP_TO_NEXT -> {
@@ -182,7 +184,7 @@ private fun getStandardAction(
                 MediaControlDrawables.getNextIcon(context),
                 { controller.transportControls.skipToNext() },
                 context.getString(R.string.controls_media_button_next),
-                null
+                null,
             )
         }
         else -> null
@@ -194,13 +196,13 @@ private fun getCustomAction(
     context: Context,
     packageName: String,
     controller: MediaController,
-    customAction: PlaybackState.CustomAction
+    customAction: PlaybackState.CustomAction,
 ): MediaAction {
     return MediaAction(
         Icon.createWithResource(packageName, customAction.icon).loadDrawable(context),
         { controller.transportControls.sendCustomAction(customAction, customAction.extras) },
         customAction.name,
-        null
+        null,
     )
 }
 
@@ -218,7 +220,7 @@ private fun includesAction(stateActions: Long, @PlaybackState.Actions action: Lo
 /** Generate action buttons based on notification actions */
 fun createActionsFromNotification(
     context: Context,
-    sbn: StatusBarNotification
+    sbn: StatusBarNotification,
 ): Pair<List<MediaNotificationAction>, List<Int>> {
     val notif = sbn.notification
     val actionIcons: MutableList<MediaNotificationAction> = ArrayList()
@@ -229,7 +231,7 @@ fun createActionsFromNotification(
     if (actionsToShowCollapsed.size > MAX_COMPACT_ACTIONS) {
         Log.e(
             TAG,
-            "Too many compact actions for ${sbn.key}, limiting to first $MAX_COMPACT_ACTIONS"
+            "Too many compact actions for ${sbn.key}, limiting to first $MAX_COMPACT_ACTIONS",
         )
         actionsToShowCollapsed = actionsToShowCollapsed.subList(0, MAX_COMPACT_ACTIONS)
     }
@@ -239,7 +241,7 @@ fun createActionsFromNotification(
             Log.w(
                 TAG,
                 "Too many notification actions for ${sbn.key}, " +
-                    "limiting to first $MAX_NOTIFICATION_ACTIONS"
+                    "limiting to first $MAX_NOTIFICATION_ACTIONS",
             )
         }
 
@@ -253,7 +255,7 @@ fun createActionsFromNotification(
             val themeText =
                 com.android.settingslib.Utils.getColorAttr(
                         context,
-                        com.android.internal.R.attr.textColorPrimary
+                        com.android.internal.R.attr.textColorPrimary,
                     )
                     .defaultColor
 
@@ -271,7 +273,7 @@ fun createActionsFromNotification(
                     action.isAuthenticationRequired,
                     action.actionIntent,
                     mediaActionIcon,
-                    action.title
+                    action.title,
                 )
             actionIcons.add(mediaAction)
         }
@@ -288,7 +290,7 @@ fun createActionsFromNotification(
  */
 fun getNotificationActions(
     actions: List<MediaNotificationAction>,
-    activityStarter: ActivityStarter
+    activityStarter: ActivityStarter,
 ): List<MediaAction> {
     return actions.map { action ->
         val runnable =
@@ -303,7 +305,7 @@ fun getNotificationActions(
                             activityStarter.dismissKeyguardThenExecute(
                                 { sendPendingIntent(action.actionIntent) },
                                 {},
-                                true
+                                true,
                             )
                         else -> sendPendingIntent(actionIntent)
                     }

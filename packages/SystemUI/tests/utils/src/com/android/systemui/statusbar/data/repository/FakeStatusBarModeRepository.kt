@@ -20,9 +20,10 @@ import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.data.model.StatusBarAppearance
 import com.android.systemui.statusbar.data.model.StatusBarMode
-import com.google.common.truth.Truth.assertThat
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import dagger.Binds
 import dagger.Module
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -33,13 +34,12 @@ class FakeStatusBarModeRepository @Inject constructor() : StatusBarModeRepositor
         const val DISPLAY_ID = Display.DEFAULT_DISPLAY
     }
 
-    override val defaultDisplay: FakeStatusBarModePerDisplayRepository =
-        FakeStatusBarModePerDisplayRepository()
+    private val perDisplayRepos = mutableMapOf<Int, FakeStatusBarModePerDisplayRepository>()
 
-    override fun forDisplay(displayId: Int): FakeStatusBarModePerDisplayRepository {
-        assertThat(displayId).isEqualTo(DISPLAY_ID)
-        return defaultDisplay
-    }
+    override val defaultDisplay: FakeStatusBarModePerDisplayRepository = forDisplay(DISPLAY_ID)
+
+    override fun forDisplay(displayId: Int): FakeStatusBarModePerDisplayRepository =
+        perDisplayRepos.computeIfAbsent(displayId) { FakeStatusBarModePerDisplayRepository() }
 }
 
 class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository {
@@ -51,9 +51,18 @@ class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository 
     override fun showTransient() {
         isTransientShown.value = true
     }
+
     override fun clearTransient() {
         isTransientShown.value = false
     }
+
+    override fun start() {}
+
+    override fun stop() {}
+
+    override fun onStatusBarViewInitialized(component: HomeStatusBarComponent) {}
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {}
 }
 
 @Module

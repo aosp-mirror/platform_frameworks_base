@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.KeyguardIndicationController
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
@@ -34,7 +35,7 @@ import kotlinx.coroutines.DisposableHandle
 class DefaultIndicationAreaSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
     private val indicationController: KeyguardIndicationController,
 ) : KeyguardSection() {

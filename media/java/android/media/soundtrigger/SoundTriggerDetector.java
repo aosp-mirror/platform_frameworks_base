@@ -323,10 +323,15 @@ public final class SoundTriggerDetector {
 
         int status;
         try {
-            status = mSoundTriggerSession.startRecognition(mSoundModel,
-                    mRecognitionCallback, new RecognitionConfig(captureTriggerAudio,
-                            allowMultipleTriggers, null, null, audioCapabilities),
-                    runInBatterySaver);
+            status = mSoundTriggerSession.startRecognition(
+                mSoundModel,
+                mRecognitionCallback,
+                new RecognitionConfig.Builder()
+                    .setCaptureRequested(captureTriggerAudio)
+                    .setMultipleTriggersAllowed(allowMultipleTriggers)
+                    .setAudioCapabilities(audioCapabilities)
+                    .build(),
+                runInBatterySaver);
         } catch (RemoteException e) {
             return false;
         }

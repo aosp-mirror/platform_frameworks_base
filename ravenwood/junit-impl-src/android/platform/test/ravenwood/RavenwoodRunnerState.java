@@ -15,238 +15,144 @@
  */
 package android.platform.test.ravenwood;
 
-import static com.android.ravenwood.common.RavenwoodCommonUtils.ensureIsPublicMember;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.util.Log;
+import android.util.Pair;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.ravenwood.common.RavenwoodRuntimeException;
+import com.android.ravenwood.RavenwoodRuntimeNative;
 
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.WeakHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
- * Used to store various states associated with the current test runner.
+ * Used to store various states associated with the current test runner that's only needed
+ * in junit-impl.
  *
- * This class could be added to {@link RavenwoodAwareTestRunner} as a field, but we don't
- * want to put it in junit-src/ (for one, that'll cause all the downstream dependencies to be
- * rebuilt when this file is updated), so we manage it separately using a Map from each
- * {@link RavenwoodAwareTestRunner} instance to a {@link RavenwoodRunnerState}.
+ * We don't want to put it in junit-src to avoid having to recompile all the downstream
+ * dependencies after changing this class.
  *
  * All members must be called from the runner's main thread.
  */
 public final class RavenwoodRunnerState {
-    private static final String TAG = "RavenwoodRunnerState";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
+    private static final String RAVENWOOD_RULE_ERROR =
+            "RavenwoodRule(s) are not executed in the correct order";
 
-    @GuardedBy("sStates")
-    private static final WeakHashMap<RavenwoodAwareTestRunner, RavenwoodRunnerState> sStates =
-            new WeakHashMap<>();
-
-    /**
-     * Get the instance for a given runner.
-     */
-    public static RavenwoodRunnerState forRunner(@NonNull RavenwoodAwareTestRunner runner) {
-        synchronized (sStates) {
-            var ret = sStates.get(runner);
-            if (ret == null) {
-                ret = new RavenwoodRunnerState(runner);
-                sStates.put(runner, ret);
-            }
-            return ret;
-        }
-    }
+    private static final List<Pair<RavenwoodRule, RavenwoodPropertyState>> sActiveProperties =
+            new ArrayList<>();
 
     private final RavenwoodAwareTestRunner mRunner;
 
-    private RavenwoodRunnerState(RavenwoodAwareTestRunner runner) {
+    /**
+     * Ctor.
+     */
+    public RavenwoodRunnerState(RavenwoodAwareTestRunner runner) {
         mRunner = runner;
     }
 
-    private Description mClassDescription;
     private Description mMethodDescription;
 
-    private RavenwoodConfig mCurrentConfig;
-    private RavenwoodRule mCurrentRule;
-
-    public Description getClassDescription() {
-        return mClassDescription;
+    public void enterTestRunner() {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "enterTestRunner: " + mRunner);
+        }
+        RavenwoodRuntimeEnvironmentController.initForRunner();
     }
 
-    public void enterTestClass(Description classDescription) throws IOException {
-        mClassDescription = classDescription;
-
-        mCurrentConfig = extractConfiguration(mRunner.getTestClass().getJavaClass());
-
-        if (mCurrentConfig != null) {
-            RavenwoodRuntimeEnvironmentController.init(mCurrentConfig);
+    public void enterTestClass() {
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "enterTestClass: " + mRunner.mTestJavaClass.getName());
         }
     }
 
     public void exitTestClass() {
-        if (mCurrentConfig != null) {
-            try {
-                RavenwoodRuntimeEnvironmentController.reset();
-            } finally {
-                mClassDescription = null;
-            }
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "exitTestClass: " + mRunner.mTestJavaClass.getName());
         }
+        assertTrue(RAVENWOOD_RULE_ERROR, sActiveProperties.isEmpty());
+        RavenwoodRuntimeEnvironmentController.exitTestClass();
     }
 
     public void enterTestMethod(Description description) {
         mMethodDescription = description;
+        RavenwoodRuntimeEnvironmentController.initForMethod();
     }
 
     public void exitTestMethod() {
         mMethodDescription = null;
     }
 
-    public void enterRavenwoodRule(RavenwoodRule rule) throws IOException {
-        if (mCurrentConfig != null) {
-            fail("RavenwoodConfiguration and RavenwoodRule cannot be used in the same class."
-                    + " Suggest migrating to RavenwoodConfiguration.");
-        }
-        if (mCurrentRule != null) {
-            fail("Multiple nesting RavenwoodRule's are detected in the same class,"
-                    + " which is not supported.");
-        }
-        mCurrentRule = rule;
-        RavenwoodRuntimeEnvironmentController.init(rule.getConfiguration());
+    public void enterRavenwoodRule(RavenwoodRule rule) {
+        pushTestProperties(rule);
     }
 
     public void exitRavenwoodRule(RavenwoodRule rule) {
-        if (mCurrentRule != rule) {
-            return; // This happens if the rule did _not_ take effect somehow.
-        }
-
-        try {
-            RavenwoodRuntimeEnvironmentController.reset();
-        } finally {
-            mCurrentRule = null;
-        }
+        popTestProperties(rule);
     }
 
-    /**
-     * @return a configuration from a test class, if any.
-     */
-    @Nullable
-    private static RavenwoodConfig extractConfiguration(Class<?> testClass) {
-        final boolean hasRavenwoodRule = hasRavenwoodRule(testClass);
+    static class RavenwoodPropertyState {
 
-        var field = findConfigurationField(testClass);
-        if (field == null) {
-            return null;
-        }
-        if (hasRavenwoodRule) {
-            fail("RavenwoodConfiguration and RavenwoodRule cannot be used in the same class."
-                    + " Suggest migrating to RavenwoodConfiguration.");
+        final List<Pair<String, String>> mBackup;
+        final Set<String> mKeyReadable;
+        final Set<String> mKeyWritable;
+
+        RavenwoodPropertyState(RavenwoodTestProperties props) {
+            mBackup = props.mValues.keySet().stream()
+                    .map(key -> Pair.create(key, RavenwoodRuntimeNative.getSystemProperty(key)))
+                    .toList();
+            mKeyReadable = Set.copyOf(props.mKeyReadable);
+            mKeyWritable = Set.copyOf(props.mKeyWritable);
         }
 
-        try {
-            return (RavenwoodConfig) field.get(null);
-        } catch (IllegalAccessException e) {
-            throw new RavenwoodRuntimeException("Failed to fetch from the configuration field", e);
+        boolean isKeyAccessible(String key, boolean write) {
+            return write ? mKeyWritable.contains(key) : mKeyReadable.contains(key);
         }
-    }
 
-    /**
-     * @return true if the current target class (or its super classes) has any @Rule / @ClassRule
-     * fields of type RavenwoodRule.
-     *
-     * Note, this check won't detect cases where a Rule is of type
-     * {@link TestRule} and still be a {@link RavenwoodRule}. But that'll be detected at runtime
-     * as a failure, in {@link #enterRavenwoodRule}.
-     */
-    private static boolean hasRavenwoodRule(Class<?> testClass) {
-        for (var field : testClass.getDeclaredFields()) {
-            if (!field.isAnnotationPresent(Rule.class)
-                    && field.isAnnotationPresent(ClassRule.class)) {
-                continue;
-            }
-            if (field.getType().equals(RavenwoodRule.class)) {
-                return true;
-            }
-        }
-        // JUnit supports rules as methods, so we need to check them too.
-        for (var method : testClass.getDeclaredMethods()) {
-            if (!method.isAnnotationPresent(Rule.class)
-                    && method.isAnnotationPresent(ClassRule.class)) {
-                continue;
-            }
-            if (method.getReturnType().equals(RavenwoodRule.class)) {
-                return true;
-            }
-        }
-        // Look into the super class.
-        if (!testClass.getSuperclass().equals(Object.class)) {
-            return hasRavenwoodRule(testClass.getSuperclass());
-        }
-        return false;
-    }
-
-    /**
-     * Find and return a field with @RavenwoodConfiguration.Config, which must be of type
-     * RavenwoodConfiguration.
-     */
-    @Nullable
-    private static Field findConfigurationField(Class<?> testClass) {
-        Field foundField = null;
-
-        for (var field : testClass.getDeclaredFields()) {
-            final var hasAnot = field.isAnnotationPresent(RavenwoodConfig.Config.class);
-            final var isType = field.getType().equals(RavenwoodConfig.class);
-
-            if (hasAnot) {
-                if (isType) {
-                    // Good, use this field.
-                    if (foundField != null) {
-                        fail(String.format(
-                                "Class %s has multiple fields with %s",
-                                testClass.getCanonicalName(),
-                                "@RavenwoodConfiguration.Config"));
-                    }
-                    // Make sure it's static public
-                    ensureIsPublicMember(field, true);
-
-                    foundField = field;
+        void restore() {
+            mBackup.forEach(pair -> {
+                if (pair.second == null) {
+                    RavenwoodRuntimeNative.removeSystemProperty(pair.first);
                 } else {
-                    fail(String.format(
-                            "Field %s.%s has %s but type is not %s",
-                            testClass.getCanonicalName(),
-                            field.getName(),
-                            "@RavenwoodConfiguration.Config",
-                            "RavenwoodConfiguration"));
-                    return null; // unreachable
+                    RavenwoodRuntimeNative.setSystemProperty(pair.first, pair.second);
                 }
-            } else {
-                if (isType) {
-                    fail(String.format(
-                            "Field %s.%s does not have %s but type is %s",
-                            testClass.getCanonicalName(),
-                            field.getName(),
-                            "@RavenwoodConfiguration.Config",
-                            "RavenwoodConfiguration"));
-                    return null; // unreachable
-                } else {
-                    // Unrelated field, ignore.
-                    continue;
-                }
-            }
+            });
         }
-        if (foundField != null) {
-            return foundField;
+    }
+
+    private static void pushTestProperties(RavenwoodRule rule) {
+        sActiveProperties.add(Pair.create(rule, new RavenwoodPropertyState(rule.mProperties)));
+        rule.mProperties.mValues.forEach(RavenwoodRuntimeNative::setSystemProperty);
+    }
+
+    private static void popTestProperties(RavenwoodRule rule) {
+        var pair = sActiveProperties.removeLast();
+        assertNotNull(RAVENWOOD_RULE_ERROR, pair);
+        assertEquals(RAVENWOOD_RULE_ERROR, rule, pair.first);
+        pair.second.restore();
+    }
+
+    @SuppressWarnings("unused")  // Called from native code (ravenwood_sysprop.cpp)
+    private static void checkSystemPropertyAccess(String key, boolean write) {
+        if (write && RavenwoodSystemProperties.sDefaultValues.containsKey(key)) {
+            // The default core values should never be modified
+            throw new IllegalArgumentException(
+                    "Setting core system property '" + key + "' is not allowed");
         }
-        if (!testClass.getSuperclass().equals(Object.class)) {
-            return findConfigurationField(testClass.getSuperclass());
+
+        final boolean result = RavenwoodSystemProperties.isKeyAccessible(key, write)
+                || sActiveProperties.stream().anyMatch(p -> p.second.isKeyAccessible(key, write));
+
+        if (!result) {
+            throw new IllegalArgumentException((write ? "Write" : "Read")
+                    + " access to system property '" + key + "' denied via RavenwoodRule");
         }
-        return null;
     }
 }

@@ -27,9 +27,9 @@ import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -41,7 +41,7 @@ import kotlinx.coroutines.withContext
 class CameraQuickAffordanceConfig
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val packageManager: PackageManager,
     private val cameraGestureHelper: Lazy<CameraGestureHelper>,
     private val userTracker: UserTracker,

@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.hardware.input.InputManager;
 import android.os.PowerManager;
 import android.platform.test.flag.junit.SetFlagsRule;
 
@@ -95,6 +96,9 @@ public class PhoneWindowManagerTests {
         mStatusBarManagerInternal = mock(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
         mPhoneWindowManager.mKeyguardDelegate = mock(KeyguardServiceDelegate.class);
+        final InputManager im = mock(InputManager.class);
+        doNothing().when(im).registerKeyGestureEventHandler(any());
+        doReturn(im).when(mContext).getSystemService(eq(Context.INPUT_SERVICE));
     }
 
     @After

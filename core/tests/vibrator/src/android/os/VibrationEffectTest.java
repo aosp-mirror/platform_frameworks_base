@@ -46,6 +46,7 @@ import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 
 import com.android.internal.R;
@@ -401,6 +402,67 @@ public class VibrationEffectTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void computeLegacyPattern_repeatingEffect() {
+        VibrationEffect repeatingEffect = VibrationEffect.createRepeatingEffect(TEST_ONE_SHOT,
+                TEST_WAVEFORM);
+        assertNull(repeatingEffect.computeCreateWaveformOffOnTimingsOrNull());
+
+        repeatingEffect = VibrationEffect.createRepeatingEffect(TEST_WAVEFORM);
+        assertNull(repeatingEffect.computeCreateWaveformOffOnTimingsOrNull());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void computeLegacyPattern_effectsViaWaveformEnvelopeBuilder() {
+        // Effects created via waveformEnvelopeBuilder are not expected to be converted to long[]
+        // patterns, as they are not configured to always play with the default amplitude.
+        VibrationEffect effect = new VibrationEffect.WaveformEnvelopeBuilder()
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*durationMillis=*/ 50)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 80)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 40)
+                .build();
+
+        assertNull(effect.computeCreateWaveformOffOnTimingsOrNull());
+
+        effect = new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(/*initialFrequencyHz=*/ 60)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*durationMillis=*/ 50)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 80)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 40)
+                .build();
+
+        assertNull(effect.computeCreateWaveformOffOnTimingsOrNull());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void computeLegacyPattern_effectsViaBasicEnvelopeBuilder() {
+        // Effects created via BasicEnvelopeBuilder are not expected to be converted to long[]
+        // patterns, as they are not configured to always play with the default amplitude.
+        VibrationEffect effect = new VibrationEffect.BasicEnvelopeBuilder()
+                .addControlPoint(/*intensity=*/ 0.1f, /*sharpness=*/ 0.2f, /*durationMillis=*/ 20)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 50)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 80)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 40)
+                .build();
+
+        assertNull(effect.computeCreateWaveformOffOnTimingsOrNull());
+
+        effect = new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.1f)
+                .addControlPoint(/*intensity=*/ 0.2f, /*sharpness=*/ 0.2f, /*durationMillis=*/ 20)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 50)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 80)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 40)
+                .build();
+
+        assertNull(effect.computeCreateWaveformOffOnTimingsOrNull());
+    }
+
+    @Test
     public void computeLegacyPattern_effectsViaStartWaveform() {
         // Effects created via startWaveform are not expected to be converted to long[] patterns, as
         // they are not configured to always play with the default amplitude.
@@ -510,6 +572,17 @@ public class VibrationEffectTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void cropToLength_repeatingEffect() {
+        VibrationEffect repeatingEffect = VibrationEffect.createRepeatingEffect(TEST_ONE_SHOT,
+                TEST_WAVEFORM);
+        assertThat(repeatingEffect.cropToLengthOrNull(1)).isNull();
+
+        repeatingEffect = VibrationEffect.createRepeatingEffect(TEST_WAVEFORM);
+        assertThat(repeatingEffect.cropToLengthOrNull(1)).isNull();
+    }
+
+    @Test
     public void getRingtones_noPrebakedRingtones() {
         Resources r = mockRingtoneResources(new String[0]);
         Context context = mockContext(r);
@@ -595,6 +668,234 @@ public class VibrationEffectTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testValidateWaveformEnvelopeBuilder() {
+        new VibrationEffect.WaveformEnvelopeBuilder()
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*durationMillis=*/ 50)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 80)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 40)
+                .build()
+                .validate();
+
+        new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f, /*durationMillis=*/ 20)
+                .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f, /*durationMillis=*/ 50)
+                .addControlPoint(/*amplitude=*/ 0.4f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 80)
+                .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 120f, /*durationMillis=*/ 40)
+                .build()
+                .validate();
+
+        VibrationEffect.createRepeatingEffect(
+                /*preamble=*/ new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .addControlPoint(/*amplitude=*/ 0.3f, /*frequencyHz=*/ 100f,
+                                /*durationMillis=*/ 50)
+                        .build(),
+                /*repeatingEffect=*/ new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .addControlPoint(/*amplitude=*/ 0.5f, /*frequencyHz=*/ 150f,
+                                /*durationMillis=*/ 100)
+                        .build()
+        ).validate();
+
+        VibrationEffect.createRepeatingEffect(
+                /*effect=*/ new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ 0.0f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .addControlPoint(/*amplitude=*/ 0.5f, /*frequencyHz=*/ 150f,
+                                /*durationMillis=*/ 100)
+                        .build()
+        ).validate();
+
+        assertThrows(IllegalStateException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder().build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ -1.0f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ 1.1f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ 0.8f, /*frequencyHz=*/ 0f,
+                                /*durationMillis=*/ 20)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .addControlPoint(/*amplitude=*/ 0.8f, /*frequencyHz=*/ 100f,
+                                /*durationMillis=*/ 0)
+                        .build()
+                        .validate());
+
+        assertThrows(IllegalStateException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                        .build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                        .addControlPoint(/*amplitude=*/ -1.0f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                        .addControlPoint(/*amplitude=*/ 1.1f, /*frequencyHz=*/ 60f,
+                                /*durationMillis=*/ 20)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                        .addControlPoint(/*amplitude=*/ 0.8f, /*frequencyHz=*/ 0f,
+                                /*durationMillis=*/ 20)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                        .addControlPoint(/*amplitude=*/ 0.8f, /*frequencyHz=*/ 100f,
+                                /*durationMillis=*/ 0)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.WaveformEnvelopeBuilder()
+                        .setInitialFrequencyHz(/*initialFrequencyHz=*/ 0)
+                        .addControlPoint(/*amplitude=*/ 0.8f, /*frequencyHz=*/ 100f,
+                                /*durationMillis=*/ 20)
+                        .build().validate());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testValidateBasicEnvelopeBuilder() {
+        new VibrationEffect.BasicEnvelopeBuilder()
+                .addControlPoint(/*intensity=*/ 0.1f, /*sharpness=*/ 0.2f, /*durationMillis=*/ 20)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 50)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 80)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 40)
+                .build()
+                .validate();
+
+        new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.1f)
+                .addControlPoint(/*intensity=*/ 0.2f, /*sharpness=*/ 0.2f, /*durationMillis=*/ 20)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 50)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 80)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 40)
+                .build()
+                .validate();
+
+        VibrationEffect.createRepeatingEffect(
+                /*preamble=*/ new VibrationEffect.BasicEnvelopeBuilder()
+                        // intensity, sharpness, durationMillis
+                        .addControlPoint(0.3f, 0.5f, 60)
+                        .addControlPoint(0.0f, 0.5f, 100)
+                        .build(),
+                /*repeatingEffect=*/ new VibrationEffect.BasicEnvelopeBuilder()
+                        // intensity, sharpness, durationMillis
+                        .addControlPoint(0.5f, 0.8f, 60)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+        ).validate();
+
+        VibrationEffect.createRepeatingEffect(
+                new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                        // intensity, sharpness, durationMillis
+                        .addControlPoint(0.5f, 0.8f, 60)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+        ).validate();
+
+        assertThrows(IllegalStateException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder().build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                        .addControlPoint(-1.0f, 0.5f, 20)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                        .addControlPoint(1.1f, 0.5f, 20)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                        .addControlPoint(0.8f, -0.1f, 20)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                        .addControlPoint(0.8f, 0.5f, 0)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        // Waveform effects created using the basic builder must end with a zero intensity
+        // control point.
+        assertThrows(IllegalStateException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                        .addControlPoint(0.8f, 0.5f, 100)
+                        .build()
+                        .validate());
+
+        assertThrows(IllegalStateException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/0.2f).build().validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                        .addControlPoint(-1.0f, 0.5f, 20)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                        .addControlPoint(1.1f, 0.5f, 20)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                        .addControlPoint(0.8f, -0.1f, 20)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        assertThrows(IllegalArgumentException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                        .addControlPoint(0.8f, 0.5f, 0)
+                        .addControlPoint(0.0f, 0.3f, 100)
+                        .build()
+                        .validate());
+        // Waveform effects created using the basic builder must end with a zero intensity
+        // control point.
+        assertThrows(IllegalStateException.class,
+                () -> new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                        .addControlPoint(0.8f, 0.5f, 100)
+                        .build()
+                        .validate());
+    }
+
+    @Test
     public void testValidateWaveformBuilder() {
         // Cover builder methods
         VibrationEffect.startWaveform(targetAmplitude(1))
@@ -670,6 +971,21 @@ public class VibrationEffectTest {
                 .repeatEffectIndefinitely(TEST_ONE_SHOT)
                 .compose()
                 .validate();
+        VibrationEffect.startComposition()
+                .addEffect(TEST_ONE_SHOT)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+                .addEffect(VibrationEffect.createRepeatingEffect(
+                        /*preamble=*/ VibrationEffect.createPredefined(
+                                VibrationEffect.EFFECT_DOUBLE_CLICK),
+                        /*repeatingEffect=*/ TEST_WAVEFORM))
+                .compose()
+                .validate();
+        VibrationEffect.startComposition()
+                .addEffect(TEST_ONE_SHOT)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+                .addEffect(VibrationEffect.createRepeatingEffect(TEST_WAVEFORM))
+                .compose()
+                .validate();
 
         // Make sure class summary javadoc examples compile and are valid.
         // NOTE: IF THIS IS UPDATED, PLEASE ALSO UPDATE Composition javadocs.
@@ -730,6 +1046,31 @@ public class VibrationEffectTest {
                 () -> VibrationEffect.startComposition()
                         .repeatEffectIndefinitely(TEST_WAVEFORM)
                         .addEffect(TEST_ONE_SHOT)
+                        .compose()
+                        .validate());
+
+        assertThrows(UnreachableAfterRepeatingIndefinitelyException.class,
+                () -> VibrationEffect.startComposition()
+                        .addEffect(VibrationEffect.createRepeatingEffect(
+                                /*preamble=*/ VibrationEffect.createPredefined(
+                                        VibrationEffect.EFFECT_DOUBLE_CLICK),
+                                /*repeatingEffect=*/ TEST_WAVEFORM))
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose()
+                        .validate());
+        assertThrows(UnreachableAfterRepeatingIndefinitelyException.class,
+                () -> VibrationEffect.startComposition()
+                        .addEffect(VibrationEffect.createRepeatingEffect(
+                                        /*preamble=*/ VibrationEffect.createPredefined(
+                                                VibrationEffect.EFFECT_DOUBLE_CLICK),
+                                        /*repeatingEffect=*/ TEST_WAVEFORM))
+                        .addEffect(TEST_ONE_SHOT)
+                        .compose()
+                        .validate());
+        assertThrows(UnreachableAfterRepeatingIndefinitelyException.class,
+                () -> VibrationEffect.startComposition()
+                        .addEffect(VibrationEffect.createRepeatingEffect(TEST_WAVEFORM))
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                         .compose()
                         .validate());
     }
@@ -1078,6 +1419,52 @@ public class VibrationEffectTest {
     }
 
     @Test
+    public void testDuration_withVibratorSupportingPrimitives() {
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
+                .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 5)
+                .build();
+
+        VibrationEffect composition = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                .compose();
+
+        assertEquals(1, VibrationEffect.createOneShot(1, 1).getDuration());
+        assertEquals(10, VibrationEffect.get(VibrationEffect.EFFECT_CLICK).getDuration(info));
+        assertEquals(115, composition.getDuration(info));
+        assertEquals(Long.MAX_VALUE,
+                VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(composition)
+                        .compose()
+                        .getDuration(info));
+        if (Flags.vendorVibrationEffects()) {
+            assertEquals(-1,
+                    VibrationEffect.createVendorEffect(createNonEmptyBundle()).getDuration(info));
+        }
+    }
+
+    @Test
+    public void testDuration_withVibratorNotSupportingPrimitives() {
+        VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+                .build();
+
+        VibrationEffect composition = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .compose();
+
+        assertEquals(-1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK).getDuration(info));
+        assertEquals(-1, composition.getDuration(info));
+        assertEquals(Long.MAX_VALUE,
+                VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(composition)
+                        .compose()
+                        .getDuration(info));
+    }
+
+    @Test
     public void testAreVibrationFeaturesSupported_allSegmentsSupported() {
         VibratorInfo info = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
@@ -1147,6 +1534,44 @@ public class VibrationEffectTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testIsHapticFeedbackCandidate_longEnvelopeEffects_notCandidates() {
+        assertFalse(new VibrationEffect.WaveformEnvelopeBuilder()
+                //amplitude, frequencyHz, durationMillis
+                .addControlPoint(0.0f, 60f, 200)
+                .addControlPoint(0.3f, 100f, 500)
+                .addControlPoint(0.4f, 120f, 800)
+                .addControlPoint(0.0f, 120f, 400)
+                .build()
+                .isHapticFeedbackCandidate());
+        assertFalse(new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(/*initialFrequencyHz=*/ 40)
+                //amplitude, frequencyHz, durationMillis
+                .addControlPoint(0.0f, 60f, 200)
+                .addControlPoint(0.3f, 100f, 500)
+                .addControlPoint(0.4f, 120f, 800)
+                .addControlPoint(0.0f, 120f, 400)
+                .build()
+                .isHapticFeedbackCandidate());
+
+        assertFalse(new VibrationEffect.BasicEnvelopeBuilder()
+                .addControlPoint(/*intensity=*/ 0.1f, /*sharpness=*/ 0.2f, /*durationMillis=*/ 200)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 500)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 800)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 400)
+                .build()
+                .isHapticFeedbackCandidate());
+        assertFalse(new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                .addControlPoint(/*intensity=*/ 0.1f, /*sharpness=*/ 0.2f, /*durationMillis=*/ 200)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 500)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 800)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 400)
+                .build()
+                .isHapticFeedbackCandidate());
+    }
+
+    @Test
     public void testIsHapticFeedbackCandidate_shortEffects_areCandidates() {
         assertTrue(VibrationEffect.createOneShot(500, 255).isHapticFeedbackCandidate());
         assertTrue(VibrationEffect.createWaveform(
@@ -1155,6 +1580,39 @@ public class VibrationEffectTest {
                 .addTransition(Duration.ofMillis(300), targetAmplitude(1))
                 .addTransition(Duration.ofMillis(200), targetAmplitude(0.5f))
                 .addTransition(Duration.ofMillis(300), targetAmplitude(0))
+                .build()
+                .isHapticFeedbackCandidate());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testIsHapticFeedbackCandidate_shortEnvelopeEffects_areCandidates() {
+        assertTrue(new VibrationEffect.WaveformEnvelopeBuilder()
+                //amplitude, frequencyHz, durationMillis
+                .addControlPoint(0.3f, 100f, 500)
+                .addControlPoint(0.4f, 120f, 400)
+                .addControlPoint(0.0f, 120f, 100)
+                .build()
+                .isHapticFeedbackCandidate());
+        assertTrue(new VibrationEffect.WaveformEnvelopeBuilder()
+                .setInitialFrequencyHz(/*initialFrequencyHz=*/ 30)
+                .addControlPoint(0.3f, 100f, 500)
+                .addControlPoint(0.4f, 120f, 400)
+                .addControlPoint(0.0f, 120f, 100)
+                .build()
+                .isHapticFeedbackCandidate());
+
+        assertTrue(new VibrationEffect.BasicEnvelopeBuilder()
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 500)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 400)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 100)
+                .build()
+                .isHapticFeedbackCandidate());
+        assertTrue(new VibrationEffect.BasicEnvelopeBuilder()
+                .setInitialSharpness(/*initialSharpness=*/ 0.2f)
+                .addControlPoint(/*intensity=*/ 0.3f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 500)
+                .addControlPoint(/*intensity=*/ 0.4f, /*sharpness=*/ 0.5f, /*durationMillis=*/ 400)
+                .addControlPoint(/*intensity=*/ 0.0f, /*sharpness=*/ 0.3f, /*durationMillis=*/ 100)
                 .build()
                 .isHapticFeedbackCandidate());
     }

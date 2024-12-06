@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
@@ -1735,6 +1736,11 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
         pw.decreaseIndent();
+    }
+
+    @Override
+    protected void onUnhandledException(int code, int flags, Exception e) {
+        Slog.wtf(TAG, "Uncaught exception in AudioService: " + code + ", " + flags, e);
     }
 
     @GuardedBy("mUsbMidiLock")

@@ -21,12 +21,13 @@ import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
 import com.android.internal.R
+import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileUserActionInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 class DataSaverDialogDelegate(
     private val sysuiDialogFactory: SystemUIDialog.Factory,
@@ -44,9 +45,8 @@ class DataSaverDialogDelegate(
             setTitle(R.string.data_saver_enable_title)
             setMessage(R.string.data_saver_description)
             setPositiveButton(R.string.data_saver_enable_button) { _: DialogInterface?, _ ->
-                CoroutineScope(backgroundContext).launch {
-                    dataSaverController.setDataSaverEnabled(true)
-                }
+                CoroutineScope(backgroundContext + newTracingContext("DataSaverDialogScope"))
+                    .launch { dataSaverController.setDataSaverEnabled(true) }
 
                 sharedPreferences
                     .edit()

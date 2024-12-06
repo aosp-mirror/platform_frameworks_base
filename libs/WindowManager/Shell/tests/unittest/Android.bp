@@ -63,12 +63,13 @@ android_test {
         "com.android.window.flags.window-aconfig-java",
         "platform-test-annotations",
         "flag-junit",
+        "platform-parametric-runner-lib",
     ],
 
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     jni_libs: [

@@ -38,6 +38,8 @@ import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.os.BackgroundThread;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -48,6 +50,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * Class used to provide one time hooks for existing OEM devices to migrate their config store
@@ -98,6 +102,39 @@ public final class WifiMigration {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserStoreFileId { }
+
+    /**
+     * Keystore migration was completed successfully.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE = 0;
+
+    /**
+     * Keystore migration was not needed.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED = 1;
+
+    /**
+     * Keystore migration failed because an exception was encountered.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "KEYSTORE_MIGRATION_" }, value = {
+            KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE,
+            KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED,
+            KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KeystoreMigrationStatus { }
 
     /**
      * Mapping of Store file Id to Store file names.
@@ -572,14 +609,39 @@ public final class WifiMigration {
     /**
      * Migrate any certificates in Legacy Keystore to the newer WifiBlobstore database.
      *
+     * Operation will be handled on the BackgroundThread, and the result will be posted
+     * to the provided Executor.
+     *
+     * @param executor The executor on which callback will be invoked
+     * @param resultsCallback Callback to receive the status code
+     *
      * @hide
      */
     @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static void migrateLegacyKeystoreToWifiBlobstore() {
+    public static void migrateLegacyKeystoreToWifiBlobstore(
+            @NonNull Executor executor, @NonNull IntConsumer resultsCallback) {
+        Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(resultsCallback, "resultsCallback cannot be null");
+        BackgroundThread.getHandler().post(() -> {
+            int status = migrateLegacyKeystoreToWifiBlobstoreInternal();
+            executor.execute(() -> {
+                resultsCallback.accept(status);
+            });
+        });
+    }
+
+    /**
+     * Synchronously perform the Keystore migration described in
+     * {@link #migrateLegacyKeystoreToWifiBlobstore(Executor, IntConsumer)}
+     *
+     * @hide
+     */
+    public static @KeystoreMigrationStatus int migrateLegacyKeystoreToWifiBlobstoreInternal() {
         if (!WifiBlobStore.supplicantCanAccessBlobstore()) {
+            // Supplicant cannot access WifiBlobstore, so keep the certs in Legacy Keystore
             Log.i(TAG, "Avoiding migration since supplicant cannot access WifiBlobstore");
-            return;
+            return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED;
         }
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -587,7 +649,7 @@ public final class WifiMigration {
             String[] legacyAliases = legacyKeystore.list("", Process.WIFI_UID);
             if (legacyAliases == null || legacyAliases.length == 0) {
                 Log.i(TAG, "No aliases need to be migrated");
-                return;
+                return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED;
             }
 
             WifiBlobStore wifiBlobStore = WifiBlobStore.getInstance();
@@ -605,14 +667,17 @@ public final class WifiMigration {
                 legacyKeystore.remove(legacyAlias, Process.WIFI_UID);
             }
             Log.i(TAG, "Successfully migrated aliases from Legacy Keystore");
+            return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE;
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ILegacyKeystore.ERROR_SYSTEM_ERROR) {
                 Log.i(TAG, "Legacy Keystore service has been deprecated");
-            } else {
-                Log.e(TAG, "Encountered an exception while migrating aliases. " + e);
+                return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED;
             }
+            Log.e(TAG, "Encountered a ServiceSpecificException while migrating aliases. " + e);
+            return KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION;
         } catch (Exception e) {
             Log.e(TAG, "Encountered an exception while migrating aliases. " + e);
+            return KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

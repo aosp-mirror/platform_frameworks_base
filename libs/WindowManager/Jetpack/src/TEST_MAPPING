@@ -1,32 +1,10 @@
 {
   "presubmit": [
     {
-      "name": "WMJetpackUnitTests",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "WMJetpackUnitTests_Presubmit"
     },
     {
-      "name": "CtsWindowManagerJetpackTestCases",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "CtsWindowManagerJetpackTestCases_Presubmit"
     }
   ],
   "imports": [

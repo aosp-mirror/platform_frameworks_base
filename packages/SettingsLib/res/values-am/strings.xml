@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"የተሻሻለ ተገናኝነት ባህሪውን ያነቃል።"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"አካባቢያዊ ተርሚናል"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"የአካባቢያዊ ሼል መዳረሻ የሚያቀርብ የተርሚናል መተግበሪያ አንቃ"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"የLinux ግንባታ አከባቢ"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(የሙከራ) Android ላይ Linux ተርሚናል ያሂዱ"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ካሰናከሉ የLinux ተርሚናል ውሂብ ይሰርዛል"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"የHDCP ምልከታ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"የHDCP መመልከቻ ጠባይ አዘጋጅ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ስህተት በማስወገድ ላይ"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"ማንቂያዎች እና አስታዋሾች"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"ይህ መተግበሪያ ማንቂያዎችን እንዲያቀናብር እና የጊዜ ትብነት ያላቸው እርምጃዎችን መርሐግብር እንዲያስይዝ ይፍቀዱለት። ይህ መተግበሪያው ከበስተጀርባ ማሄድ እንዲችል ያስችለዋል፣ ይህም የበለጠ ባትሪ ሊጠቀም ይችላል።\n\nይህ ፈቃድ ከጠፋ በዚህ መተግበሪያ መርሐግብር የተያዘላቸው ነባር ማንቂያዎች እና ጊዜ-ተኮር ክስተቶች አይሰሩም።"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"የጊዜ መርሐግብር፣ ማንቂያ፣ አስታዋሽ ሰዓት"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"አትረብሽ"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"አይረብሹ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"አብራ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"አትረብሽን አብራ"</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ልክ አሁን"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ይህ ስልክ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ይህ ጡባዊ"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ይህ ኮምፒውተር (ውስጣዊ)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ይህ ቲቪ"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"የመትከያ ድምፅ ማውጫ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"የውጭ መሣሪያ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"የተገናኘ መሣሪያ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ይህ ስልክ"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"አናሎግ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"ተጨማሪ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"በዚህ መሣሪያ ላይ ማጫወት አልተቻለም"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ለመቀየር መለያ ያልቁ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ውርዶችን እዚህ ማጫወት አይቻልም"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI ኢኤአርሲ"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"በኤአርሲ በኩል ተገናኝቷል"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"በኢኤአርሲ በኩል ተገናኝቷል"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"የቲቪ ነባሪ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"የHDMI ውጤት"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ውስጣዊ ድምፅ ማውጫዎች"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"አብሮ የተሰራ ድምፅ ማውጫ"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"የTV ኦዲዮ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"መገናኘት ላይ ችግር። መሳሪያውን ያጥፉት እና እንደገና ያብሩት"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ባለገመድ የኦዲዮ መሣሪያ"</string>
     <string name="help_label" msgid="3528360748637781274">"እገዛ እና ግብረመልስ"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ተሰናክሏል"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ነቅቷል"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"የእርስዎን መሣሪያ ይህ ለው ለማመልከት እንደገና መነሣት አለበት። አሁን እንደገና ያስነሡ ወይም ይተዉት።"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"ባለገመድ ጆሮ ማዳመጫ"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ባለገመድ የራስ ላይ ማዳመጫ"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"ግራ የሚያጋባ ኦዶዮ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ኦዲዮ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"ባለገመድ ማይክሮፎን"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB ማይክሮፎን"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"ብሉቱዝ ማይክሮፎን"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"አብራ"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"አጥፋ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"የአገልግሎት አቅራቢ አውታረ መረብን በመቀየር ላይ"</string>

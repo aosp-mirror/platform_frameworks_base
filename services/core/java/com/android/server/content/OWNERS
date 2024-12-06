@@ -1,1 +1,3 @@
 include /services/core/java/com/android/server/am/OWNERS
+
+per-file Sync* = file:/apex/jobscheduler/JOB_OWNERS

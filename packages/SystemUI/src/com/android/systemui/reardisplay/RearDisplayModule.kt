@@ -41,4 +41,10 @@ interface RearDisplayModule {
     fun bindRearDisplayDialogControllerConfigChanges(
         impl: RearDisplayDialogController
     ): ConfigurationListener
+
+    /** Start RearDisplayCoreStartable. */
+    @Binds
+    @IntoMap
+    @ClassKey(RearDisplayCoreStartable::class)
+    abstract fun bindRearDisplayCoreStartable(impl: RearDisplayCoreStartable): CoreStartable
 }

@@ -39,7 +39,9 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.platform.test.flag.junit.FlagsParameterization;
+import android.provider.Settings;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.view.WindowManager;
@@ -53,6 +55,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -68,6 +71,7 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.util.settings.FakeSettings;
 
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -109,6 +113,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
 
+    private FakeSettings mSecureSettings;
     private final Executor mMainExecutor = MoreExecutors.directExecutor();
     private final Executor mBackgroundExecutor = MoreExecutors.directExecutor();
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
@@ -129,6 +134,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        mSecureSettings = new FakeSettings();
+        mSecureSettings.putInt(Settings.Secure.DISABLE_SECURE_WINDOWS, 0);
+
         // Preferred refresh rate is equal to the first displayMode's refresh rate
         mPreferredRefreshRate = mContext.getDisplay().getSystemSupportedModes()[0].getRefreshRate();
         overrideResource(
@@ -162,12 +171,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 () -> mSelectedUserInteractor,
                 mUserTracker,
                 mKosmos.getNotificationShadeWindowModel(),
-                mKosmos::getCommunalInteractor) {
-                    @Override
-                    protected boolean isDebuggable() {
-                        return false;
-                    }
-            };
+                mSecureSettings,
+                mKosmos::getCommunalInteractor,
+                mKosmos.getShadeLayoutParams());
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
         mNotificationShadeWindowController.fetchWindowRootView();
 
@@ -349,6 +355,19 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void setKeyguardShowingWithSecureWindowsDisabled_disablesSecureFlag() {
+        mSecureSettings.putInt(Settings.Secure.DISABLE_SECURE_WINDOWS, 1);
+        mNotificationShadeWindowController.setBouncerShowing(true);
+
+        verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
+        assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
+        assertThat(
+                (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_PRIVACY)
+                        != 0)
+                .isTrue();
+    }
+
+    @Test
     public void setKeyguardNotShowing_disablesSecureFlag() {
         mNotificationShadeWindowController.setBouncerShowing(false);
 
@@ -464,6 +483,32 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         final WindowManager.LayoutParams lp = lpList.get(lpList.size() - 1);
         assertThat(lp.preferredMaxDisplayRefreshRate).isEqualTo(0);
         assertThat(lp.preferredMinDisplayRefreshRate).isEqualTo(0);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void configChanged_boundsUpdate() {
+        when(mNotificationShadeWindowView.getWidth()).thenReturn(1600);
+        when(mNotificationShadeWindowView.getHeight()).thenReturn(800);
+        when(mNotificationShadeWindowView.getVisibility()).thenReturn(View.INVISIBLE);
+        Configuration newConfig = new Configuration();
+        // swap width and height in new bounds to simulate auto-rotate
+        newConfig.windowConfiguration.setBounds(new Rect(0, 0, 800, 1600));
+        mNotificationShadeWindowController.onConfigChanged(newConfig);
+        verify(mWindowManager, atLeastOnce()).updateViewLayout(any(), any());
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void configChanged_boundsDontUpdate() {
+        when(mNotificationShadeWindowView.getWidth()).thenReturn(1600);
+        when(mNotificationShadeWindowView.getHeight()).thenReturn(800);
+        when(mNotificationShadeWindowView.getVisibility()).thenReturn(View.INVISIBLE);
+        Configuration newConfig = new Configuration();
+        // same bounds as view's current bounds
+        newConfig.windowConfiguration.setBounds(new Rect(0, 0, 1600, 800));
+        mNotificationShadeWindowController.onConfigChanged(newConfig);
+        verify(mWindowManager, never()).updateViewLayout(any(), any());
     }
 
     private void setKeyguardShowing() {

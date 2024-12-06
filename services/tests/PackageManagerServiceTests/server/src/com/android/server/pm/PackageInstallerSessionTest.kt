@@ -195,7 +195,8 @@ class PackageInstallerSessionTest {
             /* isApplied */ false,
             /* stagedSessionErrorCode */ PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
             /* stagedSessionErrorMessage */ "some error",
-            /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar"))
+            /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar")),
+            /* installDependencyHelper */ null
         )
     }
 
@@ -249,7 +250,8 @@ class PackageInstallerSessionTest {
                                 mock(StagingManager::class.java),
                                 mTmpDir,
                                 mock(PackageSessionProvider::class.java),
-                                mock(SilentUpdatePolicy::class.java)
+                                mock(SilentUpdatePolicy::class.java),
+                                mock(InstallDependencyHelper::class.java)
                             )
                             ret.add(session)
                         } catch (e: Exception) {

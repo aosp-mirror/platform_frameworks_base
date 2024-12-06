@@ -1574,7 +1574,10 @@ class Linker {
   // If the file path ends with .flata, .jar, .jack, or .zip the file is treated
   // as ZIP archive and the files within are merged individually.
   // Otherwise the file is processed on its own.
-  bool MergePath(const std::string& path, bool override) {
+  bool MergePath(std::string path, bool override) {
+    if (path.size() > 2 && util::StartsWith(path, "'") && util::EndsWith(path, "'")) {
+      path = path.substr(1, path.size() - 2);
+    }
     if (util::EndsWith(path, ".flata") || util::EndsWith(path, ".jar") ||
         util::EndsWith(path, ".jack") || util::EndsWith(path, ".zip")) {
       return MergeArchive(path, override);

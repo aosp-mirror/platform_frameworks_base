@@ -137,6 +137,8 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             "com.android.server.policy.PROPERTY_FEATURE_REAR_DISPLAY";
     private static final String PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT =
             "com.android.server.policy.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT";
+    private static final String PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT =
+            "com.android.server.policy.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT";
 
 
 
@@ -280,6 +282,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 break;
             case PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT:
                 systemProperties.add(DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT);
+                break;
+            case PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT:
+                systemProperties.add(DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT);
                 break;
             default:
                 Slog.w(TAG, "Parsed unknown flag with name: " + propertyString);

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID pemanggil secara lalainya ditetapkan kepada terhad. Panggilan seterusnya: Tidak terhad"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID pemanggil secara lalainya ditetapkan kepada tidak terhad. Panggilan seterusnya: Terhad"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pemanggil secara lalainya ditetapkan kepada tidak dihadkan. Panggilan seterusnya: Tidak terhad"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Apl ini tidak serasi untuk 16 KB. Semakan penjajaran APK gagal. Apl ini akan dijalankan menggunakan mod serasi saiz halaman. Untuk keserasian yang terbaik, sila susun semula aplikasi dengan sokongan 16 KB. Untuk mendapatkan maklumat lanjut, lihat &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Apl ini tidak serasi untuk 16 KB. Semakan penjajaran ELF gagal. Apl ini akan dijalankan menggunakan mod serasi saiz halaman. Untuk keserasian yang terbaik, sila susun semula aplikasi dengan sokongan 16 KB. Untuk mendapatkan maklumat lanjut, lihat &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Apl ini tidak serasi untuk 16 KB. Semakan penjajaran APK dan ELF gagal. Apl ini akan dijalankan menggunakan mod serasi saiz halaman. Untuk keserasian yang terbaik, sila susun semula aplikasi dengan sokongan 16 KB. Untuk mendapatkan maklumat lanjut, lihat &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Perkhidmatan yang tidak diuntukkan."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak boleh mengubah tetapan ID pemanggil."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Data ditukar kepada <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Benarkan apl menentukan kedudukan relatif antara peranti Ultrajalur Lebar berdekatan"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"berinteraksi dengan peranti Wi-Fi berdekatan"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Membenarkan apl mengiklankan, menyambung dan menentukan kedudukan relatif peranti Wi-Fi berdekatan"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"tentukan kedudukan relatif antara peranti berdekatan"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Benarkan apl menentukan kedudukan relatif antara peranti berdekatan"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maklumat Perkhidmatan Pembayaran NFC Pilihan"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
@@ -1153,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"dalam <xliff:g id="COUNT">%d</xliff:g>j"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"dalam <xliff:g id="COUNT">%d</xliff:g>h"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"dalam <xliff:g id="COUNT">%d</xliff:g>t"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minit yang lalu}other{# minit yang lalu}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# jam yang lalu}other{# jam yang lalu}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# hari yang lalu}other{# hari yang lalu}}"</string>
@@ -1735,7 +1772,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"HIDUP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"MATI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda berkaitan dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang berkaitan dengan keperluan kebolehaksesan anda tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Melihat dan melaksanakan tindakan"</string>
@@ -1746,8 +1783,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Apl menghalang permintaan kebenaran, maka jawapan anda tidak dapat disahkan."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Pilih ciri untuk digunakan dengan butang kebolehaksesan"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Pilih ciri untuk digunakan dengan pintasan kekunci kelantangan"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> telah dimatikan"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Selesai"</string>
@@ -1939,11 +1975,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Hujung minggu"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Acara"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Tidur"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Jangan Ganggu (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Diurus oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Hidup"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Mati"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> hingga <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Sebarang kalendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> meredamkan sesetengah bunyi"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Terdapat masalah dalaman dengan peranti anda. Peranti mungkin tidak stabil sehingga anda membuat tetapan semula data kilang."</string>
@@ -2011,6 +2050,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Tetapkan kunci skrin"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Tetapkan kunci skrin"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Tetapkan kunci skrin pada peranti untuk menggunakan ruang privasi"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Untuk memadamkan ruang peribadi, tetapkan kunci skrin pada peranti ini"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Apl tidak tersedia"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak tersedia sekarang."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> tidak tersedia"</string>
@@ -2129,11 +2169,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Panggilan dan pemberitahuan akan bergetar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Panggilan dan pemberitahuan akan diredamkan"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Perubahan sistem"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Jangan Ganggu"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Baharu: Jangan Ganggu menyembunyikan pemberitahuan"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ketik untuk mengetahui lebih lanjut dan menukar tetapan."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Jangan Ganggu telah berubah"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ketik untuk menyemak item yang disekat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Semak tetapan pemberitahuan"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Bermula dengan Android 13, apl yang anda pasang memerlukan kebenaran anda untuk menghantar pemberitahuan. Ketik untuk menukar kebenaran ini bagi apl sedia ada."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Ingatkan saya nanti"</string>
@@ -2419,7 +2454,7 @@
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Ruang persendirian"</string>
     <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Klon"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Umum"</string>
-    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang privasi"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"Ruang persendirian"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Kandungan pemberitahuan yang sensitif disembunyikan"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Kandungan apl disembunyikan daripada perkongsian skrin untuk keselamatan"</string>
@@ -2429,7 +2464,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Hantar dan terima mesej tanpa rangkaian mudah alih atau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cara ciri ini berfungsi"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Hidupkan \"Pilih rangkaian secara automatik\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Hidupkan \"Pilih rangkaian secara automatik\" dalam Tetapan supaya telefon anda boleh menemukan rangkaian yang berfungsi dengan satelit"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Hidupkan"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Kembali"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Belum selesai..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS via Satelit kini tersedia"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Anda boleh menghantar mesej kepada perkhidmatan kecemasan jika tiada rangkaian mudah alih atau Wi-Fi. Google Messages mestilah ditetapkan sebagai apl pemesejan lalai anda."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS via Satelit tidak disokong"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS via Satelit tidak disokong pada peranti ini"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS via Satelit tidak disediakan"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Pastikan anda disambungkan kepada Internet dan cuba buat persediaan sekali lagi"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS via Satelit tidak tersedia"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS via Satelit tidak tersedia di negara atau rantau ini"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS via Satelit tidak disediakan"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Untuk menghantar mesej melalui satelit, tetapkan Google Messages sebagai apl pemesejan lalai anda"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS via Satelit tidak tersedia"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Untuk menyemak sama ada SOS via Satelit tersedia di negara atau rantau ini, hidupkan tetapan lokasi"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Permesejan satelit tersedia"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Anda boleh menghantar mesej melalui satelit jika tiada rangkaian mudah alih atau Wi-Fi. Google Messages mestilah ditetapkan sebagai apl pemesejan lalai anda."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Permesejan satelit tidak disokong"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Permesejan satelit tidak disokong pada peranti ini"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Permesejan satelit tidak disediakan"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Pastikan anda disambungkan kepada Internet dan cuba buat persediaan sekali lagi"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Permesejan satelit tidak tersedia"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Permesejan satelit tidak tersedia di negara atau rantau ini"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Permesejan satelit tidak disediakan"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Untuk menghantar mesej melalui satelit, tetapkan Google Messages sebagai apl pemesejan lalai anda"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Permesejan satelit tidak tersedia"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Untuk menyemak sama ada permesejan satelit tersedia di negara atau rantau ini, hidupkan tetapan lokasi"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Sediakan Buka Kunci Cap Jari sekali lagi"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> tidak dapat dicam lagi."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dan <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> tidak dapat dicam lagi."</string>

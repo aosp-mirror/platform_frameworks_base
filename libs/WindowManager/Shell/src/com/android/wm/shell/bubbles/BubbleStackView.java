@@ -61,7 +61,6 @@ import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.FrameLayout;
@@ -91,10 +90,10 @@ import com.android.wm.shell.bubbles.animation.PhysicsAnimationLayout;
 import com.android.wm.shell.bubbles.animation.StackAnimationController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.shared.bubbles.DismissView;
-import com.android.wm.shell.shared.bubbles.RelativeTouchListener;
 import com.android.wm.shell.shared.animation.Interpolators;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
+import com.android.wm.shell.shared.bubbles.DismissView;
+import com.android.wm.shell.shared.bubbles.RelativeTouchListener;
 import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import java.io.PrintWriter;
@@ -1705,6 +1704,7 @@ public class BubbleStackView extends FrameLayout
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
         getViewTreeObserver().removeOnDrawListener(mSystemGestureExcludeUpdater);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        stopMonitoringSwipeUpGesture();
     }
 
     @Override
@@ -2276,7 +2276,7 @@ public class BubbleStackView extends FrameLayout
     void startMonitoringSwipeUpGesture() {
         stopMonitoringSwipeUpGestureInternal();
 
-        if (isGestureNavEnabled()) {
+        if (ContextUtils.isGestureNavigationMode(mContext)) {
             mBubblesNavBarGestureTracker = new BubblesNavBarGestureTracker(mContext, mPositioner);
             mBubblesNavBarGestureTracker.start(mSwipeUpListener);
             setOnTouchListener(mContainerSwipeListener);
@@ -2311,16 +2311,11 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    private boolean isGestureNavEnabled() {
-        return mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_navBarInteractionMode)
-                == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-    }
-
     /**
      * Stop monitoring for swipe up gesture
      */
-    void stopMonitoringSwipeUpGesture() {
+    @VisibleForTesting
+    public void stopMonitoringSwipeUpGesture() {
         stopMonitoringSwipeUpGestureInternal();
     }
 

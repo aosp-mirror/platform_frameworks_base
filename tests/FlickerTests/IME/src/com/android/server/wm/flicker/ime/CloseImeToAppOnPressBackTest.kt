@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window closing back to app window transitions.
- * To run this test: `atest FlickerTestsIme1:CloseImeToAppOnPressBackTest`
+ * To run this test: `atest FlickerTestsIme:CloseImeToAppOnPressBackTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)

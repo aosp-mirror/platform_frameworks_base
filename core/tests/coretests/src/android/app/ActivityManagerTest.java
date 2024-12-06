@@ -60,7 +60,6 @@ public class ActivityManagerTest {
     public void testProcState() throws Exception {
         // For the moment mostly want to confirm we don't crash
         assertNotNull(ActivityManager.procStateToString(PROCESS_STATE_SERVICE));
-        assertNotNull(ActivityManager.processStateAmToProto(PROCESS_STATE_SERVICE));
         assertTrue(ActivityManager.isProcStateBackground(PROCESS_STATE_SERVICE));
         assertFalse(ActivityManager.isProcStateCached(PROCESS_STATE_SERVICE));
         assertFalse(ActivityManager.isForegroundService(PROCESS_STATE_SERVICE));

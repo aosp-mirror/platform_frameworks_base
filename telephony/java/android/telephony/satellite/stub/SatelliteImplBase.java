@@ -80,12 +80,12 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void enableCellularModemWhileSatelliteModeIsOn(boolean enabled,
+        public void enableTerrestrialNetworkScanWhileSatelliteModeIsOn(boolean enabled,
                 IIntegerConsumer resultCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .enableCellularModemWhileSatelliteModeIsOn(enabled, resultCallback),
-                    "enableCellularModemWhileSatelliteModeIsOn");
+                            .enableTerrestrialNetworkScanWhileSatelliteModeIsOn(
+                    enabled, resultCallback), "enableTerrestrialNetworkScanWhileSatelliteModeIsOn");
         }
 
         @Override
@@ -314,7 +314,7 @@ public class SatelliteImplBase extends SatelliteService {
      * and {@code false} to disable
      * @param resultCallback The callback to receive the error code result of the operation.
      */
-    public void enableCellularModemWhileSatelliteModeIsOn(boolean enabled,
+    public void enableTerrestrialNetworkScanWhileSatelliteModeIsOn(boolean enabled,
             @NonNull IIntegerConsumer resultCallback) {
         // stub implementation
     }

@@ -37,8 +37,8 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.shade.shadeTestUtil
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
@@ -287,7 +287,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun anyExpansion_shadeGreater() =
-        testScope.runTest() {
+        testScope.runTest {
             // WHEN shade is more expanded than QS
             shadeTestUtil.setShadeAndQsExpansion(.5f, 0f)
             runCurrent()
@@ -298,13 +298,43 @@ class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     @Test
     fun anyExpansion_qsGreater() =
-        testScope.runTest() {
+        testScope.runTest {
             // WHEN qs is more expanded than shade
             shadeTestUtil.setShadeAndQsExpansion(0f, .5f)
             runCurrent()
 
             // THEN anyExpansion is .5f
             assertThat(underTest.anyExpansion.value).isEqualTo(.5f)
+        }
+
+    @Test
+    fun isShadeAnyExpanded_shadeCollapsed() =
+        testScope.runTest {
+            val isShadeAnyExpanded by collectLastValue(underTest.isShadeAnyExpanded)
+            shadeTestUtil.setShadeExpansion(0f)
+            runCurrent()
+
+            assertThat(isShadeAnyExpanded).isFalse()
+        }
+
+    @Test
+    fun isShadeAnyExpanded_shadePartiallyExpanded() =
+        testScope.runTest {
+            val isShadeAnyExpanded by collectLastValue(underTest.isShadeAnyExpanded)
+            shadeTestUtil.setShadeExpansion(0.01f)
+            runCurrent()
+
+            assertThat(isShadeAnyExpanded).isTrue()
+        }
+
+    @Test
+    fun isShadeAnyExpanded_shadeFullyExpanded() =
+        testScope.runTest {
+            val isShadeAnyExpanded by collectLastValue(underTest.isShadeAnyExpanded)
+            shadeTestUtil.setShadeExpansion(1f)
+            runCurrent()
+
+            assertThat(isShadeAnyExpanded).isTrue()
         }
 
     @Test

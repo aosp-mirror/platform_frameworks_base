@@ -82,6 +82,11 @@ public class AudioManagerRouteControllerTest {
     private static final AudioDeviceInfo FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET =
             createAudioDeviceInfo(
                     AudioSystem.DEVICE_OUT_WIRED_HEADSET, "name_wired_hs", /* address= */ null);
+    private static final AudioDeviceInfo FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET_WITH_ADDRESS =
+            createAudioDeviceInfo(
+                    AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                    "name_wired_hs_with_address",
+                    /* address= */ "card=1;device=0");
     private static final AudioDeviceInfo FAKE_AUDIO_DEVICE_INFO_BLUETOOTH_A2DP =
             createAudioDeviceInfo(
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "name_a2dp", /* address= */ "12:34:45");
@@ -304,6 +309,55 @@ public class AudioManagerRouteControllerTest {
         assertThat(selectedRoute.getName().toString()).isEqualTo(FAKE_ROUTE_NAME);
     }
 
+    @Test
+    public void getAvailableRoutes_whenAddressIsPopulatedForNonBluetoothDevice_usesCorrectName() {
+        addAvailableAudioDeviceInfo(
+                /* newSelectedDevice= */ FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET_WITH_ADDRESS,
+                /* newAvailableDevices...= */ FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET_WITH_ADDRESS,
+                FAKE_AUDIO_DEVICE_INFO_BLUETOOTH_A2DP);
+
+        List<MediaRoute2Info> availableRoutes = mControllerUnderTest.getAvailableRoutes();
+        assertThat(availableRoutes.size()).isEqualTo(3);
+
+        assertThat(
+                        getAvailableRouteWithType(MediaRoute2Info.TYPE_WIRED_HEADSET)
+                                .getName()
+                                .toString())
+                .isEqualTo(
+                        FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET_WITH_ADDRESS
+                                .getProductName()
+                                .toString());
+
+        assertThat(
+                        getAvailableRouteWithType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP)
+                                .getName()
+                                .toString())
+                .isEqualTo(FAKE_AUDIO_DEVICE_INFO_BLUETOOTH_A2DP.getProductName().toString());
+    }
+
+    @Test
+    public void
+            getAvailableRoutes_whenAddressIsNotPopulatedForNonBluetoothDevice_usesCorrectName() {
+        addAvailableAudioDeviceInfo(
+                /* newSelectedDevice= */ FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET,
+                /* newAvailableDevices...= */ FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET);
+
+        List<MediaRoute2Info> availableRoutes = mControllerUnderTest.getAvailableRoutes();
+        assertThat(availableRoutes.size()).isEqualTo(2);
+
+        assertThat(
+                        getAvailableRouteWithType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER)
+                                .getName()
+                                .toString())
+                .isEqualTo(FAKE_AUDIO_DEVICE_INFO_BUILTIN_SPEAKER.getProductName().toString());
+
+        assertThat(
+                        getAvailableRouteWithType(MediaRoute2Info.TYPE_WIRED_HEADSET)
+                                .getName()
+                                .toString())
+                .isEqualTo(FAKE_AUDIO_DEVICE_INFO_WIRED_HEADSET.getProductName().toString());
+    }
+
     // Internal methods.
 
     @NonNull
@@ -346,14 +400,16 @@ public class AudioManagerRouteControllerTest {
                 .thenReturn(mAvailableAudioDeviceInfos.toArray(new AudioDeviceInfo[0]));
     }
 
-    private static AudioDeviceAttributes createAudioDeviceAttribute(int type) {
+    private static AudioDeviceAttributes createAudioDeviceAttribute(
+            @AudioDeviceInfo.AudioDeviceType int type) {
         // Address is unused.
         return new AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT, type, /* address= */ "");
     }
 
     private static AudioDeviceInfo createAudioDeviceInfo(
-            int type, @NonNull String name, @NonNull String address) {
+            @AudioDeviceInfo.AudioDeviceType int type, @NonNull String name,
+            @NonNull String address) {
         return new AudioDeviceInfo(AudioDevicePort.createForTesting(type, name, address));
     }
 }

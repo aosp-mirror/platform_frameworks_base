@@ -21,6 +21,8 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
@@ -64,6 +66,7 @@ constructor(
     private val sceneFamilyResolvers: Lazy<Map<SceneKey, @JvmSuppressWildcards SceneResolver>>,
     private val deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
     private val keyguardEnabledInteractor: Lazy<KeyguardEnabledInteractor>,
+    private val disabledContentInteractor: DisabledContentInteractor,
 ) {
 
     interface OnSceneAboutToChangeListener {
@@ -120,21 +123,18 @@ constructor(
             )
 
     /**
-     * The key of the scene that the UI is currently transitioning to or `null` if there is no
+     * The key of the content that the UI is currently transitioning to or `null` if there is no
      * active transition at the moment.
      *
      * This is a convenience wrapper around [transitionState], meant for flow-challenged consumers
      * like Java code.
      */
-    val transitioningTo: StateFlow<SceneKey?> =
+    val transitioningTo: StateFlow<ContentKey?> =
         transitionState
             .map { state ->
                 when (state) {
                     is ObservableTransitionState.Idle -> null
-                    is ObservableTransitionState.Transition.ChangeScene -> state.toScene
-                    is ObservableTransitionState.Transition.ShowOrHideOverlay,
-                    is ObservableTransitionState.Transition.ReplaceOverlay ->
-                        TODO("b/359173565: Handle overlay transitions")
+                    is ObservableTransitionState.Transition -> state.toContent
                 }
             }
             .stateIn(
@@ -160,15 +160,14 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = false
+                initialValue = false,
             )
 
     /** Whether the scene container is visible. */
     val isVisible: StateFlow<Boolean> =
-        combine(
-                repository.isVisible,
-                repository.isRemoteUserInputOngoing,
-            ) { isVisible, isRemoteUserInteractionOngoing ->
+        combine(repository.isVisible, repository.isRemoteUserInputOngoing) {
+                isVisible,
+                isRemoteUserInteractionOngoing ->
                 isVisibleInternal(
                     raw = isVisible,
                     isRemoteUserInputOngoing = isRemoteUserInteractionOngoing,
@@ -177,7 +176,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = isVisibleInternal()
+                initialValue = isVisibleInternal(),
             )
 
     /** Whether there's an ongoing remotely-initiated user interaction. */
@@ -259,10 +258,7 @@ constructor(
      * The change is instantaneous and not animated; it will be observable in the next frame and
      * there will be no transition animation.
      */
-    fun snapToScene(
-        toScene: SceneKey,
-        loggingReason: String,
-    ) {
+    fun snapToScene(toScene: SceneKey, loggingReason: String) {
         val currentSceneKey = currentScene.value
         val resolvedScene =
             sceneFamilyResolvers.get()[toScene]?.let { familyResolver ->
@@ -313,15 +309,9 @@ constructor(
             return
         }
 
-        logger.logOverlayChangeRequested(
-            to = overlay,
-            reason = loggingReason,
-        )
+        logger.logOverlayChangeRequested(to = overlay, reason = loggingReason)
 
-        repository.showOverlay(
-            overlay = overlay,
-            transitionKey = transitionKey,
-        )
+        repository.showOverlay(overlay = overlay, transitionKey = transitionKey)
     }
 
     /**
@@ -345,15 +335,9 @@ constructor(
             return
         }
 
-        logger.logOverlayChangeRequested(
-            from = overlay,
-            reason = loggingReason,
-        )
+        logger.logOverlayChangeRequested(from = overlay, reason = loggingReason)
 
-        repository.hideOverlay(
-            overlay = overlay,
-            transitionKey = transitionKey,
-        )
+        repository.hideOverlay(overlay = overlay, transitionKey = transitionKey)
     }
 
     /**
@@ -378,17 +362,9 @@ constructor(
             return
         }
 
-        logger.logOverlayChangeRequested(
-            from = from,
-            to = to,
-            reason = loggingReason,
-        )
+        logger.logOverlayChangeRequested(from = from, to = to, reason = loggingReason)
 
-        repository.replaceOverlay(
-            from = from,
-            to = to,
-            transitionKey = transitionKey,
-        )
+        repository.replaceOverlay(from = from, to = to, transitionKey = transitionKey)
     }
 
     /**
@@ -405,11 +381,7 @@ constructor(
             return
         }
 
-        logger.logVisibilityChange(
-            from = wasVisible,
-            to = isVisible,
-            reason = loggingReason,
-        )
+        logger.logVisibilityChange(from = wasVisible, to = isVisible, reason = loggingReason)
         return repository.setVisible(isVisible)
     }
 
@@ -491,12 +463,12 @@ constructor(
      * @param loggingReason The reason why the transition is requested, for logging purposes
      * @return `true` if the scene change is valid; `false` if it shouldn't happen
      */
-    private fun validateSceneChange(
-        from: SceneKey,
-        to: SceneKey,
-        loggingReason: String,
-    ): Boolean {
+    private fun validateSceneChange(from: SceneKey, to: SceneKey, loggingReason: String): Boolean {
         if (to !in repository.allContentKeys) {
+            return false
+        }
+
+        if (disabledContentInteractor.isDisabled(to)) {
             return false
         }
 
@@ -538,6 +510,10 @@ constructor(
                 " Logging reason for overlay change was: $loggingReason"
         }
 
+        if (to != null && disabledContentInteractor.isDisabled(to)) {
+            return false
+        }
+
         val isFromValid = (from == null) || (from in currentOverlays.value)
         val isToValid =
             (to == null) || (to !in currentOverlays.value && to in repository.allContentKeys)
@@ -552,4 +528,14 @@ constructor(
     /** Returns `true` if [scene] can be resolved from [family]. */
     fun isSceneInFamily(scene: SceneKey, family: SceneKey): Boolean =
         sceneFamilyResolvers.get()[family]?.includesScene(scene) == true
+
+    /**
+     * Returns a filtered version of [unfiltered], without action-result entries that would navigate
+     * to disabled scenes.
+     */
+    fun filteredUserActions(
+        unfiltered: Flow<Map<UserAction, UserActionResult>>
+    ): Flow<Map<UserAction, UserActionResult>> {
+        return disabledContentInteractor.filteredUserActions(unfiltered)
+    }
 }

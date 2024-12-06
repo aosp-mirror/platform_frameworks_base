@@ -18,13 +18,13 @@ package com.android.internal.pm.pkg.component;
 
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.ANDROID_RES_NAMESPACE;
 
+import android.aconfig.DeviceProtos;
 import android.aconfig.nano.Aconfig;
 import android.aconfig.nano.Aconfig.parsed_flag;
 import android.aconfig.nano.Aconfig.parsed_flags;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Flags;
-import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Process;
 import android.util.ArrayMap;
@@ -32,6 +32,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -40,7 +41,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -52,28 +53,24 @@ import java.util.Map;
  * @hide
  */
 public class AconfigFlags {
+    private static final boolean DEBUG = false;
     private static final String LOG_TAG = "AconfigFlags";
-
-    private static final List<String> sTextProtoFilesOnDevice = List.of(
-            "/system/etc/aconfig_flags.pb",
-            "/system_ext/etc/aconfig_flags.pb",
-            "/product/etc/aconfig_flags.pb",
-            "/vendor/etc/aconfig_flags.pb");
-
-    public enum Permission {
-        READ_WRITE,
-        READ_ONLY
-    }
+    private static final String OVERRIDE_PREFIX = "device_config_overrides/";
+    private static final String STAGED_PREFIX = "staged/";
 
     private final ArrayMap<String, Boolean> mFlagValues = new ArrayMap<>();
-    private final ArrayMap<String, Permission> mFlagPermissions = new ArrayMap<>();
 
     public AconfigFlags() {
         if (!Flags.manifestFlagging()) {
-            Slog.v(LOG_TAG, "Feature disabled, skipped all loading");
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "Feature disabled, skipped all loading");
+            }
             return;
         }
-        for (String fileName : sTextProtoFilesOnDevice) {
+        final var defaultFlagProtoFiles =
+                (Process.myUid() == Process.SYSTEM_UID) ? DeviceProtos.parsedFlagsProtoPaths()
+                        : Arrays.asList(DeviceProtos.PATHS);
+        for (String fileName : defaultFlagProtoFiles) {
             try (var inputStream = new FileInputStream(fileName)) {
                 loadAconfigDefaultValues(inputStream.readAllBytes());
             } catch (IOException e) {
@@ -132,19 +129,17 @@ public class AconfigFlags {
                     if (!"false".equalsIgnoreCase(value) && !"true".equalsIgnoreCase(value)) {
                         continue;
                     }
-                    final var overridePrefix = "device_config_overrides/";
-                    final var stagedPrefix = "staged/";
                     String separator = "/";
                     String prefix = "default";
                     int priority = 0;
-                    if (name.startsWith(overridePrefix)) {
-                        prefix = overridePrefix;
-                        name = name.substring(overridePrefix.length());
+                    if (name.startsWith(OVERRIDE_PREFIX)) {
+                        prefix = OVERRIDE_PREFIX;
+                        name = name.substring(OVERRIDE_PREFIX.length());
                         separator = ":";
                         priority = 20;
-                    } else if (name.startsWith(stagedPrefix)) {
-                        prefix = stagedPrefix;
-                        name = name.substring(stagedPrefix.length());
+                    } else if (name.startsWith(STAGED_PREFIX)) {
+                        prefix = STAGED_PREFIX;
+                        name = name.substring(STAGED_PREFIX.length());
                         separator = "*";
                         priority = 10;
                     }
@@ -157,12 +152,19 @@ public class AconfigFlags {
                     if (!mFlagValues.containsKey(flagPackageAndName)) {
                         continue;
                     }
-                    Slog.d(LOG_TAG, "Found " + prefix
-                            + " Aconfig flag value for " + flagPackageAndName + " = " + value);
+                    if (DEBUG) {
+                        Slog.d(LOG_TAG, "Found " + prefix
+                                + " Aconfig flag value in settings for " + flagPackageAndName
+                                + " = " + value);
+                    }
                     final Integer currentPriority = flagPriority.get(flagPackageAndName);
                     if (currentPriority != null && currentPriority >= priority) {
-                        Slog.i(LOG_TAG, "Skipping " + prefix + " flag " + flagPackageAndName
-                                + " because of the existing one with priority " + currentPriority);
+                        if (DEBUG) {
+                            Slog.d(LOG_TAG, "Skipping " + prefix + " flag "
+                                    + flagPackageAndName
+                                    + " in settings because of existing one with priority "
+                                    + currentPriority);
+                        }
                         continue;
                     }
                     flagPriority.put(flagPackageAndName, priority);
@@ -187,15 +189,7 @@ public class AconfigFlags {
         for (parsed_flag flag : parsedFlags.parsedFlag) {
             String flagPackageAndName = flag.package_ + "." + flag.name;
             boolean flagValue = (flag.state == Aconfig.ENABLED);
-            Slog.v(LOG_TAG, "Read Aconfig default flag value "
-                    + flagPackageAndName + " = " + flagValue);
             mFlagValues.put(flagPackageAndName, flagValue);
-
-            Permission permission = flag.permission == Aconfig.READ_ONLY
-                    ? Permission.READ_ONLY
-                    : Permission.READ_WRITE;
-
-            mFlagPermissions.put(flagPackageAndName, permission);
         }
     }
 
@@ -207,31 +201,42 @@ public class AconfigFlags {
     @Nullable
     public Boolean getFlagValue(@NonNull String flagPackageAndName) {
         Boolean value = mFlagValues.get(flagPackageAndName);
-        Slog.d(LOG_TAG, "Aconfig flag value for " + flagPackageAndName + " = " + value);
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "Aconfig flag value for " + flagPackageAndName + " = " + value);
+        }
         return value;
     }
 
     /**
-     * Get the flag permission, or null if the flag doesn't exist.
-     * @param flagPackageAndName Full flag name formatted as 'package.flag'
-     * @return the current permission of the given Aconfig flag, or null if there is no such flag
+     * Check if the element in {@code parser} should be skipped because of the feature flag.
+     * @param pkg The package being parsed
+     * @param parser XML parser object currently parsing an element
+     * @return true if the element is disabled because of its feature flag
      */
-    @Nullable
-    public Permission getFlagPermission(@NonNull String flagPackageAndName) {
-        Permission permission = mFlagPermissions.get(flagPackageAndName);
-        return permission;
+    public boolean skipCurrentElement(@Nullable ParsingPackage pkg, @NonNull XmlPullParser parser) {
+        return skipCurrentElement(pkg, parser, /* allowNoNamespace= */ false);
     }
 
     /**
      * Check if the element in {@code parser} should be skipped because of the feature flag.
+     * @param pkg The package being parsed
      * @param parser XML parser object currently parsing an element
+     * @param allowNoNamespace Whether to allow namespace null
      * @return true if the element is disabled because of its feature flag
      */
-    public boolean skipCurrentElement(@NonNull XmlResourceParser parser) {
+    public boolean skipCurrentElement(
+        @Nullable ParsingPackage pkg,
+        @NonNull XmlPullParser parser,
+        boolean allowNoNamespace
+    ) {
         if (!Flags.manifestFlagging()) {
             return false;
         }
         String featureFlag = parser.getAttributeValue(ANDROID_RES_NAMESPACE, "featureFlag");
+        // If allow no namespace, make another attempt to parse feature flag with null namespace.
+        if (featureFlag == null && allowNoNamespace) {
+            featureFlag = parser.getAttributeValue(null, "featureFlag");
+        }
         if (featureFlag == null) {
             return false;
         }
@@ -241,19 +246,25 @@ public class AconfigFlags {
             negated = true;
             featureFlag = featureFlag.substring(1).strip();
         }
-        final Boolean flagValue = getFlagValue(featureFlag);
+        Boolean flagValue = getFlagValue(featureFlag);
+        boolean isUndefined = false;
         if (flagValue == null) {
-            Slog.w(LOG_TAG, "Skipping element " + parser.getName()
-                    + " due to unknown feature flag " + featureFlag);
-            return true;
+            isUndefined = true;
+            flagValue = false;
         }
-        // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
+        boolean shouldSkip = false;
         if (flagValue == negated) {
-            Slog.v(LOG_TAG, "Skipping element " + parser.getName()
-                    + " behind feature flag " + featureFlag + " = " + flagValue);
-            return true;
+            // Skip if flag==false && attr=="flag" OR flag==true && attr=="!flag" (negated)
+            shouldSkip = true;
         }
-        return false;
+        if (pkg != null && android.content.pm.Flags.includeFeatureFlagsInPackageCacher()) {
+            if (isUndefined) {
+                pkg.addFeatureFlag(featureFlag, null);
+            } else {
+                pkg.addFeatureFlag(featureFlag, flagValue);
+            }
+        }
+        return shouldSkip;
     }
 
     /**

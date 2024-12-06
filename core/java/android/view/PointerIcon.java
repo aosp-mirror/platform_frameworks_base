@@ -174,24 +174,26 @@ public final class PointerIcon implements Parcelable {
     @IntDef(prefix = {"POINTER_ICON_VECTOR_STYLE_FILL_"}, value = {
             POINTER_ICON_VECTOR_STYLE_FILL_BLACK,
             POINTER_ICON_VECTOR_STYLE_FILL_GREEN,
-            POINTER_ICON_VECTOR_STYLE_FILL_YELLOW,
+            POINTER_ICON_VECTOR_STYLE_FILL_RED,
             POINTER_ICON_VECTOR_STYLE_FILL_PINK,
-            POINTER_ICON_VECTOR_STYLE_FILL_BLUE
+            POINTER_ICON_VECTOR_STYLE_FILL_BLUE,
+            POINTER_ICON_VECTOR_STYLE_FILL_PURPLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PointerIconVectorStyleFill {}
 
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_BLACK = 0;
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_GREEN = 1;
-    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_YELLOW = 2;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_RED = 2;
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_PINK = 3;
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_BLUE = 4;
+    /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_PURPLE = 5;
 
     // If adding a PointerIconVectorStyleFill, update END value for {@link SystemSettingsValidators}
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_BEGIN =
             POINTER_ICON_VECTOR_STYLE_FILL_BLACK;
     /** @hide */ public static final int POINTER_ICON_VECTOR_STYLE_FILL_END =
-            POINTER_ICON_VECTOR_STYLE_FILL_BLUE;
+            POINTER_ICON_VECTOR_STYLE_FILL_PURPLE;
 
     /** @hide */
     @IntDef(prefix = {"POINTER_ICON_VECTOR_STYLE_STROKE_"}, value = {
@@ -540,8 +542,6 @@ public final class PointerIcon implements Parcelable {
                 // Assumes they have the exact duration.
                 mDurationPerFrame = animationDrawable.getDuration(0);
                 mBitmapFrames = new Bitmap[frames - 1];
-                final int width = drawable.getIntrinsicWidth();
-                final int height = drawable.getIntrinsicHeight();
                 final boolean isVectorAnimation = drawable instanceof VectorDrawable;
                 mDrawNativeDropShadow = isVectorAnimation;
                 for (int i = 1; i < frames; ++i) {
@@ -556,9 +556,6 @@ public final class PointerIcon implements Parcelable {
                                 + "is a different type from the others. All frames should be the "
                                 + "same type.");
                     }
-                    // TODO(b/361232935): Check when bitmap size of the ith frame is different
-                    // drawableFrame.getIntrinsicWidth() != width ||
-                    // drawableFrame.getIntrinsicHeight() != height
                     if (isVectorAnimation) {
                         drawableFrame = getBitmapDrawableFromVectorDrawable(resources,
                                 (VectorDrawable) drawableFrame, pointerScale);
@@ -717,12 +714,14 @@ public final class PointerIcon implements Parcelable {
                     com.android.internal.R.style.PointerIconVectorStyleFillBlack;
             case POINTER_ICON_VECTOR_STYLE_FILL_GREEN ->
                     com.android.internal.R.style.PointerIconVectorStyleFillGreen;
-            case POINTER_ICON_VECTOR_STYLE_FILL_YELLOW ->
-                    com.android.internal.R.style.PointerIconVectorStyleFillYellow;
+            case POINTER_ICON_VECTOR_STYLE_FILL_RED ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillRed;
             case POINTER_ICON_VECTOR_STYLE_FILL_PINK ->
                     com.android.internal.R.style.PointerIconVectorStyleFillPink;
             case POINTER_ICON_VECTOR_STYLE_FILL_BLUE ->
                     com.android.internal.R.style.PointerIconVectorStyleFillBlue;
+            case POINTER_ICON_VECTOR_STYLE_FILL_PURPLE ->
+                    com.android.internal.R.style.PointerIconVectorStyleFillPurple;
             default -> com.android.internal.R.style.PointerIconVectorStyleFillBlack;
         };
     }

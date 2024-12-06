@@ -106,7 +106,7 @@ constructor(
                                     trySendWithFailureLogging(
                                         getFpSensorType(),
                                         TAG,
-                                        "onAllAuthenticatorsRegistered, emitting fpSensorType"
+                                        "onAllAuthenticatorsRegistered, emitting fpSensorType",
                                     )
                             }
                         }
@@ -114,7 +114,7 @@ constructor(
                     trySendWithFailureLogging(
                         getFpSensorType(),
                         TAG,
-                        "initial value for fpSensorType"
+                        "initial value for fpSensorType",
                     )
                     awaitClose { authController.removeCallback(callback) }
                 }
@@ -134,7 +134,7 @@ constructor(
                         trySendWithFailureLogging(
                             keyguardUpdateMonitor.isFingerprintLockedOut,
                             TAG,
-                            "onLockedOutStateChanged"
+                            "onLockedOutStateChanged",
                         )
                     }
                 val callback =
@@ -154,7 +154,7 @@ constructor(
             .stateIn(
                 scope,
                 started = Eagerly,
-                initialValue = keyguardUpdateMonitor.isFingerprintLockedOut
+                initialValue = keyguardUpdateMonitor.isFingerprintLockedOut,
             )
     }
 
@@ -165,13 +165,13 @@ constructor(
                         object : KeyguardUpdateMonitorCallback() {
                             override fun onBiometricRunningStateChanged(
                                 running: Boolean,
-                                biometricSourceType: BiometricSourceType?
+                                biometricSourceType: BiometricSourceType?,
                             ) {
                                 if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
                                     trySendWithFailureLogging(
                                         running,
                                         TAG,
-                                        "Fingerprint running state changed"
+                                        "Fingerprint running state changed",
                                     )
                                 }
                             }
@@ -180,7 +180,7 @@ constructor(
                     trySendWithFailureLogging(
                         keyguardUpdateMonitor.isFingerprintDetectionRunning,
                         TAG,
-                        "Initial fingerprint running state"
+                        "Initial fingerprint running state",
                     )
                     awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
                 }
@@ -193,11 +193,7 @@ constructor(
             .map { it.isEngaged }
             .filterNotNull()
             .map { it }
-            .stateIn(
-                scope = scope,
-                started = WhileSubscribed(),
-                initialValue = false,
-            )
+            .stateIn(scope = scope, started = WhileSubscribed(), initialValue = false)
 
     // TODO(b/322555228) Remove after consolidating device entry auth messages with BP auth messages
     //  in BiometricStatusRepository
@@ -232,10 +228,7 @@ constructor(
                             ) {
                                 sendUpdateIfFingerprint(
                                     biometricSourceType,
-                                    ErrorFingerprintAuthenticationStatus(
-                                        msgId,
-                                        errString,
-                                    ),
+                                    ErrorFingerprintAuthenticationStatus(msgId, errString),
                                 )
                             }
 
@@ -246,15 +239,12 @@ constructor(
                             ) {
                                 sendUpdateIfFingerprint(
                                     biometricSourceType,
-                                    HelpFingerprintAuthenticationStatus(
-                                        msgId,
-                                        helpString,
-                                    ),
+                                    HelpFingerprintAuthenticationStatus(msgId, helpString),
                                 )
                             }
 
                             override fun onBiometricAuthFailed(
-                                biometricSourceType: BiometricSourceType,
+                                biometricSourceType: BiometricSourceType
                             ) {
                                 sendUpdateIfFingerprint(
                                     biometricSourceType,
@@ -270,14 +260,14 @@ constructor(
                                     biometricSourceType,
                                     AcquiredFingerprintAuthenticationStatus(
                                         AuthenticationReason.DeviceEntryAuthentication,
-                                        acquireInfo
+                                        acquireInfo,
                                     ),
                                 )
                             }
 
                             private fun sendUpdateIfFingerprint(
                                 biometricSourceType: BiometricSourceType,
-                                authenticationStatus: FingerprintAuthenticationStatus
+                                authenticationStatus: FingerprintAuthenticationStatus,
                             ) {
                                 if (biometricSourceType != BiometricSourceType.FINGERPRINT) {
                                     return
@@ -285,13 +275,14 @@ constructor(
                                 trySendWithFailureLogging(
                                     authenticationStatus,
                                     TAG,
-                                    "new fingerprint authentication status"
+                                    "new fingerprint authentication status",
                                 )
                             }
                         }
                     keyguardUpdateMonitor.registerCallback(callback)
                     awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
                 }
+                .flowOn(mainDispatcher)
                 .buffer(capacity = 4)
 
     override val shouldUpdateIndicatorVisibility: Flow<Boolean> =
@@ -302,7 +293,7 @@ constructor(
                             shouldUpdateIndicatorVisibility,
                             TAG,
                             "Error sending shouldUpdateIndicatorVisibility " +
-                                "$shouldUpdateIndicatorVisibility"
+                                "$shouldUpdateIndicatorVisibility",
                         )
                     }
 
@@ -310,7 +301,7 @@ constructor(
                     object : KeyguardUpdateMonitorCallback() {
                         override fun onBiometricRunningStateChanged(
                             running: Boolean,
-                            biometricSourceType: BiometricSourceType?
+                            biometricSourceType: BiometricSourceType?,
                         ) {
                             sendShouldUpdateIndicatorVisibility(true)
                         }

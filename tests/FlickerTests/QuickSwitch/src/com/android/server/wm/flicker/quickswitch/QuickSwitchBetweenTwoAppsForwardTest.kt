@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switching back to previous app from last opened app
  *
- * To run this test: `atest FlickerTests:QuickSwitchBetweenTwoAppsForwardTest`
+ * To run this test: `atest FlickerTestsQuickswitch:QuickSwitchBetweenTwoAppsForwardTest`
  *
  * Actions:
  * ```

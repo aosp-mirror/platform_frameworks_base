@@ -43,13 +43,13 @@ data class UnloadedEditTileViewModel(
 ) {
     fun load(context: Context): EditTileViewModel {
         return EditTileViewModel(
-            tileSpec,
-            icon,
-            label.toAnnotatedString(context) ?: AnnotatedString(tileSpec.spec),
-            appName?.toAnnotatedString(context),
-            isCurrent,
-            availableEditActions,
-            category,
+            tileSpec = tileSpec,
+            icon = icon,
+            label = label.toAnnotatedString(context) ?: AnnotatedString(tileSpec.spec),
+            appName = appName?.toAnnotatedString(context),
+            isCurrent = isCurrent,
+            availableEditActions = availableEditActions,
+            category = category,
         )
     }
 }

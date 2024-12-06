@@ -1,0 +1,11 @@
+package: "com.android.tradeinmode.flags"
+container: "system"
+
+flag {
+  name: "enable_trade_in_mode"
+  is_exported: true
+  namespace: "phoenix"
+  description: "Enable Trade-in Mode"
+  bug: "332683751"
+  is_fixed_read_only: true
+}

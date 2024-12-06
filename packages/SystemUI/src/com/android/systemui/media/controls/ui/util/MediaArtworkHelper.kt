@@ -87,26 +87,23 @@ object MediaArtworkHelper {
         gradient: GradientDrawable,
         colorScheme: ColorScheme,
         startAlpha: Float,
-        endAlpha: Float
+        endAlpha: Float,
     ): LayerDrawable {
         gradient.colors =
             intArrayOf(
                 getColorWithAlpha(backgroundStartFromScheme(colorScheme), startAlpha),
-                getColorWithAlpha(backgroundEndFromScheme(colorScheme), endAlpha)
+                getColorWithAlpha(backgroundEndFromScheme(colorScheme), endAlpha),
             )
         return LayerDrawable(arrayOf(albumArt, gradient))
     }
 
-    /** Returns [ColorScheme] of media app given its [packageName]. */
+    /** Returns [ColorScheme] of media app given its [icon]. */
     fun getColorScheme(
-        applicationContext: Context,
-        packageName: String,
+        icon: Drawable,
         tag: String,
-        style: Style = Style.TONAL_SPOT
+        @Style.Type style: Int = Style.TONAL_SPOT,
     ): ColorScheme? {
         return try {
-            // Set up media source app's logo.
-            val icon = applicationContext.packageManager.getApplicationIcon(packageName)
             ColorScheme(WallpaperColors.fromDrawable(icon), true, style)
         } catch (e: PackageManager.NameNotFoundException) {
             Log.w(tag, "Fail to get media app info", e)

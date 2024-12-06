@@ -23,6 +23,7 @@ import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
 import android.app.admin.RoleAuthority;
 import android.app.admin.UnknownAuthority;
+import android.app.admin.flags.Flags;
 import android.content.ComponentName;
 import android.os.UserHandle;
 
@@ -280,6 +281,10 @@ final class EnforcingAdmin {
         return getAuthorities().contains(authority);
     }
 
+    boolean isSystemAuthority() {
+        return mIsSystemAuthority;
+    }
+
     @NonNull
     String getPackageName() {
         return mPackageName;
@@ -291,7 +296,15 @@ final class EnforcingAdmin {
 
     @Nullable
     public ActiveAdmin getActiveAdmin() {
+        if (Flags.activeAdminCleanup()) {
+            throw new UnsupportedOperationException("getActiveAdmin() no longer supported");
+        }
         return mActiveAdmin;
+    }
+
+    @Nullable
+    ComponentName getComponentName() {
+        return mComponentName;
     }
 
     @NonNull
@@ -308,8 +321,10 @@ final class EnforcingAdmin {
             authority = DpcAuthority.DPC_AUTHORITY;
         } else if (mAuthorities.contains(DEVICE_ADMIN_AUTHORITY)) {
             authority = DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY;
+        } else if (mIsSystemAuthority) {
+            // For now, System Authority returns UnknownAuthority.
+            authority = new UnknownAuthority(mSystemEntity);
         } else {
-            // For now, System Authority returns UNKNOWN_AUTHORITY.
             authority = UnknownAuthority.UNKNOWN_AUTHORITY;
         }
         return new android.app.admin.EnforcingAdmin(

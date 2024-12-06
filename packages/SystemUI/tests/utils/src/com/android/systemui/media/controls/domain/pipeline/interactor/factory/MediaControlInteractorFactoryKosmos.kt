@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaControlInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataProcessor
+import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.mediaOutputDialogManager
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.statusbar.notificationLockscreenUserManager
@@ -42,6 +43,7 @@ val Kosmos.mediaControlInteractorFactory by
                     lockscreenUserManager = notificationLockscreenUserManager,
                     mediaOutputDialogManager = mediaOutputDialogManager,
                     broadcastDialogController = mockBroadcastDialogController,
+                    mediaLogger = mediaLogger,
                 )
             }
         }

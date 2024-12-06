@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.phone.fragment
 
+import android.content.res.Resources
+import android.view.View
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorSet
 import androidx.core.animation.ValueAnimator
-import android.content.res.Resources
-import android.view.View
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_IN
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_OUT
@@ -33,16 +33,15 @@ import com.android.systemui.util.doOnEnd
  * An implementation of [StatusBarSystemEventDefaultAnimator], applying the onAlphaChanged and
  * onTranslationXChanged callbacks directly to the provided animatedView.
  */
-class StatusBarSystemEventAnimator @JvmOverloads constructor(
-        val animatedView: View,
-        resources: Resources,
-        isAnimationRunning: Boolean = false
-) : StatusBarSystemEventDefaultAnimator(
+class StatusBarSystemEventAnimator
+@JvmOverloads
+constructor(val animatedView: View, resources: Resources, isAnimationRunning: Boolean = false) :
+    StatusBarSystemEventDefaultAnimator(
         resources = resources,
         onAlphaChanged = animatedView::setAlpha,
         onTranslationXChanged = animatedView::setTranslationX,
-        isAnimationRunning = isAnimationRunning
-)
+        isAnimationRunning = isAnimationRunning,
+    )
 
 /**
  * Tied directly to [SystemStatusAnimationScheduler]. Any StatusBar-like thing (keyguard, collapsed
@@ -53,63 +52,106 @@ class StatusBarSystemEventAnimator @JvmOverloads constructor(
  * this class could be used directly as the animation callback, it's probably best to forward calls
  * to it so that it can be recreated at any moment without needing to remove/add callback.
  */
-
-open class StatusBarSystemEventDefaultAnimator @JvmOverloads constructor(
-        resources: Resources,
-        private val onAlphaChanged: (Float) -> Unit,
-        private val onTranslationXChanged: (Float) -> Unit,
-        var isAnimationRunning: Boolean = false
+open class StatusBarSystemEventDefaultAnimator
+@JvmOverloads
+constructor(
+    resources: Resources,
+    private val onAlphaChanged: (Float) -> Unit,
+    private val onTranslationXChanged: (Float) -> Unit,
+    var isAnimationRunning: Boolean = false,
 ) : SystemStatusAnimationCallback {
-    private val translationXIn: Int = resources.getDimensionPixelSize(
-            R.dimen.ongoing_appops_chip_animation_in_status_bar_translation_x)
-    private val translationXOut: Int = resources.getDimensionPixelSize(
-            R.dimen.ongoing_appops_chip_animation_out_status_bar_translation_x)
+    private val translationXIn: Int =
+        resources.getDimensionPixelSize(
+            R.dimen.ongoing_appops_chip_animation_in_status_bar_translation_x
+        )
+    private val translationXOut: Int =
+        resources.getDimensionPixelSize(
+            R.dimen.ongoing_appops_chip_animation_out_status_bar_translation_x
+        )
 
     override fun onSystemEventAnimationBegin(): Animator {
         isAnimationRunning = true
-        val moveOut = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 23.frames
-            interpolator = STATUS_BAR_X_MOVE_OUT
-            addUpdateListener {
-                onTranslationXChanged(-(translationXIn * animatedValue as Float))
-            }
-        }
-        val alphaOut = ValueAnimator.ofFloat(1f, 0f).apply {
-            duration = 8.frames
-            interpolator = null
-            addUpdateListener {
-                onAlphaChanged(animatedValue as Float)
-            }
-        }
-
-        val animSet = AnimatorSet()
-        animSet.playTogether(moveOut, alphaOut)
-        return animSet
+        return getDefaultStatusBarAnimationForChipEnter(
+            translationXIn,
+            onTranslationXChanged,
+            onAlphaChanged,
+        )
     }
 
     override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
         onTranslationXChanged(translationXOut.toFloat())
-        val moveIn = ValueAnimator.ofFloat(1f, 0f).apply {
-            duration = 23.frames
-            startDelay = 7.frames
-            interpolator = STATUS_BAR_X_MOVE_IN
-            addUpdateListener {
-                onTranslationXChanged(translationXOut * animatedValue as Float)
-            }
-        }
-        val alphaIn = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 5.frames
-            startDelay = 11.frames
-            interpolator = null
-            addUpdateListener {
-                onAlphaChanged(animatedValue as Float)
-            }
+        val anim =
+            getDefaultStatusBarAnimationForChipExit(
+                translationXOut,
+                onTranslationXChanged,
+                onAlphaChanged,
+            )
+        anim.doOnEnd { isAnimationRunning = false }
+        anim.doOnCancel { isAnimationRunning = false }
+
+        return anim
+    }
+
+    /** Static definition of these animations so we can use them more easily from view binders */
+    companion object {
+        /**
+         * Chip: coming in. Animated view: going out.
+         *
+         * Implements the exact spec for animating any status bar elements OUT to make space for the
+         * chip IN animation.
+         */
+        fun getDefaultStatusBarAnimationForChipEnter(
+            targetTranslation: Int,
+            setX: (Float) -> Unit,
+            setAlpha: (Float) -> Unit,
+        ): Animator {
+            val moveOut =
+                ValueAnimator.ofFloat(0f, 1f).apply {
+                    duration = 23.frames
+                    interpolator = STATUS_BAR_X_MOVE_OUT
+                    addUpdateListener { setX(-(targetTranslation * animatedValue as Float)) }
+                }
+            val alphaOut =
+                ValueAnimator.ofFloat(1f, 0f).apply {
+                    duration = 8.frames
+                    interpolator = null
+                    addUpdateListener { setAlpha(animatedValue as Float) }
+                }
+
+            val animSet = AnimatorSet()
+            animSet.playTogether(moveOut, alphaOut)
+            return animSet
         }
 
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(moveIn, alphaIn)
-        animatorSet.doOnEnd { isAnimationRunning = false }
-        animatorSet.doOnCancel { isAnimationRunning = false }
-        return animatorSet
+        /**
+         * Chip: going out. Animated view: coming in.
+         *
+         * Implements the exact spec for animating any status bar elements IN as the chip is
+         * animating OUT
+         */
+        fun getDefaultStatusBarAnimationForChipExit(
+            targetTranslation: Int,
+            setX: (Float) -> Unit,
+            setAlpha: (Float) -> Unit,
+        ): Animator {
+            val moveIn =
+                ValueAnimator.ofFloat(1f, 0f).apply {
+                    duration = 23.frames
+                    startDelay = 7.frames
+                    interpolator = STATUS_BAR_X_MOVE_IN
+                    addUpdateListener { setX(targetTranslation * animatedValue as Float) }
+                }
+            val alphaIn =
+                ValueAnimator.ofFloat(0f, 1f).apply {
+                    duration = 5.frames
+                    startDelay = 11.frames
+                    interpolator = null
+                    addUpdateListener { setAlpha(animatedValue as Float) }
+                }
+
+            val animatorSet = AnimatorSet()
+            animatorSet.playTogether(moveIn, alphaIn)
+            return animatorSet
+        }
     }
 }

@@ -48,6 +48,7 @@ import static com.android.server.location.eventlog.LocationEventLog.EVENT_LOG;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -105,6 +106,7 @@ import com.android.server.LocalServices;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationPermissions.PermissionLevel;
 import com.android.server.location.fudger.LocationFudger;
+import com.android.server.location.fudger.LocationFudgerCache;
 import com.android.server.location.injector.AlarmHelper;
 import com.android.server.location.injector.AppForegroundHelper;
 import com.android.server.location.injector.AppForegroundHelper.AppForegroundListener;
@@ -1663,6 +1665,18 @@ public class LocationProviderManager extends
     }
 
     /**
+     * Provides the optional {@link LocationFudgerCache} for coarsening based on population density.
+     */
+    @FlaggedApi(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS)
+    public void setLocationFudgerCache(LocationFudgerCache cache) {
+        if (!Flags.densityBasedCoarseLocations()) {
+            return;
+        }
+
+        mLocationFudger.setLocationFudgerCache(cache);
+    }
+
+    /**
      * Returns true if this provider is visible to the current caller (whether called from a binder
      * thread or not). If a provider isn't visible, then all APIs return the same data they would if
      * the provider didn't exist (i.e. the caller can't see or use the provider).
@@ -2584,6 +2598,9 @@ public class LocationProviderManager extends
                 registration -> {
                     if (registration.getIdentity().getPackageName().equals(
                             packageName)) {
+                        if (D) {
+                            Log.d(TAG, "package reset remove registration " + registration);
+                        }
                         registration.remove();
                     }
 

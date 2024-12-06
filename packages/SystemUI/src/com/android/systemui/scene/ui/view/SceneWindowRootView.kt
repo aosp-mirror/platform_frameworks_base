@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Overlay
@@ -13,19 +13,13 @@ import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** A root view of the main SysUI window that supports scenes. */
 @ExperimentalCoroutinesApi
-class SceneWindowRootView(
-    context: Context,
-    attrs: AttributeSet?,
-) :
-    WindowRootView(
-        context,
-        attrs,
-    ) {
+class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootView(context, attrs) {
 
     private var motionEventHandler: SceneContainerViewModel.MotionEventHandler? = null
     // TODO(b/298525212): remove once Compose exposes window inset bounds.
@@ -39,7 +33,7 @@ class SceneWindowRootView(
         overlays: Set<Overlay>,
         layoutInsetController: LayoutInsetsController,
         sceneDataSourceDelegator: SceneDataSourceDelegator,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
+        qsSceneAdapter: Provider<QSSceneAdapter>,
     ) {
         setLayoutInsetsController(layoutInsetController)
         SceneWindowRootViewBinder.bind(
@@ -57,7 +51,7 @@ class SceneWindowRootView(
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)
             },
             dataSourceDelegator = sceneDataSourceDelegator,
-            alternateBouncerDependencies = alternateBouncerDependencies,
+            qsSceneAdapter = qsSceneAdapter,
         )
     }
 
@@ -78,6 +72,11 @@ class SceneWindowRootView(
             TouchLogger.logDispatchTouch(TAG, ev, it)
             motionEventHandler?.onMotionEventComplete()
         }
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let { motionEventHandler?.onEmptySpaceMotionEvent(it) }
+        return super.onTouchEvent(event)
     }
 
     companion object {

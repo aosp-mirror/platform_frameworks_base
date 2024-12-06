@@ -26,6 +26,7 @@ import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
+import android.net.vcn.VcnUtils
 import android.net.wifi.WifiInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.annotation.ArrayRes
@@ -161,7 +162,9 @@ constructor(
         defaultNetworkCapabilities
             .map { networkCapabilities ->
                 networkCapabilities?.run {
-                    val subId = (transportInfo as? VcnTransportInfo)?.subId
+                    val subId =
+                        VcnUtils.getSubIdFromVcnCaps(connectivityManager, networkCapabilities)
+
                     // Never return an INVALID_SUBSCRIPTION_ID (-1)
                     if (subId != INVALID_SUBSCRIPTION_ID) {
                         subId
@@ -245,9 +248,9 @@ constructor(
          * info.
          */
         fun NetworkCapabilities.getMainOrUnderlyingWifiInfo(
-            connectivityManager: ConnectivityManager,
+            connectivityManager: ConnectivityManager
         ): WifiInfo? {
-            val mainWifiInfo = this.getMainWifiInfo()
+            val mainWifiInfo = this.getMainWifiInfo(connectivityManager)
             if (mainWifiInfo != null) {
                 return mainWifiInfo
             }
@@ -264,7 +267,9 @@ constructor(
             // eventually traced to a wifi or carrier merged connection. So, check those underlying
             // networks for possible wifi information as well. See b/225902574.
             return this.underlyingNetworks?.firstNotNullOfOrNull { underlyingNetwork ->
-                connectivityManager.getNetworkCapabilities(underlyingNetwork)?.getMainWifiInfo()
+                connectivityManager
+                    .getNetworkCapabilities(underlyingNetwork)
+                    ?.getMainWifiInfo(connectivityManager)
             }
         }
 
@@ -272,7 +277,9 @@ constructor(
          * Checks the network capabilities for wifi info, but does *not* check the underlying
          * networks. See [getMainOrUnderlyingWifiInfo].
          */
-        private fun NetworkCapabilities.getMainWifiInfo(): WifiInfo? {
+        private fun NetworkCapabilities.getMainWifiInfo(
+            connectivityManager: ConnectivityManager
+        ): WifiInfo? {
             // Wifi info can either come from a WIFI Transport, or from a CELLULAR transport for
             // virtual networks like VCN.
             val canHaveWifiInfo =
@@ -286,7 +293,7 @@ constructor(
                 // [com.android.settingslib.Utils.tryGetWifiInfoForVcn]. It's copied instead of
                 // re-used because it makes the logic here clearer, and because the method will be
                 // removed once this pipeline is fully launched.
-                is VcnTransportInfo -> currentTransportInfo.wifiInfo
+                is VcnTransportInfo -> VcnUtils.getWifiInfoFromVcnCaps(connectivityManager, this)
                 is WifiInfo -> currentTransportInfo
                 else -> null
             }

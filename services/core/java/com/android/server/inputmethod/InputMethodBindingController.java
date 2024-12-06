@@ -61,6 +61,7 @@ import com.android.internal.inputmethod.UnbindReason;
 import com.android.server.EventLogTags;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.PrintWriter;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -732,5 +733,26 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class")
     void setBackDisposition(@BackDispositionMode int backDisposition) {
         mBackDisposition = backDisposition;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "mSelectedMethodId=" + mSelectedMethodId);
+        pw.println(prefix + "mCurrentSubtype=" + mCurrentSubtype);
+        pw.println(prefix + "mCurSeq=" + mCurSeq);
+        pw.println(prefix + "mCurId=" + mCurId);
+        pw.println(prefix + "mHasMainConnection=" + mHasMainConnection);
+        pw.println(prefix + "mVisibleBound=" + mVisibleBound);
+        pw.println(prefix + "mCurToken=" + mCurToken);
+        pw.println(prefix + "mCurTokenDisplayId=" + mCurTokenDisplayId);
+        pw.println(prefix + "mCurHostInputToken=" + getCurHostInputToken());
+        pw.println(prefix + "mCurIntent=" + mCurIntent);
+        pw.println(prefix + "mCurMethod=" + mCurMethod);
+        pw.println(prefix + "mImeWindowVis=" + mImeWindowVis);
+        pw.println(prefix + "mBackDisposition=" + mBackDisposition);
+        pw.println(prefix + "mDisplayIdToShowIme=" + mDisplayIdToShowIme);
+        pw.println(prefix + "mDeviceIdToShowIme=" + mDeviceIdToShowIme);
+        pw.println(prefix + "mSupportsStylusHw=" + mSupportsStylusHw);
+        pw.println(prefix + "mSupportsConnectionlessStylusHw=" + mSupportsConnectionlessStylusHw);
     }
 }

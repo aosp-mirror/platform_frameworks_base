@@ -37,14 +37,16 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 fun rememberEditListState(
     tiles: List<SizedTile<EditTileViewModel>>,
     columns: Int,
+    largeTilesSpan: Int,
 ): EditTileListState {
-    return remember(tiles, columns) { EditTileListState(tiles, columns) }
+    return remember(tiles, columns) { EditTileListState(tiles, columns, largeTilesSpan) }
 }
 
 /** Holds the temporary state of the tile list during a drag movement where we move tiles around. */
 class EditTileListState(
     tiles: List<SizedTile<EditTileViewModel>>,
     private val columns: Int,
+    private val largeTilesSpan: Int,
 ) : DragAndDropState {
     private val _draggedCell = mutableStateOf<SizedTile<EditTileViewModel>?>(null)
     override val draggedCell
@@ -62,8 +64,22 @@ class EditTileListState(
         return _tiles.filterIsInstance<TileGridCell>().map { it.tile.tileSpec }
     }
 
-    fun indexOf(tileSpec: TileSpec): Int {
+    private fun indexOf(tileSpec: TileSpec): Int {
         return _tiles.indexOfFirst { it is TileGridCell && it.tile.tileSpec == tileSpec }
+    }
+
+    /** Resize the tile corresponding to the [TileSpec] to [toIcon] */
+    fun resizeTile(tileSpec: TileSpec, toIcon: Boolean) {
+        val fromIndex = indexOf(tileSpec)
+        if (fromIndex != -1) {
+            val cell = _tiles[fromIndex] as TileGridCell
+
+            if (cell.isIcon == toIcon) return
+
+            _tiles.removeAt(fromIndex)
+            _tiles.add(fromIndex, cell.copy(width = if (toIcon) 1 else largeTilesSpan))
+            regenerateGrid(fromIndex)
+        }
     }
 
     override fun isMoving(tileSpec: TileSpec): Boolean {
@@ -73,8 +89,8 @@ class EditTileListState(
     override fun onStarted(cell: SizedTile<EditTileViewModel>) {
         _draggedCell.value = cell
 
-        // Add visible spacers to the grid to indicate where the user can move a tile
-        regenerateGrid(includeSpacers = true)
+        // Add spacers to the grid to indicate where the user can move a tile
+        regenerateGrid()
     }
 
     override fun onMoved(target: Int, insertAfter: Boolean) {
@@ -88,14 +104,15 @@ class EditTileListState(
         val insertionIndex = if (insertAfter) target + 1 else target
         if (fromIndex != -1) {
             val cell = _tiles.removeAt(fromIndex)
-            regenerateGrid(includeSpacers = true)
+            regenerateGrid()
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), cell)
         } else {
-            // Add the tile with a temporary row which will get reassigned when regenerating spacers
-            _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0))
+            // Add the tile with a temporary row/col which will get reassigned when
+            // regenerating spacers
+            _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0, 0))
         }
 
-        regenerateGrid(includeSpacers = true)
+        regenerateGrid()
     }
 
     override fun movedOutOfBounds() {
@@ -110,12 +127,27 @@ class EditTileListState(
         _draggedCell.value = null
 
         // Remove the spacers
-        regenerateGrid(includeSpacers = false)
+        regenerateGrid()
     }
 
-    private fun regenerateGrid(includeSpacers: Boolean) {
-        _tiles.filterIsInstance<TileGridCell>().toGridCells(columns, includeSpacers).let {
+    /** Regenerate the list of [GridCell] with their new potential rows */
+    private fun regenerateGrid() {
+        _tiles.filterIsInstance<TileGridCell>().toGridCells(columns).let {
             _tiles.clear()
+            _tiles.addAll(it)
+        }
+    }
+
+    /**
+     * Regenerate the list of [GridCell] with their new potential rows from [fromIndex], leaving
+     * cells before that untouched.
+     */
+    private fun regenerateGrid(fromIndex: Int) {
+        val fromRow = _tiles[fromIndex].row
+        val (pre, post) = _tiles.partition { it.row < fromRow }
+        post.filterIsInstance<TileGridCell>().toGridCells(columns, startingRow = fromRow).let {
+            _tiles.clear()
+            _tiles.addAll(pre)
             _tiles.addAll(it)
         }
     }

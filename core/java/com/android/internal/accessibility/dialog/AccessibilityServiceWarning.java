@@ -58,13 +58,12 @@ public class AccessibilityServiceWarning {
             @NonNull View.OnClickListener uninstallListener) {
         final AlertDialog ad = new AlertDialog.Builder(context)
                 .setView(createAccessibilityServiceWarningDialogContentView(
-                                context, info, allowListener, denyListener, uninstallListener))
+                        context, info, allowListener, denyListener, uninstallListener))
                 .setCancelable(true)
                 .create();
         Window window = ad.getWindow();
         WindowManager.LayoutParams params = window.getAttributes();
         params.privateFlags |= SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
-        params.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
         window.setAttributes(params);
         return ad;
     }

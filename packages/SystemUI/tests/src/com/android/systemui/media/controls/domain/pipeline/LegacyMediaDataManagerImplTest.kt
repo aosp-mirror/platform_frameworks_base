@@ -82,6 +82,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -200,7 +201,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         Settings.Secure.getInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            1
+            1,
         )
 
     private lateinit var staticMockSession: MockitoSession
@@ -221,9 +222,8 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            1
+            1,
         )
-
         mediaDataManager =
             LegacyMediaDataManagerImpl(
                 context = context,
@@ -289,6 +289,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             }
         verify(smartspaceManager).createSmartspaceSession(capture(smartSpaceConfigBuilderCaptor))
         mediaControllerFactory.setControllerForToken(session.sessionToken, controller)
+        whenever(controller.sessionToken).thenReturn(session.sessionToken)
         whenever(controller.transportControls).thenReturn(transportControls)
         whenever(controller.playbackInfo).thenReturn(playbackInfo)
         whenever(controller.metadata).thenReturn(metadataBuilder.build())
@@ -334,7 +335,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            originalSmartspaceSetting
+            originalSmartspaceSetting,
         )
     }
 
@@ -365,7 +366,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 session.sessionToken,
                 APP_NAME,
                 pendingIntent,
-                PACKAGE_NAME
+                PACKAGE_NAME,
             )
 
             runCurrent()
@@ -378,7 +379,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                     capture(mediaDataCaptor),
                     eq(true),
                     eq(0),
-                    eq(false)
+                    eq(false),
                 )
 
             mediaDataManager.setInactive(PACKAGE_NAME, timedOut = true)
@@ -404,7 +405,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 metadataBuilder
                     .putLong(
                         MediaConstants.METADATA_KEY_IS_EXPLICIT,
-                        MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+                        MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT,
                     )
                     .build()
             )
@@ -420,7 +421,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value!!.isExplicit).isTrue()
     }
@@ -438,7 +439,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value!!.isExplicit).isFalse()
     }
@@ -451,7 +452,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 anyInt(),
                 eq(PACKAGE_NAME),
                 eq(mediaDataCaptor.value.instanceId),
-                eq(MediaData.PLAYBACK_LOCAL)
+                eq(MediaData.PLAYBACK_LOCAL),
             )
     }
 
@@ -467,7 +468,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value!!.active).isTrue()
     }
@@ -483,7 +484,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 anyInt(),
                 eq(SYSTEM_PACKAGE_NAME),
                 eq(mediaDataCaptor.value.instanceId),
-                eq(MediaData.PLAYBACK_CAST_REMOTE)
+                eq(MediaData.PLAYBACK_CAST_REMOTE),
             )
     }
 
@@ -511,7 +512,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
 
         assertThat(mediaDataCaptor.value!!.app).isEqualTo(subName)
@@ -597,7 +598,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
         assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
@@ -627,7 +628,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
         assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
@@ -668,7 +669,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.song).isEqualTo(SESSION_TITLE)
     }
@@ -683,7 +684,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         mediaDataManager.onMediaDataLoaded(
             KEY,
             null,
-            data.copy(song = SESSION_EMPTY_TITLE, resumeAction = Runnable {})
+            data.copy(song = SESSION_EMPTY_TITLE, resumeAction = Runnable {}),
         )
 
         // WHEN the notification is removed
@@ -698,7 +699,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         verify(logger, never())
             .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(instanceId))
@@ -716,7 +717,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         mediaDataManager.onMediaDataLoaded(
             KEY,
             null,
-            data.copy(song = SESSION_BLANK_TITLE, resumeAction = Runnable {})
+            data.copy(song = SESSION_BLANK_TITLE, resumeAction = Runnable {}),
         )
 
         // WHEN the notification is removed
@@ -731,7 +732,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         verify(logger, never())
             .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(instanceId))
@@ -756,7 +757,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
@@ -777,7 +778,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val data = mediaDataCaptor.value
         assertThat(data.resumption).isFalse()
@@ -789,7 +790,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         val data2 = mediaDataCaptor.value
         assertThat(data2.resumption).isFalse()
@@ -807,7 +808,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         verify(listener, never()).onMediaDataRemoved(eq(KEY), eq(false))
@@ -821,7 +822,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         verify(listener).onMediaDataRemoved(eq(KEY_2), eq(false))
@@ -842,7 +843,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 anyInt(),
                 eq(PACKAGE_NAME),
                 eq(mediaDataCaptor.value.instanceId),
-                eq(MediaData.PLAYBACK_CAST_LOCAL)
+                eq(MediaData.PLAYBACK_CAST_LOCAL),
             )
 
         // WHEN the notification is removed
@@ -878,7 +879,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
     }
@@ -932,7 +933,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
@@ -982,7 +983,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         // WHEN resumption controls are added with explicit indicator
         bundle.putLong(
             MediaConstants.METADATA_KEY_IS_EXPLICIT,
-            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT
+            MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT,
         )
         val desc =
             MediaDescription.Builder().run {
@@ -1015,7 +1016,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED,
                 )
                 putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, progress)
             }
@@ -1041,7 +1042,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED,
                 )
             }
         val desc =
@@ -1066,7 +1067,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED,
                 )
             }
         val desc =
@@ -1118,7 +1119,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            PACKAGE_NAME,
         )
 
         // Resumption controls are not added.
@@ -1130,7 +1131,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1151,7 +1152,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            PACKAGE_NAME,
         )
 
         // Resumption controls are not added.
@@ -1163,7 +1164,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1230,7 +1231,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1256,7 +1257,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1280,7 +1281,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1312,7 +1313,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1359,7 +1360,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1393,7 +1394,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1424,7 +1425,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
         verify(listener, never()).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
     }
@@ -1456,7 +1457,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                         expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -1466,7 +1467,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            0
+            0,
         )
         tunableCaptor.value.onTuningChanged(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, "0")
 
@@ -1488,7 +1489,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         Settings.Secure.putInt(
             context.contentResolver,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-            0
+            0,
         )
         tunableCaptor.value.onTuningChanged(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION, "0")
 
@@ -1526,7 +1527,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.lastActive).isAtLeast(currentTime)
     }
@@ -1553,7 +1554,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.lastActive).isAtLeast(currentTime)
@@ -1573,7 +1574,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         mediaDataManager.onMediaDataLoaded(
             KEY,
             null,
-            data.copy(resumeAction = Runnable {}, active = false)
+            data.copy(resumeAction = Runnable {}, active = false),
         )
 
         // WHEN the notification is removed
@@ -1589,7 +1590,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.lastActive).isLessThan(currentTime)
@@ -1599,6 +1600,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testTooManyCompactActions_isTruncated() {
         // GIVEN a notification where too many compact actions were specified
@@ -1629,12 +1631,13 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size)
             .isEqualTo(LegacyMediaDataManagerImpl.MAX_COMPACT_ACTIONS)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testTooManyNotificationActions_isTruncated() {
         // GIVEN a notification where too many notification actions are added
@@ -1664,12 +1667,13 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.actions.size)
             .isEqualTo(LegacyMediaDataManagerImpl.MAX_NOTIFICATION_ACTIONS)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
@@ -1695,7 +1699,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
 
         assertThat(mediaDataCaptor.value!!.semanticActions).isNull()
@@ -1703,6 +1707,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(mediaDataCaptor.value!!.actions[0]!!.contentDescription).isEqualTo(desc)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_hasPrevNext() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
@@ -1746,6 +1751,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
@@ -1778,6 +1784,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[3])
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_connecting() {
         val stateActions = PlaybackState.ACTION_PLAY
@@ -1797,6 +1804,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .isEqualTo(context.getString(R.string.controls_media_button_connecting))
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
@@ -1835,6 +1843,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(actions.reservePrev).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_playPause_hasButton() {
         val stateActions = PlaybackState.ACTION_PLAY_PAUSE
@@ -1868,7 +1877,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 anyInt(),
                 eq(PACKAGE_NAME),
                 eq(instanceId),
-                eq(MediaData.PLAYBACK_CAST_LOCAL)
+                eq(MediaData.PLAYBACK_CAST_LOCAL),
             )
 
         // update to remote cast
@@ -1879,7 +1888,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 anyInt(),
                 eq(SYSTEM_PACKAGE_NAME),
                 eq(instanceId),
-                eq(MediaData.PLAYBACK_CAST_REMOTE)
+                eq(MediaData.PLAYBACK_CAST_REMOTE),
             )
     }
 
@@ -1890,7 +1899,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
 
         // Callback gets an updated state
         val state = PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 1f).build()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
 
         // Listener is notified of updated state
         verify(listener)
@@ -1900,7 +1909,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isTrue()
     }
@@ -1911,7 +1920,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
 
         // No media added with this key
 
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -1928,7 +1937,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         val state = PlaybackState.Builder().build()
 
         // Then no changes are made
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -1939,7 +1948,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         whenever(controller.playbackState).thenReturn(state)
 
         addNotificationAndLoad()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -1948,7 +1957,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
         assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
@@ -1977,13 +1986,13 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 session.sessionToken,
                 APP_NAME,
                 pendingIntent,
-                PACKAGE_NAME
+                PACKAGE_NAME,
             )
             runCurrent()
             backgroundExecutor.runAllReady()
             foregroundExecutor.runAllReady()
 
-            stateCallbackCaptor.value.invoke(PACKAGE_NAME, state)
+            onStateUpdated(PACKAGE_NAME, state)
 
             verify(listener)
                 .onMediaDataLoaded(
@@ -1992,12 +2001,13 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                     capture(mediaDataCaptor),
                     eq(true),
                     eq(0),
-                    eq(false)
+                    eq(false),
                 )
             assertThat(mediaDataCaptor.value.isPlaying).isFalse()
             assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
         }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackStateNull_Pause_keyExists_callsListener() {
         whenever(controller.playbackState).thenReturn(null)
@@ -2008,7 +2018,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 .build()
 
         addNotificationAndLoad()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -2017,7 +2027,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.isPlaying).isFalse()
         assertThat(mediaDataCaptor.value.semanticActions).isNull()
@@ -2056,6 +2066,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(mediaDataCaptor.value.isClearable).isFalse()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_notifRemoved_setToResume() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2074,7 +2085,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2082,10 +2093,11 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_sessionDestroyed_doesNotChange() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2104,6 +2116,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_removeWhileActive_fullyRemoved() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2141,7 +2154,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2149,7 +2162,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2193,7 +2206,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2201,7 +2214,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2245,7 +2258,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2253,7 +2266,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2279,7 +2292,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -2321,7 +2334,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         assertThat(mediaDataCaptor.value.resumption).isTrue()
         assertThat(mediaDataCaptor.value.active).isFalse()
@@ -2329,7 +2342,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .logActiveConvertedToResume(
                 anyInt(),
                 eq(PACKAGE_NAME),
-                eq(mediaDataCaptor.value.instanceId)
+                eq(mediaDataCaptor.value.instanceId),
             )
     }
 
@@ -2355,7 +2368,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                     any(),
                     any(),
                     anyInt(),
-                    anyInt()
+                    anyInt(),
                 )
             )
             .thenReturn(1)
@@ -2385,7 +2398,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                     any(),
                     any(),
                     anyInt(),
-                    anyInt()
+                    anyInt(),
                 )
             )
             .thenThrow(SecurityException("Test no permission"))
@@ -2421,7 +2434,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         verify(kosmos.mediaLogger).logDuplicateMediaNotification(eq(KEY))
     }
@@ -2440,7 +2453,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
         verify(kosmos.mediaLogger, never()).logDuplicateMediaNotification(eq(KEY))
     }
@@ -2448,6 +2461,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
     private fun TestScope.assertRunAllReady(foreground: Int = 0, background: Int = 0) {
         runCurrent()
         if (Flags.mediaLoadMetadataViaMediaDataLoader()) {
+            advanceUntilIdle()
             // It doesn't make much sense to count tasks when we use coroutines in loader
             // so this check is skipped in that scenario.
             backgroundExecutor.runAllReady()
@@ -2478,7 +2492,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
     }
 
@@ -2493,7 +2507,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
     /** Helper function to add a resumption control and capture the resulting MediaData */
     private fun addResumeControlAndLoad(
         desc: MediaDescription,
-        packageName: String = PACKAGE_NAME
+        packageName: String = PACKAGE_NAME,
     ) {
         mediaDataManager.addResumptionControls(
             USER_ID,
@@ -2502,7 +2516,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            packageName
+            packageName,
         )
 
         testScope.assertRunAllReady(foreground = 1, background = 1)
@@ -2514,7 +2528,13 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 capture(mediaDataCaptor),
                 eq(true),
                 eq(0),
-                eq(false)
+                eq(false),
             )
+    }
+
+    private fun onStateUpdated(key: String, state: PlaybackState) {
+        stateCallbackCaptor.value.invoke(key, state)
+        backgroundExecutor.runAllReady()
+        foregroundExecutor.runAllReady()
     }
 }

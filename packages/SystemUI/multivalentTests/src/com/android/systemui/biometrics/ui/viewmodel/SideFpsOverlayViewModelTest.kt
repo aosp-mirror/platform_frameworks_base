@@ -80,17 +80,17 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     private val indicatorColor =
         Utils.getColorAttrDefaultColor(
             context,
-            com.android.internal.R.attr.materialColorPrimaryFixed
+            com.android.internal.R.attr.materialColorPrimaryFixed,
         )
     private val outerRimColor =
         Utils.getColorAttrDefaultColor(
             context,
-            com.android.internal.R.attr.materialColorPrimaryFixedDim
+            com.android.internal.R.attr.materialColorPrimaryFixedDim,
         )
     private val chevronFill =
         Utils.getColorAttrDefaultColor(
             context,
-            com.android.internal.R.attr.materialColorOnPrimaryFixed
+            com.android.internal.R.attr.materialColorOnPrimaryFixed,
         )
     private val color_blue400 =
         context.getColor(com.android.settingslib.color.R.color.settingslib_color_blue400)
@@ -129,7 +129,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewProperties by
@@ -163,7 +163,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewProperties by
@@ -197,7 +197,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewParams by
@@ -239,7 +239,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
-                isInRearDisplayMode = false
+                isInRearDisplayMode = false,
             )
 
             val overlayViewParams by
@@ -375,7 +375,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
             sensorId = 1,
             strength = SensorStrength.STRONG,
             sensorType = FingerprintSensorType.POWER_BUTTON,
-            sensorLocations = mapOf(DISPLAY_ID to sensorLocation)
+            sensorLocations = mapOf(DISPLAY_ID to sensorLocation),
         )
 
         kosmos.displayStateRepository.setIsInRearDisplayMode(isInRearDisplayMode)

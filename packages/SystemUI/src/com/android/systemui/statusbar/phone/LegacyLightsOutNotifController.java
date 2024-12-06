@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 
-import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.LIGHTS_OUT_NOTIF_VIEW;
+import static com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarModule.LIGHTS_OUT_NOTIF_VIEW;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,7 +37,7 @@ import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarScope;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -51,7 +51,7 @@ import javax.inject.Named;
  * This controller shows and hides the notification dot in the status bar to indicate
  * whether there are notifications when the device is in {@link View#SYSTEM_UI_FLAG_LOW_PROFILE}.
  */
-@StatusBarFragmentScope
+@HomeStatusBarScope
 public class LegacyLightsOutNotifController extends ViewController<View> {
     private final CommandQueue mCommandQueue;
     private final NotifLiveDataStore mNotifDataStore;

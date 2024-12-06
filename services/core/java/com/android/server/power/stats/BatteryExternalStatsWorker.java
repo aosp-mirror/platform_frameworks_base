@@ -27,12 +27,11 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.OutcomeReceiver;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
-import android.os.ThreadLocalWorkSource;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.power.PowerStatsInternal;
 import android.telephony.ModemActivityInfo;
@@ -50,11 +49,7 @@ import com.android.server.LocalServices;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -85,27 +80,21 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
     // stop running.
     public static final int UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS = 10_000;
 
-    private final ScheduledExecutorService mExecutorService =
-            Executors.newSingleThreadScheduledExecutor(
-                    (ThreadFactory) r -> {
-                        Thread t = new Thread(
-                                () -> {
-                                    ThreadLocalWorkSource.setUid(Process.myUid());
-                                    r.run();
-                                },
-                                "batterystats-worker");
-                        t.setPriority(Thread.NORM_PRIORITY);
-                        return t;
-                    });
+    // Various types of sync, passed to Handler
+    private static final int SYNC_UPDATE = 1;
+    private static final int SYNC_WAKELOCK_CHANGE = 2;
+    private static final int SYNC_BATTERY_LEVEL_CHANGE = 3;
+    private static final int SYNC_PROCESS_STATE_CHANGE = 4;
+    private static final int SYNC_USER_REMOVAL = 5;
+
+    private final Handler mHandler;
 
     @GuardedBy("mStats")
     private final BatteryStatsImpl mStats;
 
     @GuardedBy("this")
+    @ExternalUpdateFlag
     private int mUpdateFlags = 0;
-
-    @GuardedBy("this")
-    private Future<?> mCurrentFuture = null;
 
     @GuardedBy("this")
     private String mCurrentReason = null;
@@ -124,15 +113,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
     @GuardedBy("this")
     private boolean mUseLatestStates = true;
-
-    @GuardedBy("this")
-    private Future<?> mWakelockChangesUpdate;
-
-    @GuardedBy("this")
-    private Future<?> mBatteryLevelSync;
-
-    @GuardedBy("this")
-    private Future<?> mProcessStateSync;
 
     // If both mStats and mWorkerLock need to be synchronized, mWorkerLock must be acquired first.
     private final Object mWorkerLock = new Object();
@@ -190,14 +170,15 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         }
     }
 
-    public BatteryExternalStatsWorker(Context context, BatteryStatsImpl stats) {
-        this(new Injector(context), stats);
+    public BatteryExternalStatsWorker(Context context, BatteryStatsImpl stats, Handler handler) {
+        this(new Injector(context), stats, handler);
     }
 
     @VisibleForTesting
-    BatteryExternalStatsWorker(Injector injector, BatteryStatsImpl stats) {
+    BatteryExternalStatsWorker(Injector injector, BatteryStatsImpl stats, Handler handler) {
         mInjector = injector;
         mStats = stats;
+        mHandler = handler;
     }
 
     public void systemServicesReady() {
@@ -249,20 +230,20 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
     }
 
     @Override
-    public synchronized Future<?> scheduleSync(String reason, int flags) {
-        return scheduleSyncLocked(reason, flags);
+    public synchronized void scheduleSync(String reason, @ExternalUpdateFlag int flags) {
+        scheduleSyncLocked(reason, flags);
     }
 
     @Override
-    public synchronized Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
-        return scheduleSyncLocked("remove-uid", UPDATE_CPU);
+    public synchronized void scheduleCpuSyncDueToRemovedUid(int uid) {
+        scheduleSyncLocked("remove-uid", UPDATE_CPU);
     }
 
     @Override
-    public Future<?> scheduleSyncDueToScreenStateChange(int flags, boolean onBattery,
+    public void scheduleSyncDueToScreenStateChange(@ExternalUpdateFlag int flags, boolean onBattery,
             boolean onBatteryScreenOff, int screenState, int[] perDisplayScreenStates) {
         synchronized (BatteryExternalStatsWorker.this) {
-            if (mCurrentFuture == null || (mUpdateFlags & UPDATE_CPU) == 0) {
+            if (!mHandler.hasMessages(SYNC_UPDATE) || (mUpdateFlags & UPDATE_CPU) == 0) {
                 mOnBattery = onBattery;
                 mOnBatteryScreenOff = onBatteryScreenOff;
                 mUseLatestStates = false;
@@ -270,91 +251,70 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             // always update screen state
             mScreenState = screenState;
             mPerDisplayScreenStates = perDisplayScreenStates;
-            return scheduleSyncLocked("screen-state", flags);
+            scheduleSyncLocked("screen-state", flags);
         }
     }
 
     @Override
-    public Future<?> scheduleCpuSyncDueToWakelockChange(long delayMillis) {
+    public void scheduleCpuSyncDueToWakelockChange(long delayMillis) {
         synchronized (BatteryExternalStatsWorker.this) {
-            mWakelockChangesUpdate = scheduleDelayedSyncLocked(mWakelockChangesUpdate,
+            scheduleDelayedSyncLocked(SYNC_WAKELOCK_CHANGE,
                     () -> {
                         scheduleSync("wakelock-change", UPDATE_CPU);
                         scheduleRunnable(() -> mStats.postBatteryNeedsCpuUpdateMsg());
                     },
                     delayMillis);
-            return mWakelockChangesUpdate;
         }
     }
 
     @Override
     public void cancelCpuSyncDueToWakelockChange() {
-        synchronized (BatteryExternalStatsWorker.this) {
-            if (mWakelockChangesUpdate != null) {
-                mWakelockChangesUpdate.cancel(false);
-                mWakelockChangesUpdate = null;
-            }
-        }
+        mHandler.removeMessages(SYNC_WAKELOCK_CHANGE);
     }
 
     @Override
-    public Future<?> scheduleSyncDueToBatteryLevelChange(long delayMillis) {
+    public void scheduleSyncDueToBatteryLevelChange(long delayMillis) {
         synchronized (BatteryExternalStatsWorker.this) {
-            mBatteryLevelSync = scheduleDelayedSyncLocked(mBatteryLevelSync,
+            scheduleDelayedSyncLocked(SYNC_BATTERY_LEVEL_CHANGE,
                     () -> scheduleSync("battery-level", UPDATE_ALL),
                     delayMillis);
-            return mBatteryLevelSync;
         }
     }
 
     @GuardedBy("this")
     private void cancelSyncDueToBatteryLevelChangeLocked() {
-        if (mBatteryLevelSync != null) {
-            mBatteryLevelSync.cancel(false);
-            mBatteryLevelSync = null;
-        }
+        mHandler.removeMessages(SYNC_BATTERY_LEVEL_CHANGE);
     }
 
     @Override
     public void scheduleSyncDueToProcessStateChange(int flags, long delayMillis) {
         synchronized (BatteryExternalStatsWorker.this) {
-            mProcessStateSync = scheduleDelayedSyncLocked(mProcessStateSync,
+            scheduleDelayedSyncLocked(SYNC_PROCESS_STATE_CHANGE,
                     () -> scheduleSync("procstate-change", flags),
                     delayMillis);
         }
     }
 
     public void cancelSyncDueToProcessStateChange() {
-        synchronized (BatteryExternalStatsWorker.this) {
-            if (mProcessStateSync != null) {
-                mProcessStateSync.cancel(false);
-                mProcessStateSync = null;
-            }
-        }
+        mHandler.removeMessages(SYNC_PROCESS_STATE_CHANGE);
     }
 
     @Override
-    public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
-        synchronized (BatteryExternalStatsWorker.this) {
-            try {
-                // Initial quick clean-up after a user removal
-                mExecutorService.schedule(() -> {
-                    synchronized (mStats) {
-                        mStats.clearRemovedUserUidsLocked(userId);
-                    }
-                }, UID_QUICK_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
-
-                // Final clean-up after a user removal, to take care of UIDs that were running
-                // longer than expected
-                return mExecutorService.schedule(() -> {
-                    synchronized (mStats) {
-                        mStats.clearRemovedUserUidsLocked(userId);
-                    }
-                }, UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
-            } catch (RejectedExecutionException e) {
-                return CompletableFuture.failedFuture(e);
+    public void scheduleCleanupDueToRemovedUser(int userId) {
+        // Initial quick clean-up after a user removal
+        mHandler.postDelayed(() -> {
+            synchronized (mStats) {
+                mStats.clearRemovedUserUidsLocked(userId);
             }
-        }
+        }, SYNC_USER_REMOVAL, UID_QUICK_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS);
+
+        // Final clean-up after a user removal, to take care of UIDs that were running
+        // longer than expected
+        mHandler.postDelayed(() -> {
+            synchronized (mStats) {
+                mStats.clearRemovedUserUidsLocked(userId);
+            }
+        }, SYNC_USER_REMOVAL, UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS);
     }
 
     /**
@@ -368,42 +328,27 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
      *         cancel it if needed
      */
     @GuardedBy("this")
-    private Future<?> scheduleDelayedSyncLocked(Future<?> lastScheduledSync, Runnable syncRunnable,
+    private void scheduleDelayedSyncLocked(int what, Runnable syncRunnable,
             long delayMillis) {
-        if (mExecutorService.isShutdown()) {
-            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
-        }
-
-        if (lastScheduledSync != null) {
+        if (mHandler.hasMessages(what)) {
             // If there's already a scheduled task, leave it as is if we're trying to
             // re-schedule it again with a delay, otherwise cancel and re-schedule it.
             if (delayMillis == 0) {
-                lastScheduledSync.cancel(false);
+                mHandler.removeMessages(what);
             } else {
-                return lastScheduledSync;
+                return;
             }
         }
 
-        try {
-            return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
-        } catch (RejectedExecutionException e) {
-            return CompletableFuture.failedFuture(e);
-        }
+        mHandler.postDelayed(syncRunnable, what, delayMillis);
     }
 
-    public synchronized Future<?> scheduleWrite() {
-        if (mExecutorService.isShutdown()) {
-            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
-        }
-
+    /**
+     * Schedule and async writing of battery stats to disk
+     */
+    public synchronized void scheduleWrite() {
         scheduleSyncLocked("write", UPDATE_ALL);
-        // Since we use a single threaded executor, we can assume the next scheduled task's
-        // Future finishes after the sync.
-        try {
-            return mExecutorService.submit(mWriteTask);
-        } catch (RejectedExecutionException e) {
-            return CompletableFuture.failedFuture(e);
-        }
+        mHandler.post(mWriteTask);
     }
 
     /**
@@ -411,34 +356,25 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
      * within the task, never wait on the resulting Future. This will result in a deadlock.
      */
     public synchronized void scheduleRunnable(Runnable runnable) {
-        try {
-            mExecutorService.submit(runnable);
-        } catch (RejectedExecutionException e) {
-            Slog.e(TAG, "Couldn't schedule " + runnable, e);
-        }
+        mHandler.post(runnable);
     }
 
     public void shutdown() {
-        mExecutorService.shutdownNow();
+        mHandler.removeMessages(SYNC_UPDATE);
+        mHandler.removeMessages(SYNC_WAKELOCK_CHANGE);
+        mHandler.removeMessages(SYNC_BATTERY_LEVEL_CHANGE);
+        mHandler.removeMessages(SYNC_PROCESS_STATE_CHANGE);
+        mHandler.removeMessages(SYNC_USER_REMOVAL);
     }
 
     @GuardedBy("this")
-    private Future<?> scheduleSyncLocked(String reason, int flags) {
-        if (mExecutorService.isShutdown()) {
-            return CompletableFuture.failedFuture(new IllegalStateException("worker shutdown"));
-        }
-
-        if (mCurrentFuture == null) {
+    private void scheduleSyncLocked(String reason, @ExternalUpdateFlag int flags) {
+        if (!mHandler.hasMessages(SYNC_UPDATE)) {
             mUpdateFlags = flags;
             mCurrentReason = reason;
-            try {
-                mCurrentFuture = mExecutorService.submit(mSyncTask);
-            } catch (RejectedExecutionException e) {
-                return CompletableFuture.failedFuture(e);
-            }
+            mHandler.postDelayed(mSyncTask, SYNC_UPDATE, 0);
         }
         mUpdateFlags |= flags;
-        return mCurrentFuture;
     }
 
     public long getLastCollectionTimeStamp() {
@@ -468,7 +404,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
-                mCurrentFuture = null;
                 mUseLatestStates = true;
                 if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                     cancelSyncDueToBatteryLevelChangeLocked();

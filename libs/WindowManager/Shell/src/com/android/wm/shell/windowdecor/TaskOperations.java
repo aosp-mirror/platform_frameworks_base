@@ -76,13 +76,14 @@ class TaskOperations {
         closeTask(taskToken, new WindowContainerTransaction());
     }
 
-    void closeTask(WindowContainerToken taskToken, WindowContainerTransaction wct) {
+    IBinder closeTask(WindowContainerToken taskToken, WindowContainerTransaction wct) {
         wct.removeTask(taskToken);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mTransitionStarter.startRemoveTransition(wct);
+            return mTransitionStarter.startRemoveTransition(wct);
         } else {
             mSyncQueue.queue(wct);
         }
+        return null;
     }
 
     IBinder minimizeTask(WindowContainerToken taskToken) {

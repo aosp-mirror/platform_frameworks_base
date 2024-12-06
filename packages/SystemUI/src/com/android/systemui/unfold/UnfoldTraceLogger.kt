@@ -16,6 +16,7 @@
 package com.android.systemui.unfold
 
 import android.content.Context
+import android.hardware.devicestate.DeviceStateManager
 import android.os.Trace
 import com.android.app.tracing.TraceStateLogger
 import com.android.systemui.CoreStartable
@@ -24,10 +25,11 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.unfold.data.repository.FoldStateRepository
 import com.android.systemui.unfold.system.DeviceStateRepository
+import com.android.systemui.util.Utils.isDeviceFoldable
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.plus
 
 /**
@@ -42,13 +44,10 @@ constructor(
     private val foldStateRepository: FoldStateRepository,
     @Application applicationScope: CoroutineScope,
     @Background private val coroutineContext: CoroutineContext,
-    private val deviceStateRepository: DeviceStateRepository
+    private val deviceStateRepository: DeviceStateRepository,
+    private val deviceStateManager: DeviceStateManager
 ) : CoreStartable {
-    private val isFoldable: Boolean
-        get() =
-            context.resources
-                .getIntArray(com.android.internal.R.array.config_foldedDeviceStates)
-                .isNotEmpty()
+    private val isFoldable: Boolean = isDeviceFoldable(context.resources, deviceStateManager)
 
     private val bgScope = applicationScope.plus(coroutineContext)
 

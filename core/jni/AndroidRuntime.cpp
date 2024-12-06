@@ -77,6 +77,7 @@ extern int register_android_opengl_jni_GLES32(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
 extern int register_android_hardware_camera2_CameraMetadata(JNIEnv *env);
+extern int register_android_hardware_camera2_CameraDevice(JNIEnv *env);
 extern int register_android_hardware_camera2_DngCreator(JNIEnv *env);
 extern int register_android_hardware_camera2_impl_CameraExtensionJpegProcessor(JNIEnv* env);
 extern int register_android_hardware_camera2_utils_SurfaceUtils(JNIEnv* env);
@@ -128,6 +129,7 @@ extern int register_android_view_InputApplicationHandle(JNIEnv* env);
 extern int register_android_view_InputWindowHandle(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
+extern int register_android_view_SurfaceControlActivePictureListener(JNIEnv* env);
 extern int register_android_view_SurfaceControlHdrLayerInfoListener(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_CompositionSamplingListener(JNIEnv* env);
@@ -177,6 +179,7 @@ extern int register_android_app_backup_FullBackup(JNIEnv *env);
 extern int register_android_app_Activity(JNIEnv *env);
 extern int register_android_app_ActivityThread(JNIEnv *env);
 extern int register_android_app_NativeActivity(JNIEnv *env);
+extern int register_android_app_PropertyInvalidatedCache(JNIEnv* env);
 extern int register_android_media_RemoteDisplay(JNIEnv *env);
 extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
 extern int register_android_view_InputChannel(JNIEnv* env);
@@ -201,6 +204,7 @@ extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env
 extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayManagerImpl(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
+extern int register_com_android_internal_os_ApplicationSharedMemory(JNIEnv *env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_DebugStore(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
@@ -216,6 +220,7 @@ extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteCommandBuffer(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_security_VerityUtils(JNIEnv* env);
+extern int register_com_android_internal_util_ArrayUtils(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 extern int register_android_window_WindowInfosListener(JNIEnv* env);
 extern int register_android_window_ScreenCapture(JNIEnv* env);
@@ -1023,10 +1028,18 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
                         "--compiler-filter=", "-Ximage-compiler-option");
 
-    // If there is a dirty-image-objects file, push it.
-    if (hasFile("/system/etc/dirty-image-objects")) {
-        addOption("-Ximage-compiler-option");
-        addOption("--dirty-image-objects=/system/etc/dirty-image-objects");
+    // If there are dirty-image-objects files, push them.
+    const char* dirty_image_objects_options[] = {
+            "--dirty-image-objects=/apex/com.android.art/etc/dirty-image-objects",
+            "--dirty-image-objects=/system/etc/dirty-image-objects",
+    };
+    for (const char* option : dirty_image_objects_options) {
+        // Get the file path by finding the first '/' and check if
+        // this file exists.
+        if (hasFile(strchr(option, '/'))) {
+            addOption("-Ximage-compiler-option");
+            addOption(option);
+        }
     }
 
     parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
@@ -1516,6 +1529,7 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
 }
 
 static const RegJNIRec gRegJNI[] = {
+        REG_JNI(register_com_android_internal_os_ApplicationSharedMemory),
         REG_JNI(register_com_android_internal_os_RuntimeInit),
         REG_JNI(register_com_android_internal_os_ZygoteInit_nativeZygoteInit),
         REG_JNI(register_android_os_SystemClock),
@@ -1552,6 +1566,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_view_DisplayEventReceiver),
         REG_JNI(register_android_view_Surface),
         REG_JNI(register_android_view_SurfaceControl),
+        REG_JNI(register_android_view_SurfaceControlActivePictureListener),
         REG_JNI(register_android_view_SurfaceControlHdrLayerInfoListener),
         REG_JNI(register_android_view_SurfaceSession),
         REG_JNI(register_android_view_InputApplicationHandle),
@@ -1607,9 +1622,11 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_com_android_internal_os_ZygoteCommandBuffer),
         REG_JNI(register_com_android_internal_os_ZygoteInit),
         REG_JNI(register_com_android_internal_security_VerityUtils),
+        REG_JNI(register_com_android_internal_util_ArrayUtils),
         REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
         REG_JNI(register_android_hardware_Camera),
         REG_JNI(register_android_hardware_camera2_CameraMetadata),
+        REG_JNI(register_android_hardware_camera2_CameraDevice),
         REG_JNI(register_android_hardware_camera2_DngCreator),
         REG_JNI(register_android_hardware_camera2_impl_CameraExtensionJpegProcessor),
         REG_JNI(register_android_hardware_camera2_utils_SurfaceUtils),
@@ -1649,6 +1666,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_app_Activity),
         REG_JNI(register_android_app_ActivityThread),
         REG_JNI(register_android_app_NativeActivity),
+        REG_JNI(register_android_app_PropertyInvalidatedCache),
         REG_JNI(register_android_util_jar_StrictJarFile),
         REG_JNI(register_android_view_InputChannel),
         REG_JNI(register_android_view_InputEventReceiver),

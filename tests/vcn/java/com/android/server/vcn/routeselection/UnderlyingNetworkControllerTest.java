@@ -226,8 +226,6 @@ public class UnderlyingNetworkControllerTest {
     private void resetVcnContext(VcnContext vcnContext) {
         reset(vcnContext);
         doNothing().when(vcnContext).ensureRunningOnLooperThread();
-        doReturn(true).when(vcnContext).isFlagNetworkMetricMonitorEnabled();
-        doReturn(true).when(vcnContext).isFlagIpSecTransformStateEnabled();
     }
 
     // Package private for use in NetworkPriorityClassifierTest

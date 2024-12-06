@@ -16,8 +16,9 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
+import android.util.Log;
 
 import androidx.test.filters.LargeTest;
 
@@ -47,7 +48,9 @@ import javax.crypto.spec.IvParameterSpec;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CipherPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    private static final String TAG = "android.libcore.regression.CipherPerfTest";
+
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection getCases() {
         int[] keySizes = new int[] {128, 192, 256};
@@ -71,6 +74,10 @@ public class CipherPerfTest {
                     }
                     for (int keySize : keySizes) {
                         for (int inputSize : inputSizes) {
+                            Log.i(TAG,
+                                    "param[" + params.size() + "] = " + mode.name() + ", "
+                                            + padding.name() + ", " + keySize + ", " + inputSize
+                                            + ", " + implementation.name());
                             params.add(
                                     new Object[] {
                                         mode, padding, keySize, inputSize, implementation
@@ -180,7 +187,7 @@ public class CipherPerfTest {
             Mode mode, Padding padding, int keySize, int inputSize, Implementation implementation)
             throws Exception {
         setUp(mode, padding, keySize, implementation);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mCipherEncrypt.doFinal(DATA, 0, inputSize, mOutput);
         }
@@ -192,7 +199,7 @@ public class CipherPerfTest {
             Mode mode, Padding padding, int keySize, int inputSize, Implementation implementation)
             throws Exception {
         setUp(mode, padding, keySize, implementation);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mCipherDecrypt.doFinal(DATA, 0, inputSize, mOutput);
         }

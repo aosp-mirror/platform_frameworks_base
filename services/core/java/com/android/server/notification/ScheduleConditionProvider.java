@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ScheduleCalendar;
@@ -41,6 +42,7 @@ import com.android.server.notification.NotificationManagerService.DumpFilter;
 import com.android.server.pm.PackageManagerService;
 
 import java.io.PrintWriter;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -61,6 +63,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     private static final String SCP_SETTING = "snoozed_schedule_condition_provider";
 
     private final Context mContext = this;
+    private final Clock mClock;
     private final ArrayMap<Uri, ScheduleCalendar> mSubscriptions = new ArrayMap<>();
     @GuardedBy("mSnoozedForAlarm")
     private final ArraySet<Uri> mSnoozedForAlarm = new ArraySet<>();
@@ -71,7 +74,13 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     private long mNextAlarmTime;
 
     public ScheduleConditionProvider() {
+        this(Clock.systemUTC());
+    }
+
+    @VisibleForTesting
+    ScheduleConditionProvider(Clock clock) {
         if (DEBUG) Slog.d(TAG, "new " + SIMPLE_NAME + "()");
+        mClock = clock;
     }
 
     @Override
@@ -85,7 +94,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         pw.print("      mConnected="); pw.println(mConnected);
         pw.print("      mRegistered="); pw.println(mRegistered);
         pw.println("      mSubscriptions=");
-        final long now = System.currentTimeMillis();
+        final long now = mClock.millis();
         synchronized (mSubscriptions) {
             for (Uri conditionId : mSubscriptions.keySet()) {
                 pw.print("        ");
@@ -112,6 +121,13 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     @Override
     public void onBootComplete() {
         // noop
+    }
+
+    @Override
+    public void onUserSwitched(UserHandle user) {
+        // Nothing to do here because evaluateSubscriptions() is called for the new configuration
+        // when users switch, and that will reevaluate the next alarm, which is the only piece that
+        // is user-dependent.
     }
 
     @Override
@@ -145,12 +161,9 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     }
 
     private void evaluateSubscriptions() {
-        if (mAlarmManager == null) {
-            mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        }
-        final long now = System.currentTimeMillis();
+        final long now = mClock.millis();
         mNextAlarmTime = 0;
-        long nextUserAlarmTime = getNextAlarm();
+        long nextUserAlarmTime = getNextAlarmClockAlarm();
         List<Condition> conditionsToNotify = new ArrayList<>();
         synchronized (mSubscriptions) {
             setRegistered(!mSubscriptions.isEmpty());
@@ -226,7 +239,10 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
-    public long getNextAlarm() {
+    private long getNextAlarmClockAlarm() {
+        if (mAlarmManager == null) {
+            mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        }
         final AlarmManager.AlarmClockInfo info = mAlarmManager.getNextAlarmClock(
                 ActivityManager.getCurrentUser());
         return info != null ? info.getTriggerTime() : 0;
@@ -246,8 +262,13 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(ACTION_EVALUATE);
             filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-            registerReceiver(mReceiver, filter,
-                    Context.RECEIVER_EXPORTED_UNAUDITED);
+            if (android.app.Flags.modesHsum()) {
+                registerReceiverForAllUsers(mReceiver, filter, /* broadcastPermission= */ null,
+                        /* scheduler= */ null);
+            } else {
+                registerReceiver(mReceiver, filter,
+                        Context.RECEIVER_EXPORTED_UNAUDITED);
+            }
         } else {
             unregisterReceiver(mReceiver);
         }
@@ -321,10 +342,18 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         }
     }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Slog.d(TAG, "onReceive " + intent.getAction());
+            if (android.app.Flags.modesHsum()) {
+                if (AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED.equals(intent.getAction())
+                        && getSendingUserId() != ActivityManager.getCurrentUser()) {
+                    // A different user changed their next alarm.
+                    return;
+                }
+            }
+
             if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
                 synchronized (mSubscriptions) {
                     for (Uri conditionId : mSubscriptions.keySet()) {
@@ -339,4 +368,8 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         }
     };
 
+    @VisibleForTesting // otherwise = NONE
+    public ArrayMap<Uri, ScheduleCalendar> getSubscriptions() {
+        return mSubscriptions;
+    }
 }

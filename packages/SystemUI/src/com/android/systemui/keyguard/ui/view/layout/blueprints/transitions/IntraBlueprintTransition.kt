@@ -29,18 +29,18 @@ class IntraBlueprintTransition(
     smartspaceViewModel: KeyguardSmartspaceViewModel,
 ) : TransitionSet() {
 
-    enum class Type(
-        val priority: Int,
-        val animateNotifChanges: Boolean,
-    ) {
+    enum class Type(val priority: Int, val animateNotifChanges: Boolean) {
         ClockSize(100, true),
         ClockCenter(99, false),
         DefaultClockStepping(98, false),
-        SmartspaceVisibility(2, true),
-        DefaultTransition(1, false),
+        SmartspaceVisibility(3, true),
+        DefaultTransition(2, false),
         // When transition between blueprint, we don't need any duration or interpolator but we need
         // all elements go to correct state
-        NoTransition(0, false),
+        NoTransition(1, false),
+        // Similar to NoTransition, except also does not explicitly update any alpha. Used in
+        // OFF->LOCKSCREEN transition
+        Init(0, false),
     }
 
     data class Config(
@@ -57,6 +57,7 @@ class IntraBlueprintTransition(
     init {
         ordering = ORDERING_TOGETHER
         when (config.type) {
+            Type.Init -> {}
             Type.NoTransition -> {}
             Type.DefaultClockStepping ->
                 addTransition(

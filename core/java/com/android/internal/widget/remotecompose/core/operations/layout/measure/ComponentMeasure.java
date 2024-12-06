@@ -13,56 +13,63 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.internal.widget.remotecompose.core.operations.layout.measure;
+
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 
-/**
- * Encapsulate the result of a measure pass for a component
- */
+/** Encapsulate the result of a measure pass for a component */
 public class ComponentMeasure {
     int mId = -1;
     float mX;
     float mY;
     float mW;
     float mH;
-    Component.Visibility mVisibility = Component.Visibility.VISIBLE;
+    @NonNull Component.Visibility mVisibility = Component.Visibility.VISIBLE;
 
     public void setX(float value) {
         mX = value;
     }
+
     public void setY(float value) {
         mY = value;
     }
+
     public void setW(float value) {
         mW = value;
     }
+
     public void setH(float value) {
         mH = value;
     }
+
     public float getX() {
         return mX;
     }
+
     public float getY() {
         return mY;
     }
+
     public float getW() {
         return mW;
     }
+
     public float getH() {
         return mH;
     }
 
-    public Component.Visibility getVisibility() {
+    public @NonNull Component.Visibility getVisibility() {
         return mVisibility;
     }
 
-    public void setVisibility(Component.Visibility visibility) {
+    public void setVisibility(@NonNull Component.Visibility visibility) {
         mVisibility = visibility;
     }
 
-    public ComponentMeasure(int id, float x, float y, float w, float h,
-                            Component.Visibility visibility) {
+    public ComponentMeasure(
+            int id, float x, float y, float w, float h, @NonNull Component.Visibility visibility) {
         this.mId = id;
         this.mX = x;
         this.mY = y;
@@ -75,17 +82,25 @@ public class ComponentMeasure {
         this(id, x, y, w, h, Component.Visibility.VISIBLE);
     }
 
-    public ComponentMeasure(Component component) {
-        this(component.getComponentId(), component.getX(), component.getY(),
-                component.getWidth(), component.getHeight(),
+    public ComponentMeasure(@NonNull Component component) {
+        this(
+                component.getComponentId(),
+                component.getX(),
+                component.getY(),
+                component.getWidth(),
+                component.getHeight(),
                 component.mVisibility);
     }
 
-    public void copyFrom(ComponentMeasure m) {
+    public void copyFrom(@NonNull ComponentMeasure m) {
         mX = m.mX;
         mY = m.mY;
         mW = m.mW;
         mH = m.mH;
         mVisibility = m.mVisibility;
+    }
+
+    public boolean same(@NonNull ComponentMeasure m) {
+        return mX == m.mX && mY == m.mY && mW == m.mW && mH == m.mH && mVisibility == m.mVisibility;
     }
 }

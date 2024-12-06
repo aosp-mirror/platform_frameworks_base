@@ -24,7 +24,6 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleEvent;
 import static android.service.notification.SystemZenRules.getTriggerDescriptionForScheduleTime;
-import static android.service.notification.ZenModeConfig.tryParseCountdownConditionId;
 import static android.service.notification.ZenModeConfig.tryParseEventConditionId;
 import static android.service.notification.ZenModeConfig.tryParseScheduleConditionId;
 
@@ -140,7 +139,7 @@ public class ZenMode implements Parcelable {
 
     private static Status computeStatus(@NonNull ZenModeConfig.ZenRule zenRuleExtraData) {
         if (zenRuleExtraData.enabled) {
-            if (zenRuleExtraData.isAutomaticActive()) {
+            if (zenRuleExtraData.isActive()) {
                 return Status.ENABLED_AND_ACTIVE;
             } else {
                 return Status.ENABLED;
@@ -209,6 +208,11 @@ public class ZenMode implements Parcelable {
     }
 
     @NonNull
+    public Kind getKind() {
+        return mKind;
+    }
+
+    @NonNull
     public Status getStatus() {
         return mStatus;
     }
@@ -222,31 +226,6 @@ public class ZenMode implements Parcelable {
     @Nullable
     public String getTriggerDescription() {
         return mRule.getTriggerDescription();
-    }
-
-    /**
-     * Returns a "dynamic" trigger description. For some modes (such as manual Do Not Disturb)
-     * when activated, we know when (and if) the mode is expected to end on its own; this dynamic
-     * description reflects that. In other cases, returns {@link #getTriggerDescription}.
-     */
-    @Nullable
-    public String getDynamicDescription(Context context) {
-        if (isManualDnd() && isActive()) {
-            long countdownEndTime = tryParseCountdownConditionId(mRule.getConditionId());
-            if (countdownEndTime > 0) {
-                CharSequence formattedTime = ZenModeConfig.getFormattedTime(context,
-                        countdownEndTime, ZenModeConfig.isToday(countdownEndTime),
-                        context.getUserId());
-                return context.getString(com.android.internal.R.string.zen_mode_until,
-                        formattedTime);
-            }
-        }
-        // TODO: b/333527800 - For TYPE_SCHEDULE_TIME rules we could do the same; however
-        //   according to the snoozing discussions the mode may or may not end at the scheduled
-        //   time if manually activated. When we resolve that point, we could calculate end time
-        //   for these modes as well.
-
-        return getTriggerDescription();
     }
 
     /**

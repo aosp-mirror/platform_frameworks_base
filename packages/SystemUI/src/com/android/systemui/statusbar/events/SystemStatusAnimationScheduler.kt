@@ -16,17 +16,22 @@
 
 package com.android.systemui.statusbar.events
 
-import android.annotation.IntDef
 import androidx.core.animation.Animator
 import androidx.core.animation.AnimatorSet
 import androidx.core.animation.PathInterpolator
 import com.android.systemui.Dumpable
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
 import com.android.systemui.statusbar.policy.CallbackController
+import kotlinx.coroutines.flow.StateFlow
 
 interface SystemStatusAnimationScheduler :
-        CallbackController<SystemStatusAnimationCallback>, Dumpable {
+    CallbackController<SystemStatusAnimationCallback>, Dumpable {
 
-    @SystemAnimationState fun getAnimationState(): Int
+    /**
+     * The current state of the animation. This can be used from compose functions to coordinate
+     * their animations with the chip
+     */
+    val animationState: StateFlow<SystemEventAnimationState>
 
     fun onStatusEvent(event: StatusEvent)
 
@@ -44,46 +49,24 @@ interface SystemStatusAnimationScheduler :
  */
 interface SystemStatusAnimationCallback {
     /** Implement this method to return an [Animator] or [AnimatorSet] that presents the chip */
-    fun onSystemEventAnimationBegin(): Animator? { return null }
+    fun onSystemEventAnimationBegin(): Animator? {
+        return null
+    }
+
     /** Implement this method to return an [Animator] or [AnimatorSet] that hides the chip */
-    fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator? { return null }
+    fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator? {
+        return null
+    }
 
     // Best method name, change my mind
     fun onSystemStatusAnimationTransitionToPersistentDot(contentDescription: String?): Animator? {
         return null
     }
-    fun onHidePersistentDot(): Animator? { return null }
+
+    fun onHidePersistentDot(): Animator? {
+        return null
+    }
 }
-
-
-/**
- * Animation state IntDef
- */
-@Retention(AnnotationRetention.SOURCE)
-@IntDef(
-        value = [
-            IDLE,
-            ANIMATION_QUEUED,
-            ANIMATING_IN,
-            RUNNING_CHIP_ANIM,
-            ANIMATING_OUT,
-            SHOWING_PERSISTENT_DOT
-        ]
-)
-annotation class SystemAnimationState
-
-/** No animation is in progress */
-@SystemAnimationState const val IDLE = 0
-/** An animation is queued, and awaiting the debounce period */
-const val ANIMATION_QUEUED = 1
-/** System is animating out, and chip is animating in */
-const val ANIMATING_IN = 2
-/** Chip has animated in and is awaiting exit animation, and optionally playing its own animation */
-const val RUNNING_CHIP_ANIM = 3
-/** Chip is animating away and system is animating back */
-const val ANIMATING_OUT = 4
-/** Chip has animated away, and the persistent dot is showing */
-const val SHOWING_PERSISTENT_DOT = 5
 
 /** Commonly-needed interpolators can go here */
 @JvmField val STATUS_BAR_X_MOVE_OUT = PathInterpolator(0.33f, 0f, 0f, 1f)

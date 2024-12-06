@@ -17,6 +17,7 @@
 package com.android.systemui.animation
 
 import android.app.ActivityManager
+import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
@@ -24,18 +25,22 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.graphics.Color
 import android.graphics.Matrix
+import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.os.RemoteException
+import android.util.ArrayMap
 import android.util.Log
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
+import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewGroup
@@ -45,8 +50,12 @@ import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.view.animation.PathInterpolator
+import android.window.IRemoteTransition
+import android.window.IRemoteTransitionFinishedCallback
 import android.window.RemoteTransition
 import android.window.TransitionFilter
+import android.window.TransitionInfo
+import android.window.WindowAnimationState
 import androidx.annotation.AnyThread
 import androidx.annotation.BinderThread
 import androidx.annotation.UiThread
@@ -55,9 +64,14 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.systemui.Flags.activityTransitionUseLargestWindow
 import com.android.systemui.Flags.translucentOccludingActivityFix
-import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
+import com.android.systemui.animation.TransitionAnimator.Companion.assertLongLivedReturnAnimations
+import com.android.systemui.animation.TransitionAnimator.Companion.assertReturnAnimations
+import com.android.systemui.animation.TransitionAnimator.Companion.longLivedReturnAnimationsEnabled
+import com.android.systemui.animation.TransitionAnimator.Companion.returnAnimationsEnabled
+import com.android.systemui.animation.TransitionAnimator.Companion.toTransitionState
 import com.android.wm.shell.shared.IShellTransitions
 import com.android.wm.shell.shared.ShellTransitions
+import com.android.wm.shell.shared.TransitionUtil
 import java.util.concurrent.Executor
 import kotlin.math.roundToInt
 
@@ -130,7 +144,20 @@ constructor(
                 contentBeforeFadeOutDelay = 0L,
                 contentBeforeFadeOutDuration = 150L,
                 contentAfterFadeInDelay = 150L,
-                contentAfterFadeInDuration = 183L
+                contentAfterFadeInDuration = 183L,
+            )
+
+        /**
+         * The timings when animating a View into an app using a spring animator. These timings
+         * represent fractions of the progress between the spring's initial value and its final
+         * value.
+         */
+        val SPRING_TIMINGS =
+            TransitionAnimator.SpringTimings(
+                contentBeforeFadeOutDelay = 0f,
+                contentBeforeFadeOutDuration = 0.8f,
+                contentAfterFadeInDelay = 0.85f,
+                contentAfterFadeInDuration = 0.135f,
             )
 
         /**
@@ -147,7 +174,14 @@ constructor(
                 positionInterpolator = Interpolators.EMPHASIZED,
                 positionXInterpolator = Interpolators.EMPHASIZED_COMPLEMENT,
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
-                contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
+                contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f),
+            )
+
+        /** The interpolators when animating a View into an app using a spring animator. */
+        val SPRING_INTERPOLATORS =
+            INTERPOLATORS.copy(
+                contentBeforeFadeOutInterpolator = Interpolators.DECELERATE_1_5,
+                contentAfterFadeInInterpolator = Interpolators.SLOW_OUT_LINEAR_IN,
             )
 
         // TODO(b/288507023): Remove this flag.
@@ -172,7 +206,13 @@ constructor(
         private const val LONG_TRANSITION_TIMEOUT = 5_000L
 
         private fun defaultTransitionAnimator(mainExecutor: Executor): TransitionAnimator {
-            return TransitionAnimator(mainExecutor, TIMINGS, INTERPOLATORS)
+            return TransitionAnimator(
+                mainExecutor,
+                TIMINGS,
+                INTERPOLATORS,
+                SPRING_TIMINGS,
+                SPRING_INTERPOLATORS,
+            )
         }
 
         private fun defaultDialogToAppAnimator(mainExecutor: Executor): TransitionAnimator {
@@ -238,7 +278,7 @@ constructor(
         animate: Boolean = true,
         packageName: String? = null,
         showOverLockscreen: Boolean = false,
-        intentStarter: (RemoteAnimationAdapter?) -> Int
+        intentStarter: (RemoteAnimationAdapter?) -> Int,
     ) {
         if (controller == null || !animate) {
             Log.i(TAG, "Starting intent with no animation")
@@ -253,7 +293,7 @@ constructor(
                     "ActivityTransitionAnimator.callback must be set before using this animator"
                 )
         val runner = createRunner(controller)
-        val runnerDelegate = runner.delegate!!
+        val runnerDelegate = runner.delegate
         val hideKeyguardWithAnimation = callback.isOnKeyguard() && !showOverLockscreen
 
         // Pass the RemoteAnimationAdapter to the intent starter only if we are not hiding the
@@ -263,7 +303,7 @@ constructor(
                 RemoteAnimationAdapter(
                     runner,
                     TIMINGS.totalDuration,
-                    TIMINGS.totalDuration - 150 /* statusBarTransitionDelay */
+                    TIMINGS.totalDuration - 150, /* statusBarTransitionDelay */
                 )
             } else {
                 null
@@ -277,7 +317,7 @@ constructor(
                     .registerRemoteAnimationForNextActivityStart(
                         packageName,
                         animationAdapter,
-                        null /* launchCookie */
+                        null, /* launchCookie */
                     )
             } catch (e: RemoteException) {
                 Log.w(TAG, "Unable to register the remote animation", e)
@@ -301,14 +341,18 @@ constructor(
         Log.i(
             TAG,
             "launchResult=$launchResult willAnimate=$willAnimate " +
-                "hideKeyguardWithAnimation=$hideKeyguardWithAnimation"
+                "hideKeyguardWithAnimation=$hideKeyguardWithAnimation",
         )
         controller.callOnIntentStartedOnMainThread(willAnimate)
 
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
-            runnerDelegate.postTimeouts()
+            if (longLivedReturnAnimationsEnabled()) {
+                runner.postTimeouts()
+            } else {
+                runnerDelegate!!.postTimeouts()
+            }
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
             if (hideKeyguardWithAnimation) {
@@ -328,7 +372,7 @@ constructor(
                 Log.d(
                     TAG,
                     "Calling controller.onIntentStarted(willAnimate=$willAnimate) " +
-                        "[controller=$this]"
+                        "[controller=$this]",
                 )
             }
             this.onIntentStarted(willAnimate)
@@ -350,7 +394,7 @@ constructor(
         animate: Boolean = true,
         packageName: String? = null,
         showOverLockscreen: Boolean = false,
-        intentStarter: PendingIntentStarter
+        intentStarter: PendingIntentStarter,
     ) {
         startIntentWithAnimation(controller, animate, packageName, showOverLockscreen) {
             intentStarter.startPendingIntent(it)
@@ -366,9 +410,9 @@ constructor(
      */
     private fun registerEphemeralReturnAnimation(
         launchController: Controller,
-        transitionRegister: TransitionRegister?
+        transitionRegister: TransitionRegister?,
     ) {
-        if (!returnAnimationFrameworkLibrary()) return
+        if (!returnAnimationsEnabled()) return
 
         var cleanUpRunnable: Runnable? = null
         val returnRunner =
@@ -380,15 +424,16 @@ constructor(
                         newKeyguardOccludedState: Boolean?
                     ) {
                         super.onTransitionAnimationCancelled(newKeyguardOccludedState)
-                        cleanUp()
+                        onDispose()
                     }
 
                     override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                         super.onTransitionAnimationEnd(isExpandingFullyAbove)
-                        cleanUp()
+                        onDispose()
                     }
 
-                    private fun cleanUp() {
+                    override fun onDispose() {
+                        super.onDispose()
                         cleanUpRunnable?.run()
                     }
                 }
@@ -410,10 +455,14 @@ constructor(
         val transition =
             RemoteTransition(
                 RemoteAnimationRunnerCompat.wrap(returnRunner),
-                "${launchController.transitionCookie}_returnTransition"
+                "${launchController.transitionCookie}_returnTransition",
             )
 
-        transitionRegister?.register(filter, transition)
+        transitionRegister?.register(
+            filter,
+            transition,
+            includeTakeover = longLivedReturnAnimationsEnabled(),
+        )
         cleanUpRunnable = Runnable { transitionRegister?.unregister(transition) }
     }
 
@@ -429,7 +478,10 @@ constructor(
 
     /** Create a new animation [Runner] controlled by [controller]. */
     @VisibleForTesting
-    fun createRunner(controller: Controller): Runner {
+    @JvmOverloads
+    fun createRunner(controller: Controller, longLived: Boolean = false): Runner {
+        if (longLived) assertLongLivedReturnAnimations()
+
         // Make sure we use the modified timings when animating a dialog into an app.
         val transitionAnimator =
             if (controller.isDialogLaunch) {
@@ -438,7 +490,7 @@ constructor(
                 transitionAnimator
             }
 
-        return Runner(controller, callback!!, transitionAnimator, lifecycleListener)
+        return Runner(controller, callback!!, transitionAnimator, lifecycleListener, longLived)
     }
 
     interface PendingIntentStarter {
@@ -508,7 +560,8 @@ constructor(
                 cujType: Int? = null,
                 cookie: TransitionCookie? = null,
                 component: ComponentName? = null,
-                returnCujType: Int? = null
+                returnCujType: Int? = null,
+                isEphemeral: Boolean = true,
             ): Controller? {
                 // Make sure the View we launch from implements LaunchableView to avoid visibility
                 // issues.
@@ -525,7 +578,7 @@ constructor(
                     Log.e(
                         TAG,
                         "Skipping animation as view $view is not attached to a ViewGroup",
-                        Exception()
+                        Exception(),
                     )
                     return null
                 }
@@ -535,7 +588,8 @@ constructor(
                     cujType,
                     cookie,
                     component,
-                    returnCujType
+                    returnCujType,
+                    isEphemeral,
                 )
             }
         }
@@ -596,6 +650,9 @@ constructor(
          * appropriately.
          */
         fun onTransitionAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
+
+        /** The controller will not be used again. Clean up the relevant internal state. */
+        fun onDispose() {}
     }
 
     /**
@@ -606,10 +663,7 @@ constructor(
      * this registration.
      */
     fun register(controller: Controller) {
-        check(returnAnimationFrameworkLibrary()) {
-            "Long-lived registrations cannot be used when the returnAnimationFrameworkLibrary " +
-                "flag is disabled"
-        }
+        assertLongLivedReturnAnimations()
 
         if (transitionRegister == null) {
             throw IllegalStateException(
@@ -645,15 +699,17 @@ constructor(
             }
         val launchRemoteTransition =
             RemoteTransition(
-                RemoteAnimationRunnerCompat.wrap(createRunner(controller)),
-                "${cookie}_launchTransition"
+                OriginTransition(createRunner(controller, longLived = true)),
+                "${cookie}_launchTransition",
             )
-        transitionRegister.register(launchFilter, launchRemoteTransition)
+        transitionRegister.register(launchFilter, launchRemoteTransition, includeTakeover = true)
 
         val returnController =
             object : Controller by controller {
                 override val isLaunching: Boolean = false
             }
+        // Cross-task close transitions should not use this animation, so we only register it for
+        // when the opening window is Launcher.
         val returnFilter =
             TransitionFilter().apply {
                 mRequirements =
@@ -662,15 +718,19 @@ constructor(
                             mActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
                             mModes = intArrayOf(TRANSIT_CLOSE, TRANSIT_TO_BACK)
                             mTopActivity = component
-                        }
+                        },
+                        TransitionFilter.Requirement().apply {
+                            mActivityType = WindowConfiguration.ACTIVITY_TYPE_HOME
+                            mModes = intArrayOf(TRANSIT_OPEN, TRANSIT_TO_FRONT)
+                        },
                     )
             }
         val returnRemoteTransition =
             RemoteTransition(
-                RemoteAnimationRunnerCompat.wrap(createRunner(returnController)),
-                "${cookie}_returnTransition"
+                OriginTransition(createRunner(returnController, longLived = true)),
+                "${cookie}_returnTransition",
             )
-        transitionRegister.register(returnFilter, returnRemoteTransition)
+        transitionRegister.register(returnFilter, returnRemoteTransition, includeTakeover = true)
 
         longLivedTransitions[cookie] = Pair(launchRemoteTransition, returnRemoteTransition)
     }
@@ -690,7 +750,7 @@ constructor(
     @VisibleForTesting
     inner class DelegatingAnimationCompletionListener(
         private val delegate: Listener?,
-        private val onAnimationComplete: () -> Unit
+        private val onAnimationComplete: () -> Unit,
     ) : Listener {
         var cancelled = false
 
@@ -716,14 +776,165 @@ constructor(
         }
     }
 
+    /** [Runner] wrapper that supports animation takeovers. */
+    private inner class OriginTransition(private val runner: Runner) : IRemoteTransition {
+        private val delegate = RemoteAnimationRunnerCompat.wrap(runner)
+
+        init {
+            assertLongLivedReturnAnimations()
+        }
+
+        override fun startAnimation(
+            token: IBinder?,
+            info: TransitionInfo?,
+            t: SurfaceControl.Transaction?,
+            finishCallback: IRemoteTransitionFinishedCallback?,
+        ) {
+            delegate.startAnimation(token, info, t, finishCallback)
+        }
+
+        override fun mergeAnimation(
+            transition: IBinder?,
+            info: TransitionInfo?,
+            t: SurfaceControl.Transaction?,
+            mergeTarget: IBinder?,
+            finishCallback: IRemoteTransitionFinishedCallback?,
+        ) {
+            delegate.mergeAnimation(transition, info, t, mergeTarget, finishCallback)
+        }
+
+        override fun onTransitionConsumed(transition: IBinder?, aborted: Boolean) {
+            delegate.onTransitionConsumed(transition, aborted)
+        }
+
+        override fun takeOverAnimation(
+            token: IBinder?,
+            info: TransitionInfo?,
+            t: SurfaceControl.Transaction?,
+            finishCallback: IRemoteTransitionFinishedCallback?,
+            states: Array<WindowAnimationState>,
+        ) {
+            if (info == null || t == null) {
+                Log.e(
+                    TAG,
+                    "Skipping the animation takeover because the required data is missing: " +
+                        "info=$info, transaction=$t",
+                )
+                return
+            }
+
+            // The following code converts the contents of the given TransitionInfo into
+            // RemoteAnimationTargets. This is necessary because we must currently support both the
+            // new (Shell, remote transitions) and old (remote animations) framework to maintain
+            // functionality for all users of the library.
+            val apps = ArrayList<RemoteAnimationTarget>()
+            val filteredStates = ArrayList<WindowAnimationState>()
+            val leashMap = ArrayMap<SurfaceControl, SurfaceControl>()
+            val leafTaskFilter = TransitionUtil.LeafTaskFilter()
+
+            // About layering: we divide up the "layer space" into 2 regions (each the size of the
+            // change count). This lets us categorize things into above and below while
+            // maintaining their relative ordering.
+            val belowLayers = info.changes.size
+            val aboveLayers = info.changes.size * 2
+            for (i in info.changes.indices) {
+                val change = info.changes[i]
+                if (change == null || change.taskInfo == null) {
+                    continue
+                }
+
+                val taskInfo = change.taskInfo
+
+                if (TransitionUtil.isWallpaper(change)) {
+                    val target =
+                        TransitionUtil.newTarget(
+                            change,
+                            belowLayers - i, // wallpapers go into the "below" layer space
+                            info,
+                            t,
+                            leashMap,
+                        )
+
+                    // Make all the wallpapers opaque.
+                    t.setAlpha(target.leash, 1f)
+                } else if (leafTaskFilter.test(change)) {
+                    // Start by putting everything into the "below" layer space.
+                    val target =
+                        TransitionUtil.newTarget(change, belowLayers - i, info, t, leashMap)
+                    apps.add(target)
+                    filteredStates.add(states[i])
+
+                    // Make all the apps opaque.
+                    t.setAlpha(target.leash, 1f)
+
+                    if (
+                        TransitionUtil.isClosingType(change.mode) &&
+                            taskInfo?.topActivityType != WindowConfiguration.ACTIVITY_TYPE_HOME
+                    ) {
+                        // Raise closing task to "above" layer so it isn't covered.
+                        t.setLayer(target.leash, aboveLayers - i)
+                    } else if (TransitionUtil.isOpeningType(change.mode)) {
+                        // Put into the "below" layer space.
+                        t.setLayer(target.leash, belowLayers - i)
+                    }
+                } else if (TransitionInfo.isIndependent(change, info)) {
+                    // Root tasks
+                    if (TransitionUtil.isClosingType(change.mode)) {
+                        // Raise closing task to "above" layer so it isn't covered.
+                        t.setLayer(change.leash, aboveLayers - i)
+                    } else if (TransitionUtil.isOpeningType(change.mode)) {
+                        // Put into the "below" layer space.
+                        t.setLayer(change.leash, belowLayers - i)
+                    }
+                } else if (TransitionUtil.isDividerBar(change)) {
+                    val target =
+                        TransitionUtil.newTarget(change, belowLayers - i, info, t, leashMap)
+                    apps.add(target)
+                    filteredStates.add(states[i])
+                }
+            }
+
+            val wrappedCallback: IRemoteAnimationFinishedCallback =
+                object : IRemoteAnimationFinishedCallback.Stub() {
+                    override fun onAnimationFinished() {
+                        leashMap.clear()
+                        val finishTransaction = SurfaceControl.Transaction()
+                        finishCallback?.onTransitionFinished(null, finishTransaction)
+                        finishTransaction.close()
+                    }
+                }
+
+            runner.takeOverAnimation(
+                apps.toTypedArray(),
+                filteredStates.toTypedArray(),
+                t,
+                wrappedCallback,
+            )
+        }
+
+        override fun asBinder(): IBinder {
+            return delegate.asBinder()
+        }
+    }
+
     @VisibleForTesting
     inner class Runner(
-        controller: Controller,
-        callback: Callback,
+        /**
+         * This can hold a reference to a view, so it needs to be cleaned up and can't be held on to
+         * forever when ![longLived].
+         */
+        private var controller: Controller?,
+        private val callback: Callback,
         /** The animator to use to animate the window transition. */
-        transitionAnimator: TransitionAnimator,
+        private val transitionAnimator: TransitionAnimator,
         /** Listener for animation lifecycle events. */
-        listener: Listener? = null
+        private val listener: Listener? = null,
+        /**
+         * Whether the internal should be kept around after execution for later usage. IMPORTANT:
+         * should always be false if this [Runner] is to be used directly with [ActivityOptions]
+         * (i.e. for ephemeral launches), or the controller will leak its view.
+         */
+        private val longLived: Boolean = false,
     ) : IRemoteAnimationRunner.Stub() {
         // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
         // etc.) are possible. So we need to make sure we drop any references that might
@@ -731,15 +942,14 @@ constructor(
         @VisibleForTesting var delegate: AnimationDelegate?
 
         init {
-            delegate =
-                AnimationDelegate(
-                    mainExecutor,
-                    controller,
-                    callback,
-                    DelegatingAnimationCompletionListener(listener, this::dispose),
-                    transitionAnimator,
-                    disableWmTimeout,
-                )
+            delegate = null
+            if (!longLived) {
+                // Ephemeral launches bundle the runner with the launch request (instead of being
+                // registered ahead of time for later use). This means that there could be a timeout
+                // between creation and invocation, so the delegate needs to exist from the
+                // beginning in order to handle such timeout.
+                createDelegate()
+            }
         }
 
         @BinderThread
@@ -748,8 +958,38 @@ constructor(
             apps: Array<out RemoteAnimationTarget>?,
             wallpapers: Array<out RemoteAnimationTarget>?,
             nonApps: Array<out RemoteAnimationTarget>?,
-            finishedCallback: IRemoteAnimationFinishedCallback?
+            finishedCallback: IRemoteAnimationFinishedCallback?,
         ) {
+            initAndRun(finishedCallback) { delegate ->
+                delegate.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback)
+            }
+        }
+
+        @VisibleForTesting
+        @BinderThread
+        fun takeOverAnimation(
+            apps: Array<RemoteAnimationTarget>?,
+            windowAnimationStates: Array<WindowAnimationState>,
+            startTransaction: SurfaceControl.Transaction,
+            finishedCallback: IRemoteAnimationFinishedCallback?,
+        ) {
+            assertLongLivedReturnAnimations()
+            initAndRun(finishedCallback) { delegate ->
+                delegate.takeOverAnimation(
+                    apps,
+                    windowAnimationStates,
+                    startTransaction,
+                    finishedCallback,
+                )
+            }
+        }
+
+        @BinderThread
+        private fun initAndRun(
+            finishedCallback: IRemoteAnimationFinishedCallback?,
+            performAnimation: (AnimationDelegate) -> Unit,
+        ) {
+            maybeSetUp()
             val delegate = delegate
             mainExecutor.execute {
                 if (delegate == null) {
@@ -758,7 +998,7 @@ constructor(
                     // signal back that we're done with it.
                     finishedCallback?.onAnimationFinished()
                 } else {
-                    delegate.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback)
+                    performAnimation(delegate)
                 }
             }
         }
@@ -772,11 +1012,43 @@ constructor(
             }
         }
 
+        @VisibleForTesting
+        @UiThread
+        fun postTimeouts() {
+            maybeSetUp()
+            delegate?.postTimeouts()
+        }
+
+        @AnyThread
+        private fun maybeSetUp() {
+            if (!longLived || delegate != null) return
+            createDelegate()
+        }
+
+        @AnyThread
+        private fun createDelegate() {
+            if (controller == null) return
+            delegate =
+                AnimationDelegate(
+                    mainExecutor,
+                    controller!!,
+                    callback,
+                    DelegatingAnimationCompletionListener(listener, this::dispose),
+                    transitionAnimator,
+                    disableWmTimeout,
+                )
+        }
+
         @AnyThread
         fun dispose() {
             // Drop references to animation controller once we're done with the animation
             // to avoid leaking.
-            mainExecutor.execute { delegate = null }
+            mainExecutor.execute {
+                delegate = null
+                // When long lived, the same Runner can be used more than once. In this case we need
+                // to keep the controller around so we can rebuild the delegate on demand.
+                if (!longLived) controller = null
+            }
         }
     }
 
@@ -838,14 +1110,14 @@ constructor(
             Log.wtf(
                 TAG,
                 "The remote animation was neither cancelled or started within " +
-                    "$LONG_TRANSITION_TIMEOUT"
+                    "$LONG_TRANSITION_TIMEOUT",
             )
         }
 
         init {
             // We do this check here to cover all entry points, including Launcher which doesn't
             // call startIntentWithAnimation()
-            if (!controller.isLaunching) TransitionAnimator.checkReturnAnimationFrameworkFlag()
+            if (!controller.isLaunching) assertReturnAnimations()
         }
 
         @UiThread
@@ -869,21 +1141,76 @@ constructor(
             apps: Array<out RemoteAnimationTarget>?,
             wallpapers: Array<out RemoteAnimationTarget>?,
             nonApps: Array<out RemoteAnimationTarget>?,
-            callback: IRemoteAnimationFinishedCallback?
+            callback: IRemoteAnimationFinishedCallback?,
         ) {
+            val window = setUpAnimation(apps, callback) ?: return
+
+            if (controller.windowAnimatorState == null || !longLivedReturnAnimationsEnabled()) {
+                val navigationBar =
+                    nonApps?.firstOrNull {
+                        it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
+                    }
+
+                startAnimation(window, navigationBar, iCallback = callback)
+            } else {
+                // If a [controller.windowAnimatorState] exists, treat this like a takeover.
+                takeOverAnimationInternal(
+                    window,
+                    startWindowState = null,
+                    startTransaction = null,
+                    callback,
+                )
+            }
+        }
+
+        @UiThread
+        internal fun takeOverAnimation(
+            apps: Array<out RemoteAnimationTarget>?,
+            startWindowStates: Array<WindowAnimationState>,
+            startTransaction: SurfaceControl.Transaction,
+            callback: IRemoteAnimationFinishedCallback?,
+        ) {
+            val window = setUpAnimation(apps, callback) ?: return
+            val startWindowState = startWindowStates[apps!!.indexOf(window)]
+            takeOverAnimationInternal(window, startWindowState, startTransaction, callback)
+        }
+
+        private fun takeOverAnimationInternal(
+            window: RemoteAnimationTarget,
+            startWindowState: WindowAnimationState?,
+            startTransaction: SurfaceControl.Transaction?,
+            callback: IRemoteAnimationFinishedCallback?,
+        ) {
+            val useSpring =
+                !controller.isLaunching && startWindowState != null && startTransaction != null
+            startAnimation(
+                window,
+                navigationBar = null,
+                useSpring,
+                startWindowState,
+                startTransaction,
+                callback,
+            )
+        }
+
+        @UiThread
+        private fun setUpAnimation(
+            apps: Array<out RemoteAnimationTarget>?,
+            callback: IRemoteAnimationFinishedCallback?,
+        ): RemoteAnimationTarget? {
             removeTimeouts()
 
             // The animation was started too late and we already notified the controller that it
             // timed out.
             if (timedOut) {
                 callback?.invoke()
-                return
+                return null
             }
 
             // This should not happen, but let's make sure we don't start the animation if it was
             // cancelled before and we already notified the controller.
             if (cancelled) {
-                return
+                return null
             }
 
             val window = findTargetWindowIfPossible(apps)
@@ -894,20 +1221,15 @@ constructor(
                 if (DEBUG_TRANSITION_ANIMATION) {
                     Log.d(
                         TAG,
-                        "Calling controller.onTransitionAnimationCancelled() [no window opening]"
+                        "Calling controller.onTransitionAnimationCancelled() [no window opening]",
                     )
                 }
                 controller.onTransitionAnimationCancelled()
                 listener?.onTransitionAnimationCancelled()
-                return
+                return null
             }
 
-            val navigationBar =
-                nonApps?.firstOrNull {
-                    it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
-                }
-
-            startAnimation(window, navigationBar, callback)
+            return window
         }
 
         private fun findTargetWindowIfPossible(
@@ -928,7 +1250,7 @@ constructor(
             for (it in apps) {
                 if (it.mode == targetMode) {
                     if (activityTransitionUseLargestWindow()) {
-                        if (returnAnimationFrameworkLibrary()) {
+                        if (returnAnimationsEnabled()) {
                             // If the controller contains a cookie, _only_ match if either the
                             // candidate contains the matching cookie, or a component is also
                             // defined and is a match.
@@ -973,8 +1295,11 @@ constructor(
 
         private fun startAnimation(
             window: RemoteAnimationTarget,
-            navigationBar: RemoteAnimationTarget?,
-            iCallback: IRemoteAnimationFinishedCallback?
+            navigationBar: RemoteAnimationTarget? = null,
+            useSpring: Boolean = false,
+            startingWindowState: WindowAnimationState? = null,
+            startTransaction: SurfaceControl.Transaction? = null,
+            iCallback: IRemoteAnimationFinishedCallback? = null,
         ) {
             if (TransitionAnimator.DEBUG) {
                 Log.d(TAG, "Remote animation started")
@@ -983,12 +1308,28 @@ constructor(
             val windowBounds = window.screenSpaceBounds
             val endState =
                 if (controller.isLaunching) {
-                    TransitionAnimator.State(
-                        top = windowBounds.top,
-                        bottom = windowBounds.bottom,
-                        left = windowBounds.left,
-                        right = windowBounds.right
-                    )
+                    controller.windowAnimatorState?.toTransitionState()
+                        ?: TransitionAnimator.State(
+                                top = windowBounds.top,
+                                bottom = windowBounds.bottom,
+                                left = windowBounds.left,
+                                right = windowBounds.right,
+                            )
+                            .apply {
+                                // TODO(b/184121838): We should somehow get the top and bottom
+                                // radius of the window instead of recomputing isExpandingFullyAbove
+                                // here.
+                                getWindowRadius(
+                                        transitionAnimator.isExpandingFullyAbove(
+                                            controller.transitionContainer,
+                                            this,
+                                        )
+                                    )
+                                    .let {
+                                        topCornerRadius = it
+                                        bottomCornerRadius = it
+                                    }
+                            }
                 } else {
                     controller.createAnimatorState()
                 }
@@ -1000,30 +1341,62 @@ constructor(
                         ?: window.backgroundColor
                 }
 
-            // TODO(b/184121838): We should somehow get the top and bottom radius of the window
-            // instead of recomputing isExpandingFullyAbove here.
             val isExpandingFullyAbove =
                 transitionAnimator.isExpandingFullyAbove(controller.transitionContainer, endState)
-            if (controller.isLaunching) {
-                val endRadius = getWindowRadius(isExpandingFullyAbove)
-                endState.topCornerRadius = endRadius
-                endState.bottomCornerRadius = endRadius
-            }
+            val windowState = startingWindowState ?: controller.windowAnimatorState
 
             // We animate the opening window and delegate the view expansion to [this.controller].
             val delegate = this.controller
             val controller =
                 object : Controller by delegate {
                     override fun createAnimatorState(): TransitionAnimator.State {
-                        if (isLaunching) return delegate.createAnimatorState()
-                        val windowRadius = getWindowRadius(isExpandingFullyAbove)
+                        if (isLaunching) {
+                            return delegate.createAnimatorState()
+                        } else if (!longLivedReturnAnimationsEnabled()) {
+                            return delegate.windowAnimatorState?.toTransitionState()
+                                ?: getWindowRadius(isExpandingFullyAbove).let {
+                                    TransitionAnimator.State(
+                                        top = windowBounds.top,
+                                        bottom = windowBounds.bottom,
+                                        left = windowBounds.left,
+                                        right = windowBounds.right,
+                                        topCornerRadius = it,
+                                        bottomCornerRadius = it,
+                                    )
+                                }
+                        }
+
+                        // TODO(b/323863002): use the timestamp and velocity to update the initial
+                        //   position.
+                        val bounds = windowState?.bounds
+                        val left: Int = bounds?.left?.toInt() ?: windowBounds.left
+                        val top: Int = bounds?.top?.toInt() ?: windowBounds.top
+                        val right: Int = bounds?.right?.toInt() ?: windowBounds.right
+                        val bottom: Int = bounds?.bottom?.toInt() ?: windowBounds.bottom
+
+                        val width = windowBounds.right - windowBounds.left
+                        val height = windowBounds.bottom - windowBounds.top
+                        // Scale the window. We use the max of (widthRatio, heightRatio) so that
+                        // there is no blank space on any side.
+                        val widthRatio = (right - left).toFloat() / width
+                        val heightRatio = (bottom - top).toFloat() / height
+                        val startScale = maxOf(widthRatio, heightRatio)
+
+                        val maybeRadius = windowState?.topLeftRadius
+                        val windowRadius =
+                            if (maybeRadius != null) {
+                                maybeRadius * startScale
+                            } else {
+                                getWindowRadius(isExpandingFullyAbove)
+                            }
+
                         return TransitionAnimator.State(
-                            top = windowBounds.top,
-                            bottom = windowBounds.bottom,
-                            left = windowBounds.left,
-                            right = windowBounds.right,
+                            top = top,
+                            bottom = bottom,
+                            left = left,
+                            right = right,
                             topCornerRadius = windowRadius,
-                            bottomCornerRadius = windowRadius
+                            bottomCornerRadius = windowRadius,
                         )
                     }
 
@@ -1035,9 +1408,22 @@ constructor(
                                 TAG,
                                 "Calling controller.onTransitionAnimationStart(" +
                                     "isExpandingFullyAbove=$isExpandingFullyAbove) " +
-                                    "[controller=$delegate]"
+                                    "[controller=$delegate]",
                             )
                         }
+
+                        if (startTransaction != null) {
+                            // Calling applyStateToWindow() here avoids skipping a frame when taking
+                            // over an animation.
+                            applyStateToWindow(
+                                window,
+                                createAnimatorState(),
+                                linearProgress = 0f,
+                                useSpring,
+                                startTransaction,
+                            )
+                        }
+
                         delegate.onTransitionAnimationStart(isExpandingFullyAbove)
                     }
 
@@ -1050,7 +1436,7 @@ constructor(
                                 TAG,
                                 "Calling controller.onTransitionAnimationEnd(" +
                                     "isExpandingFullyAbove=$isExpandingFullyAbove) " +
-                                    "[controller=$delegate]"
+                                    "[controller=$delegate]",
                             )
                         }
                         delegate.onTransitionAnimationEnd(isExpandingFullyAbove)
@@ -1059,16 +1445,25 @@ constructor(
                     override fun onTransitionAnimationProgress(
                         state: TransitionAnimator.State,
                         progress: Float,
-                        linearProgress: Float
+                        linearProgress: Float,
                     ) {
-                        applyStateToWindow(window, state, linearProgress)
+                        applyStateToWindow(window, state, linearProgress, useSpring)
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
                         listener?.onTransitionAnimationProgress(linearProgress)
                         delegate.onTransitionAnimationProgress(state, progress, linearProgress)
                     }
                 }
-
+            val velocityPxPerS =
+                if (longLivedReturnAnimationsEnabled() && windowState?.velocityPxPerMs != null) {
+                    val xVelocityPxPerS = windowState.velocityPxPerMs.x * 1000
+                    val yVelocityPxPerS = windowState.velocityPxPerMs.y * 1000
+                    PointF(xVelocityPxPerS, yVelocityPxPerS)
+                } else if (useSpring) {
+                    PointF(0f, 0f)
+                } else {
+                    null
+                }
             animation =
                 transitionAnimator.startAnimation(
                     controller,
@@ -1076,6 +1471,8 @@ constructor(
                     windowBackgroundColor,
                     fadeWindowBackgroundLayer = !controller.isBelowAnimatingWindow,
                     drawHole = !controller.isBelowAnimatingWindow,
+                    startVelocity = velocityPxPerS,
+                    startFrameTime = windowState?.timestamp ?: -1,
                 )
         }
 
@@ -1095,6 +1492,8 @@ constructor(
             window: RemoteAnimationTarget,
             state: TransitionAnimator.State,
             linearProgress: Float,
+            useSpring: Boolean,
+            transaction: SurfaceControl.Transaction? = null,
         ) {
             if (transactionApplierView.viewRootImpl == null || !window.leash.isValid) {
                 // Don't apply any transaction if the view root we synchronize with was detached or
@@ -1135,28 +1534,50 @@ constructor(
                 windowCropF.left.roundToInt(),
                 windowCropF.top.roundToInt(),
                 windowCropF.right.roundToInt(),
-                windowCropF.bottom.roundToInt()
+                windowCropF.bottom.roundToInt(),
             )
 
-            val windowAnimationDelay =
+            val interpolators: TransitionAnimator.Interpolators
+            val windowProgress: Float
+
+            if (useSpring) {
+                val windowAnimationDelay: Float
+                val windowAnimationDuration: Float
                 if (controller.isLaunching) {
-                    TIMINGS.contentAfterFadeInDelay
+                    windowAnimationDelay = SPRING_TIMINGS.contentAfterFadeInDelay
+                    windowAnimationDuration = SPRING_TIMINGS.contentAfterFadeInDuration
                 } else {
-                    TIMINGS.contentBeforeFadeOutDelay
+                    windowAnimationDelay = SPRING_TIMINGS.contentBeforeFadeOutDelay
+                    windowAnimationDuration = SPRING_TIMINGS.contentBeforeFadeOutDuration
                 }
-            val windowAnimationDuration =
+
+                interpolators = SPRING_INTERPOLATORS
+                windowProgress =
+                    TransitionAnimator.getProgress(
+                        linearProgress,
+                        windowAnimationDelay,
+                        windowAnimationDuration,
+                    )
+            } else {
+                val windowAnimationDelay: Long
+                val windowAnimationDuration: Long
                 if (controller.isLaunching) {
-                    TIMINGS.contentAfterFadeInDuration
+                    windowAnimationDelay = TIMINGS.contentAfterFadeInDelay
+                    windowAnimationDuration = TIMINGS.contentAfterFadeInDuration
                 } else {
-                    TIMINGS.contentBeforeFadeOutDuration
+                    windowAnimationDelay = TIMINGS.contentBeforeFadeOutDelay
+                    windowAnimationDuration = TIMINGS.contentBeforeFadeOutDuration
                 }
-            val windowProgress =
-                TransitionAnimator.getProgress(
-                    TIMINGS,
-                    linearProgress,
-                    windowAnimationDelay,
-                    windowAnimationDuration
-                )
+
+                interpolators = INTERPOLATORS
+                windowProgress =
+                    TransitionAnimator.getProgress(
+                        TIMINGS,
+                        linearProgress,
+                        windowAnimationDelay,
+                        windowAnimationDuration,
+                    )
+            }
 
             // The alpha of the opening window. If it opens above the expandable, then it should
             // fade in progressively. Otherwise, it should be fully opaque and will be progressively
@@ -1164,12 +1585,12 @@ constructor(
             val alpha =
                 if (controller.isBelowAnimatingWindow) {
                     if (controller.isLaunching) {
-                        INTERPOLATORS.contentAfterFadeInInterpolator.getInterpolation(
+                        interpolators.contentAfterFadeInInterpolator.getInterpolation(
                             windowProgress
                         )
                     } else {
                         1 -
-                            INTERPOLATORS.contentBeforeFadeOutInterpolator.getInterpolation(
+                            interpolators.contentBeforeFadeOutInterpolator.getInterpolation(
                                 windowProgress
                             )
                     }
@@ -1183,6 +1604,7 @@ constructor(
             // especially important for lock screen animations, where the window is not clipped by
             // the shade.
             val cornerRadius = maxOf(state.topCornerRadius, state.bottomCornerRadius) / scale
+
             val params =
                 SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(window.leash)
                     .withAlpha(alpha)
@@ -1190,15 +1612,19 @@ constructor(
                     .withWindowCrop(windowCrop)
                     .withCornerRadius(cornerRadius)
                     .withVisibility(true)
-                    .build()
+            if (transaction != null) params.withMergeTransaction(transaction)
 
-            transactionApplier.scheduleApply(params)
+            transactionApplier.scheduleApply(params.build())
         }
 
+        // TODO(b/377643129): remote transitions have no way of identifying the navbar when
+        //  converting to RemoteAnimationTargets (and in my testing it was never included in the
+        //  transition at all). So this method is not used anymore. Remove or adapt once we fully
+        //  convert to remote transitions.
         private fun applyStateToNavigationBar(
             navigationBar: RemoteAnimationTarget,
             state: TransitionAnimator.State,
-            linearProgress: Float
+            linearProgress: Float,
         ) {
             if (transactionApplierView.viewRootImpl == null || !navigationBar.leash.isValid) {
                 // Don't apply any transaction if the view root we synchronize with was detached or
@@ -1212,7 +1638,7 @@ constructor(
                     TIMINGS,
                     linearProgress,
                     ANIMATION_DELAY_NAV_FADE_IN,
-                    ANIMATION_DURATION_NAV_FADE_OUT
+                    ANIMATION_DURATION_NAV_FADE_OUT,
                 )
 
             val params = SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(navigationBar.leash)
@@ -1220,7 +1646,7 @@ constructor(
                 matrix.reset()
                 matrix.setTranslate(
                     0f,
-                    (state.top - navigationBar.sourceContainerBounds.top).toFloat()
+                    (state.top - navigationBar.sourceContainerBounds.top).toFloat(),
                 )
                 windowCrop.set(state.left, 0, state.right, state.height)
                 params
@@ -1234,7 +1660,7 @@ constructor(
                         TIMINGS,
                         linearProgress,
                         0,
-                        ANIMATION_DURATION_NAV_FADE_OUT
+                        ANIMATION_DURATION_NAV_FADE_OUT,
                     )
                 params.withAlpha(1f - NAV_FADE_OUT_INTERPOLATOR.getInterpolation(fadeOutProgress))
             }
@@ -1255,7 +1681,7 @@ constructor(
             if (DEBUG_TRANSITION_ANIMATION) {
                 Log.d(
                     TAG,
-                    "Calling controller.onTransitionAnimationCancelled() [animation timed out]"
+                    "Calling controller.onTransitionAnimationCancelled() [animation timed out]",
                 )
             }
             controller.onTransitionAnimationCancelled()
@@ -1332,9 +1758,14 @@ constructor(
         internal fun register(
             filter: TransitionFilter,
             remoteTransition: RemoteTransition,
+            includeTakeover: Boolean,
         ) {
             shellTransitions?.registerRemote(filter, remoteTransition)
             iShellTransitions?.registerRemote(filter, remoteTransition)
+            if (includeTakeover) {
+                shellTransitions?.registerRemoteForTakeover(filter, remoteTransition)
+                iShellTransitions?.registerRemoteForTakeover(filter, remoteTransition)
+            }
         }
 
         /** Unregister [remoteTransition] from WM Shell. */

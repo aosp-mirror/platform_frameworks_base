@@ -14,21 +14,35 @@
  * limitations under the License.
  */
 
+#include <core_jni_helpers.h>
+#include <cutils/trace.h>
 #include <fcntl.h>
+#include <minikin/Hyphenator.h>
+#ifdef __ANDROID__
 #include <sys/mman.h>
+#else
+#include <android-base/mapped_file.h>
+#include <android-base/properties.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef __ANDROID__
+#include <tracing_perfetto.h>
+#endif
+#include <unicode/uloc.h>
 #include <unistd.h>
 
 #include <algorithm>
 
-#include <core_jni_helpers.h>
-#include <minikin/Hyphenator.h>
-
 namespace android {
 
 static std::string buildFileName(const std::string& locale) {
+#ifdef __ANDROID__
     constexpr char SYSTEM_HYPHENATOR_PREFIX[] = "/system/usr/hyphen-data/hyph-";
+#else
+    std::string hyphenPath = base::GetProperty("ro.hyphen.data.dir", "/system/usr/hyphen-data");
+    std::string SYSTEM_HYPHENATOR_PREFIX = hyphenPath + "/hyph-";
+#endif
     constexpr char SYSTEM_HYPHENATOR_SUFFIX[] = ".hyb";
     std::string lowerLocale;
     lowerLocale.reserve(locale.size());
@@ -49,11 +63,22 @@ static std::pair<const uint8_t*, size_t> mmapPatternFile(const std::string& loca
         return std::make_pair(nullptr, 0);
     }
 
+#ifdef __ANDROID__
     void* ptr = mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED, fd, 0 /* offset */);
     close(fd);
     if (ptr == MAP_FAILED) {
         return std::make_pair(nullptr, 0);
     }
+#else
+    std::unique_ptr<base::MappedFile> patternFile =
+            base::MappedFile::FromFd(fd, 0, st.st_size, PROT_READ);
+    close(fd);
+    if (patternFile == nullptr) {
+        return std::make_pair(nullptr, 0);
+    }
+    auto* mappedPtr = new base::MappedFile(std::move(*patternFile));
+    char* ptr = mappedPtr->data();
+#endif
     return std::make_pair(reinterpret_cast<const uint8_t*>(ptr), st.st_size);
 }
 
@@ -77,6 +102,23 @@ static void addHyphenator(const std::string& locale, int minPrefix, int minSuffi
 
 static void addHyphenatorAlias(const std::string& from, const std::string& to) {
     minikin::addHyphenatorAlias(from, to);
+}
+
+/*
+ * Cache the subtag key map by calling uloc_forLanguageTag with a subtag.
+ * minikin calls uloc_forLanguageTag with an Unicode extension specifying
+ * the line breaking strictness. Parsing the extension requires loading the key map
+ * from keyTypeData.res in the ICU.
+ * "lb" is the key commonly used by minikin. "ca" is a common legacy key mapping to
+ * the "calendar" key. It ensures that the key map is loaded and cached in icu4c.
+ * "en-Latn-US" is a common locale used in the Android system regardless what default locale
+ * is selected in the Settings app.
+ */
+inline static void cacheUnicodeExtensionSubtagsKeyMap() {
+    UErrorCode status = U_ZERO_ERROR;
+    char localeID[ULOC_FULLNAME_CAPACITY] = {};
+    uloc_forLanguageTag("en-Latn-US-u-lb-loose-ca-gregory", localeID, ULOC_FULLNAME_CAPACITY,
+                        nullptr, &status);
 }
 
 static void init() {
@@ -190,6 +232,14 @@ static void init() {
     addHyphenatorAlias("und-Orya", "or");  // Oriya
     addHyphenatorAlias("und-Taml", "ta");  // Tamil
     addHyphenatorAlias("und-Telu", "te");  // Telugu
+
+#ifdef __ANDROID__
+    tracing_perfetto::traceBegin(ATRACE_TAG_VIEW, "CacheUnicodeExtensionSubtagsKeyMap");
+#endif
+    cacheUnicodeExtensionSubtagsKeyMap();
+#ifdef __ANDROID__
+    tracing_perfetto::traceEnd(ATRACE_TAG_VIEW); // CacheUnicodeExtensionSubtagsKeyMap
+#endif
 }
 
 static const JNINativeMethod gMethods[] = {

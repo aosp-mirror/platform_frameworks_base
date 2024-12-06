@@ -54,20 +54,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Allows granted apps to manage the WearableSensingService.
- * Applications are responsible for managing the connection to Wearables. Applications can choose
- * to provide a data stream to the WearableSensingService to use for
- * computing {@link AmbientContextEvent}s. Applications can also optionally provide their own
- * defined data to power the detection of {@link AmbientContextEvent}s.
- * Methods on this class requires the caller to hold and be granted the
- * {@link Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE}.
+ * Allows granted apps to manage the WearableSensingService. Applications are responsible for
+ * managing the connection to Wearables. Applications can choose to provide a data stream to the
+ * WearableSensingService to use for computing {@link AmbientContextEvent}s. Applications can also
+ * optionally provide their own defined data to power the detection of {@link AmbientContextEvent}s.
+ * Methods on this class requires the caller to hold and be granted the {@link
+ * Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE}.
  *
  * <p>The use of "Wearable" here is not the same as the Android Wear platform and should be treated
- * separately. </p>
+ * separately.
  *
  * @hide
  */
@@ -75,8 +77,8 @@ import java.util.function.Consumer;
 @SystemService(Context.WEARABLE_SENSING_SERVICE)
 public class WearableSensingManager {
     /**
-     * The bundle key for the service status query result, used in
-     * {@code RemoteCallback#sendResult}.
+     * The bundle key for the service status query result, used in {@code
+     * RemoteCallback#sendResult}.
      *
      * @hide
      */
@@ -93,13 +95,20 @@ public class WearableSensingManager {
             "android.app.wearable.extra.WEARABLE_SENSING_DATA_REQUEST";
 
     /**
-     * An unknown status.
+     * An invalid connection ID returned by the system_server when it encounters an error providing
+     * a connection to WearableSensingService.
+     *
+     * @hide
      */
+    public static final int CONNECTION_ID_INVALID = -1;
+
+    /** A placeholder connection ID used in an implementation detail. */
+    private static final int CONNECTION_ID_PLACEHOLDER = -2;
+
+    /** An unknown status. */
     public static final int STATUS_UNKNOWN = 0;
 
-    /**
-     * The value of the status code that indicates success.
-     */
+    /** The value of the status code that indicates success. */
     public static final int STATUS_SUCCESS = 1;
 
     /**
@@ -107,45 +116,44 @@ public class WearableSensingManager {
      * supported.
      *
      * @deprecated WearableSensingManager does not deal with events. Use {@link
-     * STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation of
-     * {@link WearableSensingService}.
+     *     STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation
+     *     of {@link WearableSensingService}.
      */
-    @Deprecated
-    public static final int STATUS_UNSUPPORTED = 2;
+    @Deprecated public static final int STATUS_UNSUPPORTED = 2;
 
-    /**
-     * The value of the status code that indicates service not available.
-     */
+    /** The value of the status code that indicates service not available. */
     public static final int STATUS_SERVICE_UNAVAILABLE = 3;
 
-    /**
-     * The value of the status code that there's no connection to the wearable.
-     */
+    /** The value of the status code that there's no connection to the wearable. */
     public static final int STATUS_WEARABLE_UNAVAILABLE = 4;
 
-    /**
-     * The value of the status code that the app is not granted access.
-     */
+    /** The value of the status code that the app is not granted access. */
     public static final int STATUS_ACCESS_DENIED = 5;
 
     /**
      * The value of the status code that indicates the method called is not supported by the
      * implementation of {@link WearableSensingService}.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
     public static final int STATUS_UNSUPPORTED_OPERATION = 6;
 
     /**
      * The value of the status code that indicates an error occurred in the encrypted channel backed
-     * by the provided connection. See {@link #provideConnection(ParcelFileDescriptor,
-     * Executor, Consumer)}.
+     * by the provided connection. See {@link #provideConnection(ParcelFileDescriptor, Executor,
+     * Consumer)}.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
     public static final int STATUS_CHANNEL_ERROR = 7;
 
     /** The value of the status code that indicates the provided data type is not supported. */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     public static final int STATUS_UNSUPPORTED_DATA_TYPE = 8;
+
+    /**
+     * The value of the status code that indicates the provided connection is rejected because the
+     * maximum number of concurrent connections have already been provided. Use {@link
+     * #removeConnection(WearableConnection)} or {@link #removeAllConnections()} to remove a
+     * connection before providing a new one.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    public static final int STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED = 9;
 
     /** @hide */
     @IntDef(
@@ -159,7 +167,8 @@ public class WearableSensingManager {
                 STATUS_ACCESS_DENIED,
                 STATUS_UNSUPPORTED_OPERATION,
                 STATUS_CHANNEL_ERROR,
-                STATUS_UNSUPPORTED_DATA_TYPE
+                STATUS_UNSUPPORTED_DATA_TYPE,
+                STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusCode {}
@@ -183,7 +192,6 @@ public class WearableSensingManager {
      * @return The WearableSensingDataRequest in the provided Intent, or null if the Intent does not
      *     contain a WearableSensingDataRequest.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @Nullable
     public static WearableSensingDataRequest getDataRequestFromIntent(@NonNull Intent intent) {
         return intent.getParcelableExtra(
@@ -194,8 +202,13 @@ public class WearableSensingManager {
     private final Context mContext;
     private final IWearableSensingManager mService;
 
+    private final Map<WearableConnection, Integer> mWearableConnectionIdMap =
+            new ConcurrentHashMap<>();
+
     /**
-     * {@hide}
+     * Creates a WearableSensingManager.
+     *
+     * @hide
      */
     public WearableSensingManager(Context context, IWearableSensingManager service) {
         mContext = context;
@@ -203,8 +216,64 @@ public class WearableSensingManager {
     }
 
     /**
+     * Returns the remaining number of concurrent connections allowed by {@link
+     * #provideConnection(WearableConnection, Executor)}.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    public int getAvailableConnectionCount() {
+        try {
+            return mService.getAvailableConnectionCount();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Provides a remote wearable device connection to the WearableSensingService and sends the
      * resulting status to the {@code statusConsumer} after the call.
+     *
+     * <p>This method has the same behavior as {@link #provideConnection(WearableConnection,
+     * Executor)} except that concurrent connections are not allowed. Before providing the
+     * secureWearableConnection, the system will restart the WearableSensingService process if it
+     * has not been restarted since the last secureWearableConnection was provided via this method.
+     * Other method calls into WearableSensingService may be dropped during the restart. The caller
+     * is responsible for ensuring other method calls are queued until a success status is returned
+     * from the {@code statusConsumer}.
+     *
+     * <p>If an error occurred in the encrypted channel (such as the underlying stream closed), the
+     * system will send a status code of {@link STATUS_CHANNEL_ERROR} to the {@code statusConsumer}
+     * and kill the WearableSensingService process.
+     *
+     * @param wearableConnection The connection to provide
+     * @param executor Executor on which to run the consumer callback
+     * @param statusConsumer A consumer that handles the status codes for providing the connection
+     *     and errors in the encrypted channel.
+     * @deprecated Use {@link #provideConnection(WearableConnection, Executor)} instead to provide a
+     *     remote wearable device connection to the WearableSensingService
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    @Deprecated
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    public void provideConnection(
+            @NonNull ParcelFileDescriptor wearableConnection,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
+        try {
+            // The wearableSensingCallback is included in this method call even though it is not
+            // semantically related to the connection because we want to avoid race conditions
+            // during the process restart triggered by this method call. See
+            // com.android.server.wearable.RemoteWearableSensingService for details.
+            mService.provideConnection(
+                    wearableConnection, createWearableSensingCallback(executor), statusCallback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provides a remote wearable device connection to the WearableSensingService.
      *
      * <p>This is used by applications that will also provide an implementation of the isolated
      * WearableSensingService.
@@ -228,15 +297,18 @@ public class WearableSensingManager {
      * from secureWearableConnection. The raw {@code wearableConnection} provided to this method
      * will not be directly available to the WearableSensingService.
      *
-     * <p>If an error occurred in the encrypted channel (such as the underlying stream closed), the
-     * system will send a status code of {@link STATUS_CHANNEL_ERROR} to the {@code statusConsumer}
-     * and kill the WearableSensingService process.
+     * <p>There is a limit on the number of concurrent connections allowed. Call {@link
+     * #getAvailableConnectionCount()} to check the remaining quota. If more connections are
+     * provided than allowed, the new connection will be rejected with {@value
+     * #STATUS_MAX_CONCURRENT_CONNECTIONS_EXCEEDED}. To reclaim the quota of a previously provided
+     * connection that is no longer needed, call {@link #removeConnection(WearableConnection)} with
+     * the same WearableConnection instance. Connections provided via {@link
+     * #provideConnection(ParcelFileDescriptor, Executor, Consumer)} will not contribute towards the
+     * concurrent connection limit.
      *
-     * <p>Before providing the secureWearableConnection, the system will restart the
-     * WearableSensingService process if it has not been restarted since the last
-     * secureWearableConnection was provided. Other method calls into WearableSensingService may be
-     * dropped during the restart. The caller is responsible for ensuring other method calls are
-     * queued until a success status is returned from the {@code statusConsumer}.
+     * <p>If the {@code wearableConnection} receives an error, either the connection will not be
+     * sent to the WearableSensingService, or the connection will be closed by the system. Either
+     * way, the concurrent connection quota for this connection will be automatically released.
      *
      * <p>If the WearableSensingService implementation belongs to the same APK as the caller,
      * calling this method will allow WearableSensingService to read from the caller's file
@@ -244,24 +316,143 @@ public class WearableSensingManager {
      * caller's process and executed by the {@code executor} provided to this method.
      *
      * @param wearableConnection The connection to provide
-     * @param executor Executor on which to run the consumer callback
-     * @param statusConsumer A consumer that handles the status codes for providing the connection
-     *     and errors in the encrypted channel.
+     * @param executor Executor on which to run the callback methods on {@code wearableConnection}
      */
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
-    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
     public void provideConnection(
-            @NonNull ParcelFileDescriptor wearableConnection,
+            @NonNull WearableConnection wearableConnection, @NonNull Executor executor) {
+        RemoteCallback statusCallback =
+                createStatusCallback(
+                        executor,
+                        statusCode -> {
+                            if (!mWearableConnectionIdMap.containsKey(wearableConnection)) {
+                                Slog.i(
+                                        TAG,
+                                        "Surpassed status callback for removed connection "
+                                                + wearableConnection);
+                                return;
+                            }
+                            if (statusCode == STATUS_SUCCESS) {
+                                wearableConnection.onConnectionAccepted();
+                            } else {
+                                mWearableConnectionIdMap.remove(wearableConnection);
+                                wearableConnection.onError(statusCode);
+                            }
+                        });
+        try {
+            // The statusCallback should not invoke callback on a removed connection. To implement
+            // this behavior, statusCallback will only invoke the callback if the connection is
+            // present in mWearableConnectionIdMap. We need to add the connection to the map before
+            // statusCallback is sent to mService in case the system triggers the statusCallback
+            // before the connectionId is returned.
+            mWearableConnectionIdMap.put(wearableConnection, CONNECTION_ID_PLACEHOLDER);
+            int connectionId =
+                    mService.provideConcurrentConnection(
+                            wearableConnection.getConnection(),
+                            wearableConnection.getMetadata(),
+                            createWearableSensingCallback(executor),
+                            statusCallback);
+            mWearableConnectionIdMap.put(wearableConnection, connectionId);
+            // For invalid connection IDs, the status callback will remove the connection from
+            // mWearableConnectionIdMap
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a connection previously provided via {@link #provideConnection(WearableConnection,
+     * Executor)}.
+     *
+     * <p>The WearableSensingService will no longer be able to use this connection.
+     *
+     * <p>After this method returns, there will be no new invocation to callback methods in the
+     * removed {@link WearableConnection}. Ongoing invocations will continue to run.
+     *
+     * <p>This method throws a {@link NoSuchElementException} if the provided {@code
+     * wearableConnection} does not match any open connection.
+     *
+     * <p>This method should not be called before the corresponding {@link
+     * #provideConnection(WearableConnection, Executor)} invocation returns. Otherwise, the
+     * connection may not be removed, and an {@link IllegalStateException} may be thrown.
+     *
+     * @param wearableConnection The WearableConnection instance previously provided to {@link
+     *     #provideConnection(WearableConnection, Executor)}.
+     * @throws NoSuchElementException if the connection was never provided or was already removed.
+     * @throws IllegalStateException if the {@link #provideConnection(WearableConnection, Executor)}
+     *     invocation for the given connection has not returned.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    public void removeConnection(@NonNull WearableConnection wearableConnection) {
+        Integer connectionId = mWearableConnectionIdMap.remove(wearableConnection);
+        if (connectionId == null || connectionId == CONNECTION_ID_INVALID) {
+            throw new NoSuchElementException(
+                    "The provided connection was never provided or was already removed.");
+        }
+        if (connectionId == CONNECTION_ID_PLACEHOLDER) {
+            throw new IllegalStateException(
+                    "Attempt to remove connection before provideConnection returns. The connection"
+                            + " will not be removed.");
+        }
+        try {
+            if (!mService.removeConnection(connectionId)) {
+                throw new NoSuchElementException(
+                        "The provided connection was never provided or was already removed.");
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes all connections previously provided via {@link #provideConnection(WearableConnection,
+     * Executor)}.
+     *
+     * <p>The connection provided via {@link #provideConnection(ParcelFileDescriptor, Executor,
+     * Consumer)}, if exists, will not be affected by this method.
+     *
+     * <p>The WearableSensingService will no longer be able to use any of the removed connections.
+     *
+     * <p>After this method returns, there will be no new invocation to callback methods in the
+     * removed {@link WearableConnection}s. Ongoing invocations will continue to run.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    @FlaggedApi(Flags.FLAG_ENABLE_CONCURRENT_WEARABLE_CONNECTIONS)
+    public void removeAllConnections() {
+        mWearableConnectionIdMap.clear();
+        try {
+            mService.removeAllConnections();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provides a read-only {@link ParcelFileDescriptor} to the WearableSensingService.
+     *
+     * <p>This is used by the application that will also provide an implementation of the isolated
+     * WearableSensingService. If the {@link ParcelFileDescriptor} was provided successfully, {@link
+     * WearableSensingManager#STATUS_SUCCESS} will be sent to the {@code statusConsumer}.
+     *
+     * @param parcelFileDescriptor The read-only {@link ParcelFileDescriptor} to provide
+     * @param metadata Metadata used to identify the {@code parcelFileDescriptor}
+     * @param executor Executor on which to run the {@code statusConsumer}
+     * @param statusConsumer A consumer that handles the status codes
+     * @throws IllegalArgumentException when the {@code parcelFileDescriptor} is not read-only
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
+    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_READ_ONLY_PFD)
+    public void provideReadOnlyParcelFileDescriptor(
+            @NonNull ParcelFileDescriptor parcelFileDescriptor,
+            @NonNull PersistableBundle metadata,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
         RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
         try {
-            // The wearableSensingCallback is included in this method call even though it is not
-            // semantically related to the connection because we want to avoid race conditions
-            // during the process restart triggered by this method call. See
-            // com.android.server.wearable.RemoteWearableSensingService for details.
-            mService.provideConnection(
-                    wearableConnection, createWearableSensingCallback(executor), statusCallback);
+            mService.provideReadOnlyParcelFileDescriptor(
+                    parcelFileDescriptor, metadata, statusCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -284,8 +475,8 @@ public class WearableSensingManager {
      * @param executor Executor on which to run the consumer callback
      * @param statusConsumer A consumer that handles the status codes, which is returned right after
      *     the call.
-     * @deprecated Use {@link #provideConnection(ParcelFileDescriptor, Executor, Consumer)} instead
-     *     to provide a remote wearable device connection to the WearableSensingService
+     * @deprecated Use {@link #provideConnection(WearableConnection, Executor)} instead to provide a
+     *     remote wearable device connection to the WearableSensingService
      */
     @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
@@ -308,28 +499,27 @@ public class WearableSensingManager {
 
     /**
      * Sets configuration and provides read-only data in a {@link PersistableBundle} that may be
-     * used by the WearableSensingService, and sends the result to the {@link Consumer}
-     * right after the call. It is dependent on the application to
-     * define the type of data to provide. This is used by applications that will also
-     * provide an implementation of an isolated WearableSensingService. If the data was
-     * provided successfully {@link WearableSensingManager#STATUS_SUCCESS} will be povided.
+     * used by the WearableSensingService, and sends the result to the {@link Consumer} right after
+     * the call. It is dependent on the application to define the type of data to provide. This is
+     * used by applications that will also provide an implementation of an isolated
+     * WearableSensingService. If the data was provided successfully {@link
+     * WearableSensingManager#STATUS_SUCCESS} will be povided.
      *
      * @param data Application configuration data to provide to the {@link WearableSensingService}.
-     *             PersistableBundle does not allow any remotable objects or other contents
-     *             that can be used to communicate with other processes.
-     * @param sharedMemory The unrestricted data blob to
-     *                     provide to the {@link WearableSensingService}. Use this to provide the
-     *                     sensing models data or other such data to the trusted process.
-     *                     The sharedMemory must be read only and protected with
-     *                     {@link OsConstants.PROT_READ}.
-     *                     Other operations will be removed by the system.
+     *     PersistableBundle does not allow any remotable objects or other contents that can be used
+     *     to communicate with other processes.
+     * @param sharedMemory The unrestricted data blob to provide to the {@link
+     *     WearableSensingService}. Use this to provide the sensing models data or other such data
+     *     to the trusted process. The sharedMemory must be read only and protected with {@link
+     *     OsConstants.PROT_READ}. Other operations will be removed by the system.
      * @param executor Executor on which to run the consumer callback
-     * @param statusConsumer A consumer that handles the status codes, which is returned
-     *                     right after the call
+     * @param statusConsumer A consumer that handles the status codes, which is returned right after
+     *     the call
      */
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void provideData(
-            @NonNull PersistableBundle data, @Nullable SharedMemory sharedMemory,
+            @NonNull PersistableBundle data,
+            @Nullable SharedMemory sharedMemory,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
         try {
@@ -390,7 +580,6 @@ public class WearableSensingManager {
      * @param executor Executor on which to run the consumer callback.
      * @param statusConsumer A consumer that handles the status code for the observer registration.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void registerDataRequestObserver(
             int dataType,
@@ -417,7 +606,6 @@ public class WearableSensingManager {
      * @param statusConsumer A consumer that handles the status code for the observer
      *     unregistration.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void unregisterDataRequestObserver(
             int dataType,
@@ -449,8 +637,8 @@ public class WearableSensingManager {
      * Consumer<android.service.voice.HotwordAudioStream>}, the system will check whether the {@link
      * android.service.voice.VoiceInteractionService} at that time is {@code
      * targetVisComponentName}. If not, the system will call {@link
-     * WearableSensingService#onStopHotwordAudioStream()} and will not forward the audio
-     * data to the current {@link android.service.voice.HotwordDetectionService} nor {@link
+     * WearableSensingService#onStopHotwordAudioStream()} and will not forward the audio data to the
+     * current {@link android.service.voice.HotwordDetectionService} nor {@link
      * android.service.voice.VoiceInteractionService}. The system will not send a status code to
      * {@code statusConsumer} regarding the {@code targetVisComponentName} check. The caller is
      * responsible for determining whether the system's {@link
@@ -466,9 +654,9 @@ public class WearableSensingManager {
      * <p>If the {@code statusConsumer} returns {@link STATUS_SUCCESS}, the caller should call
      * {@link #stopHotwordRecognition(Executor, Consumer)} when it wants the wearable to stop
      * listening for hotword. If the {@code statusConsumer} returns any other status code, a failure
-     * has occurred and calling {@link #stopHotwordRecognition(Executor, Consumer)} is not
-     * required. The system will not retry listening automatically. The caller should call this
-     * method again if they want to retry.
+     * has occurred and calling {@link #stopHotwordRecognition(Executor, Consumer)} is not required.
+     * The system will not retry listening automatically. The caller should call this method again
+     * if they want to retry.
      *
      * <p>If a failure occurred after the {@link statusConsumer} returns {@link STATUS_SUCCESS},
      * {@link statusConsumer} will be invoked again with a status code other than {@link

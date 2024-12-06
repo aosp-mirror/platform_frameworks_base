@@ -61,6 +61,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.InlineSuggestionRenderService;
 import android.service.autofill.SaveInfo;
@@ -92,6 +93,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
@@ -99,6 +101,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
  * app's {@link IAutoFillService} implementation.
@@ -192,6 +195,8 @@ final class AutofillManagerServiceImpl
 
     private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
 
+    private final UserManagerInternal mUserManagerInternal;
+
     private final DisabledInfoCache mDisabledInfoCache;
 
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
@@ -208,6 +213,7 @@ final class AutofillManagerServiceImpl
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mContentCaptureManagerInternal = LocalServices.getService(
                 ContentCaptureManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mDisabledInfoCache = disableCache;
         updateLocked(disabled);
     }
@@ -376,6 +382,13 @@ final class AutofillManagerServiceImpl
         boolean forAugmentedAutofillOnly = (flags
                 & FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY) != 0;
         if (!isEnabledLocked() && !forAugmentedAutofillOnly) {
+            return 0;
+        }
+
+        // TODO(b/376482880): remove this check once autofill service supports visible
+        // background users.
+        if (mUserManagerInternal.isVisibleBackgroundFullUser(mUserId)) {
+            Slog.d(TAG, "Currently, autofill service does not support visible background users.");
             return 0;
         }
 
@@ -737,6 +750,22 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void removeSessionLocked(int sessionId) {
         mSessions.remove(sessionId);
+        if (Flags.autofillSessionDestroyed()) {
+            if (sVerbose) {
+                Slog.v(
+                        TAG,
+                        "removeSessionLocked(): removed " + sessionId);
+            }
+            RemoteFillService remoteService =
+                    new RemoteFillService(
+                            getContext(),
+                            mInfo.getServiceInfo().getComponentName(),
+                            mUserId,
+                            /* callbacks= */ null,
+                            mMaster.isInstantServiceAllowed(),
+                            /* credentialAutofillService= */ null);
+            remoteService.onSessionDestroyed(null);
+        }
     }
 
     /**
@@ -791,6 +820,36 @@ final class AutofillManagerServiceImpl
                     + DebugUtils.flagsToString(AutofillManager.class, "PENDING_UI_OPERATION_",
                             operation));
         }
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationStart(int sessionId, long startTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationStart(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationStart(startTimeMs);
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationEnd(int sessionId, long endTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationEnd(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationEnd(endTimeMs);
     }
 
     @GuardedBy("mLock")
@@ -889,13 +948,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill selection when an authentication was selected.
      */
     void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState,
-            int uiType) {
+            int uiType, @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
                                 null, null, null, null, null, null,
-                                NO_SAVE_UI_REASON_NONE, uiType));
+                                NO_SAVE_UI_REASON_NONE, uiType, focusedId));
             }
         }
     }
@@ -904,13 +963,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill selection when an dataset authentication was selected.
      */
     void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState, int uiType) {
+            @Nullable Bundle clientState, int uiType, @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
                                 clientState, null, null, null, null, null, null, null, null,
-                                NO_SAVE_UI_REASON_NONE, uiType));
+                                NO_SAVE_UI_REASON_NONE, uiType, focusedId));
             }
         }
     }
@@ -922,7 +981,7 @@ final class AutofillManagerServiceImpl
         synchronized (mLock) {
             if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
-                        null, null, null, null, null, null, null));
+                        null, null, null, null, null, null, null, /* focusedId= */ null));
             }
         }
     }
@@ -931,13 +990,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill response when a dataset was selected.
      */
     void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState,  int uiType) {
+            @Nullable Bundle clientState,  int uiType, @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
                                 null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                uiType));
+                                uiType, focusedId));
             }
         }
     }
@@ -945,13 +1004,14 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a dataset is shown.
      */
-    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType) {
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType,
+            @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetShown", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                                 null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                uiType));
+                                uiType, focusedId));
             }
         }
     }
@@ -959,7 +1019,8 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a view was entered.
      */
-    void logViewEntered(int sessionId, @Nullable Bundle clientState) {
+    void logViewEntered(int sessionId, @Nullable Bundle clientState,
+            @Nullable AutofillId focusedId) {
         synchronized (mLock) {
             if (!isValidEventLocked("logViewEntered", sessionId)) {
                 return;
@@ -977,7 +1038,7 @@ final class AutofillManagerServiceImpl
 
             mEventHistory.addEvent(
                     new Event(Event.TYPE_VIEW_REQUESTED_AUTOFILL, null, clientState, null,
-                            null, null, null, null, null, null, null));
+                            null, null, null, null, null, null, null, focusedId));
         }
     }
 
@@ -990,7 +1051,8 @@ final class AutofillManagerServiceImpl
             }
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                            clientState, null, null, null, null, null, null, null, null));
+                            clientState, null, null, null, null, null, null, null, null,
+                            /* focusedId= */ null));
         }
     }
 
@@ -1003,7 +1065,7 @@ final class AutofillManagerServiceImpl
             }
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_SELECTED, suggestionId, clientState, null, null,
-                            null, null, null, null, null, null));
+                            null, null, null, null, null, null, /* focusedId= */ null));
         }
     }
 
@@ -1018,7 +1080,7 @@ final class AutofillManagerServiceImpl
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                             null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                            UI_TYPE_INLINE));
+                            UI_TYPE_INLINE, /* focusedId= */ null));
 
         }
     }
@@ -1102,7 +1164,8 @@ final class AutofillManagerServiceImpl
                     clientState, selectedDatasets, ignoredDatasets,
                     changedFieldIds, changedDatasetIds,
                     manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason));
+                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason,
+                    /* focusedId= */ null));
         }
     }
 

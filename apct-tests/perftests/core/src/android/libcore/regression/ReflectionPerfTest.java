@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -33,12 +33,12 @@ import java.lang.reflect.Method;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ReflectionPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeObject_getClass() throws Exception {
         C c = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             c.getClass();
         }
@@ -47,7 +47,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeClass_getField() throws Exception {
         Class<?> klass = C.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.getField("f");
         }
@@ -56,7 +56,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeClass_getDeclaredField() throws Exception {
         Class<?> klass = C.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.getDeclaredField("f");
         }
@@ -65,7 +65,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeClass_getConstructor() throws Exception {
         Class<?> klass = C.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.getConstructor();
         }
@@ -75,7 +75,7 @@ public class ReflectionPerfTest {
     public void timeClass_newInstance() throws Exception {
         Class<?> klass = C.class;
         Constructor constructor = klass.getConstructor();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             constructor.newInstance();
         }
@@ -84,7 +84,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeClass_getMethod() throws Exception {
         Class<?> klass = C.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.getMethod("m");
         }
@@ -93,7 +93,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeClass_getDeclaredMethod() throws Exception {
         Class<?> klass = C.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.getDeclaredMethod("m");
         }
@@ -104,7 +104,7 @@ public class ReflectionPerfTest {
         Class<?> klass = C.class;
         Field f = klass.getDeclaredField("f");
         C instance = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             f.setInt(instance, 1);
         }
@@ -115,7 +115,7 @@ public class ReflectionPerfTest {
         Class<?> klass = C.class;
         Field f = klass.getDeclaredField("f");
         C instance = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             f.getInt(instance);
         }
@@ -126,7 +126,7 @@ public class ReflectionPerfTest {
         Class<?> klass = C.class;
         Method m = klass.getDeclaredMethod("m");
         C instance = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             m.invoke(instance);
         }
@@ -136,7 +136,7 @@ public class ReflectionPerfTest {
     public void timeMethod_invokeStaticV() throws Exception {
         Class<?> klass = C.class;
         Method m = klass.getDeclaredMethod("sm");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             m.invoke(null);
         }
@@ -147,7 +147,7 @@ public class ReflectionPerfTest {
         Class<?> klass = C.class;
         Method m = klass.getDeclaredMethod("setField", int.class);
         C instance = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             m.invoke(instance, 1);
         }
@@ -159,7 +159,7 @@ public class ReflectionPerfTest {
         Method m = klass.getDeclaredMethod("setField", int.class);
         C instance = new C();
         Integer one = Integer.valueOf(1);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             m.invoke(instance, one);
         }
@@ -169,7 +169,7 @@ public class ReflectionPerfTest {
     public void timeMethod_invokeStaticI() throws Exception {
         Class<?> klass = C.class;
         Method m = klass.getDeclaredMethod("setStaticField", int.class);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             m.invoke(null, 1);
         }
@@ -180,7 +180,7 @@ public class ReflectionPerfTest {
         Class<?> klass = C.class;
         Method m = klass.getDeclaredMethod("setStaticField", int.class);
         Integer one = Integer.valueOf(1);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             m.invoke(null, one);
         }
@@ -189,7 +189,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeRegularMethodInvocation() throws Exception {
         C instance = new C();
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             instance.setField(1);
         }
@@ -197,7 +197,7 @@ public class ReflectionPerfTest {
 
     @Test
     public void timeRegularConstructor() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new C();
         }
@@ -206,7 +206,7 @@ public class ReflectionPerfTest {
     @Test
     public void timeClass_classNewInstance() throws Exception {
         Class<?> klass = C.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.newInstance();
         }
@@ -216,7 +216,7 @@ public class ReflectionPerfTest {
     public void timeClass_isInstance() throws Exception {
         D d = new D();
         Class<?> klass = IC.class;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             klass.isInstance(d);
         }
@@ -224,7 +224,7 @@ public class ReflectionPerfTest {
 
     @Test
     public void timeGetInstanceField() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             // TODO: Write a test script that generates both the classes we're
             // reflecting on and the test case for each of its fields.
@@ -234,7 +234,7 @@ public class ReflectionPerfTest {
 
     @Test
     public void timeGetStaticField() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             R.class.getField("WEEK_NUMBER_COLOR");
         }
@@ -242,7 +242,7 @@ public class ReflectionPerfTest {
 
     @Test
     public void timeGetInterfaceStaticField() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             F.class.getField("SF");
         }
@@ -250,7 +250,7 @@ public class ReflectionPerfTest {
 
     @Test
     public void timeGetSuperClassField() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             G.class.getField("f");
         }

@@ -36,6 +36,6 @@ fun main(args: Array<String>) {
         log.v("Options: $options")
 
         // Run.
-        Ravenizer(options).run()
+        Ravenizer().run(options)
     }
 }

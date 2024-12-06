@@ -22,7 +22,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.NotificationViewFlipperViewModel
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationViewFlipper] to its [view model][NotificationViewFlipperViewModel]. */
 object NotificationViewFlipperBinder {

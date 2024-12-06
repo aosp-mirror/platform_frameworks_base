@@ -18,12 +18,9 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.app.NotificationManager.Policy
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
-import android.provider.Settings
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.DisableSceneContainer
@@ -43,16 +40,18 @@ import com.android.systemui.statusbar.data.repository.fakeRemoteInputRepository
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
-import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -79,7 +78,6 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     private val fakeRemoteInputRepository = kosmos.fakeRemoteInputRepository
     private val fakeUserSetupRepository = kosmos.fakeUserSetupRepository
     private val headsUpRepository = kosmos.headsUpNotificationRepository
-    private val zenModeRepository = kosmos.zenModeRepository
 
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
@@ -155,7 +153,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_trueWhenNoNotifs() =
         testScope.runTest {
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
             val shouldIncludeFooterView by collectFooterViewVisibility()
 
             // WHEN has no notifs
@@ -170,7 +168,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_falseWhenNotifs() =
         testScope.runTest {
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -183,7 +181,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_falseWhenQsExpandedDefault() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShow by collectEmptyShadeViewVisibility()
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -198,7 +196,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_trueWhenQsExpandedInSplitShade() =
         testScope.runTest {
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
             val shouldIncludeFooterView by collectFooterViewVisibility()
 
             // WHEN has no notifs
@@ -219,7 +217,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_trueWhenLockedShade() =
         testScope.runTest {
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
             val shouldIncludeFooterView by collectFooterViewVisibility()
 
             // WHEN has no notifs
@@ -236,7 +234,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_falseWhenKeyguard() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShow by collectEmptyShadeViewVisibility()
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -251,7 +249,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @Test
     fun shouldShowEmptyShadeView_falseWhenStartingToSleep() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShow by collectEmptyShadeViewVisibility()
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -266,60 +264,10 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
         }
 
     @Test
-    fun areNotificationsHiddenInShade_true() =
-        testScope.runTest {
-            val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
-
-            zenModeRepository.updateNotificationPolicy(
-                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
-            )
-            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-            runCurrent()
-
-            assertThat(hidden).isTrue()
-        }
-
-    @Test
-    fun areNotificationsHiddenInShade_false() =
-        testScope.runTest {
-            val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
-
-            zenModeRepository.updateNotificationPolicy(
-                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
-            )
-            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_OFF)
-            runCurrent()
-
-            assertThat(hidden).isFalse()
-        }
-
-    @Test
-    fun hasFilteredOutSeenNotifications_true() =
-        testScope.runTest {
-            val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
-
-            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
-            runCurrent()
-
-            assertThat(hasFilteredNotifs).isTrue()
-        }
-
-    @Test
-    fun hasFilteredOutSeenNotifications_false() =
-        testScope.runTest {
-            val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
-
-            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
-            runCurrent()
-
-            assertThat(hasFilteredNotifs).isFalse()
-        }
-
-    @Test
     fun shouldIncludeFooterView_trueWhenShade() =
         testScope.runTest {
             val shouldIncludeFooterView by collectFooterViewVisibility()
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -337,7 +285,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     fun shouldIncludeFooterView_trueWhenLockedShade() =
         testScope.runTest {
             val shouldIncludeFooterView by collectFooterViewVisibility()
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -425,7 +373,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     fun shouldIncludeFooterView_trueWhenQsExpandedSplitShade() =
         testScope.runTest {
             val shouldIncludeFooterView by collectFooterViewVisibility()
-            val shouldShowEmptyShadeView by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldShowEmptyShadeView by collectEmptyShadeViewVisibility()
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -559,7 +507,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @EnableSceneContainer
     fun pinnedHeadsUpRows_filtersForPinnedItems() =
         testScope.runTest {
-            val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRows)
+            val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRowKeys)
 
             // WHEN there are no pinned rows
             val rows =
@@ -575,21 +523,21 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             assertThat(pinnedHeadsUpRows).isEmpty()
 
             // WHEN a row gets pinned
-            rows[0].isPinned.value = true
+            rows[0].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
 
             // THEN it's added to the list
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
 
             // WHEN more rows are pinned
-            rows[1].isPinned.value = true
+            rows[1].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
 
             // THEN they are all in the list
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0], rows[1])
 
             // WHEN a row gets unpinned
-            rows[0].isPinned.value = false
+            rows[0].pinnedStatus.value = PinnedStatus.NotPinned
             runCurrent()
 
             // THEN it's removed from the list
@@ -668,5 +616,12 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
         collectLastValue(
             if (SceneContainerFlag.isEnabled) underTest.shouldShowFooterView
             else underTest.shouldIncludeFooterView
+        )
+
+    private fun TestScope.collectEmptyShadeViewVisibility() =
+        collectLastValue(
+            if (ModesEmptyShadeFix.isEnabled)
+                underTest.shouldShowEmptyShadeViewAnimated.map { it.value }
+            else underTest.shouldShowEmptyShadeView
         )
 }

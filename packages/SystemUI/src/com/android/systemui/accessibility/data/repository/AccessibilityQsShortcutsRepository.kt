@@ -36,7 +36,7 @@ import com.android.systemui.qs.tiles.ReduceBrightColorsTile
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
+import com.android.app.tracing.coroutines.asyncTraced as async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.withContext
@@ -127,7 +127,7 @@ constructor(
     private suspend fun getAccessibilityTileServices(context: Context): Set<ComponentName> =
         coroutineScope {
             val a11yServiceTileServices: Deferred<Set<ComponentName>> =
-                async(backgroundDispatcher) {
+                async(context = backgroundDispatcher) {
                     manager.installedAccessibilityServiceList
                         .mapNotNull {
                             val packageName = it.resolveInfo.serviceInfo.packageName
@@ -143,7 +143,7 @@ constructor(
                 }
 
             val a11yShortcutInfoTileServices: Deferred<Set<ComponentName>> =
-                async(backgroundDispatcher) {
+                async(context = backgroundDispatcher) {
                     manager
                         .getInstalledAccessibilityShortcutListAsUser(context, context.userId)
                         .mapNotNull {

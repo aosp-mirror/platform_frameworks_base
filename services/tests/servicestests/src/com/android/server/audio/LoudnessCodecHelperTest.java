@@ -314,12 +314,13 @@ public class LoudnessCodecHelperTest {
         AudioDeviceInfo[] devicesStatic = AudioManager.getDevicesStatic(GET_DEVICES_OUTPUTS);
         assumeTrue(devIdx < devicesStatic.length);
         Log.d(TAG, "Out devices number " + devicesStatic.length + ". Picking index " + devIdx);
-        int deviceId = devicesStatic[devIdx].getId();
+        int[] deviceIds = new int[1];
+        deviceIds[0] = devicesStatic[devIdx].getId();
 
         PlayerBase.PlayerIdCard idCard = Mockito.mock(PlayerBase.PlayerIdCard.class);
         AudioPlaybackConfiguration apc =
                 new AudioPlaybackConfiguration(idCard, piid, /*uid=*/1, /*pid=*/myPid());
-        apc.handleStateEvent(PLAYER_UPDATE_DEVICE_ID, deviceId);
+        apc.handleStateEvent(PLAYER_UPDATE_DEVICE_ID, deviceIds);
         apc.handleSessionIdEvent(sessionId);
         apc.handleAudioAttributesEvent(new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)

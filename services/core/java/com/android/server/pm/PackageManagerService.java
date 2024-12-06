@@ -204,7 +204,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
-import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.ThreadPriorityBooster;
@@ -214,6 +213,7 @@ import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.model.DeleteResult;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
@@ -923,8 +923,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int ENABLE_ROLLBACK_TIMEOUT = 22;
     static final int DEFERRED_NO_KILL_POST_DELETE = 23;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER = 24;
-    static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
-    static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
+    // static final int UNUSED = 25;
+    // static final int UNUSED = 26;
     static final int DOMAIN_VERIFICATION = 27;
     static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
     static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER = 29;
@@ -3048,7 +3048,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexManager.writePackageDexUsageNow();
         mDynamicCodeLogger.writeNow();
         if (!refactorCrashrecovery()) {
-            PackageWatchdog.getInstance(mContext).writeNow();
+            CrashRecoveryAdaptor.packageWatchdogWriteNow(mContext);
         }
 
         synchronized (mLock) {
@@ -3389,18 +3389,31 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     return true;
                 }
                 // Does it contain a device admin for any user?
-                int[] users;
+                int[] allUsers = mUserManager.getUserIds();
+                int[] targetUsers;
                 if (userId == UserHandle.USER_ALL) {
-                    users = mUserManager.getUserIds();
+                    targetUsers = allUsers;
                 } else {
-                    users = new int[]{userId};
+                    targetUsers = new int[]{userId};
                 }
-                for (int i = 0; i < users.length; ++i) {
-                    if (dpm.packageHasActiveAdmins(packageName, users[i])) {
+
+                for (int i = 0; i < targetUsers.length; ++i) {
+                    if (dpm.packageHasActiveAdmins(packageName, targetUsers[i])) {
                         return true;
                     }
-                    if (isDeviceManagementRoleHolder(packageName, users[i])
-                            && dpmi.isUserOrganizationManaged(users[i])) {
+                }
+
+                // If a package is DMRH on a managed user, it should also be treated as an admin on
+                // that user. If that package is also a system package, it should also be protected
+                // on other users otherwise "uninstall updates" on an unmanaged user may break
+                // management on other users because apk version is shared between all users.
+                var packageState = snapshotComputer().getPackageStateInternal(packageName);
+                if (packageState == null) {
+                    return false;
+                }
+                for (int user : packageState.isSystem() ? allUsers : targetUsers) {
+                    if (isDeviceManagementRoleHolder(packageName, user)
+                            && dpmi.isUserOrganizationManaged(user)) {
                         return true;
                     }
                 }
@@ -4297,6 +4310,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (intent == null) {
                     return;
                 }
+                final String action = intent.getAction();
+                if (action == null) {
+                    return;
+                }
                 Uri data = intent.getData();
                 if (data == null) {
                     return;
@@ -4696,10 +4713,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 extras.putLong(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
                 mHandler.post(() -> {
                     mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_UNSTOPPED,
-                            packageName, extras,
-                            Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
-                            userIds, null, broadcastAllowList, null,
-                            null);
+                            packageName, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY,
+                            null /* targetPkg */, null /* finishedReceiver */, userIds,
+                            null /* instantUserIds */, broadcastAllowList,
+                            null /* filterExtrasForReceiver */, null /* bOptions */,
+                            null /* requiredPermissions */);
                 });
                 mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
                         packageName, extras, userIds, null /* instantUserIds */,
@@ -5856,6 +5874,67 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     userId, callingPackage);
         }
 
+        @Override
+        public void setPageSizeAppCompatFlagsSettingsOverride(String packageName, boolean enabled) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            int settingsMode = enabled
+                    ? ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_SETTINGS_OVERRIDE_ENABLED
+                    : ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_SETTINGS_OVERRIDE_DISABLED;
+            PackageStateMutator.Result result =
+                    commitPackageStateMutation(
+                            null,
+                            packageName,
+                            packageState ->
+                                    packageState
+                                            .setPageSizeAppCompatFlags(settingsMode));
+            if (result.isSpecificPackageNull()) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+            scheduleWriteSettings();
+        }
+
+        @Override
+        public boolean isPageSizeCompatEnabled(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int userId = UserHandle.getCallingUserId();
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            PackageStateInternal packageState =
+                    snapshotComputer().getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+
+            return packageState == null ? false : packageState.isPageSizeAppCompatEnabled();
+        }
+
+        @Override
+        public String getPageSizeCompatWarningMessage(String packageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int userId = UserHandle.getCallingUserId();
+
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)) {
+                throw new SecurityException("Caller must be the system or root.");
+            }
+
+            PackageStateInternal packageState =
+                    snapshotComputer().getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
+
+            return packageState == null
+                    ? null
+                    : packageState.getPageSizeCompatWarningMessage(mContext);
+        }
+
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_USERS)
         @Override
         public boolean setApplicationHiddenSettingAsUser(String packageName, boolean hidden,
@@ -6560,6 +6639,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        @NonNull
+        public List<String> getAllApexDirectories() {
+            PackageManagerServiceUtils.enforceSystemOrRoot(
+                    "getAllApexDirectories can only be called by system or root");
+            List<String> apexDirectories = new ArrayList<>();
+            List<ApexManager.ActiveApexInfo> apexes = mApexManager.getActiveApexInfos();
+            for (int i = 0; i < apexes.size(); i++) {
+                ApexManager.ActiveApexInfo apex = apexes.get(i);
+                apexDirectories.add(apex.apexDirectory.getAbsolutePath());
+            }
+            return apexDirectories;
+        }
+
+        @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
             try {
@@ -7031,12 +7124,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return mSettings.isPermissionUpgradeNeeded(userId);
         }
 
+        @Deprecated
         @Override
         public void setIntegrityVerificationResult(int verificationId, int verificationResult) {
-            final Message msg = mHandler.obtainMessage(INTEGRITY_VERIFICATION_COMPLETE);
-            msg.arg1 = verificationId;
-            msg.obj = verificationResult;
-            mHandler.sendMessage(msg);
+          // Do nothing.
         }
 
         @Override
@@ -7156,17 +7247,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Sent async using the PM handler, to maintain ordering with PACKAGE_UNSTOPPED
                 mHandler.post(() -> {
                     mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
-                            packageName, extras,
-                            flags, null, null,
-                            userIds, null, broadcastAllowList, null,
-                            null);
+                            packageName, extras, flags, null /* targetPkg */,
+                            null /* finishedReceiver */, userIds, null /* instantUserIds */,
+                            broadcastAllowList, null /* filterExtrasForReceiver */,
+                            null /* bOptions */, null /* requiredPermissions */);
                 });
             } else {
                 mBroadcastHelper.sendPackageBroadcast(Intent.ACTION_PACKAGE_RESTARTED,
-                        packageName, extras,
-                        flags, null, null,
-                        userIds, null, broadcastAllowList, null,
-                        null);
+                        packageName, extras, flags, null /* targetPkg */,
+                        null /* finishedReceiver */, userIds, null /* instantUserIds */,
+                        broadcastAllowList, null /* filterExtrasForReceiver */, null /* bOptions */,
+                        null /* requiredPermissions */);
             }
             mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_RESTARTED,
                     packageName, extras, userIds, null /* instantUserIds */,

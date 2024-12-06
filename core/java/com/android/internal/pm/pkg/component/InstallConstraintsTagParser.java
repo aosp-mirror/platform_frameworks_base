@@ -54,7 +54,7 @@ public class InstallConstraintsTagParser {
             return input.skip("install-constraints cannot be used by this package");
         }
 
-        ParseResult<Set<String>> prefixes = parseFingerprintPrefixes(input, res, parser);
+        ParseResult<Set<String>> prefixes = parseFingerprintPrefixes(input, pkg, res, parser);
         if (prefixes.isSuccess()) {
             if (validateFingerprintPrefixes(prefixes.getResult())) {
                 return input.success(pkg);
@@ -68,7 +68,7 @@ public class InstallConstraintsTagParser {
     }
 
     private static ParseResult<Set<String>> parseFingerprintPrefixes(
-            ParseInput input, Resources res, XmlResourceParser parser)
+            ParseInput input, ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         Set<String> prefixes = new ArraySet<>();
         int type;
@@ -81,7 +81,7 @@ public class InstallConstraintsTagParser {
                 }
                 return input.success(prefixes);
             } else if (type == XmlPullParser.START_TAG) {
-                if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
+                if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(pkg, parser)) {
                     continue;
                 }
                 if (parser.getName().equals(TAG_FINGERPRINT_PREFIX)) {

@@ -29,7 +29,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.app.AlarmManager;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Trace;
@@ -53,8 +52,6 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
-import com.android.systemui.CoreStartable;
-import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
@@ -81,11 +78,9 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
-import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
@@ -104,8 +99,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 @ExperimentalCoroutinesApi
-public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dumpable,
-        CoreStartable {
+public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dumpable {
 
     static final String TAG = "ScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -217,7 +211,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
     private final DockManager mDockManager;
-    private final AlarmTimeout mTimeTicker;
     private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
     private final Handler mHandler;
     private final Executor mMainExecutor;
@@ -232,7 +225,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     private float mAdditionalScrimBehindAlphaKeyguard = 0f;
     // Combined scrim behind keyguard alpha of default scrim + additional scrim
-    // (if wallpaper dimming is applied).
     private float mScrimBehindAlphaKeyguard = KEYGUARD_SCRIM_ALPHA;
     private final float mDefaultScrimAlpha;
 
@@ -261,7 +253,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private int mBehindTint;
     private int mNotificationsTint;
 
-    private boolean mWallpaperVisibilityTimedOut;
     private int mScrimsVisibility;
     private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
@@ -269,7 +260,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
     private Callback mCallback;
-    private boolean mWallpaperSupportsAmbientMode;
     private boolean mScreenOn;
     private boolean mTransparentScrimBackground;
 
@@ -282,7 +272,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mKeyguardOccluded;
 
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
-    private final WallpaperRepository mWallpaperRepository;
     private CoroutineDispatcher mMainDispatcher;
     private boolean mIsBouncerToGoneTransitionRunning = false;
     private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
@@ -332,7 +321,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     public ScrimController(
             LightBarController lightBarController,
             DozeParameters dozeParameters,
-            AlarmManager alarmManager,
             KeyguardStateController keyguardStateController,
             DelayedWakeLock.Factory delayedWakeLockFactory,
             Handler handler,
@@ -348,7 +336,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             AlternateBouncerToGoneTransitionViewModel alternateBouncerToGoneTransitionViewModel,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             KeyguardInteractor keyguardInteractor,
-            WallpaperRepository wallpaperRepository,
             @Main CoroutineDispatcher mainDispatcher,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
         mScrimStateListener = lightBarController::setScrimState;
@@ -363,8 +350,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mMainExecutor = mainExecutor;
         mJavaAdapter = javaAdapter;
         mScreenOffAnimationController = screenOffAnimationController;
-        mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
-                "hide_aod_wallpaper", mHandler);
         mWakeLock = delayedWakeLockFactory.create("Scrims");
         // Scrim alpha is initially set to the value on the resource but might be changed
         // to make sure that text on top of it is legible.
@@ -395,15 +380,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mAlternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
-        mWallpaperRepository = wallpaperRepository;
         mMainDispatcher = mainDispatcher;
-    }
-
-    @Override
-    public void start() {
-        mJavaAdapter.alwaysCollectFlow(
-                mWallpaperRepository.getWallpaperSupportsAmbientMode(),
-                this::setWallpaperSupportsAmbientMode);
     }
 
     /**
@@ -469,6 +446,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                             mStatusBarKeyguardViewManager.onKeyguardFadedAway();
                         }
                         dispatchScrimsVisible();
+                        dispatchBackScrimState(mScrimBehind.getViewAlpha());
                     }
                 };
 
@@ -627,18 +605,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             holdWakeLock();
         }
 
-        // AOD wallpapers should fade away after a while.
-        // Docking pulses may take a long time, wallpapers should also fade away after a while.
-        mWallpaperVisibilityTimedOut = false;
-        if (shouldFadeAwayWallpaper()) {
-            DejankUtils.postAfterTraversal(() -> {
-                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
-                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
-            });
-        } else {
-            DejankUtils.postAfterTraversal(mTimeTicker::cancel);
-        }
-
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
             mAnimationDelay = CentralSurfaces.FADE_KEYGUARD_START_DELAY;
             scheduleUpdate();
@@ -655,19 +621,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
 
         dispatchBackScrimState(mScrimBehind.getViewAlpha());
-    }
-
-    private boolean shouldFadeAwayWallpaper() {
-        if (!mWallpaperSupportsAmbientMode) {
-            return false;
-        }
-
-        if (mState == ScrimState.AOD
-                && (mDozeParameters.getAlwaysOn() || mDockManager.isDocked())) {
-            return true;
-        }
-
-        return false;
     }
 
     public ScrimState getState() {
@@ -726,19 +679,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (!mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
             mAnimatingPanelExpansionOnUnlock = false;
         }
-    }
-
-    @VisibleForTesting
-    protected void onHideWallpaperTimeout() {
-        if (mState != ScrimState.AOD && mState != ScrimState.PULSING) {
-            return;
-        }
-
-        holdWakeLock();
-        mWallpaperVisibilityTimedOut = true;
-        mAnimateChange = true;
-        mAnimationDuration = mDozeParameters.getWallpaperFadeOutDuration();
-        scheduleUpdate();
     }
 
     private void holdWakeLock() {
@@ -1171,16 +1111,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         setOrAdaptCurrentAnimation(mNotificationsScrim);
         setOrAdaptCurrentAnimation(mScrimInFront);
         dispatchBackScrimState(mScrimBehind.getViewAlpha());
-
-        // Reset wallpaper timeout if it's already timeout like expanding panel while PULSING
-        // and docking.
-        if (mWallpaperVisibilityTimedOut) {
-            mWallpaperVisibilityTimedOut = false;
-            DejankUtils.postAfterTraversal(() -> {
-                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
-                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
-            });
-        }
     }
 
     /**
@@ -1259,15 +1189,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             dispatchBackScrimState(mScrimBehind.getViewAlpha());
         }
 
-        // We want to override the back scrim opacity for the AOD state
-        // when it's time to fade the wallpaper away.
-        boolean aodWallpaperTimeout = (mState == ScrimState.AOD || mState == ScrimState.PULSING)
-                && mWallpaperVisibilityTimedOut;
         // We also want to hide FLAG_SHOW_WHEN_LOCKED activities under the scrim.
         boolean hideFlagShowWhenLockedActivities =
                 (mState == ScrimState.PULSING || mState == ScrimState.AOD)
                 && mKeyguardOccluded;
-        if (aodWallpaperTimeout || hideFlagShowWhenLockedActivities) {
+        if (hideFlagShowWhenLockedActivities) {
             mBehindAlpha = 1;
         }
         // Prevent notification scrim flicker when transitioning away from keyguard.
@@ -1668,17 +1594,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.println(mPanelExpansionFraction);
         pw.print("  mExpansionAffectsAlpha=");
         pw.println(mExpansionAffectsAlpha);
-
-        pw.print("  mState.getMaxLightRevealScrimAlpha=");
-        pw.println(mState.getMaxLightRevealScrimAlpha());
-    }
-
-    private void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
-        mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
-        ScrimState[] states = ScrimState.values();
-        for (int i = 0; i < states.length; i++) {
-            states[i].setWallpaperSupportsAmbientMode(wallpaperSupportsAmbientMode);
-        }
     }
 
     /**
@@ -1713,26 +1628,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
         mKeyguardOccluded = keyguardOccluded;
         updateScrims();
-    }
-
-    public void setHasBackdrop(boolean hasBackdrop) {
-        for (ScrimState state : ScrimState.values()) {
-            state.setHasBackdrop(hasBackdrop);
-        }
-
-        // Backdrop event may arrive after state was already applied,
-        // in this case, back-scrim needs to be re-evaluated
-        if (mState == ScrimState.AOD || mState == ScrimState.PULSING) {
-            float newBehindAlpha = mState.getBehindAlpha();
-            if (isNaN(newBehindAlpha)) {
-                throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
-                        + ", back: " + mBehindAlpha);
-            }
-            if (mBehindAlpha != newBehindAlpha) {
-                mBehindAlpha = newBehindAlpha;
-                updateScrims();
-            }
-        }
     }
 
     private void setKeyguardFadingAway(boolean fadingAway, long duration) {

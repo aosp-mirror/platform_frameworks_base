@@ -27,6 +27,8 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
@@ -49,7 +51,6 @@ import dagger.Lazy
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.reflect.KMutableProperty0
-import kotlinx.coroutines.launch
 
 @VisibleForTesting internal const val INSET_DEBOUNCE_MILLIS = 500L
 
@@ -314,7 +315,7 @@ constructor(
 
     private fun setKeyguardStatusViewConstraints(constraintSet: ConstraintSet) {
         val statusViewMarginHorizontal =
-            resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+            resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
         constraintSet.apply {
             setMargin(R.id.keyguard_status_view, START, statusViewMarginHorizontal)
             setMargin(R.id.keyguard_status_view, END, statusViewMarginHorizontal)
@@ -334,7 +335,7 @@ constructor(
 private data class Paddings(
     val containerPadding: Int,
     val notificationsMargin: Int,
-    val qsContainerPadding: Int
+    val qsContainerPadding: Int,
 )
 
 private fun KMutableProperty0<Int>.setAndReportChange(newValue: Int): Boolean {

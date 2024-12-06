@@ -16,8 +16,6 @@
 
 package com.android.server.webkit;
 
-import static android.webkit.Flags.updateServiceV2;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +30,7 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Base64;
-import android.webkit.UserPackage;
+import android.webkit.Flags;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
@@ -62,7 +60,7 @@ import java.util.concurrent.CountDownLatch;
 public class WebViewUpdateServiceTest {
     private final static String TAG = WebViewUpdateServiceTest.class.getSimpleName();
 
-    private WebViewUpdateServiceInterface mWebViewUpdateServiceImpl;
+    private WebViewUpdateServiceImpl2 mWebViewUpdateServiceImpl;
     private TestSystemImpl mTestSystemImpl;
 
     private static final String WEBVIEW_LIBRARY_FLAG = "com.android.webview.WebViewLibrary";
@@ -77,38 +75,23 @@ public class WebViewUpdateServiceTest {
     }
 
     private void setupWithPackages(WebViewProviderInfo[] packages) {
-        setupWithAllParameters(packages, 1 /* numRelros */, true /* isDebuggable */,
-                false /* multiProcessDefault */);
+        setupWithAllParameters(packages, 1 /* numRelros */, true /* isDebuggable */);
     }
 
     private void setupWithPackagesAndRelroCount(WebViewProviderInfo[] packages, int numRelros) {
-        setupWithAllParameters(packages, numRelros, true /* isDebuggable */,
-                false /* multiProcessDefault */);
+        setupWithAllParameters(packages, numRelros, true /* isDebuggable */);
     }
 
     private void setupWithPackagesNonDebuggable(WebViewProviderInfo[] packages) {
-        setupWithAllParameters(packages, 1 /* numRelros */, false /* isDebuggable */,
-                false /* multiProcessDefault */);
-    }
-
-    private void setupWithPackagesAndMultiProcess(WebViewProviderInfo[] packages,
-            boolean multiProcessDefault) {
-        setupWithAllParameters(packages, 1 /* numRelros */, true /* isDebuggable */,
-                multiProcessDefault);
+        setupWithAllParameters(packages, 1 /* numRelros */, false /* isDebuggable */);
     }
 
     private void setupWithAllParameters(WebViewProviderInfo[] packages, int numRelros,
-            boolean isDebuggable, boolean multiProcessDefault) {
-        TestSystemImpl testing = new TestSystemImpl(packages, numRelros, isDebuggable,
-                multiProcessDefault);
+            boolean isDebuggable) {
+        TestSystemImpl testing = new TestSystemImpl(packages, numRelros, isDebuggable);
         mTestSystemImpl = Mockito.spy(testing);
-        if (updateServiceV2()) {
-            mWebViewUpdateServiceImpl =
-                    new WebViewUpdateServiceImpl2(mTestSystemImpl);
-        } else {
-            mWebViewUpdateServiceImpl =
-                    new WebViewUpdateServiceImpl(mTestSystemImpl);
-        }
+        mWebViewUpdateServiceImpl =
+                new WebViewUpdateServiceImpl2(mTestSystemImpl);
     }
 
     private void setEnabledAndValidPackageInfos(WebViewProviderInfo[] providers) {
@@ -194,8 +177,6 @@ public class WebViewUpdateServiceTest {
             // no flag means invalid
             p.applicationInfo.metaData.putString(WEBVIEW_LIBRARY_FLAG, "blah");
         }
-        // Default to this package being valid in terms of targetSdkVersion.
-        p.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
         return p;
     }
 
@@ -347,24 +328,6 @@ public class WebViewUpdateServiceTest {
 
         WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
         assertEquals(WebViewFactory.LIBLOAD_FAILED_WAITING_FOR_RELRO, response.status);
-    }
-
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    // If the flag is set, will throw an exception because of no available by default provider.
-    public void testEmptyConfig() {
-        WebViewProviderInfo[] packages = new WebViewProviderInfo[0];
-        setupWithPackages(packages);
-        setEnabledAndValidPackageInfos(packages);
-
-        runWebViewBootPreparationOnMainSync();
-
-        Mockito.verify(mTestSystemImpl, Mockito.never()).onWebViewProviderChanged(
-                Matchers.anyObject());
-
-        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
-        assertEquals(null, mWebViewUpdateServiceImpl.getCurrentWebViewPackage());
     }
 
     @Test
@@ -552,73 +515,6 @@ public class WebViewUpdateServiceTest {
             countdown.await();
         } catch (InterruptedException e) {
         }
-    }
-
-    /**
-     * Scenario for testing re-enabling a fallback package.
-     */
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    public void testFallbackPackageEnabling() {
-        String testPackage = "testFallback";
-        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
-            new WebViewProviderInfo(
-                    testPackage, "", true /* default available */, true /* fallback */, null)};
-        setupWithPackages(packages);
-        mTestSystemImpl.setPackageInfo(
-                createPackageInfo(testPackage, false /* enabled */ , true /* valid */,
-                    true /* installed */));
-
-        // Check that the boot time logic re-enables the fallback package.
-        runWebViewBootPreparationOnMainSync();
-        Mockito.verify(mTestSystemImpl).enablePackageForAllUsers(
-                Mockito.eq(testPackage), Mockito.eq(true));
-
-        // Fake the message about the enabling having changed the package state,
-        // and check we now use that package.
-        mWebViewUpdateServiceImpl.packageStateChanged(
-                testPackage, WebViewUpdateService.PACKAGE_CHANGED, TestSystemImpl.PRIMARY_USER_ID);
-        checkPreparationPhasesForPackage(testPackage, 1);
-    }
-
-    /**
-     * Scenario for installing primary package when secondary in use.
-     * 1. Start with only secondary installed
-     * 2. Install primary
-     * 3. Primary should be used
-     */
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    // If the flag is set, we don't automitally switch to secondary package unless it is
-    // chosen directly.
-    public void testInstallingPrimaryPackage() {
-        String primaryPackage = "primary";
-        String secondaryPackage = "secondary";
-        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
-            new WebViewProviderInfo(
-                    primaryPackage, "", true /* default available */, false /* fallback */, null),
-            new WebViewProviderInfo(
-                    secondaryPackage, "", true /* default available */, false /* fallback */,
-                    null)};
-        setupWithPackages(packages);
-        mTestSystemImpl.setPackageInfo(
-                createPackageInfo(secondaryPackage, true /* enabled */ , true /* valid */,
-                    true /* installed */));
-
-        runWebViewBootPreparationOnMainSync();
-        checkPreparationPhasesForPackage(secondaryPackage,
-                1 /* first preparation for this package*/);
-
-        // Install primary package
-        mTestSystemImpl.setPackageInfo(
-                createPackageInfo(primaryPackage, true /* enabled */ , true /* valid */,
-                    true /* installed */));
-        mWebViewUpdateServiceImpl.packageStateChanged(primaryPackage,
-                WebViewUpdateService.PACKAGE_ADDED_REPLACED, TestSystemImpl.PRIMARY_USER_ID);
-
-        // Verify primary package used as provider, and secondary package killed
-        checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation for this package*/);
-        Mockito.verify(mTestSystemImpl).killPackageDependents(Mockito.eq(secondaryPackage));
     }
 
     @Test
@@ -846,14 +742,6 @@ public class WebViewUpdateServiceTest {
     @Test
     public void testRecoverFailedListingWebViewPackagesSettingsChange() {
         checkRecoverAfterFailListingWebviewPackages(true);
-    }
-
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    // If the flag is set, we don't automitally switch to second package unless it is chosen
-    // directly.
-    public void testRecoverFailedListingWebViewPackagesAddedPackage() {
-        checkRecoverAfterFailListingWebviewPackages(false);
     }
 
     /**
@@ -1114,31 +1002,6 @@ public class WebViewUpdateServiceTest {
         }
     }
 
-    /**
-     * Ensure that the update service does not use an uninstalled package even if it is the only
-     * package available.
-     */
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    // If the flag is set, we return the package even if it is not installed.
-    public void testWithSingleUninstalledPackage() {
-        String testPackageName = "test.package.name";
-        WebViewProviderInfo[] webviewPackages = new WebViewProviderInfo[] {
-                new WebViewProviderInfo(testPackageName, "",
-                        true /*default available*/, false /* fallback */, null)};
-        setupWithPackages(webviewPackages);
-        mTestSystemImpl.setPackageInfo(createPackageInfo(testPackageName, true /* enabled */,
-                    true /* valid */, false /* installed */));
-
-        runWebViewBootPreparationOnMainSync();
-
-        Mockito.verify(mTestSystemImpl, Mockito.never()).onWebViewProviderChanged(
-                Matchers.anyObject());
-        WebViewProviderResponse response = mWebViewUpdateServiceImpl.waitForAndGetProvider();
-        assertEquals(WebViewFactory.LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES, response.status);
-        assertEquals(null, mWebViewUpdateServiceImpl.getCurrentWebViewPackage());
-    }
-
     @Test
     public void testNonhiddenPackageUserOverHidden() {
         checkVisiblePackageUserOverNonVisible(false /* multiUser*/, PackageRemovalType.HIDE);
@@ -1374,110 +1237,22 @@ public class WebViewUpdateServiceTest {
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
     }
 
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    public void testMultiProcessEnabledByDefault() {
-        testMultiProcessByDefault(true /* enabledByDefault */);
-    }
-
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    public void testMultiProcessDisabledByDefault() {
-        testMultiProcessByDefault(false /* enabledByDefault */);
-    }
-
-    private void testMultiProcessByDefault(boolean enabledByDefault) {
-        String primaryPackage = "primary";
-        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
-            new WebViewProviderInfo(
-                    primaryPackage, "", true /* default available */, false /* fallback */, null)};
-        setupWithPackagesAndMultiProcess(packages, enabledByDefault);
-        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
-                    true /* valid */, true /* installed */, null /* signatures */,
-                    10 /* lastUpdateTime*/, false /* not hidden */, 1000 /* versionCode */,
-                    false /* isSystemApp */));
-
-        runWebViewBootPreparationOnMainSync();
-        checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation phase */);
-
-        // Check it's off by default
-        assertEquals(enabledByDefault, mWebViewUpdateServiceImpl.isMultiProcessEnabled());
-
-        // Test toggling it
-        mWebViewUpdateServiceImpl.enableMultiProcess(!enabledByDefault);
-        assertEquals(!enabledByDefault, mWebViewUpdateServiceImpl.isMultiProcessEnabled());
-        mWebViewUpdateServiceImpl.enableMultiProcess(enabledByDefault);
-        assertEquals(enabledByDefault, mWebViewUpdateServiceImpl.isMultiProcessEnabled());
-    }
-
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    public void testMultiProcessEnabledByDefaultWithSettingsValue() {
-        testMultiProcessByDefaultWithSettingsValue(
-                true /* enabledByDefault */, Integer.MIN_VALUE, false /* expectEnabled */);
-        testMultiProcessByDefaultWithSettingsValue(
-                true /* enabledByDefault */, -999999, true /* expectEnabled */);
-        testMultiProcessByDefaultWithSettingsValue(
-                true /* enabledByDefault */, 0, true /* expectEnabled */);
-        testMultiProcessByDefaultWithSettingsValue(
-                true /* enabledByDefault */, 999999, true /* expectEnabled */);
-    }
-
-    @Test
-    @RequiresFlagsDisabled("android.webkit.update_service_v2")
-    public void testMultiProcessDisabledByDefaultWithSettingsValue() {
-        testMultiProcessByDefaultWithSettingsValue(
-                false /* enabledByDefault */, Integer.MIN_VALUE, false /* expectEnabled */);
-        testMultiProcessByDefaultWithSettingsValue(
-                false /* enabledByDefault */, 0, false /* expectEnabled */);
-        testMultiProcessByDefaultWithSettingsValue(
-                false /* enabledByDefault */, 999999, false /* expectEnabled */);
-        testMultiProcessByDefaultWithSettingsValue(
-                false /* enabledByDefault */, Integer.MAX_VALUE, true /* expectEnabled */);
-    }
-
     /**
-     * Test the logic of the multiprocess setting depending on whether multiprocess is enabled by
-     * default, and what the setting is set to.
-     * @param enabledByDefault whether multiprocess is enabled by default.
-     * @param settingValue value of the multiprocess setting.
-     */
-    private void testMultiProcessByDefaultWithSettingsValue(
-            boolean enabledByDefault, int settingValue, boolean expectEnabled) {
-        String primaryPackage = "primary";
-        WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
-            new WebViewProviderInfo(
-                    primaryPackage, "", true /* default available */, false /* fallback */, null)};
-        setupWithPackagesAndMultiProcess(packages, enabledByDefault);
-        mTestSystemImpl.setPackageInfo(createPackageInfo(primaryPackage, true /* enabled */,
-                    true /* valid */, true /* installed */, null /* signatures */,
-                    10 /* lastUpdateTime*/, false /* not hidden */, 1000 /* versionCode */,
-                    false /* isSystemApp */));
-
-        runWebViewBootPreparationOnMainSync();
-        checkPreparationPhasesForPackage(primaryPackage, 1 /* first preparation phase */);
-
-        mTestSystemImpl.setMultiProcessSetting(settingValue);
-
-        assertEquals(expectEnabled, mWebViewUpdateServiceImpl.isMultiProcessEnabled());
-    }
-
-
-    /**
-     * Ensure that packages with a targetSdkVersion targeting the current platform are valid, and
+     * Ensure that packages with a targetSdkVersion targeting the correct platform are valid, and
      * that packages targeting an older version are not valid.
      */
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_USE_B_ENTRY_POINT)
     public void testTargetSdkVersionValidity() {
         PackageInfo newSdkPackage = createPackageInfo("newTargetSdkPackage",
-            true /* enabled */, true /* valid */, true /* installed */);
-        newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+                true /* enabled */, true /* valid */, true /* installed */);
+        newSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
         PackageInfo currentSdkPackage = createPackageInfo("currentTargetSdkPackage",
-            true /* enabled */, true /* valid */, true /* installed */);
-        currentSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK;
+                true /* enabled */, true /* valid */, true /* installed */);
+        currentSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.TIRAMISU;
         PackageInfo oldSdkPackage = createPackageInfo("oldTargetSdkPackage",
-            true /* enabled */, true /* valid */, true /* installed */);
-        oldSdkPackage.applicationInfo.targetSdkVersion = UserPackage.MINIMUM_SUPPORTED_SDK - 1;
+                true /* enabled */, true /* valid */, true /* installed */);
+        oldSdkPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.S;
 
         WebViewProviderInfo newSdkProviderInfo =
                 new WebViewProviderInfo(newSdkPackage.packageName, "", true, false, null);
@@ -1490,6 +1265,9 @@ public class WebViewUpdateServiceTest {
                     newSdkProviderInfo
                 };
         setupWithPackages(packages);
+        // Mock the compatibility predicate, requiring T as targetSdkVersion.
+        mTestSystemImpl.setCompatibilityPredicate(
+                pi -> pi.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.TIRAMISU);
         // Start with the setting pointing to the invalid package
         mTestSystemImpl.updateUserSetting(oldSdkPackage.packageName);
 
@@ -1506,8 +1284,55 @@ public class WebViewUpdateServiceTest {
                 1 /* first preparation phase */);
     }
 
+    /**
+     * Ensure that packages with a versionCode new enough for the current platform are valid, and
+     * that older packages are not valid.
+     */
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
+    @RequiresFlagsEnabled(Flags.FLAG_USE_B_ENTRY_POINT)
+    public void testVersionCodeOSCompatValidity() {
+        PackageInfo newVersionPackage = createPackageInfo("newVersionPackage",
+                true /* enabled */, true /* valid */, true /* installed */);
+        newVersionPackage.setLongVersionCode(200L);
+        PackageInfo currentVersionPackage = createPackageInfo("currentVersionPackage",
+                true /* enabled */, true /* valid */, true /* installed */);
+        currentVersionPackage.setLongVersionCode(100L);
+        PackageInfo oldVersionPackage = createPackageInfo("oldVersionPackage",
+                true /* enabled */, true /* valid */, true /* installed */);
+        oldVersionPackage.setLongVersionCode(50L);
+
+        WebViewProviderInfo newVersionProviderInfo =
+                new WebViewProviderInfo(newVersionPackage.packageName, "", true, false, null);
+        WebViewProviderInfo currentVersionProviderInfo =
+                new WebViewProviderInfo(currentVersionPackage.packageName, "", true, false, null);
+        WebViewProviderInfo[] packages =
+                new WebViewProviderInfo[] {
+                    currentVersionProviderInfo,
+                    new WebViewProviderInfo(oldVersionPackage.packageName, "", true, false, null),
+                    newVersionProviderInfo
+                };
+        setupWithPackages(packages);
+        // Mock the compatibility predicate as requiring 100 as versionCode.
+        mTestSystemImpl.setCompatibilityPredicate(
+                pi -> pi.getLongVersionCode() >= 100L);
+        // Start with the setting pointing to the invalid package
+        mTestSystemImpl.updateUserSetting(oldVersionPackage.packageName);
+
+        mTestSystemImpl.setPackageInfo(newVersionPackage);
+        mTestSystemImpl.setPackageInfo(currentVersionPackage);
+        mTestSystemImpl.setPackageInfo(oldVersionPackage);
+
+        assertArrayEquals(
+                new WebViewProviderInfo[] { currentVersionProviderInfo, newVersionProviderInfo },
+                mWebViewUpdateServiceImpl.getValidWebViewPackages());
+
+        runWebViewBootPreparationOnMainSync();
+
+        checkPreparationPhasesForPackage(currentVersionPackage.packageName,
+                1 /* first preparation phase */);
+    }
+
+    @Test
     public void testDefaultWebViewPackageIsTheFirstAvailableByDefault() {
         String nonDefaultPackage = "nonDefaultPackage";
         String defaultPackage1 = "defaultPackage1";
@@ -1524,7 +1349,6 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
     public void testDefaultWebViewPackageEnabling() {
         String testPackage = "testDefault";
         WebViewProviderInfo[] packages =
@@ -1548,7 +1372,6 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
     public void testDefaultWebViewPackageInstallingDuringStartUp() {
         String testPackage = "testDefault";
         WebViewProviderInfo[] packages =
@@ -1572,7 +1395,6 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
     public void testDefaultWebViewPackageInstallingAfterStartUp() {
         String testPackage = "testDefault";
         WebViewProviderInfo[] packages =
@@ -1603,7 +1425,6 @@ public class WebViewUpdateServiceTest {
      * the repair logic.
      */
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
     public void testAddingNewUserWithDefaultdPackageNotInstalled() {
         String testPackage = "testDefault";
         WebViewProviderInfo[] packages =
@@ -1651,7 +1472,6 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
     public void testDisabledDefaultPackageChosen() {
         PackageInfo disabledPackage =
                 createPackageInfo(
@@ -1664,7 +1484,6 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled("android.webkit.update_service_v2")
     public void testUninstalledDefaultPackageChosen() {
         PackageInfo uninstalledPackage =
                 createPackageInfo(

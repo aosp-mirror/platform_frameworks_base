@@ -41,7 +41,7 @@ public class BatteryStatsManagerTest {
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
-    public void testBatteryUsageStatsDataConsistency() {
+    public void testBatteryUsageStatsDataConsistency() throws Exception {
         BatteryStatsManager bsm = getContext().getSystemService(BatteryStatsManager.class);
         BatteryUsageStats stats = bsm.getBatteryUsageStats(
                 new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(
@@ -70,5 +70,7 @@ public class BatteryStatsManagerTest {
                 }
             }
         }
+
+        stats.close();
     }
 }

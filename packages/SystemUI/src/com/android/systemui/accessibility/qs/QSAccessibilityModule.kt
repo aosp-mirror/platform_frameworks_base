@@ -39,6 +39,10 @@ import com.android.systemui.qs.tiles.impl.fontscaling.domain.FontScalingTileMapp
 import com.android.systemui.qs.tiles.impl.fontscaling.domain.interactor.FontScalingTileDataInteractor
 import com.android.systemui.qs.tiles.impl.fontscaling.domain.interactor.FontScalingTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.fontscaling.domain.model.FontScalingTileModel
+import com.android.systemui.qs.tiles.impl.hearingdevices.domain.HearingDevicesTileMapper
+import com.android.systemui.qs.tiles.impl.hearingdevices.domain.interactor.HearingDevicesTileDataInteractor
+import com.android.systemui.qs.tiles.impl.hearingdevices.domain.interactor.HearingDevicesTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.hearingdevices.domain.model.HearingDevicesTileModel
 import com.android.systemui.qs.tiles.impl.inversion.domain.ColorInversionTileMapper
 import com.android.systemui.qs.tiles.impl.inversion.domain.interactor.ColorInversionTileDataInteractor
 import com.android.systemui.qs.tiles.impl.inversion.domain.interactor.ColorInversionUserActionInteractor
@@ -159,6 +163,13 @@ interface QSAccessibilityModule {
         impl: NightDisplayTileDataInteractor
     ): QSTileAvailabilityInteractor
 
+    @Binds
+    @IntoMap
+    @StringKey(HEARING_DEVICES_TILE_SPEC)
+    fun provideHearingDevicesAvailabilityInteractor(
+        impl: HearingDevicesTileDataInteractor
+    ): QSTileAvailabilityInteractor
+
     companion object {
         const val COLOR_CORRECTION_TILE_SPEC = "color_correction"
         const val COLOR_INVERSION_TILE_SPEC = "inversion"
@@ -191,7 +202,7 @@ interface QSAccessibilityModule {
             factory: QSTileViewModelFactory.Static<ColorCorrectionTileModel>,
             mapper: ColorCorrectionTileMapper,
             stateInteractor: ColorCorrectionTileDataInteractor,
-            userActionInteractor: ColorCorrectionUserActionInteractor
+            userActionInteractor: ColorCorrectionUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(COLOR_CORRECTION_TILE_SPEC),
@@ -223,7 +234,7 @@ interface QSAccessibilityModule {
             factory: QSTileViewModelFactory.Static<ColorInversionTileModel>,
             mapper: ColorInversionTileMapper,
             stateInteractor: ColorInversionTileDataInteractor,
-            userActionInteractor: ColorInversionUserActionInteractor
+            userActionInteractor: ColorInversionUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(COLOR_INVERSION_TILE_SPEC),
@@ -255,7 +266,7 @@ interface QSAccessibilityModule {
             factory: QSTileViewModelFactory.Static<FontScalingTileModel>,
             mapper: FontScalingTileMapper,
             stateInteractor: FontScalingTileDataInteractor,
-            userActionInteractor: FontScalingTileUserActionInteractor
+            userActionInteractor: FontScalingTileUserActionInteractor,
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(FONT_SCALING_TILE_SPEC),
@@ -279,21 +290,6 @@ interface QSAccessibilityModule {
                 category = TileCategory.DISPLAY,
             )
 
-        @Provides
-        @IntoMap
-        @StringKey(HEARING_DEVICES_TILE_SPEC)
-        fun provideHearingDevicesTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
-            QSTileConfig(
-                tileSpec = TileSpec.create(HEARING_DEVICES_TILE_SPEC),
-                uiConfig =
-                    QSTileUIConfig.Resource(
-                        iconRes = R.drawable.qs_hearing_devices_icon,
-                        labelRes = R.string.quick_settings_hearing_devices_label,
-                    ),
-                instanceId = uiEventLogger.getNewInstanceId(),
-                category = TileCategory.ACCESSIBILITY,
-            )
-
         /**
          * Inject Reduce Bright Colors Tile into tileViewModelMap in QSModule. The tile is hidden
          * behind a flag.
@@ -305,7 +301,7 @@ interface QSAccessibilityModule {
             factory: QSTileViewModelFactory.Static<ReduceBrightColorsTileModel>,
             mapper: ReduceBrightColorsTileMapper,
             stateInteractor: ReduceBrightColorsTileDataInteractor,
-            userActionInteractor: ReduceBrightColorsTileUserActionInteractor
+            userActionInteractor: ReduceBrightColorsTileUserActionInteractor,
         ): QSTileViewModel =
             if (Flags.qsNewTilesFuture())
                 factory.create(
@@ -339,7 +335,7 @@ interface QSAccessibilityModule {
             factory: QSTileViewModelFactory.Static<OneHandedModeTileModel>,
             mapper: OneHandedModeTileMapper,
             stateInteractor: OneHandedModeTileDataInteractor,
-            userActionInteractor: OneHandedModeTileUserActionInteractor
+            userActionInteractor: OneHandedModeTileUserActionInteractor,
         ): QSTileViewModel =
             if (Flags.qsNewTilesFuture())
                 factory.create(
@@ -376,7 +372,7 @@ interface QSAccessibilityModule {
             factory: QSTileViewModelFactory.Static<NightDisplayTileModel>,
             mapper: NightDisplayTileMapper,
             stateInteractor: NightDisplayTileDataInteractor,
-            userActionInteractor: NightDisplayTileUserActionInteractor
+            userActionInteractor: NightDisplayTileUserActionInteractor,
         ): QSTileViewModel =
             if (Flags.qsNewTilesFuture())
                 factory.create(
@@ -386,5 +382,43 @@ interface QSAccessibilityModule {
                     mapper,
                 )
             else StubQSTileViewModel
+
+        @Provides
+        @IntoMap
+        @StringKey(HEARING_DEVICES_TILE_SPEC)
+        fun provideHearingDevicesTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(HEARING_DEVICES_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_hearing_devices_icon,
+                        labelRes = R.string.quick_settings_hearing_devices_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
+            )
+
+        /**
+         * Inject HearingDevices Tile into tileViewModelMap in QSModule. The tile is hidden behind a
+         * flag.
+         */
+        @Provides
+        @IntoMap
+        @StringKey(HEARING_DEVICES_TILE_SPEC)
+        fun provideHearingDevicesTileViewModel(
+            factory: QSTileViewModelFactory.Static<HearingDevicesTileModel>,
+            mapper: HearingDevicesTileMapper,
+            stateInteractor: HearingDevicesTileDataInteractor,
+            userActionInteractor: HearingDevicesTileUserActionInteractor,
+        ): QSTileViewModel {
+            return if (Flags.hearingAidsQsTileDialog() && Flags.qsNewTilesFuture()) {
+                factory.create(
+                    TileSpec.create(HEARING_DEVICES_TILE_SPEC),
+                    userActionInteractor,
+                    stateInteractor,
+                    mapper,
+                )
+            } else StubQSTileViewModel
+        }
     }
 }

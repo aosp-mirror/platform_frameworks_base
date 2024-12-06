@@ -7,8 +7,6 @@ dsandler@google.com #{LAST_RESORT_SUGGESTION}
 hackbod@android.com #{LAST_RESORT_SUGGESTION}
 hackbod@google.com #{LAST_RESORT_SUGGESTION}
 jjaggi@google.com #{LAST_RESORT_SUGGESTION}
-jsharkey@android.com #{LAST_RESORT_SUGGESTION}
-jsharkey@google.com #{LAST_RESORT_SUGGESTION}
 lorenzo@google.com #{LAST_RESORT_SUGGESTION}
 michaelwr@google.com #{LAST_RESORT_SUGGESTION}
 nandana@google.com #{LAST_RESORT_SUGGESTION}
@@ -33,15 +31,20 @@ per-file **.bp,**.mk =joeo@google.com, lamontjones@google.com
 per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/health/OWNERS
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 
-per-file INPUT_OWNERS = file:/INPUT_OWNERS
-per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
-per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
-
 per-file *ravenwood* = file:ravenwood/OWNERS
 per-file *Ravenwood* = file:ravenwood/OWNERS
 
+per-file INPUT_OWNERS = file:/INPUT_OWNERS
+per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
+per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
 per-file PERFORMANCE_OWNERS = file:/PERFORMANCE_OWNERS
-
 per-file PACKAGE_MANAGER_OWNERS = file:/PACKAGE_MANAGER_OWNERS
-
 per-file WEAR_OWNERS = file:/WEAR_OWNERS
+per-file ACTIVITY_MANAGER_OWNERS = file:/ACTIVITY_MANAGER_OWNERS
+per-file BATTERY_STATS_OWNERS = file:/BATTERY_STATS_OWNERS
+per-file OOM_ADJUSTER_OWNERS = file:/OOM_ADJUSTER_OWNERS
+per-file MULTIUSER_OWNERS = file:/MULTIUSER_OWNERS
+per-file BROADCASTS_OWNERS = file:/BROADCASTS_OWNERS
+per-file ADPF_OWNERS = file:/ADPF_OWNERS
+per-file GAME_MANAGER_OWNERS = file:/GAME_MANAGER_OWNERS
+per-file SDK_OWNERS = file:/SDK_OWNERS

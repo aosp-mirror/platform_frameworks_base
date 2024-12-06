@@ -261,6 +261,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 .setDisplayName(HdmiUtils.getDefaultDeviceName(source))
                 .setDeviceType(deviceTypes.get(0))
                 .setVendorId(Constants.VENDOR_ID_UNKNOWN)
+                .setPortId(mService.getHdmiCecNetwork().physicalAddressToPortId(physicalAddress))
                 .build();
         mService.getHdmiCecNetwork().addCecDevice(newDevice);
     }
@@ -470,6 +471,10 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void startRoutingControl(int oldPath, int newPath, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         if (oldPath == newPath) {
+            HdmiCecMessage setStreamPath =
+                    HdmiCecMessageBuilder.buildSetStreamPath(getDeviceInfo().getLogicalAddress(),
+                            oldPath);
+            mService.sendCecCommand(setStreamPath);
             return;
         }
         HdmiCecMessage routingChange =
@@ -641,8 +646,9 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         int address = message.getSource();
         int type = message.getParams()[2];
 
-        if (!mService.getHdmiCecNetwork().isInDeviceList(address, path)) {
-            handleNewDeviceAtTheTailOfActivePath(path);
+        if (getActiveSource().logicalAddress != address && getActivePath() == path) {
+            HdmiLogger.debug("New logical address detected on the current active path.");
+            startRoutingControl(path, path, null);
         }
         startNewDeviceAction(ActiveSource.of(address, path), type);
         return Constants.HANDLED;
@@ -791,6 +797,10 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     @Override
                     public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
                         for (HdmiDeviceInfo info : deviceInfos) {
+                            if (!isInputReady(info.getDeviceId())) {
+                                mService.getHdmiCecNetwork().removeCecDevice(
+                                        HdmiCecLocalDeviceTv.this, info.getLogicalAddress());
+                            }
                             mService.getHdmiCecNetwork().addCecDevice(info);
                         }
 
@@ -1433,6 +1443,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
+        mTvInputs.clear();
         // Remove any repeated working actions.
         // HotplugDetectionAction will be reinstated during the wake up process.
         // HdmiControlService.onWakeUp() -> initializeLocalDevices() ->

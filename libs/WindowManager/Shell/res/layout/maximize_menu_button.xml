@@ -19,7 +19,8 @@
 
     <FrameLayout
         android:layout_width="44dp"
-        android:layout_height="40dp">
+        android:layout_height="40dp"
+        android:importantForAccessibility="noHideDescendants">
         <ProgressBar
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyleHorizontal"

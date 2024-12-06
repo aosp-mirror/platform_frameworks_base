@@ -39,3 +39,36 @@ flag {
   description: "This flag controls whether LSKF fallback is removed from biometric prompt when the phone is outside trusted locations"
   bug: "322081563"
 }
+
+flag {
+  name: "screen_off_unlock_udfps"
+  is_exported: true
+  namespace: "biometrics_integration"
+  description: "This flag controls Whether to enable fp unlock when screen turns off on udfps devices"
+  bug: "373792870"
+}
+
+flag {
+  name: "identity_check_api"
+  namespace: "biometrics_framework"
+  description: "This flag is for API changes related to Identity Check"
+  bug: "373424727"
+  is_exported: true
+}
+
+flag {
+  name: "private_space_bp"
+  namespace: "biometrics_framework"
+  description: "Feature flag for biometric prompt improvements in private space"
+  bug: "365554098"
+}
+
+flag {
+  name: "effective_user_bp"
+  namespace: "biometrics_framework"
+  description: "Feature flag for using effective user in biometric prompt"
+  bug: "365094949"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

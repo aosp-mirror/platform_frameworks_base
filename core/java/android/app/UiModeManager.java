@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.Flags.enableCurrentModeTypeBinderCache;
 import static android.app.Flags.enableNightModeBinderCache;
 
 import android.annotation.CallbackExecutor;
@@ -682,6 +683,53 @@ public class UiModeManager {
         }
     }
 
+    private Integer getCurrentModeTypeFromServer() {
+        try {
+            if (sGlobals != null) {
+                return sGlobals.mService.getCurrentModeType();
+            }
+            return Configuration.UI_MODE_TYPE_NORMAL;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Retrieve the current running mode type for the user.
+     */
+    private final IpcDataCache.QueryHandler<Void, Integer> mCurrentModeTypeQuery =
+            new IpcDataCache.QueryHandler<>() {
+
+                @Override
+                @NonNull
+                public Integer apply(Void query) {
+                    return getCurrentModeTypeFromServer();
+                }
+            };
+
+    private static final String CURRENT_MODE_TYPE_API = "getCurrentModeType";
+
+    /**
+     * Cache the current running mode type for a user.
+     */
+    private final IpcDataCache<Void, Integer> mCurrentModeTypeCache =
+            new IpcDataCache<>(1, IpcDataCache.MODULE_SYSTEM,
+                    CURRENT_MODE_TYPE_API, /* cacheName= */ "CurrentModeTypeCache",
+                    mCurrentModeTypeQuery);
+
+    /**
+     * Invalidate the current mode type cache.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_CURRENT_MODE_TYPE_BINDER_CACHE)
+    public static void invalidateCurrentModeTypeCache() {
+        IpcDataCache.invalidateCache(IpcDataCache.MODULE_SYSTEM,
+                CURRENT_MODE_TYPE_API);
+    }
+
+
     /**
      * Return the current running mode type.  May be one of
      * {@link Configuration#UI_MODE_TYPE_NORMAL Configuration.UI_MODE_TYPE_NORMAL},
@@ -693,14 +741,11 @@ public class UiModeManager {
      * {@link Configuration#UI_MODE_TYPE_VR_HEADSET Configuration.UI_MODE_TYPE_VR_HEADSET}.
      */
     public int getCurrentModeType() {
-        if (sGlobals != null) {
-            try {
-                return sGlobals.mService.getCurrentModeType();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        if (enableCurrentModeTypeBinderCache()) {
+            return mCurrentModeTypeCache.query(null);
+        } else {
+            return getCurrentModeTypeFromServer();
         }
-        return Configuration.UI_MODE_TYPE_NORMAL;
     }
 
     /**

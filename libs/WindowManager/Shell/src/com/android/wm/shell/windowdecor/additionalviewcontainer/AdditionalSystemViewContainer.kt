@@ -23,7 +23,9 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.View
+import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 
 /**
@@ -38,6 +40,8 @@ class AdditionalSystemViewContainer(
     width: Int,
     height: Int,
     flags: Int,
+    @WindowInsets.Type.InsetsType forciblyShownTypes: Int = 0,
+    ignoreCutouts: Boolean = false,
     override val view: View
 ) : AdditionalViewContainer() {
     val lp: WindowManager.LayoutParams = WindowManager.LayoutParams(
@@ -49,6 +53,11 @@ class AdditionalSystemViewContainer(
         title = "Additional view container of Task=$taskId"
         gravity = Gravity.LEFT or Gravity.TOP
         setTrustedOverlay()
+        this.forciblyShownTypes = forciblyShownTypes
+        if (ignoreCutouts) {
+            fitInsetsTypes = 0
+            layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        }
     }
 
     constructor(
@@ -60,7 +69,8 @@ class AdditionalSystemViewContainer(
         width: Int,
         height: Int,
         flags: Int,
-        @LayoutRes layoutId: Int
+        @LayoutRes layoutId: Int,
+        ignoreCutouts: Boolean = false
     ) : this(
         windowManagerWrapper = windowManagerWrapper,
         taskId = taskId,
@@ -69,7 +79,8 @@ class AdditionalSystemViewContainer(
         width = width,
         height = height,
         flags = flags,
-        view = LayoutInflater.from(context).inflate(layoutId, null /* parent */)
+        view = LayoutInflater.from(context).inflate(layoutId, null /* parent */),
+        ignoreCutouts = ignoreCutouts
     )
 
     constructor(
@@ -80,7 +91,8 @@ class AdditionalSystemViewContainer(
         y: Int,
         width: Int,
         height: Int,
-        flags: Int
+        flags: Int,
+        ignoreCutouts: Boolean = false
     ) : this(
         windowManagerWrapper = windowManagerWrapper,
         taskId = taskId,
@@ -89,7 +101,8 @@ class AdditionalSystemViewContainer(
         width = width,
         height = height,
         flags = flags,
-        view = View(context)
+        view = View(context),
+        ignoreCutouts = ignoreCutouts
     )
 
     init {
@@ -106,5 +119,28 @@ class AdditionalSystemViewContainer(
             this.y = y.toInt()
         }
         windowManagerWrapper.updateViewLayout(view, lp)
+    }
+
+    class Factory {
+        fun create(
+            windowManagerWrapper: WindowManagerWrapper,
+            taskId: Int,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int,
+            flags: Int,
+            view: View,
+        ): AdditionalSystemViewContainer =
+            AdditionalSystemViewContainer(
+                windowManagerWrapper = windowManagerWrapper,
+                taskId = taskId,
+                x = x,
+                y = y,
+                width = width,
+                height = height,
+                flags = flags,
+                view = view
+            )
     }
 }

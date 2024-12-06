@@ -506,18 +506,23 @@ final class LogicalDisplay {
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
+            mBaseDisplayInfo.hasArrSupport = deviceInfo.hasArrSupport;
+            mBaseDisplayInfo.frameRateCategoryRate = deviceInfo.frameRateCategoryRate;
+            mBaseDisplayInfo.supportedRefreshRates = Arrays.copyOf(
+                    deviceInfo.supportedRefreshRates, deviceInfo.supportedRefreshRates.length);
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(
                     deviceInfo.supportedModes, deviceInfo.supportedModes.length);
             mBaseDisplayInfo.appsSupportedModes = syntheticModeManager.createAppSupportedModes(
-                    config, mBaseDisplayInfo.supportedModes
+                    config, mBaseDisplayInfo.supportedModes, mBaseDisplayInfo.hasArrSupport
             );
             mBaseDisplayInfo.colorMode = deviceInfo.colorMode;
             mBaseDisplayInfo.supportedColorModes = Arrays.copyOf(
                     deviceInfo.supportedColorModes,
                     deviceInfo.supportedColorModes.length);
             mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
+            mBaseDisplayInfo.isForceSdr = deviceInfo.isForceSdr;
             mBaseDisplayInfo.userDisabledHdrTypes = mUserDisabledHdrTypes;
             mBaseDisplayInfo.minimalPostProcessingSupported =
                     deviceInfo.allmSupported || deviceInfo.gameContentTypeSupported;
@@ -543,6 +548,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
+            mBaseDisplayInfo.brightnessDim = deviceInfo.brightnessDim;
             mBaseDisplayInfo.hdrSdrRatio = deviceInfo.hdrSdrRatio;
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
@@ -896,6 +902,29 @@ final class LogicalDisplay {
             mBaseDisplayInfo.userDisabledHdrTypes = userDisabledHdrTypes;
             mInfo.set(null);
         }
+    }
+
+    /**
+     * Checks whether display is of the type where HDR settings are relevant, and then sets
+     * whether Force SDR conversion mode is active.  isForceSdr is checked by the Display when
+     * returning HDR capabilities.
+     *
+     * @param isForceSdr Whether Force SDR conversion mode is active
+     * @return Whether Display Manager should call handleLogicalDisplayChangedLocked()
+     */
+    public boolean setIsForceSdr(boolean isForceSdr) {
+        int displayType = getDisplayInfoLocked().type;
+        boolean isTargetDisplayType = displayType == Display.TYPE_INTERNAL
+                || displayType == Display.TYPE_EXTERNAL
+                || displayType == Display.TYPE_OVERLAY;
+
+        boolean handleLogicalDisplayChangedLocked = false;
+        if (isTargetDisplayType && mBaseDisplayInfo.isForceSdr != isForceSdr) {
+            mBaseDisplayInfo.isForceSdr = isForceSdr;
+            mInfo.set(null);
+            handleLogicalDisplayChangedLocked = true;
+        }
+        return handleLogicalDisplayChangedLocked;
     }
 
     /**

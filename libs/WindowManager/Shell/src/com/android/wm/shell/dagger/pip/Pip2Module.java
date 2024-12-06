@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -38,6 +39,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.pip2.phone.PhonePipMenuController;
 import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipMotionHelper;
@@ -77,10 +79,12 @@ public abstract class Pip2Module {
             PipTaskListener pipTaskListener,
             @NonNull PipScheduler pipScheduler,
             @NonNull PipTransitionState pipStackListenerController,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipUiStateChangeController pipUiStateChangeController) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
-                pipScheduler, pipStackListenerController, pipUiStateChangeController);
+                pipScheduler, pipStackListenerController, pipDisplayLayoutState,
+                pipUiStateChangeController);
     }
 
     @WMSingleton
@@ -125,11 +129,12 @@ public abstract class Pip2Module {
     @Provides
     static PipScheduler providePipScheduler(Context context,
             PipBoundsState pipBoundsState,
-            PhonePipMenuController pipMenuController,
             @ShellMainThread ShellExecutor mainExecutor,
-            PipTransitionState pipTransitionState) {
-        return new PipScheduler(context, pipBoundsState, pipMenuController,
-                mainExecutor, pipTransitionState);
+            PipTransitionState pipTransitionState,
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+        return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState,
+                desktopUserRepositoriesOptional, rootTaskDisplayAreaOrganizer);
     }
 
     @WMSingleton
@@ -138,10 +143,13 @@ public abstract class Pip2Module {
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             SystemWindows systemWindows,
             PipUiEventLogger pipUiEventLogger,
+            PipTaskListener pipTaskListener,
+            @NonNull PipTransitionState pipTransitionState,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler) {
         return new PhonePipMenuController(context, pipBoundsState, pipMediaController,
-                systemWindows, pipUiEventLogger, mainExecutor, mainHandler);
+                systemWindows, pipUiEventLogger, pipTaskListener, pipTransitionState, mainExecutor,
+                mainHandler);
     }
 
 

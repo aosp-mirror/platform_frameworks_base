@@ -17,13 +17,19 @@
 package com.android.keyguard
 
 import android.view.MotionEvent
+import android.view.View
 
 /** Controls the [LockIconView]. */
 interface LockIconViewController {
-    fun setLockIconView(lockIconView: LockIconView)
+    fun setLockIconView(lockIconView: View)
+
     fun getTop(): Float
+
     fun getBottom(): Float
+
     fun dozeTimeTick()
+
     fun setAlpha(alpha: Float)
+
     fun willHandleTouchWhileDozing(event: MotionEvent): Boolean
 }

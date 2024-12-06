@@ -17,6 +17,8 @@
 package android.nfc;
 
 import android.content.ComponentName;
+import android.nfc.INfcEventListener;
+
 import android.nfc.cardemulation.AidGroup;
 import android.nfc.cardemulation.ApduServiceInfo;
 import android.os.RemoteCallback;
@@ -45,10 +47,19 @@ interface INfcCardEmulation
     boolean unsetPreferredService();
     boolean supportsAidPrefixRegistration();
     ApduServiceInfo getPreferredPaymentService(int userHandle);
-    boolean setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
+    int setServiceEnabledForCategoryOther(int userHandle, in ComponentName app, boolean status);
     boolean isDefaultPaymentRegistered();
 
     void overrideRoutingTable(int userHandle, String protocol, String technology, in String pkg);
     void recoverRoutingTable(int userHandle);
     boolean isEuiccSupported();
+    int getDefaultNfcSubscriptionId(in String pkg);
+    int setDefaultNfcSubscriptionId(int subscriptionId, in String pkg);
+    void setAutoChangeStatus(boolean state);
+    boolean isAutoChangeEnabled();
+    List<String> getRoutingStatus();
+    void overwriteRoutingTable(int userHandle, String emptyAid, String protocol, String tech, String sc);
+
+    void registerNfcEventListener(in INfcEventListener listener);
+    void unregisterNfcEventListener(in INfcEventListener listener);
 }

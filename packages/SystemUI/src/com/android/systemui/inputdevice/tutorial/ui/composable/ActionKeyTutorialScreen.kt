@@ -37,25 +37,22 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.android.compose.theme.LocalAndroidColorScheme
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
 import com.android.systemui.res.R
 
 @Composable
-fun ActionKeyTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun ActionKeyTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     BackHandler(onBack = onBack)
     val screenConfig = buildScreenConfig()
-    var actionState by remember { mutableStateOf(NOT_STARTED) }
+    var actionState: TutorialActionState by remember { mutableStateOf(NotStarted) }
     val focusRequester = remember { FocusRequester() }
     Box(
         modifier =
             Modifier.fillMaxSize()
                 .onKeyEvent { keyEvent: KeyEvent ->
                     if (keyEvent.key == Key.MetaLeft && keyEvent.type == KeyEventType.KeyUp) {
-                        actionState = FINISHED
+                        actionState = Finished(R.raw.action_key_success)
                     }
                     true
                 }
@@ -81,13 +78,9 @@ private fun buildScreenConfig() =
                 titleResId = R.string.tutorial_action_key_title,
                 bodyResId = R.string.tutorial_action_key_guidance,
                 titleSuccessResId = R.string.tutorial_action_key_success_title,
-                bodySuccessResId = R.string.tutorial_action_key_success_body
+                bodySuccessResId = R.string.tutorial_action_key_success_body,
             ),
-        animations =
-            TutorialScreenConfig.Animations(
-                educationResId = R.raw.action_key_edu,
-                successResId = R.raw.action_key_success
-            )
+        animations = TutorialScreenConfig.Animations(educationResId = R.raw.action_key_edu),
     )
 
 @Composable
@@ -101,7 +94,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".primaryFixedDim", primaryFixedDim),
             rememberColorFilterProperty(".secondaryFixedDim", secondaryFixedDim),
             rememberColorFilterProperty(".onSecondaryFixed", onSecondaryFixed),
-            rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant)
+            rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {

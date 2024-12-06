@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import static android.app.Flags.notificationsRedesignTemplates;
 import static android.widget.flags.Flags.conversationLayoutUseMaximumChildHeight;
 
 import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
@@ -692,7 +693,7 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateActionListPadding() {
-        if (mActions != null) {
+        if (!notificationsRedesignTemplates() && mActions != null) {
             mActions.setCollapsibleIndentDimen(R.dimen.call_notification_collapsible_indent);
         }
     }

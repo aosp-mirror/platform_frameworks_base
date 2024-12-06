@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Caller ID defaults to restricted. Next call: Not restricted"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Caller ID defaults to not restricted. Next call: Restricted"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Caller ID defaults to not restricted. Next call: Not restricted"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"This app isn\'t 16 KB compatible. APK alignment check failed. This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support. For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"This app isn\'t 16 KB compatible. ELF alignment check failed. This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support. For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"This app isn\'t 16 KB compatible. APK and ELF alignment checks failed. This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support. For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Service not provisioned."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"You can\'t change the caller ID setting."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Switched data to <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Allow the app to determine relative position between nearby ultra-wideband devices"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interact with nearby Wi‑Fi devices"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Allows the app to advertise, connect and determine the relative position of nearby Wi‑Fi devices"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"determine relative position between nearby devices"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Allow the app to determine relative position between nearby devices"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferred NFC payment service information"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred NFC payment service information, such as registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near-Field Communication"</string>
@@ -1153,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"in <xliff:g id="COUNT">%d</xliff:g>h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"in <xliff:g id="COUNT">%d</xliff:g>d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"in <xliff:g id="COUNT">%d</xliff:g> y"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minute ago}other{# minutes ago}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# hour ago}other{# hours ago}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# day ago}other{# days ago}}"</string>
@@ -1401,7 +1438,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB turned on"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Device connected as webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB accessory connected"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Tap for more options."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Tap for more options"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Charging connected device. Tap for more options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogue audio accessory detected"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"The attached device is not compatible with this phone. Tap to learn more."</string>
@@ -1746,8 +1783,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"An app is obscuring the permission request so your response cannot be verified."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tap a feature to start using it:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Choose features to use with the Accessibility button"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Choose features to use with the volume keys shortcut"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> has been turned off"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit shortcuts"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Done"</string>
@@ -1939,11 +1975,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Event"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sleeping"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Do Not Disturb (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Managed by <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"On"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> to <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Any calendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> is muting some sounds"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
@@ -2011,6 +2050,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Set a screen lock"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Set screen lock"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"To use your private space, set a screen lock on this device"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"To delete private space, set a screen lock on this device"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is not available"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is not available right now."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> unavailable"</string>
@@ -2129,11 +2169,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Calls and notifications will vibrate"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Calls and notifications will be muted"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"System changes"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Do not disturb"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"New: Do Not Disturb is hiding notifications"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tap to find out more and change."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Do Not Disturb has changed"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tap to check what\'s blocked."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Review notification settings"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Starting in Android 13, apps that you install need your permission to send notifications. Tap to change this permission for existing apps."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Remind me later"</string>
@@ -2429,7 +2464,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Send and receive messages without a mobile or Wi-Fi network"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Open Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"How it works"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Turn on \'Automatically select network\'"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Turn on \'Automatically select network\' in Settings so your phone can find a network that works with satellite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Turn on"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Go back"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Pending…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Satellite SOS is now available"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"You can message emergency services if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Satellite SOS isn\'t supported"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Satellite SOS isn\'t supported on this device"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Satellite SOS isn\'t set up"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Make sure that you\'re connected to the Internet and try setup again"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Satellite SOS isn\'t available"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Satellite SOS isn\'t available in this country or region"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satellite SOS not set up"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"To message by satellite, set Google Messages as your default messaging app"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satellite SOS isn\'t available"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"To check if satellite SOS is available in this country or region, turn on location settings"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Satellite messaging available"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"You can message by satellite if there\'s no mobile or Wi-Fi network. Google Messages must be your default messaging app."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Satellite messaging not supported"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Satellite messaging isn\'t supported on this device"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Satellite messaging not set up"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Make sure that you\'re connected to the Internet and try setup again"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Satellite messaging not available"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Satellite messaging isn\'t available in this country or region"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Satellite messaging not set up"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"To message by satellite, set Google Messages as your default messaging app"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Satellite messaging not available"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"To check if satellite messaging is available in this country or region, turn on location settings"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Set up Fingerprint Unlock again"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> can no longer be recognised."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> and <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> can no longer be recognised."</string>
@@ -2439,7 +2502,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Your face model can no longer be recognised. Set up Face Unlock again."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Set up"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Not now"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm for: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm for <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Switch user"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Mute"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tap to mute sound"</string>

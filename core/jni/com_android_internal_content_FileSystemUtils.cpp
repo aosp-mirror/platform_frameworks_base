@@ -22,7 +22,6 @@
 #include <android-base/hex.h>
 #include <android-base/unique_fd.h>
 #include <bionic/macros.h>
-#include <elf.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -204,7 +203,8 @@ bool punchHoles(const char *filePath, const uint64_t offset,
     return true;
 }
 
-bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
+bool getLoadSegmentPhdrs(const char *filePath, const uint64_t offset,
+                         std::vector<Elf64_Phdr> &programHeaders) {
     // Open Elf file
     Elf64_Ehdr ehdr;
     std::ifstream inputStream(filePath, std::ifstream::in);
@@ -227,11 +227,6 @@ bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
     uint64_t programHeaderOffset = ehdr.e_phoff;
     uint16_t programHeaderNum = ehdr.e_phnum;
 
-    IF_ALOGD() {
-        ALOGD("Punching holes in file: %s programHeaderOffset: %" PRIu64 " programHeaderNum: %hu",
-              filePath, programHeaderOffset, programHeaderNum);
-    }
-
     // if this is a zip file, also consider elf offset inside a file
     uint64_t phOffset;
     if (__builtin_add_overflow(offset, programHeaderOffset, &phOffset)) {
@@ -240,7 +235,6 @@ bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
     }
     inputStream.seekg(phOffset);
 
-    std::vector<Elf64_Phdr> programHeaders;
     for (int headerIndex = 0; headerIndex < programHeaderNum; headerIndex++) {
         Elf64_Phdr header;
         inputStream.read((char *)&header, sizeof(header));
@@ -254,6 +248,15 @@ bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
         programHeaders.push_back(header);
     }
 
+    return true;
+}
+
+bool punchHolesInElf64(const char *filePath, const uint64_t offset) {
+    std::vector<Elf64_Phdr> programHeaders;
+    if (!getLoadSegmentPhdrs(filePath, offset, programHeaders)) {
+        ALOGE("Failed to read program headers from ELF file.");
+        return false;
+    }
     return punchHoles(filePath, offset, programHeaders);
 }
 

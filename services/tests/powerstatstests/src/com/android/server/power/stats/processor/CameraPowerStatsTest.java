@@ -125,7 +125,7 @@ public class CameraPowerStatsTest {
                 .thenReturn(new int[]{ENERGY_CONSUMER_ID});
 
         PowerComponentAggregatedPowerStats stats = createAggregatedPowerStats(
-                () -> new CameraPowerStatsProcessor(mStatsRule.getPowerProfile(), mUidResolver));
+                () -> new CameraPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
         CameraPowerStatsCollector collector = new CameraPowerStatsCollector(mInjector);
         collector.addConsumer(

@@ -18,7 +18,10 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -53,12 +56,7 @@ import org.junit.runner.RunWith
 class AnimatedSharedAsStateTest {
     @get:Rule val rule = createComposeRule()
 
-    private data class Values(
-        val int: Int,
-        val float: Float,
-        val dp: Dp,
-        val color: Color,
-    )
+    private data class Values(val int: Int, val float: Float, val dp: Dp, val color: Color)
 
     private fun lerp(start: Values, stop: Values, fraction: Float): Values {
         return Values(
@@ -70,10 +68,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun ContentScope.Foo(
-        targetValues: Values,
-        onCurrentValueChanged: (Values) -> Unit,
-    ) {
+    private fun ContentScope.Foo(targetValues: Values, onCurrentValueChanged: (Values) -> Unit) {
         val key = TestElements.Foo
         Element(key, Modifier) {
             val int by animateElementIntAsState(targetValues.int, key = TestValues.Value1)
@@ -245,7 +240,7 @@ class AnimatedSharedAsStateTest {
             fromSceneContent = {
                 SceneValues(
                     targetValues = fromValues,
-                    onCurrentValueChanged = { lastValueInFrom = it }
+                    onCurrentValueChanged = { lastValueInFrom = it },
                 )
             },
             toSceneContent = {
@@ -457,7 +452,7 @@ class AnimatedSharedAsStateTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
                 )
             }
 
@@ -502,5 +497,14 @@ class AnimatedSharedAsStateTest {
         rule.waitForIdle()
         assertThat(lastValues[SceneA]).isWithin(0.001f).of(100f)
         assertThat(lastValues[SceneB]).isWithin(0.001f).of(100f)
+    }
+
+    @Test
+    fun interpolatedColor() {
+        val a = Color.Red
+        val b = Color.Green
+        val delta = SharedColorType.diff(b, a) // b - a
+        val interpolated = SharedColorType.addWeighted(a, delta, 0.5f) // a + (b - a) * 0.5f
+        rule.setContent { Box(Modifier.fillMaxSize().background(interpolated)) }
     }
 }

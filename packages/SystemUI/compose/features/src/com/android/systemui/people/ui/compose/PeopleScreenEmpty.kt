@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,15 +42,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.compose.theme.colorAttr
 import com.android.systemui.res.R
 
 @Composable
-internal fun PeopleScreenEmpty(
-    onGotItClicked: () -> Unit,
-) {
+internal fun PeopleScreenEmpty(onGotItClicked: () -> Unit) {
     Column(
-        Modifier.fillMaxSize().padding(PeopleSpacePadding),
+        Modifier.fillMaxSize().safeContentPadding().padding(PeopleSpacePadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -70,15 +69,14 @@ internal fun PeopleScreenEmpty(
         ExampleTile()
         Spacer(Modifier.weight(1f))
 
-        val androidColors = LocalAndroidColorScheme.current
         Button(
             onGotItClicked,
             Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp),
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = androidColors.deprecated.colorAccentPrimary,
-                    contentColor = androidColors.deprecated.textColorOnAccent,
-                )
+                    containerColor = colorAttr(com.android.internal.R.attr.colorAccentPrimary),
+                    contentColor = colorAttr(com.android.internal.R.attr.textColorOnAccent),
+                ),
         ) {
             Text(stringResource(R.string.got_it))
         }
@@ -87,11 +85,10 @@ internal fun PeopleScreenEmpty(
 
 @Composable
 private fun ExampleTile() {
-    val androidColors = LocalAndroidColorScheme.current
     Surface(
         shape = RoundedCornerShape(28.dp),
-        color = androidColors.deprecated.colorSurface,
-        contentColor = androidColors.deprecated.textColorPrimary,
+        color = colorAttr(com.android.internal.R.attr.colorSurface),
+        contentColor = colorAttr(com.android.internal.R.attr.textColorPrimary),
     ) {
         Row(
             Modifier.padding(vertical = 20.dp, horizontal = 16.dp),

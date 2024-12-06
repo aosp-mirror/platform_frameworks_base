@@ -20,7 +20,7 @@ import androidx.preference.PreferenceDataStore
 import com.android.settingslib.datastore.KeyValueStore
 
 /** Adapter to translate [KeyValueStore] into [PreferenceDataStore]. */
-class PreferenceDataStoreAdapter(private val keyValueStore: KeyValueStore) : PreferenceDataStore() {
+class PreferenceDataStoreAdapter(val keyValueStore: KeyValueStore) : PreferenceDataStore() {
 
     override fun getBoolean(key: String, defValue: Boolean): Boolean =
         keyValueStore.getValue(key, Boolean::class.javaObjectType) ?: defValue
@@ -37,6 +37,7 @@ class PreferenceDataStoreAdapter(private val keyValueStore: KeyValueStore) : Pre
     override fun getString(key: String, defValue: String?): String? =
         keyValueStore.getValue(key, String::class.javaObjectType) ?: defValue
 
+    @Suppress("UNCHECKED_CAST")
     override fun getStringSet(key: String, defValues: Set<String>?): Set<String>? =
         (keyValueStore.getValue(key, Set::class.javaObjectType) as Set<String>?) ?: defValues
 

@@ -415,8 +415,16 @@ public class Environment {
      * Returns the base directory for per-user system directory, device encrypted.
      * {@hide}
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
     @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
+    public static @NonNull File getDataSystemDeviceProtectedDirectory() {
+        return buildPath(getDataDirectory(), "system_de");
+    }
+
+    /** Use {@link #getDataSystemDeviceProtectedDirectory()} instead.
+     * {@hide}
+     */
+    @Deprecated
     public static @NonNull File getDataSystemDeDirectory() {
         return buildPath(getDataDirectory(), "system_de");
     }

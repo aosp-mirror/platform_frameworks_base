@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "RollbackPackageHealthObserverTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.rollback"
-        }
-      ]
+      "name": "RollbackPackageHealthObserverTests_server_rollback"
     }
   ]
 }

@@ -15,7 +15,6 @@
  */
 package android.hardware.location;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -99,8 +98,7 @@ public class ContextHubInfo implements Parcelable {
         mSleepPowerDrawMw = 0;
         mPeakPowerDrawMw = 0;
         mMaxPacketLengthBytes = contextHub.maxSupportedMessageLengthBytes;
-        mSupportsReliableMessages = Flags.reliableMessageImplementation()
-                && contextHub.supportsReliableMessages;
+        mSupportsReliableMessages = contextHub.supportsReliableMessages;
         mChrePlatformId = contextHub.chrePlatformId;
         mChreApiMajorVersion = contextHub.chreApiMajorVersion;
         mChreApiMinorVersion = contextHub.chreApiMinorVersion;
@@ -124,7 +122,6 @@ public class ContextHubInfo implements Parcelable {
      *
      * @return whether reliable messages are supported.
      */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public boolean supportsReliableMessages() {
         return mSupportsReliableMessages;
     }
@@ -364,22 +361,22 @@ public class ContextHubInfo implements Parcelable {
         boolean isEqual = false;
         if (object instanceof ContextHubInfo) {
             ContextHubInfo other = (ContextHubInfo) object;
-            isEqual = (other.getId() == mId)
-                    && other.getName().equals(mName)
-                    && other.getVendor().equals(mVendor)
-                    && other.getToolchain().equals(mToolchain)
-                    && (other.getToolchainVersion() == mToolchainVersion)
-                    && (other.getStaticSwVersion() == getStaticSwVersion())
-                    && (other.getChrePlatformId() == mChrePlatformId)
-                    && (other.getPeakMips() == mPeakMips)
-                    && (other.getStoppedPowerDrawMw() == mStoppedPowerDrawMw)
-                    && (other.getSleepPowerDrawMw() == mSleepPowerDrawMw)
-                    && (other.getPeakPowerDrawMw() == mPeakPowerDrawMw)
-                    && (other.getMaxPacketLengthBytes() == mMaxPacketLengthBytes)
-                    && (!Flags.reliableMessage()
-                            || (other.supportsReliableMessages() == mSupportsReliableMessages))
-                    && Arrays.equals(other.getSupportedSensors(), mSupportedSensors)
-                    && Arrays.equals(other.getMemoryRegions(), mMemoryRegions);
+            isEqual =
+                    (other.getId() == mId)
+                            && other.getName().equals(mName)
+                            && other.getVendor().equals(mVendor)
+                            && other.getToolchain().equals(mToolchain)
+                            && (other.getToolchainVersion() == mToolchainVersion)
+                            && (other.getStaticSwVersion() == getStaticSwVersion())
+                            && (other.getChrePlatformId() == mChrePlatformId)
+                            && (other.getPeakMips() == mPeakMips)
+                            && (other.getStoppedPowerDrawMw() == mStoppedPowerDrawMw)
+                            && (other.getSleepPowerDrawMw() == mSleepPowerDrawMw)
+                            && (other.getPeakPowerDrawMw() == mPeakPowerDrawMw)
+                            && (other.getMaxPacketLengthBytes() == mMaxPacketLengthBytes)
+                            && (other.supportsReliableMessages() == mSupportsReliableMessages)
+                            && Arrays.equals(other.getSupportedSensors(), mSupportedSensors)
+                            && Arrays.equals(other.getMemoryRegions(), mMemoryRegions);
         }
 
         return isEqual;

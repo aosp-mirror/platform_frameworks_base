@@ -2,36 +2,18 @@
   "presubmit": [
     {
       "file_patterns": ["Bugreport[^/]*\\.java"],
-      "name": "BugreportManagerTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        }
-      ]
+      "name": "BugreportManagerTestCases_android_server_os"
     },
     {
       "file_patterns": ["Bugreport[^/]*\\.java"],
-      "name": "CtsBugreportTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        }
-      ]
+      "name": "CtsBugreportTestCases_android_server_os"
     },
     {
       "name": "CtsUsbTests"
     },
     {
       "file_patterns": ["Bugreport[^/]*\\.java"],
-      "name": "ShellTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "ShellTests_android_server_os"
     }
   ],
   "postsubmit": [

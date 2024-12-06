@@ -26,6 +26,7 @@ import android.media.AudioAttributes;
 import android.os.RemoteException;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,38 +38,40 @@ public class SystemNotificationChannels {
      * @deprecated Legacy system channel, which is no longer used,
      */
     @Deprecated public static String VIRTUAL_KEYBOARD  = "VIRTUAL_KEYBOARD";
-    public static String PHYSICAL_KEYBOARD = "PHYSICAL_KEYBOARD";
-    public static String SECURITY = "SECURITY";
-    public static String CAR_MODE = "CAR_MODE";
-    public static String ACCOUNT = "ACCOUNT";
-    public static String DEVELOPER = "DEVELOPER";
-    public static String DEVELOPER_IMPORTANT = "DEVELOPER_IMPORTANT";
-    public static String UPDATES = "UPDATES";
-    public static String NETWORK_STATUS = "NETWORK_STATUS";
-    public static String NETWORK_ALERTS = "NETWORK_ALERTS";
-    public static String NETWORK_AVAILABLE = "NETWORK_AVAILABLE";
-    public static String VPN = "VPN";
+    public static final String PHYSICAL_KEYBOARD = "PHYSICAL_KEYBOARD";
+    public static final String SECURITY = "SECURITY";
+    public static final String CAR_MODE = "CAR_MODE";
+    public static final String ACCOUNT = "ACCOUNT";
+    public static final String DEVELOPER = "DEVELOPER";
+    public static final String DEVELOPER_IMPORTANT = "DEVELOPER_IMPORTANT";
+    public static final String UPDATES = "UPDATES";
+    public static final String NETWORK_STATUS = "NETWORK_STATUS";
+    public static final String NETWORK_ALERTS = "NETWORK_ALERTS";
+    public static final String NETWORK_AVAILABLE = "NETWORK_AVAILABLE";
+    public static final String VPN = "VPN";
     /**
      * @deprecated Legacy device admin channel with low importance which is no longer used,
      *  Use the high importance {@link #DEVICE_ADMIN} channel instead.
      */
-    @Deprecated public static String DEVICE_ADMIN_DEPRECATED = "DEVICE_ADMIN";
-    public static String DEVICE_ADMIN = "DEVICE_ADMIN_ALERTS";
-    public static String ALERTS = "ALERTS";
-    public static String RETAIL_MODE = "RETAIL_MODE";
-    public static String USB = "USB";
-    public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
-    public static String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
+    @Deprecated public static final String DEVICE_ADMIN_DEPRECATED = "DEVICE_ADMIN";
+    public static final String DEVICE_ADMIN = "DEVICE_ADMIN_ALERTS";
+    public static final String ALERTS = "ALERTS";
+    public static final String RETAIL_MODE = "RETAIL_MODE";
+    public static final String USB = "USB";
+    public static final String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
+    public static final String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
     /**
      * @deprecated Legacy system changes channel with low importance which is no longer used,
      *  Use the default importance {@link #SYSTEM_CHANGES} channel instead.
      */
-    @Deprecated public static String SYSTEM_CHANGES_DEPRECATED = "SYSTEM_CHANGES";
-    public static String SYSTEM_CHANGES = "SYSTEM_CHANGES_ALERTS";
-    public static String DO_NOT_DISTURB = "DO_NOT_DISTURB";
-    public static String ACCESSIBILITY_MAGNIFICATION = "ACCESSIBILITY_MAGNIFICATION";
-    public static String ACCESSIBILITY_SECURITY_POLICY = "ACCESSIBILITY_SECURITY_POLICY";
-    public static String ABUSIVE_BACKGROUND_APPS = "ABUSIVE_BACKGROUND_APPS";
+    @Deprecated public static final String SYSTEM_CHANGES_DEPRECATED = "SYSTEM_CHANGES";
+    public static final String SYSTEM_CHANGES = "SYSTEM_CHANGES_ALERTS";
+    public static final String ACCESSIBILITY_MAGNIFICATION = "ACCESSIBILITY_MAGNIFICATION";
+    public static final String ACCESSIBILITY_SECURITY_POLICY = "ACCESSIBILITY_SECURITY_POLICY";
+    public static final String ABUSIVE_BACKGROUND_APPS = "ABUSIVE_BACKGROUND_APPS";
+
+    @VisibleForTesting
+    static final String OBSOLETE_DO_NOT_DISTURB = "DO_NOT_DISTURB";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -193,11 +196,6 @@ public class SystemNotificationChannels {
                 .build());
         channelsList.add(systemChanges);
 
-        NotificationChannel dndChanges = new NotificationChannel(DO_NOT_DISTURB,
-                context.getString(R.string.notification_channel_do_not_disturb),
-                NotificationManager.IMPORTANCE_LOW);
-        channelsList.add(dndChanges);
-
         final NotificationChannel newFeaturePrompt = new NotificationChannel(
                 ACCESSIBILITY_MAGNIFICATION,
                 context.getString(R.string.notification_channel_accessibility_magnification),
@@ -218,6 +216,9 @@ public class SystemNotificationChannels {
         channelsList.add(abusiveBackgroundAppsChannel);
 
         nm.createNotificationChannels(channelsList);
+
+        // Delete channels created by previous Android versions that are no longer used.
+        nm.deleteNotificationChannel(OBSOLETE_DO_NOT_DISTURB);
     }
 
     private static String getDeviceAdminNotificationChannelName(Context context) {

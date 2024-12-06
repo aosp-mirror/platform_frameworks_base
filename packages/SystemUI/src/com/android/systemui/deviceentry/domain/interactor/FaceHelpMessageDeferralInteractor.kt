@@ -21,7 +21,6 @@ import android.hardware.face.FaceManager
 import com.android.systemui.biometrics.FaceHelpMessageDeferralFactory
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.deviceentry.shared.model.AcquiredFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import javax.inject.Inject
@@ -31,7 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * FaceHelpMessageDeferral business logic. Processes face acquired and face help authentication
@@ -55,9 +54,7 @@ constructor(
         faceAuthInteractor.authenticationStatus.filterIsInstance<HelpFaceAuthenticationStatus>()
 
     init {
-        if (DeviceEntryUdfpsRefactor.isEnabled) {
-            startUpdatingFaceHelpMessageDeferral()
-        }
+        startUpdatingFaceHelpMessageDeferral()
     }
 
     /**

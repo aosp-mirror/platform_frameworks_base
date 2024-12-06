@@ -186,14 +186,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         HashMap<Integer, List<Size>> supportedCaptureSizes = new HashMap<>();
-        IntArray supportedCaptureOutputFormats =
-                new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
-        supportedCaptureOutputFormats.addAll(
-                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
-        if (Flags.extension10Bit()) {
-            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
-        }
-        for (int format : supportedCaptureOutputFormats.toArray()) {
+        Integer[] supportedCaptureOutputFormats =
+                new Integer[CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.size()];
+        supportedCaptureOutputFormats =
+                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.toArray(
+                        supportedCaptureOutputFormats);
+        for (int format : supportedCaptureOutputFormats) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
             if (supportedSizes != null) {
@@ -225,7 +223,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             Size burstCaptureSurfaceSize =
                     new Size(burstCaptureSurfaceInfo.mWidth, burstCaptureSurfaceInfo.mHeight);
             HashMap<Integer, List<Size>> supportedPostviewSizes = new HashMap<>();
-            for (int format : supportedCaptureOutputFormats.toArray()) {
+            for (int format : supportedCaptureOutputFormats) {
                 List<Size> supportedSizesPostview = extensionChars.getPostviewSupportedSizes(
                         config.getExtension(), burstCaptureSurfaceSize, format);
                 if (supportedSizesPostview != null) {
@@ -401,7 +399,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 if (surfaceInfo.mFormat == ImageFormat.JPEG) {
                     mImageJpegProcessor = new CameraExtensionJpegProcessor(mImageProcessor);
                     mImageProcessor = mImageJpegProcessor;
-                } else if (Flags.extension10Bit() && mClientPostviewSurface != null) {
+                } else if (mClientPostviewSurface != null) {
                     // Handles case when postview is JPEG and capture is YUV
                     CameraExtensionUtils.SurfaceInfo postviewSurfaceInfo =
                             CameraExtensionUtils.querySurface(mClientPostviewSurface);

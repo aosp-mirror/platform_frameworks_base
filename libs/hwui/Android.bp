@@ -355,6 +355,7 @@ cc_defaults {
         "jni/AnimatedImageDrawable.cpp",
         "jni/Bitmap.cpp",
         "jni/BitmapRegionDecoder.cpp",
+        "jni/RuntimeXfermode.cpp",
         "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
@@ -384,6 +385,7 @@ cc_defaults {
         "jni/ScopedParcel.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
+        "jni/RuntimeEffectUtils.cpp",
         "jni/Typeface.cpp",
         "jni/Utils.cpp",
         "jni/YuvToJpegEncoder.cpp",
@@ -501,6 +503,13 @@ genrule {
     ],
 }
 
+genrule {
+    name: "statslog-hwui-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module hwui --javaPackage com.android.os.coregraphics --javaClass HwuiStatsLog",
+    out: ["com/android/os/coregraphics/HwuiStatsLog.java"],
+}
+
 // ------------------------
 // library
 // ------------------------
@@ -572,6 +581,7 @@ cc_defaults {
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
         "utils/StringUtils.cpp",
+        "utils/StatsUtils.cpp",
         "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",

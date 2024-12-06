@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
-import android.hardware.camera2.impl.ExtensionKey;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.utils.TypeReference;
@@ -487,11 +486,17 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #COLOR_CORRECTION_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
      * </ul>
      *
+     * <p><b>Available values for this device:</b><br>
+     * Starting from API level 36, {@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_MODES android.colorCorrection.availableModes}
+     * can be used to check the list of supported values. Prior to API level 36,
+     * TRANSFORM_MATRIX, HIGH_QUALITY, and FAST are guaranteed to be available
+     * as valid modes on devices that support this key.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_MODES
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
      * @see CaptureRequest#CONTROL_AWB_MODE
@@ -594,6 +599,60 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @NonNull
     public static final Key<Integer> COLOR_CORRECTION_ABERRATION_MODE =
             new Key<Integer>("android.colorCorrection.aberrationMode", int.class);
+
+    /**
+     * <p>Specifies the color temperature for CCT mode in Kelvin
+     * to adjust the white balance of the image.</p>
+     * <p>Sets the color temperature in Kelvin units for when
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} is CCT to adjust the
+     * white balance of the image.</p>
+     * <p>If CCT mode is enabled without a requested color temperature,
+     * a default value will be set by the camera device. The default value can be
+     * retrieved by checking the corresponding capture result. Color temperatures
+     * requested outside the advertised {@link CameraCharacteristics#COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE android.colorCorrection.colorTemperatureRange}
+     * will be clamped.</p>
+     * <p><b>Units</b>: Kelvin</p>
+     * <p><b>Range of valid values:</b><br>
+     * {@link CameraCharacteristics#COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE android.colorCorrection.colorTemperatureRange}</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#COLOR_CORRECTION_COLOR_TEMPERATURE_RANGE
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<Integer> COLOR_CORRECTION_COLOR_TEMPERATURE =
+            new Key<Integer>("android.colorCorrection.colorTemperature", int.class);
+
+    /**
+     * <p>Specifies the color tint for CCT mode to adjust the white
+     * balance of the image.</p>
+     * <p>Sets the color tint for when {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}
+     * is CCT to adjust the white balance of the image.</p>
+     * <p>If CCT mode is enabled without a requested color tint,
+     * a default value will be set by the camera device. The default value can be
+     * retrieved by checking the corresponding capture result. Color tints requested
+     * outside the supported range will be clamped to the nearest limit (-50 or +50).</p>
+     * <p><b>Units</b>: D_uv defined as the distance from the Planckian locus on the CIE 1931 xy
+     * chromaticity diagram, with the range ±50 mapping to ±0.01 D_uv</p>
+     * <p><b>Range of valid values:</b><br>
+     * The supported range, -50 to +50, corresponds to a D_uv distance
+     * of ±0.01 below and above the Planckian locus. Some camera devices may have
+     * limitations to achieving the full ±0.01 D_uv range at some color temperatures
+     * (e.g., below 1500K). In these cases, the applied D_uv value may be clamped and
+     * the actual color tint will be reported in the {@link CaptureRequest#COLOR_CORRECTION_COLOR_TINT android.colorCorrection.colorTint}
+     * result.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#COLOR_CORRECTION_COLOR_TINT
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_COLOR_TEMPERATURE)
+    public static final Key<Integer> COLOR_CORRECTION_COLOR_TINT =
+            new Key<Integer>("android.colorCorrection.colorTint", int.class);
 
     /**
      * <p>The desired setting for the camera device's auto-exposure
@@ -748,7 +807,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * application's selected exposure time, sensor sensitivity,
      * and frame duration ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime},
      * {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
-     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If one of the FLASH modes
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). If {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is
+     * enabled, the relevant priority CaptureRequest settings will not be overridden.
+     * See {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} for more details. If one of the FLASH modes
      * is selected, the camera device's flash unit controls are
      * also overridden.</p>
      * <p>The FLASH modes are only available if the camera device
@@ -759,6 +820,13 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * camera device auto-exposure routine for the overridden
      * fields for a given capture will be available in its
      * CaptureResult.</p>
+     * <p>When {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is AE_MODE_ON and if the device
+     * supports manual flash strength control, i.e.,
+     * if {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1, then
+     * the auto-exposure (AE) precapture metering sequence should be
+     * triggered to avoid the image being incorrectly exposed at
+     * different {@link CaptureRequest#FLASH_STRENGTH_LEVEL android.flash.strengthLevel}.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_AE_MODE_OFF OFF}</li>
@@ -774,9 +842,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CaptureRequest#FLASH_STRENGTH_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
@@ -855,7 +928,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where
      * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -1355,7 +1428,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where
      * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}},
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -1991,7 +2064,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where
      * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}},
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -2844,6 +2917,85 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.lowLightBoostState", int.class);
 
     /**
+     * <p>Whether the application uses {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}
+     * to control zoom levels.</p>
+     * <p>If set to AUTO, the camera device detects which capture request key the application uses
+     * to do zoom, {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}. If
+     * the application doesn't set android.scaler.zoomRatio or sets it to 1.0 in the capture
+     * request, the effective zoom level is reflected in {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} in capture
+     * results. If {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} is set to values other than 1.0, the effective
+     * zoom level is reflected in {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}. AUTO is the default value
+     * for this control, and also the behavior of the OS before Android version
+     * {@link android.os.Build.VERSION_CODES#BAKLAVA BAKLAVA}.</p>
+     * <p>If set to ZOOM_RATIO, the application explicitly specifies zoom level be controlled
+     * by {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, and the effective zoom level is reflected in
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} in capture results. This addresses an ambiguity with AUTO,
+     * with which the camera device cannot know if the application is using cropRegion or
+     * zoomRatio at 1.0x.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_ZOOM_METHOD_AUTO AUTO}</li>
+     *   <li>{@link #CONTROL_ZOOM_METHOD_ZOOM_RATIO ZOOM_RATIO}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see #CONTROL_ZOOM_METHOD_AUTO
+     * @see #CONTROL_ZOOM_METHOD_ZOOM_RATIO
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_ZOOM_METHOD)
+    public static final Key<Integer> CONTROL_ZOOM_METHOD =
+            new Key<Integer>("android.control.zoomMethod", int.class);
+
+    /**
+     * <p>Turn on AE priority mode.</p>
+     * <p>This control is only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} is
+     * AUTO and {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to one of its
+     * ON modes, with the exception of ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
+     * <p>When a priority mode is enabled, the camera device's
+     * auto-exposure routine will maintain the application's
+     * selected parameters relevant to the priority mode while overriding
+     * the remaining exposure parameters
+     * ({@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}, {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}, and
+     * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}). For example, if
+     * SENSOR_SENSITIVITY_PRIORITY mode is enabled, the camera device will
+     * maintain the application-selected {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}
+     * while adjusting {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}
+     * and {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}. The overridden fields for a
+     * given capture will be available in its CaptureResult.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_OFF OFF}</li>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY SENSOR_SENSITIVITY_PRIORITY}</li>
+     *   <li>{@link #CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY SENSOR_EXPOSURE_TIME_PRIORITY}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_FRAME_DURATION
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see #CONTROL_AE_PRIORITY_MODE_OFF
+     * @see #CONTROL_AE_PRIORITY_MODE_SENSOR_SENSITIVITY_PRIORITY
+     * @see #CONTROL_AE_PRIORITY_MODE_SENSOR_EXPOSURE_TIME_PRIORITY
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_AE_PRIORITY)
+    public static final Key<Integer> CONTROL_AE_PRIORITY_MODE =
+            new Key<Integer>("android.control.aePriorityMode", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means
@@ -3022,7 +3174,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_STRENGTH_LEVEL =
             new Key<Integer>("android.flash.strengthLevel", int.class);
 
@@ -3943,8 +4094,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
-     * <p>{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
+     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
@@ -4129,7 +4280,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * duration exposed to the nearest possible value (rather than expose longer).
      * The final exposure time used will be available in the output capture result.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
-     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * OFF; otherwise the auto-exposure algorithm will override this value. However, in the
+     * case that {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is set to SENSOR_EXPOSURE_TIME_PRIORITY, this
+     * control will be effective and not controlled by the auto-exposure algorithm.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</p>
@@ -4139,6 +4292,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
@@ -4247,7 +4401,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * value. The final sensitivity used will be available in the
      * output capture result.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
-     * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * OFF; otherwise the auto-exposure algorithm will override this value. However, in the
+     * case that {@link CaptureRequest#CONTROL_AE_PRIORITY_MODE android.control.aePriorityMode} is set to SENSOR_SENSITIVITY_PRIORITY, this
+     * control will be effective and not controlled by the auto-exposure algorithm.</p>
      * <p>Note that for devices supporting postRawSensitivityBoost, the total sensitivity applied
      * to the final processed image is the combination of {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} and
      * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost}. In case the application uses the sensor
@@ -4263,6 +4419,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_PRIORITY_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
@@ -5127,6 +5284,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * height dimensions are given in {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.
      * This may include hot pixels that lie outside of the active array
      * bounds given by {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     * <p>For camera devices with the
+     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability or devices where
+     * {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
+     * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.pixelArraySizeMaximumResolution} will be used as the
+     * pixel array size if the corresponding request sets {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} to
+     * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>n &lt;= number of pixels on the sensor.
      * The <code>(x, y)</code> coordinates must be bounded by
@@ -5135,6 +5300,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
     @PublicKey
     @NonNull
@@ -5294,7 +5461,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @PublicKey
     @NonNull
     @SyntheticKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<android.hardware.camera2.params.LensIntrinsicsSample[]> STATISTICS_LENS_INTRINSICS_SAMPLES =
             new Key<android.hardware.camera2.params.LensIntrinsicsSample[]>("android.statistics.lensIntrinsicsSamples", android.hardware.camera2.params.LensIntrinsicsSample[].class);
 
@@ -5308,7 +5474,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureResult#SENSOR_TIMESTAMP
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<long[]> STATISTICS_LENS_INTRINSIC_TIMESTAMPS =
             new Key<long[]>("android.statistics.lensIntrinsicTimestamps", long[].class);
 
@@ -5324,7 +5489,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<float[]> STATISTICS_LENS_INTRINSIC_SAMPLES =
             new Key<float[]>("android.statistics.lensIntrinsicSamples", float[].class);
 
@@ -5791,8 +5955,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>For camera devices with the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
-     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}
-     * , the current active physical device
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode},
+     * the current active physical device
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.activeArraySizeMaximumResolution} /
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION android.sensor.info.preCorrectionActiveArraySizeMaximumResolution} must be used as the
      * coordinate system for requests where {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode} is set to
@@ -5815,7 +5979,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<android.graphics.Rect> LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_SENSOR_CROP_REGION =
             new Key<android.graphics.Rect>("android.logicalMultiCamera.activePhysicalSensorCropRegion", android.graphics.Rect.class);
 
@@ -5941,212 +6104,36 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.extension.strength", int.class);
 
     /**
-     * <p>The padding region for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>An array [left, top, right, bottom] of the padding in pixels remaining on all four sides
-     * before the target region starts to go out of bounds.</p>
-     * <p>The padding region denotes the area surrounding the stabilized target region within which
-     * the camera can be moved while maintaining the target region in view. As the camera moves,
-     * the padding region adjusts to represent the proximity of the target region to the
-     * boundary, which is the point at which the target region will start to go out of bounds.</p>
-     * <p><b>Range of valid values:</b><br>
-     * The padding is the number of remaining pixels of padding in each direction.
-     * The pixels reference the active array coordinate system. Negative values indicate the target
-     * region is out of bounds. The value for this key may be null for when the stabilization mode is
-     * in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_OFF }
-     * or {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_GIMBAL } mode.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<int[]> EFV_PADDING_REGION =
-            new Key<int[]>("android.efv.paddingRegion", int[].class);
-
-    /**
-     * <p>The padding region when android.efv.autoZoom is enabled for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>An array [left, top, right, bottom] of the padding in pixels remaining on all four sides
-     * before the target region starts to go out of bounds.</p>
-     * <p>This may differ from android.efv.paddingRegion as the field of view can change
-     * during android.efv.autoZoom, altering the boundary region and thus updating the padding between the
-     * target region and the boundary.</p>
-     * <p><b>Range of valid values:</b><br>
-     * The padding is the number of remaining pixels of padding in each direction
-     * when android.efv.autoZoom is enabled. Negative values indicate the target region is out of bounds.
-     * The value for this key may be null for when the android.efv.autoZoom is not enabled.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<int[]> EFV_AUTO_ZOOM_PADDING_REGION =
-            new Key<int[]>("android.efv.autoZoomPaddingRegion", int[].class);
-
-    /**
-     * <p>List of coordinates representing the target region relative to the
-     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE }
-     * for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in
-     * {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>A list of android.graphics.PointF that define the coordinates of the target region
-     * relative to the
-     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE }.
-     * The array represents the target region coordinates as: top-left, top-right, bottom-left,
-     * bottom-right.</p>
-     * <p><b>Range of valid values:</b><br>
-     * The list of target coordinates will define a region within the bounds of the
-     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE }</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<android.graphics.PointF[]> EFV_TARGET_COORDINATES =
-            new Key<android.graphics.PointF[]>("android.efv.targetCoordinates", android.graphics.PointF[].class);
-
-    /**
-     * <p>Used to apply an additional digital zoom factor for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>For the {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * feature, an additional zoom factor is applied on top of the existing {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}.
-     * This additional zoom factor serves as a buffer to provide more flexibility for the
-     * {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED }
-     * mode. If android.efv.paddingZoomFactor is not set, the default will be used.
-     * The effectiveness of the stabilization may be influenced by the amount of padding zoom
-     * applied. A higher padding zoom factor can stabilize the target region more effectively
-     * with greater flexibility but may potentially impact image quality. Conversely, a lower
-     * padding zoom factor may be used to prioritize preserving image quality, albeit with less
-     * leeway in stabilizing the target region. It is recommended to set the
-     * android.efv.paddingZoomFactor to at least 1.5.</p>
-     * <p>If android.efv.autoZoom is enabled, the requested android.efv.paddingZoomFactor will be overridden.
-     * android.efv.maxPaddingZoomFactor can be checked for more details on controlling the
-     * padding zoom factor during android.efv.autoZoom.</p>
-     * <p><b>Range of valid values:</b><br>
-     * android.efv.paddingZoomFactorRange</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     *
-     * @see CaptureRequest#CONTROL_ZOOM_RATIO
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Float> EFV_PADDING_ZOOM_FACTOR =
-            new Key<Float>("android.efv.paddingZoomFactor", float.class);
-
-    /**
-     * <p>Set the stabilization mode for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension</p>
-     * <p>The desired stabilization mode. Gimbal stabilization mode provides simple, non-locked
-     * video stabilization. Locked mode uses the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * stabilization feature to fixate on the current region, utilizing it as the target area for
-     * stabilization.</p>
+     * <p>Indicates when to activate Night Mode Camera Extension for high-quality
+     * still captures in low-light conditions.</p>
+     * <p>Provides awareness to the application when the current scene can benefit from using a
+     * Night Mode Camera Extension to take a high-quality photo.</p>
+     * <p>Support for this capture result can be queried via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
+     * <p>If the device supports this capability then it will also support
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_NIGHT NIGHT}
+     * and will be available in both
+     * {@link android.hardware.camera2.CameraCaptureSession sessions} and
+     * {@link android.hardware.camera2.CameraExtensionSession sessions}.</p>
+     * <p>The value will be {@code UNKNOWN} in the following auto exposure modes: ON_AUTO_FLASH,
+     * ON_ALWAYS_FLASH, ON_AUTO_FLASH_REDEYE, or ON_EXTERNAL_FLASH.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
-     *   <li>{@link #EFV_STABILIZATION_MODE_OFF OFF}</li>
-     *   <li>{@link #EFV_STABILIZATION_MODE_GIMBAL GIMBAL}</li>
-     *   <li>{@link #EFV_STABILIZATION_MODE_LOCKED LOCKED}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN UNKNOWN}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_OFF OFF}</li>
+     *   <li>{@link #EXTENSION_NIGHT_MODE_INDICATOR_ON ON}</li>
      * </ul>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @see #EFV_STABILIZATION_MODE_OFF
-     * @see #EFV_STABILIZATION_MODE_GIMBAL
-     * @see #EFV_STABILIZATION_MODE_LOCKED
-     * @hide
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_UNKNOWN
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_OFF
+     * @see #EXTENSION_NIGHT_MODE_INDICATOR_ON
      */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Integer> EFV_STABILIZATION_MODE =
-            new Key<Integer>("android.efv.stabilizationMode", int.class);
-
-    /**
-     * <p>Used to enable or disable auto zoom for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>Turn on auto zoom to let the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * feature decide at any given point a combination of
-     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} and android.efv.paddingZoomFactor
-     * to keep the target region in view and stabilized. The combination chosen by the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * will equal the requested {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} multiplied with the requested
-     * android.efv.paddingZoomFactor. A limit can be set on the padding zoom if wanting
-     * to control image quality further using android.efv.maxPaddingZoomFactor.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     *
-     * @see CaptureRequest#CONTROL_ZOOM_RATIO
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Boolean> EFV_AUTO_ZOOM =
-            new Key<Boolean>("android.efv.autoZoom", boolean.class);
-
-    /**
-     * <p>Representing the desired clockwise rotation
-     * of the target region in degrees for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>Value representing the desired clockwise rotation of the target
-     * region in degrees.</p>
-     * <p><b>Range of valid values:</b><br>
-     * 0 to 360</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Float> EFV_ROTATE_VIEWPORT =
-            new Key<Float>("android.efv.rotateViewport", float.class);
-
-    /**
-     * <p>Used to update the target region for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>A android.util.Pair<Integer,Integer> that represents the desired
-     * <Horizontal,Vertical> shift of the current locked view (or target region) in
-     * pixels. Negative values indicate left and upward shifts, while positive values indicate
-     * right and downward shifts in the active array coordinate system.</p>
-     * <p><b>Range of valid values:</b><br>
-     * android.util.Pair<Integer,Integer> represents the
-     * <Horizontal,Vertical> shift. The range for the horizontal shift is
-     * [-max(android.efv.paddingRegion-left), max(android.efv.paddingRegion-right)].
-     * The range for the vertical shift is
-     * [-max(android.efv.paddingRegion-top), max(android.efv.paddingRegion-bottom)]</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT =
-            new Key<android.util.Pair<Integer,Integer>>("android.efv.translateViewport", new TypeReference<android.util.Pair<Integer,Integer>>() {{ }});
-
-    /**
-     * <p>Used to limit the android.efv.paddingZoomFactor if
-     * android.efv.autoZoom is enabled for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode.</p>
-     * <p>If android.efv.autoZoom is enabled, this key can be used to set a limit
-     * on the android.efv.paddingZoomFactor chosen by the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension in {@link android.hardware.camera2.CameraMetadata#EFV_STABILIZATION_MODE_LOCKED } mode
-     * to control image quality.</p>
-     * <p><b>Range of valid values:</b><br>
-     * The range of android.efv.paddingZoomFactorRange. Use a value greater than or equal to
-     * the android.efv.paddingZoomFactor to effectively utilize this key.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR =
-            new Key<Float>("android.efv.maxPaddingZoomFactor", float.class);
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_NIGHT_MODE_INDICATOR)
+    public static final Key<Integer> EXTENSION_NIGHT_MODE_INDICATOR =
+            new Key<Integer>("android.extension.nightModeIndicator", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

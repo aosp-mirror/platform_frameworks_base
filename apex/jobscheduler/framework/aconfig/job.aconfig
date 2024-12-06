@@ -25,8 +25,33 @@ flag {
 }
 
 flag {
-   name: "cleanup_empty_jobs"
+   name: "handle_abandoned_jobs"
    namespace: "backstage_power"
-   description: "Enables automatic cancellation of jobs due to leaked JobParameters, reducing unnecessary battery drain and improving system efficiency. This includes logging and traces for better issue diagnosis."
-   bug: "349688611"
+   description: "Detect, report and take action on jobs that maybe abandoned by the app without calling jobFinished."
+   bug: "372529068"
+   is_exported: true
+}
+
+flag {
+    name: "ignore_important_while_foreground"
+    namespace: "backstage_power"
+    description: "Ignore the important_while_foreground flag and change the related APIs to be not effective"
+    bug: "374175032"
+    is_exported: true
+}
+
+flag {
+    name: "get_pending_job_reasons_api"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Introduce a new getPendingJobReasons() API which returns reasons why a job may not have executed. Also deprecate the existing getPendingJobReason() API."
+    bug: "372031023"
+}
+
+flag {
+    name: "get_pending_job_reasons_history_api"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Introduce a new getPendingJobReasonsHistory() API which returns a limited historical view of getPendingJobReasons()."
+    bug: "372031023"
 }

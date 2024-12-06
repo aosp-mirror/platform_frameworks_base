@@ -33,9 +33,6 @@ final class HardwareKeyboardShortcutController {
     @GuardedBy("ImfLock.class")
     private final ArrayList<InputMethodSubtypeHandle> mSubtypeHandles = new ArrayList<>();
 
-    HardwareKeyboardShortcutController() {
-    }
-
     @GuardedBy("ImfLock.class")
     void update(@NonNull InputMethodSettings settings) {
         mSubtypeHandles.clear();

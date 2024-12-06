@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"接続強化機能を有効にします。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"ローカルターミナル"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ローカルシェルアクセスを提供するターミナルアプリを有効にします"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 開発環境"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"（試験運用版）Android で Linux ターミナルを実行する"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"無効にすると、Linux ターミナルのデータが消去されます"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP チェック"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP チェック動作を設定"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"デバッグ"</string>
@@ -477,7 +480,7 @@
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g>によって上書き済み"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - バッテリーを保護するため、充電を一時停止しています"</string>
-    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電用アクセサリを確認してください"</string>
+    <string name="power_incompatible_charging_settings_home_page" msgid="1322050766135126880">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電用アクセサリーを確認してください"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"残り時間: 約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1076561255466053220">"残り時間: 約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>（<xliff:g id="LEVEL">%2$s</xliff:g>）"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="2527842780666073218">"残り時間: 約 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>（使用状況に基づく）"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"アラームとリマインダー"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"アラームの設定や時間ベースのアクション設定を、このアプリに許可します。これによりアプリがバックグラウンドで実行できるようになるため、バッテリーの使用量が増えることがあります。\n\nこの権限が OFF の場合、このアプリで設定された既存のアラームと時間ベースのイベントは機能しなくなります。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"スケジュール, アラーム, リマインダー, 時計"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"サイレント モード"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"サイレント モード"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ON にする"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"サイレント モードを ON にする"</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"このデバイス"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"このタブレット"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"このパソコン（内蔵）"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"このテレビ"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ホルダー スピーカー"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部デバイス"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"接続済みのデバイス"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"このデバイス"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"アナログ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスでは再生できません"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"アカウントを更新して切り替えてください"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"再生不可: ダウンロードしたコンテンツ"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC 経由で接続済み"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC 経由で接続済み"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"テレビのデフォルト"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI 出力"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"内蔵スピーカー"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"内蔵スピーカー"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV オーディオ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
     <string name="help_label" msgid="3528360748637781274">"ヘルプとフィードバック"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"無効"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"有効"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"この変更を適用するには、デバイスの再起動が必要です。今すぐ再起動するか、キャンセルしてください。"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"有線ヘッドフォン"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有線ヘッドフォン"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"有線オーディオ"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB オーディオ"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"有線マイク"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB マイク"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT マイク"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ON"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"OFF"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"携帯通信会社のネットワークを変更します"</string>

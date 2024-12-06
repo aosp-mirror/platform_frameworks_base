@@ -31,6 +31,8 @@ constexpr size_t kPngSignatureSize = 8u;
 
 struct PngOptions {
   int grayscale_tolerance = 0;
+  // By default we want small files and can take the performance hit to achieve this goal.
+  int compression_level = 9;
 };
 
 /**

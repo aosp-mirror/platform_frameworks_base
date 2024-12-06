@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
+import com.android.wm.shell.util.GMAIL_PACKAGE_NAME
 import com.android.wm.shell.util.createWindowingEducationProto
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -80,8 +81,8 @@ class AppHandleEducationDatastoreRepositoryTest {
       runTest(StandardTestDispatcher()) {
         val windowingEducationProto =
             createWindowingEducationProto(
-                educationViewedTimestampMillis = 123L,
-                featureUsedTimestampMillis = 124L,
+                appHandleHintViewedTimestampMillis = 123L,
+                appHandleHintUsedTimestampMillis = 124L,
                 appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 2),
                 appUsageStatsLastUpdateTimestampMillis = 125L)
         testDatastore.updateData { windowingEducationProto }
@@ -108,8 +109,25 @@ class AppHandleEducationDatastoreRepositoryTest {
         assertThat(result).isEqualTo(windowingEducationProto)
       }
 
+  @Test
+  fun updateAppHandleHintViewedTimestampMillis_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        datastoreRepository.updateAppHandleHintViewedTimestampMillis(true)
+
+        val result = testDatastore.data.first().hasAppHandleHintViewedTimestampMillis()
+        assertThat(result).isEqualTo(true)
+      }
+
+  @Test
+  fun updateAppHandleHintUsedTimestampMillis_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        datastoreRepository.updateAppHandleHintUsedTimestampMillis(true)
+
+        val result = testDatastore.data.first().hasAppHandleHintUsedTimestampMillis()
+        assertThat(result).isEqualTo(true)
+      }
+
   companion object {
-    private const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
     private const val APP_HANDLE_EDUCATION_DATASTORE_TEST_FILE = "app_handle_education_test.pb"
   }
 }

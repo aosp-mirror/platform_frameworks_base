@@ -60,7 +60,7 @@ public class CachedBluetoothDeviceManager {
         mBtManager = localBtManager;
         mHearingAidDeviceManager = new HearingAidDeviceManager(context, localBtManager,
                 mCachedDevices);
-        mCsipDeviceManager = new CsipDeviceManager(localBtManager, mCachedDevices);
+        mCsipDeviceManager = new CsipDeviceManager(context, localBtManager, mCachedDevices);
     }
 
     public synchronized Collection<CachedBluetoothDevice> getCachedDevicesCopy() {

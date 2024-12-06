@@ -102,6 +102,7 @@ public final class ContextualSearchManager {
      * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
      */
     public static final String EXTRA_TOKEN = "android.app.contextualsearch.extra.TOKEN";
+
     /**
      * Intent action for contextual search invocation. The app providing the contextual search
      * experience must add this intent filter action to the activity it wants to be launched.
@@ -110,6 +111,14 @@ public final class ContextualSearchManager {
      */
     public static final String ACTION_LAUNCH_CONTEXTUAL_SEARCH =
             "android.app.contextualsearch.action.LAUNCH_CONTEXTUAL_SEARCH";
+
+    /**
+     * System feature declaring that the device supports Contextual Search.
+     *
+     * @hide
+     */
+    public static final String FEATURE_CONTEXTUAL_SEARCH =
+            "com.google.android.feature.CONTEXTUAL_SEARCH";
 
     /** Entrypoint to be used when a user long presses on the nav handle. */
     public static final int ENTRYPOINT_LONG_PRESS_NAV_HANDLE = 1;

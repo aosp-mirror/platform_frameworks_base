@@ -18,9 +18,11 @@ package android.view;
 
 import static android.system.OsConstants.EINVAL;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo.Translator;
@@ -203,7 +205,8 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    FRAME_RATE_COMPATIBILITY_GTE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -212,6 +215,11 @@ public class Surface implements Parcelable {
      * system selects a frame rate other than what the app requested, the app will be able
      * to run at the system frame rate without requiring pull down. This value should be
      * used when displaying game content, UIs, and anything that isn't video.
+     *
+     * In Android version {@link Build.VERSION_CODES#BAKLAVA} and above, use
+     * {@link FRAME_RATE_COMPATIBILITY_DEFAULT} for game content.
+     * For other cases, see {@link FRAME_RATE_COMPATIBILITY_FIXED_SOURCE} and
+     * {@link FRAME_RATE_COMPATIBILITY_GTE}.
      */
     public static final int FRAME_RATE_COMPATIBILITY_DEFAULT = 0;
 
@@ -224,6 +232,17 @@ public class Surface implements Parcelable {
      * the app's requested frame rate. This value should be used for video content.
      */
     public static final int FRAME_RATE_COMPATIBILITY_FIXED_SOURCE = 1;
+
+    /**
+     * The surface requests a frame rate that is greater than or equal to the specified frame rate.
+     * This value should be used for UIs, animations, scrolling and fling, and anything that is not
+     * a game or video.
+     *
+     * For video, use {@link FRAME_RATE_COMPATIBILITY_FIXED_SOURCE} instead. For game content, use
+     * {@link FRAME_RATE_COMPATIBILITY_DEFAULT}.
+     */
+    @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_GTE_ENUM)
+    public static final int FRAME_RATE_COMPATIBILITY_GTE = 2;
 
     /**
      * This surface belongs to an app on the High Refresh Rate Deny list, and needs the display
@@ -247,13 +266,6 @@ public class Surface implements Parcelable {
      * @hide
      */
     public static final int FRAME_RATE_COMPATIBILITY_MIN = 102;
-
-    // From window.h. Keep these in sync.
-    /**
-     * The surface requests a frame rate that is greater than or equal to {@code frameRate}.
-     * @hide
-     */
-    public static final int FRAME_RATE_COMPATIBILITY_GTE = 103;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -1023,6 +1035,211 @@ public class Surface implements Parcelable {
      */
     public boolean isAutoRefreshEnabled() {
         return mIsAutoRefreshEnabled;
+    }
+
+    /**
+     * Parameter object for {@link #setFrameRate(FrameRateParams)}, describing the intended frame
+     * rate for the Surface that setFrameRate is called on.
+     */
+    @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+    public static class FrameRateParams {
+        private FrameRateParams() {}
+
+        /**
+         * A static FrameRateParams that can be passed directly into {@link
+         * #setFrameRate(FrameRateParams)} to indicate the surface has no preference and any frame
+         * rate is acceptable.
+         */
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+        public static final FrameRateParams IGNORE =
+                new FrameRateParams.Builder().setDesiredRateRange(0f, Float.MAX_VALUE).build();
+
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+        public static final class Builder {
+            private float mDesiredMinRate;
+            private float mDesiredMaxRate;
+            private float mFixedSourceRate;
+            private int mChangeFrameRateStrategy;
+
+            /**
+             * Sets the desired frame rate range (inclusive) values for the surface, specifying that
+             * the surface prefers the device render rate to be in the range [desiredMinRate,
+             * desiredMaxRate].
+
+             * Set desiredMaxRate to FLOAT.MAX_VALUE to indicate the surface prefers any value
+             * greater than or equal to desiredMinRate.
+             *
+             * Set desiredMinRate = desiredMaxRate to indicate the surface prefers an exact frame
+             * rate. Note that this is different than specifying the fixed source frame rate with
+             * {@link FrameRateParams.Builder#setFixedSourceRate}. To reiterate, this call is used
+             * to specify the surface's frame rate preference to be within the desired range.
+             *
+             * desiredMaxRate must be greater than or equal to desiredMinRate.
+             * The values should be greater than or equal to 0.
+             *
+             * If the surface has no preference and any frame rate is acceptable, use the constant
+             * {@link FrameRateParams.IGNORE} in {@link #setFrameRate(FrameRateParams)} instead of
+             * building {@link FrameRateParams.Builder}.
+             *
+             * @see FrameRateParams#getDesiredMinRate()
+             * @see FrameRateParams#getDesiredMaxRate()
+             */
+            @SuppressLint("MissingGetterMatchingBuilder")
+            @NonNull
+            @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+            public Builder setDesiredRateRange(@FloatRange(from = 0.0) float desiredMinRate,
+                    @FloatRange(from = 0.0) float desiredMaxRate) {
+                if (desiredMaxRate < desiredMinRate) {
+                    Log.e(TAG,
+                            "Failed to set desired frame rate range. desiredMaxRate should be "
+                                    + "greater than or equal to desiredMinRate");
+                    return this;
+                }
+                mDesiredMinRate = desiredMinRate;
+                mDesiredMaxRate = desiredMaxRate;
+                return this;
+            }
+
+            /**
+             * Sets the fixed frame rate of the surface when its content has a fixed frame rate,
+             * e.g. a video with a fixed frame rate.
+             *
+             * When the frame rate chosen for the surface is the {@code fixedSourceRate} or a
+             * multiple, the surface can render without frame pulldown, for optimal smoothness. For
+             * example, a 30 fps video ({@code fixedSourceRate=30}) renders just as well on 30 fps,
+             * 60 fps, 90 fps, 120 fps, and so on.
+             *
+             * This method to set the fixed source rate can also be used together with a desired
+             * frame rate range via {@link FrameRateParams.Builder#setDesiredRateRange}. This still
+             * means the surface's content has a fixed frame rate of the provided {@code
+             * fixedSourceRate}, as well as it preferring to be within the desired frame rate range.
+             * For example, a 30 fps video {@code fixedSourceRate=30} and desired frame rate range
+             * [60,90] means the surface ideally prefers 60 fps (which is 30 fps * 2) or 90 fps (30
+             * fps * 3).
+             *
+             * @see FrameRateParams#getFixedSourceRate()
+             */
+            @NonNull
+            @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+            public Builder setFixedSourceRate(@FloatRange(from = 0.0) float fixedSourceRate) {
+                mFixedSourceRate = fixedSourceRate;
+                return this;
+            }
+
+            /**
+             * Whether display refresh rate transitions caused by this surface should be seamless. A
+             * seamless transition is one that doesn't have any visual interruptions, such as a
+             * black screen for a second or two. Value is
+             * Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS, or Surface.CHANGE_FRAME_RATE_ALWAYS
+             *
+             * @see FrameRateParams#getChangeFrameRateStrategy()
+             */
+            @NonNull
+            @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+            public Builder setChangeFrameRateStrategy(
+                    @ChangeFrameRateStrategy int changeFrameRateStrategy) {
+                mChangeFrameRateStrategy = changeFrameRateStrategy;
+                return this;
+            }
+
+            /**
+             * Builds the FrameRateParams object.
+             */
+            @NonNull
+            @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+            public FrameRateParams build() {
+                FrameRateParams frameRate = new FrameRateParams();
+                frameRate.mDesiredMinRate = this.mDesiredMinRate;
+                frameRate.mDesiredMaxRate = this.mDesiredMaxRate;
+                frameRate.mFixedSourceRate = this.mFixedSourceRate;
+                frameRate.mChangeFrameRateStrategy = this.mChangeFrameRateStrategy;
+                return frameRate;
+            }
+        }
+
+        /**
+         * Gets the minimum desired frame rate.
+         * @see FrameRateParams.Builder#setDesiredRateRange()
+         */
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+        public float getDesiredMinRate() {
+            return mDesiredMinRate;
+        }
+
+        /**
+         * Gets the maximum desired frame rate.
+         * @see FrameRateParams.Builder#setDesiredRateRange()
+         */
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+        public float getDesiredMaxRate() {
+            return mDesiredMaxRate;
+        }
+
+        /**
+         * Gets the fixed source frame rate.
+         * @see FrameRateParams.Builder#setFixedSourceRate()
+         */
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+        public float getFixedSourceRate() {
+            return mFixedSourceRate;
+        }
+
+        /**
+         * Gets the strategy when changing frame rate.
+         * @see FrameRateParams.Builder#setChangeFrameRateStrategy
+         */
+        @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+        @ChangeFrameRateStrategy
+        public int getChangeFrameRateStrategy() {
+            return mChangeFrameRateStrategy;
+        }
+
+        float mDesiredMinRate;
+        float mDesiredMaxRate;
+        float mFixedSourceRate;
+        int mChangeFrameRateStrategy;
+    }
+
+    /**
+     * Sets the intended frame rate for this surface.
+     *
+     * <p>On devices that are capable of running the display at different frame rates,
+     * the system may choose a display refresh rate to better match this surface's frame
+     * rate. Usage of this API won't introduce frame rate throttling, or affect other
+     * aspects of the application's frame production pipeline. However, because the system
+     * may change the display refresh rate, calls to this function may result in changes
+     * to Choreographer callback timings, and changes to the time interval at which the
+     * system releases buffers back to the application.</p>
+     *
+     * <p>Note that this only has an effect for surfaces presented on the display. If this
+     * surface is consumed by something other than the system compositor, e.g. a media
+     * codec, this call has no effect.</p>
+     *
+     * @param frameRateParams The parameters describing the intended frame rate of this surface.
+     *         Refer to {@link FrameRateParams} for details.
+     * @throws IllegalArgumentException If <code>frameRateParams</code> is invalid.
+     * @see #clearFrameRate()
+     */
+    @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_API)
+    public void setFrameRate(@NonNull FrameRateParams frameRateParams) {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            // TODO(b/362798998): Logic currently incomplete: it uses fixed source rate over the
+            // desired min/max rates. Fix when plumbing is upgraded.
+            int compatibility = frameRateParams.getFixedSourceRate() == 0
+                    ? FRAME_RATE_COMPATIBILITY_DEFAULT
+                    : FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+            float frameRate = compatibility == FRAME_RATE_COMPATIBILITY_DEFAULT
+                    ? frameRateParams.getDesiredMinRate()
+                    : frameRateParams.getFixedSourceRate();
+            int error = nativeSetFrameRate(mNativeObject, frameRate, compatibility,
+                    frameRateParams.getChangeFrameRateStrategy());
+            if (error == -EINVAL) {
+                throw new IllegalArgumentException("Invalid argument to Surface.setFrameRate()");
+            } else if (error != 0) {
+                Log.e(TAG, "Failed to set frame rate on Surface. Native error: " + error);
+            }
+        }
     }
 
     /**

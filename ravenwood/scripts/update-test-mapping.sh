@@ -20,6 +20,17 @@
 
 set -e
 
+# Tests that shouldn't be in presubmit.
+EXEMPT='^(SystemUiRavenTests)$'
+
+is_car() {
+    local module="$1"
+
+    # If the module name starts with "Car", then it's a test for "Car".
+    [[ "$module" =~ ^Car ]]
+    return $?
+}
+
 main() {
     local script_name="${0##*/}"
     local script_dir="${0%/*}"
@@ -30,7 +41,7 @@ main() {
     local footer="$(sed -ne '/AUTO-GENERATED-END/,$p' "$test_mapping")"
 
     echo "Getting all tests"
-    local tests=( $("$script_dir/list-ravenwood-tests.sh") )
+    local tests=( $("$script_dir/list-ravenwood-tests.sh" | grep -vP "$EXEMPT") )
 
     local num_tests="${#tests[@]}"
 
@@ -59,6 +70,10 @@ main() {
             fi
             echo "    {"
             echo "      \"name\": \"${tests[$i]}\","
+            if is_car "${tests[$i]}"; then
+                echo '      "keywords": ["automotive_code_coverage"],'
+            fi
+
             echo "      \"host\": true"
             echo "    }$comma"
 

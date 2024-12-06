@@ -48,6 +48,7 @@ per-file KeyCharacterMap.java = file:/services/core/java/com/android/server/inpu
 per-file VelocityTracker.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file VerifiedInputEvent.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file VerifiedInputEvent.aidl = file:/services/core/java/com/android/server/input/OWNERS
+per-file LetterboxScrollProcessor*.java = file:/services/core/java/com/android/server/input/OWNERS
 
 # InputWindowHandle
 per-file InputWindowHandle.java  = file:/services/core/java/com/android/server/input/OWNERS
@@ -87,6 +88,7 @@ per-file OnReceiveContentListener.java = file:/core/java/android/service/autofil
 per-file OnReceiveContentListener.java = file:/core/java/android/widget/OWNERS
 per-file ContentInfo.java = file:/core/java/android/service/autofill/OWNERS
 per-file ContentInfo.java = file:/core/java/android/widget/OWNERS
+per-file view_flags.aconfig = file:/services/core/java/com/android/server/wm/OWNERS
 
 # WindowManager
 per-file ContentRecordingSession.aidl = file:/services/core/java/com/android/server/wm/OWNERS

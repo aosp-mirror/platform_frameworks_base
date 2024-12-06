@@ -70,7 +70,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Uri;
-import android.net.vcn.Flags;
 import android.net.vcn.IVcnStatusCallback;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
@@ -78,6 +77,8 @@ import android.net.vcn.VcnConfigTest;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
+import android.net.vcn.util.PersistableBundleUtils;
+import android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
@@ -100,8 +101,6 @@ import com.android.server.vcn.TelephonySubscriptionTracker;
 import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
-import com.android.server.vcn.util.PersistableBundleUtils;
-import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -145,6 +144,8 @@ public class VcnManagementServiceTest {
     private static final String TEST_IFACE_NAME_2 = "TEST_IFACE2";
     private static final LinkProperties TEST_LP_1 = new LinkProperties();
     private static final LinkProperties TEST_LP_2 = new LinkProperties();
+
+    private static final int ACTIVE_MODEM_COUNT = 2;
 
     static {
         TEST_LP_1.setInterfaceName(TEST_IFACE_NAME);
@@ -233,6 +234,7 @@ public class VcnManagementServiceTest {
         setupSystemService(mMockContext, mUserManager, Context.USER_SERVICE, UserManager.class);
 
         doReturn(TEST_USER_HANDLE).when(mUserManager).getMainUser();
+        doReturn(ACTIVE_MODEM_COUNT).when(mTelMgr).getActiveModemCount();
 
         doReturn(TEST_PACKAGE_NAME).when(mMockContext).getOpPackageName();
 
@@ -282,8 +284,6 @@ public class VcnManagementServiceTest {
 
     @Before
     public void setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ENFORCE_MAIN_USER);
-
         doNothing()
                 .when(mMockContext)
                 .enforceCallingOrSelfPermission(
@@ -441,6 +441,14 @@ public class VcnManagementServiceTest {
             }
             return subIds;
         }).when(snapshot).getAllSubIdsInGroup(any());
+
+        doAnswer(invocation -> {
+            final Set<ParcelUuid> subGroups = new ArraySet<>();
+            for (Entry<Integer, ParcelUuid> entry : subIdToGroupMap.entrySet()) {
+                subGroups.add(entry.getValue());
+            }
+            return subGroups;
+        }).when(snapshot).getAllSubscriptionGroups();
 
         return snapshot;
     }
@@ -1484,6 +1492,28 @@ public class VcnManagementServiceTest {
                 Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
 
         verify(mMockPolicyListener).onPolicyChanged();
+    }
+
+    @Test
+    public void testGarbageCollectionKeepConfigUntilNewSnapshot() throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+        startAndGetVcnInstance(TEST_UUID_2);
+
+        // Report loss of subscription from mSubMgr
+        doReturn(Collections.emptyList()).when(mSubMgr).getSubscriptionsInGroup(any());
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                TEST_UUID_2,
+                Collections.singleton(TEST_UUID_2),
+                Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
+
+        assertTrue(mVcnMgmtSvc.getConfigs().containsKey(TEST_UUID_2));
+
+        // Report loss of subscription from snapshot
+        triggerSubscriptionTrackerCbAndGetSnapshot(null, Collections.emptySet());
+
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertFalse(mVcnMgmtSvc.getConfigs().containsKey(TEST_UUID_2));
     }
 
     @Test

@@ -27,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -36,7 +35,6 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Trace;
@@ -61,6 +59,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIcon.Shape;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Flags;
+import com.android.systemui.modes.shared.ModesUiIcons;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.NotificationContentDescription;
 import com.android.systemui.statusbar.notification.NotificationDozeHelper;
@@ -178,8 +177,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private float[] mMatrix;
     private ColorMatrixColorFilter mMatrixColorFilter;
     private Runnable mLayoutRunnable;
-    private boolean mDismissed;
-    private Runnable mOnDismissListener;
     private boolean mIncreasedSize;
     private boolean mShowsConversation;
     private float mDozeAmount;
@@ -215,7 +212,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         // We scale notification icons (on the left) plus icons on the right that explicitly
         // want FIXED_SPACE.
         boolean useNonSystemIconScaling = isNotification()
-                || (usesModeIcons() && mIcon != null && mIcon.shape == Shape.FIXED_SPACE);
+                || (ModesUiIcons.isEnabled() && mIcon != null && mIcon.shape == Shape.FIXED_SPACE);
 
         if (useNonSystemIconScaling) {
             updateIconScaleForNonSystemIcons();
@@ -415,7 +412,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
         }
-        if (usesModeIcons() && icon.shape == Shape.FIXED_SPACE) {
+        if (ModesUiIcons.isEnabled() && icon.shape == Shape.FIXED_SPACE) {
             setScaleType(ScaleType.FIT_CENTER);
         }
         if (!visibilityEquals) {
@@ -506,7 +503,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     @Nullable
     private Drawable loadDrawable(Context context, StatusBarIcon statusBarIcon) {
-        if (usesModeIcons() && statusBarIcon.preloadedIcon != null) {
+        if (ModesUiIcons.isEnabled() && statusBarIcon.preloadedIcon != null) {
             Drawable.ConstantState cached = statusBarIcon.preloadedIcon.getConstantState();
             if (cached != null) {
                 return cached.newDrawable(mContext.getResources()).mutate();
@@ -519,34 +516,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 userId = UserHandle.USER_SYSTEM;
             }
 
-            // Try to load the monochrome app icon if applicable
-            Drawable icon = maybeGetMonochromeAppIcon(context, statusBarIcon);
-            // Otherwise, just use the icon normally
-            if (icon == null) {
-                icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
-            }
-            return icon;
+            return statusBarIcon.icon.loadDrawableAsUser(context, userId);
         }
-    }
-
-    @Nullable
-    private Drawable maybeGetMonochromeAppIcon(Context context,
-            StatusBarIcon statusBarIcon) {
-        if (android.app.Flags.notificationsUseMonochromeAppIcon()
-                && statusBarIcon.type == StatusBarIcon.Type.MaybeMonochromeAppIcon) {
-            // Check if we have a monochrome app icon
-            PackageManager pm = context.getPackageManager();
-            Drawable appIcon = context.getApplicationInfo().loadIcon(pm);
-            if (appIcon instanceof AdaptiveIconDrawable) {
-                Drawable monochrome = ((AdaptiveIconDrawable) appIcon).getMonochrome();
-                if (monochrome != null) {
-                    setCropToPadding(true);
-                    setScaleType(ScaleType.CENTER);
-                    return new ScalingDrawableWrapper(monochrome, APP_ICON_SCALE);
-                }
-            }
-        }
-        return null;
     }
 
     public StatusBarIcon getStatusBarIcon() {
@@ -983,21 +954,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mLayoutRunnable = runnable;
     }
 
-    public void setDismissed() {
-        mDismissed = true;
-        if (mOnDismissListener != null) {
-            mOnDismissListener.run();
-        }
-    }
-
-    public boolean isDismissed() {
-        return mDismissed;
-    }
-
-    public void setOnDismissListener(Runnable onDismissListener) {
-        mOnDismissListener = onDismissListener;
-    }
-
     @Override
     public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
         int areaTint = getTint(areas, this, tint);
@@ -1040,10 +996,5 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      */
     public boolean showsConversation() {
         return mShowsConversation;
-    }
-
-    private static boolean usesModeIcons() {
-        return android.app.Flags.modesApi() && android.app.Flags.modesUi()
-                && android.app.Flags.modesUiIcons();
     }
 }

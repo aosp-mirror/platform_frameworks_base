@@ -218,10 +218,16 @@ public final class VibratorHelper {
      * @param uri {@code Uri} an uri including query parameter "vibraiton_uri"
      */
     public @Nullable VibrationEffect createVibrationEffectFromSoundUri(Uri uri) {
-        if (uri == null) {
+        if (uri == null || uri.isOpaque()) {
             return null;
         }
-        return Utils.parseVibrationEffect(mVibrator, Utils.getVibrationUri(uri));
+
+        try {
+            return Utils.parseVibrationEffect(mVibrator, Utils.getVibrationUri(uri));
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to get vibration effect: ", e);
+        }
+        return null;
     }
 
     /** Returns if a given vibration can be played by the vibrator that does notification buzz. */

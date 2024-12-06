@@ -55,7 +55,7 @@ android_app {
     ],
 }
 
-genrule {
+java_genrule {
     name: "generate_priv_manifest",
     srcs: [
         "shim_priv/AndroidManifest.xml",
@@ -169,7 +169,7 @@ android_app {
     min_sdk_version: "24",
 }
 
-genrule {
+java_genrule {
     name: "generate_shim_manifest",
     srcs: [
         "shim/AndroidManifest.xml",

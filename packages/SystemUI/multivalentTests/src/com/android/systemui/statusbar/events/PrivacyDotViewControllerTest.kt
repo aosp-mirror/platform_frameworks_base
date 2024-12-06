@@ -29,6 +29,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.FakeStatusBarStateController
+import com.android.systemui.statusbar.events.PrivacyDotCorner.BottomLeft
+import com.android.systemui.statusbar.events.PrivacyDotCorner.BottomRight
+import com.android.systemui.statusbar.events.PrivacyDotCorner.TopLeft
+import com.android.systemui.statusbar.events.PrivacyDotCorner.TopRight
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -70,16 +74,16 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
         }
 
     private fun createController() =
-        PrivacyDotViewController(
-                executor,
-                testScope.backgroundScope,
-                statusBarStateController,
-                configurationController,
-                contentInsetsProvider,
-                animationScheduler = mock<SystemStatusAnimationScheduler>(),
-                shadeInteractor = null
-            )
-            .also { it.setUiExecutor(executor) }
+        PrivacyDotViewControllerImpl(
+            executor,
+            testScope.backgroundScope,
+            statusBarStateController,
+            configurationController,
+            contentInsetsProvider,
+            animationScheduler = mock<SystemStatusAnimationScheduler>(),
+            shadeInteractor = null,
+            uiExecutor = executor,
+        )
 
     @Test
     fun topMargin_topLeftView_basedOnSeascapeArea() {
@@ -215,7 +219,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_RIGHT)
+        assertThat(controller.currentViewState.corner).isEqualTo(TopRight)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(topRightView)
     }
 
@@ -225,7 +229,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_RIGHT)
+        assertThat(controller.currentViewState.corner).isEqualTo(BottomRight)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomRightView)
     }
 
@@ -235,7 +239,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_LEFT)
+        assertThat(controller.currentViewState.corner).isEqualTo(TopLeft)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(topLeftView)
     }
 
@@ -245,7 +249,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
 
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_LEFT)
+        assertThat(controller.currentViewState.corner).isEqualTo(BottomLeft)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomLeftView)
     }
 
@@ -256,7 +260,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
         enableRtl()
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_LEFT)
+        assertThat(controller.currentViewState.corner).isEqualTo(TopLeft)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(topLeftView)
     }
 
@@ -267,7 +271,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
         enableRtl()
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(TOP_RIGHT)
+        assertThat(controller.currentViewState.corner).isEqualTo(TopRight)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(topRightView)
     }
 
@@ -278,7 +282,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
         enableRtl()
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_LEFT)
+        assertThat(controller.currentViewState.corner).isEqualTo(BottomLeft)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomLeftView)
     }
 
@@ -289,7 +293,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
         enableRtl()
         val controller = createAndInitializeController()
 
-        assertThat(controller.currentViewState.cornerIndex).isEqualTo(BOTTOM_RIGHT)
+        assertThat(controller.currentViewState.corner).isEqualTo(BottomRight)
         assertThat(controller.currentViewState.designatedCorner).isEqualTo(bottomRightView)
     }
 
@@ -307,7 +311,7 @@ class PrivacyDotViewControllerTest : SysuiTestCase() {
             newTopLeftView,
             newTopRightView,
             newBottomLeftView,
-            newBottomRightView
+            newBottomRightView,
         )
 
         assertThat((newBottomRightView.layoutParams as FrameLayout.LayoutParams).gravity)

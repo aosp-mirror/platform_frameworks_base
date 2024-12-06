@@ -82,7 +82,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Veľmi rýchla"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Vypršalo"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Odpojený"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Odpojené"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Prebieha pripájanie…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -357,6 +357,9 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Povoľuje funkciu Zlepšené možnosti pripojenia."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Miestny terminál"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Povoliť terminálovú apl. na miestny prístup k prostrediu shell"</string>
+    <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Vývojové prostredie Linux"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimentálne) Spúšťať terminál systému Linux v Androide"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ak túto možnosť vypnete, údaje terminálu systému Linux sa vymažú"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Nastaviť spôsob kontroly HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ladenie"</string>
@@ -473,7 +476,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomália (červená a zelená)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomália (modrá a žltá)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Úprava farieb"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Úprava farieb môže byť užitočná, keď chcete:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;zobrazovať farby presnejšie;&lt;/li&gt; &lt;li&gt;&amp;nbsp;odstrániť farby, aby ste sa mohli sústrediť.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Úprava farieb môže byť užitočná, keď chcete:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;vidieť farby presnejšie;&lt;/li&gt; &lt;li&gt;&amp;nbsp;odstrániť farby, aby ste sa mohli sústrediť.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Prekonané predvoľbou <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> – nabíjanie je pozastavené, aby sa chránila batéria"</string>
@@ -564,8 +567,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Budíky a pripomenutia"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciou nebudú fungovať."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plán, budík, pripomenutie, hodiny"</string>
-    <!-- no translation found for zen_mode_do_not_disturb_name (6798711401734798283) -->
-    <skip />
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Režim bez vyrušení"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Režim bez vyrušení"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Zapnúť"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zapnite režim bez vyrušení"</string>
@@ -583,12 +585,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Teraz"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Tento telefón"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tento tablet"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Tento počítač (interný)"</string>
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Tento televízor"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Reproduktor doku"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externé zariadenie"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pripojené zariadenie"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefón"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analógový"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"V tomto zariadení sa nedá prehrávať obsah"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Inovujte účet a prejdite naň"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Tu sa nedajú prehrať stiahnuté súbory"</string>
@@ -601,9 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Pripojené prostredníctvom rozhrania ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Pripojené prostredníctvom rozhrania eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Predvolené nastavenie televízora"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Výstup HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interné reproduktory"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Vstavaný reproduktor"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Zvuk televízora"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Pri pripájaní sa vyskytol problém. Zariadenie vypnite a znova zapnite."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio zariadenie s káblom"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomocník a spätná väzba"</string>
@@ -685,7 +689,12 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Vypnuté"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Zapnuté"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Zmena sa prejaví až po reštarte zariadenia. Môžete ho teraz reštartovať alebo akciu zrušiť."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Slúchadlá s káblom"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Slúchadlá s káblom"</string>
+    <string name="media_transfer_headphone_name" msgid="1157798825650178478">"Zvuk cez kábel"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"Zvuk cez USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7115192790725088698">"Káblový mikrofón"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"Mikrofón s rozhraním USB"</string>
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"Mikrofón Bluetooth"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Zapnúť"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Vypnúť"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Mení sa sieť operátora"</string>

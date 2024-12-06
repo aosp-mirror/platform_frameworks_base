@@ -25,6 +25,7 @@ interface KeyValueStore : KeyedObservable<String> {
     fun contains(key: String): Boolean
 
     /** Gets default value of given key. */
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> getDefaultValue(key: String, valueType: Class<T>): T? =
         when (valueType) {
             Boolean::class.javaObjectType -> false
@@ -56,6 +57,7 @@ interface SharedPreferencesKeyValueStore : KeyValueStore {
 
     override fun contains(key: String): Boolean = sharedPreferences.contains(key)
 
+    @Suppress("IMPLICIT_CAST_TO_ANY", "UNCHECKED_CAST")
     override fun <T : Any> getValue(key: String, valueType: Class<T>): T? =
         when (valueType) {
             Boolean::class.javaObjectType -> sharedPreferences.getBoolean(key, false)
@@ -68,6 +70,7 @@ interface SharedPreferencesKeyValueStore : KeyValueStore {
         }
             as T?
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : Any> setValue(key: String, valueType: Class<T>, value: T?) {
         if (value == null) {
             sharedPreferences.edit().remove(key).apply()

@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"બંધ છે"</item>
     <item msgid="3028994095749238254">"ચાલુ છે"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"અનુપલબ્ધ"</item>
+    <item msgid="6419996398343291862">"બંધ"</item>
+    <item msgid="5908720590832378783">"ચાલુ"</item>
+  </string-array>
 </resources>

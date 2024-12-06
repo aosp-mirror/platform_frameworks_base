@@ -42,7 +42,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_noCutout_returnsNull() {
         val noCutoutDisplay = createDisplay(cutout = null)
         val noCutoutDisplayContext = context.createDisplayContext(noCutoutDisplay)
-        val provider = SysUICutoutProvider(noCutoutDisplayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(noCutoutDisplayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()
 
@@ -53,7 +53,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_returnsCutout() {
         val cutoutDisplay = createDisplay()
         val cutoutDisplayContext = context.createDisplayContext(cutoutDisplay)
-        val provider = SysUICutoutProvider(cutoutDisplayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(cutoutDisplayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
@@ -64,7 +64,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_noAssociatedProtection_returnsNoProtection() {
         val cutoutDisplay = createDisplay()
         val cutoutDisplayContext = context.createDisplayContext(cutoutDisplay)
-        val provider = SysUICutoutProvider(cutoutDisplayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(cutoutDisplayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
@@ -75,7 +75,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_outerDisplay_protectionAssociated_returnsProtection() {
         fakeProtectionLoader.addOuterCameraProtection(displayUniqueId = OUTER_DISPLAY_UNIQUE_ID)
         val outerDisplayContext = context.createDisplayContext(OUTER_DISPLAY)
-        val provider = SysUICutoutProvider(outerDisplayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(outerDisplayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
@@ -86,7 +86,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_outerDisplay_protectionNotAvailable_returnsNullProtection() {
         fakeProtectionLoader.clearProtectionInfoList()
         val outerDisplayContext = context.createDisplayContext(OUTER_DISPLAY)
-        val provider = SysUICutoutProvider(outerDisplayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(outerDisplayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
@@ -97,7 +97,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_displayWithNullId_protectionsWithNoId_returnsNullProtection() {
         fakeProtectionLoader.addOuterCameraProtection(displayUniqueId = "")
         val displayContext = context.createDisplayContext(createDisplay(uniqueId = null))
-        val provider = SysUICutoutProvider(displayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(displayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
@@ -108,7 +108,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
     fun cutoutInfoForCurrentDisplay_displayWithEmptyId_protectionsWithNoId_returnsNullProtection() {
         fakeProtectionLoader.addOuterCameraProtection(displayUniqueId = "")
         val displayContext = context.createDisplayContext(createDisplay(uniqueId = ""))
-        val provider = SysUICutoutProvider(displayContext, fakeProtectionLoader)
+        val provider = SysUICutoutProviderImpl(displayContext, fakeProtectionLoader)
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
@@ -123,15 +123,13 @@ class SysUICutoutProviderTest : SysuiTestCase() {
                 displayHeight = 1000,
                 rotation = Surface.ROTATION_0,
                 protectionBounds =
-                    Rect(/* left = */ 440, /* top = */ 10, /* right = */ 490, /* bottom = */ 110)
+                    Rect(/* left= */ 440, /* top= */ 10, /* right= */ 490, /* bottom= */ 110),
             )
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
         assertThat(sysUICutout.cameraProtection!!.bounds)
-            .isEqualTo(
-                Rect(/* left = */ 440, /* top = */ 10, /* right = */ 490, /* bottom = */ 110)
-            )
+            .isEqualTo(Rect(/* left= */ 440, /* top= */ 10, /* right= */ 490, /* bottom= */ 110))
     }
 
     @Test
@@ -142,13 +140,13 @@ class SysUICutoutProviderTest : SysuiTestCase() {
                 displayHeight = 1000,
                 rotation = Surface.ROTATION_90,
                 protectionBounds =
-                    Rect(/* left = */ 440, /* top = */ 10, /* right = */ 490, /* bottom = */ 110)
+                    Rect(/* left= */ 440, /* top= */ 10, /* right= */ 490, /* bottom= */ 110),
             )
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
         assertThat(sysUICutout.cameraProtection!!.bounds)
-            .isEqualTo(Rect(/* left = */ 10, /* top = */ 10, /* right = */ 110, /* bottom = */ 60))
+            .isEqualTo(Rect(/* left= */ 10, /* top= */ 10, /* right= */ 110, /* bottom= */ 60))
     }
 
     @Test
@@ -156,7 +154,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
         val displayNaturalWidth = 500
         val displayNaturalHeight = 1000
         val originalProtectionBounds =
-            Rect(/* left = */ 440, /* top = */ 10, /* right = */ 490, /* bottom = */ 110)
+            Rect(/* left= */ 440, /* top= */ 10, /* right= */ 490, /* bottom= */ 110)
         // Safe copy as we don't know at which layer the mutation could happen
         val originalProtectionBoundsCopy = Rect(originalProtectionBounds)
         val display =
@@ -168,10 +166,10 @@ class SysUICutoutProviderTest : SysuiTestCase() {
             )
         fakeProtectionLoader.addOuterCameraProtection(
             displayUniqueId = OUTER_DISPLAY_UNIQUE_ID,
-            bounds = originalProtectionBounds
+            bounds = originalProtectionBounds,
         )
         val provider =
-            SysUICutoutProvider(context.createDisplayContext(display), fakeProtectionLoader)
+            SysUICutoutProviderImpl(context.createDisplayContext(display), fakeProtectionLoader)
 
         // Here we get the rotated bounds once
         provider.cutoutInfoForCurrentDisplayAndRotation()
@@ -194,13 +192,13 @@ class SysUICutoutProviderTest : SysuiTestCase() {
                 displayHeight = 1000,
                 rotation = Surface.ROTATION_180,
                 protectionBounds =
-                    Rect(/* left = */ 440, /* top = */ 10, /* right = */ 490, /* bottom = */ 110)
+                    Rect(/* left= */ 440, /* top= */ 10, /* right= */ 490, /* bottom= */ 110),
             )
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
         assertThat(sysUICutout.cameraProtection!!.bounds)
-            .isEqualTo(Rect(/* left = */ 10, /* top = */ 890, /* right = */ 60, /* bottom = */ 990))
+            .isEqualTo(Rect(/* left= */ 10, /* top= */ 890, /* right= */ 60, /* bottom= */ 990))
     }
 
     @Test
@@ -211,15 +209,13 @@ class SysUICutoutProviderTest : SysuiTestCase() {
                 displayHeight = 1000,
                 rotation = Surface.ROTATION_270,
                 protectionBounds =
-                    Rect(/* left = */ 440, /* top = */ 10, /* right = */ 490, /* bottom = */ 110)
+                    Rect(/* left= */ 440, /* top= */ 10, /* right= */ 490, /* bottom= */ 110),
             )
 
         val sysUICutout = provider.cutoutInfoForCurrentDisplayAndRotation()!!
 
         assertThat(sysUICutout.cameraProtection!!.bounds)
-            .isEqualTo(
-                Rect(/* left = */ 890, /* top = */ 440, /* right = */ 990, /* bottom = */ 490)
-            )
+            .isEqualTo(Rect(/* left= */ 890, /* top= */ 440, /* right= */ 990, /* bottom= */ 490))
     }
 
     private fun setUpProviderWithCameraProtection(
@@ -245,9 +241,9 @@ class SysUICutoutProviderTest : SysuiTestCase() {
             )
         fakeProtectionLoader.addOuterCameraProtection(
             displayUniqueId = OUTER_DISPLAY_UNIQUE_ID,
-            bounds = protectionBounds
+            bounds = protectionBounds,
         )
-        return SysUICutoutProvider(context.createDisplayContext(display), fakeProtectionLoader)
+        return SysUICutoutProviderImpl(context.createDisplayContext(display), fakeProtectionLoader)
     }
 
     companion object {
@@ -259,7 +255,7 @@ class SysUICutoutProviderTest : SysuiTestCase() {
             height: Int = 1000,
             @Rotation rotation: Int = Surface.ROTATION_0,
             uniqueId: String? = "uniqueId",
-            cutout: DisplayCutout? = mock<DisplayCutout>()
+            cutout: DisplayCutout? = mock<DisplayCutout>(),
         ) =
             mock<Display> {
                 whenever(this.getDisplayInfo(any())).thenAnswer {

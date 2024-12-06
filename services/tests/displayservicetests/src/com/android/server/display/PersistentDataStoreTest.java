@@ -459,7 +459,6 @@ public class PersistentDataStoreTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         newInjector.setReadStream(bais);
         newDataStore.loadIfNeeded();
-        assertNotNull(newDataStore.getUserPreferredRefreshRate(testDisplayDevice));
         assertEquals(85.3f, mDataStore.getUserPreferredRefreshRate(testDisplayDevice), 01.f);
         assertEquals(85.3f, newDataStore.getUserPreferredRefreshRate(testDisplayDevice), 0.1f);
     }

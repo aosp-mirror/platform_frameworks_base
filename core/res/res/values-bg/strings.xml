@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Стандартната идентификация на повикванията е „забранено“. За следващото обаждане тя е разрешена."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е забранена."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е разрешена."</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Това приложение не е съвместимо със страници с размер 16 KB. Проверката за съответствие с APK файла не бе успешна. Това приложение ще се изпълнява в режим на съвместимост с размера на страницата. За най-добра съвместимост компилирайте отново приложението така, че да поддържа страници с размер 16 KB. За повече информация вижте &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Това приложение не е съвместимо със страници с размер 16 KB. Проверката за съответствие с ELF файла не бе успешна. Това приложение ще се изпълнява в режим на съвместимост с размера на страницата. За най-добра съвместимост компилирайте отново приложението така, че да поддържа страници с размер 16 KB. За повече информация вижте &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Това приложение не е съвместимо със страници с размер 16 KB. Проверките за съответствие с APK и ELF файловете не бяха успешни. Това приложение ще се изпълнява в режим на съвместимост с размера на страницата. За най-добра съвместимост компилирайте отново приложението така, че да поддържа страници с размер 16 KB. За повече информация вижте &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услугата не е обезпечена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да променяте настройката за идентификация на обажданията."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Преминахте към мобилни данни от <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Разрешаване на приложението да определя относителната позиция между устройствата с ултрашироколентови сигнали в близост"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"взаимодействие с устройствата с Wi-Fi в близост"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Разрешава на приложението да рекламира, да се свързва и да определя относителната позиция на устройствата с Wi-Fi в близост"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"опр. на относителната позиция м/у у-вата в близост"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Разрешаване на приложението да определя относителната позиция между устройствата в близост"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Информация за предпочитаната услуга за плащане чрез NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
@@ -1153,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"след <xliff:g id="COUNT">%d</xliff:g> ч"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"след <xliff:g id="COUNT">%d</xliff:g> д"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"след <xliff:g id="COUNT">%d</xliff:g> г."</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{преди # минута}other{преди # минути}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{преди # час}other{преди # часа}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{преди # ден}other{преди # дни}}"</string>
@@ -1746,8 +1783,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Отговорът ви не може да бъде потвърден, тъй като приложение прикрива заявката за разрешение."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Докоснете дадена функция, за да започнете да я използвате:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Избиране на функции, които да използвате с бутона за достъпност"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Избиране на функции, които да използвате с прекия път чрез бутоните за силата на звука"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Изключихте <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редактиране на преките пътища"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
@@ -1939,11 +1975,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Събота и неделя"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Събитие"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Време за сън"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Не безпокойте (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Управлява се от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Вкл."</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Изкл."</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"От <xliff:g id="START">%1$s</xliff:g> до <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Всички календари"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> заглушава някои звуци"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Възникна вътрешен проблем с устройството ви. То може да е нестабилно, докато не възстановите фабричните настройки."</string>
@@ -2011,6 +2050,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Настройте заключване на екрана"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Заключване на екрана"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"За да ползвате частното си пространство, настройте заключване на екрана"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"За да изтриете личното пространство, настройте заключване на екрана"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> не е налице"</string>
@@ -2129,11 +2169,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"При обаждания и известия устройството ще вибрира"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Промени в системата"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не безпокойте"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Ново: Режимът „Не безпокойте“ скрива известията"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Докоснете, за да научите повече и да извършите промени."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Настройките за „Не безпокойте“ са променени"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Докоснете, за да проверите какво е блокирано."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Преглед на настройките за известия"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"От Android 13 инсталираните от вас приложения трябва да получат разрешението ви, за да изпращат известия. Докоснете, за да промените това разрешение за съществуващите приложения."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Напомняне по-късно"</string>
@@ -2408,9 +2443,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"За клавиатурната подредба са зададени <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> и <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Докоснете за промяна."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физическите клавиатури са конфигурирани"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Докоснете за преглед на клавиатурите"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Частни"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Частен"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клониране"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Служебни"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Служебен"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Служебни 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Служебни 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестване"</string>
@@ -2429,7 +2464,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Изпращайте и получавайте съобщения без мобилна или Wi-Fi мрежа"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отваряне на Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Начин на работа"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Включване на „Автоматично избиране на мрежа“"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Включете „Автоматично избиране на мрежа“ в „Настройки“, за да може телефонът ви да намери мрежа, която работи със сателит"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Включване"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Назад"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Изчаква..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Функцията „SOS чрез сателит“ вече е налице"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Можете да изпращате съобщения до службите за спешни случаи, ако нямате връзка с мобилна или Wi-Fi мрежа. Google Messages трябва да е основното ви приложение за съобщения."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Функцията „SOS чрез сателит“ не се поддържа"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Функцията „SOS чрез сателит“ не се поддържа на това устройство"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Функцията „SOS чрез сателит“ не е настроена"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Проверете дали имате връзка с интернет, и опитайте да настроите отново"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Функцията „SOS чрез сателит“ не е налице"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Функцията „SOS чрез сателит“ не е налице в тази държава или регион"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Функцията „SOS чрез сателит“ не е настроена"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"За да изпращате съобщения чрез сателит, задайте Google Messages като основното си приложение за съобщения"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Функцията „SOS чрез сателит“ не е налице"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"За да проверите дали функцията „SOS чрез сателит“ е налице в тази държава или регион, включете настройките за местоположението"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Функцията за сателитни съобщения е налице"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Можете да изпращате съобщения чрез сателит, ако нямате връзка с мобилна или Wi-Fi мрежа. Google Messages трябва да е основното ви приложение за съобщения."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Функцията за сателитни съобщения не се поддържа"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Функцията за сателитни съобщения не се поддържа на това устройство"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Функцията за сателитни съобщения не е настроена"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Проверете дали имате връзка с интернет, и опитайте да настроите отново"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Функцията за сателитни съобщения не е налице"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Функцията за сателитни съобщения не е налице в тази държава или регион"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Функцията за сателитни съобщения не е настроена"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"За да изпращате съобщения чрез сателит, задайте Google Messages като основното си приложение за съобщения"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Функцията за сателитни съобщения не е налице"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"За да проверите дали функцията за сателитни съобщения е налице в тази държава или регион, включете настройките за местоположението"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Повторно настройване на „Отключване с отпечатък“"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> вече не може да се разпознае."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> и <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> вече не могат да бъдат разпознати."</string>

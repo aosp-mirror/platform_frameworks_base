@@ -31,8 +31,10 @@ java_test_host {
     ],
     static_libs: [
         "truth",
+        "flag-junit-host",
+        "android.app.flags-aconfig-java-host",
     ],
-    data: [
+    device_common_data: [
         ":BinaryTransparencyTestApp",
         ":EasterEgg",
         ":FeatureSplitBase",

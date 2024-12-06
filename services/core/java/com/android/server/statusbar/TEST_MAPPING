@@ -1,29 +1,10 @@
 {
   "presubmit": [
     {
-      "name": "CtsTileServiceTestCases",
-      "options": [
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTileServiceTestCases"
     },
     {
-      "name": "CtsAppTestCases",
-      "options": [
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-filter": "android.app.cts.RequestTileServiceAddTest"
-        }
-      ]
+      "name": "CtsAppTestCases_cts_requesttileserviceaddtest"
     }
   ]
 }

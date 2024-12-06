@@ -38,6 +38,7 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, Parsed
         ParsedProvider::isForceUriPermissions,
         ParsedProvider::isMultiProcess,
         ParsedProvider::getInitOrder,
+        ParsedProvider::getIntentMatchingFlags,
     )
 
     override fun mainComponentSubclassExtraParams() = listOf(

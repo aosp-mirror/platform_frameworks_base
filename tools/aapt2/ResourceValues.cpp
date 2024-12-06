@@ -1102,6 +1102,7 @@ template <typename T>
 std::unique_ptr<T> CopyValueFields(std::unique_ptr<T> new_value, const T* value) {
   new_value->SetSource(value->GetSource());
   new_value->SetComment(value->GetComment());
+  new_value->SetFlag(value->GetFlag());
   new_value->SetFlagStatus(value->GetFlagStatus());
   return new_value;
 }

@@ -28,8 +28,19 @@ using namespace std::literals;
 namespace aapt {
 
 static constexpr ApiVersion sDevelopmentSdkLevel = 10000;
+
+// clang-format off
 static constexpr StringPiece sDevelopmentSdkCodeNames[] = {
-    "Q"sv, "R"sv, "S"sv, "Sv2"sv, "Tiramisu"sv, "UpsideDownCake"sv, "VanillaIceCream"sv};
+    "Q"sv,
+    "R"sv,
+    "S"sv,
+    "Sv2"sv,
+    "Tiramisu"sv,
+    "UpsideDownCake"sv,
+    "VanillaIceCream"sv,
+    "Baklava"sv,
+};
+// clang-format on
 
 static constexpr auto sPrivacySandboxSuffix = "PrivacySandbox"sv;
 

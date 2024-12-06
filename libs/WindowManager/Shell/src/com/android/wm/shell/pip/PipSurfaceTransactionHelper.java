@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.pip;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.view.Choreographer;
@@ -68,10 +70,25 @@ public class PipSurfaceTransactionHelper {
      * Operates the crop (and position) on a given transaction and leash
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper crop(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect destinationBounds) {
+    public PipSurfaceTransactionHelper cropAndPosition(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect destinationBounds) {
         tx.setWindowCrop(leash, destinationBounds.width(), destinationBounds.height())
                 .setPosition(leash, destinationBounds.left, destinationBounds.top);
+        return this;
+    }
+
+    /**
+     * Operates {@link SurfaceControl.Transaction#setCrop} on a given transaction and leash.
+     *
+     * @param tx the transaction to  apply
+     * @param leash the leash to crop
+     * @param relativeDestinationBounds the bounds to crop, which is relative to the leash
+     *                                  coordinate
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper crop(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect relativeDestinationBounds) {
+        tx.setCrop(leash, relativeDestinationBounds);
         return this;
     }
 
@@ -82,38 +99,73 @@ public class PipSurfaceTransactionHelper {
     public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect sourceBounds, Rect destinationBounds) {
         mTmpDestinationRectF.set(destinationBounds);
-        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, 0 /* degrees */);
+        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, 0 /* degrees */,
+                true /* shouldOffset */);
     }
 
     /**
      * Operates the scale (setMatrix) on a given transaction and leash
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect sourceBounds, RectF destinationBounds) {
-        return scale(tx, leash, sourceBounds, destinationBounds, 0 /* degrees */);
+    public PipSurfaceTransactionHelper scale(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect sourceBounds,
+            @NonNull RectF destinationBounds) {
+        return scale(tx, leash, sourceBounds, destinationBounds, 0 /* degrees */,
+                true /* shouldOffset */);
     }
 
     /**
-     * Operates the scale (setMatrix) on a given transaction and leash
+     * Operates the scale (setMatrix) on a given transaction and leash.
+     *
+     * @param shouldOffset {@code true} to offset the leash to (0, 0)
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect sourceBounds, Rect destinationBounds, float degrees) {
+    public PipSurfaceTransactionHelper scale(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect sourceBounds,
+            @NonNull Rect destinationBounds, boolean shouldOffset) {
         mTmpDestinationRectF.set(destinationBounds);
-        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, degrees);
+        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, 0 /* degrees */, shouldOffset);
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash.
+     *
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper scale(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect sourceBounds,
+            @NonNull Rect destinationBounds, float degrees) {
+        return scale(tx, leash, sourceBounds, destinationBounds, degrees, true /* shouldOffset */);
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash.
+     *
+     * @param shouldOffset {@code true} to offset the leash to (0, 0)
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper scale(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect sourceBounds,
+            @NonNull Rect destinationBounds, float degrees, boolean shouldOffset) {
+        mTmpDestinationRectF.set(destinationBounds);
+        return scale(tx, leash, sourceBounds, mTmpDestinationRectF, degrees, shouldOffset);
     }
 
     /**
      * Operates the scale (setMatrix) on a given transaction and leash, along with a rotation.
+     *
+     * @param shouldOffset {@code true} to offset the leash to (0, 0)
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
-            Rect sourceBounds, RectF destinationBounds, float degrees) {
+    public PipSurfaceTransactionHelper scale(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect sourceBounds,
+            @NonNull RectF destinationBounds, float degrees, boolean shouldOffset) {
         mTmpSourceRectF.set(sourceBounds);
         // We want the matrix to position the surface relative to the screen coordinates so offset
-        // the source to 0,0
-        mTmpSourceRectF.offsetTo(0, 0);
+        // the source to (0, 0) if {@code shouldOffset} is true.
+        if (shouldOffset) {
+            mTmpSourceRectF.offsetTo(0, 0);
+        }
         mTmpDestinationRectF.set(destinationBounds);
         mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
         mTmpTransform.postRotate(degrees,
@@ -123,17 +175,19 @@ public class PipSurfaceTransactionHelper {
     }
 
     /**
-     * Operates the scale (setMatrix) on a given transaction and leash
+     * Operates the scale (setMatrix) on a given transaction and leash.
+     *
+     * @param leashOffset the offset of the leash bounds relative to the screen coordinate
      * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
      */
-    public PipSurfaceTransactionHelper scaleAndCrop(SurfaceControl.Transaction tx,
-            SurfaceControl leash, Rect sourceRectHint,
-            Rect sourceBounds, Rect destinationBounds, Rect insets,
-            boolean isInPipDirection, float fraction) {
+    public PipSurfaceTransactionHelper scaleAndCrop(@NonNull SurfaceControl.Transaction tx,
+            @NonNull SurfaceControl leash, @NonNull Rect sourceRectHint, @NonNull Rect sourceBounds,
+            @NonNull Rect destinationBounds, @NonNull Rect insets, boolean isInPipDirection,
+            float fraction, @NonNull Point leashOffset) {
         mTmpDestinationRect.set(sourceBounds);
         // Similar to {@link #scale}, we want to position the surface relative to the screen
-        // coordinates so offset the bounds to 0,0
-        mTmpDestinationRect.offsetTo(0, 0);
+        // coordinates so offset the bounds relative to the leash.
+        mTmpDestinationRect.offset(-leashOffset.x, -leashOffset.y);
         mTmpDestinationRect.inset(insets);
         // Scale to the bounds no smaller than the destination and offset such that the top/left
         // of the scaled inset source rect aligns with the top/left of the destination bounds
@@ -152,13 +206,13 @@ public class PipSurfaceTransactionHelper {
             scale = Math.max((float) destinationBounds.width() / sourceBounds.width(),
                     (float) destinationBounds.height() / sourceBounds.height());
         }
-        float left = destinationBounds.left - insets.left * scale;
-        float top = destinationBounds.top - insets.top * scale;
+        float left = destinationBounds.left - mTmpDestinationRect.left * scale;
+        float top = destinationBounds.top - mTmpDestinationRect.top * scale;
         if (scale == 1) {
             // Work around the 1 pixel off error by rounding the position down at very beginning.
             // We noticed such error from flicker tests, not visually.
-            left = sourceBounds.left;
-            top = sourceBounds.top;
+            left = leashOffset.x;
+            top = leashOffset.y;
         }
         mTmpTransform.setScale(scale, scale);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)

@@ -44,6 +44,22 @@ public abstract class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implem
         mEncoded = x509EncodedForm;
     }
 
+    /**
+     * Returns the byte array encoding of the certificate corresponding to this public key.
+     * @hide
+     */
+    public byte[] getCertificate() {
+        return mCertificate;
+    }
+
+    /**
+     * Returns the byte array encoding of the certificate chain for this public key.
+     * @hide
+     */
+    public byte[] getCertificateChain() {
+        return mCertificateChain;
+    }
+
     abstract AndroidKeyStorePrivateKey getPrivateKey();
 
     @Override

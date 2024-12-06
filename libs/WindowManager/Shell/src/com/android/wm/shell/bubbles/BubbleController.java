@@ -35,7 +35,6 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
 
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
@@ -274,7 +273,11 @@ public class BubbleController implements ConfigurationChangeListener,
     private final DragAndDropController mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
-
+    /**
+     * Used to track previous navigation mode to detect switch to buttons navigation. Set to
+     * true to switch the bubble bar to the opposite side for 3 nav buttons mode on device boot.
+     */
+    private boolean mIsPrevNavModeGestures = true;
     /** Used to send updates to the views from {@link #mBubbleDataListener}. */
     private BubbleViewCallback mBubbleViewCallback;
 
@@ -518,7 +521,7 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         mShellController.addConfigurationChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BUBBLES,
+        mShellController.addExternalInterface(IBubbles.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
     }
@@ -589,6 +592,13 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     private void sendInitialListenerUpdate() {
         if (mBubbleStateListener != null) {
+            boolean isCurrentNavModeGestures = ContextUtils.isGestureNavigationMode(mContext);
+            if (mIsPrevNavModeGestures && !isCurrentNavModeGestures) {
+                BubbleBarLocation bubbleBarLocation = ContextUtils.isRtl(mContext)
+                        ? BubbleBarLocation.RIGHT : BubbleBarLocation.LEFT;
+                mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
+            }
+            mIsPrevNavModeGestures = isCurrentNavModeGestures;
             BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
             mBubbleStateListener.onBubbleStateChange(update);
         }
@@ -731,8 +741,10 @@ public class BubbleController implements ConfigurationChangeListener,
     /**
      * Update bubble bar location and trigger and update to listeners
      */
-    public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
+    public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation,
+            @BubbleBarLocation.UpdateSource int source) {
         if (canShowAsBubbleBar()) {
+            BubbleBarLocation previousLocation = mBubblePositioner.getBubbleBarLocation();
             mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
             if (mLayerView != null && !mLayerView.isExpandedViewDragged()) {
                 mLayerView.updateExpandedView();
@@ -740,13 +752,47 @@ public class BubbleController implements ConfigurationChangeListener,
             BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
             bubbleBarUpdate.bubbleBarLocation = bubbleBarLocation;
             mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);
+
+            logBubbleBarLocationIfChanged(bubbleBarLocation, previousLocation, source);
+        }
+    }
+
+    private void logBubbleBarLocationIfChanged(BubbleBarLocation location,
+            BubbleBarLocation previous,
+            @BubbleBarLocation.UpdateSource int source) {
+        if (mLayerView == null) {
+            return;
+        }
+        boolean isRtl = mLayerView.isLayoutRtl();
+        boolean wasLeft = previous.isOnLeft(isRtl);
+        boolean onLeft = location.isOnLeft(isRtl);
+        if (wasLeft == onLeft) {
+            // No changes, skip logging
+            return;
+        }
+        switch (source) {
+            case BubbleBarLocation.UpdateSource.DRAG_BAR:
+            case BubbleBarLocation.UpdateSource.A11Y_ACTION_BAR:
+                mLogger.log(onLeft ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_BAR
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_BAR);
+                break;
+            case BubbleBarLocation.UpdateSource.DRAG_BUBBLE:
+            case BubbleBarLocation.UpdateSource.A11Y_ACTION_BUBBLE:
+                mLogger.log(onLeft ? BubbleLogger.Event.BUBBLE_BAR_MOVED_LEFT_DRAG_BUBBLE
+                        : BubbleLogger.Event.BUBBLE_BAR_MOVED_RIGHT_DRAG_BUBBLE);
+                break;
+            case BubbleBarLocation.UpdateSource.DRAG_EXP_VIEW:
+            case BubbleBarLocation.UpdateSource.A11Y_ACTION_EXP_VIEW:
+                // TODO(b/349845968): move logging from BubbleBarLayerView to here
+                break;
         }
     }
 
     /**
      * Animate bubble bar to the given location. The location change is transient. It does not
      * update the state of the bubble bar.
-     * To update bubble bar pinned location, use {@link #setBubbleBarLocation(BubbleBarLocation)}.
+     * To update bubble bar pinned location, use
+     * {@link #setBubbleBarLocation(BubbleBarLocation, int)}.
      */
     public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
         if (canShowAsBubbleBar()) {
@@ -824,7 +870,7 @@ public class BubbleController implements ConfigurationChangeListener,
             // window to show this in, but we use a separate code path.
             // TODO(b/273312602): consider foldables where we do need a stack view when folded
             if (mLayerView == null) {
-                mLayerView = new BubbleBarLayerView(mContext, this, mBubbleData);
+                mLayerView = new BubbleBarLayerView(mContext, this, mBubbleData, mLogger);
                 mLayerView.setUnBubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
             }
         } else {
@@ -883,7 +929,7 @@ public class BubbleController implements ConfigurationChangeListener,
             registerBroadcastReceiver();
             if (isShowingAsBubbleBar()) {
                 mBubbleData.getOverflow().initializeForBubbleBar(
-                        mExpandedViewManager, mBubblePositioner);
+                        mExpandedViewManager, mBubblePositioner, mLogger);
             } else {
                 mBubbleData.getOverflow().initialize(
                         mExpandedViewManager, mStackView, mBubblePositioner);
@@ -1091,6 +1137,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     mExpandedViewManager,
                     mBubbleTaskViewFactory,
                     mBubblePositioner,
+                    mLogger,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1102,6 +1149,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     mExpandedViewManager,
                     mBubbleTaskViewFactory,
                     mBubblePositioner,
+                    mLogger,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1201,7 +1249,7 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     public void startBubbleDrag(String bubbleKey) {
         if (mBubbleData.getSelectedBubble() != null) {
-            mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ false);
+            collapseExpandedViewForBubbleBar();
         }
         if (mBubbleStateListener != null) {
             boolean overflow = BubbleOverflow.KEY.equals(bubbleKey);
@@ -1237,13 +1285,25 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     public void dragBubbleToDismiss(String bubbleKey, long timestamp) {
         String selectedBubbleKey = mBubbleData.getSelectedBubbleKey();
-        if (mBubbleData.hasAnyBubbleWithKey(bubbleKey)) {
+        Bubble bubbleToDismiss = mBubbleData.getAnyBubbleWithkey(bubbleKey);
+        if (bubbleToDismiss != null) {
             mBubbleData.dismissBubbleWithKey(
                     bubbleKey, Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, timestamp);
+            mLogger.log(bubbleToDismiss,
+                    BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE);
         }
-        if (selectedBubbleKey != null && !selectedBubbleKey.equals(bubbleKey)) {
-            // We did not remove the selected bubble. Expand it again
+        if (mBubbleData.hasBubbles()) {
+            // We still have bubbles, if we dragged an individual bubble to dismiss we were expanded
+            // so re-expand to whatever is selected.
             showExpandedViewForBubbleBar();
+            if (bubbleKey.equals(selectedBubbleKey)) {
+                // We dragged the selected bubble to dismiss, log switch event
+                if (mBubbleData.getSelectedBubble() instanceof Bubble) {
+                    // Log only bubbles as overflow can't be dragged
+                    mLogger.log((Bubble) mBubbleData.getSelectedBubble(),
+                            BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+                }
+            }
         }
     }
 
@@ -1268,7 +1328,11 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Promote the provided bubble from the overflow view. */
     public void promoteBubbleFromOverflow(Bubble bubble) {
-        mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        if (isShowingAsBubbleBar()) {
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR);
+        } else {
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
+        }
         ProtoLog.d(WM_SHELL_BUBBLES, "promoteBubbleFromOverflow=%s", bubble.getKey());
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.setShouldAutoExpand(true);
@@ -1286,9 +1350,12 @@ public class BubbleController implements ConfigurationChangeListener,
     public void expandStackAndSelectBubbleFromLauncher(String key, int topOnScreen) {
         mBubblePositioner.setBubbleBarTopOnScreen(topOnScreen);
 
+        boolean wasExpanded = (mLayerView != null && mLayerView.isExpanded());
+
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
             mLayerView.showExpandedView(mBubbleData.getOverflow());
+            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_SELECTED);
             return;
         }
 
@@ -1300,6 +1367,11 @@ public class BubbleController implements ConfigurationChangeListener,
             // already in the stack
             mBubbleData.setSelectedBubbleFromLauncher(b);
             mLayerView.showExpandedView(b);
+            if (wasExpanded) {
+                mLogger.log(b, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+            } else {
+                mLogger.log(b, BubbleLogger.Event.BUBBLE_BAR_EXPANDED);
+            }
         } else if (mBubbleData.hasOverflowBubbleWithKey(b.getKey())) {
             // TODO: (b/271468319) handle overflow
         } else {
@@ -1572,6 +1644,7 @@ public class BubbleController implements ConfigurationChangeListener,
                         mExpandedViewManager,
                         mBubbleTaskViewFactory,
                         mBubblePositioner,
+                        mLogger,
                         mStackView,
                         mLayerView,
                         mBubbleIconFactory,
@@ -1614,6 +1687,7 @@ public class BubbleController implements ConfigurationChangeListener,
         if (!isShowingAsBubbleBar()) {
             callback = b -> {
                 if (mStackView != null) {
+                    b.setSuppressFlyout(true);
                     mStackView.addBubble(b);
                     mStackView.setSelectedBubble(b);
                 } else {
@@ -1634,6 +1708,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     mExpandedViewManager,
                     mBubbleTaskViewFactory,
                     mBubblePositioner,
+                    mLogger,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
@@ -1714,6 +1789,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mExpandedViewManager,
                 mBubbleTaskViewFactory,
                 mBubblePositioner,
+                mLogger,
                 mStackView,
                 mLayerView,
                 mBubbleIconFactory,
@@ -1741,6 +1817,9 @@ public class BubbleController implements ConfigurationChangeListener,
     @MainThread
     public void removeAllBubbles(@Bubbles.DismissReason int reason) {
         mBubbleData.dismissAll(reason);
+        if (reason == Bubbles.DISMISS_USER_GESTURE) {
+            mLogger.log(BubbleLogger.Event.BUBBLE_BAR_DISMISSED_DRAG_BAR);
+        }
     }
 
     private void onEntryAdded(BubbleEntry entry) {
@@ -1969,11 +2048,15 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void addBubble(Bubble addedBubble) {
+            // Only log metrics event
+            mLogger.log(addedBubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_POSTED);
             // Nothing to do for adds, these are handled by launcher / in the bubble bar.
         }
 
         @Override
         public void updateBubble(Bubble updatedBubble) {
+            // Only log metrics event
+            mLogger.log(updatedBubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_UPDATED);
             // Nothing to do for updates, these are handled by launcher / in the bubble bar.
         }
 
@@ -1999,16 +2082,29 @@ public class BubbleController implements ConfigurationChangeListener,
         public void expansionChanged(boolean isExpanded) {
             // in bubble bar mode, let the request to show the expanded view come from launcher.
             // only collapse here if we're collapsing.
-            if (mLayerView != null && !isExpanded) {
-                mLayerView.collapse();
+            if (!isExpanded) {
+                collapseExpandedViewForBubbleBar();
+            }
+
+            BubbleLogger.Event event = isExpanded ? BubbleLogger.Event.BUBBLE_BAR_EXPANDED
+                    : BubbleLogger.Event.BUBBLE_BAR_COLLAPSED;
+            BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
+            if (selectedBubble instanceof Bubble) {
+                mLogger.log((Bubble) selectedBubble, event);
+            } else {
+                mLogger.log(event);
             }
         }
 
         @Override
         public void selectionChanged(BubbleViewProvider selectedBubble) {
             // Only need to update the layer view if we're currently expanded for selection changes.
-            if (mLayerView != null && isStackExpanded()) {
+            if (mLayerView != null && mLayerView.isExpanded()) {
                 mLayerView.showExpandedView(selectedBubble);
+                if (selectedBubble instanceof Bubble) {
+                    mLogger.log((Bubble) selectedBubble,
+                            BubbleLogger.Event.BUBBLE_BAR_BUBBLE_SWITCHED);
+                }
             }
         }
     };
@@ -2150,6 +2246,16 @@ public class BubbleController implements ConfigurationChangeListener,
         BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
         if (selectedBubble != null && mLayerView != null) {
             mLayerView.showExpandedView(selectedBubble);
+        }
+    }
+
+    private void collapseExpandedViewForBubbleBar() {
+        if (mLayerView != null && mLayerView.isExpanded()) {
+            if (mBubblePositioner.isImeVisible()) {
+                // If we're collapsing, hide the IME
+                hideCurrentInputMethod();
+            }
+            mLayerView.collapse();
         }
     }
 
@@ -2522,9 +2628,10 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void setBubbleBarLocation(BubbleBarLocation location) {
+        public void setBubbleBarLocation(BubbleBarLocation location,
+                @BubbleBarLocation.UpdateSource int source) {
             mMainExecutor.execute(() ->
-                    mController.setBubbleBarLocation(location));
+                    mController.setBubbleBarLocation(location, source));
         }
 
         @Override

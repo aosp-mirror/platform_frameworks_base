@@ -17,7 +17,6 @@
 package android.app.appfunctions;
 
 import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
-import static android.app.appfunctions.ExecuteAppFunctionResponse.getResultCode;
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
@@ -26,11 +25,14 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.CancellationSignal;
 import android.os.IBinder;
-
-import java.util.function.Consumer;
+import android.os.ICancellationSignal;
+import android.os.OutcomeReceiver;
+import android.os.RemoteException;
 
 /**
  * Abstract base class to provide app functions to the system.
@@ -60,29 +62,86 @@ public abstract class AppFunctionService extends Service {
     @NonNull
     public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
 
-    private final Binder mBinder =
-            new IAppFunctionService.Stub() {
-                @Override
-                public void executeAppFunction(
-                        @NonNull ExecuteAppFunctionRequest request,
-                        @NonNull IExecuteAppFunctionCallback callback) {
-                    if (AppFunctionService.this.checkCallingPermission(BIND_APP_FUNCTION_SERVICE)
-                            == PERMISSION_DENIED) {
-                        throw new SecurityException("Can only be called by the system server.");
-                    }
-                    SafeOneTimeExecuteAppFunctionCallback safeCallback =
-                            new SafeOneTimeExecuteAppFunctionCallback(callback);
-                    try {
-                        AppFunctionService.this.onExecuteFunction(request, safeCallback::onResult);
-                    } catch (Exception ex) {
-                        // Apps should handle exceptions. But if they don't, report the error on
-                        // behalf of them.
-                        safeCallback.onResult(
-                                ExecuteAppFunctionResponse.newFailure(
-                                        getResultCode(ex), ex.getMessage(), /* extras= */ null));
-                    }
+    /**
+     * Functional interface to represent the execution logic of an app function.
+     *
+     * @hide
+     */
+    @FunctionalInterface
+    public interface OnExecuteFunction {
+        /**
+         * Performs the semantic of executing the function specified by the provided request and
+         * return the response through the provided callback.
+         */
+        void perform(
+                @NonNull ExecuteAppFunctionRequest request,
+                @NonNull String callingPackage,
+                @NonNull CancellationSignal cancellationSignal,
+                @NonNull
+                        OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                                callback);
+    }
+
+    /** @hide */
+    @NonNull
+    public static Binder createBinder(
+            @NonNull Context context, @NonNull OnExecuteFunction onExecuteFunction) {
+        return new IAppFunctionService.Stub() {
+            @Override
+            public void executeAppFunction(
+                    @NonNull ExecuteAppFunctionRequest request,
+                    @NonNull String callingPackage,
+                    @NonNull ICancellationCallback cancellationCallback,
+                    @NonNull IExecuteAppFunctionCallback callback) {
+                if (context.checkCallingPermission(BIND_APP_FUNCTION_SERVICE)
+                        == PERMISSION_DENIED) {
+                    throw new SecurityException("Can only be called by the system server.");
                 }
-            };
+                SafeOneTimeExecuteAppFunctionCallback safeCallback =
+                        new SafeOneTimeExecuteAppFunctionCallback(callback);
+                try {
+                    onExecuteFunction.perform(
+                            request,
+                            callingPackage,
+                            buildCancellationSignal(cancellationCallback),
+                            new OutcomeReceiver<>() {
+                                @Override
+                                public void onResult(ExecuteAppFunctionResponse result) {
+                                    safeCallback.onResult(result);
+                                }
+
+                                @Override
+                                public void onError(AppFunctionException exception) {
+                                    safeCallback.onError(exception);
+                                }
+                            });
+                } catch (Exception ex) {
+                    // Apps should handle exceptions. But if they don't, report the error on
+                    // behalf of them.
+                    safeCallback.onError(
+                            new AppFunctionException(toErrorCode(ex), ex.getMessage()));
+                }
+            }
+        };
+    }
+
+    private static CancellationSignal buildCancellationSignal(
+            @NonNull ICancellationCallback cancellationCallback) {
+        final ICancellationSignal cancellationSignalTransport =
+                CancellationSignal.createTransport();
+        CancellationSignal cancellationSignal =
+                CancellationSignal.fromTransport(cancellationSignalTransport);
+        try {
+            cancellationCallback.sendCancellationTransport(cancellationSignalTransport);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return cancellationSignal;
+    }
+
+    private final Binder mBinder =
+            createBinder(AppFunctionService.this, AppFunctionService.this::onExecuteFunction);
 
     @NonNull
     @Override
@@ -107,11 +166,32 @@ public abstract class AppFunctionService extends Service {
      * thread and dispatch the result with the given callback. You should always report back the
      * result using the callback, no matter if the execution was successful or not.
      *
+     * <p>This method also accepts a {@link CancellationSignal} that the app should listen to cancel
+     * the execution of function if requested by the system.
+     *
      * @param request The function execution request.
-     * @param callback A callback to report back the result.
+     * @param callingPackage The package name of the app that is requesting the execution.
+     * @param cancellationSignal A signal to cancel the execution.
+     * @param callback A callback to report back the result or error.
      */
     @MainThread
     public abstract void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+            @NonNull String callingPackage,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull
+                    OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                            callback);
+
+    /**
+     * Returns result codes from throwable.
+     *
+     * @hide
+     */
+    private static @AppFunctionException.ErrorCode int toErrorCode(@NonNull Throwable t) {
+        if (t instanceof IllegalArgumentException) {
+            return AppFunctionException.ERROR_INVALID_ARGUMENT;
+        }
+        return AppFunctionException.ERROR_APP_UNKNOWN_ERROR;
+    }
 }

@@ -22,7 +22,9 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.layout
@@ -31,11 +33,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.systemui.media.controls.ui.composable.MediaCarouselStateLoader.stateForMediaCarouselContent
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
+import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.res.R
 import com.android.systemui.util.animation.MeasurementInput
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 object MediaCarousel {
     object Elements {
@@ -47,7 +51,6 @@ object MediaCarousel {
     }
 }
 
-@ExperimentalCoroutinesApi
 @Composable
 fun SceneScope.MediaCarousel(
     isVisible: Boolean,
@@ -55,12 +58,20 @@ fun SceneScope.MediaCarousel(
     modifier: Modifier = Modifier,
     carouselController: MediaCarouselController,
     offsetProvider: (() -> IntOffset)? = null,
+    usingCollapsedLandscapeMedia: Boolean = false,
+    isInSplitShade: Boolean = false,
 ) {
     if (!isVisible || carouselController.isLockedAndHidden()) {
         return
     }
-
-    val mediaHeight = dimensionResource(R.dimen.qs_media_session_height_expanded)
+    val carouselState = remember { { stateForMediaCarouselContent(isInSplitShade) } }
+    val isCollapsed = usingCollapsedLandscapeMedia && isLandscape()
+    val mediaHeight =
+        if (isCollapsed && mediaHost.expansion == MediaHostState.COLLAPSED) {
+            dimensionResource(R.dimen.qs_media_session_height_collapsed)
+        } else {
+            dimensionResource(R.dimen.qs_media_session_height_expanded)
+        }
 
     MovableElement(
         key = MediaCarousel.Elements.Content,
@@ -79,7 +90,7 @@ fun SceneScope.MediaCarousel(
                                         offsetProvider?.invoke() ?: IntOffset.Zero
                                     )
                                 }
-                            }
+                            },
                         )
                         .layout { measurable, constraints ->
                             val placeable = measurable.measure(constraints)
@@ -89,7 +100,7 @@ fun SceneScope.MediaCarousel(
                                 MeasurementInput(placeable.width, placeable.height)
                             carouselController.setSceneContainerSize(
                                 placeable.width,
-                                placeable.height
+                                placeable.height,
                             )
 
                             layout(placeable.width, placeable.height) {
@@ -97,6 +108,7 @@ fun SceneScope.MediaCarousel(
                             }
                         },
                 factory = { context ->
+                    MediaCarouselStateLoader.loadCarouselState(carouselController, carouselState())
                     FrameLayout(context).apply {
                         layoutParams =
                             FrameLayout.LayoutParams(
@@ -105,8 +117,11 @@ fun SceneScope.MediaCarousel(
                             )
                     }
                 },
-                update = { it.setView(carouselController.mediaFrame) },
-                onRelease = { it.removeAllViews() }
+                update = {
+                    MediaCarouselStateLoader.loadCarouselState(carouselController, carouselState())
+                    it.setView(carouselController.mediaFrame)
+                },
+                onRelease = { it.removeAllViews() },
             )
         }
     }
@@ -118,4 +133,9 @@ private fun ViewGroup.setView(view: View) {
     }
     (view.parent as? ViewGroup)?.removeView(view)
     addView(view)
+}
+
+@Composable
+fun SceneScope.isLandscape(): Boolean {
+    return LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
 }

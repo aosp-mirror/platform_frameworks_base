@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.app.IApplicationThread;
 import android.app.compat.CompatChanges;
-import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.LaunchActivityItem;
@@ -97,31 +96,34 @@ class ClientLifecycleManager {
     }
 
     /**
-     * Schedules a single transaction item, either a callback or a lifecycle request, delivery to
-     * client application.
+     * Schedules a transaction with the given item, delivery to client application.
+     *
      * @throws RemoteException
      * @see ClientTransactionItem
      */
     void scheduleTransactionItem(@NonNull IApplicationThread client,
-            @NonNull ClientTransactionItem transactionItem) throws RemoteException {
+            @NonNull ClientTransactionItem item) throws RemoteException {
         // Wait until RootWindowContainer#performSurfacePlacementNoTrace to dispatch all pending
         // transactions at once.
         final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
-        clientTransaction.addTransactionItem(transactionItem);
+        clientTransaction.addTransactionItem(item);
 
-        onClientTransactionItemScheduled(clientTransaction,
-                false /* shouldDispatchImmediately */);
-    }
-
-    void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
-            @NonNull ClientTransactionItem transactionItem,
-            @NonNull ActivityLifecycleItem lifecycleItem) throws RemoteException {
-        scheduleTransactionAndLifecycleItems(client, transactionItem, lifecycleItem,
-                false /* shouldDispatchImmediately */);
+        onClientTransactionItemScheduled(clientTransaction, false /* shouldDispatchImmediately */);
     }
 
     /**
-     * Schedules a single transaction item with a lifecycle request, delivery to client application.
+     * Schedules a transaction with the given items, delivery to client application.
+     *
+     * @throws RemoteException
+     * @see ClientTransactionItem
+     */
+    void scheduleTransactionItems(@NonNull IApplicationThread client,
+            @NonNull ClientTransactionItem... items) throws RemoteException {
+        scheduleTransactionItems(client, false /* shouldDispatchImmediately */, items);
+    }
+
+    /**
+     * Schedules a transaction with the given items, delivery to client application.
      *
      * @param shouldDispatchImmediately whether or not to dispatch the transaction immediately. This
      *                                  should only be {@code true} when it is important to know the
@@ -133,15 +135,17 @@ class ClientLifecycleManager {
      * @throws RemoteException
      * @see ClientTransactionItem
      */
-    void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
-            @NonNull ClientTransactionItem transactionItem,
-            @NonNull ActivityLifecycleItem lifecycleItem,
-            boolean shouldDispatchImmediately) throws RemoteException {
+    void scheduleTransactionItems(@NonNull IApplicationThread client,
+            boolean shouldDispatchImmediately,
+            @NonNull ClientTransactionItem... items) throws RemoteException {
         // Wait until RootWindowContainer#performSurfacePlacementNoTrace to dispatch all pending
         // transactions at once.
         final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
-        clientTransaction.addTransactionItem(transactionItem);
-        clientTransaction.addTransactionItem(lifecycleItem);
+
+        final int size = items.length;
+        for (int i = 0; i < size; i++) {
+            clientTransaction.addTransactionItem(items[i]);
+        }
 
         onClientTransactionItemScheduled(clientTransaction, shouldDispatchImmediately);
     }

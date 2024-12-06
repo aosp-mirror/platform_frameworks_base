@@ -39,7 +39,7 @@
                 android:id="@+id/list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingVertical="8dp"
+                android:paddingTop="8dp"
                 android:clipToPadding="false"
                 android:layoutManager="com.android.internal.widget.LinearLayoutManager"/>
 
@@ -74,8 +74,7 @@
             android:text="@string/input_method_switcher_settings_button"
             android:fontFamily="google-sans-text"
             android:textAppearance="?attr/textAppearance"
-            android:contentDescription="@string/input_method_language_settings"
-            android:visibility="gone"/>
+            android:contentDescription="@string/input_method_language_settings"/>
 
     </LinearLayout>
 

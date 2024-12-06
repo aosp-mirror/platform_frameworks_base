@@ -146,6 +146,11 @@ public class TaskSnapshotWindow {
             Slog.w(TAG, "Failed to relayout snapshot starting window");
             return null;
         }
+        if (!surfaceControl.isValid()) {
+            snapshotSurface.clearWindowSynced();
+            Slog.w(TAG, "Unable to draw snapshot, no valid surface");
+            return null;
+        }
 
         SnapshotDrawerUtils.drawSnapshotOnSurface(info, layoutParams, surfaceControl, snapshot,
                 info.taskBounds, topWindowInsetsState, true /* releaseAfterDraw */);

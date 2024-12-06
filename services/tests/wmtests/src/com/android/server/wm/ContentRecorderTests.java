@@ -49,9 +49,11 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.projection.StopReason;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.ContentRecordingSession;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.SurfaceControl;
@@ -93,9 +95,11 @@ public class ContentRecorderTests extends WindowTestsBase {
     private boolean mHandleAnisotropicDisplayMirroring = false;
 
     @Before public void setUp() {
+        mDisplayInfo.type = Display.TYPE_VIRTUAL;
         MockitoAnnotations.initMocks(this);
 
         doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+        doReturn(false).when(mWm.mDisplayManagerInternal).isDisplayReadyForMirroring(anyInt());
 
         // Skip unnecessary operations of relayout.
         spyOn(mWm.mWindowPlacerLocked);
@@ -163,6 +167,25 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUpdateRecording_externalDisplayWithoutUserConfirmation() {
+        mDisplayInfo.type = Display.TYPE_EXTERNAL;
+        defaultInit();
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testUpdateRecording_externalDisplayWithUserConfirmation() {
+        doReturn(true).when(mWm.mDisplayManagerInternal).isDisplayReadyForMirroring(anyInt());
+        mDisplayInfo.type = Display.TYPE_EXTERNAL;
+        defaultInit();
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
     public void testUpdateRecording_display_invalidDisplayIdToMirror() {
         defaultInit();
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
@@ -191,7 +214,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.setContentRecordingSession(session);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
-        verify(mMediaProjectionManagerWrapper).stopActiveProjection();
+        verify(mMediaProjectionManagerWrapper).stopActiveProjection(StopReason.STOP_ERROR);
     }
 
     @Test
@@ -203,7 +226,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.setContentRecordingSession(invalidTaskSession);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
-        verify(mMediaProjectionManagerWrapper).stopActiveProjection();
+        verify(mMediaProjectionManagerWrapper).stopActiveProjection(StopReason.STOP_ERROR);
     }
 
     @Test
@@ -288,8 +311,7 @@ public class ContentRecorderTests extends WindowTestsBase {
                 mVirtualDisplayContent.getConfiguration().orientation, WINDOWING_MODE_FULLSCREEN);
 
         // No resize is issued, only the initial transformations when we started recording.
-        verify(mTransaction).setPosition(eq(mRecordedSurface), anyFloat(),
-                anyFloat());
+        verify(mTransaction).setPosition(eq(mRecordedSurface), anyFloat(), anyFloat());
         verify(mTransaction).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
                 anyFloat(), anyFloat());
     }
@@ -364,19 +386,18 @@ public class ContentRecorderTests extends WindowTestsBase {
 
         // WHEN a configuration change arrives, and the recorded content is a different size.
         Configuration configuration = mTask.getConfiguration();
-        configuration.windowConfiguration.setBounds(new Rect(0, 0, recordedWidth, recordedHeight));
-        configuration.windowConfiguration.setAppBounds(
-                new Rect(0, 0, recordedWidth, recordedHeight));
+        Rect newBounds = new Rect(0, 0, recordedWidth, recordedHeight);
+        configuration.windowConfiguration.setBounds(newBounds);
+        configuration.windowConfiguration.setAppBounds(newBounds);
         mTask.onConfigurationChanged(configuration);
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
         // THEN content in the captured DisplayArea is scaled to fit the surface size.
-        verify(mTransaction, atLeastOnce()).setMatrix(eq(mRecordedSurface), anyFloat(), eq(0f),
-                eq(0f),
-                anyFloat());
+        verify(mTransaction, atLeastOnce()).setMatrix(
+                eq(mRecordedSurface), anyFloat(), eq(0f), eq(0f), anyFloat());
         // THEN the resize callback is notified.
-        verify(mMediaProjectionManagerWrapper).notifyActiveProjectionCapturedContentResized(
-                recordedWidth, recordedHeight);
+        verify(mMediaProjectionManagerWrapper).notifyCaptureBoundsChanged(
+                mTaskSession.getContentToRecord(), mTaskSession.getTargetUid(), newBounds);
     }
 
     @Test
@@ -627,7 +648,7 @@ public class ContentRecorderTests extends WindowTestsBase {
 
         mTask.removeImmediately();
 
-        verify(mMediaProjectionManagerWrapper).stopActiveProjection();
+        verify(mMediaProjectionManagerWrapper).stopActiveProjection(StopReason.STOP_TARGET_REMOVED);
     }
 
     @Test
@@ -662,8 +683,8 @@ public class ContentRecorderTests extends WindowTestsBase {
         int xInset = (mSurfaceSize.x - scaledWidth) / 2;
         verify(mTransaction, atLeastOnce()).setPosition(mRecordedSurface, xInset, 0);
         // THEN the resize callback is notified.
-        verify(mMediaProjectionManagerWrapper).notifyActiveProjectionCapturedContentResized(
-                displayAreaBounds.width(), displayAreaBounds.height());
+        verify(mMediaProjectionManagerWrapper).notifyCaptureBoundsChanged(
+                mDisplaySession.getContentToRecord(), mDisplaySession.getTargetUid(),  displayAreaBounds);
     }
 
     @Test

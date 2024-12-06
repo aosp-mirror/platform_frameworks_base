@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window shown on the app with fixing portrait orientation.
- * To run this test: `atest FlickerTestsIme2:OpenImeWindowToFixedPortraitAppTest`
+ * To run this test: `atest FlickerTestsIme:OpenImeWindowToFixedPortraitAppTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

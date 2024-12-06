@@ -24,7 +24,7 @@ android_test {
     name: "SmartCamera-tests",
     platform_apis: true,
     srcs: ["src/**/*.java"],
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs.system"],
     static_libs: [
         "guava",
         "junit",

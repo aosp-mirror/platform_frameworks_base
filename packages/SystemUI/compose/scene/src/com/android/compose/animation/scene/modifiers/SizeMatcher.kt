@@ -119,9 +119,8 @@ fun Modifier.sizeMatcherDestination(matcher: SizeMatcher): Modifier {
     return this.then(SizeMatcherDestinationElement(matcher))
 }
 
-private data class SizeMatcherSourceNodeElement(
-    private val matcher: SizeMatcher,
-) : ModifierNodeElement<SizeMatcherSourceNode>() {
+private data class SizeMatcherSourceNodeElement(private val matcher: SizeMatcher) :
+    ModifierNodeElement<SizeMatcherSourceNode>() {
     override fun create(): SizeMatcherSourceNode = SizeMatcherSourceNode(matcher)
 
     override fun update(node: SizeMatcherSourceNode) {
@@ -129,9 +128,8 @@ private data class SizeMatcherSourceNodeElement(
     }
 }
 
-private class SizeMatcherSourceNode(
-    private var matcher: SizeMatcher,
-) : Modifier.Node(), LayoutModifierNode {
+private class SizeMatcherSourceNode(private var matcher: SizeMatcher) :
+    Modifier.Node(), LayoutModifierNode {
     override fun onAttach() {
         matcher.source = this
     }
@@ -150,7 +148,7 @@ private class SizeMatcherSourceNode(
 
     override fun MeasureScope.measure(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         return measurable.measure(constraints).run {
             matcher.sourceSize = IntSize(width, height)
@@ -159,9 +157,8 @@ private class SizeMatcherSourceNode(
     }
 }
 
-private data class SizeMatcherDestinationElement(
-    private val matcher: SizeMatcher,
-) : ModifierNodeElement<SizeMatcherDestinationNode>() {
+private data class SizeMatcherDestinationElement(private val matcher: SizeMatcher) :
+    ModifierNodeElement<SizeMatcherDestinationNode>() {
     override fun create(): SizeMatcherDestinationNode = SizeMatcherDestinationNode(matcher)
 
     override fun update(node: SizeMatcherDestinationNode) {
@@ -169,9 +166,8 @@ private data class SizeMatcherDestinationElement(
     }
 }
 
-private class SizeMatcherDestinationNode(
-    private var matcher: SizeMatcher,
-) : Modifier.Node(), LayoutModifierNode {
+private class SizeMatcherDestinationNode(private var matcher: SizeMatcher) :
+    Modifier.Node(), LayoutModifierNode {
     override fun onAttach() {
         this.matcher.destinations.add(this)
     }
@@ -190,7 +186,7 @@ private class SizeMatcherDestinationNode(
 
     override fun MeasureScope.measure(
         measurable: Measurable,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         val preferredSize = matcher.sourceSize
         val preferredConstraints = Constraints.fixed(preferredSize.width, preferredSize.height)

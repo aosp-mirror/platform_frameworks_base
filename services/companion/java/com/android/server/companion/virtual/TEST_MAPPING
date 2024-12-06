@@ -1,81 +1,32 @@
 {
   "presubmit": [
     {
-      "name": "CtsVirtualDevicesTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsVirtualDevicesTestCases"
     },
     {
-      "name": "CtsVirtualDevicesAudioTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsVirtualDevicesAudioTestCases"
     },
     {
-      "name": "CtsVirtualDevicesSensorTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsVirtualDevicesSensorTestCases"
     },
     {
-      "name": "CtsVirtualDevicesAppLaunchTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsVirtualDevicesAppLaunchTestCases"
     },
     {
       "name": "CtsVirtualDevicesCameraTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ],
       "keywords": ["primary-device"]
     },
     {
-      "name": "CtsHardwareTestCases",
-      "options": [
-        {
-          "include-filter": "android.hardware.input.cts.tests"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ],
+      "name": "CtsHardwareTestCases_cts_tests",
       "file_patterns": ["Virtual[^/]*\\.java"]
     },
     {
-      "name": "CtsAccessibilityServiceTestCases",
-      "options": [
-        {
-          "include-filter": "android.accessibilityservice.cts.AccessibilityDisplayProxyTest"
-        },
-        {
-          "exclude-annotation": "android.support.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAccessibilityServiceTestCases_cts_accessibilitydisplayproxytest"
     }
   ],
   "postsubmit": [
     {
-      "name": "CtsMediaAudioTestCases",
-      "options": [
-        {
-          "include-filter": "android.media.audio.cts.AudioFocusWithVdmTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsMediaAudioTestCases_cts_audiofocuswithvdmtest"
     },
     {
       "name": "CtsPermissionTestCases",
@@ -92,12 +43,7 @@
       ]
     },
     {
-      "name": "CtsPermissionMultiDeviceTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsPermissionMultiDeviceTestCases"
     }
   ]
 }

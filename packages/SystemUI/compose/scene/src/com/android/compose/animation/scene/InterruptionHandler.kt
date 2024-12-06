@@ -79,9 +79,6 @@ object DefaultInterruptionHandler : InterruptionHandler {
         interrupted: TransitionState.Transition.ChangeScene,
         newTargetScene: SceneKey,
     ): InterruptionResult {
-        return InterruptionResult(
-            animateFrom = interrupted.currentScene,
-            chain = true,
-        )
+        return InterruptionResult(animateFrom = interrupted.currentScene, chain = true)
     }
 }

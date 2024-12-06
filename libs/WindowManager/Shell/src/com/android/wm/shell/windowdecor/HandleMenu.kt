@@ -19,32 +19,35 @@ import android.annotation.ColorInt
 import android.annotation.DimenRes
 import android.annotation.SuppressLint
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.BlendMode
-import android.graphics.BlendModeColorFilter
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_OUTSIDE
 import android.view.SurfaceControl
 import android.view.View
+import android.view.WindowInsets.Type.systemBars
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.window.DesktopModeFlags
 import android.window.SurfaceSyncGroup
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.apptoweb.isBrowserApp
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
@@ -71,16 +74,21 @@ class HandleMenu(
     private val splitScreenController: SplitScreenController,
     private val shouldShowWindowingPill: Boolean,
     private val shouldShowNewWindowButton: Boolean,
-    private val openInBrowserLink: Uri?,
+    private val shouldShowManageWindowsButton: Boolean,
+    private val shouldShowChangeAspectRatioButton: Boolean,
+    private val shouldShowDesktopModeButton: Boolean,
+    private val isBrowserApp: Boolean,
+    private val openInAppOrBrowserIntent: Intent?,
     private val captionWidth: Int,
     private val captionHeight: Int,
-    captionX: Int
+    captionX: Int,
+    captionY: Int
 ) {
     private val context: Context = parentDecor.mDecorWindowContext
     private val taskInfo: RunningTaskInfo = parentDecor.mTaskInfo
 
     private val isViewAboveStatusBar: Boolean
-        get() = (Flags.enableAdditionalWindowsAboveStatusBar() && !taskInfo.isFreeform)
+        get() = (DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue() && !taskInfo.isFreeform)
 
     private val pillElevation: Int = loadDimensionPixelSize(
         R.dimen.desktop_mode_handle_menu_pill_elevation)
@@ -108,10 +116,14 @@ class HandleMenu(
     private val globalMenuPosition: Point = Point()
 
     private val shouldShowBrowserPill: Boolean
-        get() = openInBrowserLink != null
+        get() = openInAppOrBrowserIntent != null
+
+    private val shouldShowMoreActionsPill: Boolean
+        get() = SHOULD_SHOW_SCREENSHOT_BUTTON || shouldShowNewWindowButton ||
+            shouldShowManageWindowsButton || shouldShowChangeAspectRatioButton
 
     init {
-        updateHandleMenuPillPositions(captionX)
+        updateHandleMenuPillPositions(captionX, captionY)
     }
 
     fun show(
@@ -119,9 +131,13 @@ class HandleMenu(
         onToFullscreenClickListener: () -> Unit,
         onToSplitScreenClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
-        openInBrowserClickListener: (Uri) -> Unit,
+        onManageWindowsClickListener: () -> Unit,
+        onChangeAspectRatioClickListener: () -> Unit,
+        openInAppOrBrowserClickListener: (Intent) -> Unit,
+        onOpenByDefaultClickListener: () -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit,
+        forceShowSystemBars: Boolean = false,
     ) {
         val ssg = SurfaceSyncGroup(TAG)
         val t = SurfaceControl.Transaction()
@@ -133,9 +149,13 @@ class HandleMenu(
             onToFullscreenClickListener = onToFullscreenClickListener,
             onToSplitScreenClickListener = onToSplitScreenClickListener,
             onNewWindowClickListener = onNewWindowClickListener,
-            openInBrowserClickListener = openInBrowserClickListener,
+            onManageWindowsClickListener = onManageWindowsClickListener,
+            onChangeAspectRatioClickListener = onChangeAspectRatioClickListener,
+            openInAppOrBrowserClickListener = openInAppOrBrowserClickListener,
+            onOpenByDefaultClickListener = onOpenByDefaultClickListener,
             onCloseMenuClickListener = onCloseMenuClickListener,
             onOutsideTouchListener = onOutsideTouchListener,
+            forceShowSystemBars = forceShowSystemBars,
         )
         ssg.addTransaction(t)
         ssg.markSyncReady()
@@ -150,9 +170,13 @@ class HandleMenu(
         onToFullscreenClickListener: () -> Unit,
         onToSplitScreenClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
-        openInBrowserClickListener: (Uri) -> Unit,
+        onManageWindowsClickListener: () -> Unit,
+        onChangeAspectRatioClickListener: () -> Unit,
+        openInAppOrBrowserClickListener: (Intent) -> Unit,
+        onOpenByDefaultClickListener: () -> Unit,
         onCloseMenuClickListener: () -> Unit,
-        onOutsideTouchListener: () -> Unit
+        onOutsideTouchListener: () -> Unit,
+        forceShowSystemBars: Boolean = false,
     ) {
         val handleMenuView = HandleMenuView(
             context = context,
@@ -160,16 +184,23 @@ class HandleMenu(
             captionHeight = captionHeight,
             shouldShowWindowingPill = shouldShowWindowingPill,
             shouldShowBrowserPill = shouldShowBrowserPill,
-            shouldShowNewWindowButton = shouldShowNewWindowButton
+            shouldShowNewWindowButton = shouldShowNewWindowButton,
+            shouldShowManageWindowsButton = shouldShowManageWindowsButton,
+            shouldShowChangeAspectRatioButton = shouldShowChangeAspectRatioButton,
+            shouldShowDesktopModeButton = shouldShowDesktopModeButton,
+            isBrowserApp = isBrowserApp
         ).apply {
-            bind(taskInfo, appIconBitmap, appName)
+            bind(taskInfo, appIconBitmap, appName, shouldShowMoreActionsPill)
             this.onToDesktopClickListener = onToDesktopClickListener
             this.onToFullscreenClickListener = onToFullscreenClickListener
             this.onToSplitScreenClickListener = onToSplitScreenClickListener
             this.onNewWindowClickListener = onNewWindowClickListener
-            this.onOpenInBrowserClickListener = {
-                openInBrowserClickListener.invoke(openInBrowserLink!!)
+            this.onManageWindowsClickListener = onManageWindowsClickListener
+            this.onChangeAspectRatioClickListener = onChangeAspectRatioClickListener
+            this.onOpenInAppOrBrowserClickListener = {
+                openInAppOrBrowserClickListener.invoke(openInAppOrBrowserIntent!!)
             }
+            this.onOpenByDefaultClickListener = onOpenByDefaultClickListener
             this.onCloseMenuClickListener = onCloseMenuClickListener
             this.onOutsideTouchListener = onOutsideTouchListener
         }
@@ -177,7 +208,8 @@ class HandleMenu(
         val x = handleMenuPosition.x.toInt()
         val y = handleMenuPosition.y.toInt()
         handleMenuViewContainer =
-            if (!taskInfo.isFreeform && Flags.enableAdditionalWindowsAboveStatusBar()) {
+            if ((!taskInfo.isFreeform && DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue())
+                    || forceShowSystemBars) {
                 AdditionalSystemViewContainer(
                     windowManagerWrapper = windowManagerWrapper,
                     taskId = taskInfo.taskId,
@@ -188,7 +220,9 @@ class HandleMenu(
                     flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                             WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                    view = handleMenuView.rootView
+                    view = handleMenuView.rootView,
+                    forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 },
+                    ignoreCutouts = Flags.showAppHandleLargeScreens()
                 )
             } else {
                 parentDecor.addWindow(
@@ -202,17 +236,21 @@ class HandleMenu(
     /**
      * Updates handle menu's position variables to reflect its next position.
      */
-    private fun updateHandleMenuPillPositions(captionX: Int) {
+    private fun updateHandleMenuPillPositions(captionX: Int, captionY: Int) {
         val menuX: Int
         val menuY: Int
         val taskBounds = taskInfo.getConfiguration().windowConfiguration.bounds
-        updateGlobalMenuPosition(taskBounds, captionX)
+        updateGlobalMenuPosition(taskBounds, captionX, captionY)
         if (layoutResId == R.layout.desktop_mode_app_header) {
-            // Align the handle menu to the left side of the caption.
-            menuX = marginMenuStart
-            menuY = marginMenuTop
+            // Align the handle menu to the start of the header.
+            menuX = if (context.isRtl()) {
+                taskBounds.width() - menuWidth - marginMenuStart
+            } else {
+                marginMenuStart
+            }
+            menuY = captionY + marginMenuTop
         } else {
-            if (Flags.enableAdditionalWindowsAboveStatusBar()) {
+            if (DesktopModeFlags.ENABLE_HANDLE_INPUT_FIX.isTrue()) {
                 // In a focused decor, we use global coordinates for handle menu. Therefore we
                 // need to account for other factors like split stage and menu/handle width to
                 // center the menu.
@@ -220,26 +258,33 @@ class HandleMenu(
                 menuY = globalMenuPosition.y
             } else {
                 menuX = (taskBounds.width() / 2) - (menuWidth / 2)
-                menuY = marginMenuTop
+                menuY = captionY + marginMenuTop
             }
         }
         // Handle Menu position setup.
         handleMenuPosition.set(menuX.toFloat(), menuY.toFloat())
     }
 
-    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int) {
+    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int, captionY: Int) {
         val nonFreeformX = captionX + (captionWidth / 2) - (menuWidth / 2)
         when {
             taskInfo.isFreeform -> {
-                globalMenuPosition.set(
-                    /* x = */ taskBounds.left + marginMenuStart,
-                    /* y = */ taskBounds.top + marginMenuTop
-                )
+                if (context.isRtl()) {
+                    globalMenuPosition.set(
+                        /* x= */ taskBounds.right - menuWidth - marginMenuStart,
+                        /* y= */ taskBounds.top + captionY + marginMenuTop
+                    )
+                } else {
+                    globalMenuPosition.set(
+                        /* x= */ taskBounds.left + marginMenuStart,
+                        /* y= */ taskBounds.top + captionY + marginMenuTop
+                    )
+                }
             }
             taskInfo.isFullscreen -> {
                 globalMenuPosition.set(
                     /* x = */ nonFreeformX,
-                    /* y = */ marginMenuTop
+                    /* y = */ marginMenuTop + captionY
                 )
             }
             taskInfo.isMultiWindow -> {
@@ -253,13 +298,13 @@ class HandleMenu(
                     SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT -> {
                         globalMenuPosition.set(
                             /* x = */ leftOrTopStageBounds.width() + nonFreeformX,
-                            /* y = */ marginMenuTop
+                            /* y = */ captionY + marginMenuTop
                         )
                     }
                     SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT -> {
                         globalMenuPosition.set(
                             /* x = */ nonFreeformX,
-                            /* y = */ marginMenuTop
+                            /* y = */ captionY + marginMenuTop
                         )
                     }
                 }
@@ -272,10 +317,11 @@ class HandleMenu(
      */
     fun relayout(
         t: SurfaceControl.Transaction,
-        captionX: Int
+        captionX: Int,
+        captionY: Int,
     ) {
         handleMenuViewContainer?.let { container ->
-            updateHandleMenuPillPositions(captionX)
+            updateHandleMenuPillPositions(captionX, captionY)
             container.setPosition(t, handleMenuPosition.x, handleMenuPosition.y)
         }
     }
@@ -372,7 +418,16 @@ class HandleMenu(
                 R.dimen.desktop_mode_handle_menu_new_window_height
             )
         }
-        if (!SHOULD_SHOW_SCREENSHOT_BUTTON && !shouldShowNewWindowButton) {
+        if (!shouldShowManageWindowsButton) {
+            menuHeight -= loadDimensionPixelSize(
+                R.dimen.desktop_mode_handle_menu_manage_windows_height
+            )
+        }
+        if (!shouldShowChangeAspectRatioButton) {
+            menuHeight -= loadDimensionPixelSize(
+                R.dimen.desktop_mode_handle_menu_change_aspect_ratio_height)
+        }
+        if (!shouldShowMoreActionsPill) {
             menuHeight -= pillTopMargin
         }
         if (!shouldShowBrowserPill) {
@@ -390,6 +445,9 @@ class HandleMenu(
         return context.resources.getDimensionPixelSize(resourceId)
     }
 
+    private fun Context.isRtl() =
+        resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+
     fun close() {
         handleMenuView?.animateCloseMenu {
             handleMenuViewContainer?.releaseView()
@@ -400,12 +458,16 @@ class HandleMenu(
     /** The view within the Handle Menu, with options to change the windowing mode and more. */
     @SuppressLint("ClickableViewAccessibility")
     class HandleMenuView(
-        context: Context,
+        private val context: Context,
         menuWidth: Int,
         captionHeight: Int,
         private val shouldShowWindowingPill: Boolean,
         private val shouldShowBrowserPill: Boolean,
-        private val shouldShowNewWindowButton: Boolean
+        private val shouldShowNewWindowButton: Boolean,
+        private val shouldShowManageWindowsButton: Boolean,
+        private val shouldShowChangeAspectRatioButton: Boolean,
+        private val shouldShowDesktopModeButton: Boolean,
+        private val isBrowserApp: Boolean
     ) {
         val rootView = LayoutInflater.from(context)
             .inflate(R.layout.desktop_mode_window_decor_handle_menu, null /* root */) as View
@@ -430,12 +492,18 @@ class HandleMenu(
         private val moreActionsPill = rootView.requireViewById<View>(R.id.more_actions_pill)
         private val screenshotBtn = moreActionsPill.requireViewById<Button>(R.id.screenshot_button)
         private val newWindowBtn = moreActionsPill.requireViewById<Button>(R.id.new_window_button)
+        private val manageWindowBtn = moreActionsPill
+            .requireViewById<Button>(R.id.manage_windows_button)
+        private val changeAspectRatioBtn = moreActionsPill
+            .requireViewById<Button>(R.id.change_aspect_ratio_button)
 
-        // Open in Browser Pill.
-        private val openInBrowserPill = rootView.requireViewById<View>(R.id.open_in_browser_pill)
-        private val browserBtn = openInBrowserPill.requireViewById<Button>(
-            R.id.open_in_browser_button)
-
+        // Open in Browser/App Pill.
+        private val openInAppOrBrowserPill = rootView.requireViewById<View>(
+            R.id.open_in_app_or_browser_pill)
+        private val openInAppOrBrowserBtn = openInAppOrBrowserPill.requireViewById<Button>(
+            R.id.open_in_app_or_browser_button)
+        private val openByDefaultBtn = openInAppOrBrowserPill.requireViewById<ImageButton>(
+            R.id.open_by_default_button)
         private val decorThemeUtil = DecorThemeUtil(context)
         private val animator = HandleMenuAnimator(rootView, menuWidth, captionHeight.toFloat())
 
@@ -446,7 +514,10 @@ class HandleMenu(
         var onToFullscreenClickListener: (() -> Unit)? = null
         var onToSplitScreenClickListener: (() -> Unit)? = null
         var onNewWindowClickListener: (() -> Unit)? = null
-        var onOpenInBrowserClickListener: (() -> Unit)? = null
+        var onManageWindowsClickListener: (() -> Unit)? = null
+        var onChangeAspectRatioClickListener: (() -> Unit)? = null
+        var onOpenInAppOrBrowserClickListener: (() -> Unit)? = null
+        var onOpenByDefaultClickListener: (() -> Unit)? = null
         var onCloseMenuClickListener: (() -> Unit)? = null
         var onOutsideTouchListener: (() -> Unit)? = null
 
@@ -454,9 +525,14 @@ class HandleMenu(
             fullscreenBtn.setOnClickListener { onToFullscreenClickListener?.invoke() }
             splitscreenBtn.setOnClickListener { onToSplitScreenClickListener?.invoke() }
             desktopBtn.setOnClickListener { onToDesktopClickListener?.invoke() }
-            browserBtn.setOnClickListener { onOpenInBrowserClickListener?.invoke() }
+            openInAppOrBrowserBtn.setOnClickListener { onOpenInAppOrBrowserClickListener?.invoke() }
+            openByDefaultBtn.setOnClickListener {
+                onOpenByDefaultClickListener?.invoke()
+            }
             collapseMenuButton.setOnClickListener { onCloseMenuClickListener?.invoke() }
             newWindowBtn.setOnClickListener { onNewWindowClickListener?.invoke() }
+            manageWindowBtn.setOnClickListener { onManageWindowsClickListener?.invoke() }
+            changeAspectRatioBtn.setOnClickListener { onChangeAspectRatioClickListener?.invoke() }
 
             rootView.setOnTouchListener { _, event ->
                 if (event.actionMasked == ACTION_OUTSIDE) {
@@ -468,7 +544,12 @@ class HandleMenu(
         }
 
         /** Binds the menu views to the new data. */
-        fun bind(taskInfo: RunningTaskInfo, appIconBitmap: Bitmap?, appName: CharSequence?) {
+        fun bind(
+            taskInfo: RunningTaskInfo,
+            appIconBitmap: Bitmap?,
+            appName: CharSequence?,
+            shouldShowMoreActionsPill: Boolean
+        ) {
             this.taskInfo = taskInfo
             this.style = calculateMenuStyle(taskInfo)
 
@@ -476,11 +557,14 @@ class HandleMenu(
             if (shouldShowWindowingPill) {
                 bindWindowingPill(style)
             }
-            bindMoreActionsPill(style)
-            bindOpenInBrowserPill(style)
+            moreActionsPill.isGone = !shouldShowMoreActionsPill
+            if (shouldShowMoreActionsPill) {
+                bindMoreActionsPill(style)
+            }
+            bindOpenInAppOrBrowserPill(style)
         }
 
-        /** Animates the menu opening. */
+        /** Animates the menu openInAppOrBrowserg. */
         fun animateOpenMenu() {
             if (taskInfo.isFullscreen || taskInfo.isMultiWindow) {
                 animator.animateCaptionHandleExpandToOpen()
@@ -551,9 +635,7 @@ class HandleMenu(
             appIconBitmap: Bitmap?,
             appName: CharSequence?
         ) {
-            appInfoPill.background.colorFilter = BlendModeColorFilter(
-                style.backgroundColor, BlendMode.MULTIPLY
-            )
+            appInfoPill.background.setTint(style.backgroundColor)
 
             collapseMenuButton.apply {
                 imageTintList = ColorStateList.valueOf(style.textColor)
@@ -567,57 +649,67 @@ class HandleMenu(
         }
 
         private fun bindWindowingPill(style: MenuStyle) {
-            windowingPill.background.colorFilter = BlendModeColorFilter(
-                style.backgroundColor, BlendMode.MULTIPLY
-            )
+            windowingPill.background.setTint(style.backgroundColor)
 
             // TODO: Remove once implemented.
             floatingBtn.visibility = View.GONE
 
             fullscreenBtn.isSelected = taskInfo.isFullscreen
+            fullscreenBtn.isEnabled = !taskInfo.isFullscreen
             fullscreenBtn.imageTintList = style.windowingButtonColor
             splitscreenBtn.isSelected = taskInfo.isMultiWindow
+            splitscreenBtn.isEnabled = !taskInfo.isMultiWindow
             splitscreenBtn.imageTintList = style.windowingButtonColor
             floatingBtn.isSelected = taskInfo.isPinned
+            floatingBtn.isEnabled = !taskInfo.isPinned
             floatingBtn.imageTintList = style.windowingButtonColor
+            desktopBtn.isGone = !shouldShowDesktopModeButton
             desktopBtn.isSelected = taskInfo.isFreeform
+            desktopBtn.isEnabled = !taskInfo.isFreeform
             desktopBtn.imageTintList = style.windowingButtonColor
         }
 
         private fun bindMoreActionsPill(style: MenuStyle) {
-            moreActionsPill.apply {
-                isGone = !shouldShowNewWindowButton && !SHOULD_SHOW_SCREENSHOT_BUTTON
-            }
-            screenshotBtn.apply {
-                isGone = !SHOULD_SHOW_SCREENSHOT_BUTTON
-                background.colorFilter =
-                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY
-                )
-                setTextColor(style.textColor)
-                compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
-            }
-            newWindowBtn.apply {
-                isGone = !shouldShowNewWindowButton
-                background.colorFilter =
-                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
-                setTextColor(style.textColor)
-                compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+            moreActionsPill.background.setTint(style.backgroundColor)
+
+            arrayOf(
+                screenshotBtn to SHOULD_SHOW_SCREENSHOT_BUTTON,
+                newWindowBtn to shouldShowNewWindowButton,
+                manageWindowBtn to shouldShowManageWindowsButton,
+                changeAspectRatioBtn to shouldShowChangeAspectRatioButton,
+            ).forEach {
+                val button = it.first
+                val shouldShow = it.second
+                button.apply {
+                    isGone = !shouldShow
+                    setTextColor(style.textColor)
+                    compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
+                }
             }
         }
 
-        private fun bindOpenInBrowserPill(style: MenuStyle) {
-            openInBrowserPill.apply {
+        private fun bindOpenInAppOrBrowserPill(style: MenuStyle) {
+            openInAppOrBrowserPill.apply {
                 isGone = !shouldShowBrowserPill
-                background.colorFilter = BlendModeColorFilter(
-                    style.backgroundColor, BlendMode.MULTIPLY
-                )
+                background.setTint(style.backgroundColor)
             }
 
-            browserBtn.apply {
+            val btnText = if (isBrowserApp) {
+                getString(R.string.open_in_app_text)
+            } else {
+                getString(R.string.open_in_browser_text)
+            }
+            openInAppOrBrowserBtn.apply {
+                text = btnText
+                contentDescription = btnText
                 setTextColor(style.textColor)
                 compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
             }
+
+            openByDefaultBtn.imageTintList = ColorStateList.valueOf(style.textColor)
         }
+
+        private fun getString(@StringRes resId: Int): String = context.resources.getString(resId)
 
         private data class MenuStyle(
             @ColorInt val backgroundColor: Int,
@@ -629,6 +721,14 @@ class HandleMenu(
     companion object {
         private const val TAG = "HandleMenu"
         private const val SHOULD_SHOW_SCREENSHOT_BUTTON = false
+
+        /**
+         * Returns whether the aspect ratio button should be shown for the task. It usually means
+         * that the task is on a large screen with ignore-orientation-request.
+         */
+        fun shouldShowChangeAspectRatioButton(taskInfo: RunningTaskInfo): Boolean =
+            taskInfo.appCompatTaskInfo.eligibleForUserAspectRatioButton() &&
+                taskInfo.windowingMode == WindowConfiguration.WINDOWING_MODE_FULLSCREEN
     }
 }
 
@@ -643,10 +743,15 @@ interface HandleMenuFactory {
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
-        openInBrowserLink: Uri?,
+        shouldShowManageWindowsButton: Boolean,
+        shouldShowChangeAspectRatioButton: Boolean,
+        shouldShowDesktopModeButton: Boolean,
+        isBrowserApp: Boolean,
+        openInAppOrBrowserIntent: Intent?,
         captionWidth: Int,
         captionHeight: Int,
-        captionX: Int
+        captionX: Int,
+        captionY: Int,
     ): HandleMenu
 }
 
@@ -661,10 +766,15 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
-        openInBrowserLink: Uri?,
+        shouldShowManageWindowsButton: Boolean,
+        shouldShowChangeAspectRatioButton: Boolean,
+        shouldShowDesktopModeButton: Boolean,
+        isBrowserApp: Boolean,
+        openInAppOrBrowserIntent: Intent?,
         captionWidth: Int,
         captionHeight: Int,
-        captionX: Int
+        captionX: Int,
+        captionY: Int,
     ): HandleMenu {
         return HandleMenu(
             parentDecor,
@@ -675,10 +785,15 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             splitScreenController,
             shouldShowWindowingPill,
             shouldShowNewWindowButton,
-            openInBrowserLink,
+            shouldShowManageWindowsButton,
+            shouldShowChangeAspectRatioButton,
+            shouldShowDesktopModeButton,
+            isBrowserApp,
+            openInAppOrBrowserIntent,
             captionWidth,
             captionHeight,
-            captionX
+            captionX,
+            captionY,
         )
     }
 }

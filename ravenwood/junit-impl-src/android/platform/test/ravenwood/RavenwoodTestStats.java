@@ -18,6 +18,9 @@ package android.platform.test.ravenwood;
 import android.util.Log;
 
 import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunListener;
+import org.junit.runner.notification.RunNotifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +30,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -38,8 +41,8 @@ import java.util.Map;
  * `/tmp/Ravenwood-stats_[TEST-MODULE=NAME]_latest.csv`.
  */
 public class RavenwoodTestStats {
-    private static final String TAG = "RavenwoodTestStats";
-    private static final String HEADER = "Module,Class,ClassDesc,Passed,Failed,Skipped";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
+    private static final String HEADER = "Module,Class,OuterClass,Passed,Failed,Skipped";
 
     private static RavenwoodTestStats sInstance;
 
@@ -66,7 +69,7 @@ public class RavenwoodTestStats {
     private final PrintWriter mOutputWriter;
     private final String mTestModuleName;
 
-    public final Map<Description, Map<Description, Result>> mStats = new HashMap<>();
+    public final Map<String, Map<String, Result>> mStats = new LinkedHashMap<>();
 
     /** Ctor */
     public RavenwoodTestStats() {
@@ -84,19 +87,17 @@ public class RavenwoodTestStats {
         try {
             mOutputWriter = new PrintWriter(mOutputFile);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to crete logfile. File=" + mOutputFile, e);
+            throw new RuntimeException("Failed to create logfile. File=" + mOutputFile, e);
         }
 
-        // Crete the "latest" symlink.
+        // Create the "latest" symlink.
         Path symlink = Paths.get(tmpdir, basename + "latest.csv");
         try {
-            if (Files.exists(symlink)) {
-                Files.delete(symlink);
-            }
+            Files.deleteIfExists(symlink);
             Files.createSymbolicLink(symlink, Paths.get(mOutputFile.getName()));
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to crete logfile. File=" + mOutputFile, e);
+            throw new RuntimeException("Failed to create logfile. File=" + mOutputFile, e);
         }
 
         Log.i(TAG, "Test result stats file: " + mOutputFile);
@@ -117,75 +118,129 @@ public class RavenwoodTestStats {
         return cwd.getName();
     }
 
-    private void addResult(Description classDescription, Description methodDescription,
+    private void addResult(String className, String methodName,
             Result result) {
-        mStats.compute(classDescription, (classDesc, value) -> {
+        mStats.compute(className, (className_, value) -> {
             if (value == null) {
-                value = new HashMap<>();
+                value = new LinkedHashMap<>();
             }
-            value.put(methodDescription, result);
+            // If the result is already set, don't overwrite it.
+            if (!value.containsKey(methodName)) {
+                value.put(methodName, result);
+            }
             return value;
         });
     }
 
     /**
-     * Call it when a test class is skipped.
-     */
-    public void onClassSkipped(Description classDescription) {
-        addResult(classDescription, Description.EMPTY, Result.Skipped);
-        onClassFinished(classDescription);
-    }
-
-    /**
      * Call it when a test method is finished.
      */
-    public void onTestFinished(Description classDescription, Description testDescription,
-            Result result) {
-        addResult(classDescription, testDescription, result);
+    private void onTestFinished(String className, String testName, Result result) {
+        addResult(className, testName, result);
     }
 
     /**
-     * Call it when a test class is finished.
+     * Dump all the results and clear it.
      */
-    public void onClassFinished(Description classDescription) {
-        int passed = 0;
-        int skipped = 0;
-        int failed = 0;
-        var stats = mStats.get(classDescription);
-        if (stats == null) {
-            return;
-        }
-        for (var e : stats.values()) {
-            switch (e) {
-                case Passed: passed++; break;
-                case Skipped: skipped++; break;
-                case Failed: failed++; break;
+    private void dumpAllAndClear() {
+        for (var entry : mStats.entrySet()) {
+            int passed = 0;
+            int skipped = 0;
+            int failed = 0;
+            var className = entry.getKey();
+
+            for (var e : entry.getValue().values()) {
+                switch (e) {
+                    case Passed:
+                        passed++;
+                        break;
+                    case Skipped:
+                        skipped++;
+                        break;
+                    case Failed:
+                        failed++;
+                        break;
+                }
             }
+
+            mOutputWriter.printf("%s,%s,%s,%d,%d,%d\n",
+                    mTestModuleName, className, getOuterClassName(className),
+                    passed, failed, skipped);
         }
-
-        var testClass = extractTestClass(classDescription);
-
-        mOutputWriter.printf("%s,%s,%s,%d,%d,%d\n",
-                mTestModuleName, (testClass == null ? "?" : testClass.getCanonicalName()),
-                classDescription, passed, failed, skipped);
         mOutputWriter.flush();
+        mStats.clear();
     }
 
-    /**
-     * Try to extract the class from a description, which is needed because
-     * ParameterizedAndroidJunit4's description doesn't contain a class.
-     */
-    private Class<?> extractTestClass(Description desc) {
-        if (desc.getTestClass() != null) {
-            return desc.getTestClass();
+    private static String getOuterClassName(String className) {
+        // Just delete the '$', because I'm not sure if the className we get here is actaully a
+        // valid class name that does exist. (it might have a parameter name, etc?)
+        int p = className.indexOf('$');
+        if (p < 0) {
+            return className;
         }
-        // Look into the children.
-        for (var child : desc.getChildren()) {
-            var fromChild = extractTestClass(child);
-            if (fromChild != null) {
-                return fromChild;
-            }
-        }
-        return null;
+        return className.substring(0, p);
     }
+
+    public void attachToRunNotifier(RunNotifier notifier) {
+        notifier.addListener(mRunListener);
+    }
+
+    private final RunListener mRunListener = new RunListener() {
+        @Override
+        public void testSuiteStarted(Description description) {
+            Log.d(TAG, "testSuiteStarted: " + description);
+        }
+
+        @Override
+        public void testSuiteFinished(Description description) {
+            Log.d(TAG, "testSuiteFinished: " + description);
+        }
+
+        @Override
+        public void testRunStarted(Description description) {
+            Log.d(TAG, "testRunStarted: " + description);
+        }
+
+        @Override
+        public void testRunFinished(org.junit.runner.Result result) {
+            Log.d(TAG, "testRunFinished: " + result);
+
+            dumpAllAndClear();
+        }
+
+        @Override
+        public void testStarted(Description description) {
+            Log.d(TAG, "  testStarted: " + description);
+        }
+
+        @Override
+        public void testFinished(Description description) {
+            Log.d(TAG, "  testFinished: " + description);
+
+            // Send "Passed", but if there's already another result sent for this, this won't
+            // override it.
+            onTestFinished(description.getClassName(), description.getMethodName(), Result.Passed);
+        }
+
+        @Override
+        public void testFailure(Failure failure) {
+            Log.d(TAG, "    testFailure: " + failure);
+
+            var description = failure.getDescription();
+            onTestFinished(description.getClassName(), description.getMethodName(), Result.Failed);
+        }
+
+        @Override
+        public void testAssumptionFailure(Failure failure) {
+            Log.d(TAG, "    testAssumptionFailure: " + failure);
+            var description = failure.getDescription();
+            onTestFinished(description.getClassName(), description.getMethodName(), Result.Skipped);
+        }
+
+        @Override
+        public void testIgnored(Description description) {
+            Log.d(TAG, "    testIgnored: " + description);
+            onTestFinished(description.getClassName(), description.getMethodName(), Result.Skipped);
+        }
+    };
 }

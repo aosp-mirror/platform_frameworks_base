@@ -46,7 +46,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
-import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
@@ -55,7 +54,6 @@ import android.window.TaskOrganizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
@@ -74,7 +72,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Unified task organizer for all components in the shell.
@@ -490,6 +487,20 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         return mHomeTaskOverlayContainer;
     }
 
+    /**
+     * Returns the home task surface, not for wide use.
+     */
+    @Nullable
+    public SurfaceControl getHomeTaskSurface() {
+        for (int i = 0; i < mTasks.size(); i++) {
+            final TaskAppearedInfo info = mTasks.valueAt(i);
+            if (info.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+                return info.getLeash();
+            }
+        }
+        return null;
+    }
+
     @Override
     public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {
@@ -561,19 +572,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
     }
 
-    /**
-     * Take a screenshot of a task.
-     */
-    public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
-            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
-        final TaskAppearedInfo info = mTasks.get(taskInfo.taskId);
-        if (info == null) {
-            return;
-        }
-        ScreenshotUtils.captureLayer(info.getLeash(), crop, consumer);
-    }
-
-
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         synchronized (mLock) {
@@ -599,8 +597,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             }
             final boolean windowModeChanged =
                     data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode();
-            final boolean visibilityChanged = data.getTaskInfo().isVisible != taskInfo.isVisible;
-            if (windowModeChanged || visibilityChanged) {
+            if (windowModeChanged
+                    || hasFreeformConfigurationChanged(data.getTaskInfo(), taskInfo)) {
                 mRecentTasks.ifPresent(recentTasks ->
                         recentTasks.onTaskRunningInfoChanged(taskInfo));
             }
@@ -619,6 +617,17 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                 mLastFocusedTaskInfo = taskInfo;
             }
         }
+    }
+
+    private boolean hasFreeformConfigurationChanged(RunningTaskInfo oldTaskInfo,
+            RunningTaskInfo newTaskInfo) {
+        if (newTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            return false;
+        }
+        return oldTaskInfo.isVisible != newTaskInfo.isVisible
+                || !oldTaskInfo.positionInParent.equals(newTaskInfo.positionInParent)
+                || !Objects.equals(oldTaskInfo.configuration.windowConfiguration.getAppBounds(),
+                newTaskInfo.configuration.windowConfiguration.getAppBounds());
     }
 
     @Override

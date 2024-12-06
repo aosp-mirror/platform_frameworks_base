@@ -16,6 +16,11 @@
 
 package com.android.systemui.reardisplay;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 
@@ -53,6 +58,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+import java.util.Set;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -69,13 +77,25 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
     private SysUiState mSysUiState;
     @Mock
     private Resources mResources;
+    @Mock
+    private DeviceStateManager mDeviceStateManager;
 
     LayoutInflater mLayoutInflater = LayoutInflater.from(mContext);
 
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
-    private static final int CLOSED_BASE_STATE = 0;
-    private static final int OPEN_BASE_STATE = 1;
+    private static final DeviceState CLOSED_BASE_STATE = new DeviceState(
+            new DeviceState.Configuration.Builder(0, "CLOSED").setSystemProperties(
+                    Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY))
+                    .setPhysicalProperties(Set.of(
+                            PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))
+                    .build());
+    private static final DeviceState OPEN_BASE_STATE = new DeviceState(
+            new DeviceState.Configuration.Builder(1, "OPEN").setSystemProperties(
+                    Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY))
+                    .setPhysicalProperties(Set.of(
+                            PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN))
+                    .build());
 
     @Before
     public void setup() {
@@ -92,12 +112,13 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
                 mFakeExecutor,
                 mResources,
                 mLayoutInflater,
-                mSystemUIDialogFactory);
+                mSystemUIDialogFactory,
+                mDeviceStateManager);
         controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
-        controller.setFoldedStates(new int[]{0});
+        controller.setFoldedStates(List.of(0));
         controller.setAnimationRepeatCount(0);
 
-        controller.showRearDisplayDialog(CLOSED_BASE_STATE);
+        controller.showRearDisplayDialog(CLOSED_BASE_STATE.getIdentifier());
         verify(mSystemUIDialog).show();
 
         View container = getDialogViewContainer();
@@ -115,12 +136,13 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
                 mFakeExecutor,
                 mResources,
                 mLayoutInflater,
-                mSystemUIDialogFactory);
+                mSystemUIDialogFactory,
+                mDeviceStateManager);
         controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
-        controller.setFoldedStates(new int[]{0});
+        controller.setFoldedStates(List.of(0));
         controller.setAnimationRepeatCount(0);
 
-        controller.showRearDisplayDialog(CLOSED_BASE_STATE);
+        controller.showRearDisplayDialog(CLOSED_BASE_STATE.getIdentifier());
         verify(mSystemUIDialog).show();
         View container = getDialogViewContainer();
         TextView deviceClosedTitleTextView = container.findViewById(
@@ -144,12 +166,13 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
                 mFakeExecutor,
                 mResources,
                 mLayoutInflater,
-                mSystemUIDialogFactory);
+                mSystemUIDialogFactory,
+                mDeviceStateManager);
         controller.setDeviceStateManagerCallback(new TestDeviceStateManagerCallback());
-        controller.setFoldedStates(new int[]{0});
+        controller.setFoldedStates(List.of(0));
         controller.setAnimationRepeatCount(0);
 
-        controller.showRearDisplayDialog(OPEN_BASE_STATE);
+        controller.showRearDisplayDialog(OPEN_BASE_STATE.getIdentifier());
 
         verify(mSystemUIDialog).show();
         View container = getDialogViewContainer();

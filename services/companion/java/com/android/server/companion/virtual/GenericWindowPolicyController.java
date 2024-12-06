@@ -88,6 +88,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         /** Called when a secure window shows on the virtual display. */
         void onSecureWindowShown(int displayId, @NonNull ActivityInfo activityInfo);
 
+        /** Called when a secure window is no longer shown on the virtual display. */
+        void onSecureWindowHidden(int displayId);
+
         /** Returns true when an intent should be intercepted */
         boolean shouldInterceptIntent(@NonNull Intent intent);
     }
@@ -122,6 +125,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private int mDisplayId = Display.INVALID_DISPLAY;
     private boolean mIsMirrorDisplay = false;
     private final CountDownLatch mDisplayIdSetLatch = new CountDownLatch(1);
+
+    // Used for detecting changes in the window flags.
+    private int mCurrentWindowFlags = 0;
 
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -371,12 +377,19 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
         int displayId = waitAndGetDisplayId();
-        // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
-        // aware that the virtual display has a secure window on top.
-        if ((windowFlags & FLAG_SECURE) != 0 && displayId != INVALID_DISPLAY) {
+        if (displayId != INVALID_DISPLAY) {
+            // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
+            // aware that the virtual display has a secure window on top.
             // Post callback on the main thread, so it doesn't block activity launching.
-            mHandler.post(() -> mActivityListener.onSecureWindowShown(displayId, activityInfo));
+            if ((windowFlags & FLAG_SECURE) != 0 && (mCurrentWindowFlags & FLAG_SECURE) == 0) {
+                mHandler.post(
+                        () -> mActivityListener.onSecureWindowShown(displayId, activityInfo));
+            }
+            if ((windowFlags & FLAG_SECURE) == 0 && (mCurrentWindowFlags & FLAG_SECURE) != 0) {
+                mHandler.post(() -> mActivityListener.onSecureWindowHidden(displayId));
+            }
         }
+        mCurrentWindowFlags = windowFlags;
 
         if (!CompatChanges.isChangeEnabled(ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE,
                 activityInfo.packageName,

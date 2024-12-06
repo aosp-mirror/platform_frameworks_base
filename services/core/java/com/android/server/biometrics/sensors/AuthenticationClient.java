@@ -115,7 +115,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
     }
 
     @LockoutTracker.LockoutMode
-    public int handleFailedAttempt(int userId) {
+    private int handleFailedAttempt(int userId) {
         if (mLockoutTracker != null) {
             mLockoutTracker.addFailedAttemptForUser(getTargetUserId());
         }

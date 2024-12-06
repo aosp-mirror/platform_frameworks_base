@@ -17,14 +17,18 @@
 package com.android.frameworks.core.batterystatsviewer;
 
 import android.content.Context;
+import android.os.BatteryConsumer;
 import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +44,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.settingslib.utils.AsyncLoaderCompat;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +68,16 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private View mCardView;
     private View mEmptyView;
-    private List<BatteryUsageStats> mBatteryUsageStats;
+    private BatteryUsageStats mBatteryUsageStats;
+
+    private static SparseArray<String> sProcStateNames = new SparseArray<>();
+    static {
+        sProcStateNames.put(BatteryConsumer.PROCESS_STATE_UNSPECIFIED, "-");
+        sProcStateNames.put(BatteryConsumer.PROCESS_STATE_FOREGROUND, "FG");
+        sProcStateNames.put(BatteryConsumer.PROCESS_STATE_BACKGROUND, "BG");
+        sProcStateNames.put(BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE, "FGS");
+        sProcStateNames.put(BatteryConsumer.PROCESS_STATE_CACHED, "Cached");
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,7 +136,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     }
 
     private static class BatteryUsageStatsLoader extends
-            AsyncLoaderCompat<List<BatteryUsageStats>> {
+            AsyncLoaderCompat<BatteryUsageStats> {
         private final BatteryStatsManager mBatteryStatsManager;
         private final boolean mForceFreshStats;
 
@@ -133,51 +147,44 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         }
 
         @Override
-        public List<BatteryUsageStats> loadInBackground() {
+        public BatteryUsageStats loadInBackground() {
             final int maxStatsAgeMs = mForceFreshStats ? 0 : BATTERY_STATS_REFRESH_RATE_MILLIS;
             final BatteryUsageStatsQuery queryDefault =
                     new BatteryUsageStatsQuery.Builder()
-                            .includePowerModels()
                             .includeProcessStateData()
+                            .includeScreenStateData()
+                            .includePowerStateData()
                             .setMaxStatsAgeMs(maxStatsAgeMs)
                             .build();
-            final BatteryUsageStatsQuery queryPowerProfileModeledOnly =
-                    new BatteryUsageStatsQuery.Builder()
-                            .powerProfileModeledOnly()
-                            .includePowerModels()
-                            .includeProcessStateData()
-                            .setMaxStatsAgeMs(maxStatsAgeMs)
-                            .build();
-            return mBatteryStatsManager.getBatteryUsageStats(
-                    List.of(queryDefault, queryPowerProfileModeledOnly));
+            return mBatteryStatsManager.getBatteryUsageStats(queryDefault);
         }
 
         @Override
-        protected void onDiscardResult(List<BatteryUsageStats> result) {
+        protected void onDiscardResult(BatteryUsageStats result) {
         }
     }
 
     private class BatteryUsageStatsLoaderCallbacks
-            implements LoaderCallbacks<List<BatteryUsageStats>> {
+            implements LoaderCallbacks<BatteryUsageStats> {
         @NonNull
         @Override
-        public Loader<List<BatteryUsageStats>> onCreateLoader(int id, Bundle args) {
+        public Loader<BatteryUsageStats> onCreateLoader(int id, Bundle args) {
             return new BatteryUsageStatsLoader(BatteryStatsViewerActivity.this,
                     args.getBoolean(FORCE_FRESH_STATS));
         }
 
         @Override
-        public void onLoadFinished(@NonNull Loader<List<BatteryUsageStats>> loader,
-                List<BatteryUsageStats> batteryUsageStats) {
+        public void onLoadFinished(@NonNull Loader<BatteryUsageStats> loader,
+                BatteryUsageStats batteryUsageStats) {
             onBatteryUsageStatsLoaded(batteryUsageStats);
         }
 
         @Override
-        public void onLoaderReset(@NonNull Loader<List<BatteryUsageStats>> loader) {
+        public void onLoaderReset(@NonNull Loader<BatteryUsageStats> loader) {
         }
     }
 
-    private void onBatteryUsageStatsLoaded(List<BatteryUsageStats> batteryUsageStats) {
+    private void onBatteryUsageStatsLoaded(BatteryUsageStats batteryUsageStats) {
         mBatteryUsageStats = batteryUsageStats;
         onBatteryStatsDataLoaded();
     }
@@ -238,10 +245,21 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private static class BatteryStatsDataAdapter extends
             RecyclerView.Adapter<BatteryStatsDataAdapter.ViewHolder> {
         public static class ViewHolder extends RecyclerView.ViewHolder {
+            public static class SliceViewHolder {
+                public TableRow tableRow;
+                public int procState;
+                public int powerState;
+                public int screenState;
+                public TextView powerTextView;
+                public TextView durationTextView;
+            }
+
             public ImageView iconImageView;
             public TextView titleTextView;
             public TextView value1TextView;
             public TextView value2TextView;
+            public TableLayout table;
+            public List<SliceViewHolder> slices = new ArrayList<>();
 
             ViewHolder(View itemView) {
                 super(itemView);
@@ -250,6 +268,40 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                 titleTextView = itemView.findViewById(R.id.title);
                 value1TextView = itemView.findViewById(R.id.value1);
                 value2TextView = itemView.findViewById(R.id.value2);
+                table = itemView.findViewById(R.id.table);
+
+                for (int i = 0; i < sProcStateNames.size(); i++) {
+                    int procState = sProcStateNames.keyAt(i);
+                    slices.add(createSliceViewHolder(procState,
+                            BatteryConsumer.POWER_STATE_BATTERY,
+                            BatteryConsumer.SCREEN_STATE_ON,
+                            R.id.power_b_on, R.id.duration_b_on));
+                    slices.add(createSliceViewHolder(procState,
+                            BatteryConsumer.POWER_STATE_BATTERY,
+                            BatteryConsumer.SCREEN_STATE_OTHER,
+                            R.id.power_b_off, R.id.duration_b_off));
+                    slices.add(createSliceViewHolder(procState,
+                            BatteryConsumer.POWER_STATE_OTHER,
+                            BatteryConsumer.SCREEN_STATE_ON,
+                            R.id.power_c_on, R.id.duration_c_on));
+                    slices.add(createSliceViewHolder(procState,
+                            BatteryConsumer.POWER_STATE_OTHER,
+                            BatteryConsumer.SCREEN_STATE_OTHER,
+                            R.id.power_c_off, R.id.duration_c_off));
+                }
+            }
+
+            private SliceViewHolder createSliceViewHolder(int procState, int powerState,
+                    int screenState, int powerTextViewResId, int durationTextViewResId) {
+                TableRow powerRow = table.findViewWithTag("procstate" + procState);
+                SliceViewHolder svh = new SliceViewHolder();
+                svh.tableRow = powerRow;
+                svh.procState = procState;
+                svh.powerState = powerState;
+                svh.screenState = screenState;
+                svh.powerTextView = powerRow.findViewById(powerTextViewResId);
+                svh.durationTextView = powerRow.findViewById(durationTextViewResId);
+                return svh;
             }
         }
 
@@ -269,62 +321,32 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int position) {
             LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-            View itemView = layoutInflater.inflate(R.layout.battery_consumer_entry_layout, parent,
-                    false);
+            ViewGroup itemView = (ViewGroup) layoutInflater.inflate(
+                    R.layout.battery_consumer_entry_layout, parent, false);
+            TableLayout table = itemView.findViewById(R.id.table);
+            int offset = 1;     // Skip header
+            for (int i = 0; i < sProcStateNames.size(); i++) {
+                View powerRow = layoutInflater.inflate(R.layout.battery_consumer_slices_layout,
+                        itemView, false);
+                ((TextView) powerRow.findViewById(R.id.procState))
+                        .setText(sProcStateNames.valueAt(i));
+                powerRow.setTag("procstate" + sProcStateNames.keyAt(i));
+                table.addView(powerRow, offset++);
+            }
+
             return new ViewHolder(itemView);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
             BatteryConsumerData.Entry entry = mEntries.get(position);
-
             switch (entry.entryType) {
-                case UID_TOTAL_POWER:
+                case UID:
                     setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_sum_24, 0);
+                            R.drawable.gm_energy_24, 0);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setProportionText(viewHolder.value2TextView, entry);
-                    break;
-                case UID_POWER_PROFILE:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_calculate_24,
-                            R.color.battery_consumer_bg_power_profile);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setProportionText(viewHolder.value2TextView, entry);
-                    break;
-                case UID_POWER_PROFILE_PROCESS_STATE:
-                    setTitleIconAndBackground(viewHolder, "    " + entry.title,
-                            R.drawable.gm_calculate_24,
-                            R.color.battery_consumer_bg_power_profile);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    viewHolder.value2TextView.setVisibility(View.INVISIBLE);
-                    break;
-                case UID_POWER_ENERGY_CONSUMPTION:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setProportionText(viewHolder.value2TextView, entry);
-                    break;
-                case UID_POWER_ENERGY_PROCESS_STATE:
-                    setTitleIconAndBackground(viewHolder, "    " + entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    viewHolder.value2TextView.setVisibility(View.INVISIBLE);
-                    break;
-                case UID_POWER_CUSTOM:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setProportionText(viewHolder.value2TextView, entry);
-                    break;
-                case UID_DURATION:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_timer_24, 0);
-                    setDurationText(viewHolder.value1TextView, (long) entry.value1);
-                    setProportionText(viewHolder.value2TextView, entry);
+                    bindSlices(viewHolder, entry);
                     break;
                 case DEVICE_TOTAL_POWER:
                     setTitleIconAndBackground(viewHolder, entry.title,
@@ -332,24 +354,10 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
-                case DEVICE_POWER_MODELED:
+                case DEVICE_POWER:
                     setTitleIconAndBackground(viewHolder, entry.title,
                             R.drawable.gm_calculate_24,
                             R.color.battery_consumer_bg_power_profile);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setPowerText(viewHolder.value2TextView, entry.value2);
-                    break;
-                case DEVICE_POWER_ENERGY_CONSUMPTION:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
-                    setPowerText(viewHolder.value1TextView, entry.value1);
-                    setPowerText(viewHolder.value2TextView, entry.value2);
-                    break;
-                case DEVICE_POWER_CUSTOM:
-                    setTitleIconAndBackground(viewHolder, entry.title,
-                            R.drawable.gm_energy_24,
-                            R.color.battery_consumer_bg_energy_consumption);
                     setPowerText(viewHolder.value1TextView, entry.value1);
                     setPowerText(viewHolder.value2TextView, entry.value2);
                     break;
@@ -359,6 +367,65 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
                     setDurationText(viewHolder.value1TextView, (long) entry.value1);
                     viewHolder.value2TextView.setVisibility(View.GONE);
                     break;
+            }
+        }
+
+        private void bindSlices(ViewHolder viewHolder, BatteryConsumerData.Entry entry) {
+            if (entry.slices == null || entry.slices.isEmpty()) {
+                viewHolder.table.setVisibility(View.GONE);
+                return;
+            }
+            viewHolder.table.setVisibility(View.VISIBLE);
+
+            boolean[] procStateRowPopulated =
+                    new boolean[BatteryConsumer.PROCESS_STATE_COUNT];
+            for (BatteryConsumerData.Slice s : entry.slices) {
+                if (s.powerMah != 0 || s.durationMs != 0) {
+                    procStateRowPopulated[s.processState] = true;
+                }
+            }
+
+            for (ViewHolder.SliceViewHolder sliceViewHolder : viewHolder.slices) {
+                BatteryConsumerData.Slice slice = null;
+                for (BatteryConsumerData.Slice s : entry.slices) {
+                    if (s.powerState == sliceViewHolder.powerState
+                            && s.screenState == sliceViewHolder.screenState
+                            && s.processState == sliceViewHolder.procState) {
+                        slice = s;
+                        break;
+                    }
+                }
+                if (!procStateRowPopulated[sliceViewHolder.procState]) {
+                    sliceViewHolder.tableRow.setVisibility(View.GONE);
+                } else {
+                    sliceViewHolder.tableRow.setVisibility(View.VISIBLE);
+
+                    if (slice != null && (slice.powerMah != 0 || slice.durationMs != 0)) {
+                        sliceViewHolder.powerTextView.setText(
+                                String.format(Locale.getDefault(), "%.1f", slice.powerMah));
+                    } else {
+                        sliceViewHolder.powerTextView.setText(null);
+                    }
+
+                    if (slice != null && slice.durationMs != 0) {
+                        sliceViewHolder.durationTextView.setVisibility(View.VISIBLE);
+                        String timeString;
+                        if (slice.durationMs < MILLIS_IN_MINUTE) {
+                            timeString = String.format(Locale.getDefault(), "%ds",
+                                    slice.durationMs / 1000);
+                        } else if (slice.durationMs < 60 * MILLIS_IN_MINUTE) {
+                            timeString = String.format(Locale.getDefault(), "%dm %ds",
+                                    slice.durationMs / MILLIS_IN_MINUTE,
+                                    (slice.durationMs % MILLIS_IN_MINUTE) / 1000);
+                        } else {
+                            timeString = String.format(Locale.getDefault(), "%dm",
+                                    slice.durationMs / MILLIS_IN_MINUTE);
+                        }
+                        sliceViewHolder.durationTextView.setText(timeString);
+                    } else {
+                        sliceViewHolder.durationTextView.setVisibility(View.GONE);
+                    }
+                }
             }
         }
 

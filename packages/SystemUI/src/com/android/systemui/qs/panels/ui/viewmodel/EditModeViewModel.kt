@@ -30,6 +30,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.domain.interactor.MinimumTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import javax.inject.Named
@@ -54,8 +55,8 @@ constructor(
     private val currentTilesInteractor: CurrentTilesInteractor,
     private val tilesAvailabilityInteractor: TilesAvailabilityInteractor,
     private val minTilesInteractor: MinimumTilesInteractor,
-    private val configurationInteractor: ConfigurationInteractor,
-    @Application private val applicationContext: Context,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware  private val context: Context,
     @Named("Default") private val defaultGridLayout: GridLayout,
     @Application private val applicationScope: CoroutineScope,
     gridLayoutTypeInteractor: GridLayoutTypeInteractor,
@@ -73,11 +74,7 @@ constructor(
     val gridLayout: StateFlow<GridLayout> =
         gridLayoutTypeInteractor.layout
             .map { gridLayoutMap[it] ?: defaultGridLayout }
-            .stateIn(
-                applicationScope,
-                SharingStarted.WhileSubscribed(),
-                defaultGridLayout,
-            )
+            .stateIn(applicationScope, SharingStarted.WhileSubscribed(), defaultGridLayout)
 
     /**
      * Flow of view models for each tile that should be visible in edit mode (or empty flow when not
@@ -143,7 +140,7 @@ constructor(
                     .combine(configurationInteractor.onAnyConfigurationChange.emitOnStart()) {
                         tiles,
                         _ ->
-                        tiles.fastMap { it.load(applicationContext) }
+                        tiles.fastMap { it.load(context) }
                     }
             } else {
                 emptyFlow()
@@ -195,10 +192,5 @@ constructor(
 
     fun setTiles(tileSpecs: List<TileSpec>) {
         currentTilesInteractor.setTiles(tileSpecs)
-    }
-
-    /** Immediately resets the current tiles to the default list. */
-    fun resetCurrentTilesToDefault() {
-        throw NotImplementedError("This is not supported yet")
     }
 }

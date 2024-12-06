@@ -121,7 +121,7 @@ fun ContentScope.animateContentFloatAsState(
 
 @Deprecated(
     "Use animateContentFloatAsState() instead",
-    replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)")
+    replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)"),
 )
 @Composable
 fun ContentScope.animateSceneFloatAsState(
@@ -172,14 +172,11 @@ fun ContentScope.animateContentDpAsState(
 
 @Deprecated(
     "Use animateContentDpAsState() instead",
-    replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)")
+    replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)"),
 )
 @Composable
-fun ContentScope.animateSceneDpAsState(
-    value: Dp,
-    key: ValueKey,
-    canOverflow: Boolean = true,
-) = animateContentDpAsState(value, key, canOverflow)
+fun ContentScope.animateSceneDpAsState(value: Dp, key: ValueKey, canOverflow: Boolean = true) =
+    animateContentDpAsState(value, key, canOverflow)
 
 /**
  * Animate a shared element Dp value.
@@ -214,10 +211,7 @@ private object SharedDpType : SharedValueType<Dp, Dp> {
  * @see ContentScope.animateContentValueAsState
  */
 @Composable
-fun ContentScope.animateContentColorAsState(
-    value: Color,
-    key: ValueKey,
-): AnimatedState<Color> {
+fun ContentScope.animateContentColorAsState(value: Color, key: ValueKey): AnimatedState<Color> {
     return animateContentValueAsState(value, key, SharedColorType, canOverflow = false)
 }
 
@@ -227,14 +221,11 @@ fun ContentScope.animateContentColorAsState(
  * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun ElementScope<*>.animateElementColorAsState(
-    value: Color,
-    key: ValueKey,
-): AnimatedState<Color> {
+fun ElementScope<*>.animateElementColorAsState(value: Color, key: ValueKey): AnimatedState<Color> {
     return animateElementValueAsState(value, key, SharedColorType, canOverflow = false)
 }
 
-private object SharedColorType : SharedValueType<Color, ColorDelta> {
+internal object SharedColorType : SharedValueType<Color, ColorDelta> {
     override val unspecifiedValue: Color = Color.Unspecified
     override val zeroDeltaValue: ColorDelta = ColorDelta(0f, 0f, 0f, 0f)
 
@@ -264,22 +255,17 @@ private object SharedColorType : SharedValueType<Color, ColorDelta> {
                 alpha = aOklab.alpha + b.alpha * bWeight,
                 colorSpace = ColorSpaces.Oklab,
             )
-            .convert(aOklab.colorSpace)
+            .convert(a.colorSpace)
     }
 }
 
 /**
- * Represents the diff between two colors in the same color space.
+ * Represents the diff between two colors in the Oklab color space.
  *
  * Note: This class is necessary because Color() checks the bounds of its values and UncheckedColor
  * is internal.
  */
-private class ColorDelta(
-    val red: Float,
-    val green: Float,
-    val blue: Float,
-    val alpha: Float,
-)
+internal class ColorDelta(val red: Float, val green: Float, val blue: Float, val alpha: Float)
 
 @Composable
 internal fun <T> animateSharedValueAsState(
@@ -331,7 +317,7 @@ internal fun <T> animateSharedValueAsState(
 private fun <T, Delta> sharedValue(
     layoutImpl: SceneTransitionLayoutImpl,
     key: ValueKey,
-    element: ElementKey?
+    element: ElementKey?,
 ): SharedValue<T, Delta> {
     return layoutImpl.sharedValues[key]?.get(element)?.let { it as SharedValue<T, Delta> }
         ?: error(valueReadTooEarlyMessage(key))
@@ -342,9 +328,7 @@ private fun valueReadTooEarlyMessage(key: ValueKey) =
         "means that you are reading it during composition, which you should not do. See the " +
         "documentation of AnimatedState for more information."
 
-internal class SharedValue<T, Delta>(
-    val type: SharedValueType<T, Delta>,
-) {
+internal class SharedValue<T, Delta>(val type: SharedValueType<T, Delta>) {
     /** The target value of this shared value for each content. */
     val targetValues = SnapshotStateMap<ContentKey, T>()
 

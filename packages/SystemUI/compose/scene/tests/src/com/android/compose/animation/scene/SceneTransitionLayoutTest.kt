@@ -85,24 +85,12 @@ class SceneTransitionLayoutTest {
 
     /** The content under test. */
     @Composable
-    private fun TestContent(enableInterruptions: Boolean = true) {
+    private fun TestContent() {
         coroutineScope = rememberCoroutineScope()
-        layoutState = remember {
-            MutableSceneTransitionLayoutState(
-                SceneA,
-                EmptyTestTransitions,
-                enableInterruptions = enableInterruptions,
-            )
-        }
+        layoutState = remember { MutableSceneTransitionLayoutState(SceneA, EmptyTestTransitions) }
 
-        SceneTransitionLayout(
-            state = layoutState,
-            modifier = Modifier.size(LayoutSize),
-        ) {
-            scene(
-                SceneA,
-                userActions = mapOf(Back to SceneB),
-            ) {
+        SceneTransitionLayout(state = layoutState, modifier = Modifier.size(LayoutSize)) {
+            scene(SceneA, userActions = mapOf(Back to SceneB)) {
                 Box(Modifier.fillMaxSize()) {
                     SharedFoo(size = 50.dp, childOffset = 0.dp, Modifier.align(Alignment.TopEnd))
                     Text("SceneA")
@@ -211,7 +199,7 @@ class SceneTransitionLayoutTest {
 
     @Test
     fun testSharedElement() {
-        rule.setContent { TestContent(enableInterruptions = false) }
+        rule.setContent { TestContent() }
 
         // In scene A, the shared element SharedFoo() is at the top end of the layout and has a size
         // of 50.dp.
@@ -250,7 +238,7 @@ class SceneTransitionLayoutTest {
         sharedFoo.assertHeightIsEqualTo(75.dp)
         sharedFoo.assertPositionInRootIsEqualTo(
             expectedTop = 0.dp,
-            expectedLeft = (LayoutSize - 50.dp) / 2
+            expectedLeft = (LayoutSize - 50.dp) / 2,
         )
 
         // The shared offset of the single child of SharedFoo() is 50dp in scene B and 0dp in Scene
@@ -258,6 +246,9 @@ class SceneTransitionLayoutTest {
         assertThat(sharedFoo.onChild().offsetRelativeTo(sharedFoo))
             .isWithin(DpOffsetSubject.DefaultTolerance)
             .of(DpOffset(25.dp, 25.dp))
+
+        // Finish the transition.
+        rule.mainClock.advanceTimeBy(TestTransitionDuration / 2)
 
         // Animate to scene C, let the animation start then go to the middle of the transition.
         currentScene = SceneC
@@ -325,7 +316,7 @@ class SceneTransitionLayoutTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
                 )
             }
 
@@ -371,7 +362,7 @@ class SceneTransitionLayoutTest {
                         from(SceneB, to = SceneC) {
                             spec = tween(duration.toInt(), easing = LinearEasing)
                         }
-                    }
+                    },
                 )
             }
 
@@ -447,7 +438,7 @@ class SceneTransitionLayoutTest {
     }
 
     private fun SemanticsNodeInteraction.offsetRelativeTo(
-        other: SemanticsNodeInteraction,
+        other: SemanticsNodeInteraction
     ): DpOffset {
         val node = fetchSemanticsNode()
         val bounds = node.boundsInRoot

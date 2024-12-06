@@ -24,6 +24,7 @@ import android.os.MessageQueue;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.WeaklyReferencedCallback;
 
 import dalvik.annotation.optimization.FastNative;
 
@@ -40,6 +41,7 @@ import java.lang.ref.WeakReference;
  *
  * @hide
  */
+@WeaklyReferencedCallback
 public abstract class DisplayEventReceiver {
 
     /**
@@ -205,6 +207,8 @@ public abstract class DisplayEventReceiver {
         // reasonable timestamps.
         public int frameTimelinesLength = 1;
 
+        public int numberQueuedBuffers = 0;
+
         VsyncEventData() {
             frameTimelines = new FrameTimeline[FRAME_TIMELINES_CAPACITY];
             for (int i = 0; i < frameTimelines.length; i++) {
@@ -215,11 +219,13 @@ public abstract class DisplayEventReceiver {
         // Called from native code.
         @SuppressWarnings("unused")
         VsyncEventData(FrameTimeline[] frameTimelines, int preferredFrameTimelineIndex,
-                int frameTimelinesLength, long frameInterval) {
+                int frameTimelinesLength, long frameInterval,
+                int numberQueuedBuffers) {
             this.frameTimelines = frameTimelines;
             this.preferredFrameTimelineIndex = preferredFrameTimelineIndex;
             this.frameTimelinesLength = frameTimelinesLength;
             this.frameInterval = frameInterval;
+            this.numberQueuedBuffers = numberQueuedBuffers;
         }
 
         void copyFrom(VsyncEventData other) {
@@ -229,6 +235,7 @@ public abstract class DisplayEventReceiver {
             for (int i = 0; i < frameTimelines.length; i++) {
                 frameTimelines[i].copyFrom(other.frameTimelines[i]);
             }
+            numberQueuedBuffers = other.numberQueuedBuffers;
         }
 
         public FrameTimeline preferredFrameTimeline() {
@@ -279,11 +286,20 @@ public abstract class DisplayEventReceiver {
      * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
      * timebase.
      * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
-     * @param modeId The new mode Id
+     * @param modeId The new mode ID
      * @param renderPeriod The render frame period, which is a multiple of the mode's vsync period
      */
     public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
             long renderPeriod) {
+    }
+
+    /**
+     * Called when a display mode rejection event is received.
+     *
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
+     * @param modeId The mode ID of the mode that was rejected
+     */
+    public void onModeRejected(long physicalDisplayId, int modeId) {
     }
 
     /**
@@ -375,6 +391,12 @@ public abstract class DisplayEventReceiver {
     private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
             long renderPeriod) {
         onModeChanged(timestampNanos, physicalDisplayId, modeId, renderPeriod);
+    }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchModeRejected(long physicalDisplayId, int modeId) {
+        onModeRejected(physicalDisplayId, modeId);
     }
 
     // Called from native code.

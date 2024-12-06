@@ -19,6 +19,8 @@ yunfanc@google.com
 wilsonshih@google.com
 jiamingliu@google.com
 pdwilliams@google.com
+charlesccchen@google.com
+marziana@google.com
 
 # Files related to background activity launches
 per-file Background*Start* = set noparent
@@ -32,3 +34,8 @@ per-file ActivityCallerState.java = file:/core/java/android/app/COMPONENT_CALLER
 # Files related to tracing
 per-file *TransitionTracer.java = file:platform/development:/tools/winscope/OWNERS
 per-file *WindowTracing* = file:platform/development:/tools/winscope/OWNERS
+
+# Files related to activity security
+per-file ActivityStarter.java = file:/ACTIVITY_SECURITY_OWNERS
+per-file ActivityStartController.java = file:/ACTIVITY_SECURITY_OWNERS
+per-file ActivityTaskManagerService.java = file:/ACTIVITY_SECURITY_OWNERS

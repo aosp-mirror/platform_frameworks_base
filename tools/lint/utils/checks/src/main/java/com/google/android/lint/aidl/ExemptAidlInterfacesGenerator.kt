@@ -33,12 +33,6 @@ import org.jetbrains.uast.UMethod
  */
 class ExemptAidlInterfacesGenerator : AidlImplementationDetector() {
     private val targetExemptAidlInterfaceNames = mutableSetOf<String>()
-    private val systemServicePathPrefixes = setOf(
-        "frameworks/base/services",
-        "frameworks/base/apex",
-        "frameworks/opt/wear",
-        "packages/modules"
-    )
 
     // We could've improved performance by visiting classes rather than methods, however, this lint
     // check won't be run regularly, hence we've decided not to add extra overrides to
@@ -49,14 +43,7 @@ class ExemptAidlInterfacesGenerator : AidlImplementationDetector() {
         interfaceName: String,
         body: UBlockExpression
     ) {
-        val filePath = context.file.path
-
-        // We perform `filePath.contains` instead of `filePath.startsWith` since getting the
-        // relative path of a source file is non-trivial. That is because `context.file.path`
-        // returns the path to where soong builds the file (i.e. /out/soong/...). Moreover, the
-        // logic to extract the relative path would need to consider several /out/soong/...
-        // locations patterns.
-        if (systemServicePathPrefixes.none { filePath.contains(it) }) return
+        if (!isSystemServicePath(context)) return
 
         val fullyQualifiedInterfaceName =
             getContainingAidlInterfaceQualified(context, node) ?: return

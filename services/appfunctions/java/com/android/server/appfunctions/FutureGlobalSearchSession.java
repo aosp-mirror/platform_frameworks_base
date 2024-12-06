@@ -20,15 +20,14 @@ import android.annotation.NonNull;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.GlobalSearchSession;
+import android.app.appsearch.SearchSpec;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.observer.ObserverCallback;
 import android.app.appsearch.observer.ObserverSpec;
-import android.util.Slog;
 
 import com.android.internal.infra.AndroidFuture;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 /** A wrapper around {@link GlobalSearchSession} that provides a future-based API. */
@@ -51,9 +50,20 @@ public class FutureGlobalSearchSession implements Closeable {
                         return result.getResultValue();
                     } else {
                         throw new RuntimeException(
-                                FutureAppSearchSession.failedResultToException(result));
+                                FutureSearchResults.failedResultToException(result));
                     }
                 });
+    }
+
+    /**
+     * Retrieves documents from the open {@link GlobalSearchSession} that match a given query string
+     * and type of search provided.
+     */
+    public AndroidFuture<FutureSearchResults> search(
+            String queryExpression, SearchSpec searchSpec) {
+        return getSessionAsync()
+                .thenApply(session -> session.search(queryExpression, searchSpec))
+                .thenApply(result -> new FutureSearchResultsImpl(result, mExecutor));
     }
 
     /**
@@ -84,11 +94,13 @@ public class FutureGlobalSearchSession implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        try {
-            getSessionAsync().get().close();
-        } catch (Exception ex) {
-            Slog.e(TAG, "Failed to close global search session", ex);
-        }
+    public void close() {
+        getSessionAsync()
+                .whenComplete(
+                        (appSearchSession, throwable) -> {
+                            if (appSearchSession != null) {
+                                appSearchSession.close();
+                            }
+                        });
     }
 }

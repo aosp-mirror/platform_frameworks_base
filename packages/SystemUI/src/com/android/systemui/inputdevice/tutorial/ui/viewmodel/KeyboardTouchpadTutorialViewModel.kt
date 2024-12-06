@@ -22,14 +22,21 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.domain.interactor.ConnectionState
 import com.android.systemui.inputdevice.tutorial.domain.interactor.KeyboardTouchpadConnectionInteractor
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEY
-import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_ALL
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEY
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_KEYBOARD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.RequiredHardware.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.RequiredHardware.TOUCHPAD
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.ACTION_KEY
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.BACK_GESTURE
+import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGesturesInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -41,25 +48,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.runningFold
-import kotlinx.coroutines.launch
 
 class KeyboardTouchpadTutorialViewModel(
     private val gesturesInteractor: Optional<TouchpadGesturesInteractor>,
     private val keyboardTouchpadConnectionInteractor: KeyboardTouchpadConnectionInteractor,
     private val hasTouchpadTutorialScreens: Boolean,
-    handle: SavedStateHandle
+    private val logger: InputDeviceTutorialLogger,
+    handle: SavedStateHandle,
 ) : ViewModel(), DefaultLifecycleObserver {
-
-    private fun startingScreen(handle: SavedStateHandle): Screen {
-        val tutorialType: String? = handle[INTENT_TUTORIAL_TYPE_KEY]
-        return if (tutorialType == INTENT_TUTORIAL_TYPE_KEYBOARD) ACTION_KEY else BACK_GESTURE
-    }
 
     private val _screen = MutableStateFlow(startingScreen(handle))
     val screen: Flow<Screen> = _screen.filter { it.canBeShown() }
 
     private val _closeActivity: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val closeActivity: StateFlow<Boolean> = _closeActivity
+
+    private val screenSequence: ScreenSequence = chooseScreenSequence(handle)
 
     private val screensBackStack = ArrayDeque(listOf(_screen.value))
 
@@ -68,7 +72,10 @@ class KeyboardTouchpadTutorialViewModel(
 
     init {
         viewModelScope.launch {
-            keyboardTouchpadConnectionInteractor.connectionState.collect { connectionState = it }
+            keyboardTouchpadConnectionInteractor.connectionState.collect {
+                logger.logNewConnectionState(connectionState)
+                connectionState = it
+            }
         }
 
         viewModelScope.launch {
@@ -89,7 +96,41 @@ class KeyboardTouchpadTutorialViewModel(
         viewModelScope.launch {
             // close activity if screen requires touchpad but we don't have it. This can only happen
             // when current sysui build doesn't contain touchpad module dependency
-            _screen.filterNot { it.canBeShown() }.collect { _closeActivity.value = true }
+            _screen
+                .filterNot { it.canBeShown() }
+                .collect {
+                    logger.e(
+                        "Touchpad is connected but touchpad module is missing, something went wrong"
+                    )
+                    _closeActivity.value = true
+                }
+        }
+    }
+
+    private fun startingScreen(handle: SavedStateHandle): Screen {
+        val scope: String? = handle[INTENT_TUTORIAL_SCOPE_KEY]
+        return when (scope) {
+            INTENT_TUTORIAL_SCOPE_KEYBOARD -> ACTION_KEY
+            INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME -> HOME_GESTURE
+            INTENT_TUTORIAL_SCOPE_TOUCHPAD,
+            INTENT_TUTORIAL_SCOPE_ALL,
+            INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK -> BACK_GESTURE
+            else -> {
+                logger.w("Intent didn't specify tutorial scope, starting with default")
+                BACK_GESTURE
+            }
+        }
+    }
+
+    private fun chooseScreenSequence(handle: SavedStateHandle): ScreenSequence {
+        val scope: String? = handle[INTENT_TUTORIAL_SCOPE_KEY]
+        return if (
+            scope == INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME ||
+                scope == INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK
+        ) {
+            SingleScreenOnly
+        } else {
+            AllSupportedScreens
         }
     }
 
@@ -109,16 +150,19 @@ class KeyboardTouchpadTutorialViewModel(
     }
 
     fun onDoneButtonClicked() {
-        var nextScreen = _screen.value.next()
+        var nextScreen = screenSequence.nextScreen(_screen.value)
         while (nextScreen != null) {
             if (requiredHardwarePresent(nextScreen)) {
                 break
             }
-            nextScreen = nextScreen.next()
+            logger.logNextScreenMissingHardware(nextScreen)
+            nextScreen = screenSequence.nextScreen(nextScreen)
         }
         if (nextScreen == null) {
+            logger.d("Final screen reached, closing tutorial")
             _closeActivity.value = true
         } else {
+            logger.logNextScreen(nextScreen)
             _screen.value = nextScreen
             screensBackStack.add(nextScreen)
         }
@@ -127,6 +171,7 @@ class KeyboardTouchpadTutorialViewModel(
     private fun Screen.canBeShown() = requiredHardware != TOUCHPAD || hasTouchpadTutorialScreens
 
     private fun setupDeviceState(previousScreen: Screen?, currentScreen: Screen) {
+        logger.logMovingBetweenScreens(previousScreen, currentScreen)
         if (previousScreen?.requiredHardware == currentScreen.requiredHardware) return
         previousScreen?.let { clearDeviceStateForScreen(it) }
         when (currentScreen.requiredHardware) {
@@ -153,6 +198,7 @@ class KeyboardTouchpadTutorialViewModel(
             _closeActivity.value = true
         } else {
             screensBackStack.removeLast()
+            logger.logGoingBack(screensBackStack.last())
             _screen.value = screensBackStack.last()
         }
     }
@@ -162,6 +208,7 @@ class KeyboardTouchpadTutorialViewModel(
     constructor(
         private val gesturesInteractor: Optional<TouchpadGesturesInteractor>,
         private val keyboardTouchpadConnected: KeyboardTouchpadConnectionInteractor,
+        private val logger: InputDeviceTutorialLogger,
         @Assisted private val hasTouchpadTutorialScreens: Boolean,
     ) : AbstractSavedStateViewModelFactory() {
 
@@ -174,32 +221,44 @@ class KeyboardTouchpadTutorialViewModel(
         override fun <T : ViewModel> create(
             key: String,
             modelClass: Class<T>,
-            handle: SavedStateHandle
+            handle: SavedStateHandle,
         ): T =
             KeyboardTouchpadTutorialViewModel(
                 gesturesInteractor,
                 keyboardTouchpadConnected,
                 hasTouchpadTutorialScreens,
-                handle
+                logger,
+                handle,
             )
                 as T
+    }
+
+    private interface ScreenSequence {
+        fun nextScreen(current: Screen): Screen?
+    }
+
+    private object AllSupportedScreens : ScreenSequence {
+        override fun nextScreen(current: Screen): Screen? {
+            return when (current) {
+                BACK_GESTURE -> HOME_GESTURE
+                HOME_GESTURE -> ACTION_KEY
+                ACTION_KEY -> null
+            }
+        }
+    }
+
+    private object SingleScreenOnly : ScreenSequence {
+        override fun nextScreen(current: Screen): Screen? = null
     }
 }
 
 enum class RequiredHardware {
     TOUCHPAD,
-    KEYBOARD
+    KEYBOARD,
 }
 
 enum class Screen(val requiredHardware: RequiredHardware) {
     BACK_GESTURE(requiredHardware = TOUCHPAD),
     HOME_GESTURE(requiredHardware = TOUCHPAD),
-    ACTION_KEY(requiredHardware = KEYBOARD);
-
-    fun next(): Screen? =
-        when (this) {
-            BACK_GESTURE -> HOME_GESTURE
-            HOME_GESTURE -> ACTION_KEY
-            ACTION_KEY -> null
-        }
+    ACTION_KEY(requiredHardware = KEYBOARD),
 }

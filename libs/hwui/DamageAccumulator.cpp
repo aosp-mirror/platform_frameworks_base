@@ -242,45 +242,59 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     }
 }
 
-SkRect DamageAccumulator::computeClipAndTransform(const SkRect& bounds, Matrix4* outMatrix) const {
-    const DirtyStack* frame = mHead;
-    Matrix4 transform;
-    SkRect pretransformResult = bounds;
-    while (true) {
-        SkRect currentBounds = pretransformResult;
-        pretransformResult.setEmpty();
-        switch (frame->type) {
-            case TransformRenderNode: {
-                const RenderProperties& props = frame->renderNode->properties();
-                // Perform clipping
-                if (props.getClipDamageToBounds() && !currentBounds.isEmpty()) {
-                    if (!currentBounds.intersect(
-                                SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
-                        currentBounds.setEmpty();
-                    }
+static void computeClipAndTransformImpl(const DirtyStack* currentFrame, SkRect* crop,
+                                        Matrix4* outMatrix) {
+    SkRect currentCrop = *crop;
+    switch (currentFrame->type) {
+        case TransformRenderNode: {
+            const RenderProperties& props = currentFrame->renderNode->properties();
+            // Perform clipping
+            if (props.getClipDamageToBounds() && !currentCrop.isEmpty()) {
+                if (!currentCrop.intersect(SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
+                    currentCrop.setEmpty();
                 }
+            }
 
-                // apply all transforms
-                mapRect(props, currentBounds, &pretransformResult);
-                frame->renderNode->applyViewPropertyTransforms(transform);
-            } break;
-            case TransformMatrix4:
-                mapRect(frame->matrix4, currentBounds, &pretransformResult);
-                transform.multiply(*frame->matrix4);
-                break;
-            default:
-                pretransformResult = currentBounds;
-                break;
-        }
-        if (frame->prev == frame) break;
-        frame = frame->prev;
+            // apply all transforms
+            crop->setEmpty();
+            mapRect(props, currentCrop, crop);
+        } break;
+        case TransformMatrix4:
+            crop->setEmpty();
+            mapRect(currentFrame->matrix4, currentCrop, crop);
+            break;
+        default:
+            break;
     }
-    SkRect result;
+
+    if (currentFrame->prev != currentFrame) {
+        computeClipAndTransformImpl(currentFrame->prev, crop, outMatrix);
+    }
+    switch (currentFrame->type) {
+        case TransformRenderNode:
+            currentFrame->renderNode->applyViewPropertyTransforms(*outMatrix);
+            break;
+        case TransformMatrix4:
+            outMatrix->multiply(*currentFrame->matrix4);
+            break;
+        case TransformNone:
+            // nothing to be done
+            break;
+        default:
+            LOG_ALWAYS_FATAL("Tried to compute transform with an invalid type: %d",
+                             currentFrame->type);
+    }
+}
+
+SkRect DamageAccumulator::computeClipAndTransform(const SkRect& bounds, Matrix4* outMatrix) const {
+    SkRect cropInGlobal = bounds;
+    outMatrix->loadIdentity();
+    computeClipAndTransformImpl(mHead, &cropInGlobal, outMatrix);
+    SkRect cropInLocal;
     Matrix4 globalToLocal;
-    globalToLocal.loadInverse(transform);
-    mapRect(&globalToLocal, pretransformResult, &result);
-    *outMatrix = transform;
-    return result;
+    globalToLocal.loadInverse(*outMatrix);
+    mapRect(&globalToLocal, cropInGlobal, &cropInLocal);
+    return cropInLocal;
 }
 
 void DamageAccumulator::dirty(float left, float top, float right, float bottom) {

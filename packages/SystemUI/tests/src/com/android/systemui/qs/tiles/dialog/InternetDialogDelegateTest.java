@@ -17,13 +17,13 @@ import android.os.Handler;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.TestableLooper;
-import android.testing.UiThreadTest;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;

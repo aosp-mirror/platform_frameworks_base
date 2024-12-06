@@ -21,13 +21,13 @@ import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.google.common.truth.Truth.assertThat
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
 
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class SignalIconModelParameterizedTest(private val testCase: TestCase) : SysuiTestCase() {
     @Test
     fun drawableFromModel_level0_numLevels4_noExclamation_notCarrierNetworkChange() {

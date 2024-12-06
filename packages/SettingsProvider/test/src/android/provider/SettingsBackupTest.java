@@ -564,6 +564,8 @@ public class SettingsBackupTest {
                     Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
+                    Settings.Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, // cache per hearing device
+                    Settings.Global.HEARING_DEVICE_LOCAL_NOTIFICATION, // cache per hearing device
                     Settings.Global.Wearable.COMBINED_LOCATION_ENABLE,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,
                     Settings.Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN,
@@ -633,7 +635,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE,
                     Settings.Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED,
                     Settings.Global.Wearable.CONNECTIVITY_KEEP_DATA_ON,
-                    Settings.Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE);
+                    Settings.Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE,
+                    Settings.Global.Wearable.WEAR_SYSTEM_STATUS_TRAY_CONFIGURATION);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -903,8 +906,8 @@ public class SettingsBackupTest {
                         Settings.System.EGG_MODE, // I am the lolrus
                         Settings.System.END_BUTTON_BEHAVIOR, // bug?
                         Settings.System.DEFAULT_DEVICE_FONT_SCALE, // Non configurable
-                        Settings.System
-                                .HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                        Settings.System.INPUT_GAIN_INDEX_SETTINGS,
                         // candidate for backup?
                         Settings.System.LOCKSCREEN_DISABLED, // ?
                         Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
@@ -944,7 +947,9 @@ public class SettingsBackupTest {
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,
                         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
+                        // Potentially disruptive to on-boarding flow on new devices
+                        Settings.System.TOUCHPAD_SYSTEM_GESTURES
                 );
         if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.MIN_REFRESH_RATE);

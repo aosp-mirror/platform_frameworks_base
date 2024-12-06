@@ -34,6 +34,7 @@ import android.view.KeyEvent;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class provides access to device specific key glyphs, modifier glyphs and device specific
@@ -107,7 +108,62 @@ public final class KeyGlyphMap implements Parcelable {
     /**
      * Defines a key combination that includes a keycode and modifier state.
      */
-    public record KeyCombination(int modifierState, int keycode) {}
+    public static class KeyCombination implements Parcelable {
+        private final int mModifierState;
+        private final int mKeycode;
+
+        public KeyCombination(int modifierState, int keycode) {
+            this.mModifierState = modifierState;
+            this.mKeycode = keycode;
+        }
+
+        public KeyCombination(Parcel in) {
+            this(in.readInt(), in.readInt());
+        }
+
+        public static final Creator<KeyCombination> CREATOR = new Creator<>() {
+            @Override
+            public KeyCombination createFromParcel(Parcel in) {
+                return new KeyCombination(in);
+            }
+
+            @Override
+            public KeyCombination[] newArray(int size) {
+                return new KeyCombination[size];
+            }
+        };
+
+        public int getModifierState() {
+            return mModifierState;
+        }
+
+        public int getKeycode() {
+            return mKeycode;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@androidx.annotation.NonNull Parcel dest, int flags) {
+            dest.writeInt(mModifierState);
+            dest.writeInt(mKeycode);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof KeyCombination that)) return false;
+            return mModifierState == that.mModifierState && mKeycode == that.mKeycode;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mModifierState, mKeycode);
+        }
+    }
 
     /**
      * Returns keycodes generated from the functional row defined for the keyboard.
@@ -158,6 +214,15 @@ public final class KeyGlyphMap implements Parcelable {
         return getDrawable(context, mModifierGlyphs.get(modifier, 0));
     }
 
+    /**
+     * Provides the drawable resource for the glyph for a modifier state (e.g. META_META_ON).
+     * Returns null if not available.
+     */
+    @Nullable
+    public Drawable getDrawableForModifierState(Context context, int modifierState) {
+        return getDrawable(context, mModifierGlyphs.get(modifierState, 0));
+    }
+
     @Nullable
     private Drawable getDrawable(Context context, @DrawableRes int drawableRes) {
         PackageManager pm = context.getPackageManager();
@@ -170,6 +235,8 @@ public final class KeyGlyphMap implements Parcelable {
             return resources.getDrawable(drawableRes, null);
         } catch (PackageManager.NameNotFoundException ignored) {
             Log.e(TAG, "Package name not found for " + mComponentName);
+        } catch (Resources.NotFoundException ignored) {
+            Log.e(TAG, "Resource not found for " + mComponentName);
         }
         return null;
     }

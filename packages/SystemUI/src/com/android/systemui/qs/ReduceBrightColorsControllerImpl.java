@@ -48,7 +48,6 @@ public class ReduceBrightColorsControllerImpl implements
     private final ContentObserver mContentObserver;
     private final SecureSettings mSecureSettings;
     private final ArrayList<ReduceBrightColorsController.Listener> mListeners = new ArrayList<>();
-    private boolean mAvailable = true;
 
     @Inject
     public ReduceBrightColorsControllerImpl(UserTracker userTracker,
@@ -77,7 +76,6 @@ public class ReduceBrightColorsControllerImpl implements
         mCurrentUserTrackerCallback = new UserTracker.Callback() {
             @Override
             public void onUserChanged(int newUser, Context userContext) {
-                mAvailable = true;
                 synchronized (mListeners) {
                     if (mListeners.size() > 0) {
                         if (com.android.systemui.Flags.registerContentObserversAsync()) {
@@ -141,17 +139,6 @@ public class ReduceBrightColorsControllerImpl implements
         mManager.setReduceBrightColorsActivated(activated);
     }
 
-    @Override
-    public void setReduceBrightColorsFeatureAvailable(boolean enabled) {
-        mAvailable = enabled;
-        dispatchOnEnabledChanged(enabled);
-        mAvailable = true;
-    }
-
-    @Override
-    public boolean isReduceBrightColorsFeatureAvailable() {
-        return mAvailable;
-    }
 
     @Override
     public boolean isInUpgradeMode(Resources resources) {
@@ -164,13 +151,6 @@ public class ReduceBrightColorsControllerImpl implements
         ArrayList<Listener> copy = new ArrayList<>(mListeners);
         for (Listener l : copy) {
             l.onActivated(activated);
-        }
-    }
-
-    private void dispatchOnEnabledChanged(boolean enabled) {
-        ArrayList<Listener> copy = new ArrayList<>(mListeners);
-        for (Listener l : copy) {
-            l.onFeatureEnabledChanged(enabled);
         }
     }
 }

@@ -173,17 +173,6 @@ class KeyguardClockInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableSceneContainer
-    fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_isActiveDreamLockscreenHosted_true() =
-        testScope.runTest {
-            val value by collectLastValue(underTest.clockShouldBeCentered)
-            kosmos.shadeRepository.setShadeLayoutWide(true)
-            kosmos.activeNotificationListRepository.setActiveNotifs(1)
-            kosmos.keyguardRepository.setIsActiveDreamLockscreenHosted(true)
-            assertThat(value).isTrue()
-        }
-
-    @Test
-    @EnableSceneContainer
     fun clockShouldBeCentered_sceneContainerFlagOn_splitMode_hasPulsingNotifications_false() =
         testScope.runTest {
             val value by collectLastValue(underTest.clockShouldBeCentered)

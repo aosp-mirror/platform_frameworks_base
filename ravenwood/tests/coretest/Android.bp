@@ -16,10 +16,20 @@ android_ravenwood_test {
         "androidx.test.rules",
         "junit-params",
         "platform-parametric-runner-lib",
-        "truth",
+
+        // This library should be removed by Ravenizer
+        "mockito-target-minus-junit4",
+    ],
+    libs: [
+        // We access internal private classes
+        "ravenwood-junit-impl",
     ],
     srcs: [
         "test/**/*.java",
+        "test/**/*.kt",
     ],
+    ravenizer: {
+        strip_mockito: true,
+    },
     auto_gen_config: true,
 }

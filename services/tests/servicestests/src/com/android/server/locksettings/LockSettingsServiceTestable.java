@@ -50,6 +50,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     public static class MockInjector extends LockSettingsService.Injector {
 
         private LockSettingsStorage mLockSettingsStorage;
+        private final LockSettingsStrongAuth mStrongAuth;
         private IActivityManager mActivityManager;
         private IStorageManager mStorageManager;
         private SyntheticPasswordManager mSpManager;
@@ -62,12 +63,14 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         public boolean mIsMainUserPermanentAdmin = false;
 
         public MockInjector(Context context, LockSettingsStorage storage,
+                LockSettingsStrongAuth strongAuth,
                 IActivityManager activityManager, IStorageManager storageManager,
                 SyntheticPasswordManager spManager, FakeGsiService gsiService,
                 RecoverableKeyStoreManager recoverableKeyStoreManager,
                 UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache) {
             super(context);
             mLockSettingsStorage = storage;
+            mStrongAuth = strongAuth;
             mActivityManager = activityManager;
             mStorageManager = storageManager;
             mSpManager = spManager;
@@ -89,7 +92,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
 
         @Override
         public LockSettingsStrongAuth getStrongAuth() {
-            return mock(LockSettingsStrongAuth.class);
+            return mStrongAuth;
         }
 
         @Override

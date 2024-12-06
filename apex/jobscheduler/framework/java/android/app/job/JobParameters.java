@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,6 +34,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.system.SystemCleaner;
 import android.util.Log;
@@ -120,6 +122,15 @@ public class JobParameters implements Parcelable {
             JobProtoEnums.INTERNAL_STOP_REASON_ANR; // 12.
 
     /**
+     * The job ran for at least its minimum execution limit and the app lost the strong reference
+     * to the {@link JobParameters}. This could indicate that the job is empty because the app
+     * can no longer call {@link JobService#jobFinished(JobParameters, boolean)}.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_TIMEOUT_ABANDONED =
+            JobProtoEnums.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED; // 13.
+
+    /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
      *
      * Note the order of these values will affect "dumpsys batterystats", and we do not want to
@@ -143,6 +154,7 @@ public class JobParameters implements Parcelable {
             INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
             INTERNAL_STOP_REASON_USER_UI_STOP,
             INTERNAL_STOP_REASON_ANR,
+            INTERNAL_STOP_REASON_TIMEOUT_ABANDONED,
     };
 
     /**
@@ -165,6 +177,7 @@ public class JobParameters implements Parcelable {
             case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
             case INTERNAL_STOP_REASON_USER_UI_STOP: return "user_ui_stop";
             case INTERNAL_STOP_REASON_ANR: return "anr";
+            case INTERNAL_STOP_REASON_TIMEOUT_ABANDONED: return "timeout_abandoned";
             default: return "unknown:" + reasonCode;
         }
     }
@@ -268,6 +281,25 @@ public class JobParameters implements Parcelable {
      */
     public static final int STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED = 15;
 
+    /**
+     * The job used up its maximum execution time and timed out. The system also detected that the
+     * app can no longer call {@link JobService#jobFinished(JobParameters, boolean)} for this job,
+     * likely because the strong reference to the job handle ({@link JobParameters}) passed to it
+     * via {@link JobService#onStartJob(JobParameters)} was lost. This can occur even if the app
+     * called {@link JobScheduler#cancel(int)}, {@link JobScheduler#cancelAll()}, or
+     * {@link JobScheduler#cancelInAllNamespaces()} to stop an active job while losing strong
+     * references to the job handle. In this case, the job is not necessarily abandoned. However,
+     * the system cannot distinguish such cases from truly abandoned jobs.
+     * <p>
+     * It is recommended that you use {@link JobService#jobFinished(JobParameters, boolean)} or
+     * return false from {@link JobService#onStartJob(JobParameters)} to stop an active job. This
+     * will prevent the occurrence of this stop reason and the need to handle it. The primary use
+     * case for this stop reason is to report a probable case of a job being abandoned.
+     * <p>
+     */
+    @FlaggedApi(Flags.FLAG_HANDLE_ABANDONED_JOBS)
+    public static final int STOP_REASON_TIMEOUT_ABANDONED = 16;
+
     /** @hide */
     @IntDef(prefix = {"STOP_REASON_"}, value = {
             STOP_REASON_UNDEFINED,
@@ -286,6 +318,7 @@ public class JobParameters implements Parcelable {
             STOP_REASON_USER,
             STOP_REASON_SYSTEM_PROCESSING,
             STOP_REASON_ESTIMATED_APP_LAUNCH_TIME_CHANGED,
+            STOP_REASON_TIMEOUT_ABANDONED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StopReason {
@@ -360,6 +393,12 @@ public class JobParameters implements Parcelable {
     }
 
     /**
+     * Returns the reason {@link JobService#onStopJob(JobParameters)} was called on this job.
+     * <p>
+     * Apps should not rely on the stop reason for critical decision-making, as additional stop
+     * reasons may be added in subsequent Android releases. The primary intended use of this method
+     * is for logging and diagnostic purposes to gain insights into the causes of job termination.
+     * <p>
      * @return The reason {@link JobService#onStopJob(JobParameters)} was called on this job. Will
      * be {@link #STOP_REASON_UNDEFINED} if {@link JobService#onStopJob(JobParameters)} has not
      * yet been called.
@@ -638,6 +677,12 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public void enableCleaner() {
+        // JobParameters objects are passed by reference in local Binder
+        // transactions for clients running as SYSTEM. The life cycle of the
+        // JobParameters objects are no longer controlled by the client.
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            return;
+        }
         if (mJobCleanupCallback == null) {
             initCleaner(new JobCleanupCallback(IJobCallback.Stub.asInterface(callback), jobId));
         }
@@ -763,7 +808,7 @@ public class JobParameters implements Parcelable {
                 return;
             }
             try {
-                mCallback.forceJobFinished(mJobId);
+                mCallback.handleAbandonedJob(mJobId);
             } catch (Exception e) {
                 Log.wtf(TAG, "Could not destroy running job", e);
             }

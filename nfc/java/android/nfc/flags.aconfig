@@ -157,3 +157,35 @@ flag {
     description: "Enable EUICC card emulation"
     bug: "321314635"
 }
+
+flag {
+    name: "nfc_state_change_security_log_event_enabled"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enabling security log for nfc state change"
+    bug: "319934052"
+}
+
+flag {
+    name: "nfc_associated_role_services"
+    is_exported: true
+    namespace: "nfc"
+    description: "Share wallet role routing priority with associated services"
+    bug: "366243361"
+}
+
+flag {
+    name: "nfc_set_service_enabled_for_category_other"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enable set service enabled for category other"
+    bug: "338157113"
+}
+
+flag {
+    name: "nfc_check_tag_intent_preference"
+    is_exported: true
+    namespace: "nfc"
+    description: "App can check its tag intent preference status"
+    bug: "335916336"
+}

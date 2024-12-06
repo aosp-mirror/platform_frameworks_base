@@ -32,7 +32,7 @@ import com.android.systemui.util.kotlin.Quad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "PromptIconViewBinder"
 

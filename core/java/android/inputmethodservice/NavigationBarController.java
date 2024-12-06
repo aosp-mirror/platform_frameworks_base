@@ -16,7 +16,6 @@
 
 package android.inputmethodservice;
 
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
@@ -42,6 +41,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.Flags;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
@@ -179,6 +179,9 @@ final class NavigationBarController {
 
         private boolean mDrawLegacyNavigationBarBackground;
 
+        /** Whether a custom IME Switcher button should be visible. */
+        private boolean mCustomImeSwitcherVisible;
+
         private final Rect mTempRect = new Rect();
         private final int[] mTempPos = new int[2];
 
@@ -260,15 +263,16 @@ final class NavigationBarController {
             setIconTintInternal(calculateTargetDarkIntensity(mAppearance,
                     mDrawLegacyNavigationBarBackground));
 
-            if (ENABLE_HIDE_IME_CAPTION_BAR) {
-                mNavigationBarFrame.setOnApplyWindowInsetsListener((view, insets) -> {
-                    if (mNavigationBarFrame != null) {
-                        boolean visible = insets.isVisible(captionBar());
-                        mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
-                    }
-                    return view.onApplyWindowInsets(insets);
-                });
-            }
+            mNavigationBarFrame.setOnApplyWindowInsetsListener((view, insets) -> {
+                if (mNavigationBarFrame != null) {
+                    // The IME window receives IME-specific captionBar insets, representing the
+                    // IME navigation bar.
+                    boolean visible = insets.isVisible(captionBar());
+                    mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
+                    checkCustomImeSwitcherVisibility();
+                }
+                return view.onApplyWindowInsets(insets);
+            });
         }
 
         private void uninstallNavigationBarFrameIfNecessary() {
@@ -279,9 +283,7 @@ final class NavigationBarController {
             if (parent instanceof ViewGroup) {
                 ((ViewGroup) parent).removeView(mNavigationBarFrame);
             }
-            if (ENABLE_HIDE_IME_CAPTION_BAR) {
-                mNavigationBarFrame.setOnApplyWindowInsetsListener(null);
-            }
+            mNavigationBarFrame.setOnApplyWindowInsetsListener(null);
             mNavigationBarFrame = null;
         }
 
@@ -474,9 +476,6 @@ final class NavigationBarController {
                         decor.bringChildToFront(mNavigationBarFrame);
                     }
                 }
-                if (!ENABLE_HIDE_IME_CAPTION_BAR) {
-                    mNavigationBarFrame.setVisibility(View.VISIBLE);
-                }
             }
         }
 
@@ -497,10 +496,10 @@ final class NavigationBarController {
                     mShouldShowImeSwitcherWhenImeIsShown;
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
 
-            if (ENABLE_HIDE_IME_CAPTION_BAR) {
-                mService.mWindow.getWindow().getDecorView().getWindowInsetsController()
-                        .setImeCaptionBarInsetsHeight(getImeCaptionBarHeight());
-            }
+            checkCustomImeSwitcherVisibility();
+
+            mService.mWindow.getWindow().getDecorView().getWindowInsetsController()
+                    .setImeCaptionBarInsetsHeight(getImeCaptionBarHeight(imeDrawsImeNavBar));
 
             if (imeDrawsImeNavBar) {
                 installNavigationBarFrameIfNecessary();
@@ -608,9 +607,11 @@ final class NavigationBarController {
 
         /**
          * Returns the height of the IME caption bar if this should be shown, or {@code 0} instead.
+         *
+         * @param imeDrawsImeNavBar whether the IME should show the IME navigation bar.
          */
-        private int getImeCaptionBarHeight() {
-            return mImeDrawsImeNavBar
+        private int getImeCaptionBarHeight(boolean imeDrawsImeNavBar) {
+            return imeDrawsImeNavBar
                     ? mService.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_frame_height)
                     : 0;
@@ -622,12 +623,33 @@ final class NavigationBarController {
                     && mNavigationBarFrame.getVisibility() == View.VISIBLE;
         }
 
+        /**
+         * Checks if a custom IME Switcher button should be visible, and notifies the IME when this
+         * state changes. This can only be {@code true} if three conditions are met:
+         *
+         * <li>The IME should draw the IME navigation bar.</li>
+         * <li>The IME Switcher button should be visible when the IME is visible.</li>
+         * <li>The IME navigation bar should be visible, but was requested hidden by the IME.</li>
+         */
+        private void checkCustomImeSwitcherVisibility() {
+            if (!Flags.imeSwitcherRevampApi()) {
+                return;
+            }
+            final boolean visible = mImeDrawsImeNavBar && mShouldShowImeSwitcherWhenImeIsShown
+                    && mNavigationBarFrame != null && !isShown();
+            if (visible != mCustomImeSwitcherVisible) {
+                mCustomImeSwitcherVisible = visible;
+                mService.onCustomImeSwitcherButtonRequestedVisible(mCustomImeSwitcherVisible);
+            }
+        }
+
         @Override
         public String toDebugString() {
             return "{mImeDrawsImeNavBar=" + mImeDrawsImeNavBar
                     + " mNavigationBarFrame=" + mNavigationBarFrame
                     + " mShouldShowImeSwitcherWhenImeIsShown="
                     + mShouldShowImeSwitcherWhenImeIsShown
+                    + " mCustomImeSwitcherVisible="  + mCustomImeSwitcherVisible
                     + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + " mDarkIntensity=" + mDarkIntensity
                     + " mDrawLegacyNavigationBarBackground=" + mDrawLegacyNavigationBarBackground

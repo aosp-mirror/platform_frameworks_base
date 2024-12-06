@@ -42,7 +42,8 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
@@ -57,7 +58,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.Mockito.reset
 
 @ExperimentalCoroutinesApi
@@ -66,7 +66,7 @@ import org.mockito.Mockito.reset
 class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            this.fakeKeyguardTransitionRepository = Mockito.spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
     private val testScope = kosmos.testScope
     private lateinit var underTest: FromAlternateBouncerTransitionInteractor
@@ -74,7 +74,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        transitionRepository = kosmos.fakeKeyguardTransitionRepository
+        transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
         underTest = kosmos.fromAlternateBouncerTransitionInteractor
         underTest.start()
     }
@@ -86,7 +86,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.ALTERNATE_BOUNCER,
-                testScope
+                testScope,
             )
             reset(transitionRepository)
 
@@ -111,7 +111,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.ALTERNATE_BOUNCER,
-                testScope
+                testScope,
             )
             reset(transitionRepository)
 
@@ -129,7 +129,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.ALTERNATE_BOUNCER,
-                testScope
+                testScope,
             )
             reset(transitionRepository)
 
@@ -158,7 +158,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.ALTERNATE_BOUNCER,
-                testScope
+                testScope,
             )
             reset(transitionRepository)
 
@@ -168,7 +168,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             assertThat(transitionRepository)
                 .startedTransition(
                     from = KeyguardState.ALTERNATE_BOUNCER,
-                    to = KeyguardState.OCCLUDED
+                    to = KeyguardState.OCCLUDED,
                 )
         }
 
@@ -183,7 +183,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.GLANCEABLE_HUB,
                 to = KeyguardState.ALTERNATE_BOUNCER,
-                testScope
+                testScope,
             )
             reset(transitionRepository)
 

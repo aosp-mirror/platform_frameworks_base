@@ -19,6 +19,7 @@
 #include <GLES2/gl2ext.h>
 
 // TODO: Use public SurfaceTexture APIs once available and include public NDK header file instead.
+#include <statslog_hwui.h>
 #include <surfacetexture/surface_texture_platform.h>
 
 #include "AutoBackendTextureRelease.h"
@@ -50,6 +51,14 @@ DeferredLayerUpdater::~DeferredLayerUpdater() {
     setTransform(nullptr);
     mRenderState.removeContextCallback(this);
     destroyLayer();
+    if (mFirstTimeForDataspace > std::chrono::steady_clock::time_point::min()) {
+        auto currentTime = std::chrono::steady_clock::now();
+        stats_write(stats::TEXTURE_VIEW_EVENT, static_cast<int32_t>(getuid()),
+                    static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                 currentTime - mFirstTimeForDataspace)
+                                                 .count()),
+                    mDataspace);
+    }
 }
 
 void DeferredLayerUpdater::setSurfaceTexture(AutoTextureRelease&& consumer) {
@@ -194,6 +203,21 @@ void DeferredLayerUpdater::apply() {
                     mLayer->setBufferFormat(bufferDesc.format);
                     updateLayer(forceFilter, layerImage, outTransform, currentCropRect,
                                 maxLuminanceNits);
+                }
+
+                if (dataspace != mDataspace ||
+                    mFirstTimeForDataspace == std::chrono::steady_clock::time_point::min()) {
+                    auto currentTime = std::chrono::steady_clock::now();
+                    if (mFirstTimeForDataspace > std::chrono::steady_clock::time_point::min()) {
+                        stats_write(stats::TEXTURE_VIEW_EVENT, static_cast<int32_t>(getuid()),
+                                    static_cast<int64_t>(
+                                            std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                    currentTime - mFirstTimeForDataspace)
+                                                    .count()),
+                                    mDataspace);
+                    }
+                    mFirstTimeForDataspace = currentTime;
+                    mDataspace = dataspace;
                 }
             }
         }

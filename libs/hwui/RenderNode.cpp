@@ -186,7 +186,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
     if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable()) ||
-        CC_UNLIKELY(properties().getWidth() == 0) || CC_UNLIKELY(properties().getHeight() == 0) ||
+        CC_UNLIKELY(properties().getWidth() <= 0) || CC_UNLIKELY(properties().getHeight() <= 0) ||
         CC_UNLIKELY(!properties().fitsOnLayer())) {
         if (CC_UNLIKELY(hasLayer())) {
             this->setLayerSurface(nullptr);
@@ -404,12 +404,18 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     }
 }
 
+inline bool RenderNode::isForceInvertDark(TreeInfo& info) {
+    return CC_UNLIKELY(
+             info.forceDarkType == android::uirenderer::ForceDarkType::FORCE_INVERT_COLOR_DARK);
+}
+
 inline bool RenderNode::shouldEnableForceDark(TreeInfo* info) {
     return CC_UNLIKELY(
             info &&
-            (!info->disableForceDark ||
-             info->forceDarkType == android::uirenderer::ForceDarkType::FORCE_INVERT_COLOR_DARK));
+            (!info->disableForceDark || isForceInvertDark(*info)));
 }
+
+
 
 void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
     if (!shouldEnableForceDark(info)) {
@@ -421,7 +427,7 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         children.push_back(node);
     });
     if (mDisplayList.hasText()) {
-        if (mDisplayList.hasFill()) {
+        if (isForceInvertDark(*info) && mDisplayList.hasFill()) {
             // Handle a special case for custom views that draw both text and background in the
             // same RenderNode, which would otherwise be altered to white-on-white text.
             usage = UsageHint::Container;

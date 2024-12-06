@@ -72,6 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID-ul apelantului este restricționat în mod prestabilit. Apelul următor: nerestricționat"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID-ul apelantului este nerestricționat în mod prestabilit. Apelul următor: Restricționat."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID-ul apelantului este nerestricționat în mod prestabilit. Apelul următor: nerestricționat"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Această aplicație nu este compatibilă cu 16 KB. Verificarea alinierii APK nu a reușit. Aplicația va rula folosind modul compatibil cu dimensiunea paginii. Pentru cea mai bună compatibilitate, recompilează aplicația cu suport pentru 16 KB. Pentru mai multe informații, accesează &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Această aplicație nu este compatibilă cu 16 KB. Verificarea alinierii ELF nu a reușit. Aplicația va rula folosind modul compatibil cu dimensiunea paginii. Pentru cea mai bună compatibilitate, recompilează aplicația cu suport pentru 16 KB. Pentru mai multe informații, accesează &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Această aplicație nu este compatibilă cu 16 KB. Verificările de aliniere APK și ELF nu au reușit. Aplicația va rula folosind modul compatibil cu dimensiunea paginii. Pentru cea mai bună compatibilitate, recompilează aplicația cu suport pentru 16 KB. Pentru mai multe informații, accesează &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Nu se asigură accesul la acest serviciu."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nu poți modifica setarea pentru ID-ul apelantului."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"S-a trecut la datele mobile <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -613,6 +616,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Permite-i aplicației să stabilească poziția relativă dintre dispozitivele Ultra-Wideband din apropiere"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"să interacționeze cu dispozitive Wi‑Fi din apropiere"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permite aplicației să se conecteze la dispozitive Wi-Fi din apropiere, să transmită anunțuri și să stabilească poziția relativă a acestora"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"stabilește poziția dispozitivelor din apropiere"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Permite-i aplicației să stabilească poziția relativă dintre dispozitivele din apropiere"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informații despre serviciul de plăți NFC preferat"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite aplicației să obțină informații despre serviciul de plăți NFC preferat, de exemplu, identificatorii de aplicație înregistrați și destinația traseului."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlare schimb de date prin Near Field Communication"</string>
@@ -1154,6 +1159,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"în <xliff:g id="COUNT">%d</xliff:g> ore"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"în <xliff:g id="COUNT">%d</xliff:g> z"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"în <xliff:g id="COUNT">%d</xliff:g> ani"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Acum # minut}few{Acum # minute}other{Acum # de minute}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Acum # oră}few{Acum # ore}other{Acum # de ore}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Acum # zi}few{Acum # zile}other{Acum # de zile}}"</string>
@@ -1747,8 +1784,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"O aplicație blochează solicitarea de permisiune, așa că răspunsul nu se poate verifica."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Atinge o funcție ca să începi să o folosești:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Alege funcțiile pe care să le folosești cu butonul de accesibilitate"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Alege funcțiile pentru comanda rapidă a butoanelor de volum"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> a fost dezactivat"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editează comenzile rapide"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gata"</string>
@@ -1940,11 +1976,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Eveniment"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Somn"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Nu deranja (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestionat de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activată"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Dezactivată"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Orice calendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dezactivează anumite sunete"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"A apărut o problemă internă pe dispozitiv, iar acesta poate fi instabil până la revenirea la setările din fabrică."</string>
@@ -2012,6 +2051,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Setează o blocare a ecranului"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Setează blocarea ecranului"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ca să folosești spațiul privat, setează blocarea ecranului pe acest dispozitiv"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ca să ștergi spațiul privat, setează o blocare a ecranului pe acest dispozitiv"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nu este disponibilă"</string>
@@ -2130,11 +2170,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Apelurile și notificările vor vibra"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Apelurile și notificările vor avea sunetul dezactivat"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modificări de sistem"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nu deranja"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Funcția nouă Nu deranja ascunde notificările"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Atinge ca să afli mai multe și să modifici"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Funcția Nu deranja s-a schimbat"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Atinge pentru a verifica ce este blocat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Verifică setările pentru notificări"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Începând cu Android 13, aplicațiile pe care le instalezi necesită permisiunea de a trimite notificări. Atinge ca să modifici permisiunea pentru aplicațiile existente."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Mai târziu"</string>
@@ -2186,7 +2221,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Conexiunea Bluetooth va rămâne activată în modul Avion"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Se încarcă"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fișier}few{{file_name} + # fișiere}other{{file_name} + # de fișiere}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nu există persoane recomandate pentru permiterea accesului"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nu există persoane recomandate pentru trimitere"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicații"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Permisiunea de înregistrare nu a fost acordată aplicației, dar aceasta poate să înregistreze conținut audio prin intermediul acestui dispozitiv USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Pornire"</string>
@@ -2430,7 +2465,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Trimite și primește mesaje fără o rețea mobilă sau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Deschide Mesaje"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cum funcționează"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Activează opțiunea Selectează automat rețeaua"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Activează opțiunea Selectează automat rețeaua în Setări pentru ca telefonul să găsească o rețea compatibilă cu satelitul"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Activează"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Înapoi"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"În așteptare..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Funcția SOS prin satelit este acum disponibilă"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Poți să trimiți mesaje serviciilor de urgență dacă nu este disponibilă o rețea mobilă sau Wi-Fi. Mesaje Google trebuie să fie aplicația ta prestabilită pentru mesaje."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Funcția SOS prin satelit nu este acceptată"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Funcția SOS prin satelit nu este acceptată pe acest dispozitiv"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Funcția SOS prin satelit nu este configurată"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Asigură-te că te-ai conectat la internet și încearcă din nou configurarea"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Funcția SOS prin satelit nu este disponibilă"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Funcția SOS prin satelit nu este disponibilă în această țară sau regiune"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Funcția SOS prin satelit nu este configurată"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Pentru a trimite mesaje prin satelit, setează Mesaje Google ca aplicație prestabilită pentru mesaje"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Funcția SOS prin satelit nu este disponibilă"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Pentru a verifica dacă funcția SOS prin satelit este disponibilă în această țară sau regiune, activează setările privind locația"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Mesajele prin satelit sunt disponibile"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Dacă nu este disponibilă o rețea mobilă sau Wi-Fi, poți să trimiți mesaje prin satelit. Mesaje Google trebuie să fie aplicația ta prestabilită pentru mesaje."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Mesajele prin satelit nu sunt acceptate"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Mesajele prin satelit nu sunt acceptate pe acest dispozitiv"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Mesajele prin satelit nu sunt configurate"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Asigură-te că te-ai conectat la internet și încearcă din nou configurarea"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Mesajele prin satelit nu sunt disponibile"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Mesajele prin satelit nu sunt disponibile în această țară sau regiune"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Mesajele prin satelit nu sunt configurate"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Pentru a trimite mesaje prin satelit, setează Mesaje Google ca aplicație prestabilită pentru mesaje"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Mesajele prin satelit nu sunt disponibile"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Pentru a verifica dacă mesajele prin satelit sunt disponibile în această țară sau regiune, activează setările privind locația"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Configurează din nou Deblocarea cu amprenta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nu mai poate fi recunoscută."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> și <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nu mai pot fi recunoscute."</string>

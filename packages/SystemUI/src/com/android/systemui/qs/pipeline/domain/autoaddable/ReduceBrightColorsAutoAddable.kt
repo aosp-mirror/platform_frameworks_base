@@ -42,7 +42,7 @@ constructor(
 ) :
     CallbackControllerAutoAddable<
         ReduceBrightColorsController.Listener,
-        ReduceBrightColorsController
+        ReduceBrightColorsController,
     >(controller) {
 
     override val spec: TileSpec
@@ -53,12 +53,6 @@ constructor(
             override fun onActivated(activated: Boolean) {
                 if (activated && available) {
                     sendAdd()
-                }
-            }
-
-            override fun onFeatureEnabledChanged(enabled: Boolean) {
-                if (!enabled) {
-                    available = false
                 }
             }
         }

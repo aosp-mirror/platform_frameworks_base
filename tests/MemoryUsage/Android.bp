@@ -14,8 +14,8 @@ android_test {
     platform_apis: true,
     certificate: "platform",
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: ["junit"],
 }

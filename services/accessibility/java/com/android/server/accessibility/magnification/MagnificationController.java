@@ -27,6 +27,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static com.android.server.accessibility.AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID;
 
 import android.accessibilityservice.MagnificationConfig;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -50,7 +51,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
-import com.android.window.flags.Flags;
 
 import java.util.concurrent.Executor;
 
@@ -101,6 +101,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     /** Whether the platform supports window magnification feature. */
     private final boolean mSupportWindowMagnification;
+    private final MagnificationScaleStepProvider mScaleStepProvider;
 
     private final Executor mBackgroundExecutor;
 
@@ -131,6 +132,14 @@ public class MagnificationController implements MagnificationConnectionManager.C
             .UiChangesForAccessibilityCallbacks> mAccessibilityCallbacksDelegateArray =
             new SparseArray<>();
 
+    // Direction magnifier scale can be altered.
+    public static final int ZOOM_DIRECTION_IN = 0;
+    public static final int ZOOM_DIRECTION_OUT = 1;
+
+    @IntDef({ZOOM_DIRECTION_IN, ZOOM_DIRECTION_OUT})
+    public @interface ZoomDirection {
+    }
+
     /**
      * A callback to inform the magnification transition result on the given display.
      */
@@ -142,6 +151,41 @@ public class MagnificationController implements MagnificationConnectionManager.C
          * @param success {@code true} if the transition success.
          */
         void onResult(int displayId, boolean success);
+    }
+
+
+    /**
+     * An interface to configure how much the magnification scale should be affected when moving in
+     * steps.
+     */
+    public interface MagnificationScaleStepProvider {
+        /**
+         * Calculate the next value given which direction (in/out) to adjust the magnification
+         * scale.
+         *
+         * @param currentScale The current magnification scale value.
+         * @param direction    Whether to zoom in or out.
+         * @return The next scale value.
+         */
+        float nextScaleStep(float currentScale, @ZoomDirection int direction);
+    }
+
+    public static class DefaultMagnificationScaleStepProvider implements
+            MagnificationScaleStepProvider {
+        // Factor of magnification scale. For example, when this value is 1.189, scale
+        // value will be changed x1.000, x1.189, x1.414, x1.681, x2.000, ...
+        // Note: this value is 2.0 ^ (1 / 4).
+        public static final float ZOOM_STEP_SCALE_FACTOR = 1.18920712f;
+
+        @Override
+        public float nextScaleStep(float currentScale, @ZoomDirection int direction) {
+            final int stepDelta = direction == ZOOM_DIRECTION_IN ? 1 : -1;
+            final long scaleIndex = Math.round(
+                    Math.log(currentScale) / Math.log(ZOOM_STEP_SCALE_FACTOR));
+            final float nextScale = (float) Math.pow(ZOOM_STEP_SCALE_FACTOR,
+                    scaleIndex + stepDelta);
+            return MagnificationScaleProvider.constrainScale(nextScale);
+        }
     }
 
     public MagnificationController(AccessibilityManagerService ams, Object lock,
@@ -156,6 +200,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
                 FEATURE_WINDOW_MAGNIFICATION);
+        mScaleStepProvider = new DefaultMagnificationScaleStepProvider();
 
         mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag(context);
         mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
@@ -176,7 +221,8 @@ public class MagnificationController implements MagnificationConnectionManager.C
     public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
         if (getFullScreenMagnificationController().isActivated(displayId)) {
             getFullScreenMagnificationController().setScaleAndCenter(displayId, scale,
-                    Float.NaN, Float.NaN, false, MAGNIFICATION_GESTURE_HANDLER_ID);
+                    Float.NaN, Float.NaN, /* isScaleTransient= */ !updatePersistence, false,
+                    MAGNIFICATION_GESTURE_HANDLER_ID);
             if (updatePersistence) {
                 getFullScreenMagnificationController().persistScale(displayId);
             }
@@ -371,7 +417,7 @@ public class MagnificationController implements MagnificationConnectionManager.C
                         }
                         screenMagnificationController.setScaleAndCenter(displayId, targetScale,
                                 magnificationCenter.x, magnificationCenter.y,
-                                magnificationAnimationCallback, id);
+                                /* isScaleTransient= */ false, magnificationAnimationCallback, id);
                     } else {
                         if (screenMagnificationController.isRegistered(displayId)) {
                             screenMagnificationController.reset(displayId, false);
@@ -587,10 +633,8 @@ public class MagnificationController implements MagnificationConnectionManager.C
 
     @Override
     public void onFullScreenMagnificationActivationState(int displayId, boolean activated) {
-        if (Flags.alwaysDrawMagnificationFullscreenBorder()) {
-            getMagnificationConnectionManager()
-                    .onFullscreenMagnificationActivationChanged(displayId, activated);
-        }
+        getMagnificationConnectionManager()
+                .onFullscreenMagnificationActivationChanged(displayId, activated);
 
         if (activated) {
             synchronized (mLock) {
@@ -888,6 +932,37 @@ public class MagnificationController implements MagnificationConnectionManager.C
             }
         }
         return isActivated;
+    }
+
+    /**
+     * Scales the magnifier on the given display one step in/out based on the zoomIn param.
+     *
+     * @param displayId The logical display id.
+     * @param direction Whether the scale should be zoomed in or out.
+     * @return {@code true} if the magnification scale was affected.
+     */
+    public boolean scaleMagnificationByStep(int displayId, @ZoomDirection int direction) {
+        if (getFullScreenMagnificationController().isActivated(displayId)) {
+            final float magnificationScale = getFullScreenMagnificationController().getScale(
+                    displayId);
+            final float nextMagnificationScale = mScaleStepProvider.nextScaleStep(
+                    magnificationScale, direction);
+            getFullScreenMagnificationController().setScaleAndCenter(displayId,
+                    nextMagnificationScale,
+                    Float.NaN, Float.NaN, true, MAGNIFICATION_GESTURE_HANDLER_ID);
+            return nextMagnificationScale != magnificationScale;
+        }
+
+        if (getMagnificationConnectionManager().isWindowMagnifierEnabled(displayId)) {
+            final float magnificationScale = getMagnificationConnectionManager().getScale(
+                    displayId);
+            final float nextMagnificationScale = mScaleStepProvider.nextScaleStep(
+                    magnificationScale, direction);
+            getMagnificationConnectionManager().setScale(displayId, nextMagnificationScale);
+            return nextMagnificationScale != magnificationScale;
+        }
+
+        return false;
     }
 
     private final class DisableMagnificationCallback implements

@@ -1028,6 +1028,9 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     // Camera is already closed, so nothing left to do
                     if (DEBUG) Log.v(TAG, mIdString +
                             "Camera was already closed or busy, skipping unconfigure");
+                } catch (SecurityException e) {
+                    // UID state change revoked camera permission
+                    Log.e(TAG, mIdString + "Exception while unconfiguring outputs: ", e);
                 }
             }
         }

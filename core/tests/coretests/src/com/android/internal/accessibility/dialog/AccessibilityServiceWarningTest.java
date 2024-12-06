@@ -89,7 +89,7 @@ public class AccessibilityServiceWarningTest {
     }
 
     @Test
-    public void createAccessibilityServiceWarningDialog_hasExpectedWindowParams() {
+    public void createAccessibilityServiceWarningDialog_hasExpectedWindowParams_notSystemDialog() {
         final AlertDialog dialog =
                 AccessibilityServiceWarning.createAccessibilityServiceWarningDialog(
                         mContext,
@@ -101,7 +101,7 @@ public class AccessibilityServiceWarningTest {
         expect.that(dialogWindow.getAttributes().privateFlags
                 & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS).isEqualTo(
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-        expect.that(dialogWindow.getAttributes().type).isEqualTo(TYPE_SYSTEM_DIALOG);
+        expect.that(dialogWindow.getAttributes().type).isNotEqualTo(TYPE_SYSTEM_DIALOG);
     }
 
     @Test

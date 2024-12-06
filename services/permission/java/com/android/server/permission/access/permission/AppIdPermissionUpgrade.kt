@@ -297,6 +297,7 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
 
         private const val MASK_ANY_FIXED =
             PermissionFlags.USER_SET or
+                PermissionFlags.ONE_TIME or
                 PermissionFlags.USER_FIXED or
                 PermissionFlags.POLICY_FIXED or
                 PermissionFlags.SYSTEM_FIXED

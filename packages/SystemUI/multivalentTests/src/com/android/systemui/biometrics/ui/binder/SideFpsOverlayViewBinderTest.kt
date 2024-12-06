@@ -163,20 +163,22 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             inOrder.verify(kosmos.windowManager).addView(any(), any())
 
             // Set progress bar visible
-            //            updateSfpsIndicatorRequests(
-            //                kosmos, mContext, primaryBouncerRequest = true, progressBarShowing =
-            // true
-            //            )
+            updateSfpsIndicatorRequests(
+                kosmos,
+                mContext,
+                primaryBouncerRequest = true,
+            ) // , progressBarShowing = true)
             runCurrent()
 
             // Verify indicator hidden
             inOrder.verify(kosmos.windowManager).removeView(any())
 
             // Set progress bar invisible
-            //            updateSfpsIndicatorRequests(
-            //                kosmos, mContext, primaryBouncerRequest = true, progressBarShowing =
-            // false
-            //            )
+            updateSfpsIndicatorRequests(
+                kosmos,
+                mContext,
+                primaryBouncerRequest = true,
+            ) // , progressBarShowing = false)
             runCurrent()
 
             // Verify indicator shown
@@ -189,7 +191,7 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             sensorId = 1,
             strength = SensorStrength.STRONG,
             sensorType = FingerprintSensorType.POWER_BUTTON,
-            sensorLocations = emptyMap()
+            sensorLocations = emptyMap(),
         )
 
         kosmos.displayStateRepository.setIsInRearDisplayMode(isInRearDisplayMode)

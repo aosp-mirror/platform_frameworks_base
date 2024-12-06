@@ -30,6 +30,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,7 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("MessageQueue_host")
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG = "LockedMessageQueue";
     private static final boolean DEBUG = false;
@@ -294,6 +296,7 @@ public final class MessageQueue {
         * Keep this for manual debugging. It's easier to pepper the code with this function
         * than MessageQueue.dump()
         */
+        @NeverCompile
         void print() {
             Log.v(TAG, "heap num elem: " + mNumElements + " mHeap.length " + mHeap.length);
             for (int i = 0; i < mNumElements; i++) {
@@ -1209,6 +1212,7 @@ public final class MessageQueue {
                 sMatchAllFutureMessages, true);
     }
 
+    @NeverCompile
     int dumpPriorityQueue(Printer pw, String prefix, Handler h, MessageHeap priorityQueue) {
         int n = 0;
         long now = SystemClock.uptimeMillis();
@@ -1222,6 +1226,7 @@ public final class MessageQueue {
         return n;
     }
 
+    @NeverCompile
     void dumpPriorityQueue(ProtoOutputStream proto, MessageHeap priorityQueue) {
         for (int i = 0; i < priorityQueue.numElements(); i++) {
             Message m = priorityQueue.getMessageAt(i);
@@ -1229,6 +1234,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         synchronized (this) {
             pw.println(prefix + "(MessageQueue is using Locked implementation)");
@@ -1240,6 +1246,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
         synchronized (this) {

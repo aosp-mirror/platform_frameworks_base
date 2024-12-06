@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်ထားသည်။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ဤအက်ပ်သည် ၁၆ KB နှင့် တွဲမသုံးနိုင်ပါ။ APK နှင့် ELF ချိန်ညှိခြင်း စစ်ဆေးမှု မအောင်မြင်ပါ။ ဤအက်ပ်သည် တွဲသုံးနိုင်သော စာမျက်နှာအရွယ်အစားမုဒ်သုံး၍ လုပ်ဆောင်ပါမည်။ အကောင်းဆုံး တွဲသုံးနိုင်မှုအတွက် အပလီကေးရှင်းကို ၁၆ KB ပံ့ပိုးမှုဖြင့် ပြန်လည်တည်ဆောက်ပါ။ နောက်ထပ်အချက်အလက်အတွက် &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; တွင် ကြည့်ပါ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ဝန်ဆောင်မှုအား ကန့်သတ်မထားပါ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"သင်သည် ခေါ်ဆိုသူ ID ဆက်တင်ကို မပြောင်းလဲနိုင်ပါ။"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ဒေတာကို <xliff:g id="CARRIERDISPLAY">%s</xliff:g> သို့ ပြောင်းထားသည်"</string>
@@ -322,7 +325,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"တည်နေရာ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူရန်"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"ပြက္ခဒိန်"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ဖိုင်များ"</string>
@@ -612,6 +615,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"အနီးတစ်ဝိုက်ရှိ စက်များကြား ဆက်စပ်နေရာသတ်မှတ်ခြင်း"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"အနီးတစ်ဝိုက်ရှိ စက်များကြား ဆက်စပ်နေရာသတ်မှတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"အက်ပ်အား ဦစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များဖြစ်သည့် မှတ်ပုံတင်ထားသော အကူအညီများနှင့် သွားလာရာ လမ်းကြောင်းတို့ကို ရယူရန် ခွင့်ပြုသည်။"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
@@ -797,7 +802,7 @@
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"သတိပေးချက်များအား အသုံးပြုခွင့်"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"အပလီကေးရှင်းကို အကြောင်းကြားချက်များအား ထုတ်လုပ်ရန်၊ လေ့လာရန်၊ ဖျက်ရန် ခွင့်ပြုခြင်း။ တခြား အပလီကေးရှင်းများမှ သတိပေးချက်များလည်း ပါဝင်ပါသည်"</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"သတိပေးချက် နားထောင်ခြင်း ဆားဗစ် နှင့် ပူးပေါင်းခြင်း"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးခြင်း။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးသည်။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"အခြေအနေ စီမံပေးရေး ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"စွဲကိုင်ထားသူအား အခြေအနေကို စီမံပေးသူ၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ကို ပေးသည်။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"အိပ်မက် ဝန်ဆောင်မှုသို့ ပေါင်းစည်းမည်"</string>
@@ -1153,6 +1158,38 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> နာရီအတွင်း"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ရက်အတွင်း"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> နှစ်အတွင်း"</string>
+    <!-- no translation found for duration_minutes_shortest_past (1740022450020492407) -->
+    <skip />
+    <!-- no translation found for duration_hours_shortest_past (2098397414186628489) -->
+    <skip />
+    <!-- no translation found for duration_days_shortest_past (1832006037955897625) -->
+    <skip />
+    <!-- no translation found for duration_years_shortest_past (6168256514200469291) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium (5891933490342643944) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium (1465359726485910115) -->
+    <skip />
+    <!-- no translation found for duration_days_medium (5994225628248661388) -->
+    <skip />
+    <!-- no translation found for duration_years_medium (734023884353592526) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_future (2750894988731934402) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_future (6050833881463849764) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_future (1700821545602729963) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_future (3281018940397120166) -->
+    <skip />
+    <!-- no translation found for duration_minutes_medium_past (7400424340181947714) -->
+    <skip />
+    <!-- no translation found for duration_hours_medium_past (6709441336035202617) -->
+    <skip />
+    <!-- no translation found for duration_days_medium_past (5748156261134344532) -->
+    <skip />
+    <!-- no translation found for duration_years_medium_past (893797065424596243) -->
+    <skip />
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{ပြီးခဲ့သော # မိနစ်}other{ပြီးခဲ့သော # မိနစ်}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{ပြီးခဲ့သော # နာရီ}other{ပြီးခဲ့သော # နာရီ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{ပြီးခဲ့သော # ရက်}other{ပြီးခဲ့သော # ရက်}}"</string>
@@ -1746,8 +1783,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"အက်ပ်တစ်ခုသည် ခွင့်ပြုချက်တောင်းဆိုမှုကို ပိတ်နေသဖြင့် သင့်တုံ့ပြန်မှုကို စိစစ်၍မရပါ။"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"အများသုံးနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"အသံထိန်းခလုတ်ဖြတ်လမ်းဖြင့် အသုံးပြုရန်အတွက် တူးလ်များကိုရွေးပါ"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ကို ပိတ်ထားသည်"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ပြီးပြီ"</string>
@@ -1939,11 +1975,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"စနေ၊ တနင်္ဂနွေ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"အစီအစဉ်"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"အိပ်နေချိန်"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"မနှောင့်ယှက်ရ (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> က စီမံသည်"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ဖွင့်"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ပိတ်"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"၊ "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> မှ <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>၊ <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"မည်သည့်ပြက္ခဒိန်မဆို"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> သည် အချို့အသံကို ပိတ်နေသည်"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
@@ -2011,6 +2050,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ဖန်သားပြင်လော့ခ် သတ်မှတ်ပါ"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ဖန်သားပြင်လော့ခ် သတ်မှတ်ရန်"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"သင့်သီးသန့်နေရာသုံးရန် ဤစက်၌ ဖန်သားပြင်လော့ခ် သတ်မှတ်ပါ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"သီးသန့်နေရာကို ဖျက်ရန်အတွက် ဤစက်တွင် ဖန်သားပြင်လော့ခ် သတ်မှတ်ပါ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> မရနိုင်ပါ"</string>
@@ -2129,11 +2169,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များ တုန်ခါပါမည်"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များကို အသံပိတ်ထားပါမည်"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"စနစ် အပြောင်းအလဲများ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"မနှောင့်ယှက်ရ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"အသစ်− \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"အကြောင်းကြားချက် ဆက်တင်များ စိစစ်ရန်"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 မှစ၍ ထည့်သွင်းသော အက်ပ်များသည် အကြောင်းကြားချက်များပို့ရန် သင်၏ခွင့်ပြုချက် လိုအပ်ပါမည်။ ရှိပြီးသားအက်ပ်များအတွက် ဤခွင့်ပြုချက်ကိုပြောင်းရန် တို့ပါ။"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"နောက်မှ သတိပေးပါ"</string>
@@ -2429,7 +2464,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များ ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"အလုပ်လုပ်ပုံ"</string>
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"“ကွန်ရက် အလိုအလျောက်ရွေးရန်” ကို ဖွင့်ပါ"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"သင့်ဖုန်းက ဂြိုဟ်တုဖြင့် အလုပ်လုပ်သော ကွန်ရက်ကို ရှာနိုင်ရန်အတွက် ဆက်တင်များတွင် “ကွန်ရက် အလိုအလျောက်ရွေးရန်” ကို ဖွင့်ပါ"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ဖွင့်ရန်"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"နောက်သို့"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ဆိုင်းငံ့ထားသည်…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Satellite SOS ကို ယခုသုံးနိုင်ပြီ"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက် မရှိပါက အရေးပေါ်ဝန်ဆောင်မှု ဌာနများသို့ မက်ဆေ့ဂျ်ပို့နိုင်သည်။ Google Messages သည် သင်၏ မူရင်းမက်ဆေ့ဂျ်ပို့ရန်အက်ပ် ဖြစ်ရမည်။"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Satellite SOS ကို ပံ့ပိုးမထားပါ"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Satellite SOS ကို ဤစက်တွင် ပံ့ပိုးမထားပါ"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Satellite SOS ကို စနစ်ထည့်သွင်းမထားပါ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"အင်တာနက်နှင့် ချိတ်ဆက်ထားခြင်း ရှိ၊ မရှိ စစ်ဆေးပြီး စနစ်ထပ်မံထည့်သွင်းကြည့်ပါ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Satellite SOS မရနိုင်ပါ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Satellite SOS ကို ဤနိုင်ငံ (သို့) ဒေသတွင် မရနိုင်ပါ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satellite SOS ကို စနစ်ထည့်သွင်းမထားပါ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ရန် Google Messages ကို သင်၏ မက်ဆေ့ဂျ်ပို့ရန် မူရင်းအက်ပ်အဖြစ် သတ်မှတ်ပါ"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satellite SOS မရနိုင်ပါ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Satellite SOS ကို ဤနိုင်ငံ (သို့) ဒေသတွင် ရနိုင်ခြင်းရှိ၊ မရှိ စစ်ဆေးရန် တည်နေရာပြ ဆက်တင်များကို ဖွင့်ပါ"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်း ရနိုင်သည်"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက် မရှိသည့်အခါ ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့နိုင်သည်။ Google Messages သည် သင်၏ မူရင်းမက်ဆေ့ဂျ်ပို့ရန်အက်ပ် ဖြစ်ရမည်။"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို ပံ့ပိုးမထားပါ"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို ဤစက်တွင် ပံ့ပိုးမထားပါ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို စနစ်ထည့်သွင်းမထားပါ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"အင်တာနက်နှင့် ချိတ်ဆက်ထားခြင်း ရှိ၊ မရှိ စစ်ဆေးပြီး စနစ်ထပ်မံထည့်သွင်းကြည့်ပါ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို မရနိုင်ပါ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို ဤနိုင်ငံ (သို့) ဒေသတွင် မရနိုင်ပါ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို စနစ်ထည့်သွင်းမထားပါ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ရန် Google Messages ကို သင်၏ မက်ဆေ့ဂျ်ပို့ရန် မူရင်းအက်ပ်အဖြစ် သတ်မှတ်ပါ"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို မရနိုင်ပါ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်းကို ဤနိုင်ငံ (သို့) ဒေသတွင် ရနိုင်ခြင်းရှိ၊ မရှိ စစ်ဆေးရန် တည်နေရာပြ ဆက်တင်များကို ဖွင့်ပါ"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"‘လက်ဗွေသုံး လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ထပ်မံထည့်သွင်းပါ"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ကို မသိရှိနိုင်တော့ပါ။"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> နှင့် <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ကို မသိရှိနိုင်တော့ပါ။"</string>

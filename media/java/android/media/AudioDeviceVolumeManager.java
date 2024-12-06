@@ -16,8 +16,11 @@
 
 package android.media;
 
+import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -430,6 +433,83 @@ public class AudioDeviceVolumeManager {
             e.rethrowFromSystemServer();
         }
         return VolumeInfo.getDefaultVolumeInfo();
+    }
+
+    /**
+     * @hide
+     * Sets the input gain index for a particular AudioDeviceAttributes.
+     * TODO(b/364923030): create InputVolumeInfo on top of VolumeInfo rather than using index to
+     * handle volume information, to solve issues e.g. gain index ranges might be different for
+     * different categories of devices.
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setInputGainIndex(@NonNull AudioDeviceAttributes ada, int index) {
+        try {
+            getService().setInputGainIndex(ada, index);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the input gain index for a particular AudioDeviceAttributes.
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int getInputGainIndex(@NonNull AudioDeviceAttributes ada) {
+        try {
+            return getService().getInputGainIndex(ada);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the maximum input gain index for input device.
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int getMaxInputGainIndex() {
+        try {
+            return getService().getMaxInputGainIndex();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the minimum input gain index for input device.
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int getMinInputGainIndex() {
+        try {
+            return getService().getMinInputGainIndex();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Indicates if an input device does not support input gain control.
+     *     <p>The following APIs have no effect when input gain is fixed:
+     *     <ul>
+     *       <li>{@link #setInputGainIndex(AudioDeviceAttributes, int)}
+     *     </ul>
+     */
+    @FlaggedApi(FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isInputGainFixed(@NonNull AudioDeviceAttributes ada) {
+        try {
+            return getService().isInputGainFixed(ada);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

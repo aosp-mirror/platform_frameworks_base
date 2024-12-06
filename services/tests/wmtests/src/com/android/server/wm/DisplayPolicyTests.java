@@ -16,10 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -40,7 +38,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -58,14 +55,11 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
-import android.view.DisplayShape;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.PrivacyIndicatorBounds;
 import android.view.Surface;
 import android.view.WindowInsets;
-import android.view.WindowInsets.Side;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -141,49 +135,49 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         // If everything is null, return null.
         assertNull(null, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, null, NAV_BAR_BOTTOM));
+                null, null, true));
 
         // If no IME windows, return candidate window.
         assertEquals(candidate, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, null, NAV_BAR_BOTTOM));
+                candidate, null, true));
         assertEquals(dimmingImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, null, NAV_BAR_BOTTOM));
+                dimmingImTarget, null, true));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, null, NAV_BAR_BOTTOM));
+                dimmingNonImTarget, null, true));
 
         // If IME is not visible, return candidate window.
         assertEquals(null, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, invisibleIme, NAV_BAR_BOTTOM));
+                null, invisibleIme, true));
         assertEquals(candidate, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, invisibleIme, NAV_BAR_BOTTOM));
+                candidate, invisibleIme, true));
         assertEquals(dimmingImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, invisibleIme, NAV_BAR_BOTTOM));
+                dimmingImTarget, invisibleIme, true));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, invisibleIme, NAV_BAR_BOTTOM));
+                dimmingNonImTarget, invisibleIme, true));
 
         // If IME is visible, return candidate when the candidate window is not dimming.
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, visibleIme, NAV_BAR_BOTTOM));
+                null, visibleIme, true));
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, visibleIme, NAV_BAR_BOTTOM));
+                candidate, visibleIme, true));
 
         // If IME is visible and the candidate window is dimming, checks whether the dimming window
         // can be IME tartget or not.
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, visibleIme, NAV_BAR_BOTTOM));
+                dimmingImTarget, visibleIme, true));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, visibleIme, NAV_BAR_BOTTOM));
+                dimmingNonImTarget, visibleIme, true));
 
         // Only IME windows that have FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS should be navigation color
         // window.
         assertEquals(null, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+                null, imeNonDrawNavBar, true));
         assertEquals(candidate, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+                candidate, imeNonDrawNavBar, true));
         assertEquals(dimmingImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+                dimmingImTarget, imeNonDrawNavBar, true));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+                dimmingNonImTarget, imeNonDrawNavBar, true));
     }
 
     @Test
@@ -196,32 +190,32 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final WindowState nonDrawBarIme = createInputMethodWindow(true, false, false);
 
         assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
-                drawBarWin, null, NAV_BAR_BOTTOM));
+                drawBarWin, null, true));
         assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
-                null, null, NAV_BAR_BOTTOM));
+                null, null, true));
         assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
-                nonDrawBarWin, null, NAV_BAR_BOTTOM));
+                nonDrawBarWin, null, true));
 
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
-                drawBarWin, visibleIme, NAV_BAR_BOTTOM));
+                drawBarWin, visibleIme, true));
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
-                null, visibleIme, NAV_BAR_BOTTOM));
+                null, visibleIme, true));
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationBackgroundWindow(
-                nonDrawBarWin, visibleIme, NAV_BAR_BOTTOM));
-
-        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
-                drawBarWin, invisibleIme, NAV_BAR_BOTTOM));
-        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
-                null, invisibleIme, NAV_BAR_BOTTOM));
-        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
-                nonDrawBarWin, invisibleIme, NAV_BAR_BOTTOM));
+                nonDrawBarWin, visibleIme, true));
 
         assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
-                drawBarWin, nonDrawBarIme, NAV_BAR_BOTTOM));
+                drawBarWin, invisibleIme, true));
         assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
-                null, nonDrawBarIme, NAV_BAR_BOTTOM));
+                null, invisibleIme, true));
         assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
-                nonDrawBarWin, nonDrawBarIme, NAV_BAR_BOTTOM));
+                nonDrawBarWin, invisibleIme, true));
+
+        assertEquals(drawBarWin, DisplayPolicy.chooseNavigationBackgroundWindow(
+                drawBarWin, nonDrawBarIme, true));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                null, nonDrawBarIme, true));
+        assertNull(DisplayPolicy.chooseNavigationBackgroundWindow(
+                nonDrawBarWin, nonDrawBarIme, true));
     }
 
     @SetupWindows(addWindows = W_NAVIGATION_BAR)
@@ -413,15 +407,25 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testUpdateDisplayConfigurationByDecor() {
-        if (Flags.insetsDecoupledConfiguration()) {
-            // No configuration update when flag enables.
-            return;
-        }
         doReturn(NO_CUTOUT).when(mDisplayContent).calculateDisplayCutoutForRotation(anyInt());
         final WindowState navbar = createNavBarWithProvidedInsets(mDisplayContent);
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
         final int prevScreenHeightDp = mDisplayContent.getConfiguration().screenHeightDp;
+        if (Flags.insetsDecoupledConfiguration()) {
+            // No configuration update when flag enables.
+            assertFalse(displayPolicy.updateDecorInsetsInfo());
+            assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalHeight, di.logicalWidth).mOverrideConfigInsets.bottom);
+
+            final int barHeight = 2 * NAV_BAR_HEIGHT;
+            navbar.mAttrs.providedInsets[0].setInsetsSize(Insets.of(0, 0, 0, barHeight));
+            assertFalse(displayPolicy.updateDecorInsetsInfo());
+            assertEquals(barHeight, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalHeight, di.logicalWidth).mOverrideConfigInsets.bottom);
+            return;
+        }
+
         assertTrue(navbar.providesDisplayDecorInsets() && displayPolicy.updateDecorInsetsInfo());
         assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
                 di.logicalWidth, di.logicalHeight).mConfigInsets.bottom);
@@ -486,50 +490,13 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 di.logicalHeight).mNonDecorInsets.bottom);
     }
 
-    @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
-    @Test
-    public void testImeMinimalSourceFrame() {
-        Assume.assumeFalse("Behavior no longer needed with ENABLE_HIDE_IME_CAPTION_BAR",
-                ENABLE_HIDE_IME_CAPTION_BAR);
-
-        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-
-        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
-        displayPolicy.addWindowLw(mNavBarWindow, attrs);
-        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
-        mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
-        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        mImeWindow.mAboveInsetsState.set(state);
-        mDisplayContent.mDisplayFrames = new DisplayFrames(
-                state, displayInfo, NO_CUTOUT, NO_ROUNDED_CORNERS, new PrivacyIndicatorBounds(),
-                DisplayShape.NONE);
-
-        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
-        mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
-        mImeWindow.mGivenContentInsets.set(0, displayInfo.logicalHeight, 0, 0);
-        mImeWindow.getControllableInsetProvider().setServerVisible(true);
-
-        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
-        displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
-
-        final InsetsSource imeSource = state.peekSource(ID_IME);
-        final InsetsSource navBarSource = state.peekSource(
-                mNavBarWindow.getControllableInsetProvider().getSource().getId());
-
-        assertNotNull(imeSource);
-        assertNotNull(navBarSource);
-        assertFalse(imeSource.getFrame().isEmpty());
-        assertFalse(navBarSource.getFrame().isEmpty());
-        assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
-    }
-
     @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsGivenContentFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+        makeWindowVisible(mImeWindow);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
         mImeWindow.mGivenContentInsets.set(0, 10, 0, 0);

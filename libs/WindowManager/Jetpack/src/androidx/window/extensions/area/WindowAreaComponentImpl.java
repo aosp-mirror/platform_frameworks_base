@@ -16,6 +16,12 @@
 
 package androidx.window.extensions.area;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
 import android.app.Activity;
@@ -23,6 +29,7 @@ import android.content.Context;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateRequest;
+import android.hardware.devicestate.feature.flags.Flags;
 import android.hardware.display.DisplayManager;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -72,18 +79,18 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @GuardedBy("mLock")
     private final ArraySet<Consumer<ExtensionWindowAreaStatus>>
             mRearDisplayPresentationStatusListeners = new ArraySet<>();
-    private final int mRearDisplayState;
+    private int mRearDisplayState = INVALID_DEVICE_STATE_IDENTIFIER;
     private final int mConcurrentDisplayState;
     @NonNull
-    private final int[] mFoldedDeviceStates;
+    private int[] mFoldedDeviceStates = new int[0];
     private long mRearDisplayAddress = INVALID_DISPLAY_ADDRESS;
     @WindowAreaSessionState
     private int mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
 
     @GuardedBy("mLock")
-    private int mCurrentDeviceState = INVALID_DEVICE_STATE_IDENTIFIER;
+    private DeviceState mCurrentDeviceState = INVALID_DEVICE_STATE;
     @GuardedBy("mLock")
-    private int[] mCurrentSupportedDeviceStates;
+    private List<DeviceState> mCurrentSupportedDeviceStates;
 
     @GuardedBy("mLock")
     private DeviceStateRequest mRearDisplayStateRequest;
@@ -98,21 +105,52 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @GuardedBy("mLock")
     private int mLastReportedRearDisplayPresentationStatus;
 
+    @VisibleForTesting
+    static int getRdmV1Identifier(List<DeviceState> currentSupportedDeviceStates) {
+        for (int i = 0; i < currentSupportedDeviceStates.size(); i++) {
+            DeviceState state = currentSupportedDeviceStates.get(i);
+            if (state.hasProperty(PROPERTY_FEATURE_REAR_DISPLAY)
+                    && !state.hasProperty(PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT)) {
+                return state.getIdentifier();
+            }
+        }
+        return INVALID_DEVICE_STATE_IDENTIFIER;
+    }
+
+    @VisibleForTesting
+    static int getRdmV2Identifier(List<DeviceState> currentSupportedDeviceStates) {
+        for (int i = 0; i < currentSupportedDeviceStates.size(); i++) {
+            DeviceState state = currentSupportedDeviceStates.get(i);
+            if (state.hasProperties(PROPERTY_FEATURE_REAR_DISPLAY,
+                    PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT)) {
+                return state.getIdentifier();
+            }
+        }
+        return INVALID_DEVICE_STATE_IDENTIFIER;
+    }
+
     public WindowAreaComponentImpl(@NonNull Context context) {
         mDeviceStateManager = context.getSystemService(DeviceStateManager.class);
         mDisplayManager = context.getSystemService(DisplayManager.class);
         mExecutor = context.getMainExecutor();
 
-        // TODO(b/329436166): Update the usage of device state manager API's
-        mCurrentSupportedDeviceStates = getSupportedStateIdentifiers(
-                mDeviceStateManager.getSupportedDeviceStates());
-        mFoldedDeviceStates = context.getResources().getIntArray(
-                R.array.config_foldedDeviceStates);
+        mCurrentSupportedDeviceStates = mDeviceStateManager.getSupportedDeviceStates();
 
-        // TODO(b/236022708) Move rear display state to device state config file
-        mRearDisplayState = context.getResources().getInteger(
-                R.integer.config_deviceStateRearDisplay);
+        if (Flags.deviceStatePropertyMigration()) {
+            if (Flags.deviceStateRdmV2()) {
+                mRearDisplayState = getRdmV2Identifier(mCurrentSupportedDeviceStates);
+            } else {
+                mRearDisplayState = getRdmV1Identifier(mCurrentSupportedDeviceStates);
+            }
+        } else {
+            mFoldedDeviceStates = context.getResources().getIntArray(
+                    R.array.config_foldedDeviceStates);
+            // TODO(b/236022708) Move rear display state to device state config file
+            mRearDisplayState = context.getResources().getInteger(
+                    R.integer.config_deviceStateRearDisplay);
+        }
 
+        // TODO(b/374351956) Use DeviceState API when the dual display state is always returned
         mConcurrentDisplayState = context.getResources().getInteger(
                 R.integer.config_deviceStateConcurrentRearDisplay);
 
@@ -147,7 +185,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             mRearDisplayStatusListeners.add(consumer);
 
             // If current device state is still invalid, the initial value has not been provided.
-            if (mCurrentDeviceState == INVALID_DEVICE_STATE_IDENTIFIER) {
+            if (mCurrentDeviceState.getIdentifier() == INVALID_DEVICE_STATE_IDENTIFIER) {
                 return;
             }
             consumer.accept(getCurrentRearDisplayModeStatus());
@@ -312,7 +350,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             mRearDisplayPresentationStatusListeners.add(consumer);
 
             // If current device state is still invalid, the initial value has not been provided
-            if (mCurrentDeviceState == INVALID_DEVICE_STATE_IDENTIFIER) {
+            if (mCurrentDeviceState.getIdentifier() == INVALID_DEVICE_STATE_IDENTIFIER) {
                 return;
             }
             @WindowAreaStatus int currentStatus = getCurrentRearDisplayPresentationModeStatus();
@@ -452,8 +490,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @Override
     public void onSupportedStatesChanged(@NonNull List<DeviceState> supportedStates) {
         synchronized (mLock) {
-            // TODO(b/329436166): Update the usage of device state manager API's
-            mCurrentSupportedDeviceStates = getSupportedStateIdentifiers(supportedStates);
+            mCurrentSupportedDeviceStates = supportedStates;
             updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             updateRearDisplayPresentationStatusListeners(
                     getCurrentRearDisplayPresentationModeStatus());
@@ -463,8 +500,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @Override
     public void onDeviceStateChanged(@NonNull DeviceState state) {
         synchronized (mLock) {
-            // TODO(b/329436166): Update the usage of device state manager API's
-            mCurrentDeviceState = state.getIdentifier();
+            mCurrentDeviceState = state;
             updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             updateRearDisplayPresentationStatusListeners(
                     getCurrentRearDisplayPresentationModeStatus());
@@ -477,7 +513,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             return WindowAreaComponent.STATUS_UNSUPPORTED;
         }
 
-        if (!ArrayUtils.contains(mCurrentSupportedDeviceStates, mRearDisplayState)) {
+        if (!deviceStateListContainsIdentifier(mCurrentSupportedDeviceStates,
+                mRearDisplayState)) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
 
@@ -488,15 +525,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         return WindowAreaComponent.STATUS_AVAILABLE;
     }
 
-    // TODO(b/329436166): Remove and update the usage of device state manager API's
-    private int[] getSupportedStateIdentifiers(@NonNull List<DeviceState> states) {
-        int[] identifiers = new int[states.size()];
-        for (int i = 0; i < states.size(); i++) {
-            identifiers[i] = states.get(i).getIdentifier();
-        }
-        return identifiers;
-    }
-
     /**
      * Helper method to determine if a rear display session is currently active by checking
      * if the current device state is that which corresponds to {@code mRearDisplayState}.
@@ -505,7 +533,31 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
      */
     @GuardedBy("mLock")
     private boolean isRearDisplayActive() {
-        return mCurrentDeviceState == mRearDisplayState;
+        if (Flags.deviceStatePropertyApi()) {
+            return mCurrentDeviceState.hasProperty(PROPERTY_FEATURE_REAR_DISPLAY);
+        } else {
+            return mCurrentDeviceState.getIdentifier() == mRearDisplayState;
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean isRearDisplayPresentationModeActive() {
+        if (Flags.deviceStatePropertyApi()) {
+            return mCurrentDeviceState.hasProperty(PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT);
+        } else {
+            return mCurrentDeviceState.getIdentifier() == mConcurrentDisplayState;
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean deviceStateListContainsIdentifier(List<DeviceState> deviceStates,
+            int identifier) {
+        for (int i = 0; i < deviceStates.size(); i++) {
+            if (deviceStates.get(i).getIdentifier() == identifier) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @GuardedBy("mLock")
@@ -526,12 +578,12 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             return WindowAreaComponent.STATUS_UNSUPPORTED;
         }
 
-        if (mCurrentDeviceState == mConcurrentDisplayState) {
+        if (isRearDisplayPresentationModeActive()) {
             return WindowAreaComponent.STATUS_ACTIVE;
         }
 
-        if (!ArrayUtils.contains(mCurrentSupportedDeviceStates, mConcurrentDisplayState)
-                || isDeviceFolded()) {
+        if (!deviceStateListContainsIdentifier(mCurrentSupportedDeviceStates,
+                mConcurrentDisplayState) || isDeviceFolded()) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
         return WindowAreaComponent.STATUS_AVAILABLE;
@@ -539,7 +591,13 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private boolean isDeviceFolded() {
-        return ArrayUtils.contains(mFoldedDeviceStates, mCurrentDeviceState);
+        if (Flags.deviceStatePropertyApi()) {
+            return mCurrentDeviceState.hasProperty(
+                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)
+                    && !mCurrentDeviceState.hasProperty(PROPERTY_EMULATED_ONLY);
+        } else {
+            return ArrayUtils.contains(mFoldedDeviceStates, mCurrentDeviceState.getIdentifier());
+        }
     }
 
     @GuardedBy("mLock")

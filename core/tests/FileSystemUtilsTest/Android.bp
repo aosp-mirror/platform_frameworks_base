@@ -17,12 +17,38 @@ package {
     default_team: "trendy_team_android_kernel",
 }
 
-cc_library {
-    name: "libpunchtest",
+cc_defaults {
+    name: "libpunch_defaults",
     stl: "none",
     host_supported: true,
     srcs: ["jni/android_test_jni_source.cpp"],
     header_libs: ["jni_headers"],
+}
+
+cc_library {
+    name: "libpunchtest",
+    defaults: ["libpunch_defaults"],
+}
+
+cc_library {
+    name: "libpunchtest_4kb",
+    defaults: ["libpunch_defaults"],
+    ldflags: ["-z max-page-size=0x1000"],
+}
+
+android_test_helper_app {
+    name: "app_with_4kb_elf",
+    srcs: ["app_with_4kb_elf/src/**/*.java"],
+    manifest: "app_with_4kb_elf/app_with_4kb_elf.xml",
+    compile_multilib: "64",
+    jni_libs: [
+        "libpunchtest_4kb",
+    ],
+    static_libs: [
+        "androidx.test.rules",
+        "platform-test-annotations",
+    ],
+    use_embedded_native_libs: true,
 }
 
 android_test_helper_app {
@@ -69,9 +95,10 @@ java_test_host {
         "compatibility-host-util",
         "compatibility-tradefed",
     ],
-    data: [
+    device_common_data: [
         ":embedded_native_libs_test_app",
         ":extract_native_libs_test_app",
+        ":app_with_4kb_elf",
     ],
     test_suites: ["general-tests"],
     test_config: "AndroidTest.xml",

@@ -18,7 +18,7 @@ package com.android.server.wm;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 
 import android.annotation.NonNull;
 import android.app.servertransaction.RefreshCallbackItem;
@@ -89,7 +89,7 @@ class ActivityRefresher {
         final ResumeActivityItem resumeActivityItem = new ResumeActivityItem(
                 activity.token, /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
         try {
-            activity.mAtmService.getLifecycleManager().scheduleTransactionAndLifecycleItems(
+            activity.mAtmService.getLifecycleManager().scheduleTransactionItems(
                     activity.app.getThread(), refreshCallbackItem, resumeActivityItem);
             mHandler.postDelayed(() -> {
                 synchronized (mWmService.mGlobalLock) {

@@ -2,93 +2,14 @@ package: "android.os"
 container: "system"
 container: "system"
 
+# keep-sorted start block=yes newline_separated=yes
 flag {
-    name: "android_os_build_vanilla_ice_cream"
-    is_exported: true
-    namespace: "build"
-    description: "Feature flag for adding the VANILLA_ICE_CREAM constant."
-    bug: "264658905"
-}
-
-flag {
-    name: "state_of_health_public"
-    is_exported: true
-    namespace: "system_sw_battery"
-    description: "Feature flag for making state_of_health a public api."
-    bug: "288842045"
-}
-
-flag {
-    name: "disallow_cellular_null_ciphers_restriction"
-    namespace: "cellular_security"
-    description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
-    bug: "276752881"
-}
-
-flag {
-    name: "remove_app_profiler_pss_collection"
-    is_exported: true
-    namespace: "backstage_power"
-    description: "Replaces background PSS collection in AppProfiler with RSS"
-    bug: "297542292"
-}
-
-flag {
-    name: "allow_thermal_headroom_thresholds"
-    is_exported: true
-    namespace: "game"
-    description: "Enable thermal headroom thresholds API"
-    bug: "288119641"
-}
-
-# This flag guards the private space feature, its APIs, and some of the feature implementations. The flag android.multiuser.Flags.enable_private_space_features exclusively guards all the implementations.
-flag {
-    name: "allow_private_profile"
-    is_exported: true
-    namespace: "profile_experiences"
-    description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
-    bug: "299069460"
-    is_exported: true
-}
-
-flag {
-    name: "bugreport_mode_max_value"
-    is_exported: true
-    namespace: "telephony"
-    description: "Introduce a constant as maximum value of bugreport mode."
-    bug: "305067125"
-}
-
-flag {
-    name: "adpf_prefer_power_efficiency"
-    is_exported: true
-    namespace: "game"
-    description: "Guards the ADPF power efficiency API"
-    bug: "288117936"
-}
-
-flag {
-    name: "security_state_service"
-    is_exported: true
-    namespace: "dynamic_spl"
-    description: "Guards the Security State API."
-    bug: "302189431"
-}
-
-flag {
-    name: "ordered_broadcast_multiple_permissions"
-    is_exported: true
-    namespace: "bluetooth"
-    description: "Guards the Context.sendOrderedBroadcastMultiplePermissions API"
-    bug: "345802719"
-}
-
-flag {
-    name: "battery_saver_supported_check_api"
-    is_exported: true
-    namespace: "backstage_power"
-    description: "Guards a new API in PowerManager to check if battery saver is supported or not."
-    bug: "305067031"
+     # Holdback study for concurrent MessageQueue.
+     # Do not promote beyond trunkfood.
+     namespace: "system_performance"
+     name: "message_queue_force_legacy"
+     description: "Whether to holdback concurrent MessageQueue (force legacy)."
+     bug: "336880969"
 }
 
 flag {
@@ -100,26 +21,12 @@ flag {
 }
 
 flag {
-    name: "adpf_use_fmq_channel"
+    name: "adpf_graphics_pipeline"
+    is_exported: true
     namespace: "game"
-    description: "Guards use of the FMQ channel for ADPF"
-    bug: "315894228"
-}
-
-flag {
-    name: "adpf_use_fmq_channel_fixed"
-    namespace: "game"
-    description: "Guards use of the FMQ channel for ADPF with a readonly flag"
+    description: "Guards use of SessionCreationConfig and Graphics Pipeline mode"
     is_fixed_read_only: true
-    bug: "315894228"
-}
-
-flag {
-    name: "adpf_fmq_eager_send"
-    namespace: "game"
-    description: "Guards the use of an eager-sending optimization in FMQ for low-latency messages"
-    is_fixed_read_only: true
-    bug: "315894228"
+    bug: "367803904"
 }
 
 flag {
@@ -128,6 +35,13 @@ flag {
     description: "Guards use of the FMQ channel for ADPF"
     is_fixed_read_only: true
     bug: "330922490"
+}
+
+flag {
+    name: "adpf_measure_during_input_event_boost"
+    namespace: "game"
+    description: "Guards use of a boost when view measures during input events"
+    bug: "256549451"
 }
 
 flag {
@@ -147,33 +61,84 @@ flag {
 }
 
 flag {
-    name: "adpf_measure_during_input_event_boost"
+    name: "adpf_prefer_power_efficiency"
+    is_exported: true
     namespace: "game"
-    description: "Guards use of a boost when view measures during input events"
-    bug: "256549451"
+    description: "Guards the ADPF power efficiency API"
+    bug: "288117936"
 }
 
 flag {
-    name: "battery_service_support_current_adb_command"
-    namespace: "backstage_power"
-    description: "Whether or not BatteryService supports adb commands for Current values."
+    name: "adpf_use_fmq_channel"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF"
+    bug: "315894228"
+}
+
+flag {
+    name: "adpf_use_fmq_channel_fixed"
+    namespace: "game"
+    description: "Guards use of the FMQ channel for ADPF with a readonly flag"
     is_fixed_read_only: true
-    bug: "315037695"
+    bug: "315894228"
 }
 
 flag {
-    name: "strict_mode_restricted_network"
-    namespace: "backstage_power"
-    description: "Guards StrictMode APIs for detecting restricted network access."
-    bug: "317250784"
-}
-
-flag {
-    name: "message_queue_tail_tracking"
-    namespace: "system_performance"
-    description: "track tail of message queue."
-    bug: "305311707"
+    name: "adpf_use_load_hints"
+    namespace: "game"
+    description: "Guards use of the ADPF public load hints behind a readonly flag"
     is_fixed_read_only: true
+    bug: "367803904"
+}
+
+flag {
+    name: "allow_consentless_bugreport_delegated_consent"
+    namespace: "crumpet"
+    description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
+    bug: "324046728"
+    is_exported: true
+}
+
+# This flag guards the private space feature, its APIs, and some of the feature implementations. The flag android.multiuser.Flags.enable_private_space_features exclusively guards all the implementations.
+flag {
+    name: "allow_private_profile"
+    is_exported: true
+    namespace: "profile_experiences"
+    description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."
+    bug: "299069460"
+    is_exported: true
+}
+
+flag {
+    name: "allow_thermal_headroom_thresholds"
+    is_exported: true
+    namespace: "game"
+    description: "Enable thermal headroom thresholds API"
+    bug: "288119641"
+}
+
+flag {
+    name: "allow_thermal_thresholds_callback"
+    is_exported: true
+    namespace: "game"
+    description: "Enable thermal threshold callback"
+    bug: "360486877"
+}
+
+flag {
+    name: "android_os_build_vanilla_ice_cream"
+    is_exported: true
+    namespace: "build"
+    description: "Feature flag for adding the VANILLA_ICE_CREAM constant."
+    bug: "264658905"
+}
+
+flag {
+    name: "api_for_backported_fixes"
+    namespace: "media_reliability"
+    description: "Public API app developers use to check if a known issue is fixed on a device."
+    bug: "308461809"
+    is_exported: true
 }
 
 flag {
@@ -186,12 +151,191 @@ flag {
 }
 
 flag {
+    name: "battery_saver_supported_check_api"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Guards a new API in PowerManager to check if battery saver is supported or not."
+    bug: "305067031"
+}
+
+flag {
+    name: "battery_service_support_current_adb_command"
+    namespace: "backstage_power"
+    description: "Whether or not BatteryService supports adb commands for Current values."
+    is_fixed_read_only: true
+    bug: "315037695"
+}
+
+flag {
+    name: "binder_frozen_state_change_callback"
+    is_exported: true
+    namespace: "system_performance"
+    description: "Guards the frozen state change callback API."
+    bug: "361157077"
+}
+
+flag {
+    name: "cpu_gpu_headrooms"
+    namespace: "game"
+    description: "Feature flag for adding CPU/GPU headroom API"
+    bug: "346604998"
+    is_exported: true
+}
+
+flag {
+    name: "disallow_cellular_null_ciphers_restriction"
+    namespace: "cellular_security"
+    description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
+    bug: "276752881"
+}
+
+flag {
+    name: "enable_angle_allow_list"
+    namespace: "gpu"
+    description: "Whether to read from angle allowlist to determine if app should use ANGLE"
+    is_fixed_read_only: true
+    bug: "370845648"
+}
+
+flag {
+    name: "get_private_space_settings"
+    namespace: "profile_experiences"
+    description: "Guards a new Private Profile API in LauncherApps"
+    bug: "346294653"
+    is_exported: true
+}
+
+flag {
+     name: "mainline_vcn_platform_api"
+     namespace: "vcn"
+     description: "Expose platform APIs to mainline VCN"
+     is_exported: true
+     bug: "366598445"
+}
+
+flag {
+    name: "material_colors_10_2024"
+    namespace: "systemui"
+    description: "Adding new Material Tokens as of October 2024"
+    bug: "376195115"
+    is_exported: true
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    name: "material_motion_tokens"
+    namespace: "systemui"
+    description: "Adding new Material Tokens for M3 Motion Spec"
+    bug: "324922198"
+    is_exported: true
+}
+
+flag {
+    name: "material_shape_tokens"
+    namespace: "systemui"
+    description: "Adding new Material Tokens for M3 Shape (corner radius) Spec"
+    bug: "324928718"
+    is_exported: true
+}
+
+flag {
+    name: "message_queue_tail_tracking"
+    namespace: "system_performance"
+    description: "track tail of message queue."
+    bug: "305311707"
+    is_fixed_read_only: true
+}
+
+flag {
+     name: "message_queue_testability"
+     namespace: "system_performance"
+     is_exported: true
+     description: "Whether MessageQueue implements test APIs."
+     bug: "379472827"
+     is_fixed_read_only: true
+}
+
+flag {
+    name: "network_time_uses_shared_memory"
+    namespace: "system_performance"
+    description: "SystemClock.currentNetworkTimeMillis() reads network time offset from shared memory"
+    bug: "361329788"
+    is_exported: true
+}
+
+flag {
+    name: "ordered_broadcast_multiple_permissions"
+    is_exported: true
+    namespace: "bluetooth"
+    description: "Guards the Context.sendOrderedBroadcastMultiplePermissions API"
+    bug: "345802719"
+}
+
+flag {
+    name: "remove_app_profiler_pss_collection"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Replaces background PSS collection in AppProfiler with RSS"
+    bug: "297542292"
+}
+
+flag {
+    name: "security_state_service"
+    is_exported: true
+    namespace: "dynamic_spl"
+    description: "Guards the Security State API."
+    bug: "302189431"
+}
+
+flag {
+    name: "state_of_health_public"
+    is_exported: true
+    namespace: "system_sw_battery"
+    description: "Feature flag for making state_of_health a public api."
+    bug: "288842045"
+}
+
+flag {
     name: "storage_lifetime_api"
     is_exported: true
     namespace: "phoenix"
     description: "Feature flag for adding storage component health APIs."
     is_fixed_read_only: true
     bug: "309792384"
+}
+
+flag {
+    name: "strict_mode_restricted_network"
+    namespace: "backstage_power"
+    description: "Guards StrictMode APIs for detecting restricted network access."
+    bug: "317250784"
+}
+
+flag {
+    name: "update_engine_api"
+    namespace: "art_mainline"
+    description: "Update Engine APIs for ART"
+    is_exported: true
+    is_fixed_read_only: true
+    bug: "377557749"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "enable_has_binders"
+     is_exported: true
+     description: "Add hasBinders to Public API under a flag."
+     is_fixed_read_only: true
+     bug: "330345513"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "perfetto_sdk_tracing"
+     description: "Tracing using Perfetto SDK."
+     bug: "303199244"
 }
 
 flag {
@@ -203,24 +347,4 @@ flag {
      bug: "324241334"
 }
 
-flag {
-     namespace: "system_performance"
-     name: "perfetto_sdk_tracing"
-     description: "Tracing using Perfetto SDK."
-     bug: "303199244"
-}
-
-flag {
-    name: "allow_consentless_bugreport_delegated_consent"
-    namespace: "crumpet"
-    description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
-    bug: "324046728"
-}
-
-flag {
-    name: "get_private_space_settings"
-    namespace: "profile_experiences"
-    description: "Guards a new Private Profile API in LauncherApps"
-    bug: "346294653"
-    is_exported: true
-}
+# keep-sorted end

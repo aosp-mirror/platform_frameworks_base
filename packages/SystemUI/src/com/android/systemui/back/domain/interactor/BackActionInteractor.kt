@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Handles requests to go back either from a button or gesture. */
 @SysUISingleton
@@ -47,7 +47,9 @@ constructor(
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val shadeController: ShadeController,
     private val notificationShadeWindowController: NotificationShadeWindowController,
-    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor
+    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor,
+    private val shadeBackActionInteractor: ShadeBackActionInteractor,
+    private val qsController: QuickSettingsController,
 ) : CoreStartable {
 
     private var isCallbackRegistered = false
@@ -76,14 +78,6 @@ constructor(
     private val onBackInvokedDispatcher: WindowOnBackInvokedDispatcher?
         get() =
             notificationShadeWindowController.windowRootView?.viewRootImpl?.onBackInvokedDispatcher
-
-    private lateinit var shadeBackActionInteractor: ShadeBackActionInteractor
-    private lateinit var qsController: QuickSettingsController
-
-    fun setup(qsController: QuickSettingsController, svController: ShadeBackActionInteractor) {
-        this.qsController = qsController
-        this.shadeBackActionInteractor = svController
-    }
 
     override fun start() {
         scope.launch {

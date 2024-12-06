@@ -17,8 +17,10 @@
 package com.android.systemui.volume.panel.component.volume.domain.interactor
 
 import android.media.AudioManager
+import com.android.settingslib.volume.data.repository.AudioSystemRepository
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
+import com.android.systemui.Flags
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.isTheSameSession
@@ -41,6 +43,7 @@ constructor(
     @VolumePanelScope scope: CoroutineScope,
     mediaOutputInteractor: MediaOutputInteractor,
     audioModeInteractor: AudioModeInteractor,
+    private val audioSystemRepository: AudioSystemRepository,
 ) {
 
     val volumePanelSliders: StateFlow<List<SliderType>> =
@@ -83,6 +86,16 @@ constructor(
     }
 
     private fun MutableList<SliderType>.addStream(stream: Int) {
+        // Hide other streams except STREAM_MUSIC if the isSingleVolume mode is on. This makes sure
+        // the volume slider in volume panel is consistent with the volume slider inside system
+        // settings app.
+        if (Flags.onlyShowMediaStreamSliderInSingleVolumeMode() &&
+            audioSystemRepository.isSingleVolume &&
+            stream != AudioManager.STREAM_MUSIC
+        ) {
+            return
+        }
+
         add(SliderType.Stream(AudioStream(stream)))
     }
 }

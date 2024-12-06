@@ -19,6 +19,11 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+
+        <activity
+            android:name="androidx.activity.ComponentActivity"
+            android:theme="@android:style/Theme.DeviceDefault.DayNight"
+            android:exported="true" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

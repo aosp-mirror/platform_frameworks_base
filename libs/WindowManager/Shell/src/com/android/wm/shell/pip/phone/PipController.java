@@ -32,7 +32,6 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -44,6 +43,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Pair;
@@ -93,6 +93,7 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -102,6 +103,7 @@ import com.android.wm.shell.sysui.UserChangeListener;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -146,6 +148,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private Optional<OneHandedController> mOneHandedController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
+    @ShellMainThread
+    private final Handler mHandler;
     protected final PipImpl mImpl;
 
     private final Rect mTmpInsetBounds = new Rect();
@@ -211,7 +215,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private boolean mIsKeyguardShowingOrAnimating;
 
-    private Consumer<Boolean> mOnIsInPipStateChangedListener;
+    private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
 
     @VisibleForTesting
     interface PipAnimationListener {
@@ -324,7 +328,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         return;
                     }
                     onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
-                            false /* saveRestoreSnapFraction */);
+                            true /* saveRestoreSnapFraction */);
                 }
 
                 @Override
@@ -405,7 +409,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayInsetsController displayInsetsController,
             TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Handler handler) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Device doesn't support Pip feature", TAG);
@@ -418,7 +423,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 pipDisplayLayoutState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor)
+                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor,
+                handler)
                 .mImpl;
     }
 
@@ -446,11 +452,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayInsetsController displayInsetsController,
             TabletopModeController tabletopModeController,
             Optional<OneHandedController> oneHandedController,
-            ShellExecutor mainExecutor
+            ShellExecutor mainExecutor,
+            @ShellMainThread Handler handler
     ) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
+        mHandler = handler;
         mImpl = new PipImpl();
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
@@ -493,11 +501,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     false /* saveRestoreSnapFraction */);
         });
         mPipTransitionState.addOnPipTransitionStateChangedListener((oldState, newState) -> {
-            if (mOnIsInPipStateChangedListener != null) {
-                final boolean wasInPip = PipTransitionState.isInPip(oldState);
-                final boolean nowInPip = PipTransitionState.isInPip(newState);
-                if (nowInPip != wasInPip) {
-                    mOnIsInPipStateChangedListener.accept(nowInPip);
+            final boolean wasInPip = PipTransitionState.isInPip(oldState);
+            final boolean nowInPip = PipTransitionState.isInPip(newState);
+            if (nowInPip != wasInPip) {
+                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
+                    listener.accept(nowInPip);
                 }
             }
         });
@@ -584,8 +592,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
                         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                "onActivityRestartAttempt: %s", task.topActivity);
-                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                                "onActivityRestartAttempt: topActivity=%s, wasVisible=%b",
+                                task.topActivity, wasVisible);
+                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED || !wasVisible) {
                             return;
                         }
                         if (mPipTaskOrganizer.isLaunchToSplit(task)) {
@@ -652,9 +661,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             // there's a keyguard present
                             return;
                         }
-                        onDisplayChangedUncheck(mDisplayController
-                                        .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()),
-                                false /* saveRestoreSnapFraction */);
+                        mMainExecutor.executeDelayed(() -> {
+                            onDisplayChangedUncheck(mDisplayController.getDisplayLayout(
+                                    mPipDisplayLayoutState.getDisplayId()),
+                                    false /* saveRestoreSnapFraction */);
+                        }, PIP_KEEP_CLEAR_AREAS_DELAY);
                     }
                 });
 
@@ -715,7 +726,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mShellController.addConfigurationChangeListener(this);
         mShellController.addKeyguardChangeListener(this);
         mShellController.addUserChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
+        mShellController.addExternalInterface(IPip.DESCRIPTOR,
                 this::createExternalInterface, this);
     }
 
@@ -800,7 +811,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             }
         };
 
-        if (mPipTaskOrganizer.isInPip() && saveRestoreSnapFraction) {
+        if (mPipTransitionState.hasEnteredPip() && saveRestoreSnapFraction) {
             mMenuController.attachPipMenuView();
             // Calculate the snap fraction of the current stack along the old movement bounds
             final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
@@ -949,10 +960,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState.getLauncherState().setAppIconSizePx(iconSizePx);
     }
 
-    private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
-        mOnIsInPipStateChangedListener = callback;
-        if (mOnIsInPipStateChangedListener != null) {
+    private void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.add(callback);
             callback.accept(mPipTransitionState.isInPip());
+        }
+    }
+
+    private void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.remove(callback);
         }
     }
 
@@ -1045,7 +1062,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         // Begin InteractionJankMonitor with PIP transition CUJs
         final InteractionJankMonitor.Configuration.Builder builder =
                 InteractionJankMonitor.Configuration.Builder.withSurface(
-                        CUJ_PIP_TRANSITION, mContext, mPipTaskOrganizer.getSurfaceControl())
+                                CUJ_PIP_TRANSITION, mContext, mPipTaskOrganizer.getSurfaceControl(),
+                                mHandler)
                 .setTag(getTransitionTag(direction))
                 .setTimeout(2000);
         InteractionJankMonitor.getInstance().begin(builder);
@@ -1210,9 +1228,16 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+        public void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
             mMainExecutor.execute(() -> {
-                PipController.this.setOnIsInPipStateChangedListener(callback);
+                PipController.this.addOnIsInPipStateChangedListener(callback);
+            });
+        }
+
+        @Override
+        public void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+            mMainExecutor.execute(() -> {
+                PipController.this.removeOnIsInPipStateChangedListener(callback);
             });
         }
 

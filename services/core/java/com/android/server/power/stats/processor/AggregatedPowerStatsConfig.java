@@ -174,36 +174,36 @@ class AggregatedPowerStatsConfig {
      * standard power component IDs, e.g. {@link BatteryConsumer#POWER_COMPONENT_CPU}, or
      * a custom power component.
      */
-    PowerComponent trackPowerComponent(int powerComponentId) {
+    PowerComponent trackPowerComponent(@BatteryConsumer.PowerComponentId int powerComponentId) {
         PowerComponent builder = new PowerComponent(powerComponentId);
         mPowerComponents.add(builder);
         return builder;
     }
 
     /**
-     * Creates a configuration for the specified power component, which is a subcomponent
-     * of a different power component.  The tracked states will be the same as the parent
-     * component's.
+     * Creates a configuration for the specified power component, whose attribution calculation
+     * depends on a different power component.  The tracked states will be the same as the
+     * "dependsOn" component's.
      */
-    PowerComponent trackPowerComponent(int powerComponentId,
-            int parentPowerComponentId) {
-        PowerComponent parent = null;
+    PowerComponent trackPowerComponent(@BatteryConsumer.PowerComponentId int powerComponentId,
+            @BatteryConsumer.PowerComponentId int dependsOnPowerComponentId) {
+        PowerComponent dependsOnPowerComponent = null;
         for (int i = 0; i < mPowerComponents.size(); i++) {
             PowerComponent powerComponent = mPowerComponents.get(i);
-            if (powerComponent.getPowerComponentId() == parentPowerComponentId) {
-                parent = powerComponent;
+            if (powerComponent.getPowerComponentId() == dependsOnPowerComponentId) {
+                dependsOnPowerComponent = powerComponent;
                 break;
             }
         }
 
-        if (parent == null) {
+        if (dependsOnPowerComponent == null) {
             throw new IllegalArgumentException(
-                    "Parent component " + parentPowerComponentId + " is not configured");
+                    "Required component " + dependsOnPowerComponentId + " is not configured");
         }
 
         PowerComponent powerComponent = trackPowerComponent(powerComponentId);
-        powerComponent.mTrackedDeviceStates = parent.mTrackedDeviceStates;
-        powerComponent.mTrackedUidStates = parent.mTrackedUidStates;
+        powerComponent.mTrackedDeviceStates = dependsOnPowerComponent.mTrackedDeviceStates;
+        powerComponent.mTrackedUidStates = dependsOnPowerComponent.mTrackedUidStates;
         return powerComponent;
     }
 

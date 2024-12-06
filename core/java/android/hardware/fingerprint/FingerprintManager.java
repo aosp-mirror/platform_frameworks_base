@@ -1517,7 +1517,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     public static String getAcquiredString(Context context, int acquireInfo, int vendorCode) {
         switch (acquireInfo) {
-            case FINGERPRINT_ACQUIRED_GOOD:
+            case FINGERPRINT_ACQUIRED_GOOD, FINGERPRINT_ACQUIRED_START:
                 return null;
             case FINGERPRINT_ACQUIRED_PARTIAL:
                 return context.getString(
@@ -1546,13 +1546,10 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             case FINGERPRINT_ACQUIRED_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         com.android.internal.R.array.fingerprint_acquired_vendor);
-                if (vendorCode < msgArray.length) {
+                if (vendorCode < msgArray.length && !msgArray[vendorCode].isEmpty()) {
                     return msgArray[vendorCode];
                 }
             }
-                break;
-            case FINGERPRINT_ACQUIRED_START:
-                return null;
         }
         Slog.w(TAG, "Invalid acquired message: " + acquireInfo + ", " + vendorCode);
         return null;

@@ -87,6 +87,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -148,7 +149,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final TelephonyDisplayInfo DEFAULT_TELEPHONY_DISPLAY_INFO =
             new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false);
+                    TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false, false, false);
 
     static final int MAX_WIFI_ENTRY_COUNT = 3;
 
@@ -240,7 +241,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     }
 
     @Inject
-    public InternetDialogController(@NonNull Context context, UiEventLogger uiEventLogger,
+    public InternetDialogController(@ShadeDisplayAware Context context, UiEventLogger uiEventLogger,
             ActivityStarter starter, AccessPointController accessPointController,
             SubscriptionManager subscriptionManager, TelephonyManager telephonyManager,
             @Nullable WifiManager wifiManager, ConnectivityManager connectivityManager,
@@ -311,10 +312,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mConfig = MobileMappings.Config.readConfig(mContext);
         mTelephonyManager = mTelephonyManager.createForSubscriptionId(mDefaultDataSubId);
         mSubIdTelephonyManagerMap.put(mDefaultDataSubId, mTelephonyManager);
-        InternetTelephonyCallback telephonyCallback =
-                new InternetTelephonyCallback(mDefaultDataSubId);
-        mSubIdTelephonyCallbackMap.put(mDefaultDataSubId, telephonyCallback);
-        mTelephonyManager.registerTelephonyCallback(mExecutor, telephonyCallback);
+        registerInternetTelephonyCallback(mTelephonyManager, mDefaultDataSubId);
         // Listen the connectivity changes
         mConnectivityManager.registerDefaultNetworkCallback(mConnectivityManagerNetworkCallback);
         mCanConfigWifi = canConfigWifi;
@@ -344,6 +342,23 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mConnectivityManager.unregisterNetworkCallback(mConnectivityManagerNetworkCallback);
         mConnectedWifiInternetMonitor.unregisterCallback();
         mCallback = null;
+    }
+
+    /**
+     * This is to generate and register the new callback to Telephony for uncached subscription id,
+     * then cache it. Telephony also cached this callback into
+     * {@link com.android.server.TelephonyRegistry}, so if subscription id and callback were cached
+     * already, it shall do nothing to avoid registering redundant callback to Telephony.
+     */
+    private void registerInternetTelephonyCallback(
+            TelephonyManager telephonyManager, int subId) {
+        if (mSubIdTelephonyCallbackMap.containsKey(subId)) {
+            // Avoid to generate and register unnecessary callback to Telephony.
+            return;
+        }
+        InternetTelephonyCallback telephonyCallback = new InternetTelephonyCallback(subId);
+        mSubIdTelephonyCallbackMap.put(subId, telephonyCallback);
+        telephonyManager.registerTelephonyCallback(mExecutor, telephonyCallback);
     }
 
     boolean isAirplaneModeEnabled() {
@@ -673,9 +688,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             int subId = subInfo.getSubscriptionId();
             if (mSubIdTelephonyManagerMap.get(subId) == null) {
                 TelephonyManager secondaryTm = mTelephonyManager.createForSubscriptionId(subId);
-                InternetTelephonyCallback telephonyCallback = new InternetTelephonyCallback(subId);
-                secondaryTm.registerTelephonyCallback(mExecutor, telephonyCallback);
-                mSubIdTelephonyCallbackMap.put(subId, telephonyCallback);
+                registerInternetTelephonyCallback(secondaryTm, subId);
                 mSubIdTelephonyManagerMap.put(subId, secondaryTm);
             }
             return subId;
@@ -1351,6 +1364,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         if (DEBUG) {
             Log.d(TAG, "DDS: defaultDataSubId:" + defaultDataSubId);
         }
+
         if (SubscriptionManager.isUsableSubscriptionId(defaultDataSubId)) {
             // clean up old defaultDataSubId
             TelephonyCallback oldCallback = mSubIdTelephonyCallbackMap.get(mDefaultDataSubId);
@@ -1366,9 +1380,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             // create for new defaultDataSubId
             mTelephonyManager = mTelephonyManager.createForSubscriptionId(defaultDataSubId);
             mSubIdTelephonyManagerMap.put(defaultDataSubId, mTelephonyManager);
-            InternetTelephonyCallback newCallback = new InternetTelephonyCallback(defaultDataSubId);
-            mSubIdTelephonyCallbackMap.put(defaultDataSubId, newCallback);
-            mTelephonyManager.registerTelephonyCallback(mHandler::post, newCallback);
+            registerInternetTelephonyCallback(mTelephonyManager, defaultDataSubId);
             mCallback.onSubscriptionsChanged(defaultDataSubId);
         }
         mDefaultDataSubId = defaultDataSubId;
@@ -1418,7 +1430,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     void makeOverlayToast(int stringId) {
         final Resources res = mContext.getResources();
 
-        final SystemUIToast systemUIToast = mToastFactory.createToast(mContext,
+        final SystemUIToast systemUIToast = mToastFactory.createToast(mContext, mContext,
                 res.getString(stringId), mContext.getPackageName(), UserHandle.myUserId(),
                 res.getConfiguration().orientation);
         if (systemUIToast == null) {

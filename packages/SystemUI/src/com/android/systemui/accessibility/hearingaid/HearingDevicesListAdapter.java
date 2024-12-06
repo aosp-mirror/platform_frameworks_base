@@ -108,6 +108,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
         private final ImageView mIconView;
         private final ImageView mGearIcon;
         private final View mGearView;
+        private final View mDividerView;
 
         DeviceItemViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
@@ -118,6 +119,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
             mIconView = itemView.requireViewById(R.id.bluetooth_device_icon);
             mGearIcon = itemView.requireViewById(R.id.gear_icon_image);
             mGearView = itemView.requireViewById(R.id.gear_icon);
+            mDividerView = itemView.requireViewById(R.id.divider);
         }
 
         public void bindView(DeviceItem item, HearingDeviceItemCallback callback) {
@@ -136,23 +138,23 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
 
             Pair<Drawable, String> iconPair = item.getIconWithDescription();
             if (iconPair != null) {
-                Drawable drawable = iconPair.getFirst().mutate();
-                drawable.setTint(tintColor);
+                Drawable drawable = iconPair.getFirst();
                 mIconView.setImageDrawable(drawable);
                 mIconView.setContentDescription(iconPair.getSecond());
             }
 
             mNameView.setTextAppearance(
-                    item.isActive() ? R.style.BluetoothTileDialog_DeviceName_Active
-                            : R.style.BluetoothTileDialog_DeviceName);
+                    item.isActive() ? R.style.TextAppearance_BluetoothTileDialog_Active
+                            : R.style.TextAppearance_BluetoothTileDialog);
             mNameView.setText(item.getDeviceName());
             mSummaryView.setTextAppearance(
-                    item.isActive() ? R.style.BluetoothTileDialog_DeviceSummary_Active
-                            : R.style.BluetoothTileDialog_DeviceSummary);
+                    item.isActive() ? R.style.TextAppearance_BluetoothTileDialog_Active
+                            : R.style.TextAppearance_BluetoothTileDialog);
             mSummaryView.setText(item.getConnectionSummary());
 
             mGearIcon.getDrawable().mutate().setTint(tintColor);
             mGearView.setOnClickListener(view -> callback.onDeviceItemGearClicked(item, view));
+            mDividerView.setBackgroundColor(tintColor);
         }
     }
 }

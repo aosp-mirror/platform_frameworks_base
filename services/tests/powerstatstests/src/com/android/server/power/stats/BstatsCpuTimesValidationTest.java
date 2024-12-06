@@ -39,11 +39,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
 import android.platform.test.ravenwood.RavenwoodRule;
@@ -52,10 +52,10 @@ import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
+import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.frameworks.coretests.aidl.ICmdCallback;
@@ -66,7 +66,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
@@ -103,6 +102,7 @@ public class BstatsCpuTimesValidationTest {
 
     private static final int GENERAL_TIMEOUT_MS = 4000;
     private static final int GENERAL_INTERVAL_MS = 200;
+    private static final int SCREEN_STATE_CHANGE_TIMEOUT_MS = 10000;
 
     private static final int WORK_DURATION_MS = 2000;
 
@@ -110,6 +110,7 @@ public class BstatsCpuTimesValidationTest {
     private static String sOriginalBatteryStatsConsts;
 
     private static Context sContext;
+    private static Display sDisplay;
     private static UiDevice sUiDevice;
     private static int sTestPkgUid;
     private static boolean sCpuFreqTimesAvailable;
@@ -131,6 +132,10 @@ public class BstatsCpuTimesValidationTest {
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_PKG, 0);
         executeCmd("cmd deviceidle whitelist +" + TEST_PKG);
         checkCpuTimesAvailability();
+        DisplayManager displayManager = sContext.getSystemService(DisplayManager.class);
+        if (displayManager != null) {
+            sDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        }
     }
 
     @AfterClass
@@ -833,12 +838,12 @@ public class BstatsCpuTimesValidationTest {
         executeCmd("input keyevent KEYCODE_WAKEUP");
         executeCmd("wm dismiss-keyguard");
         assertKeyguardUnLocked();
-        assertScreenInteractive(true);
+        assertScreenState(true);
     }
 
     private void screenoff() throws Exception {
         executeCmd("input keyevent KEYCODE_SLEEP");
-        assertScreenInteractive(false);
+        assertScreenState(false);
     }
 
     private void forceStop() throws Exception {
@@ -854,12 +859,15 @@ public class BstatsCpuTimesValidationTest {
         );
     }
 
-    private void assertScreenInteractive(boolean interactive) throws Exception {
-        final PowerManager powerManager =
-                (PowerManager) sContext.getSystemService(Context.POWER_SERVICE);
-        assertDelayedCondition("Unexpected screen interactive state", () ->
-                interactive == powerManager.isInteractive() ? null : "expected=" + interactive
-        );
+    private void assertScreenState(boolean expectedOn) throws Exception {
+        if (sDisplay == null) {
+            return;
+        }
+
+        assertDelayedCondition("Unexpected screen-on state",
+                () -> expectedOn == Display.isOnState(sDisplay.getState())
+                        ? null : "expected=" + expectedOn,
+                SCREEN_STATE_CHANGE_TIMEOUT_MS, GENERAL_INTERVAL_MS);
     }
 
     private void assertDelayedCondition(String errMsgPrefix, ExpectedCondition condition)

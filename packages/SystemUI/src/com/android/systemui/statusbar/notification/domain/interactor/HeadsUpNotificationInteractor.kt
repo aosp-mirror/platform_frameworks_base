@@ -39,10 +39,10 @@ class HeadsUpNotificationInteractor
 @Inject
 constructor(
     private val headsUpRepository: HeadsUpRepository,
-    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
-    private val shadeInteractor: ShadeInteractor,
+    faceAuthInteractor: DeviceEntryFaceAuthInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    shadeInteractor: ShadeInteractor,
 ) {
 
     /** The top-ranked heads up row, regardless of pinned state */
@@ -52,12 +52,13 @@ constructor(
     val topHeadsUpRowIfPinned: Flow<HeadsUpRowKey?> =
         headsUpRepository.topHeadsUpRow
             .flatMapLatest { repository ->
-                repository?.isPinned?.map { pinned -> repository.takeIf { pinned } } ?: flowOf(null)
+                repository?.pinnedStatus?.map { pinnedStatus ->
+                    repository.takeIf { pinnedStatus.isPinned }
+                } ?: flowOf(null)
             }
             .distinctUntilChanged()
 
-    /** Set of currently pinned top-level heads up rows to be displayed. */
-    val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
+    private val activeHeadsUpRows: Flow<Set<Pair<HeadsUpRowKey, Boolean>>> by lazy {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
@@ -65,11 +66,9 @@ constructor(
                 if (repositories.isNotEmpty()) {
                     val toCombine: List<Flow<Pair<HeadsUpRowRepository, Boolean>>> =
                         repositories.map { repo ->
-                            repo.isPinned.map { isPinned -> repo to isPinned }
+                            repo.pinnedStatus.map { pinnedStatus -> repo to pinnedStatus.isPinned }
                         }
-                    combine(toCombine) { pairs ->
-                        pairs.filter { (_, isPinned) -> isPinned }.map { (repo, _) -> repo }.toSet()
-                    }
+                    combine(toCombine) { pairs -> pairs.toSet() }
                 } else {
                     // if the set is empty, there are no flows to combine
                     flowOf(emptySet())
@@ -78,21 +77,38 @@ constructor(
         }
     }
 
-    /** Are there any pinned heads up rows to display? */
-    val hasPinnedRows: Flow<Boolean> by lazy {
+    /** Set of currently active top-level heads up rows to be displayed. */
+    val activeHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
-            flowOf(false)
+            flowOf(emptySet())
         } else {
-            headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
-                if (rows.isNotEmpty()) {
-                    combine(rows.map { it.isPinned }) { pins -> pins.any { it } }
-                } else {
-                    // if the set is empty, there are no flows to combine
-                    flowOf(false)
-                }
+            activeHeadsUpRows.map { it.map { (repo, _) -> repo }.toSet() }
+        }
+    }
+
+    /** Set of currently pinned top-level heads up rows to be displayed. */
+    val pinnedHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            activeHeadsUpRows.map {
+                it.filter { (_, isPinned) -> isPinned }.map { (repo, _) -> repo }.toSet()
             }
         }
     }
+
+    /** Are there any pinned heads up rows to display? */
+    val hasPinnedRows: Flow<Boolean> =
+        headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
+            if (rows.isNotEmpty()) {
+                combine(rows.map { it.pinnedStatus }) { pinnedStatus ->
+                    pinnedStatus.any { it.isPinned }
+                }
+            } else {
+                // if the set is empty, there are no flows to combine
+                flowOf(false)
+            }
+        }
 
     val isHeadsUpOrAnimatingAway: Flow<Boolean> by lazy {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
@@ -122,15 +138,10 @@ constructor(
             }
         }
 
-    val showHeadsUpStatusBar: Flow<Boolean> by lazy {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
-            flowOf(false)
-        } else {
-            combine(hasPinnedRows, canShowHeadsUp) { hasPinnedRows, canShowHeadsUp ->
-                hasPinnedRows && canShowHeadsUp
-            }
+    val showHeadsUpStatusBar =
+        combine(hasPinnedRows, canShowHeadsUp) { hasPinnedRows, canShowHeadsUp ->
+            hasPinnedRows && canShowHeadsUp
         }
-    }
 
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowInteractor =
         HeadsUpRowInteractor(key as HeadsUpRowRepository)

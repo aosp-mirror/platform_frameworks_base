@@ -21,6 +21,7 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
@@ -38,6 +39,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
@@ -72,7 +74,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /** The default view model used for showing the communal hub. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -89,13 +90,20 @@ constructor(
     private val keyguardIndicationController: KeyguardIndicationController,
     communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
-    communalSettingsInteractor: CommunalSettingsInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
     private val metricsLogger: CommunalMetricsLogger,
-) : BaseCommunalViewModel(communalSceneInteractor, communalInteractor, mediaHost) {
+    mediaCarouselController: MediaCarouselController,
+) :
+    BaseCommunalViewModel(
+        communalSceneInteractor,
+        communalInteractor,
+        mediaHost,
+        mediaCarouselController,
+    ) {
 
     private val logger = Logger(logBuffer, "CommunalViewModel")
 
@@ -125,15 +133,9 @@ constructor(
     private var frozenCommunalContent: List<CommunalContentModel>? = null
 
     private val ongoingContent =
-        combine(
-            isMediaHostVisible,
-            communalInteractor.ongoingContent.onEach { mediaHost.updateViewVisibility() }
-        ) { mediaVisible, ongoingContent ->
-            if (mediaVisible) {
-                ongoingContent
-            } else {
-                // Media is not visible, don't show UMO
-                ongoingContent.filterNot { it is CommunalContentModel.Umo }
+        isMediaHostVisible.flatMapLatest { isMediaHostVisible ->
+            communalInteractor.ongoingContent(isMediaHostVisible).onEach {
+                mediaHost.updateViewVisibility()
             }
         }
 
@@ -148,8 +150,7 @@ constructor(
                     ongoingContent,
                     communalInteractor.widgetContent,
                     communalInteractor.ctaTileContent,
-                ) { ongoing, widgets, ctaTile,
-                    ->
+                ) { ongoing, widgets, ctaTile ->
                     ongoing + widgets + ctaTile
                 }
             }
@@ -172,10 +173,10 @@ constructor(
         allOf(
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Communal,
-                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB,
                 ),
                 keyguardInteractor.isKeyguardOccluded,
-                not(keyguardInteractor.isAbleToDream)
+                not(keyguardInteractor.isAbleToDream),
             )
             .distinctUntilChanged()
             .onEach { logger.d("isCommunalContentFlowFrozen: $it") }
@@ -208,7 +209,7 @@ constructor(
         combine(
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Communal,
-                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB,
                 ),
                 communalInteractor.isIdleOnCommunal,
                 shadeInteractor.isAnyFullyExpanded,
@@ -221,7 +222,7 @@ constructor(
         object : View.AccessibilityDelegate() {
             override fun onInitializeAccessibilityNodeInfo(
                 host: View,
-                info: AccessibilityNodeInfo
+                info: AccessibilityNodeInfo,
             ) {
                 super.onInitializeAccessibilityNodeInfo(host, info)
                 // Hint user to long press in order to enter edit mode
@@ -230,7 +231,7 @@ constructor(
                         AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
                         resources
                             .getString(R.string.accessibility_action_label_edit_widgets)
-                            .lowercase()
+                            .lowercase(),
                     )
                 )
             }
@@ -238,7 +239,7 @@ constructor(
             override fun performAccessibilityAction(
                 host: View,
                 action: Int,
-                args: Bundle?
+                args: Bundle?,
             ): Boolean {
                 when (action) {
                     AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id -> {
@@ -271,9 +272,7 @@ constructor(
         }
     }
 
-    override fun onOpenWidgetEditor(
-        shouldOpenWidgetPickerOnStart: Boolean,
-    ) {
+    override fun onOpenWidgetEditor(shouldOpenWidgetPickerOnStart: Boolean) {
         persistScrollPosition()
         communalInteractor.showWidgetEditor(shouldOpenWidgetPickerOnStart)
     }
@@ -372,6 +371,9 @@ constructor(
     /** The type of background to use for the hub. */
     val communalBackground: Flow<CommunalBackgroundType> =
         communalSettingsInteractor.communalBackground
+
+    /** See [CommunalSettingsInteractor.isV2FlagEnabled] */
+    fun v2FlagEnabled(): Boolean = communalSettingsInteractor.isV2FlagEnabled()
 
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L

@@ -20,8 +20,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
-import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -29,13 +27,15 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.domain.interactor.PulseExpansionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
@@ -44,6 +44,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.NotificationShadeWindowModel
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
@@ -57,12 +58,9 @@ import javax.inject.Inject
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -84,12 +82,16 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    private val pulseExpansionInteractor: PulseExpansionInteractor,
     notificationShadeWindowModel: NotificationShadeWindowModel,
+    private val aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val alternateBouncerToLockscreenTransitionViewModel:
         AlternateBouncerToLockscreenTransitionViewModel,
+    private val alternateBouncerToOccludedTransitionViewModel:
+        AlternateBouncerToOccludedTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
@@ -114,9 +116,12 @@ constructor(
     private val lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     private val lockscreenToPrimaryBouncerTransitionViewModel:
         LockscreenToPrimaryBouncerTransitionViewModel,
+    private val occludedToAlternateBouncerTransitionViewModel:
+        OccludedToAlternateBouncerTransitionViewModel,
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
     private val occludedToDozingTransitionViewModel: OccludedToDozingTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    private val offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
     private val primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
@@ -126,10 +131,6 @@ constructor(
     private val aodAlphaViewModel: AodAlphaViewModel,
     private val shadeInteractor: ShadeInteractor,
 ) {
-    private var burnInJob: Job? = null
-    private val _burnInModel = MutableStateFlow(BurnInModel())
-    val burnInModel = _burnInModel.asStateFlow()
-
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .filter { it.to == AOD || it.to == LOCKSCREEN }
@@ -138,7 +139,7 @@ constructor(
     val goneToAodTransition =
         keyguardTransitionInteractor.transition(
             edge = Edge.create(Scenes.Gone, AOD),
-            edgeWithoutSceneContainer = Edge.create(GONE, AOD)
+            edgeWithoutSceneContainer = Edge.create(GONE, AOD),
         )
 
     private val goneToAodTransitionRunning: Flow<Boolean> =
@@ -174,6 +175,9 @@ constructor(
                     keyguardTransitionInteractor.isInTransition(
                         Edge.create(from = LOCKSCREEN, to = DREAMING)
                     ),
+                    keyguardTransitionInteractor.isInTransition(
+                        Edge.create(from = LOCKSCREEN, to = OCCLUDED)
+                    ),
                 ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
@@ -188,7 +192,7 @@ constructor(
                                 /* rangeMax = */ 1f,
                                 /* valueMin = */ 0f,
                                 /* valueMax = */ 0.2f,
-                                /* value = */ max(qsExpansion, shadeExpansion)
+                                /* value = */ max(qsExpansion, shadeExpansion),
                             )
                     emit(alpha)
                 }
@@ -203,6 +207,10 @@ constructor(
         anyOf(
             notificationShadeWindowModel.isKeyguardOccluded,
             communalInteractor.isIdleOnCommunal,
+            keyguardTransitionInteractor
+                .transitionValue(OFF)
+                .map { it > 1f - offToLockscreenTransitionViewModel.alphaStartAt }
+                .onStart { emit(false) },
             keyguardTransitionInteractor
                 .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                 .map { it == 1f }
@@ -230,6 +238,7 @@ constructor(
                         alternateBouncerToAodTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+                        alternateBouncerToOccludedTransitionViewModel.lockscreenAlpha,
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
@@ -252,14 +261,16 @@ constructor(
                         lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
                         lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+                        occludedToAlternateBouncerTransitionViewModel.lockscreenAlpha,
                         occludedToAodTransitionViewModel.lockscreenAlpha,
                         occludedToDozingTransitionViewModel.lockscreenAlpha,
                         occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+                        offToLockscreenTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToAodTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                     )
-                    .onStart { emit(1f) }
+                    .onStart { emit(0f) },
             ) { hideKeyguard, alpha ->
                 if (hideKeyguard) {
                     0f
@@ -279,30 +290,24 @@ constructor(
     /** For elements that appear and move during the animation -> AOD */
     val burnInLayerAlpha: Flow<Float> = aodAlphaViewModel.alpha
 
-    val translationY: Flow<Float> = burnInModel.map { it.translationY.toFloat() }
+    val translationY: Flow<Float> = aodBurnInViewModel.movement.map { it.translationY.toFloat() }
 
     val translationX: Flow<StateToValue> =
         merge(
-            burnInModel.map { StateToValue(to = AOD, value = it.translationX.toFloat()) },
+            aodBurnInViewModel.movement.map {
+                StateToValue(to = AOD, value = it.translationX.toFloat())
+            },
             lockscreenToGlanceableHubTransitionViewModel.keyguardTranslationX,
             glanceableHubToLockscreenTransitionViewModel.keyguardTranslationX,
         )
 
     fun updateBurnInParams(params: BurnInParameters) {
-        burnInJob?.cancel()
-
-        burnInJob =
-            applicationScope.launch("$TAG#aodBurnInViewModel") {
-                aodBurnInViewModel.movement(params).collect { _burnInModel.value = it }
-            }
+        aodBurnInViewModel.updateBurnInParams(params)
     }
 
     val scale: Flow<BurnInScaleViewModel> =
-        burnInModel.map {
-            BurnInScaleViewModel(
-                scale = it.scale,
-                scaleClockOnly = it.scaleClockOnly,
-            )
+        aodBurnInViewModel.movement.map {
+            BurnInScaleViewModel(scale = it.scale, scaleClockOnly = it.scaleClockOnly)
         }
 
     /** Is the notification icon container visible? */
@@ -315,11 +320,12 @@ constructor(
                     .onStart { emit(false) },
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Gone,
-                    stateWithoutSceneContainer = GONE
+                    stateWithoutSceneContainer = GONE,
                 ),
                 deviceEntryInteractor.isBypassEnabled,
                 areNotifsFullyHiddenAnimated(),
                 isPulseExpandingAnimated(),
+                aodNotificationIconViewModel.icons.map { it.visibleIcons.isNotEmpty() },
             ) { flows ->
                 val goneToAodTransitionRunning = flows[0] as Boolean
                 val isOnLockscreen = flows[1] as Boolean
@@ -327,6 +333,7 @@ constructor(
                 val isBypassEnabled = flows[3] as Boolean
                 val notifsFullyHidden = flows[4] as AnimatedValue<Boolean>
                 val pulseExpanding = flows[5] as AnimatedValue<Boolean>
+                val hasAodIcons = flows[6] as Boolean
 
                 when {
                     // Hide the AOD icons if we're not in the KEYGUARD state unless the screen off
@@ -338,15 +345,12 @@ constructor(
                     else ->
                         zip(notifsFullyHidden, pulseExpanding) {
                             areNotifsFullyHidden,
-                            isPulseExpanding,
-                            ->
+                            isPulseExpanding ->
                             when {
-                                // If we're bypassing, then we're visible
-                                isBypassEnabled -> true
+                                // If there are no notification icons to show, then it can be hidden
+                                !hasAodIcons -> false
                                 // If we are pulsing (and not bypassing), then we are hidden
                                 isPulseExpanding -> false
-                                // Besides bypass above, they should not be visible on lockscreen
-                                isOnLockscreen -> false
                                 // If notifs are fully gone, then we're visible
                                 areNotifsFullyHidden -> true
                                 // Otherwise, we're hidden
@@ -369,7 +373,7 @@ constructor(
 
     /** Is there an expanded pulse, are we animating in response? */
     private fun isPulseExpandingAnimated(): Flow<AnimatedValue<Boolean>> {
-        return notificationsKeyguardInteractor.isPulseExpanding
+        return pulseExpansionInteractor.isPulseExpanding
             .pairwise(initialValue = null)
             // If pulsing changes, start animating, unless it's the first emission
             .map { (prev, expanding) -> AnimatableEvent(expanding, startAnimating = prev != null) }
@@ -392,10 +396,7 @@ constructor(
                         !dozeParameters.alwaysOn -> false
                         // Don't animate when going to AOD if the display needs blanking.
                         dozeParameters.displayNeedsBlanking -> false
-                        // We only want the appear animations to happen when the notifications
-                        // get fully hidden, since otherwise the un-hide animation overlaps.
-                        newAodTransition() -> true
-                        else -> fullyHidden
+                        else -> true
                     }
                 AnimatableEvent(fullyHidden, animate)
             }

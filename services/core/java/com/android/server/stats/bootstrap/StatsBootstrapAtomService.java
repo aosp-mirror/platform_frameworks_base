@@ -42,31 +42,54 @@ public class StatsBootstrapAtomService extends IStatsBootstrapAtomService.Stub {
             return;
         }
         StatsEvent.Builder builder = StatsEvent.newBuilder().setAtomId(atom.atomId);
-        for (StatsBootstrapAtomValue value : atom.values) {
+        for (StatsBootstrapAtomValue atomValue : atom.values) {
+            StatsBootstrapAtomValue.Primitive value = atomValue.value;
             switch (value.getTag()) {
-                case StatsBootstrapAtomValue.boolValue:
+                case StatsBootstrapAtomValue.Primitive.boolValue:
                     builder.writeBoolean(value.getBoolValue());
                     break;
-                case StatsBootstrapAtomValue.intValue:
+                case StatsBootstrapAtomValue.Primitive.intValue:
                     builder.writeInt(value.getIntValue());
                     break;
-                case StatsBootstrapAtomValue.longValue:
+                case StatsBootstrapAtomValue.Primitive.longValue:
                     builder.writeLong(value.getLongValue());
                     break;
-                case StatsBootstrapAtomValue.floatValue:
+                case StatsBootstrapAtomValue.Primitive.floatValue:
                     builder.writeFloat(value.getFloatValue());
                     break;
-                case StatsBootstrapAtomValue.stringValue:
+                case StatsBootstrapAtomValue.Primitive.stringValue:
                     builder.writeString(value.getStringValue());
                     break;
-                case StatsBootstrapAtomValue.bytesValue:
+                case StatsBootstrapAtomValue.Primitive.bytesValue:
                     builder.writeByteArray(value.getBytesValue());
+                    break;
+                case StatsBootstrapAtomValue.Primitive.stringArrayValue:
+                    builder.writeStringArray(value.getStringArrayValue());
                     break;
                 default:
                     Slog.e(TAG, "Unexpected value type " + value.getTag()
                             + " when logging atom " + atom.atomId);
                     return;
 
+            }
+            StatsBootstrapAtomValue.Annotation[] annotations = atomValue.annotations;
+            for (StatsBootstrapAtomValue.Annotation annotation : atomValue.annotations) {
+                if (annotation.id != StatsBootstrapAtomValue.Annotation.Id.IS_UID) {
+                    Slog.e(TAG, "Unexpected annotation ID: " + annotation.id
+                            + ", for atom " + atom.atomId + ": only UIDs are supported!");
+                    return;
+                }
+
+                switch (annotation.value.getTag()) {
+                    case StatsBootstrapAtomValue.Annotation.Primitive.boolValue:
+                        builder.addBooleanAnnotation(
+                                annotation.id, annotation.value.getBoolValue());
+                        break;
+                    default:
+                        Slog.e(TAG, "Unexpected value type " + annotation.value.getTag()
+                                + " when logging UID for atom " + atom.atomId);
+                        return;
+                }
             }
         }
         StatsLog.write(builder.usePooledBuffer().build());

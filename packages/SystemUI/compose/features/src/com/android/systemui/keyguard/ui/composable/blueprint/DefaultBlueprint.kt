@@ -21,12 +21,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
@@ -42,6 +45,7 @@ import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.res.R
 import java.util.Optional
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -65,10 +69,7 @@ constructor(
     override val id: String = "default"
 
     @Composable
-    override fun SceneScope.Content(
-        viewModel: LockscreenContentViewModel,
-        modifier: Modifier,
-    ) {
+    override fun SceneScope.Content(viewModel: LockscreenContentViewModel, modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
@@ -80,22 +81,18 @@ constructor(
             with(notificationSection) { HeadsUpNotifications() }
         }
 
-        LockscreenLongPress(
-            viewModel = viewModel.touchHandling,
-            modifier = modifier,
-        ) { onSettingsMenuPlaced ->
+        LockscreenLongPress(viewModel = viewModel.touchHandling, modifier = modifier) {
+            onSettingsMenuPlaced ->
             Layout(
                 content = {
                     // Constrained to above the lock icon.
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         with(statusBarSection) {
                             StatusBar(
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(
-                                            horizontal = { unfoldTranslations.start.roundToInt() },
+                                            horizontal = { unfoldTranslations.start.roundToInt() }
                                         )
                             )
                         }
@@ -104,36 +101,51 @@ constructor(
                             with(topAreaSection) {
                                 DefaultClockLayout(
                                     smartSpacePaddingTop = viewModel::getSmartSpacePaddingTop,
+                                    isShadeLayoutWide = isShadeLayoutWide,
                                     modifier =
                                         Modifier.thenIf(isShadeLayoutWide) {
                                                 Modifier.fillMaxWidth(0.5f)
                                             }
                                             .graphicsLayer {
                                                 translationX = unfoldTranslations.start
-                                            }
+                                            },
                                 )
                             }
                             if (isShadeLayoutWide && !isBypassEnabled) {
                                 with(notificationSection) {
                                     Notifications(
                                         areNotificationsVisible = areNotificationsVisible,
-                                        isShadeLayoutWide = isShadeLayoutWide,
+                                        isShadeLayoutWide = true,
                                         burnInParams = null,
                                         modifier =
                                             Modifier.fillMaxWidth(0.5f)
                                                 .fillMaxHeight()
-                                                .align(alignment = Alignment.TopEnd)
+                                                .align(alignment = Alignment.TopEnd),
                                     )
                                 }
                             }
                         }
-                        if (!isShadeLayoutWide && !isBypassEnabled) {
-                            with(notificationSection) {
-                                Notifications(
-                                    areNotificationsVisible = areNotificationsVisible,
-                                    isShadeLayoutWide = isShadeLayoutWide,
-                                    burnInParams = null,
-                                    modifier = Modifier.weight(weight = 1f)
+
+                        val aodIconPadding: Dp =
+                            dimensionResource(R.dimen.below_clock_padding_start_icons)
+
+                        with(notificationSection) {
+                            if (!isShadeLayoutWide && !isBypassEnabled) {
+                                Box(modifier = Modifier.weight(weight = 1f)) {
+                                    AodNotificationIcons(
+                                        modifier =
+                                            Modifier.align(alignment = Alignment.TopStart)
+                                                .padding(start = aodIconPadding)
+                                    )
+                                    Notifications(
+                                        areNotificationsVisible = areNotificationsVisible,
+                                        isShadeLayoutWide = false,
+                                        burnInParams = null,
+                                    )
+                                }
+                            } else {
+                                AodNotificationIcons(
+                                    modifier = Modifier.padding(start = aodIconPadding)
                                 )
                             }
                         }
@@ -186,11 +198,7 @@ constructor(
                 val endShortcutMeasurable = measurables[4]
                 val settingsMenuMeasurable = measurables[5]
 
-                val noMinConstraints =
-                    constraints.copy(
-                        minWidth = 0,
-                        minHeight = 0,
-                    )
+                val noMinConstraints = constraints.copy(minWidth = 0, minHeight = 0)
                 val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
                 val lockIconBounds =
                     IntRect(
@@ -216,14 +224,8 @@ constructor(
                 val settingsMenuPlaceable = settingsMenuMeasurable.measure(noMinConstraints)
 
                 layout(constraints.maxWidth, constraints.maxHeight) {
-                    aboveLockIconPlaceable.place(
-                        x = 0,
-                        y = 0,
-                    )
-                    lockIconPlaceable.place(
-                        x = lockIconBounds.left,
-                        y = lockIconBounds.top,
-                    )
+                    aboveLockIconPlaceable.place(x = 0, y = 0)
+                    lockIconPlaceable.place(x = lockIconBounds.left, y = lockIconBounds.top)
                     belowLockIconPlaceable.place(
                         x = 0,
                         y = constraints.maxHeight - belowLockIconPlaceable.height,

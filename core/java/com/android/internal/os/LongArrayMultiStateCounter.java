@@ -30,9 +30,6 @@ import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * Performs per-state counting of multi-element values over time. The class' behavior is illustrated
  * by this example:
@@ -44,15 +41,14 @@ import java.util.concurrent.atomic.AtomicReference;
  *   counter.setState(1, 1000);
  *
  *   // At 3000 ms, the tracked values are updated to {30, 300}
- *   arrayContainer.setValues(new long[]{{30, 300}};
- *   counter.updateValues(arrayContainer, 3000);
+ *   counter.updateValues(arrayContainer, new long[]{{30, 300}, 3000);
  *
  *   // The values are distributed between states 0 and 1 according to the time
  *   // spent in those respective states. In this specific case, 1000 and 2000 ms.
- *   counter.getValues(arrayContainer, 0);
- *   // arrayContainer now has values {10, 100}
- *   counter.getValues(arrayContainer, 1);
- *   // arrayContainer now has values {20, 200}
+ *   counter.getCounts(array, 0);
+ *   // array now has values {10, 100}
+ *   counter.getCounts(array, 1);
+ *   // array now has values {20, 200}
  * </pre>
  *
  * The tracked values are expected to increase monotonically.
@@ -60,112 +56,9 @@ import java.util.concurrent.atomic.AtomicReference;
  * @hide
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("LongArrayMultiStateCounter_host")
+@RavenwoodRedirectionClass("LongArrayMultiStateCounter_ravenwood")
 public final class LongArrayMultiStateCounter implements Parcelable {
-
-    /**
-     * Container for a native equivalent of a long[].
-     */
-    @RavenwoodKeepWholeClass
-    @RavenwoodRedirectionClass("LongArrayContainer_host")
-    public static class LongArrayContainer {
-        private static NativeAllocationRegistry sRegistry;
-
-        // Visible to other objects in this package so that it can be passed to @CriticalNative
-        // methods.
-        final long mNativeObject;
-        private final int mLength;
-
-        public LongArrayContainer(int length) {
-            mLength = length;
-            mNativeObject = native_init(length);
-            registerNativeAllocation();
-        }
-
-        @RavenwoodReplace
-        private void registerNativeAllocation() {
-            if (sRegistry == null) {
-                synchronized (LongArrayMultiStateCounter.class) {
-                    if (sRegistry == null) {
-                        sRegistry = NativeAllocationRegistry.createMalloced(
-                                LongArrayContainer.class.getClassLoader(), native_getReleaseFunc());
-                    }
-                }
-            }
-            sRegistry.registerNativeAllocation(this, mNativeObject);
-        }
-
-        private void registerNativeAllocation$ravenwood() {
-            // No-op under ravenwood
-        }
-
-        /**
-         * Copies the supplied values into the underlying native array.
-         */
-        public void setValues(long[] array) {
-            if (array.length != mLength) {
-                throw new IllegalArgumentException(
-                        "Invalid array length: " + mLength + ", expected: " + mLength);
-            }
-            native_setValues(mNativeObject, array);
-        }
-
-        /**
-         * Copies the underlying native array values to the supplied array.
-         */
-        public void getValues(long[] array) {
-            if (array.length != mLength) {
-                throw new IllegalArgumentException(
-                        "Invalid array length: " + mLength + ", expected: " + mLength);
-            }
-            native_getValues(mNativeObject, array);
-        }
-
-        /**
-         * Combines contained values into a smaller array by aggregating them
-         * according to an index map.
-         */
-        public boolean combineValues(long[] array, int[] indexMap) {
-            if (indexMap.length != mLength) {
-                throw new IllegalArgumentException(
-                        "Wrong index map size " + indexMap.length + ", expected " + mLength);
-            }
-            return native_combineValues(mNativeObject, array, indexMap);
-        }
-
-        @Override
-        public String toString() {
-            final long[] array = new long[mLength];
-            getValues(array);
-            return Arrays.toString(array);
-        }
-
-        @CriticalNative
-        @RavenwoodRedirect
-        private static native long native_init(int length);
-
-        @CriticalNative
-        @RavenwoodRedirect
-        private static native long native_getReleaseFunc();
-
-        @FastNative
-        @RavenwoodRedirect
-        private static native void native_setValues(long nativeObject, long[] array);
-
-        @FastNative
-        @RavenwoodRedirect
-        private static native void native_getValues(long nativeObject, long[] array);
-
-        @FastNative
-        @RavenwoodRedirect
-        private static native boolean native_combineValues(long nativeObject, long[] array,
-                int[] indexMap);
-    }
-
     private static volatile NativeAllocationRegistry sRegistry;
-    private static final AtomicReference<LongArrayContainer> sTmpArrayContainer =
-            new AtomicReference<>();
-
     private final int mStateCount;
     private final int mLength;
 
@@ -257,13 +150,14 @@ public final class LongArrayMultiStateCounter implements Parcelable {
             throw new IllegalArgumentException(
                     "Invalid array length: " + values.length + ", expected: " + mLength);
         }
-        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
-        if (container == null || container.mLength != values.length) {
-            container = new LongArrayContainer(values.length);
-        }
-        container.setValues(values);
-        native_setValues(mNativeObject, state, container.mNativeObject);
-        sTmpArrayContainer.set(container);
+        native_setValues(mNativeObject, state, values);
+    }
+
+    /**
+     * Adds the supplied values to the current accumulated values in the counter.
+     */
+    public void incrementValues(long[] values, long timestampMs) {
+        native_incrementValues(mNativeObject, values, timestampMs);
     }
 
     /**
@@ -272,51 +166,22 @@ public final class LongArrayMultiStateCounter implements Parcelable {
      * since the previous call to updateValues.
      */
     public void updateValues(long[] values, long timestampMs) {
-        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
-        if (container == null || container.mLength != values.length) {
-            container = new LongArrayContainer(values.length);
+        if (values.length != mLength) {
+            throw new IllegalArgumentException(
+                    "Invalid array length: " + values.length + ", expected: " + mLength);
         }
-        container.setValues(values);
-        updateValues(container, timestampMs);
-        sTmpArrayContainer.set(container);
+        native_updateValues(mNativeObject, values, timestampMs);
     }
 
     /**
      * Adds the supplied values to the current accumulated values in the counter.
      */
-    public void incrementValues(long[] values, long timestampMs) {
-        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
-        if (container == null || container.mLength != values.length) {
-            container = new LongArrayContainer(values.length);
-        }
-        container.setValues(values);
-        native_incrementValues(mNativeObject, container.mNativeObject, timestampMs);
-        sTmpArrayContainer.set(container);
-    }
-
-    /**
-     * Sets the new values.  The delta between the previously set values and these values
-     * is distributed among the state according to the time the object spent in those states
-     * since the previous call to updateValues.
-     */
-    public void updateValues(LongArrayContainer longArrayContainer, long timestampMs) {
-        if (longArrayContainer.mLength != mLength) {
+    public void addCounts(long[] counts) {
+        if (counts.length != mLength) {
             throw new IllegalArgumentException(
-                    "Invalid array length: " + longArrayContainer.mLength + ", expected: "
-                            + mLength);
+                    "Invalid array length: " + counts.length + ", expected: " + mLength);
         }
-        native_updateValues(mNativeObject, longArrayContainer.mNativeObject, timestampMs);
-    }
-
-    /**
-     * Adds the supplied values to the current accumulated values in the counter.
-     */
-    public void addCounts(LongArrayContainer counts) {
-        if (counts.mLength != mLength) {
-            throw new IllegalArgumentException(
-                    "Invalid array length: " + counts.mLength + ", expected: " + mLength);
-        }
-        native_addCounts(mNativeObject, counts.mNativeObject);
+        native_addCounts(mNativeObject, counts);
     }
 
     /**
@@ -330,24 +195,15 @@ public final class LongArrayMultiStateCounter implements Parcelable {
      * Populates the array with the accumulated counts for the specified state.
      */
     public void getCounts(long[] counts, int state) {
-        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
-        if (container == null || container.mLength != counts.length) {
-            container = new LongArrayContainer(counts.length);
-        }
-        getCounts(container, state);
-        container.getValues(counts);
-        sTmpArrayContainer.set(container);
-    }
-
-    /**
-     * Populates longArrayContainer with the accumulated counts for the specified state.
-     */
-    public void getCounts(LongArrayContainer longArrayContainer, int state) {
         if (state < 0 || state >= mStateCount) {
             throw new IllegalArgumentException(
                     "State: " + state + ", outside the range: [0-" + mStateCount + "]");
         }
-        native_getCounts(mNativeObject, longArrayContainer.mNativeObject, state);
+        if (counts.length != mLength) {
+            throw new IllegalArgumentException(
+                    "Invalid array length: " + counts.length + ", expected: " + mLength);
+        }
+        native_getCounts(mNativeObject, counts, state);
     }
 
     @Override
@@ -365,18 +221,17 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         return 0;
     }
 
-    public static final Creator<LongArrayMultiStateCounter> CREATOR =
-            new Creator<LongArrayMultiStateCounter>() {
-                @Override
-                public LongArrayMultiStateCounter createFromParcel(Parcel in) {
-                    return new LongArrayMultiStateCounter(in);
-                }
+    public static final Creator<LongArrayMultiStateCounter> CREATOR = new Creator<>() {
+        @Override
+        public LongArrayMultiStateCounter createFromParcel(Parcel in) {
+            return new LongArrayMultiStateCounter(in);
+        }
 
-                @Override
-                public LongArrayMultiStateCounter[] newArray(int size) {
-                    return new LongArrayMultiStateCounter[size];
-                }
-            };
+        @Override
+        public LongArrayMultiStateCounter[] newArray(int size) {
+            return new LongArrayMultiStateCounter[size];
+        }
+    };
 
 
     @CriticalNative
@@ -401,34 +256,31 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     private static native void native_copyStatesFrom(long nativeObjectTarget,
             long nativeObjectSource);
 
-    @CriticalNative
+    @FastNative
     @RavenwoodRedirect
-    private static native void native_setValues(long nativeObject, int state,
-            long longArrayContainerNativeObject);
+    private static native void native_setValues(long nativeObject, int state, long[] values);
 
-    @CriticalNative
+    @FastNative
     @RavenwoodRedirect
-    private static native void native_updateValues(long nativeObject,
-            long longArrayContainerNativeObject, long timestampMs);
+    private static native void native_updateValues(long nativeObject, long[] values,
+            long timestampMs);
 
-    @CriticalNative
+    @FastNative
     @RavenwoodRedirect
-    private static native void native_incrementValues(long nativeObject,
-            long longArrayContainerNativeObject, long timestampMs);
+    private static native void native_incrementValues(long nativeObject, long[] values,
+            long timestampMs);
 
-    @CriticalNative
+    @FastNative
     @RavenwoodRedirect
-    private static native void native_addCounts(long nativeObject,
-            long longArrayContainerNativeObject);
+    private static native void native_addCounts(long nativeObject, long[] counts);
 
     @CriticalNative
     @RavenwoodRedirect
     private static native void native_reset(long nativeObject);
 
-    @CriticalNative
+    @FastNative
     @RavenwoodRedirect
-    private static native void native_getCounts(long nativeObject,
-            long longArrayContainerNativeObject, int state);
+    private static native void native_getCounts(long nativeObject, long[] counts, int state);
 
     @FastNative
     @RavenwoodRedirect

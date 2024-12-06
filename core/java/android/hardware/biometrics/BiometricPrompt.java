@@ -22,7 +22,6 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
-import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
 import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 
@@ -139,6 +138,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static final int DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS = 8;
 
     /**
+     * Dialog dismissal due to the system being unable to retrieve a WindowManager instance required
+     * to show the dialog.
+     * @hide
+     */
+    public static final int DISMISSED_REASON_ERROR_NO_WM = 9;
+
+    /**
      * @hide
      */
     @IntDef({DISMISSED_REASON_BIOMETRIC_CONFIRMED,
@@ -148,7 +154,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             DISMISSED_REASON_ERROR,
             DISMISSED_REASON_SERVER_REQUESTED,
             DISMISSED_REASON_CREDENTIAL_CONFIRMED,
-            DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS})
+            DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS,
+            DISMISSED_REASON_ERROR_NO_WM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface DismissedReason {}
 
@@ -192,7 +199,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param logoRes A drawable resource of the logo that will be shown on the prompt.
          * @return This builder.
          */
-        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoRes(@DrawableRes int logoRes) {
@@ -218,7 +224,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param logoBitmap A bitmap drawable of the logo that will be shown on the prompt.
          * @return This builder.
          */
-        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoBitmap(@NonNull Bitmap logoBitmap) {
@@ -242,7 +247,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return This builder.
          * @throws IllegalArgumentException If logo description is null.
          */
-        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoDescription(@NonNull String logoDescription) {
@@ -334,7 +338,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param view The customized view information.
          * @return This builder.
          */
-        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @NonNull
         public BiometricPrompt.Builder setContentView(@NonNull PromptContentView view) {
             mPromptInfo.setContentView(view);
@@ -843,7 +846,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      *
      * @return The drawable resource of the logo, or 0 if the prompt has no logo resource set.
      */
-    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
     @DrawableRes
     public int getLogoRes() {
@@ -856,7 +858,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      *
      * @return The logo bitmap of the prompt, or null if the prompt has no logo bitmap set.
      */
-    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
     @Nullable
     public Bitmap getLogoBitmap() {
@@ -871,7 +872,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @return The logo description of the prompt, or null if the prompt has no logo description
      * set.
      */
-    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
     @Nullable
     public String getLogoDescription() {
@@ -931,7 +931,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      *
      * @return The content view for the prompt, or null if the prompt has no content view.
      */
-    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
     @Nullable
     public PromptContentView getContentView() {
         return mPromptInfo.getContentView();

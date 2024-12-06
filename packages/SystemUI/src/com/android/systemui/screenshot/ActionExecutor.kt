@@ -26,7 +26,7 @@ import android.os.UserHandle
 import android.util.Log
 import android.util.Pair
 import android.view.Window
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.app.ChooserActivity
 import com.android.systemui.dagger.qualifiers.Application
 import dagger.assisted.Assisted

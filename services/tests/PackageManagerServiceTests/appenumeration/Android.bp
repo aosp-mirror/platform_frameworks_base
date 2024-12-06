@@ -32,6 +32,7 @@ android_test {
         "androidx.test.runner",
         "truth",
         "Harrier",
+        "bedstead-multiuser",
     ],
     platform_apis: true,
     certificate: "platform",

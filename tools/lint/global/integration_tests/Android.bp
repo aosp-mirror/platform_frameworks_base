@@ -38,7 +38,7 @@ java_library {
 
 python_library_host {
     name: "AndroidGlobalLintTestNoAidl_py",
-    data: [":AndroidGlobalLintTestNoAidl{.lint}"],
+    device_common_data: [":AndroidGlobalLintTestNoAidl{.lint}"],
     pkg_path: "no_aidl",
 }
 
@@ -53,7 +53,7 @@ java_library {
 
 python_library_host {
     name: "AndroidGlobalLintTestMissingAnnotation_py",
-    data: [":AndroidGlobalLintTestMissingAnnotation{.lint}"],
+    device_common_data: [":AndroidGlobalLintTestMissingAnnotation{.lint}"],
     pkg_path: "missing_annotation",
 }
 

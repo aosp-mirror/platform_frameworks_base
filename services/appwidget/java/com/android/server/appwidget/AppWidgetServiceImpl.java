@@ -16,8 +16,11 @@
 
 package com.android.server.appwidget;
 
+import static android.appwidget.flags.Flags.checkRemoteViewsUriPermission;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.appwidget.flags.Flags.remoteViewsProto;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
+import static android.appwidget.flags.Flags.securityPolicyInteractAcrossUsers;
 import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -30,8 +33,10 @@ import static com.android.server.appwidget.AppWidgetXmlUtil.serializeWidgetSizes
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionName;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -58,6 +63,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Intent.FilterComparison;
@@ -102,6 +108,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.service.appwidget.AppWidgetServiceDumpProto;
+import android.service.appwidget.GeneratedPreviewsProto;
 import android.service.appwidget.WidgetProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -120,7 +127,9 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 import android.view.Display;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -132,6 +141,7 @@ import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
@@ -142,6 +152,8 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.WidgetBackupProvider;
+import com.android.server.uri.GrantUri;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -179,11 +191,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Simple flag to enable/disable debug logging.
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
-    // String constants for XML schema migration related to changes in keyguard package.
-    private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
-    private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
-    private static final int KEYGUARD_HOST_ID = 0x4b455947;
-
     // Filename for app widgets state persisted on disk.
     private static final String STATE_FILENAME = "appwidgets.xml";
 
@@ -203,6 +210,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final int UNKNOWN_USER_ID = -10;
 
     // Version of XML schema for app widgets. Bump if the stored widgets need to be upgraded.
+    // Version 1 introduced in 2014 - Android 5.0
     private static final int CURRENT_VERSION = 1;
 
     // Every widget update request is associated which an increasing sequence number. This is
@@ -219,6 +227,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // XML attribute for widget ids that are pending deletion.
     // See {@link Provider#pendingDeletedWidgetIds}.
     private static final String PENDING_DELETED_IDS_ATTR = "pending_deleted_ids";
+    // Name of service directory in /data/system_ce/<user>/
+    private static final String APPWIDGET_CE_DATA_DIRNAME = "appwidget";
+    // Name of previews directory in /data/system_ce/<user>/appwidget/
+    private static final String WIDGET_PREVIEWS_DIRNAME = "previews";
 
     // Hard limit of number of hosts an app can create, note that the app that hosts the widgets
     // can have multiple instances of {@link AppWidgetHost}, typically in respect to different
@@ -235,6 +247,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
             if (DEBUG) {
@@ -314,6 +330,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     // Handler to the background thread that saves states to disk.
     private Handler mSaveStateHandler;
+
+    private Handler mAlarmHandler;
+    // Handler to the background thread that saves generated previews to disk. All operations that
+    // modify saved previews must be run on this Handler.
+    private Handler mSavePreviewsHandler;
     // Handler to the foreground thread that handles broadcasts related to user
     // and package events, as well as various internal events within
     // AppWidgetService.
@@ -354,9 +375,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (removeAppWidgetServiceIoFromCriticalPath()) {
             mSaveStateHandler = new Handler(BackgroundThread.get().getLooper(),
                     this::handleSaveMessage);
+            mAlarmHandler = new Handler(BackgroundThread.get().getLooper());
         } else {
             mSaveStateHandler = BackgroundThread.getHandler();
         }
+        mSavePreviewsHandler = new Handler(BackgroundThread.get().getLooper());
         final ServiceThread serviceThread = new ServiceThread(TAG,
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
         serviceThread.start();
@@ -376,7 +399,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_PROVIDERS,
                 DEFAULT_GENERATED_PREVIEW_MAX_PROVIDERS);
         mGeneratedPreviewsApiCounter = new ApiCounter(generatedPreviewResetInterval,
-                generatedPreviewMaxCallsPerInterval, generatedPreviewsMaxProviders);
+                generatedPreviewMaxCallsPerInterval,
+                // Set a limit on the number of providers if storing them in memory.
+                remoteViewsProto() ? Integer.MAX_VALUE : generatedPreviewsMaxProviders);
         DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mCallbackHandler), this::handleSystemUiDeviceConfigChange);
 
@@ -589,7 +614,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     // ... and see if these are hosts we've been awaiting.
                     // NOTE: We are backing up and restoring only the owner.
                     // TODO: http://b/22388012
-                    if (newPackageAdded && userId == UserHandle.USER_SYSTEM) {
+                    UserHandle mainUser = mUserManager.getMainUser();
+                    if (newPackageAdded && mainUser != null && userId == mainUser.getIdentifier()) {
                         final int uid = getUidForPackage(pkgName, userId);
                         if (uid >= 0 ) {
                             resolveHostUidLocked(pkgName, uid);
@@ -642,7 +668,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         for (int i = 0; i < providerCount; i++) {
             Provider provider = mProviders.get(i);
             if (provider.id.uid == clearedUid) {
-                changed |= provider.clearGeneratedPreviewsLocked();
+                if (remoteViewsProto()) {
+                    changed |= clearGeneratedPreviewsAsync(provider);
+                } else {
+                    changed |= provider.clearGeneratedPreviewsLocked();
+                }
+                if (DEBUG) {
+                    Slog.e(TAG, "clearPreviewsForUidLocked " + provider + " changed " + changed);
+                }
             }
         }
         return changed;
@@ -892,18 +925,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             for (int j = 0; j < widgetCount; j++) {
                 Widget widget = provider.widgets.get(j);
                 if (targetWidget != null && targetWidget != widget) continue;
+                // Identify the user in the host process since the intent will be invoked by
+                // the host app.
+                final Host host = widget.host;
+                final UserHandle hostUser;
+                if (host != null && host.id != null) {
+                    hostUser = UserHandle.getUserHandleForUid(host.id.uid);
+                } else {
+                    // Fallback to the parent profile if the host is null.
+                    Slog.w(TAG, "Host is null when masking widget: " + widget.appWidgetId);
+                    hostUser = mUserManager.getProfileParent(appUserId).getUserHandle();
+                }
                 if (provider.maskedByStoppedPackage) {
                     Intent intent = createUpdateIntentLocked(provider,
                             new int[] { widget.appWidgetId });
                     views.setOnClickPendingIntent(android.R.id.background,
-                            PendingIntent.getBroadcast(mContext, widget.appWidgetId,
+                            PendingIntent.getBroadcastAsUser(mContext, widget.appWidgetId,
                                     intent, PendingIntent.FLAG_UPDATE_CURRENT
-                                            | PendingIntent.FLAG_IMMUTABLE));
+                                            | PendingIntent.FLAG_IMMUTABLE, hostUser));
                 } else if (onClickIntent != null) {
                     views.setOnClickPendingIntent(android.R.id.background,
-                            PendingIntent.getActivity(mContext, widget.appWidgetId, onClickIntent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT
-                                       | PendingIntent.FLAG_IMMUTABLE));
+                            PendingIntent.getActivityAsUser(mContext, widget.appWidgetId,
+                            onClickIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                                    | PendingIntent.FLAG_IMMUTABLE, null /* options */,
+                            hostUser));
                 }
                 if (widget.replaceWithMaskedViewsLocked(views)) {
                     scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
@@ -1442,7 +1487,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * in {@link #allocateAppWidgetId}.
      *
      * @param callingPackage The package that calls this method.
-     * @param appWidgetId The id of theapp widget to bind.
+     * @param appWidgetId The id of the widget to bind.
      * @param providerProfileId The user/profile id of the provider.
      * @param providerComponent The {@link ComponentName} that provides the widget.
      * @param options The options to pass to the provider.
@@ -1467,9 +1512,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return false;
         }
 
-        // If the provider is not under the calling user, make sure this
-        // provider is allowlisted for access from the parent.
-        if (!mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+        // If the provider is not under the calling user, make sure this provider is allowlisted for
+        // access from the parent, or that the caller has permission to interact across users.
+        if (!mSecurityPolicy.canAccessProvider(
                 providerComponent.getPackageName(), providerProfileId)) {
             return false;
         }
@@ -1734,6 +1779,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return false;
     }
 
+    /**
+     * Called by a {@link AppWidgetHost} to remove all records (i.e. {@link Host}
+     * and all {@link Widget} associated with the host) from a specified host.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param hostId id of the {@link Host}.
+     * @see AppWidgetHost#deleteHost()
+     */
     @Override
     public void deleteHost(String callingPackage, int hostId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1767,6 +1820,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Called by a host process to remove all records (i.e. {@link Host}
+     * and all {@link Widget} associated with the host) from all hosts associated
+     * with the calling process.
+     *
+     * Typically used in clean up after test execution.
+     *
+     * @see AppWidgetHost#deleteAllHosts()
+     */
     @Override
     public void deleteAllHosts() {
         final int userId = UserHandle.getCallingUserId();
@@ -1801,6 +1863,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Returns the {@link AppWidgetProviderInfo} for the specified AppWidget.
+     *
+     * Typically used by launcher during the restore of an AppWidget, the binding
+     * of new AppWidget, and during grid size migration.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId   Id of the widget.
+     * @return The {@link AppWidgetProviderInfo} for the specified widget.
+     *
+     * @see AppWidgetManager#getAppWidgetInfo(int)
+     */
     @Override
     public AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1855,6 +1929,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Returns the most recent {@link RemoteViews} of the specified AppWidget.
+     * Typically serves as a cache of the content of the AppWidget.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId   Id of the widget.
+     * @return The {@link RemoteViews} of the specified widget.
+     *
+     * @see AppWidgetHost#updateAppWidgetDeferred(String, int)
+     * @see AppWidgetHost#setListener(int, AppWidgetHostListener)
+     */
     @Override
     public RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1882,6 +1967,29 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Update the extras for a given widget instance.
+     * <p>
+     * The extras can be used to embed additional information about this widget to be accessed
+     * by the associated widget's AppWidgetProvider.
+     *
+     * <p>
+     * The new options are merged into existing options using {@link Bundle#putAll} semantics.
+     *
+     * <p>
+     * Typically called by a {@link AppWidgetHost} (e.g. Launcher) to notify
+     * {@link AppWidgetProvider} regarding contextual changes (e.g. sizes) when rendering the
+     * widget.
+     * Calling this method would trigger onAppWidgetOptionsChanged() callback on the provider's
+     * side.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId Id of the widget.
+     * @param options New options associate with this widget.
+     *
+     * @see AppWidgetManager#getAppWidgetOptions(int, Bundle)
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
+     */
     @Override
     public void updateAppWidgetOptions(String callingPackage, int appWidgetId, Bundle options) {
         final int userId = UserHandle.getCallingUserId();
@@ -1915,6 +2023,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Get the extras associated with a given widget instance.
+     * <p>
+     * The extras can be used to embed additional information about this widget to be accessed
+     * by the associated widget's AppWidgetProvider.
+     *
+     * Typically called by a host process (e.g. Launcher) to determine if they need to update the
+     * options of the widget.
+     *
+     * @see #updateAppWidgetOptions(String, int, Bundle)
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId Id of the widget.
+     * @return The options associated with the specified widget instance.
+     */
     @Override
     public Bundle getAppWidgetOptions(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1942,6 +2065,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the content of the widgets (as specified by appWidgetIds) using the provided
+     * {@link RemoteViews}.
+     *
+     * Typically called by the provider's process. Either in response to the invocation of
+     * {@link AppWidgetProvider#onUpdate} or upon receiving the
+     * {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} broadcast.
+     *
+     * <p>
+     * Note that the RemoteViews parameter will be cached by the AppWidgetService, and hence should
+     * contain a complete representation of the widget. For performing partial widget updates, see
+     * {@link #partiallyUpdateAppWidgetIds(String, int[], RemoteViews)}.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetIds Ids of the widgets to be updated.
+     * @param views The RemoteViews object containing the update.
+     *
+     * @see AppWidgetProvider#onUpdate(Context, AppWidgetManager, int[])
+     * @see AppWidgetManager#ACTION_APPWIDGET_UPDATE
+     * @see AppWidgetManager#updateAppWidget(int, RemoteViews)
+     * @see AppWidgetManager#updateAppWidget(int[], RemoteViews)
+     */
     @Override
     public void updateAppWidgetIds(String callingPackage, int[] appWidgetIds,
             RemoteViews views) {
@@ -1952,6 +2097,27 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         updateAppWidgetIds(callingPackage, appWidgetIds, views, false);
     }
 
+    /**
+     * Perform an incremental update or command on the widget(s) specified by appWidgetIds.
+     * <p>
+     * This update  differs from {@link #updateAppWidgetIds(int[], RemoteViews)} in that the
+     * RemoteViews object which is passed is understood to be an incomplete representation of the
+     * widget, and hence does not replace the cached representation of the widget. As of API
+     * level 17, the new properties set within the views objects will be appended to the cached
+     * representation of the widget, and hence will persist.
+     *
+     * <p>
+     * This method will be ignored if a widget has not received a full update via
+     * {@link #updateAppWidget(int[], RemoteViews)}.
+     *
+     * @param callingPackage   The package that calls this method.
+     * @param appWidgetIds     Ids of the widgets to be updated.
+     * @param views            The RemoteViews object containing the incremental update / command.
+     *
+     * @see AppWidgetManager#partiallyUpdateAppWidget(int[], RemoteViews)
+     * @see RemoteViews#setDisplayedChild(int, int)
+     * @see RemoteViews#setScrollPosition(int, int)
+     */
     @Override
     public void partiallyUpdateAppWidgetIds(String callingPackage, int[] appWidgetIds,
             RemoteViews views) {
@@ -1962,6 +2128,24 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         updateAppWidgetIds(callingPackage, appWidgetIds, views, true);
     }
 
+    /**
+     * Callback function which marks specified providers as extended from AppWidgetProvider.
+     *
+     * This information is used to determine if the system can combine
+     * {@link AppWidgetManager#ACTION_APPWIDGET_ENABLED} and
+     * {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} into a single broadcast.
+     *
+     * Note: The system can only combine the two broadcasts if the provider is extended from
+     * AppWidgetProvider. When they do, they are expected to override the
+     * {@link AppWidgetProvider#onUpdate} callback function to provide updates, as opposed to
+     * listening for {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} broadcasts directly.
+     *
+     * @see AppWidgetManager#ACTION_APPWIDGET_ENABLED
+     * @see AppWidgetManager#ACTION_APPWIDGET_UPDATE
+     * @see AppWidgetManager#ACTION_APPWIDGET_ENABLE_AND_UPDATE
+     * @see AppWidgetProvider#onReceive(Context, Intent)
+     * @see #sendEnableAndUpdateIntentLocked
+     */
     @Override
     public void notifyProviderInheritance(@Nullable final ComponentName[] componentNames) {
         final int userId = UserHandle.getCallingUserId();
@@ -1996,6 +2180,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Notifies the specified collection view in all the specified AppWidget instances
+     * to invalidate their data.
+     *
+     * This method is effectively deprecated since
+     * {@link RemoteViews#setRemoteAdapter(int, Intent)} has been deprecated.
+     *
+     * @see AppWidgetManager#notifyAppWidgetViewDataChanged(int[], int)
+     */
     @Override
     public void notifyAppWidgetViewDataChanged(String callingPackage, int[] appWidgetIds,
             int viewId) {
@@ -2031,6 +2224,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the content of all widgets associated with given provider (as specified by
+     * componentName) using the provided {@link RemoteViews}.
+     *
+     * Typically called by the provider's process when there's an update that needs to be supplied
+     * to all instances of the widgets.
+     *
+     * @param componentName The component name of the provider.
+     * @param views The RemoteViews object containing the update.
+     *
+     * @see AppWidgetManager#updateAppWidget(ComponentName, RemoteViews)
+     */
     @Override
     public void updateAppWidgetProvider(ComponentName componentName, RemoteViews views) {
         final int userId = UserHandle.getCallingUserId();
@@ -2064,6 +2269,27 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the info for the supplied AppWidget provider. Apps can use this to change the default
+     * behavior of the widget based on the state of the app (e.g., if the user is logged in
+     * or not). Calling this API completely replaces the previous definition.
+     *
+     * <p>
+     * The manifest entry of the provider should contain an additional meta-data tag similar to
+     * {@link AppWidgetManager#META_DATA_APPWIDGET_PROVIDER} which should point to any alternative
+     * definitions for the provider.
+     *
+     * <p>
+     * This is persisted across device reboots and app updates. If this meta-data key is not
+     * present in the manifest entry, the info reverts to default.
+     *
+     * @param provider {@link ComponentName} for the {@link
+     *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param metaDataKey key for the meta-data tag pointing to the new provider info. Use null
+     *    to reset any previously set info.
+     *
+     * @see AppWidgetManager#updateAppWidgetProviderInfo(ComponentName, String)
+     */
     @Override
     public void updateAppWidgetProviderInfo(ComponentName componentName, String metadataKey) {
         final int userId = UserHandle.getCallingUserId();
@@ -2115,6 +2341,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Returns true if the default launcher app on the device (the one that currently
+     * holds the android.app.role.HOME role) can support pinning widgets
+     * (typically means adding widgets into home screen).
+     */
     @Override
     public boolean isRequestPinAppWidgetSupported() {
         synchronized (mLock) {
@@ -2129,6 +2360,44 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET);
     }
 
+    /**
+     * Request to pin an app widget on the current launcher. It's up to the launcher to accept this
+     * request (optionally showing a user confirmation). If the request is accepted, the caller will
+     * get a confirmation with extra {@link #EXTRA_APPWIDGET_ID}.
+     *
+     * <p>When a request is denied by the user, the caller app will not get any response.
+     *
+     * <p>Only apps with a foreground activity or a foreground service can call it.  Otherwise
+     * it'll throw {@link IllegalStateException}.
+     *
+     * <p>It's up to the launcher how to handle previous pending requests when the same package
+     * calls this API multiple times in a row.  It may ignore the previous requests,
+     * for example.
+     *
+     * <p>Launcher will not show the configuration activity associated with the provider in this
+     * case. The app could either show the configuration activity as a response to the callback,
+     * or show if before calling the API (various configurations can be encapsulated in
+     * {@code successCallback} to avoid persisting them before the widgetId is known).
+     *
+     * @param provider The {@link ComponentName} for the {@link
+     *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param extras If not null, this is passed to the launcher app. For eg {@link
+     *    #EXTRA_APPWIDGET_PREVIEW} can be used for a custom preview.
+     * @param successCallback If not null, this intent will be sent when the widget is created.
+     *
+     * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
+     *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
+     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature or if
+     *    calling app belongs to a user-profile with items restricted on home screen.
+     *
+     * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
+     * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)
+     * @see AppWidgetManager#isRequestPinAppWidgetSupported()
+     * @see AppWidgetManager#requestPinAppWidget(ComponentName, Bundle, PendingIntent)
+     *
+     * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
+     * service or when the user is locked.
+     */
     @Override
     public boolean requestPinAppWidget(String callingPackage, ComponentName componentName,
             Bundle extras, IntentSender resultSender) {
@@ -2180,6 +2449,24 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Gets the AppWidget providers for the given user profile. User profile can only
+     * be the current user or a profile of the current user. For example, the current
+     * user may have a corporate profile. In this case the parent user profile has a
+     * child profile, the corporate one.
+     *
+     * @param categoryFilter Will only return providers which register as any of the specified
+     *        specified categories. See {@link AppWidgetProviderInfo#widgetCategory}.
+     * @param profile A profile of the current user which to be queried. The user
+     *        is itself also a profile. If null, the providers only for the current user
+     *        are returned.
+     * @param packageName If specified, will only return providers from the given package.
+     * @return The installed providers.
+     *
+     * @see android.os.Process#myUserHandle()
+     * @see android.os.UserManager#getUserProfiles()
+     * @see AppWidgetManager#getInstalledProvidersForProfile(int, UserHandle, String)
+     */
     @Override
     public ParceledListSlice<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
             int profileId, String packageName) {
@@ -2226,7 +2513,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Add providers only for the requested profile that are allowlisted.
                 final int providerProfileId = info.getProfile().getIdentifier();
                 if (providerProfileId == profileId
-                        && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                        && mSecurityPolicy.canAccessProvider(
                         providerPackageName, providerProfileId)
                         && !mPackageManagerInternal.filterAppAccess(providerPackageName, callingUid,
                         profileId)) {
@@ -2238,6 +2525,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the content of the widgets (as specified by appWidgetIds) using the provided
+     * {@link RemoteViews}.
+     *
+     * If performing a partial update, the given RemoteViews object is merged into existing
+     * RemoteViews object.
+     *
+     * Fails silently if appWidgetIds is null or empty, or cannot found a widget with the given
+     * appWidgetId.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetIds Ids of the widgets to be updated.
+     * @param views The RemoteViews object containing the update.
+     * @param partially Whether it was a partial update.
+     *
+     * @see AppWidgetProvider#onUpdate(Context, AppWidgetManager, int[])
+     * @see AppWidgetManager#ACTION_APPWIDGET_UPDATE
+     * @see AppWidgetManager#updateAppWidget(int, RemoteViews)
+     * @see AppWidgetManager#updateAppWidget(int[], RemoteViews)
+     */
     private void updateAppWidgetIds(String callingPackage, int[] appWidgetIds,
             RemoteViews views, boolean partially) {
         final int userId = UserHandle.getCallingUserId();
@@ -2248,6 +2555,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         // Make sure the package runs under the caller uid.
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
+        // Make sure RemoteViews do not contain URIs that the caller cannot access.
+        if (checkRemoteViewsUriPermission()) {
+            checkRemoteViewsUris(views);
+        }
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
 
@@ -2267,12 +2578,62 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Checks that all of the Uris in the given RemoteViews are accessible to the caller.
+     */
+    private void checkRemoteViewsUris(RemoteViews views) {
+        UriGrantsManagerInternal uriGrantsManager = LocalServices.getService(
+                UriGrantsManagerInternal.class);
+        int callingUid = Binder.getCallingUid();
+        int callingUser = UserHandle.getCallingUserId();
+        views.visitUris(uri -> {
+            switch (uri.getScheme()) {
+                // Check that content:// URIs are accessible to the caller.
+                case ContentResolver.SCHEME_CONTENT:
+                    boolean canAccessUri = uriGrantsManager.checkUriPermission(
+                            GrantUri.resolve(callingUser, uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION), callingUid,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            /* isFullAccessForContentUri= */ true);
+                    if (!canAccessUri) {
+                        throw new SecurityException(
+                                "Provider uid " + callingUid + " cannot access URI " + uri);
+                    }
+                    break;
+                // android.resource:// URIs are always allowed.
+                case ContentResolver.SCHEME_ANDROID_RESOURCE:
+                    break;
+                // file:// and any other schemes are disallowed.
+                case ContentResolver.SCHEME_FILE:
+                default:
+                    throw new SecurityException("Disallowed URI " + uri + " in RemoteViews.");
+            }
+        });
+    }
+
+    /**
+     * Increment the counter of widget ids and return the new id.
+     *
+     * Typically called by {@link #allocateAppWidgetId} when a instance of widget is created,
+     * either as a result of being pinned by launcher or added during a restore.
+     *
+     * Note: A widget id is a monotonically increasing integer that uniquely identifies the widget
+     * instance.
+     *
+     * TODO: Revisit this method and determine whether we need to alter the widget id during
+     *       the restore since widget id mismatch potentially leads to some issues in the past.
+     */
     private int incrementAndGetAppWidgetIdLocked(int userId) {
         final int appWidgetId = peekNextAppWidgetIdLocked(userId) + 1;
         mNextAppWidgetIds.put(userId, appWidgetId);
         return appWidgetId;
     }
 
+    /**
+     * Called by {@link #readProfileStateFromFileLocked} when widgets/providers/hosts are loaded
+     * from disk, which ensures mNextAppWidgetIds is larger than any existing widget id for given
+     * user.
+     */
     private void setMinAppWidgetIdLocked(int userId, int minWidgetId) {
         final int nextAppWidgetId = peekNextAppWidgetIdLocked(userId);
         if (nextAppWidgetId < minWidgetId) {
@@ -2381,10 +2742,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         if (provider.broadcast != null) {
             final PendingIntent broadcast = provider.broadcast;
-            mSaveStateHandler.post(() -> {
-                    mAlarmManager.cancel(broadcast);
-                    broadcast.cancel();
-            });
+            Runnable cancelRunnable = () -> {
+                mAlarmManager.cancel(broadcast);
+                broadcast.cancel();
+            };
+            if (removeAppWidgetServiceIoFromCriticalPath()) {
+                mAlarmHandler.post(cancelRunnable);
+            } else {
+                mSaveStateHandler.post(cancelRunnable);
+            }
             provider.broadcast = null;
         }
     }
@@ -2961,6 +3327,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         deleteWidgetsLocked(provider, UserHandle.USER_ALL);
         mProviders.remove(provider);
         mGeneratedPreviewsApiCounter.remove(provider.id);
+        if (remoteViewsProto()) {
+            clearGeneratedPreviewsAsync(provider);
+        }
 
         // no need to send the DISABLE broadcast, since the receiver is gone anyway
         cancelBroadcastsLocked(provider);
@@ -3061,10 +3430,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // invariant and established the PendingIntent safely.
                 final long period = Math.max(info.updatePeriodMillis, MIN_UPDATE_PERIOD);
                 final PendingIntent broadcast = provider.broadcast;
-                mSaveStateHandler.post(() ->
+
+                Runnable repeatRunnable = () -> {
                     mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + period, period, broadcast)
-                );
+                            SystemClock.elapsedRealtime() + period, period, broadcast);
+                };
+                if (removeAppWidgetServiceIoFromCriticalPath()) {
+                    mAlarmHandler.post(repeatRunnable);
+                } else {
+                    mSaveStateHandler.post(repeatRunnable);
+                }
             }
         }
     }
@@ -3538,6 +3913,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 version = readProfileStateFromFileLocked(stream, profileId, loadedWidgets);
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to read state: " + e);
+            }
+
+            if (remoteViewsProto()) {
+                try {
+                    loadGeneratedPreviewCategoriesLocked(profileId);
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to read preview categories: " + e);
+                }
             }
         }
 
@@ -4097,19 +4480,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         int version = fromVersion;
 
-        // Update 1: keyguard moved from package "android" to "com.android.keyguard"
+        // Update 1: From version 0 to 1, was used from Android 4 to Android 5. It updated the
+        // location of the keyguard widget database. No modern device will have db version 0.
         if (version == 0) {
-            HostId oldHostId = new HostId(Process.myUid(),
-                    KEYGUARD_HOST_ID, OLD_KEYGUARD_HOST_PACKAGE);
-
-            Host host = lookupHostLocked(oldHostId);
-            if (host != null) {
-                final int uid = getUidForPackage(NEW_KEYGUARD_HOST_PACKAGE,
-                        UserHandle.USER_SYSTEM);
-                if (uid >= 0) {
-                    host.id = new HostId(uid, KEYGUARD_HOST_ID, NEW_KEYGUARD_HOST_PACKAGE);
-                }
-            }
+            Slog.e(TAG, "Found widget database with version 0, this should not be possible,"
+                    + " forcing upgrade to version 1");
 
             version = 1;
         }
@@ -4119,24 +4494,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static File getStateFile(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME);
-    }
-
     private static AtomicFile getSavedStateFile(int userId) {
-        File dir = Environment.getUserSystemDirectory(userId);
-        File settingsFile = getStateFile(userId);
-        if (!settingsFile.exists() && userId == UserHandle.USER_SYSTEM) {
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            // Migrate old data
-            File oldFile = new File("/data/system/" + STATE_FILENAME);
-            // Method doesn't throw an exception on failure. Ignore any errors
-            // in moving the file (like non-existence)
-            oldFile.renameTo(settingsFile);
-        }
-        return new AtomicFile(settingsFile);
+        return new AtomicFile(new File(Environment.getUserSystemDirectory(userId), STATE_FILENAME));
     }
 
     void onUserStopped(int userId) {
@@ -4308,6 +4667,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         keep.add(providerId);
                         // Use the new AppWidgetProviderInfo.
                         provider.setPartialInfoLocked(info);
+                        // Clear old previews
+                        if (remoteViewsProto()) {
+                            clearGeneratedPreviewsAsync(provider);
+                        } else {
+                            provider.clearGeneratedPreviewsLocked();
+                        }
                         // If it's enabled
                         final int M = provider.widgets.size();
                         if (M > 0) {
@@ -4599,6 +4964,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
         ensureWidgetCategoryCombinationIsValid(widgetCategory);
 
+        AndroidFuture<RemoteViews> result = null;
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(profileId);
             final int providerCount = mProviders.size();
@@ -4620,7 +4986,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final int callingUid = Binder.getCallingUid();
                 final String providerPackageName = componentName.getPackageName();
                 final boolean providerIsInCallerProfile =
-                        mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                        mSecurityPolicy.canAccessProvider(
                                 providerPackageName, providerProfileId);
                 final boolean shouldFilterAppAccess = mPackageManagerInternal.filterAppAccess(
                         providerPackageName, callingUid, providerProfileId);
@@ -4632,8 +4998,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 callingPackage);
                 if (providerIsInCallerProfile && !shouldFilterAppAccess
                         && (providerIsInCallerPackage || hasBindAppWidgetPermission)) {
-                    return provider.getGeneratedPreviewLocked(widgetCategory);
+                    if (remoteViewsProto()) {
+                        result = getGeneratedPreviewsAsync(provider, widgetCategory);
+                    } else {
+                        return provider.getGeneratedPreviewLocked(widgetCategory);
+                    }
                 }
+            }
+        }
+
+        if (result != null) {
+            try {
+                return result.get();
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to get generated previews Future result", e);
+                return null;
             }
         }
         // Either the provider does not exist or the caller does not have permission to access its
@@ -4665,8 +5044,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         providerComponent + " is not a valid AppWidget provider");
             }
             if (mGeneratedPreviewsApiCounter.tryApiCall(providerId)) {
-                provider.setGeneratedPreviewLocked(widgetCategories, preview);
-                scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                if (remoteViewsProto()) {
+                    setGeneratedPreviewsAsync(provider, widgetCategories, preview);
+                } else {
+                    provider.setGeneratedPreviewLocked(widgetCategories, preview);
+                    scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                }
                 return true;
             }
             return false;
@@ -4694,9 +5077,359 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 throw new IllegalArgumentException(
                         providerComponent + " is not a valid AppWidget provider");
             }
-            final boolean changed = provider.removeGeneratedPreviewLocked(widgetCategories);
-            if (changed) scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+
+            if (remoteViewsProto()) {
+                removeGeneratedPreviewsAsync(provider, widgetCategories);
+            } else {
+                final boolean changed = provider.removeGeneratedPreviewLocked(widgetCategories);
+                if (changed) scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+            }
         }
+    }
+
+    /**
+     * Return previews for the specified provider from a background thread. The result of the future
+     * is nullable.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private AndroidFuture<RemoteViews> getGeneratedPreviewsAsync(
+            @NonNull Provider provider, @AppWidgetProviderInfo.CategoryFlags int widgetCategory) {
+        AndroidFuture<RemoteViews> result = new AndroidFuture<>();
+        mSavePreviewsHandler.post(() -> {
+            SparseArray<RemoteViews> previews = loadGeneratedPreviews(provider);
+            for (int i = 0; i < previews.size(); i++) {
+                if ((widgetCategory & previews.keyAt(i)) != 0) {
+                    result.complete(previews.valueAt(i));
+                    return;
+                }
+            }
+            result.complete(null);
+        });
+        return result;
+    }
+
+    /**
+     * Set previews for the specified provider on a background thread.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void setGeneratedPreviewsAsync(@NonNull Provider provider, int widgetCategories,
+            @NonNull RemoteViews preview) {
+        mSavePreviewsHandler.post(() -> {
+            SparseArray<RemoteViews> previews = loadGeneratedPreviews(provider);
+            for (int flag : Provider.WIDGET_CATEGORY_FLAGS) {
+                if ((widgetCategories & flag) != 0) {
+                    previews.put(flag, preview);
+                }
+            }
+            saveGeneratedPreviews(provider, previews, /* notify= */ true);
+        });
+    }
+
+    /**
+     * Remove previews for the specified provider on a background thread.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void removeGeneratedPreviewsAsync(@NonNull Provider provider, int widgetCategories) {
+        mSavePreviewsHandler.post(() -> {
+            SparseArray<RemoteViews> previews = loadGeneratedPreviews(provider);
+            boolean changed = false;
+            for (int flag : Provider.WIDGET_CATEGORY_FLAGS) {
+                if ((widgetCategories & flag) != 0) {
+                    changed |= previews.removeReturnOld(flag) != null;
+                }
+            }
+            if (changed) {
+                saveGeneratedPreviews(provider, previews, /* notify= */ true);
+            }
+        });
+    }
+
+    /**
+     * Clear previews for the specified provider on a background thread. Returns true if changed
+     * (i.e. there are previews to clear). If returns true, the caller should schedule a providers
+     * changed notification.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private boolean clearGeneratedPreviewsAsync(@NonNull Provider provider) {
+        mSavePreviewsHandler.post(() -> {
+            saveGeneratedPreviews(provider, /* previews= */ null, /* notify= */ false);
+        });
+        return provider.info.generatedPreviewCategories != 0;
+    }
+
+    private void checkSavePreviewsThread() {
+        if (DEBUG && !mSavePreviewsHandler.getLooper().isCurrentThread()) {
+            throw new IllegalStateException("Only modify previews on the background thread");
+        }
+    }
+
+    /**
+     * Load previews from file for the given provider. If there are no previews, returns an empty
+     * SparseArray. Else, returns a SparseArray of the previews mapped by widget category.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private SparseArray<RemoteViews> loadGeneratedPreviews(@NonNull Provider provider) {
+        checkSavePreviewsThread();
+        try {
+            AtomicFile previewsFile = getWidgetPreviewsFile(provider);
+            if (!previewsFile.exists()) {
+                return new SparseArray<>();
+            }
+            ProtoInputStream input = new ProtoInputStream(previewsFile.readFully());
+            SparseArray<RemoteViews> entries = readGeneratedPreviewsFromProto(input);
+            SparseArray<RemoteViews> singleCategoryKeyedEntries = new SparseArray<>();
+            for (int i = 0; i < entries.size(); i++) {
+                int widgetCategories = entries.keyAt(i);
+                RemoteViews preview = entries.valueAt(i);
+                for (int flag : Provider.WIDGET_CATEGORY_FLAGS) {
+                    if ((widgetCategories & flag) != 0) {
+                        singleCategoryKeyedEntries.put(flag, preview);
+                    }
+                }
+            }
+            return singleCategoryKeyedEntries;
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to load generated previews for " + provider, e);
+            return new SparseArray<>();
+        }
+    }
+
+    /**
+     * This is called when loading profile/group state to populate
+     * AppWidgetProviderInfo.generatedPreviewCategories based on what previews are saved.
+     *
+     * This is the only time previews are read while not on mSavePreviewsHandler. It happens once
+     * per profile during initialization, before any calls to get/set/removeWidgetPreviewAsync
+     * happen for that profile.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @GuardedBy("mLock")
+    private void loadGeneratedPreviewCategoriesLocked(int profileId) throws IOException {
+        for (Provider provider : mProviders) {
+            if (provider.id.getProfile().getIdentifier() != profileId) {
+                continue;
+            }
+            AtomicFile previewsFile = getWidgetPreviewsFile(provider);
+            if (!previewsFile.exists()) {
+                continue;
+            }
+            ProtoInputStream input = new ProtoInputStream(previewsFile.readFully());
+            provider.info.generatedPreviewCategories = readGeneratedPreviewCategoriesFromProto(
+                    input);
+            if (DEBUG) {
+                Slog.i(TAG, TextUtils.formatSimple(
+                        "loadGeneratedPreviewCategoriesLocked %d %s categories %d", profileId,
+                        provider, provider.info.generatedPreviewCategories));
+            }
+        }
+    }
+
+    /**
+     * Save the given previews into storage.
+     *
+     * @param provider Provider for which to save previews
+     * @param previews Previews to save. If null or empty, clears any saved previews for this
+     *                 provider.
+     * @param notify If true, then this function will notify hosts of updated provider info.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void saveGeneratedPreviews(@NonNull Provider provider,
+            @Nullable SparseArray<RemoteViews> previews, boolean notify) {
+        checkSavePreviewsThread();
+        AtomicFile file = null;
+        FileOutputStream stream = null;
+        try {
+            file = getWidgetPreviewsFile(provider);
+            if (previews == null || previews.size() == 0) {
+                if (file.exists()) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Deleting widget preview file " + file);
+                    }
+                    file.delete();
+                }
+            } else {
+                if (DEBUG) {
+                    Slog.i(TAG, "Writing widget preview file " + file);
+                }
+                ProtoOutputStream out = new ProtoOutputStream();
+                writePreviewsToProto(out, previews);
+                stream = file.startWrite();
+                stream.write(out.getBytes());
+                file.finishWrite(stream);
+            }
+
+            synchronized (mLock) {
+                provider.updateGeneratedPreviewCategoriesLocked(previews);
+                if (notify) {
+                    scheduleNotifyGroupHostsForProvidersChangedLocked(provider.getUserId());
+                }
+            }
+        } catch (IOException e) {
+            if (file != null && stream != null) {
+                file.failWrite(stream);
+            }
+            Slog.w(TAG, "Failed to save widget previews for provider " + provider.id.componentName);
+        }
+    }
+
+
+    /**
+     * Write the given previews as a GeneratedPreviewsProto to the output stream.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    private void writePreviewsToProto(@NonNull ProtoOutputStream out,
+            @NonNull SparseArray<RemoteViews> generatedPreviews) {
+        // Collect RemoteViews mapped by hashCode in order to avoid writing duplicates.
+        SparseArray<Pair<Integer, RemoteViews>> previewsToWrite = new SparseArray<>();
+        for (int i = 0; i < generatedPreviews.size(); i++) {
+            int widgetCategory = generatedPreviews.keyAt(i);
+            RemoteViews views = generatedPreviews.valueAt(i);
+            if (!previewsToWrite.contains(views.hashCode())) {
+                previewsToWrite.put(views.hashCode(), new Pair<>(widgetCategory, views));
+            } else {
+                Pair<Integer, RemoteViews> entry = previewsToWrite.get(views.hashCode());
+                previewsToWrite.put(views.hashCode(),
+                        Pair.create(entry.first | widgetCategory, views));
+            }
+        }
+
+        for (int i = 0; i < previewsToWrite.size(); i++) {
+            final long token = out.start(GeneratedPreviewsProto.PREVIEWS);
+            Pair<Integer, RemoteViews> entry = previewsToWrite.valueAt(i);
+            out.write(GeneratedPreviewsProto.Preview.WIDGET_CATEGORIES, entry.first);
+            final long viewsToken = out.start(GeneratedPreviewsProto.Preview.VIEWS);
+            entry.second.writePreviewToProto(mContext, out);
+            out.end(viewsToken);
+            out.end(token);
+        }
+    }
+
+    /**
+     * Read a GeneratedPreviewsProto message from the input stream.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private SparseArray<RemoteViews> readGeneratedPreviewsFromProto(@NonNull ProtoInputStream input)
+            throws IOException {
+        SparseArray<RemoteViews> entries = new SparseArray<>();
+        while (input.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (input.getFieldNumber()) {
+                case (int) GeneratedPreviewsProto.PREVIEWS:
+                    final long token = input.start(GeneratedPreviewsProto.PREVIEWS);
+                    Pair<Integer, RemoteViews> entry = readSinglePreviewFromProto(input,
+                            /* skipViews= */ false);
+                    entries.put(entry.first, entry.second);
+                    input.end(token);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown field while reading GeneratedPreviewsProto! "
+                            + ProtoUtils.currentFieldToString(input));
+            }
+        }
+        return entries;
+    }
+
+    /**
+     * Read the widget categories from GeneratedPreviewsProto and return an int representing the
+     * combined widget categories of all the previews.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @AppWidgetProviderInfo.CategoryFlags
+    private int readGeneratedPreviewCategoriesFromProto(@NonNull ProtoInputStream input)
+            throws IOException {
+        int widgetCategories = 0;
+        while (input.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (input.getFieldNumber()) {
+                case (int) GeneratedPreviewsProto.PREVIEWS:
+                    final long token = input.start(GeneratedPreviewsProto.PREVIEWS);
+                    Pair<Integer, RemoteViews> entry = readSinglePreviewFromProto(input,
+                            /* skipViews= */ true);
+                    widgetCategories |= entry.first;
+                    input.end(token);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown field while reading GeneratedPreviewsProto! "
+                            + ProtoUtils.currentFieldToString(input));
+            }
+        }
+        return widgetCategories;
+    }
+
+    /**
+     * Read a single GeneratedPreviewsProto.Preview message from the input stream, and returns a
+     * pair of widget category and corresponding RemoteViews. If skipViews is true, this function
+     * will only read widget categories and the returned RemoteViews will be null.
+     */
+    @FlaggedApi(android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO)
+    @NonNull
+    private Pair<Integer, RemoteViews> readSinglePreviewFromProto(@NonNull ProtoInputStream input,
+            boolean skipViews) throws IOException {
+        int widgetCategories = 0;
+        RemoteViews views = null;
+        while (input.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (input.getFieldNumber()) {
+                case (int) GeneratedPreviewsProto.Preview.VIEWS:
+                    if (skipViews)  {
+                        // ProtoInputStream will skip over the nested message when nextField() is
+                        // called.
+                        continue;
+                    }
+                    final long token = input.start(GeneratedPreviewsProto.Preview.VIEWS);
+                    try {
+                        views = RemoteViews.createPreviewFromProto(mContext, input);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Unable to deserialize RemoteViews", e);
+                    }
+                    input.end(token);
+                    break;
+                case (int) GeneratedPreviewsProto.Preview.WIDGET_CATEGORIES:
+                    widgetCategories = input.readInt(
+                            GeneratedPreviewsProto.Preview.WIDGET_CATEGORIES);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown field while reading GeneratedPreviewsProto! "
+                            + ProtoUtils.currentFieldToString(input));
+            }
+        }
+        return Pair.create(widgetCategories, views);
+    }
+
+    /**
+     * Returns the file in which all generated previews for this provider are stored. This will be
+     * a path of the form:
+     *  {@literal /data/system_ce/<userId>/appwidget/previews/<package>-<class>-<uid>.binpb}
+     *
+     * This function will not create the file if it does not already exist.
+     */
+    @NonNull
+    private static AtomicFile getWidgetPreviewsFile(@NonNull Provider provider) throws IOException {
+        int userId = provider.getUserId();
+        File previewsDirectory = getWidgetPreviewsDirectory(userId);
+        File providerPreviews = Environment.buildPath(previewsDirectory,
+                TextUtils.formatSimple("%s-%s-%d.binpb", provider.id.componentName.getPackageName(),
+                        provider.id.componentName.getClassName(), provider.id.uid));
+        return new AtomicFile(providerPreviews);
+    }
+
+    /**
+     * Returns the widget previews directory for the given user, creating it if it does not exist.
+     * This will be a path of the form:
+     *  {@literal /data/system_ce/<userId>/appwidget/previews}
+     */
+    @NonNull
+    private static File getWidgetPreviewsDirectory(int userId) throws IOException {
+        File dataSystemCeDirectory = Environment.getDataSystemCeDirectory(userId);
+        File previewsDirectory = Environment.buildPath(dataSystemCeDirectory,
+                APPWIDGET_CE_DATA_DIRNAME, WIDGET_PREVIEWS_DIRNAME);
+        if (!previewsDirectory.exists()) {
+            if (!previewsDirectory.mkdirs()) {
+                throw new IOException("Unable to create widget preview directory "
+                        + previewsDirectory.getPath());
+            }
+        }
+        return previewsDirectory;
     }
 
     private static void ensureWidgetCategoryCombinationIsValid(int widgetCategories) {
@@ -4946,12 +5679,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return true;
             }
             final int userId = UserHandle.getUserId(uid);
-            if ((widget.host.getUserId() == userId || (widget.provider != null
-                    && widget.provider.getUserId() == userId))
-                && mContext.checkCallingPermission(android.Manifest.permission.BIND_APPWIDGET)
-                    == PackageManager.PERMISSION_GRANTED) {
-                // Apps that run in the same user as either the host or the provider and
-                // have the bind widget permission have access to the widget.
+            if ((widget.host.getUserId() == userId
+                    || (widget.provider != null && widget.provider.getUserId() == userId)
+                    || hasCallerInteractAcrossUsersPermission())
+                    && callerHasPermission(android.Manifest.permission.BIND_APPWIDGET)) {
+                // Access to the widget requires the app to:
+                // - Run in the same user as the host or provider, or have permission to interact
+                //   across users
+                // - Have bind widget permission
                 return true;
             }
             if (DEBUG) {
@@ -4968,8 +5703,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return getProfileParent(profileId) == parentId;
         }
 
-        public boolean isProviderInCallerOrInProfileAndWhitelListed(String packageName,
-                int profileId) {
+        /**
+         * The provider is accessible by the caller if any of the following is true:
+         * - The provider belongs to the caller
+         * - The provider belongs to a profile of the caller and is allowlisted
+         */
+        public boolean canAccessProvider(String packageName, int profileId) {
             final int callerId = UserHandle.getCallingUserId();
             if (profileId == callerId) {
                 return true;
@@ -5041,6 +5780,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
             return true;
         }
+
+        /** Returns true if the caller has permission to interact across users. */
+        public boolean hasCallerInteractAcrossUsersPermission() {
+            if (!securityPolicyInteractAcrossUsers()) {
+                return false;
+            }
+
+            return callerHasPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+                    || callerHasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        }
+
+        private boolean callerHasPermission(@NonNull @PermissionName String permission) {
+            return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        }
     }
 
     static final class Provider {
@@ -5109,11 +5862,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
                     }
                     if (newInfo != null) {
+                        newInfo.generatedPreviewCategories = info.generatedPreviewCategories;
                         info = newInfo;
                         if (DEBUG) {
                             Objects.requireNonNull(info);
                         }
-                        updateGeneratedPreviewCategoriesLocked();
                     }
                 }
                 mInfoParsed = true;
@@ -5170,7 +5923,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     generatedPreviews.put(flag, preview);
                 }
             }
-            updateGeneratedPreviewCategoriesLocked();
+            updateGeneratedPreviewCategoriesLocked(generatedPreviews);
         }
 
         @GuardedBy("this.mLock")
@@ -5182,7 +5935,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
             if (changed) {
-                updateGeneratedPreviewCategoriesLocked();
+                updateGeneratedPreviewCategoriesLocked(generatedPreviews);
             }
             return changed;
         }
@@ -5191,17 +5944,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public boolean clearGeneratedPreviewsLocked() {
             if (generatedPreviews.size() > 0) {
                 generatedPreviews.clear();
-                updateGeneratedPreviewCategoriesLocked();
+                updateGeneratedPreviewCategoriesLocked(generatedPreviews);
                 return true;
             }
             return false;
         }
-
         @GuardedBy("this.mLock")
-        private void updateGeneratedPreviewCategoriesLocked() {
+        private void updateGeneratedPreviewCategoriesLocked(
+                @Nullable SparseArray<RemoteViews> previews) {
             info.generatedPreviewCategories = 0;
-            for (int i = 0; i < generatedPreviews.size(); i++) {
-                info.generatedPreviewCategories |= generatedPreviews.keyAt(i);
+            if (previews != null) {
+                for (int i = 0; i < previews.size(); i++) {
+                    info.generatedPreviewCategories |= previews.keyAt(i);
+                }
             }
         }
 

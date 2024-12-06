@@ -32,6 +32,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.PromptInfo;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -72,6 +73,7 @@ class PreAuthInfo {
     final boolean confirmationRequested;
     final boolean ignoreEnrollmentState;
     final int userId;
+    final int callingUserId;
     final Context context;
     private final boolean mBiometricRequested;
     private final int mBiometricStrengthRequested;
@@ -82,7 +84,7 @@ class PreAuthInfo {
     private PreAuthInfo(boolean biometricRequested, int biometricStrengthRequested,
             boolean credentialRequested, List<BiometricSensor> eligibleSensors,
             List<Pair<BiometricSensor, Integer>> ineligibleSensors, boolean credentialAvailable,
-            PromptInfo promptInfo, int userId, Context context,
+            PromptInfo promptInfo, int userId, int callingUserId, Context context,
             BiometricCameraManager biometricCameraManager,
             boolean isOnlyMandatoryBiometricsRequested,
             boolean isMandatoryBiometricsAuthentication) {
@@ -97,6 +99,7 @@ class PreAuthInfo {
         this.confirmationRequested = promptInfo.isConfirmationRequested();
         this.ignoreEnrollmentState = promptInfo.isIgnoreEnrollmentState();
         this.userId = userId;
+        this.callingUserId = callingUserId;
         this.context = context;
         this.mOnlyMandatoryBiometricsRequested = isOnlyMandatoryBiometricsRequested;
         this.mIsMandatoryBiometricsAuthentication = isMandatoryBiometricsAuthentication;
@@ -108,16 +111,24 @@ class PreAuthInfo {
             List<BiometricSensor> sensors,
             int userId, PromptInfo promptInfo, String opPackageName,
             boolean checkDevicePolicyManager, Context context,
-            BiometricCameraManager biometricCameraManager)
+            BiometricCameraManager biometricCameraManager,
+            UserManager userManager)
             throws RemoteException {
 
         final boolean isOnlyMandatoryBiometricsRequested = promptInfo.getAuthenticators()
-                == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+                == BiometricManager.Authenticators.IDENTITY_CHECK;
         boolean isMandatoryBiometricsAuthentication = false;
+
+        final int effectiveUserId;
+        if (Flags.effectiveUserBp()) {
+            effectiveUserId = userManager.getCredentialOwnerProfile(userId);
+        } else {
+            effectiveUserId = userId;
+        }
 
         if (dropCredentialFallback(promptInfo.getAuthenticators(),
                 settingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
-                        userId), trustManager)) {
+                        effectiveUserId), trustManager)) {
             isMandatoryBiometricsAuthentication = true;
             promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
             if (promptInfo.getNegativeButtonText() == null) {
@@ -145,10 +156,9 @@ class PreAuthInfo {
             for (BiometricSensor sensor : sensors) {
 
                 @AuthenticatorStatus int status = getStatusForBiometricAuthenticator(
-                        devicePolicyManager, settingObserver, sensor, userId, opPackageName,
-                        checkDevicePolicyManager, requestedStrength,
-                        promptInfo.getAllowedSensorIds(),
-                        promptInfo.isIgnoreEnrollmentState(),
+                        devicePolicyManager, settingObserver, sensor, effectiveUserId,
+                        opPackageName, checkDevicePolicyManager, requestedStrength,
+                        promptInfo.getAllowedSensorIds(), promptInfo.isIgnoreEnrollmentState(),
                         biometricCameraManager);
 
                 Slog.d(TAG, "Package: " + opPackageName
@@ -172,16 +182,16 @@ class PreAuthInfo {
         }
 
         return new PreAuthInfo(biometricRequested, requestedStrength, credentialRequested,
-                eligibleSensors, ineligibleSensors, credentialAvailable, promptInfo, userId,
-                context, biometricCameraManager, isOnlyMandatoryBiometricsRequested,
-                isMandatoryBiometricsAuthentication);
+                eligibleSensors, ineligibleSensors, credentialAvailable, promptInfo,
+                effectiveUserId, userId, context, biometricCameraManager,
+                isOnlyMandatoryBiometricsRequested, isMandatoryBiometricsAuthentication);
     }
 
     private static boolean dropCredentialFallback(int authenticators,
             boolean isMandatoryBiometricsEnabled, ITrustManager trustManager) {
         final boolean isMandatoryBiometricsRequested =
-                (authenticators & BiometricManager.Authenticators.MANDATORY_BIOMETRICS)
-                        == BiometricManager.Authenticators.MANDATORY_BIOMETRICS;
+                (authenticators & BiometricManager.Authenticators.IDENTITY_CHECK)
+                        == BiometricManager.Authenticators.IDENTITY_CHECK;
         if (Flags.mandatoryBiometrics() && isMandatoryBiometricsEnabled
                 && isMandatoryBiometricsRequested) {
             try {
@@ -216,10 +226,6 @@ class PreAuthInfo {
             return BIOMETRIC_NO_HARDWARE;
         }
 
-        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
-            return BIOMETRIC_HARDWARE_NOT_DETECTED;
-        }
-
         final boolean wasStrongEnough =
                 Utils.isAtLeastStrength(sensor.oemStrength, requestedStrength);
         final boolean isStrongEnough =
@@ -229,6 +235,10 @@ class PreAuthInfo {
             return BIOMETRIC_INSUFFICIENT_STRENGTH_AFTER_DOWNGRADE;
         } else if (!wasStrongEnough) {
             return BIOMETRIC_INSUFFICIENT_STRENGTH;
+        }
+
+        if (sensor.modality == TYPE_FACE && biometricCameraManager.isAnyCameraUnavailable()) {
+            return BIOMETRIC_HARDWARE_NOT_DETECTED;
         }
 
         try {

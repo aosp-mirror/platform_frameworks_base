@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -401,6 +402,11 @@ static void get_cpuset_cores_for_policy(SchedPolicy policy, cpu_set_t *cpu_set)
         case SP_AUDIO_SYS:
         case SP_RT_APP:
             if (!CgroupGetAttributePath("HighCapacityCPUs", &filename)) {
+                return;
+            }
+            break;
+        case SP_FOREGROUND_WINDOW:
+            if (!CgroupGetAttributePath("HighCapacityWICPUs", &filename)) {
                 return;
             }
             break;
@@ -1003,6 +1009,8 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
                 }
             }
             if ((mode&PROC_OUT_STRING) != 0 && di < NS) {
+                std::replace_if(buffer+start, buffer+end,
+                                [](unsigned char c){ return !std::isprint(c); }, '?');
                 jstring str = env->NewStringUTF(buffer+start);
                 env->SetObjectArrayElement(outStrings, di, str);
             }

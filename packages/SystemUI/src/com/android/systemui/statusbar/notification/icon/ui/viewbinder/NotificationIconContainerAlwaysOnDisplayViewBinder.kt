@@ -17,11 +17,13 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
@@ -30,7 +32,6 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
 
 /** Binds a [NotificationIconContainer] to a [NotificationIconContainerAlwaysOnDisplayViewModel]. */
 class NotificationIconContainerAlwaysOnDisplayViewBinder
@@ -38,7 +39,7 @@ class NotificationIconContainerAlwaysOnDisplayViewBinder
 constructor(
     private val viewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
-    private val configuration: ConfigurationState,
+    @ShadeDisplayAware private val configuration: ConfigurationState,
     private val failureTracker: StatusBarIconViewBindingFailureTracker,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val systemBarUtilsState: SystemBarUtilsState,

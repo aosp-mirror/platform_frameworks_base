@@ -1,0 +1,57 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_framework_android_multiuser",
+}
+
+java_library_host {
+    name: "libcached-property-annotation-processor",
+    srcs: [
+        ":framework-annotations",
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "codegen-version-info",
+        "android.multiuser.flags-aconfig-java-host",
+        "guava",
+    ],
+    use_tools_jar: true,
+}
+
+java_plugin {
+    name: "cached-property-annotation-processor",
+    processor_class: "android.processor.property_cache.CachedPropertyProcessor",
+    static_libs: ["libcached-property-annotation-processor"],
+}
+
+java_aconfig_library {
+    name: "android.multiuser.flags-aconfig-java-host",
+    aconfig_declarations: "android.multiuser.flags-aconfig",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_test_host {
+    name: "cached-property-annotation-processor-test",
+    srcs: ["test/java/**/*.java"],
+    java_resources: [":CachedPropertyAnnotationJavaTestSource"],
+    static_libs: [
+        "compile-testing-prebuilt",
+        "truth",
+        "junit",
+        "guava",
+        "libcached-property-annotation-processor",
+    ],
+    test_suites: ["general-tests"],
+}
+
+filegroup {
+    name: "CachedPropertyAnnotationJavaTestSource",
+    srcs: ["test/resources/*.java"],
+    path: "test/resources/",
+    visibility: ["//visibility:private"],
+}

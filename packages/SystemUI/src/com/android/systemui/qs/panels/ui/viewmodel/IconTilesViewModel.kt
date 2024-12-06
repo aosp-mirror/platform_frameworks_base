@@ -25,17 +25,20 @@ import kotlinx.coroutines.flow.StateFlow
 interface IconTilesViewModel {
     val largeTiles: StateFlow<Set<TileSpec>>
 
+    val largeTilesSpan: StateFlow<Int>
+
     fun isIconTile(spec: TileSpec): Boolean
 
-    fun resize(spec: TileSpec)
+    fun resize(spec: TileSpec, toIcon: Boolean)
 }
 
 @SysUISingleton
 class IconTilesViewModelImpl @Inject constructor(private val interactor: IconTilesInteractor) :
     IconTilesViewModel {
     override val largeTiles = interactor.largeTilesSpecs
+    override val largeTilesSpan = interactor.largeTilesSpan
 
     override fun isIconTile(spec: TileSpec): Boolean = interactor.isIconTile(spec)
 
-    override fun resize(spec: TileSpec) = interactor.resize(spec)
+    override fun resize(spec: TileSpec, toIcon: Boolean) = interactor.resize(spec, toIcon)
 }

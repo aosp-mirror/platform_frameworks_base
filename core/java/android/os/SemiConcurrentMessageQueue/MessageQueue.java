@@ -29,6 +29,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,7 +52,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("MessageQueue_host")
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG = "SemiConcurrentMessageQueue";
     private static final boolean DEBUG = false;
@@ -712,7 +714,7 @@ public final class MessageQueue {
                 // Idle handles only run if the queue is empty or if the first message
                 // in the queue (possibly a barrier) is due to be handled in the future.
                 if (pendingIdleHandlerCount < 0
-                        && mNextPollTimeoutMillis != 0) {
+                        && isIdle()) {
                     pendingIdleHandlerCount = mIdleHandlers.size();
                 }
                 if (pendingIdleHandlerCount <= 0) {
@@ -1249,6 +1251,7 @@ public final class MessageQueue {
                 mMatchAllFutureMessages, true);
     }
 
+    @NeverCompile
     private void printPriorityQueueNodes() {
         Iterator<MessageNode> iterator = mPriorityQueue.iterator();
 
@@ -1260,6 +1263,7 @@ public final class MessageQueue {
         }
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(PriorityQueue<MessageNode> queue, Printer pw, String prefix,
             Handler h, int n) {
         int count = 0;
@@ -1275,6 +1279,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dump(Printer pw, String prefix, Handler h) {
         long now = SystemClock.uptimeMillis();
         int n = 0;
@@ -1307,6 +1312,7 @@ public final class MessageQueue {
                 + ", quitting=" + (boolean) sQuitting.getVolatile(this) + ")");
     }
 
+    @NeverCompile
     private int dumpPriorityQueue(PriorityQueue<MessageNode> queue, ProtoOutputStream proto) {
         int count = 0;
 
@@ -1318,6 +1324,7 @@ public final class MessageQueue {
         return count;
     }
 
+    @NeverCompile
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long messageQueueToken = proto.start(fieldId);
 

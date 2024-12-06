@@ -30,14 +30,13 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class RavenwoodCommonUtils {
-    private static final String TAG = "RavenwoodCommonUtils";
+    public static final String TAG = "Ravenwood";
 
     private RavenwoodCommonUtils() {
     }
-
-    private static final Object sLock = new Object();
 
     /**
      * If set to "1", we enable the verbose logging.
@@ -46,9 +45,6 @@ public class RavenwoodCommonUtils {
      */
     public static final boolean RAVENWOOD_VERBOSE_LOGGING = "1".equals(System.getenv(
             "RAVENWOOD_VERBOSE"));
-
-    /** Name of `libravenwood_runtime` */
-    private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
 
     /** Directory name of `out/host/linux-x86/testcases/ravenwood-runtime` */
     private static final String RAVENWOOD_RUNTIME_DIR_NAME = "ravenwood-runtime";
@@ -63,14 +59,13 @@ public class RavenwoodCommonUtils {
     public static final String RAVENWOOD_SYSPROP = "ro.is_on_ravenwood";
 
     public static final String RAVENWOOD_RESOURCE_APK = "ravenwood-res-apks/ravenwood-res.apk";
+    public static final String RAVENWOOD_INST_RESOURCE_APK =
+            "ravenwood-res-apks/ravenwood-inst-res.apk";
 
     public static final String RAVENWOOD_EMPTY_RESOURCES_APK =
             RAVENWOOD_RUNTIME_PATH + "ravenwood-data/ravenwood-empty-res.apk";
 
     public static final String RAVENWOOD_VERSION_JAVA_SYSPROP = "android.ravenwood.version";
-
-    // @GuardedBy("sLock")
-    private static boolean sIntegrityChecked = false;
 
     /**
      * @return if we're running on Ravenwood.
@@ -108,29 +103,21 @@ public class RavenwoodCommonUtils {
     }
 
     /**
-     * Load the main runtime JNI library.
-     */
-    public static void loadRavenwoodNativeRuntime() {
-        ensureOnRavenwood();
-        loadJniLibrary(RAVENWOOD_NATIVE_RUNTIME_NAME);
-    }
-
-    /**
      * Internal implementation of
      * {@link android.platform.test.ravenwood.RavenwoodUtils#loadJniLibrary(String)}
      */
     public static void loadJniLibrary(String libname) {
         if (RavenwoodCommonUtils.isOnRavenwood()) {
-            loadJniLibraryInternal(libname);
+            System.load(getJniLibraryPath(libname));
         } else {
             System.loadLibrary(libname);
         }
     }
 
     /**
-     * Function equivalent to ART's System.loadLibrary. See RavenwoodUtils for why we need it.
+     * Find the shared library path from java.library.path.
      */
-    private static void loadJniLibraryInternal(String libname) {
+    public static String getJniLibraryPath(String libname) {
         var path = System.getProperty("java.library.path");
         var filename = "lib" + libname + ".so";
 
@@ -138,22 +125,21 @@ public class RavenwoodCommonUtils {
 
         try {
             if (path == null) {
-                throw new UnsatisfiedLinkError("Cannot load library " + libname + "."
+                throw new UnsatisfiedLinkError("Cannot find library " + libname + "."
                         + " Property java.library.path not set!");
             }
             for (var dir : path.split(":")) {
                 var file = new File(dir + "/" + filename);
                 if (file.exists()) {
-                    System.load(file.getAbsolutePath());
-                    return;
+                    return file.getAbsolutePath();
                 }
             }
-            throw new UnsatisfiedLinkError("Library " + libname + " not found in "
-                    + "java.library.path: " + path);
         } catch (Throwable e) {
             dumpFiles(System.out);
             throw e;
         }
+        throw new UnsatisfiedLinkError("Library " + libname + " not found in "
+                + "java.library.path: " + path);
     }
 
     private static void dumpFiles(PrintStream out) {
@@ -292,11 +278,55 @@ public class RavenwoodCommonUtils {
                 (isStatic ? "static" : "")));
     }
 
+    /**
+     * Run a supplier and swallow the exception, if any.
+     *
+     * It's a dangerous function. Only use it in an exception handler where we don't want to crash.
+     */
+    @Nullable
+    public static <T> T runIgnoringException(@NonNull Supplier<T> s) {
+        try {
+            return s.get();
+        } catch (Throwable th) {
+            log(TAG, "Warning: Exception detected! " + getStackTraceString(th));
+        }
+        return null;
+    }
+
+    /**
+     * Run a runnable and swallow the exception, if any.
+     *
+     * It's a dangerous function. Only use it in an exception handler where we don't want to crash.
+     */
+    public static void runIgnoringException(@NonNull Runnable r) {
+        runIgnoringException(() -> {
+            r.run();
+            return null;
+        });
+    }
+
     @NonNull
-    public static String getStackTraceString(@Nullable Throwable th) {
+    public static String getStackTraceString(@NonNull Throwable th) {
         StringWriter stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
         th.printStackTrace(writer);
         return stringWriter.toString();
+    }
+
+    /** Same as {@link Integer#parseInt(String)} but accepts null and returns null. */
+    @Nullable
+    public static Integer parseNullableInt(@Nullable String value) {
+        if (value == null) {
+            return null;
+        }
+        return Integer.parseInt(value);
+    }
+
+    /**
+     * @return {@code value} if it's non-null. Otherwise, returns {@code def}.
+     */
+    @Nullable
+    public static <T> T withDefault(@Nullable T value, @Nullable T def) {
+        return value != null ? value : def;
     }
 }

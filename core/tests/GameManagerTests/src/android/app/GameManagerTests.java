@@ -22,7 +22,10 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import static org.junit.Assume.assumeNotNull;
+
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -47,6 +50,9 @@ public final class GameManagerTests {
     public void setUp() {
         mContext = getInstrumentation().getContext();
         mGameManager = mContext.getSystemService(GameManager.class);
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            assumeNotNull(mGameManager);
+        }
         mPackageName = mContext.getPackageName();
 
         // Reset the Game Mode for the test app, since it persists across invocations.

@@ -1111,6 +1111,21 @@ public class Binder implements IBinder {
     }
 
     /**
+     * Called whenever the stub implementation throws an exception which isn't propagated to the
+     * remote caller by the binder. If this method isn't overridden, this exception is swallowed,
+     * and some default return values are propagated to the caller.
+     *
+     * <br> <b> This should not throw. </b> Doing so would defeat the purpose of this handler, and
+     * suppress the exception it is handling.
+     *
+     * @param code The transaction code being handled
+     * @param e The exception which was thrown.
+     * @hide
+     */
+    protected void onUnhandledException(int code, int flags, Exception e) {
+    }
+
+    /**
      * @param in The raw file descriptor that an input data stream can be read from.
      * @param out The raw file descriptor that normal command messages should be written to.
      * @param err The raw file descriptor that command error messages should be written to.
@@ -1408,10 +1423,15 @@ public class Binder implements IBinder {
                 } else {
                     Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
                 }
+                onUnhandledException(code, flags, e);
             } else {
                 // Clear the parcel before writing the exception.
                 reply.setDataSize(0);
                 reply.setDataPosition(0);
+                // The writeException below won't do anything useful if this is the case.
+                if (Parcel.getExceptionCode(e) == 0) {
+                    onUnhandledException(code, flags, e);
+                }
                 reply.writeException(e);
             }
             res = true;

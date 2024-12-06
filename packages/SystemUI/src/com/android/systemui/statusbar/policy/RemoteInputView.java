@@ -106,7 +106,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private static final long FOCUS_ANIMATION_CROSSFADE_DURATION = 50;
     private static final long FOCUS_ANIMATION_FADE_IN_DELAY = 33;
     private static final long FOCUS_ANIMATION_FADE_IN_DURATION = 83;
-    private static final float FOCUS_ANIMATION_MIN_SCALE = 0.5f;
+    public static final float FOCUS_ANIMATION_MIN_SCALE = 0.5f;
     private static final long DEFOCUS_ANIMATION_FADE_OUT_DELAY = 120;
     private static final long DEFOCUS_ANIMATION_CROSSFADE_DELAY = 180;
 

@@ -100,8 +100,10 @@ package android.content {
     method @NonNull public android.content.Context createContextForSdkInSandbox(@NonNull android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int BIND_FOREGROUND_SERVICE = 67108864; // 0x4000000
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
+    field @FlaggedApi("android.os.mainline_vcn_platform_api") public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
     field @FlaggedApi("android.webkit.update_service_ipc_wrapper") public static final String WEBVIEW_UPDATE_SERVICE = "webviewupdate";
   }
 
@@ -128,6 +130,7 @@ package android.content.pm {
 
   public abstract class PackageManager {
     method @NonNull public String getSdkSandboxPackageName();
+    method @FlaggedApi("android.content.pm.cloud_compilation_pm") @NonNull public static android.content.pm.SigningInfo getVerifiedSigningInfo(@NonNull String, int) throws android.content.pm.SigningInfoException;
     method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     field public static final String EXTRA_VERIFICATION_ROOT_HASH = "android.content.pm.extra.VERIFICATION_ROOT_HASH";
     field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
@@ -138,27 +141,30 @@ package android.content.pm {
     method @NonNull public String getPackageName();
   }
 
+  public final class SigningInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.cloud_compilation_pm") public boolean signersMatchExactly(@NonNull android.content.pm.SigningInfo);
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_JAR = 1; // 0x1
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_SIGNING_BLOCK_V2 = 2; // 0x2
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_SIGNING_BLOCK_V3 = 3; // 0x3
+    field @FlaggedApi("android.content.pm.cloud_compilation_pm") public static final int VERSION_SIGNING_BLOCK_V4 = 4; // 0x4
+  }
+
+  @FlaggedApi("android.content.pm.cloud_compilation_pm") public class SigningInfoException extends java.lang.Exception {
+    method @FlaggedApi("android.content.pm.cloud_compilation_pm") public int getCode();
+  }
+
 }
 
 package android.hardware.usb {
 
   public class UsbManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getGadgetHalVersion();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbBandwidthMbps();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int getUsbHalVersion();
     field public static final int GADGET_HAL_NOT_SUPPORTED = -1; // 0xffffffff
     field public static final int GADGET_HAL_V1_0 = 10; // 0xa
     field public static final int GADGET_HAL_V1_1 = 11; // 0xb
     field public static final int GADGET_HAL_V1_2 = 12; // 0xc
     field public static final int GADGET_HAL_V2_0 = 20; // 0x14
-    field public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
-    field public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
-    field public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
-    field public static final int USB_DATA_TRANSFER_RATE_5G = 5120; // 0x1400
-    field public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12; // 0xc
-    field public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480; // 0x1e0
-    field public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2; // 0x2
-    field public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1; // 0xffffffff
     field public static final int USB_HAL_NOT_SUPPORTED = -1; // 0xffffffff
     field public static final int USB_HAL_RETRY = -2; // 0xfffffffe
     field public static final int USB_HAL_V1_0 = 10; // 0xa
@@ -321,7 +327,10 @@ package android.net.netstats {
 package android.net.wifi {
 
   public final class WifiMigration {
-    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static void migrateLegacyKeystoreToWifiBlobstore();
+    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static void migrateLegacyKeystoreToWifiBlobstore(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
+    field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION = 2; // 0x2
+    field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE = 0; // 0x0
+    field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED = 1; // 0x1
   }
 
 }
@@ -384,8 +393,17 @@ package android.os {
     field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
-  public class Environment {
-    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
+  public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
+    method @FlaggedApi("android.os.enable_has_binders") public int hasBinders();
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_NOT_PRESENT = 0; // 0x0
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_PRESENT = 1; // 0x1
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_UNKNOWN = 2; // 0x2
+  }
+
+  public class Handler {
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final boolean hasMessagesOrCallbacks();
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeCallbacksAndEqualMessages(@Nullable Object);
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeEqualMessages(int, @Nullable Object);
   }
 
   public class IpcDataCache<Query, Result> {
@@ -462,6 +480,10 @@ package android.os {
     method public static void traceCounter(long, @NonNull String, int);
     method public static void traceEnd(long);
     field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
+  }
+
+  public class UpdateEngine {
+    method @FlaggedApi("android.os.update_engine_api") public void triggerPostinstall(@NonNull String);
   }
 
 }
@@ -599,6 +621,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method @NonNull public static int[] getAllNetworkTypes();
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Set<java.lang.String> getPackagesWithCarrierPrivileges();
   }
 
 }
@@ -673,8 +696,8 @@ package android.webkit {
     method @Nullable public android.content.pm.PackageInfo getCurrentWebViewPackage();
     method @Nullable public String getCurrentWebViewPackageName();
     method @FlaggedApi("android.webkit.update_service_v2") @NonNull public android.webkit.WebViewProviderInfo getDefaultWebViewPackage();
-    method @Nullable public static android.webkit.WebViewUpdateManager getInstance();
-    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.INTERACT_ACROSS_USERS, android.Manifest.permission.QUERY_ALL_PACKAGES}) public android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
+    method @NonNull public static android.webkit.WebViewUpdateManager getInstance();
+    method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.webkit.WebViewProviderInfo[] getValidWebViewPackages();
     method @NonNull public android.webkit.WebViewProviderResponse waitForAndGetProvider();
   }
 

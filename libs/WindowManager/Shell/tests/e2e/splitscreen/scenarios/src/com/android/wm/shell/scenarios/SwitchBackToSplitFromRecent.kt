@@ -48,6 +48,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         tapl.workspace.switchToOverview().dismissAllTasks()
 
+        tapl.setExpectedRotationCheckEnabled(false)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
 
@@ -67,5 +68,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun teardown() {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
+        Utils.resetFreezeRecentTaskList()
     }
 }

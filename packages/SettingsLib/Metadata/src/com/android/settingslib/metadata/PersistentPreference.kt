@@ -42,6 +42,19 @@ annotation class ReadWritePermit {
     }
 }
 
+/** Indicates how sensitive of the data. */
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.TYPE)
+annotation class SensitivityLevel {
+    companion object {
+        const val UNKNOWN_SENSITIVITY = 0
+        const val NO_SENSITIVITY = 1
+        const val LOW_SENSITIVITY = 2
+        const val MEDIUM_SENSITIVITY = 3
+        const val HIGH_SENSITIVITY = 4
+    }
+}
+
 /** Preference interface that has a value persisted in datastore. */
 interface PersistentPreference<T> {
 
@@ -86,6 +99,10 @@ interface PersistentPreference<T> {
             callingUid,
             this as PreferenceMetadata,
         )
+
+    /** The sensitivity level of the preference. */
+    val sensitivityLevel: @SensitivityLevel Int
+        get() = SensitivityLevel.UNKNOWN_SENSITIVITY
 }
 
 /** Descriptor of values. */
@@ -161,14 +178,14 @@ interface DiscreteIntValue : DiscreteValue<Int> {
 /** Value is between a range. */
 interface RangeValue : ValueDescriptor {
     /** The lower bound (inclusive) of the range. */
-    val minValue: Int
+    fun getMinValue(context: Context): Int
 
     /** The upper bound (inclusive) of the range. */
-    val maxValue: Int
+    fun getMaxValue(context: Context): Int
 
     /** The increment step within the range. 0 means unset, which implies step size is 1. */
-    val incrementStep: Int
-        get() = 0
+    fun getIncrementStep(context: Context) = 0
 
-    override fun isValidValue(context: Context, index: Int) = index in minValue..maxValue
+    override fun isValidValue(context: Context, index: Int) =
+        index in getMinValue(context)..getMaxValue(context)
 }

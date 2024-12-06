@@ -16,6 +16,17 @@
 
 package android.os.vibrator;
 
+import static android.os.VibrationEffect.Composition.PRIMITIVE_CLICK;
+import static android.os.VibrationEffect.Composition.PRIMITIVE_THUD;
+import static android.os.VibrationEffect.Composition.PRIMITIVE_TICK;
+import static android.os.VibrationEffect.EFFECT_CLICK;
+import static android.os.VibrationEffect.EFFECT_DOUBLE_CLICK;
+import static android.os.VibrationEffect.EFFECT_HEAVY_CLICK;
+import static android.os.VibrationEffect.EFFECT_POP;
+import static android.os.VibrationEffect.EFFECT_TEXTURE_TICK;
+import static android.os.VibrationEffect.EFFECT_THUD;
+import static android.os.VibrationEffect.EFFECT_TICK;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -78,6 +89,32 @@ public final class PrebakedSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
+    public long getDuration(@Nullable VibratorInfo vibratorInfo) {
+        if (vibratorInfo == null) {
+            return getDuration();
+        }
+        return switch (mEffectId) {
+            case EFFECT_TICK,
+                 EFFECT_CLICK,
+                 EFFECT_HEAVY_CLICK -> estimateFromPrimitiveDuration(vibratorInfo, PRIMITIVE_CLICK);
+            case EFFECT_TEXTURE_TICK -> estimateFromPrimitiveDuration(vibratorInfo, PRIMITIVE_TICK);
+            case EFFECT_THUD -> estimateFromPrimitiveDuration(vibratorInfo, PRIMITIVE_THUD);
+            case EFFECT_DOUBLE_CLICK -> {
+                long clickDuration = vibratorInfo.getPrimitiveDuration(PRIMITIVE_CLICK);
+                yield clickDuration > 0 ? 2 * clickDuration : getDuration();
+            }
+            default -> getDuration();
+        };
+    }
+
+    private long estimateFromPrimitiveDuration(VibratorInfo vibratorInfo, int primitiveId) {
+        int duration = vibratorInfo.getPrimitiveDuration(primitiveId);
+        // Unsupported primitives should be ignored here.
+        return duration > 0 ? duration : getDuration();
+    }
+
+    /** @hide */
+    @Override
     public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
         if (vibratorInfo.isEffectSupported(mEffectId) == Vibrator.VIBRATION_EFFECT_SUPPORT_YES) {
             return true;
@@ -89,34 +126,30 @@ public final class PrebakedSegment extends VibrationEffectSegment {
         }
         // The vibrator does not have hardware support for the effect, but the effect has fallback
         // support. Check if a fallback will be available for the effect ID.
-        switch (mEffectId) {
-            case VibrationEffect.EFFECT_CLICK:
-            case VibrationEffect.EFFECT_DOUBLE_CLICK:
-            case VibrationEffect.EFFECT_HEAVY_CLICK:
-            case VibrationEffect.EFFECT_TICK:
-                // Any of these effects are always supported via some form of fallback.
-                return true;
-            default:
-                return false;
-        }
+        return switch (mEffectId) {
+            // Any of these effects are always supported via some form of fallback.
+            case EFFECT_CLICK,
+                 EFFECT_DOUBLE_CLICK,
+                 EFFECT_HEAVY_CLICK,
+                 EFFECT_TICK -> true;
+            default -> false;
+        };
     }
 
     /** @hide */
     @Override
     public boolean isHapticFeedbackCandidate() {
-        switch (mEffectId) {
-            case VibrationEffect.EFFECT_CLICK:
-            case VibrationEffect.EFFECT_DOUBLE_CLICK:
-            case VibrationEffect.EFFECT_HEAVY_CLICK:
-            case VibrationEffect.EFFECT_POP:
-            case VibrationEffect.EFFECT_TEXTURE_TICK:
-            case VibrationEffect.EFFECT_THUD:
-            case VibrationEffect.EFFECT_TICK:
-                return true;
-            default:
-                // VibrationEffect.RINGTONES are not segments that could represent a haptic feedback
-                return false;
-        }
+        return switch (mEffectId) {
+            case EFFECT_CLICK,
+                 EFFECT_DOUBLE_CLICK,
+                 EFFECT_HEAVY_CLICK,
+                 EFFECT_POP,
+                 EFFECT_TEXTURE_TICK,
+                 EFFECT_THUD,
+                 EFFECT_TICK -> true;
+            // VibrationEffect.RINGTONES are not segments that could represent a haptic feedback
+            default -> false;
+        };
     }
 
     /** @hide */
@@ -153,27 +186,25 @@ public final class PrebakedSegment extends VibrationEffectSegment {
     }
 
     private static boolean isValidEffectStrength(int strength) {
-        switch (strength) {
-            case VibrationEffect.EFFECT_STRENGTH_LIGHT:
-            case VibrationEffect.EFFECT_STRENGTH_MEDIUM:
-            case VibrationEffect.EFFECT_STRENGTH_STRONG:
-                return true;
-            default:
-                return false;
-        }
+        return switch (strength) {
+            case VibrationEffect.EFFECT_STRENGTH_LIGHT,
+                 VibrationEffect.EFFECT_STRENGTH_MEDIUM,
+                 VibrationEffect.EFFECT_STRENGTH_STRONG -> true;
+            default -> false;
+        };
     }
 
     /** @hide */
     @Override
     public void validate() {
         switch (mEffectId) {
-            case VibrationEffect.EFFECT_CLICK:
-            case VibrationEffect.EFFECT_DOUBLE_CLICK:
-            case VibrationEffect.EFFECT_HEAVY_CLICK:
-            case VibrationEffect.EFFECT_POP:
-            case VibrationEffect.EFFECT_TEXTURE_TICK:
-            case VibrationEffect.EFFECT_THUD:
-            case VibrationEffect.EFFECT_TICK:
+            case EFFECT_CLICK:
+            case EFFECT_DOUBLE_CLICK:
+            case EFFECT_HEAVY_CLICK:
+            case EFFECT_POP:
+            case EFFECT_TEXTURE_TICK:
+            case EFFECT_THUD:
+            case EFFECT_TICK:
                 break;
             default:
                 int[] ringtones = VibrationEffect.RINGTONES;

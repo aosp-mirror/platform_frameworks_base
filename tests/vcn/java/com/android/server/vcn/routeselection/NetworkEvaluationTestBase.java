@@ -20,7 +20,6 @@ import static com.android.server.vcn.VcnTestUtils.setupSystemService;
 import static com.android.server.vcn.routeselection.UnderlyingNetworkControllerTest.getLinkPropertiesWithName;
 
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -34,14 +33,12 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.FeatureFlags;
-import android.net.vcn.Flags;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.ParcelUuid;
 import android.os.PowerManager;
 import android.os.test.TestLooper;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.TelephonyManager;
 
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
@@ -49,7 +46,6 @@ import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -57,8 +53,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public abstract class NetworkEvaluationTestBase {
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
     protected static final String SSID = "TestWifi";
     protected static final String SSID_OTHER = "TestWifiOther";
     protected static final String PLMN_ID = "123456";
@@ -120,10 +114,6 @@ public abstract class NetworkEvaluationTestBase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mSetFlagsRule.enableFlags(Flags.FLAG_VALIDATE_NETWORK_ON_IPSEC_LOSS);
-        mSetFlagsRule.enableFlags(Flags.FLAG_EVALUATE_IPSEC_LOSS_ON_LP_NC_CHANGE);
-        mSetFlagsRule.enableFlags(Flags.FLAG_HANDLE_SEQ_NUM_LEAP);
-
         when(mNetwork.getNetId()).thenReturn(-1);
 
         mTestLooper = new TestLooper();
@@ -135,9 +125,6 @@ public abstract class NetworkEvaluationTestBase {
                                 mock(VcnNetworkProvider.class),
                                 false /* isInTestMode */));
         doNothing().when(mVcnContext).ensureRunningOnLooperThread();
-
-        doReturn(true).when(mVcnContext).isFlagNetworkMetricMonitorEnabled();
-        doReturn(true).when(mVcnContext).isFlagIpSecTransformStateEnabled();
 
         setupSystemService(
                 mContext,

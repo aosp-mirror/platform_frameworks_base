@@ -155,7 +155,7 @@ public class Canvas extends BaseCanvas {
     /**
      * Indicates whether this Canvas is drawing high contrast text.
      *
-     * @see android.view.accessibility.AccessibilityManager#isHighTextContrastEnabled()
+     * @see android.view.accessibility.AccessibilityManager#isHighContrastTextEnabled()
      * @return True if high contrast text is enabled, false otherwise.
      *
      * @hide

@@ -43,6 +43,7 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.BatteryUsageStatsRule;
 import com.android.server.power.stats.format.CpuPowerStatsLayout;
+import com.android.server.power.stats.format.WakelockPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -78,21 +79,37 @@ public class CpuPowerStatsProcessorTest {
             .setCpuPowerBracket(0, 1, 1)
             .setCpuPowerBracket(2, 0, 2);
 
-    private AggregatedPowerStatsConfig.PowerComponent mConfig;
+    private AggregatedPowerStatsConfig mConfig;
+    private AggregatedPowerStatsConfig.PowerComponent mCpuPowerComponentConfig;
+    private AggregatedPowerStats mAggregatedPowerStats;
     private MockPowerComponentAggregatedPowerStats mStats;
+    private WakelockPowerStatsLayout mWakelockStatsLayout;
+    private PowerStats.Descriptor mWakelockDescriptor;
 
     @Before
     public void setup() {
-        mConfig = new AggregatedPowerStatsConfig.PowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
+        mConfig = new AggregatedPowerStatsConfig();
+        mConfig.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WAKELOCK)
                 .trackDeviceStates(STATE_POWER, STATE_SCREEN)
-                .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE)
+                .trackUidStates(STATE_POWER, STATE_SCREEN, STATE_PROCESS_STATE);
+        mCpuPowerComponentConfig = mConfig.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU,
+                        BatteryConsumer.POWER_COMPONENT_WAKELOCK)
                 .setProcessorSupplier(() -> new CpuPowerStatsProcessor(mStatsRule.getPowerProfile(),
                         mStatsRule.getCpuScalingPolicies()));
+        mAggregatedPowerStats = new AggregatedPowerStats(mConfig);
+
+        mWakelockStatsLayout = new WakelockPowerStatsLayout();
+        PersistableBundle extras = new PersistableBundle();
+        mWakelockStatsLayout.toExtras(extras);
+        mWakelockDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_WAKELOCK,
+                mWakelockStatsLayout.getDeviceStatsArrayLength(), null, 0,
+                mWakelockStatsLayout.getUidStatsArrayLength(), extras);
     }
 
     @Test
     public void powerProfileModel() {
-        mStats = new MockPowerComponentAggregatedPowerStats(mConfig, false);
+        mStats = new MockPowerComponentAggregatedPowerStats(mAggregatedPowerStats,
+                mCpuPowerComponentConfig, false);
         mStats.start(0);
 
         mStats.setDeviceStats(
@@ -136,7 +153,23 @@ public class CpuPowerStatsProcessorTest {
 
     @Test
     public void energyConsumerModel() {
-        mStats = new MockPowerComponentAggregatedPowerStats(mConfig, true);
+        PowerComponentAggregatedPowerStats wakelockStats =
+                mAggregatedPowerStats.getPowerComponentStats(
+                        BatteryConsumer.POWER_COMPONENT_WAKELOCK);
+
+        wakelockStats.setPowerStatsDescriptor(mWakelockDescriptor);
+        long[] wakelockDeviceStats = new long[mWakelockDescriptor.statsArrayLength];
+        mWakelockStatsLayout.setDevicePowerEstimate(wakelockDeviceStats, 1.000);
+        wakelockStats.setDeviceStats(states(POWER_STATE_BATTERY, SCREEN_STATE_ON),
+                wakelockDeviceStats);
+        long[] wakelockUidStats = new long[mWakelockDescriptor.uidStatsArrayLength];
+        mWakelockStatsLayout.setUidPowerEstimate(wakelockUidStats, 0.100);
+        wakelockStats.setUidStats(42,
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_BACKGROUND),
+                wakelockUidStats);
+
+        mStats = new MockPowerComponentAggregatedPowerStats(mAggregatedPowerStats,
+                mCpuPowerComponentConfig, true);
         mStats.start(0);
 
         mStats.setDeviceStats(
@@ -146,7 +179,7 @@ public class CpuPowerStatsProcessorTest {
                         values(2000, 1000),                 // clusters
                         values(5000),                       // uptime
                         values(5_000_000L, 6_000_000L)),    // energy, uC
-                3.055555);
+                2.055555);          // 3.055555 - 1.000 (wakelock power)
         mStats.setDeviceStats(
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON),
                 concat(
@@ -171,7 +204,8 @@ public class CpuPowerStatsProcessorTest {
                 values(900, 1000, 1500), 1.161902);
         mStats.setUidStats(42,
                 states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_BACKGROUND),
-                values(600, 500, 300), 0.355406);
+                values(600, 500, 300),
+                0.255406);      // 0.355406 - 0.100 (wakelock power)
         mStats.setUidStats(42,
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED),
                 values(1500, 2000, 1000), 0.80773);
@@ -209,10 +243,10 @@ public class CpuPowerStatsProcessorTest {
         private final HashMap<String, Double> mExpectedDevicePower = new HashMap<>();
         private final HashMap<String, Double> mExpectedUidPower = new HashMap<>();
 
-        MockPowerComponentAggregatedPowerStats(
-                AggregatedPowerStatsConfig.PowerComponent config,
+        MockPowerComponentAggregatedPowerStats(AggregatedPowerStats aggregatedPowerStats,
+                AggregatedPowerStatsConfig.PowerComponent powerComponent,
                 boolean useEnergyConsumers) {
-            super(new AggregatedPowerStats(new AggregatedPowerStatsConfig()), config);
+            super(aggregatedPowerStats, powerComponent);
             mStatsLayout = new CpuPowerStatsLayout(useEnergyConsumers ? 2 : 0, 2,
                     new int[]{0, 1, 2});
             PersistableBundle extras = new PersistableBundle();

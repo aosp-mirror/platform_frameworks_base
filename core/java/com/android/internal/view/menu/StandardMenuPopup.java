@@ -35,8 +35,6 @@ import android.widget.PopupWindow;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.TextView;
 
-import com.android.text.flags.Flags;
-
 import java.util.Objects;
 
 /**
@@ -122,8 +120,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         mMenu = menu;
         mOverflowOnly = overflowOnly;
         final LayoutInflater inflater = LayoutInflater.from(context);
-        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly,
-                Flags.fixMisalignedContextMenu() ? ITEM_LAYOUT_MATERIAL : ITEM_LAYOUT);
+        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT_MATERIAL);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
 

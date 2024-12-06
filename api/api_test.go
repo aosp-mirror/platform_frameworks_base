@@ -78,10 +78,7 @@ func gatherRequiredDepsForTest() string {
 		"stub-annotations",
 	}
 
-	extraSdkLibraryModules := []string{
-		"framework-virtualization",
-		"framework-location",
-	}
+	extraSdkLibraryModules := non_updatable_modules
 
 	extraSystemModules := []string{
 		"core-public-stubs-system-modules",
@@ -184,10 +181,10 @@ func gatherRequiredDepsForTest() string {
 
 func TestCombinedApisDefaults(t *testing.T) {
 
+	testNonUpdatableModules := append(non_updatable_modules, "framework-foo", "framework-bar")
 	result := android.GroupFixturePreparers(
 		prepareForTestWithCombinedApis,
-		java.FixtureWithLastReleaseApis(
-			"framework-location", "framework-virtualization", "framework-foo", "framework-bar"),
+		java.FixtureWithLastReleaseApis(testNonUpdatableModules...),
 		android.FixtureModifyProductVariables(func(variables android.FixtureProductVariables) {
 			variables.VendorVars = map[string]map[string]string{
 				"boolean_var": {
@@ -253,7 +250,7 @@ func TestCombinedApisDefaults(t *testing.T) {
 	`)
 
 	subModuleDependsOnSelectAppendedModule := java.CheckModuleHasDependency(t,
-		result.TestContext, "foo-current.txt", "", "framework-foo")
+		result.TestContext, "foo-current.txt", "android_common", "framework-foo")
 	android.AssertBoolEquals(t, "Submodule expected to depend on the select-appended module",
 		true, subModuleDependsOnSelectAppendedModule)
 }

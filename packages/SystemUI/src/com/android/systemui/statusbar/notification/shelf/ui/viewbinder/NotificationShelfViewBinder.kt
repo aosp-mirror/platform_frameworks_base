@@ -24,7 +24,7 @@ import com.android.systemui.statusbar.notification.row.ui.viewbinder.Activatable
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Binds a [NotificationShelf] to its [view model][NotificationShelfViewModel]. */
 object NotificationShelfViewBinder {

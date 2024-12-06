@@ -45,11 +45,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.systemui.res.R
 
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
@@ -61,23 +63,17 @@ fun SceneScope.OverlayShade(
     Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 
-        Box(
-            modifier = Modifier.fillMaxSize().panelPadding(),
-            contentAlignment = Alignment.TopEnd,
-        ) {
+        Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = Alignment.TopEnd) {
             Panel(
                 modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),
-                content = content
+                content = content,
             )
         }
     }
 }
 
 @Composable
-private fun SceneScope.Scrim(
-    onClicked: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun SceneScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modifier) {
     Spacer(
         modifier =
             modifier
@@ -89,10 +85,7 @@ private fun SceneScope.Scrim(
 }
 
 @Composable
-private fun SceneScope.Panel(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+private fun SceneScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
         Spacer(
             modifier =
@@ -101,7 +94,7 @@ private fun SceneScope.Panel(
                     .background(
                         color = OverlayShade.Colors.PanelBackground,
                         shape = OverlayShade.Shapes.RoundedCornerPanel,
-                    ),
+                    )
         )
 
         // This content is intentionally rendered as a separate element from the background in order
@@ -113,13 +106,11 @@ private fun SceneScope.Panel(
 @Composable
 private fun Modifier.panelSize(): Modifier {
     val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
-
     return this.then(
-        when (widthSizeClass) {
-            WindowWidthSizeClass.Compact -> Modifier.fillMaxWidth()
-            WindowWidthSizeClass.Medium -> Modifier.width(OverlayShade.Dimensions.PanelWidthMedium)
-            WindowWidthSizeClass.Expanded -> Modifier.width(OverlayShade.Dimensions.PanelWidthLarge)
-            else -> error("Unsupported WindowWidthSizeClass \"$widthSizeClass\"")
+        if (widthSizeClass == WindowWidthSizeClass.Compact) {
+            Modifier.fillMaxWidth()
+        } else {
+            Modifier.width(dimensionResource(id = R.dimen.shade_panel_width))
         }
     )
 }
@@ -130,14 +121,15 @@ private fun Modifier.panelPadding(): Modifier {
     val systemBars = WindowInsets.systemBarsIgnoringVisibility
     val displayCutout = WindowInsets.displayCutout
     val waterfall = WindowInsets.waterfall
-    val contentPadding = PaddingValues(all = OverlayShade.Dimensions.ScrimContentPadding)
+    val horizontalPadding =
+        PaddingValues(horizontal = dimensionResource(id = R.dimen.shade_panel_margin_horizontal))
 
     val combinedPadding =
         combinePaddings(
             systemBars.asPaddingValues(),
             displayCutout.asPaddingValues(),
             waterfall.asPaddingValues(),
-            contentPadding
+            horizontalPadding,
         )
 
     return if (widthSizeClass == WindowWidthSizeClass.Compact) {
@@ -150,20 +142,28 @@ private fun Modifier.panelPadding(): Modifier {
 /** Creates a union of [paddingValues] by using the max padding of each edge. */
 @Composable
 private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues {
-    val layoutDirection = LocalLayoutDirection.current
-
-    return PaddingValues(
-        start = paddingValues.maxOfOrNull { it.calculateStartPadding(layoutDirection) } ?: 0.dp,
-        top = paddingValues.maxOfOrNull { it.calculateTopPadding() } ?: 0.dp,
-        end = paddingValues.maxOfOrNull { it.calculateEndPadding(layoutDirection) } ?: 0.dp,
-        bottom = paddingValues.maxOfOrNull { it.calculateBottomPadding() } ?: 0.dp
-    )
+    return if (paddingValues.isEmpty()) {
+        PaddingValues(0.dp)
+    } else {
+        val layoutDirection = LocalLayoutDirection.current
+        PaddingValues(
+            start = paddingValues.maxOf { it.calculateStartPadding(layoutDirection) },
+            top = paddingValues.maxOf { it.calculateTopPadding() },
+            end = paddingValues.maxOf { it.calculateEndPadding(layoutDirection) },
+            bottom = paddingValues.maxOf { it.calculateBottomPadding() },
+        )
+    }
 }
 
 object OverlayShade {
     object Elements {
         val Scrim = ElementKey("OverlayShadeScrim", contentPicker = LowestZIndexContentPicker)
-        val Panel = ElementKey("OverlayShadePanel", contentPicker = LowestZIndexContentPicker)
+        val Panel =
+            ElementKey(
+                "OverlayShadePanel",
+                contentPicker = LowestZIndexContentPicker,
+                placeAllCopies = true,
+            )
         val PanelBackground =
             ElementKey("OverlayShadePanelBackground", contentPicker = LowestZIndexContentPicker)
     }
@@ -175,10 +175,7 @@ object OverlayShade {
     }
 
     object Dimensions {
-        val ScrimContentPadding = 16.dp
         val PanelCornerRadius = 46.dp
-        val PanelWidthMedium = 390.dp
-        val PanelWidthLarge = 474.dp
         val OverscrollLimit = 32.dp
     }
 

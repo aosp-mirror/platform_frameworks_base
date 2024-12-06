@@ -21,11 +21,12 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.TwoStatePreference
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
-import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceTitleProvider
+import com.android.settingslib.widget.MainSwitchPreference
 
 /** Binding of preference group associated with [PreferenceCategory]. */
 interface PreferenceScreenBinding : PreferenceBinding {
@@ -54,31 +55,45 @@ interface PreferenceScreenBinding : PreferenceBinding {
     }
 }
 
-/** Binding of preference group associated with [PreferenceCategory]. */
-interface PreferenceGroupBinding : PreferenceBinding {
+/** Binding of preference category associated with [PreferenceCategory]. */
+interface PreferenceCategoryBinding : PreferenceBinding {
 
     override fun createWidget(context: Context) = PreferenceCategory(context)
 
     companion object {
-        @JvmStatic val INSTANCE = object : PreferenceGroupBinding {}
+        @JvmStatic val INSTANCE = object : PreferenceCategoryBinding {}
+    }
+}
+
+/** A boolean value type preference associated with the abstract [TwoStatePreference]. */
+interface TwoStatePreferenceBinding : PreferenceBinding {
+
+    override fun bind(preference: Preference, metadata: PreferenceMetadata) {
+        super.bind(preference, metadata)
+        (preference as TwoStatePreference).apply {
+            // "false" is kind of placeholder, metadata datastore should provide the default value
+            isChecked = preferenceDataStore!!.getBoolean(key, false)
+        }
     }
 }
 
 /** A boolean value type preference associated with [SwitchPreferenceCompat]. */
-interface SwitchPreferenceBinding : PreferenceBinding {
+interface SwitchPreferenceBinding : TwoStatePreferenceBinding {
 
     override fun createWidget(context: Context): Preference = SwitchPreferenceCompat(context)
 
-    override fun bind(preference: Preference, metadata: PreferenceMetadata) {
-        super.bind(preference, metadata)
-        (metadata as? PersistentPreference<*>)
-            ?.storage(preference.context)
-            ?.getValue(metadata.key, Boolean::class.javaObjectType)
-            ?.let { (preference as SwitchPreferenceCompat).isChecked = it }
-    }
-
     companion object {
         @JvmStatic val INSTANCE = object : SwitchPreferenceBinding {}
+    }
+}
+
+/** A boolean value type preference associated with [MainSwitchPreference]. */
+interface MainSwitchPreferenceBinding : TwoStatePreferenceBinding {
+
+    override fun createWidget(context: Context): Preference = MainSwitchPreference(context)
+
+    companion object {
+        @JvmStatic val INSTANCE = object : MainSwitchPreferenceBinding {}
     }
 }
 

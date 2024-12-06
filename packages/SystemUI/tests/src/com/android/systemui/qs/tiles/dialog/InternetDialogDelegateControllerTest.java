@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -221,7 +222,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         when(SubscriptionManager.getDefaultDataSubscriptionId()).thenReturn(SUB_ID);
         SubscriptionInfo info = mock(SubscriptionInfo.class);
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
-        when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
+        when(mToastFactory.createToast(any(), any(), anyString(), anyString(), anyInt(), anyInt()))
             .thenReturn(mSystemUIToast);
         when(mSystemUIToast.getView()).thenReturn(mToastView);
         when(mSystemUIToast.getGravity()).thenReturn(GRAVITY_FLAGS);
@@ -274,8 +275,8 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory).createToast(any(), eq(TOAST_MESSAGE_STRING), anyString(), anyInt(),
-            anyInt());
+        verify(mToastFactory).createToast(any(), any(), eq(TOAST_MESSAGE_STRING), anyString(),
+                anyInt(), anyInt());
     }
 
     @Test
@@ -287,7 +288,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+        verify(mToastFactory, never()).createToast(any(), any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 
@@ -301,7 +302,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+        verify(mToastFactory, never()).createToast(any(), any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 
@@ -320,7 +321,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+        verify(mToastFactory, never()).createToast(any(), any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 
@@ -884,6 +885,34 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
         int subId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
         assertThat(subId).isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+    }
+
+    @Test
+    public void getActiveAutoSwitchNonDdsSubId_registerCallbackForExistedSubId_notRegister() {
+        mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, true);
+
+        // Adds non DDS subId
+        SubscriptionInfo info = mock(SubscriptionInfo.class);
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        doReturn(false).when(info).isOpportunistic();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+
+        // 1st time is onStart(), 2nd time is getActiveAutoSwitchNonDdsSubId()
+        verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size()).isEqualTo(2);
+
+        // Adds non DDS subId again
+        doReturn(SUB_ID2).when(info).getSubscriptionId();
+        doReturn(false).when(info).isOpportunistic();
+        when(mSubscriptionManager.getActiveSubscriptionInfo(anyInt())).thenReturn(info);
+
+        mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+
+        // Does not add due to cached subInfo in mSubIdTelephonyCallbackMap.
+        verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size()).isEqualTo(2);
     }
 
     @Test

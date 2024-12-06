@@ -22,6 +22,9 @@ import static android.os.Flags.stateOfHealthPublic;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.server.health.Utils.copyV1Battery;
 
+import static java.lang.Math.abs;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -42,11 +45,13 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.OsProtoEnums;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -64,8 +69,10 @@ import android.service.battery.BatteryServiceDumpProto;
 import android.sysprop.PowerProperties;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
@@ -83,6 +90,7 @@ import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -144,22 +152,116 @@ public final class BatteryService extends SystemService {
     private final Handler mHandler;
 
     private final Object mLock = new Object();
-
+    private final ConditionVariable mConditionVariable = new ConditionVariable();
     private HealthInfo mHealthInfo;
     private final HealthInfo mLastHealthInfo = new HealthInfo();
     private boolean mBatteryLevelCritical;
-    private int mLastBatteryStatus;
-    private int mLastBatteryHealth;
-    private boolean mLastBatteryPresent;
-    private int mLastBatteryLevel;
-    private int mLastBatteryVoltage;
-    private int mLastBatteryTemperature;
-    private boolean mLastBatteryLevelCritical;
-    private int mLastMaxChargingCurrent;
-    private int mLastMaxChargingVoltage;
-    private int mLastChargeCounter;
-    private int mLastBatteryCycleCount;
-    private int mLastChargingState;
+
+    /**
+     * {@link HealthInfo#batteryStatus} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryStatus;
+    /**
+     * {@link HealthInfo#batteryHealth} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryHealth;
+    /**
+     * {@link HealthInfo#batteryPresent} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private boolean mLastBroadcastBatteryPresent;
+    /**
+     * {@link HealthInfo#batteryLevel} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryLevel;
+    /**
+     * {@link HealthInfo#batteryVoltageMillivolts} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryVoltage;
+    /**
+     * {@link HealthInfo#batteryTemperatureTenthsCelsius} value when
+     * {@link Intent#ACTION_BATTERY_CHANGED} broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryTemperature;
+    /**
+     * {@link #mBatteryLevelCritical} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: These values may be used for internal operations and/or to determine whether to trigger
+     * the broadcast or not.
+     */
+    private boolean mLastBroadcastBatteryLevelCritical;
+    /**
+     * {@link HealthInfo#maxChargingCurrentMicroamps} value when
+     * {@link Intent#ACTION_BATTERY_CHANGED} broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastMaxChargingCurrent;
+    /**
+     * {@link HealthInfo#maxChargingVoltageMicrovolts} value when
+     * {@link Intent#ACTION_BATTERY_CHANGED} broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastMaxChargingVoltage;
+    /**
+     * {@link HealthInfo#batteryChargeCounterUah} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastChargeCounter;
+    /**
+     * {@link HealthInfo#batteryCycleCount} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryCycleCount;
+    /**
+     * {@link HealthInfo#chargingState} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastChargingState;
+    /**
+     * {@link HealthInfo#batteryCapacityLevel} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: This value may be used for internal operations and/or to determine whether to trigger
+     * the {@link Intent#ACTION_BATTERY_CHANGED} broadcast or not.
+     */
+    private int mLastBroadcastBatteryCapacityLevel;
+    /**
+     * {@link #mPlugType} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: These values may be used for internal operations and/or to determine whether to trigger
+     * the broadcast or not.
+     */
+    private int mLastBroadcastPlugType = -1; // Extra state so we can detect first run
+    /**
+     * {@link #mInvalidCharger} value when {@link Intent#ACTION_BATTERY_CHANGED}
+     * broadcast was sent last.
+     * Note: These values may be used for internal operations and/or to determine whether to trigger
+     * the broadcast or not.
+     */
+    private int mLastBroadcastInvalidCharger;
     /**
      * The last seen charging policy. This requires the
      * {@link android.Manifest.permission#BATTERY_STATS} permission and should therefore not be
@@ -170,7 +272,6 @@ public final class BatteryService extends SystemService {
     private int mSequence = 1;
 
     private int mInvalidCharger;
-    private int mLastInvalidCharger;
 
     private int mLowBatteryWarningLevel;
     private int mLastLowBatteryWarningLevel;
@@ -182,7 +283,6 @@ public final class BatteryService extends SystemService {
     private static String sSystemUiPackage;
 
     private int mPlugType;
-    private int mLastPlugType = -1; // Extra state so we can detect first run
 
     private boolean mBatteryLevelLow;
 
@@ -194,6 +294,27 @@ public final class BatteryService extends SystemService {
 
     private boolean mUpdatesStopped;
     private boolean mBatteryInputSuspended;
+
+    /**
+     * Time when the voltage was updated last by HAL and we sent the
+     * {@link Intent#ACTION_BATTERY_CHANGED} broadcast.
+     * Note: This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast
+     * so it is possible that voltage was updated but we did not send the broadcast so in that
+     * case we do not update the time.
+     */
+    @VisibleForTesting
+    public long mLastBroadcastVoltageUpdateTime;
+    /**
+     * Time when the max charging current was updated last by HAL and we sent the
+     * {@link Intent#ACTION_BATTERY_CHANGED} broadcast.
+     * Note: This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast
+     * so it is possible that max current was updated but we did not send the broadcast so in that
+     * case we do not update the time.
+     */
+    @VisibleForTesting
+    public long mLastBroadcastMaxChargingCurrentUpdateTime;
+
+    private boolean mIsFirstBatteryChangedUpdate = true;
 
     private Led mLed;
 
@@ -209,7 +330,8 @@ public final class BatteryService extends SystemService {
     private final CopyOnWriteArraySet<BatteryManagerInternal.ChargingPolicyChangeListener>
             mChargingPolicyChangeListeners = new CopyOnWriteArraySet<>();
 
-    private static final Bundle BATTERY_CHANGED_OPTIONS = BroadcastOptions.makeBasic()
+    @VisibleForTesting
+    public static final Bundle BATTERY_CHANGED_OPTIONS = BroadcastOptions.makeBasic()
             .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
             .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
             .toBundle();
@@ -231,6 +353,30 @@ public final class BatteryService extends SystemService {
     private static final int MSG_BROADCAST_BATTERY_CHANGED = 1;
     private static final int MSG_BROADCAST_POWER_CONNECTION_CHANGED = 2;
     private static final int MSG_BROADCAST_BATTERY_LOW_OKAY = 3;
+
+    /**
+     * This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
+     * only send the broadcast and update the temperature value when the temp change is greater or
+     * equals to 1 degree celsius.
+     */
+    private static final int ABSOLUTE_DECI_CELSIUS_DIFF_FOR_TEMP_UPDATE = 10;
+    /**
+     * This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
+     * only send the broadcast if the last voltage was updated at least 20 seconds back and has a
+     * fluctuation of at least 1%.
+     */
+    private static final int TIME_DIFF_FOR_VOLTAGE_UPDATE_MS = 20000;
+    /**
+     * The value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
+     * only send the broadcast if the last voltage was updated at least 20 seconds back and has a
+     * fluctuation of at least 1%.
+     */
+    private static final float BASE_POINT_DIFF_FOR_VOLTAGE_UPDATE = 0.01f;
+    /**
+     * This value is used to rate limit the {@link Intent#ACTION_BATTERY_CHANGED} broadcast. We
+     * only send the broadcast if the last max charging current was updated at least 5 seconds back.
+     */
+    private static final int TIME_DIFF_FOR_MAX_CHARGING_CURRENT_UPDATE_MS = 5000;
 
     private final Handler.Callback mLocalCallback = msg -> {
         switch (msg.what) {
@@ -281,10 +427,19 @@ public final class BatteryService extends SystemService {
     };
 
     public BatteryService(Context context) {
+        this(context, Objects.requireNonNull(Looper.myLooper(),
+                "BatteryService uses handler!! Can't create handler inside thread that has not "
+                        + "called Looper.prepare()"));
+    }
+
+    @VisibleForTesting
+    public BatteryService(Context context, @NonNull Looper looper) {
         super(context);
 
+        Objects.requireNonNull(looper);
+
         mContext = context;
-        mHandler = new Handler(mLocalCallback, true /*async*/);
+        mHandler = new Handler(looper, mLocalCallback, true /*async*/);
         mLed = new Led(context, getLocalService(LightsManager.class));
         mBatteryStats = BatteryStatsService.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
@@ -378,17 +533,10 @@ public final class BatteryService extends SystemService {
         // existing service in a near future. Wait for this.update() to instantiate
         // the initial mHealthInfo.
         long beforeWait = SystemClock.uptimeMillis();
-        synchronized (mLock) {
-            while (mHealthInfo == null) {
-                Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait) +
-                        "ms for callbacks. Waiting another " + HEALTH_HAL_WAIT_MS + " ms...");
-                try {
-                    mLock.wait(HEALTH_HAL_WAIT_MS);
-                } catch (InterruptedException ex) {
-                    Slog.i(TAG, "health: InterruptedException when waiting for update. "
-                        + " Continuing...");
-                }
-            }
+        if (mHealthInfo == null) {
+            Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait)
+                    + "ms for callbacks. Waiting another " + HEALTH_HAL_WAIT_MS + " ms...");
+            mConditionVariable.block(HEALTH_HAL_WAIT_MS);
         }
 
         Slog.i(TAG, "health: Waited " + (SystemClock.uptimeMillis() - beforeWait)
@@ -441,7 +589,7 @@ public final class BatteryService extends SystemService {
 
     private boolean shouldSendBatteryLowLocked() {
         final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
-        final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
+        final boolean oldPlugged = mLastBroadcastPlugType != BATTERY_PLUGGED_NONE;
 
         /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
          * - is just un-plugged (previously was plugged) and battery level is
@@ -452,7 +600,7 @@ public final class BatteryService extends SystemService {
         return !plugged
                 && mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                 && mHealthInfo.batteryLevel <= mLowBatteryWarningLevel
-                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel
+                && (oldPlugged || mLastBroadcastBatteryLevel > mLowBatteryWarningLevel
                     || mHealthInfo.batteryLevel > mLastLowBatteryWarningLevel);
     }
 
@@ -520,7 +668,13 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    private void update(android.hardware.health.HealthInfo info) {
+    /**
+     * Updates the healthInfo and triggers the broadcast.
+     *
+     * @param info the new health info
+     */
+    @VisibleForTesting
+    public void update(android.hardware.health.HealthInfo info) {
         traceBegin("HealthInfoUpdate");
 
         Trace.traceCounter(
@@ -534,7 +688,7 @@ public final class BatteryService extends SystemService {
                 mHealthInfo = info;
                 // Process the new values.
                 processValuesLocked(false);
-                mLock.notifyAll(); // for any waiters on new info
+                mConditionVariable.open();
             } else {
                 copyV1Battery(mLastHealthInfo, info);
             }
@@ -561,8 +715,8 @@ public final class BatteryService extends SystemService {
         long dischargeDuration = 0;
 
         mBatteryLevelCritical =
-            mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
-            && mHealthInfo.batteryLevel <= mCriticalBatteryLevel;
+                mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+                        && mHealthInfo.batteryLevel <= mCriticalBatteryLevel;
         mPlugType = plugType(mHealthInfo);
 
         if (DEBUG) {
@@ -596,23 +750,28 @@ public final class BatteryService extends SystemService {
             mHandler.post(this::notifyChargingPolicyChanged);
         }
 
-        if (force
-                || (mHealthInfo.batteryStatus != mLastBatteryStatus
-                        || mHealthInfo.batteryHealth != mLastBatteryHealth
-                        || mHealthInfo.batteryPresent != mLastBatteryPresent
-                        || mHealthInfo.batteryLevel != mLastBatteryLevel
-                        || mPlugType != mLastPlugType
-                        || mHealthInfo.batteryVoltageMillivolts != mLastBatteryVoltage
-                        || mHealthInfo.batteryTemperatureTenthsCelsius != mLastBatteryTemperature
-                        || mHealthInfo.maxChargingCurrentMicroamps != mLastMaxChargingCurrent
-                        || mHealthInfo.maxChargingVoltageMicrovolts != mLastMaxChargingVoltage
-                        || mHealthInfo.batteryChargeCounterUah != mLastChargeCounter
-                        || mInvalidCharger != mLastInvalidCharger
-                        || mHealthInfo.batteryCycleCount != mLastBatteryCycleCount
-                        || mHealthInfo.chargingState != mLastChargingState)) {
+        final boolean includeChargeCounter =
+                !com.android.server.flags.Flags.rateLimitBatteryChangedBroadcast()
+                        && mHealthInfo.batteryChargeCounterUah != mLastBroadcastChargeCounter;
 
-            if (mPlugType != mLastPlugType) {
-                if (mLastPlugType == BATTERY_PLUGGED_NONE) {
+        if (force
+                || (mHealthInfo.batteryStatus != mLastBroadcastBatteryStatus
+                || mHealthInfo.batteryHealth != mLastBroadcastBatteryHealth
+                || mHealthInfo.batteryPresent != mLastBroadcastBatteryPresent
+                || mHealthInfo.batteryLevel != mLastBroadcastBatteryLevel
+                || mPlugType != mLastBroadcastPlugType
+                || mHealthInfo.batteryVoltageMillivolts != mLastBroadcastBatteryVoltage
+                || mHealthInfo.batteryTemperatureTenthsCelsius != mLastBroadcastBatteryTemperature
+                || mHealthInfo.maxChargingCurrentMicroamps != mLastBroadcastMaxChargingCurrent
+                || mHealthInfo.maxChargingVoltageMicrovolts != mLastBroadcastMaxChargingVoltage
+                || includeChargeCounter
+                || mInvalidCharger != mLastBroadcastInvalidCharger
+                || mHealthInfo.batteryCycleCount != mLastBroadcastBatteryCycleCount
+                || mHealthInfo.chargingState != mLastBroadcastChargingState
+                || mHealthInfo.batteryCapacityLevel != mLastBroadcastBatteryCapacityLevel)) {
+
+            if (mPlugType != mLastBroadcastPlugType) {
+                if (mLastBroadcastPlugType == BATTERY_PLUGGED_NONE) {
                     // discharging -> charging
                     mChargeStartLevel = mHealthInfo.batteryLevel;
                     mChargeStartTime = SystemClock.elapsedRealtime();
@@ -626,7 +785,8 @@ public final class BatteryService extends SystemService {
 
                     // There's no value in this data unless we've discharged at least once and the
                     // battery level has changed; so don't log until it does.
-                    if (mDischargeStartTime != 0 && mDischargeStartLevel != mHealthInfo.batteryLevel) {
+                    if (mDischargeStartTime != 0
+                            && mDischargeStartLevel != mHealthInfo.batteryLevel) {
                         dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
                         logOutlier = true;
                         EventLog.writeEvent(EventLogTags.BATTERY_DISCHARGE, dischargeDuration,
@@ -643,7 +803,7 @@ public final class BatteryService extends SystemService {
                     if (mChargeStartTime != 0 && chargeDuration != 0) {
                         final LogMaker builder = new LogMaker(MetricsEvent.ACTION_CHARGE);
                         builder.setType(MetricsEvent.TYPE_DISMISS);
-                        builder.addTaggedData(MetricsEvent.FIELD_PLUG_TYPE, mLastPlugType);
+                        builder.addTaggedData(MetricsEvent.FIELD_PLUG_TYPE, mLastBroadcastPlugType);
                         builder.addTaggedData(MetricsEvent.FIELD_CHARGING_DURATION_MILLIS,
                                 chargeDuration);
                         builder.addTaggedData(MetricsEvent.FIELD_BATTERY_LEVEL_START,
@@ -655,19 +815,20 @@ public final class BatteryService extends SystemService {
                     mChargeStartTime = 0;
                 }
             }
-            if (mHealthInfo.batteryStatus != mLastBatteryStatus ||
-                    mHealthInfo.batteryHealth != mLastBatteryHealth ||
-                    mHealthInfo.batteryPresent != mLastBatteryPresent ||
-                    mPlugType != mLastPlugType) {
+            if (mHealthInfo.batteryStatus != mLastBroadcastBatteryStatus
+                    || mHealthInfo.batteryHealth != mLastBroadcastBatteryHealth
+                    || mHealthInfo.batteryPresent != mLastBroadcastBatteryPresent
+                    || mPlugType != mLastBroadcastPlugType) {
                 EventLog.writeEvent(EventLogTags.BATTERY_STATUS,
-                        mHealthInfo.batteryStatus, mHealthInfo.batteryHealth, mHealthInfo.batteryPresent ? 1 : 0,
+                        mHealthInfo.batteryStatus, mHealthInfo.batteryHealth,
+                        mHealthInfo.batteryPresent ? 1 : 0,
                         mPlugType, mHealthInfo.batteryTechnology);
                 SystemProperties.set(
                         "debug.tracing.battery_status",
                         Integer.toString(mHealthInfo.batteryStatus));
                 SystemProperties.set("debug.tracing.plug_type", Integer.toString(mPlugType));
             }
-            if (mHealthInfo.batteryLevel != mLastBatteryLevel) {
+            if (mHealthInfo.batteryLevel != mLastBroadcastBatteryLevel) {
                 // Don't do this just from voltage or temperature changes, that is
                 // too noisy.
                 EventLog.writeEvent(
@@ -676,8 +837,8 @@ public final class BatteryService extends SystemService {
                         mHealthInfo.batteryVoltageMillivolts,
                         mHealthInfo.batteryTemperatureTenthsCelsius);
             }
-            if (mBatteryLevelCritical && !mLastBatteryLevelCritical &&
-                    mPlugType == BATTERY_PLUGGED_NONE) {
+            if (mBatteryLevelCritical && !mLastBroadcastBatteryLevelCritical
+                    && mPlugType == BATTERY_PLUGGED_NONE) {
                 // We want to make sure we log discharge cycle outliers
                 // if the battery is about to die.
                 dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
@@ -688,7 +849,7 @@ public final class BatteryService extends SystemService {
                 // Should we now switch in to low battery mode?
                 if (mPlugType == BATTERY_PLUGGED_NONE
                         && mHealthInfo.batteryStatus !=
-                           BatteryManager.BATTERY_STATUS_UNKNOWN
+                        BatteryManager.BATTERY_STATUS_UNKNOWN
                         && mHealthInfo.batteryLevel <= mLowBatteryWarningLevel) {
                     mBatteryLevelLow = true;
                 }
@@ -696,7 +857,7 @@ public final class BatteryService extends SystemService {
                 // Should we now switch out of low battery mode?
                 if (mPlugType != BATTERY_PLUGGED_NONE) {
                     mBatteryLevelLow = false;
-                } else if (mHealthInfo.batteryLevel >= mLowBatteryCloseWarningLevel)  {
+                } else if (mHealthInfo.batteryLevel >= mLowBatteryCloseWarningLevel) {
                     mBatteryLevelLow = false;
                 } else if (force && mHealthInfo.batteryLevel >= mLowBatteryWarningLevel) {
                     // If being forced, the previous state doesn't matter, we will just
@@ -710,7 +871,7 @@ public final class BatteryService extends SystemService {
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
-            if (mPlugType != 0 && mLastPlugType == 0) {
+            if (mPlugType != 0 && mLastBroadcastPlugType == 0) {
                 final Intent statusIntent = new Intent(Intent.ACTION_POWER_CONNECTED);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
@@ -730,8 +891,7 @@ public final class BatteryService extends SystemService {
                         }
                     });
                 }
-            }
-            else if (mPlugType == 0 && mLastPlugType != 0) {
+            } else if (mPlugType == 0 && mLastBroadcastPlugType != 0) {
                 final Intent statusIntent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
                 statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                 statusIntent.putExtra(BatteryManager.EXTRA_SEQUENCE, mSequence);
@@ -801,8 +961,14 @@ public final class BatteryService extends SystemService {
             // We are doing this after sending the above broadcasts, so anything processing
             // them will get the new sequence number at that point.  (See for example how testing
             // of JobScheduler's BatteryController works.)
-            sendBatteryChangedIntentLocked(force);
-            if (mLastBatteryLevel != mHealthInfo.batteryLevel || mLastPlugType != mPlugType) {
+
+            boolean rateLimitBatteryChangedBroadcast = rateLimitBatteryChangedBroadcast(force);
+
+            if (!rateLimitBatteryChangedBroadcast) {
+                sendBatteryChangedIntentLocked(force);
+            }
+            if (mLastBroadcastBatteryLevel != mHealthInfo.batteryLevel
+                    || mLastBroadcastPlugType != mPlugType) {
                 sendBatteryLevelChangedIntentLocked();
             }
 
@@ -815,20 +981,24 @@ public final class BatteryService extends SystemService {
                 logOutlierLocked(dischargeDuration);
             }
 
-            mLastBatteryStatus = mHealthInfo.batteryStatus;
-            mLastBatteryHealth = mHealthInfo.batteryHealth;
-            mLastBatteryPresent = mHealthInfo.batteryPresent;
-            mLastBatteryLevel = mHealthInfo.batteryLevel;
-            mLastPlugType = mPlugType;
-            mLastBatteryVoltage = mHealthInfo.batteryVoltageMillivolts;
-            mLastBatteryTemperature = mHealthInfo.batteryTemperatureTenthsCelsius;
-            mLastMaxChargingCurrent = mHealthInfo.maxChargingCurrentMicroamps;
-            mLastMaxChargingVoltage = mHealthInfo.maxChargingVoltageMicrovolts;
-            mLastChargeCounter = mHealthInfo.batteryChargeCounterUah;
-            mLastBatteryLevelCritical = mBatteryLevelCritical;
-            mLastInvalidCharger = mInvalidCharger;
-            mLastBatteryCycleCount = mHealthInfo.batteryCycleCount;
-            mLastChargingState = mHealthInfo.chargingState;
+            // Only update the values when we send the broadcast
+            if (!rateLimitBatteryChangedBroadcast) {
+                mLastBroadcastBatteryStatus = mHealthInfo.batteryStatus;
+                mLastBroadcastBatteryHealth = mHealthInfo.batteryHealth;
+                mLastBroadcastBatteryPresent = mHealthInfo.batteryPresent;
+                mLastBroadcastBatteryLevel = mHealthInfo.batteryLevel;
+                mLastBroadcastPlugType = mPlugType;
+                mLastBroadcastBatteryVoltage = mHealthInfo.batteryVoltageMillivolts;
+                mLastBroadcastBatteryTemperature = mHealthInfo.batteryTemperatureTenthsCelsius;
+                mLastBroadcastMaxChargingCurrent = mHealthInfo.maxChargingCurrentMicroamps;
+                mLastBroadcastMaxChargingVoltage = mHealthInfo.maxChargingVoltageMicrovolts;
+                mLastBroadcastChargeCounter = mHealthInfo.batteryChargeCounterUah;
+                mLastBroadcastBatteryLevelCritical = mBatteryLevelCritical;
+                mLastBroadcastInvalidCharger = mInvalidCharger;
+                mLastBroadcastBatteryCycleCount = mHealthInfo.batteryCycleCount;
+                mLastBroadcastChargingState = mHealthInfo.chargingState;
+                mLastBroadcastBatteryCapacityLevel = mHealthInfo.batteryCapacityLevel;
+            }
         }
     }
 
@@ -862,6 +1032,7 @@ public final class BatteryService extends SystemService {
         intent.putExtra(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounterUah);
         intent.putExtra(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
         intent.putExtra(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
+        intent.putExtra(BatteryManager.EXTRA_CAPACITY_LEVEL, mHealthInfo.batteryCapacityLevel);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED. scale:" + BATTERY_SCALE
                     + ", info:" + mHealthInfo.toString());
@@ -964,6 +1135,7 @@ public final class BatteryService extends SystemService {
         event.putLong(BatteryManager.EXTRA_EVENT_TIMESTAMP, now);
         event.putInt(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
         event.putInt(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
+        event.putInt(BatteryManager.EXTRA_CAPACITY_LEVEL, mHealthInfo.batteryCapacityLevel);
 
         boolean queueWasEmpty = mBatteryLevelsEventQueue.isEmpty();
         mBatteryLevelsEventQueue.add(event);
@@ -1090,6 +1262,97 @@ public final class BatteryService extends SystemService {
         }
     }
 
+    /**
+     * Rate limit's the broadcast based on the changes in temp, voltage and chargeCounter.
+     */
+    private boolean rateLimitBatteryChangedBroadcast(boolean forceUpdate) {
+        if (!com.android.server.flags.Flags.rateLimitBatteryChangedBroadcast()) {
+            return false;
+        }
+        if (mIsFirstBatteryChangedUpdate) {
+            mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            mIsFirstBatteryChangedUpdate = false;
+            return false;
+        }
+
+        final boolean voltageUpdated =
+                mLastBroadcastBatteryVoltage != mHealthInfo.batteryVoltageMillivolts;
+        final boolean temperatureUpdated =
+                mLastBroadcastBatteryTemperature != mHealthInfo.batteryTemperatureTenthsCelsius;
+        final boolean maxChargingCurrentUpdated =
+                mLastBroadcastMaxChargingCurrent != mHealthInfo.maxChargingCurrentMicroamps;
+        final boolean otherStatesUpdated = forceUpdate
+                || mHealthInfo.batteryStatus != mLastBroadcastBatteryStatus
+                || mHealthInfo.batteryHealth != mLastBroadcastBatteryHealth
+                || mHealthInfo.batteryPresent != mLastBroadcastBatteryPresent
+                || mHealthInfo.batteryLevel != mLastBroadcastBatteryLevel
+                || mPlugType != mLastBroadcastPlugType
+                || mHealthInfo.maxChargingVoltageMicrovolts != mLastBroadcastMaxChargingVoltage
+                || mInvalidCharger != mLastBroadcastInvalidCharger
+                || mHealthInfo.batteryCycleCount != mLastBroadcastBatteryCycleCount
+                || mHealthInfo.chargingState != mLastBroadcastChargingState
+                || mHealthInfo.batteryCapacityLevel != mLastBroadcastBatteryCapacityLevel;
+
+        // We only rate limit based on changes in the temp, voltage.
+        if (otherStatesUpdated) {
+
+            if (voltageUpdated) {
+                mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            }
+            if (maxChargingCurrentUpdated) {
+                mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            }
+            return false;
+        }
+
+        final float basePointDiff =
+                (float) (mLastBroadcastBatteryVoltage - mHealthInfo.batteryVoltageMillivolts)
+                        / mLastBroadcastBatteryVoltage;
+
+        // We only send the broadcast if voltage change is greater than 1% and last voltage
+        // update was sent at least 20 seconds back.
+        if (voltageUpdated
+                && abs(basePointDiff) >= BASE_POINT_DIFF_FOR_VOLTAGE_UPDATE
+                && SystemClock.elapsedRealtime() - mLastBroadcastVoltageUpdateTime
+                        >= TIME_DIFF_FOR_VOLTAGE_UPDATE_MS) {
+            mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+
+            if (maxChargingCurrentUpdated) {
+                mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            }
+            return false;
+        }
+
+        // Only send the broadcast if the temperature update is greater than 1 degree celsius.
+        if (temperatureUpdated
+                && abs(
+                mLastBroadcastBatteryTemperature - mHealthInfo.batteryTemperatureTenthsCelsius)
+                        >= ABSOLUTE_DECI_CELSIUS_DIFF_FOR_TEMP_UPDATE) {
+
+            if (voltageUpdated) {
+                mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            }
+            if (maxChargingCurrentUpdated) {
+                mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+            }
+            return false;
+        }
+
+        if (maxChargingCurrentUpdated
+                && SystemClock.elapsedRealtime() - mLastBroadcastMaxChargingCurrentUpdateTime
+                >= TIME_DIFF_FOR_MAX_CHARGING_CURRENT_UPDATE_MS) {
+            mLastBroadcastMaxChargingCurrentUpdateTime = SystemClock.elapsedRealtime();
+
+            if (voltageUpdated) {
+                mLastBroadcastVoltageUpdateTime = SystemClock.elapsedRealtime();
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     class Shell extends ShellCommand {
         @Override
         public int onCommand(String cmd) {
@@ -1112,6 +1375,8 @@ public final class BatteryService extends SystemService {
             getSetOptions += "|current_now|current_average";
         }
         pw.println("  get [-f] [" + getSetOptions + "]");
+        pw.println("    Gets the value of a battery state.");
+        pw.println("    -f: force to get the latest property value.");
         pw.println("  set [-f] [" + getSetOptions + "] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
@@ -1158,8 +1423,15 @@ public final class BatteryService extends SystemService {
                 if (key == null) {
                     pw.println("No property specified");
                     return -1;
-
                 }
+
+                // Update the health info.
+                if ((opts & OPTION_FORCE_UPDATE) != 0) {
+                    mConditionVariable.close();
+                    updateHealthInfo();
+                    mConditionVariable.block(HEALTH_HAL_WAIT_MS);
+                }
+
                 switch (key) {
                     case "present":
                         pw.println(mHealthInfo.batteryPresent);
@@ -1187,17 +1459,11 @@ public final class BatteryService extends SystemService {
                         break;
                     case "current_now":
                         if (batteryServiceSupportCurrentAdbCommand()) {
-                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                                updateHealthInfo();
-                            }
                             pw.println(mHealthInfo.batteryCurrentMicroamps);
                         }
                         break;
                     case "current_average":
                         if (batteryServiceSupportCurrentAdbCommand()) {
-                            if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                                updateHealthInfo();
-                            }
                             pw.println(mHealthInfo.batteryCurrentAverageMicroamps);
                         }
                         break;
@@ -1389,6 +1655,9 @@ public final class BatteryService extends SystemService {
                 pw.println("  Wireless powered: " + mHealthInfo.chargerWirelessOnline);
                 pw.println("  Dock powered: " + mHealthInfo.chargerDockOnline);
                 pw.println("  Max charging current: " + mHealthInfo.maxChargingCurrentMicroamps);
+                pw.println(" Time when the latest updated value of the Max charging current was"
+                        + " sent via battery changed broadcast: "
+                        + TimeUtils.formatDuration(mLastBroadcastMaxChargingCurrentUpdateTime));
                 pw.println("  Max charging voltage: " + mHealthInfo.maxChargingVoltageMicrovolts);
                 pw.println("  Charge counter: " + mHealthInfo.batteryChargeCounterUah);
                 pw.println("  status: " + mHealthInfo.batteryStatus);
@@ -1397,10 +1666,16 @@ public final class BatteryService extends SystemService {
                 pw.println("  level: " + mHealthInfo.batteryLevel);
                 pw.println("  scale: " + BATTERY_SCALE);
                 pw.println("  voltage: " + mHealthInfo.batteryVoltageMillivolts);
+                pw.println(" Time when the latest updated value of the voltage was sent via "
+                        + "battery changed broadcast: "
+                        + TimeUtils.formatDuration(mLastBroadcastVoltageUpdateTime));
+                pw.println(" The last voltage value sent via the battery changed broadcast: "
+                        + mLastBroadcastBatteryVoltage);
                 pw.println("  temperature: " + mHealthInfo.batteryTemperatureTenthsCelsius);
                 pw.println("  technology: " + mHealthInfo.batteryTechnology);
                 pw.println("  Charging state: " + mHealthInfo.chargingState);
                 pw.println("  Charging policy: " + mHealthInfo.chargingPolicy);
+                pw.println("  Capacity level: " + mHealthInfo.batteryCapacityLevel);
             } else {
                 Shell shell = new Shell();
                 shell.exec(mBinderService, null, fd, null, args, null, new ResultReceiver(null));
@@ -1452,6 +1727,11 @@ public final class BatteryService extends SystemService {
 
     private static void traceEnd() {
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+    }
+
+    @VisibleForTesting
+    public Handler getHandlerForTest() {
+        return mHandler;
     }
 
     @SuppressLint("AndroidFrameworkRequiresPermission")

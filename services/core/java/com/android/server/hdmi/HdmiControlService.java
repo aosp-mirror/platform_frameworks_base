@@ -16,10 +16,13 @@
 
 package com.android.server.hdmi;
 
+import static android.media.tv.flags.Flags.hdmiControlEnhancedBehavior;
+
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_ENABLED;
+import static android.hardware.hdmi.HdmiControlManager.HDMI_CEC_CONTROL_DISABLED;
 import static android.hardware.hdmi.HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
 import static android.hardware.hdmi.HdmiControlManager.POWER_CONTROL_MODE_NONE;
 import static android.hardware.hdmi.HdmiControlManager.SOUNDBAR_MODE_DISABLED;
@@ -47,6 +50,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
@@ -103,6 +107,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -476,7 +481,8 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private HdmiCecController mCecController;
 
-    private HdmiCecPowerStatusController mPowerStatusController;
+    @VisibleForTesting
+    protected HdmiCecPowerStatusController mPowerStatusController;
 
     @Nullable
     private HdmiEarcController mEarcController;
@@ -721,6 +727,13 @@ public class HdmiControlService extends SystemService {
         }
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         setProhibitMode(false);
+        if (isTvDevice() && getWasCecDisabledOnStandbyByLowEnergyMode()) {
+            Slog.w(TAG, "Re-enable CEC on boot-up since it was disabled due to low energy "
+                    + " mode.");
+            mHdmiCecConfig.setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                    HDMI_CEC_CONTROL_ENABLED);
+            setWasCecDisabledOnStandbyByLowEnergyMode(false);
+        }
         mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
 
@@ -995,6 +1008,21 @@ public class HdmiControlService extends SystemService {
                                 ? SOUNDBAR_MODE_ENABLED : SOUNDBAR_MODE_DISABLED);
                     }
                 }, mServiceThreadExecutor);
+
+        if (isPlaybackDevice()) {
+            mHdmiCecConfig.registerChangeListener(
+                    HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                    new HdmiCecConfig.SettingChangeListener() {
+                        @Override
+                        public void onChange(String setting) {
+                            boolean goToStandbyOnActiveSourceLost =
+                                    mHdmiCecConfig.getStringValue(
+                                            HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST)
+                                            .equals(HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+                            writePowerStateChangeOnActiveSourceLostAtom(goToStandbyOnActiveSourceLost);
+                        }
+                    }, mServiceThreadExecutor);
+        }
 
         mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
                 new DeviceConfig.OnPropertiesChangedListener() {
@@ -1378,7 +1406,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private List<Integer> getCecLocalDeviceTypes() {
         ArrayList<Integer> allLocalDeviceTypes = new ArrayList<>(mCecLocalDevices);
-        if (isDsmEnabled() && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+        if (!isTvDevice() && isDsmEnabled()
+                && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
                 && isArcSupported() && mSoundbarModeFeatureFlagEnabled) {
             allLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         }
@@ -1685,7 +1714,11 @@ public class HdmiControlService extends SystemService {
     private void sendCecCommandWithRetries(HdmiCecMessage command,
             @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        HdmiCecLocalDevice localDevice = getAllCecLocalDevices().get(0);
+        List<HdmiCecLocalDevice> devices = getAllCecLocalDevices();
+        if (devices.isEmpty()) {
+            return;
+        }
+        HdmiCecLocalDevice localDevice = devices.get(0);
         if (localDevice != null) {
             sendCecCommandWithoutRetries(command, new SendMessageCallback() {
                 @Override
@@ -1979,7 +2012,6 @@ public class HdmiControlService extends SystemService {
     void setAudioStatus(boolean mute, int volume) {
         if (!isTvDeviceEnabled()
                 || !tv().isSystemAudioActivated()
-                || !tv().isArcEstablished() // Don't update TV volume when SAM is on and ARC is off
                 || getHdmiCecVolumeControl()
                 == HdmiControlManager.VOLUME_CONTROL_DISABLED) {
             return;
@@ -3170,6 +3202,11 @@ public class HdmiControlService extends SystemService {
         HdmiCecLocalDeviceSource source = playback();
         if (source == null) {
             source = audioSystem();
+        } else {
+            // Cancel an existing timer to send the device to sleep since OTP was triggered.
+            playback().mDelayedStandbyOnActiveSourceLostHandler
+                    .removeCallbacksAndMessages(null);
+            playback().setIsActiveSourceLostPopupLaunched(false);
         }
 
         if (source == null) {
@@ -3807,7 +3844,32 @@ public class HdmiControlService extends SystemService {
         mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON,
                 false);
         if (mCecController != null) {
-            if (isCecControlEnabled()) {
+            if (isTvDevice() && getWasCecDisabledOnStandbyByLowEnergyMode()) {
+                Slog.w(TAG, "Re-enable CEC on wake-up since it was disabled due to low energy "
+                        + " mode.");
+                getHdmiCecConfig().setIntValue(HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                        HDMI_CEC_CONTROL_ENABLED);
+                setWasCecDisabledOnStandbyByLowEnergyMode(false);
+                int controlStateChangedReason = -1;
+                switch (wakeUpAction) {
+                    case WAKE_UP_SCREEN_ON:
+                        controlStateChangedReason =
+                                HdmiControlManager.CONTROL_STATE_CHANGED_REASON_WAKEUP;
+                        break;
+                    case WAKE_UP_BOOT_UP:
+                        controlStateChangedReason =
+                                HdmiControlManager.CONTROL_STATE_CHANGED_REASON_START;
+                        break;
+                    default:
+                        Slog.e(TAG, "wakeUpAction " + wakeUpAction + " not defined.");
+                        return;
+
+                }
+                // Since CEC is going to be initialized by the setting value update, we must invoke
+                // the vendor command listeners here with the reason TV woke up.
+                invokeVendorCommandListenersOnControlStateChanged(true,
+                        controlStateChangedReason);
+            } else if (isCecControlEnabled()) {
                 int startReason = -1;
                 switch (wakeUpAction) {
                     case WAKE_UP_SCREEN_ON:
@@ -3980,6 +4042,15 @@ public class HdmiControlService extends SystemService {
                 releaseWakeLock();
                 if (isAudioSystemDevice() || !isPowerStandby()) {
                     return;
+                }
+                if (isTvDevice() && getDisableCecOnStandbyByLowEnergyMode()
+                        && mPowerManager.isLowPowerStandbyEnabled()
+                        && !userEnabledCecInOfflineMode()) {
+                    Slog.w(TAG, "Disable CEC on standby due to low power energy mode.");
+                    setWasCecDisabledOnStandbyByLowEnergyMode(true);
+                    getHdmiCecConfig().setIntValue(
+                            HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED,
+                            HDMI_CEC_CONTROL_DISABLED);
                 }
                 mCecController.enableSystemCecControl(false);
                 mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
@@ -4302,6 +4373,7 @@ public class HdmiControlService extends SystemService {
         if (deviceType == HdmiDeviceInfo.DEVICE_PLAYBACK) {
             HdmiCecLocalDevicePlayback playback = playback();
             playback.dismissUiOnActiveSourceStatusRecovered();
+            playback.removeAction(RequestActiveSourceAction.class);
             playback.setActiveSource(playback.getDeviceInfo().getLogicalAddress(), physicalAddress,
                     caller);
             playback.wakeUpIfActiveSource();
@@ -5136,5 +5208,77 @@ public class HdmiControlService extends SystemService {
         } else {
             tv().startArcAction(enabled, callback);
         }
+    }
+
+    protected boolean isHdmiControlEnhancedBehaviorFlagEnabled() {
+        return hdmiControlEnhancedBehavior();
+    }
+
+    /**
+     * Reads the property value that decides whether CEC should be disabled on standby when the low
+     * energy mode option is used.
+     */
+    @VisibleForTesting
+    protected boolean getDisableCecOnStandbyByLowEnergyMode() {
+        return SystemProperties.getBoolean(
+                Constants.PROPERTY_DISABLE_CEC_ON_STANDBY_IN_LOW_ENERGY_MODE, false);
+    }
+
+    /**
+     * Reads the property that checks if CEC was disabled on standby by low energy mode.
+     */
+    @VisibleForTesting
+    protected boolean getWasCecDisabledOnStandbyByLowEnergyMode() {
+        return SystemProperties.getBoolean(
+                Constants.PROPERTY_WAS_CEC_DISABLED_ON_STANDBY_BY_LOW_ENERGY_MODE, false);
+    }
+
+    /**
+     * Sets the truth value of the property that checks if CEC was disabled on standby by low energy
+     * mode.
+     */
+    @VisibleForTesting
+    protected void setWasCecDisabledOnStandbyByLowEnergyMode(boolean value) {
+        writeStringSystemProperty(
+                Constants.PROPERTY_WAS_CEC_DISABLED_ON_STANDBY_BY_LOW_ENERGY_MODE,
+                String.valueOf(value));
+    }
+
+    /**
+     * Writes a HdmiPowerStateChangeOnActiveSourceLostToggled atom representing a
+     * HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST setting change.
+     */
+    protected void writePowerStateChangeOnActiveSourceLostAtom(boolean isSettingEnabled) {
+        String manufacturerPnpId = "undefined";
+        int manufactureYear = -1;
+        int manufactureWeek = -1;
+        Display display = getContext().getDisplay();
+        if (display != null) {
+            DeviceProductInfo deviceProductInfo = display.getDeviceProductInfo();
+            manufacturerPnpId = deviceProductInfo.getManufacturerPnpId();
+            manufactureYear = deviceProductInfo.getManufactureYear();
+        }
+        int enumLogReason =
+                HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_UNKNOWN;
+        if (playback() != null) {
+            if (playback().isActiveSourceLostPopupLaunched()) {
+                enumLogReason = HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_POP_UP;
+            } else {
+                enumLogReason = HdmiStatsEnums.LOG_REASON_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_TOGGLE_SETTING;
+            }
+        }
+
+        getAtomWriter().powerStateChangeOnActiveSourceLostChanged(isSettingEnabled, enumLogReason,
+                manufacturerPnpId, manufactureYear, manufactureWeek);
+    }
+
+    /**
+     * Reads the property that checks if CEC was enabled by the user while in offline mode such that
+     * it won't be disabled when going to sleep by low energy mode.
+     */
+    @VisibleForTesting
+    protected boolean userEnabledCecInOfflineMode() {
+        return SystemProperties.getBoolean(
+                Constants.PROPERTY_USER_ACTION_KEEP_CEC_ENABLED_IN_OFFLINE_MODE, false);
     }
 }

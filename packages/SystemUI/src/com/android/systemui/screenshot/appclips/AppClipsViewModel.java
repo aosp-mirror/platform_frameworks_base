@@ -28,9 +28,9 @@ import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.app.assist.AssistContent;
 import android.content.ClipData;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -249,12 +249,22 @@ final class AppClipsViewModel extends ViewModel {
                                 .map(taskInfo -> new InternalTaskInfo(taskInfo.topActivityInfo,
                                         taskInfo.taskId, taskInfo.userId,
                                         getPackageManagerForUser(taskInfo.userId)))
-                                .filter(this::canAppStartThroughLauncher)
                                 .map(this::getBacklinksDataForTaskInfo)
                                 .toList(),
                         mBgExecutor);
 
         return Futures.transformAsync(backlinksNestedListFuture, Futures::allAsList, mBgExecutor);
+    }
+
+    private PackageManager getPackageManagerForUser(int userId) {
+        // If app clips was launched as the same user, then reuse the available PM from mContext.
+        if (mContext.getUserId() == userId) {
+            return mContext.getPackageManager();
+        }
+
+        // PackageManager required for a different user, create its context and return its PM.
+        UserHandle userHandle = UserHandle.of(userId);
+        return mContext.createContextAsUser(userHandle, /* flags= */ 0).getPackageManager();
     }
 
     /**
@@ -308,17 +318,6 @@ final class AppClipsViewModel extends ViewModel {
                 && taskInfo.topActivity != null
                 && taskInfo.topActivityInfo != null
                 && taskInfo.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-    }
-
-    /**
-     * Returns whether the app represented by the {@link InternalTaskInfo} can be launched through
-     * the all apps tray by a user.
-     */
-    private boolean canAppStartThroughLauncher(InternalTaskInfo internalTaskInfo) {
-        // Use Intent.resolveActivity API to check if the intent resolves as that is what Android
-        // uses internally when apps use Context.startActivity.
-        return getMainLauncherIntentForTask(internalTaskInfo)
-                .resolveActivity(internalTaskInfo.getPackageManager()) != null;
     }
 
     /**
@@ -390,11 +389,14 @@ final class AppClipsViewModel extends ViewModel {
                         internalTaskInfo.getTaskId(),
                         internalTaskInfo.getTopActivityNameForDebugLogging()));
 
-        String appName = internalTaskInfo.getTopActivityAppName();
-        Drawable appIcon = internalTaskInfo.getTopActivityAppIcon();
-        ClipData mainLauncherIntent = ClipData.newIntent(appName,
-                getMainLauncherIntentForTask(internalTaskInfo));
-        InternalBacklinksData fallback = new BacklinksData(mainLauncherIntent, appIcon);
+        String screenshottedAppName = internalTaskInfo.getTopActivityAppName();
+        Drawable screenshottedAppIcon = internalTaskInfo.getTopActivityAppIcon();
+        Intent screenshottedAppMainLauncherIntent = getMainLauncherIntentForTask(
+                internalTaskInfo.getTopActivityPackageName(), internalTaskInfo.getPackageManager());
+        ClipData screenshottedAppMainLauncherClipData =
+                ClipData.newIntent(screenshottedAppName, screenshottedAppMainLauncherIntent);
+        InternalBacklinksData fallback =
+                new BacklinksData(screenshottedAppMainLauncherClipData, screenshottedAppIcon);
         if (content == null) {
             return fallback;
         }
@@ -406,10 +408,14 @@ final class AppClipsViewModel extends ViewModel {
 
             Uri uri = content.getWebUri();
             Intent backlinksIntent = new Intent(ACTION_VIEW).setData(uri);
-            if (doesIntentResolveToSameTask(backlinksIntent, internalTaskInfo)) {
+            BacklinkDisplayInfo backlinkDisplayInfo = getInfoThatResolvesIntent(backlinksIntent,
+                    internalTaskInfo);
+            if (backlinkDisplayInfo != null) {
                 DebugLogger.INSTANCE.logcatMessage(this,
                         () -> "getBacklinksDataFromAssistContent: using app provided uri");
-                return new BacklinksData(ClipData.newRawUri(appName, uri), appIcon);
+                return new BacklinksData(
+                        ClipData.newRawUri(backlinkDisplayInfo.getDisplayLabel(), uri),
+                        backlinkDisplayInfo.getAppIcon());
             }
         }
 
@@ -419,10 +425,14 @@ final class AppClipsViewModel extends ViewModel {
                     () -> "getBacklinksDataFromAssistContent: app has provided an intent");
 
             Intent backlinksIntent = content.getIntent();
-            if (doesIntentResolveToSameTask(backlinksIntent, internalTaskInfo)) {
+            BacklinkDisplayInfo backlinkDisplayInfo = getInfoThatResolvesIntent(backlinksIntent,
+                    internalTaskInfo);
+            if (backlinkDisplayInfo != null) {
                 DebugLogger.INSTANCE.logcatMessage(this,
                         () -> "getBacklinksDataFromAssistContent: using app provided intent");
-                return new BacklinksData(ClipData.newIntent(appName, backlinksIntent), appIcon);
+                return new BacklinksData(
+                        ClipData.newIntent(backlinkDisplayInfo.getDisplayLabel(), backlinksIntent),
+                        backlinkDisplayInfo.getAppIcon());
             }
         }
 
@@ -431,44 +441,82 @@ final class AppClipsViewModel extends ViewModel {
         return fallback;
     }
 
-    private boolean doesIntentResolveToSameTask(Intent intentToResolve,
-            InternalTaskInfo requiredTaskInfo) {
-        PackageManager packageManager = requiredTaskInfo.getPackageManager();
-        ComponentName resolvedComponent = intentToResolve.resolveActivity(packageManager);
-        if (resolvedComponent == null) {
-            return false;
+    /**
+     * Returns {@link BacklinkDisplayInfo} for the app that would resolve the provided backlink
+     * {@link Intent}.
+     *
+     * <p>The method uses the {@link PackageManager} available in the provided
+     * {@link InternalTaskInfo}.
+     *
+     * <p>This method returns {@code null} if Android is not able to resolve the backlink intent or
+     * if the resolved app does not have an icon in the launcher.
+     */
+    @Nullable
+    private BacklinkDisplayInfo getInfoThatResolvesIntent(Intent backlinkIntent,
+            InternalTaskInfo internalTaskInfo) {
+        PackageManager packageManager = internalTaskInfo.getPackageManager();
+
+        // Query for all available activities as there is a chance that multiple apps could resolve
+        // the intent. In such cases the normal `intent.resolveActivity` API returns the activity
+        // resolver info which isn't helpful for further checks. Also, using MATCH_DEFAULT_ONLY flag
+        // is required as that flag will be used when the notes app builds the intent and calls
+        // startActivity with the intent.
+        List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(backlinkIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfos.isEmpty()) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getInfoThatResolvesIntent: could not resolve backlink intent");
+            return null;
         }
 
-        String requiredPackageName = requiredTaskInfo.getTopActivityPackageName();
-        return resolvedComponent.getPackageName().equals(requiredPackageName);
+        // Only use the first result as the list is ordered from best match to worst and Android
+        // will also use the best match with `intent.startActivity` API which notes app will use.
+        ActivityInfo activityInfo = resolveInfos.get(0).activityInfo;
+        if (activityInfo == null) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getInfoThatResolvesIntent: could not find activity info for backlink "
+                            + "intent");
+            return null;
+        }
+
+        // Ignore resolved backlink app if users cannot start it through all apps tray.
+        if (!canAppStartThroughLauncher(activityInfo.packageName, packageManager)) {
+            DebugLogger.INSTANCE.logcatMessage(this,
+                    () -> "getInfoThatResolvesIntent: ignoring resolved backlink app as it cannot"
+                            + " start through launcher");
+            return null;
+        }
+
+        Drawable appIcon = InternalBacklinksDataKt.getAppIcon(activityInfo, packageManager);
+        String appName = InternalBacklinksDataKt.getAppName(activityInfo, packageManager);
+        return new BacklinkDisplayInfo(appIcon, appName);
     }
 
-    private Intent getMainLauncherIntentForTask(InternalTaskInfo internalTaskInfo) {
-        String pkgName = internalTaskInfo.getTopActivityPackageName();
+    /**
+     * Returns whether the app represented by the provided {@code pkgName} can be launched through
+     * the all apps tray by the user.
+     */
+    private static boolean canAppStartThroughLauncher(String pkgName, PackageManager pkgManager) {
+        // Use Intent.resolveActivity API to check if the intent resolves as that is what Android
+        // uses internally when apps use Context.startActivity.
+        return getMainLauncherIntentForTask(pkgName, pkgManager)
+                .resolveActivity(pkgManager) != null;
+    }
+
+    private static Intent getMainLauncherIntentForTask(String pkgName,
+            PackageManager packageManager) {
         Intent intent = new Intent(ACTION_MAIN).addCategory(CATEGORY_LAUNCHER).setPackage(pkgName);
 
         // Not all apps use DEFAULT_CATEGORY for their main launcher activity so the exact component
         // needs to be queried and set on the Intent in order for note-taking apps to be able to
         // start this intent. When starting an activity with an implicit intent, Android adds the
         // DEFAULT_CATEGORY flag otherwise it fails to resolve the intent.
-        PackageManager packageManager = internalTaskInfo.getPackageManager();
         ResolveInfo resolvedActivity = packageManager.resolveActivity(intent, /* flags= */ 0);
         if (resolvedActivity != null) {
             intent.setComponent(resolvedActivity.getComponentInfo().getComponentName());
         }
 
         return intent;
-    }
-
-    private PackageManager getPackageManagerForUser(int userId) {
-        // If app clips was launched as the same user, then reuse the available PM from mContext.
-        if (mContext.getUserId() == userId) {
-            return mContext.getPackageManager();
-        }
-
-        // PackageManager required for a different user, create its context and return its PM.
-        UserHandle userHandle = UserHandle.of(userId);
-        return mContext.createContextAsUser(userHandle, /* flags= */ 0).getPackageManager();
     }
 
     /** Helper factory to help with injecting {@link AppClipsViewModel}. */

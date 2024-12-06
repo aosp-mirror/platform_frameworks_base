@@ -103,8 +103,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags) {
-        return null;
+    public boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
+        return false;
     }
 
     @Override

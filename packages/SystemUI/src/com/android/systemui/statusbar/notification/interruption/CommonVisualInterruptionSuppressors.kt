@@ -52,15 +52,16 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SUPPRESSED_OLD_WHEN
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
 import com.android.systemui.statusbar.policy.BatteryController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.NotificationChannels
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -101,7 +102,7 @@ class PeekDisabledSuppressor(
         globalSettings.registerContentObserverSync(
             globalSettings.getUriFor(HEADS_UP_NOTIFICATIONS_ENABLED),
             /* notifyForDescendants = */ true,
-            observer
+            observer,
         )
 
         // QQQ: Do we need to register for SETTING_HEADS_UP_TICKER? It seems unused.
@@ -138,7 +139,7 @@ class PeekPackageSnoozedSuppressor(private val headsUpManager: HeadsUpManager) :
 
 class PeekAlreadyBubbledSuppressor(
     private val statusBarStateController: StatusBarStateController,
-    private val bubbles: Optional<Bubbles>
+    private val bubbles: Optional<Bubbles>,
 ) : VisualInterruptionFilter(types = setOf(PEEK), reason = "already bubbled") {
     override fun shouldSuppress(entry: NotificationEntry) =
         when {
@@ -163,7 +164,7 @@ class PeekNotImportantSuppressor :
 
 class PeekDeviceNotInUseSuppressor(
     private val powerManager: PowerManager,
-    private val statusBarStateController: StatusBarStateController
+    private val statusBarStateController: StatusBarStateController,
 ) : VisualInterruptionCondition(types = setOf(PEEK), reason = "device not in use") {
     override fun shouldSuppress() =
         when {
@@ -176,7 +177,7 @@ class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
     VisualInterruptionFilter(
         types = setOf(PEEK),
         reason = "has old `when`",
-        uiEventId = HUN_SUPPRESSED_OLD_WHEN
+        uiEventId = HUN_SUPPRESSED_OLD_WHEN,
     ) {
     private fun whenAge(entry: NotificationEntry) =
         systemClock.currentTimeMillis() - entry.sbn.notification.getWhen()
@@ -205,7 +206,7 @@ class PulseEffectSuppressor :
 class PulseLockscreenVisibilityPrivateSuppressor :
     VisualInterruptionFilter(
         types = setOf(PULSE),
-        reason = "hidden by lockscreen visibility override"
+        reason = "hidden by lockscreen visibility override",
     ) {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.ranking.lockscreenVisibilityOverride == VISIBILITY_PRIVATE
@@ -219,7 +220,7 @@ class PulseLowImportanceSuppressor :
 class HunGroupAlertBehaviorSuppressor :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
-        reason = "suppressive group alert behavior"
+        reason = "suppressive group alert behavior",
     ) {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.sbn.let { it.isGroup && it.notification.suppressAlertingDueToGrouping() }
@@ -279,12 +280,9 @@ class AvalancheSuppressor(
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
     private val notificationManager: NotificationManager,
-    private val logger: VisualInterruptionDecisionLogger
-) :
-    VisualInterruptionFilter(
-        types = setOf(PEEK, PULSE),
-        reason = "avalanche",
-    ) {
+    private val logger: VisualInterruptionDecisionLogger,
+    private val systemSettings: SystemSettings,
+) : VisualInterruptionFilter(types = setOf(PEEK, PULSE), reason = "avalanche") {
     val TAG = "AvalancheSuppressor"
 
     private val prefs = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
@@ -299,6 +297,11 @@ class AvalancheSuppressor(
     // to force show for debug so that phone does not get stuck sending out infinite number of
     // education HUNs.
     private var hasShownOnceForDebug = false
+
+    // Sometimes the kotlin flow value is false even when the cooldown setting is true (b/356768397)
+    // so let's directly check settings until we confirm that the flow is initialized and in sync
+    // with the real settings value.
+    private var isCooldownFlowInSync = false
 
     private fun shouldShowEdu(): Boolean {
         val forceShowOnce = SystemProperties.get(FORCE_SHOW_AVALANCHE_EDU_ONCE, "").equals("1")
@@ -317,7 +320,7 @@ class AvalancheSuppressor(
         ALLOW_FSI_WITH_PERMISSION_ON,
         ALLOW_COLORIZED,
         ALLOW_EMERGENCY,
-        SUPPRESS
+        SUPPRESS,
     }
 
     enum class AvalancheEvent(private val id: Int) : UiEventLogger.UiEventEnum {
@@ -347,6 +350,7 @@ class AvalancheSuppressor(
         AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY(1868),
         @UiEvent(doc = "HUN allowed during avalanche because it is a car warning")
         AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_WARNING(1869);
+
         override fun getId(): Int {
             return id
         }
@@ -392,7 +396,7 @@ class AvalancheSuppressor(
         val bundle = Bundle()
         bundle.putString(
             Notification.EXTRA_SUBSTITUTE_APP_NAME,
-            context.getString(com.android.internal.R.string.android_system_label)
+            context.getString(com.android.internal.R.string.android_system_label),
         )
 
         val builder =
@@ -445,7 +449,8 @@ class AvalancheSuppressor(
 
         if (entry.sbn.notification.category == CATEGORY_CAR_EMERGENCY) {
             uiEventLogger.log(
-                    AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY)
+                AvalancheEvent.AVALANCHE_SUPPRESSOR_HUN_ALLOWED_CATEGORY_CAR_EMERGENCY
+            )
             return State.ALLOW_CATEGORY_CAR_EMERGENCY
         }
 
@@ -479,6 +484,15 @@ class AvalancheSuppressor(
     }
 
     private fun isCooldownEnabled(): Boolean {
-        return settingsInteractor.isCooldownEnabled.value
+        val isEnabledFromFlow = settingsInteractor.isCooldownEnabled.value
+        if (isCooldownFlowInSync) {
+            return isEnabledFromFlow
+        }
+        val isEnabled =
+            systemSettings.getInt(Settings.System.NOTIFICATION_COOLDOWN_ENABLED, /* def */ 1) == 1
+        if (isEnabled == isEnabledFromFlow) {
+            isCooldownFlowInSync = true
+        }
+        return isEnabled
     }
 }

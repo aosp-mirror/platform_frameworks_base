@@ -71,7 +71,11 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.log.LogWtfHandlerRule;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -89,6 +93,10 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.android.collect.Lists;
+
+import dagger.Lazy;
+
+import kotlinx.coroutines.flow.StateFlow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -152,6 +160,12 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+    @Mock
+    private DeviceUnlockedInteractor mDeviceUnlockedInteractor;
+    @Mock
+    private StateFlow<DeviceUnlockStatus> mDeviceUnlockStatusStateFlow;
 
     private UserInfo mCurrentUser;
     private UserInfo mSecondaryUser;
@@ -237,6 +251,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
+
+        when(mDeviceUnlockedInteractor.getDeviceUnlockStatus())
+                .thenReturn(mDeviceUnlockStatusStateFlow);
 
         mBackgroundExecutor.runAllReady();
     }
@@ -493,7 +510,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUpdateIsPublicMode() {
+    @DisableSceneContainer
+    public void testUpdateIsPublicMode_sceneContainerDisabled() {
         when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(false);
 
@@ -515,6 +533,57 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         verify(listener, never()).onNotificationStateChanged();
 
         // Calling again with keyguard now showing makes user 0 public; notifies
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        mLockscreenUserManager.updatePublicMode();
+        mBackgroundExecutor.runAllReady();
+        assertTrue(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener).onNotificationStateChanged();
+        clearInvocations(listener);
+
+        // calling again has no changes; does not notify
+        mLockscreenUserManager.updatePublicMode();
+        mBackgroundExecutor.runAllReady();
+        assertTrue(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener, never()).onNotificationStateChanged();
+
+        verify(mDeviceUnlockedInteractorLazy, never()).get();
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void testUpdateIsPublicMode_sceneContainerEnabled() {
+        when(mDeviceUnlockedInteractorLazy.get()).thenReturn(mDeviceUnlockedInteractor);
+
+        // device is unlocked
+        when(mDeviceUnlockStatusStateFlow.getValue()).thenReturn(new DeviceUnlockStatus(
+                /* isUnlocked = */ true,
+                /* deviceUnlockSource = */ null
+        ));
+
+        NotificationStateChangedListener listener = mock(NotificationStateChangedListener.class);
+        mLockscreenUserManager.addNotificationStateChangedListener(listener);
+        mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
+
+        // first call explicitly sets user 0 to not public; notifies
+        mLockscreenUserManager.updatePublicMode();
+        mBackgroundExecutor.runAllReady();
+        assertFalse(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener).onNotificationStateChanged();
+        clearInvocations(listener);
+
+        // calling again has no changes; does not notify
+        mLockscreenUserManager.updatePublicMode();
+        mBackgroundExecutor.runAllReady();
+        assertFalse(mLockscreenUserManager.isLockscreenPublicMode(0));
+        verify(listener, never()).onNotificationStateChanged();
+
+        // device is not unlocked
+        when(mDeviceUnlockStatusStateFlow.getValue()).thenReturn(new DeviceUnlockStatus(
+                /* isUnlocked = */ false,
+                /* deviceUnlockSource = */ null
+        ));
+
+        // Calling again with device now not unlocked makes user 0 public; notifies
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         mLockscreenUserManager.updatePublicMode();
         mBackgroundExecutor.runAllReady();
@@ -972,7 +1041,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mSettings,
                     mock(DumpManager.class),
                     mock(LockPatternUtils.class),
-                    mFakeFeatureFlags);
+                    mFakeFeatureFlags,
+                    mDeviceUnlockedInteractorLazy
+            );
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

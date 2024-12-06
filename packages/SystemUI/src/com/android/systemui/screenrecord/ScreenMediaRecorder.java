@@ -41,6 +41,7 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.media.projection.StopReason;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,11 +51,12 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.Surface;
-import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+import com.android.systemui.recordissue.ScreenRecordingStartTimeStore;
 
 import java.io.Closeable;
 import java.io.File;
@@ -91,21 +93,30 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     private ScreenInternalAudioRecorder mAudio;
     private ScreenRecordingAudioSource mAudioSource;
     private final MediaProjectionCaptureTarget mCaptureRegion;
+    private final ScreenRecordingStartTimeStore mScreenRecordingStartTimeStore;
     private final Handler mHandler;
+    private final int mDisplayId;
 
     private Context mContext;
     ScreenMediaRecorderListener mListener;
 
-    public ScreenMediaRecorder(Context context, Handler handler,
-            int uid, ScreenRecordingAudioSource audioSource,
+    public ScreenMediaRecorder(
+            Context context,
+            Handler handler,
+            int uid,
+            ScreenRecordingAudioSource audioSource,
             MediaProjectionCaptureTarget captureRegion,
-            ScreenMediaRecorderListener listener) {
+            int displayId,
+            ScreenMediaRecorderListener listener,
+            ScreenRecordingStartTimeStore screenRecordingStartTimeStore) {
         mContext = context;
         mHandler = handler;
         mUid = uid;
         mCaptureRegion = captureRegion;
         mListener = listener;
         mAudioSource = audioSource;
+        mDisplayId = displayId;
+        mScreenRecordingStartTimeStore = screenRecordingStartTimeStore;
     }
 
     private void prepare() throws IOException, RemoteException, RuntimeException {
@@ -113,9 +124,13 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         IMediaProjectionManager mediaService =
                 IMediaProjectionManager.Stub.asInterface(b);
-        IMediaProjection proj = null;
-        proj = mediaService.createProjection(mUid, mContext.getPackageName(),
-                    MediaProjectionManager.TYPE_SCREEN_CAPTURE, false);
+        IMediaProjection proj =
+                mediaService.createProjection(
+                        mUid,
+                        mContext.getPackageName(),
+                        MediaProjectionManager.TYPE_SCREEN_CAPTURE,
+                        false,
+                        mDisplayId);
         IMediaProjection projection = IMediaProjection.Stub.asInterface(proj.asBinder());
         if (mCaptureRegion != null) {
             projection.setLaunchCookie(mCaptureRegion.getLaunchCookie());
@@ -142,9 +157,10 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
 
         // Set up video
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        wm.getDefaultDisplay().getRealMetrics(metrics);
-        int refreshRate = (int) wm.getDefaultDisplay().getRefreshRate();
+        DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+        Display display = dm.getDisplay(mDisplayId);
+        display.getRealMetrics(metrics);
+        int refreshRate = (int) display.getRefreshRate();
         int[] dimens = getSupportedSize(metrics.widthPixels, metrics.heightPixels, refreshRate);
         int width = dimens[0];
         int height = dimens[1];
@@ -278,13 +294,14 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         Log.d(TAG, "start recording");
         prepare();
         mMediaRecorder.start();
+        mScreenRecordingStartTimeStore.markStartTime();
         recordInternalAudio();
     }
 
     /**
      * End screen recording, throws an exception if stopping recording failed
      */
-    void end() throws IOException {
+    void end(@StopReason int stopReason) throws IOException {
         Closer closer = new Closer();
 
         // MediaRecorder might throw RuntimeException if stopped immediately after starting
@@ -293,7 +310,17 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         closer.register(mMediaRecorder::release);
         closer.register(mInputSurface::release);
         closer.register(mVirtualDisplay::release);
-        closer.register(mMediaProjection::stop);
+        closer.register(() -> {
+            if (stopReason == StopReason.STOP_UNKNOWN) {
+                // Attempt to call MediaProjection#stop() even if it might have already been called.
+                // If projection has already been stopped, then nothing will happen. Else, stop
+                // will be logged as a manually requested stop from host app.
+                mMediaProjection.stop();
+            } else {
+                // In any other case, the stop reason is related to the recorder, so pass it on here
+                mMediaProjection.stop(stopReason);
+            }
+        });
         closer.register(this::stopInternalAudioRecording);
 
         closer.close();
@@ -307,7 +334,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     @Override
     public void onStop() {
         Log.d(TAG, "The system notified about stopping the projection");
-        mListener.onStopped();
+        mListener.onStopped(StopReason.STOP_UNKNOWN);
     }
 
     private void stopInternalAudioRecording() {
@@ -437,7 +464,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
          * For example, this might happen when doing partial screen sharing of an app
          * and the app that is being captured is closed.
          */
-        void onStopped();
+        void onStopped(@StopReason int stopReason);
     }
 
     /**

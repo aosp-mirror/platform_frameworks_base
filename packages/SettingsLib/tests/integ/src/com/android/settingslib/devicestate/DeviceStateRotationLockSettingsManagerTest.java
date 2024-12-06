@@ -16,13 +16,22 @@
 
 package com.android.settingslib.devicestate;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.devicestate.DeviceState;
+import android.hardware.devicestate.DeviceStateManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 
@@ -42,7 +51,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -52,6 +64,8 @@ public class DeviceStateRotationLockSettingsManagerTest {
 
     @Mock private Context mMockContext;
     @Mock private Resources mMockResources;
+
+    @Mock private DeviceStateManager mDeviceStateManager;
 
     private DeviceStateRotationLockSettingsManager mManager;
     private int mNumSettingsChanges = 0;
@@ -70,6 +84,9 @@ public class DeviceStateRotationLockSettingsManagerTest {
         when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockContext.getContentResolver()).thenReturn(context.getContentResolver());
+        when(mMockContext.getSystemService(DeviceStateManager.class)).thenReturn(
+                mDeviceStateManager);
+        when(mDeviceStateManager.getSupportedDeviceStates()).thenReturn(createDeviceStateList());
         when(mMockResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
                 .thenReturn(new String[]{"0:1", "1:0:2", "2:2"});
         when(mMockResources.getIntArray(R.array.config_foldedDeviceStates))
@@ -179,5 +196,30 @@ public class DeviceStateRotationLockSettingsManagerTest {
                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                 value,
                 UserHandle.USER_CURRENT);
+    }
+
+    private List<DeviceState> createDeviceStateList() {
+        List<DeviceState> deviceStates = new ArrayList<>();
+        deviceStates.add(createDeviceState(0 /* identifier */, "folded",
+                new HashSet<>(List.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY)),
+                new HashSet<>(List.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))));
+        deviceStates.add(createDeviceState(1 /* identifier */, "half_folded",
+                new HashSet<>(List.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)),
+                new HashSet<>(
+                        List.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN))));
+        deviceStates.add(createDeviceState(2, "unfolded",
+                new HashSet<>(List.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY)),
+                new HashSet<>(List.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN))));
+
+        return deviceStates;
+    }
+
+    private DeviceState createDeviceState(int identifier, @NonNull String name,
+            @NonNull Set<@DeviceState.SystemDeviceStateProperties Integer> systemProperties,
+            @NonNull Set<@DeviceState.PhysicalDeviceStateProperties Integer> physicalProperties) {
+        DeviceState.Configuration deviceStateConfiguration = new DeviceState.Configuration.Builder(
+                identifier, name).setPhysicalProperties(systemProperties).setPhysicalProperties(
+                physicalProperties).build();
+        return new DeviceState(deviceStateConfiguration);
     }
 }

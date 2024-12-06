@@ -19,14 +19,15 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -64,8 +65,6 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class StageTaskListenerTests extends ShellTestCase {
-    private static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
 
     @Mock
     private ShellTaskOrganizer mTaskOrganizer;
@@ -96,7 +95,8 @@ public final class StageTaskListenerTests extends ShellTestCase {
                 mCallbacks,
                 mSyncQueue,
                 mIconProvider,
-                Optional.of(mWindowDecorViewModel));
+                Optional.of(mWindowDecorViewModel),
+                STAGE_TYPE_UNDEFINED);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
         mSurfaceControl = new SurfaceControl.Builder().setName("test").build();
@@ -117,20 +117,19 @@ public final class StageTaskListenerTests extends ShellTestCase {
     public void testRootTaskAppeared() {
         assertThat(mStageTaskListener.mRootTaskInfo.taskId).isEqualTo(mRootTask.taskId);
         verify(mCallbacks).onRootTaskAppeared();
-        verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(false));
+        verify(mCallbacks, never()).onStageVisibilityChanged(mStageTaskListener);
     }
 
     @Test
-    public void testChildTaskAppeared() {
-        // With shell transitions, the transition manages status changes, so skip this test.
-        assumeFalse(ENABLE_SHELL_TRANSITIONS);
-        final ActivityManager.RunningTaskInfo childTask =
-                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
+    public void testRootTaskVisible() {
+        mStageTaskListener.onTaskVanished(mRootTask);
+        mRootTask = new TestRunningTaskInfoBuilder().setVisible(true).build();
+        mRootTask.parentTaskId = INVALID_TASK_ID;
+        mSurfaceControl = new SurfaceControl.Builder().setName("test").build();
+        mStageTaskListener.onTaskAppeared(mRootTask, mSurfaceControl);
 
-        mStageTaskListener.onTaskAppeared(childTask, mSurfaceControl);
+        verify(mCallbacks).onStageVisibilityChanged(mStageTaskListener);
 
-        assertThat(mStageTaskListener.mChildrenTaskInfo.contains(childTask.taskId)).isTrue();
-        verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -140,29 +139,13 @@ public final class StageTaskListenerTests extends ShellTestCase {
     }
 
     @Test
-    public void testTaskVanished() {
-        // With shell transitions, the transition manages status changes, so skip this test.
-        assumeFalse(ENABLE_SHELL_TRANSITIONS);
-        final ActivityManager.RunningTaskInfo childTask =
-                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
-        mStageTaskListener.mRootTaskInfo = mRootTask;
-        mStageTaskListener.mChildrenTaskInfo.put(childTask.taskId, childTask);
-
-        mStageTaskListener.onTaskVanished(childTask);
-        verify(mCallbacks, times(2)).onStatusChanged(eq(mRootTask.isVisible), eq(false));
-
-        mStageTaskListener.onTaskVanished(mRootTask);
-        verify(mCallbacks).onRootTaskVanished();
-    }
-
-    @Test
     public void testTaskInfoChanged_notSupportsMultiWindow() {
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
         childTask.supportsMultiWindow = false;
 
         mStageTaskListener.onTaskInfoChanged(childTask);
-        verify(mCallbacks).onNoLongerSupportMultiWindow(childTask);
+        verify(mCallbacks).onNoLongerSupportMultiWindow(mStageTaskListener, childTask);
     }
 
     @Test

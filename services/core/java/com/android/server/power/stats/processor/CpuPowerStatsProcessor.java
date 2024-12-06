@@ -16,6 +16,8 @@
 
 package com.android.server.power.stats.processor;
 
+import android.annotation.Nullable;
+import android.os.BatteryConsumer;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -23,6 +25,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.CpuPowerStatsLayout;
+import com.android.server.power.stats.format.WakelockPowerStatsLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +76,11 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
     // Temp array for retrieval of UID power stats, to avoid repeated allocations
     private long[] mTmpUidStatsArray;
 
+    private PowerStats.Descriptor mWakelockDescriptor;
+    private WakelockPowerStatsLayout mWakelockPowerStatsLayout;
+    private long[] mTmpWakelockDeviceStats;
+    private long[] mTmpWakelockUidStats;
+
     CpuPowerStatsProcessor(PowerProfile powerProfile, CpuScalingPolicies scalingPolicies) {
         mCpuScalingPolicies = scalingPolicies;
         mCpuScalingStepCount = scalingPolicies.getScalingStepCount();
@@ -109,6 +117,8 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
 
         mTmpDeviceStatsArray = new long[descriptor.statsArrayLength];
         mTmpUidStatsArray = new long[descriptor.uidStatsArrayLength];
+
+        mWakelockDescriptor = null;
     }
 
     /**
@@ -174,7 +184,9 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
         }
 
         estimatePowerByScalingStep(intermediates);
-        estimatePowerByDeviceState(stats, intermediates);
+
+        PowerComponentAggregatedPowerStats wakelockStats = getWakelockStats(stats);
+        estimatePowerByDeviceState(stats, intermediates, wakelockStats);
         combineDeviceStateEstimates();
 
         ArrayList<Integer> uids = new ArrayList<>();
@@ -182,11 +194,43 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
         if (!uids.isEmpty()) {
             for (int uid : uids) {
                 for (int i = 0; i < mPlan.uidStateEstimates.size(); i++) {
-                    estimateUidPowerConsumption(stats, uid, mPlan.uidStateEstimates.get(i));
+                    estimateUidPowerConsumption(stats, uid, mPlan.uidStateEstimates.get(i),
+                            wakelockStats);
                 }
             }
         }
         mPlan.resetIntermediates();
+    }
+
+    @Nullable
+    private PowerComponentAggregatedPowerStats getWakelockStats(
+            PowerComponentAggregatedPowerStats stats) {
+        // Wakelock power estimates are only relevant when the CPU power estimates are derived from
+        // EnergyConsumers.
+        if (mStatsLayout.getEnergyConsumerCount() == 0) {
+            return null;
+        }
+
+        PowerComponentAggregatedPowerStats wakelockStats =
+                stats.getAggregatedPowerStats().getPowerComponentStats(
+                        BatteryConsumer.POWER_COMPONENT_WAKELOCK);
+        if (wakelockStats == null) {
+            return null;
+        }
+
+        PowerStats.Descriptor descriptor = wakelockStats.getPowerStatsDescriptor();
+        if (descriptor == null) {
+            return null;
+        }
+
+        if (mWakelockDescriptor == null || !mWakelockDescriptor.equals(descriptor)) {
+            mWakelockDescriptor = descriptor;
+            mWakelockPowerStatsLayout = new WakelockPowerStatsLayout(mWakelockDescriptor);
+            mTmpWakelockDeviceStats = new long[mWakelockDescriptor.statsArrayLength];
+            mTmpWakelockUidStats = new long[mWakelockDescriptor.uidStatsArrayLength];
+        }
+
+        return wakelockStats;
     }
 
     /*
@@ -345,7 +389,8 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
     }
 
     private void estimatePowerByDeviceState(PowerComponentAggregatedPowerStats stats,
-            Intermediates intermediates) {
+            Intermediates intermediates,
+            @Nullable PowerComponentAggregatedPowerStats wakelockStats) {
         int cpuScalingStepCount = mStatsLayout.getCpuScalingStepCount();
         int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
         int[] scalingStepToBracketMap = mStatsLayout.getScalingStepToPowerBracketMap();
@@ -382,6 +427,15 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
             for (int i = deviceStatsIntermediates.powerByBracket.length - 1; i >= 0; i--) {
                 power += deviceStatsIntermediates.powerByBracket[i];
             }
+
+            if (wakelockStats != null) {
+                wakelockStats.getDeviceStats(mTmpWakelockDeviceStats,
+                        deviceStateEstimation.stateValues);
+                double wakelockPowerEstimate = mWakelockPowerStatsLayout.getDevicePowerEstimate(
+                        mTmpWakelockDeviceStats);
+                power = Math.max(0, power - wakelockPowerEstimate);
+            }
+
             deviceStatsIntermediates.power = power;
             mStatsLayout.setDevicePowerEstimate(mTmpDeviceStatsArray, power);
             stats.setDeviceStats(deviceStateEstimation.stateValues, mTmpDeviceStatsArray);
@@ -454,7 +508,8 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
     }
 
     private void estimateUidPowerConsumption(PowerComponentAggregatedPowerStats stats, int uid,
-            UidStateEstimate uidStateEstimate) {
+            UidStateEstimate uidStateEstimate,
+            @Nullable PowerComponentAggregatedPowerStats wakelockStats) {
         CombinedDeviceStateEstimate combinedDeviceStateEstimate =
                 uidStateEstimate.combinedDeviceStateEstimate;
         DeviceStatsIntermediates cdsIntermediates =
@@ -480,6 +535,14 @@ class CpuPowerStatsProcessor extends PowerStatsProcessor {
 
                 power += cdsIntermediates.powerByBracket[bracket] * timeInBracket
                             / cdsIntermediates.timeByBracket[bracket];
+            }
+
+            if (wakelockStats != null) {
+                wakelockStats.getUidStats(mTmpWakelockUidStats, uid,
+                        proportionalEstimate.stateValues);
+                double wakelockPowerEstimate = mWakelockPowerStatsLayout.getUidPowerEstimate(
+                        mTmpWakelockUidStats);
+                power = Math.max(0, power - wakelockPowerEstimate);
             }
 
             mStatsLayout.setUidPowerEstimate(mTmpUidStatsArray, power);

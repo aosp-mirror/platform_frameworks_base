@@ -20,7 +20,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,8 +34,6 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
-
-import com.android.hardware.input.Flags;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -4436,7 +4433,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
          * @see android.view.View#requestUnbufferedDispatch(int)
          * @see android.view.View#requestUnbufferedDispatch(MotionEvent)
          */
-        @FlaggedApi(Flags.FLAG_POINTER_COORDS_IS_RESAMPLED_API)
         public boolean isResampled() {
             return isResampled;
         }

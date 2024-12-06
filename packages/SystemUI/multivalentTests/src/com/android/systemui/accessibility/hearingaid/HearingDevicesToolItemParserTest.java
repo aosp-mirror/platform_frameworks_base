@@ -85,7 +85,7 @@ public class HearingDevicesToolItemParserTest extends SysuiTestCase {
     }
 
     @Test
-    public void parseStringArray_noString_emptyResult() {
+    public void parseStringArray_noToolName_emptyResult() {
         assertThat(HearingDevicesToolItemParser.parseStringArray(mContext, new String[]{},
                 new String[]{})).isEqualTo(emptyList());
     }
@@ -103,14 +103,14 @@ public class HearingDevicesToolItemParserTest extends SysuiTestCase {
     }
 
     @Test
-    public void parseStringArray_fourToolName_maxThreeToolItem() {
+    public void parseStringArray_threeToolNames_maxTwoToolItems() {
         String componentNameString = TEST_PKG + "/" + TEST_CLS;
-        String[] fourToolName =
-                new String[]{componentNameString, componentNameString, componentNameString,
-                        componentNameString};
+        String[] threeToolNames =
+                new String[]{componentNameString, componentNameString, componentNameString};
 
         List<ToolItem> toolItemList = HearingDevicesToolItemParser.parseStringArray(mContext,
-                fourToolName, new String[]{});
+                threeToolNames, new String[]{});
+
         assertThat(toolItemList.size()).isEqualTo(HearingDevicesToolItemParser.MAX_NUM);
     }
 
@@ -120,6 +120,7 @@ public class HearingDevicesToolItemParserTest extends SysuiTestCase {
 
         List<ToolItem> toolItemList = HearingDevicesToolItemParser.parseStringArray(mContext,
                 wrongFormatToolName, new String[]{});
+
         assertThat(toolItemList.size()).isEqualTo(0);
     }
 
@@ -129,6 +130,7 @@ public class HearingDevicesToolItemParserTest extends SysuiTestCase {
 
         List<ToolItem> toolItemList = HearingDevicesToolItemParser.parseStringArray(mContext,
                 notExistToolName, new String[]{});
+
         assertThat(toolItemList.size()).isEqualTo(0);
     }
 }

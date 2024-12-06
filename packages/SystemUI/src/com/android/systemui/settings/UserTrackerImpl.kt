@@ -49,7 +49,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.sync.Mutex
 
 /**
@@ -104,6 +104,9 @@ internal constructor(
         get() = userContext.contentResolver
 
     override var userInfo: UserInfo by SynchronizedDelegate(UserInfo(context.userId, "", 0))
+        protected set
+
+    override var isUserSwitching = false
         protected set
 
     /**
@@ -197,10 +200,11 @@ internal constructor(
                 }
 
                 override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
+                    isUserSwitching = true
                     if (isBackgroundUserSwitchEnabled) {
                         userSwitchingJob?.cancel()
                         userSwitchingJob =
-                            appScope.launch(backgroundContext) {
+                            appScope.launch(context = backgroundContext) {
                                 handleUserSwitchingCoroutines(newUserId) { reply?.sendResult(null) }
                             }
                     } else {
@@ -210,10 +214,11 @@ internal constructor(
                 }
 
                 override fun onUserSwitchComplete(newUserId: Int) {
+                    isUserSwitching = false
                     if (isBackgroundUserSwitchEnabled) {
                         afterUserSwitchingJob?.cancel()
                         afterUserSwitchingJob =
-                            appScope.launch(backgroundContext) {
+                            appScope.launch(context = backgroundContext) {
                                 handleUserSwitchComplete(newUserId)
                             }
                     } else {
@@ -221,7 +226,7 @@ internal constructor(
                     }
                 }
             },
-            TAG
+            TAG,
         )
     }
 
@@ -255,10 +260,10 @@ internal constructor(
 
             for (callbackDataItem in synchronized(callbacks) { callbacks.toList() }) {
                 val callback: UserTracker.Callback = callbackDataItem.callback.get() ?: continue
-                launch(callbackDataItem.executor.asCoroutineDispatcher()) {
+                launch(context = callbackDataItem.executor.asCoroutineDispatcher()) {
                         val mutex = Mutex(true)
                         val thresholdLogJob =
-                            launch(backgroundContext) {
+                            launch(context = backgroundContext) {
                                 delay(USER_CHANGE_THRESHOLD)
                                 Log.e(TAG, "Failed to finish $callback in time")
                             }
@@ -349,7 +354,7 @@ internal constructor(
 
 private data class DataItem(
     val callback: WeakReference<UserTracker.Callback>,
-    val executor: Executor
+    val executor: Executor,
 ) {
     fun sameOrEmpty(other: UserTracker.Callback): Boolean {
         return callback.get()?.equals(other) ?: true

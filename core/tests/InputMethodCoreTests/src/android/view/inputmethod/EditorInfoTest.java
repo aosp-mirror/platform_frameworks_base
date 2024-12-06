@@ -34,6 +34,7 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -78,7 +79,7 @@ public class EditorInfoTest {
         TEST_EDITOR_INFO.label = "testLabel";
         TEST_EDITOR_INFO.packageName = "android.view.inputmethod";
         TEST_EDITOR_INFO.fieldId = 0;
-        TEST_EDITOR_INFO.autofillId = AutofillId.NO_AUTOFILL_ID;
+        TEST_EDITOR_INFO.setAutofillId(AutofillId.NO_AUTOFILL_ID);
         TEST_EDITOR_INFO.fieldName = "testField";
         TEST_EDITOR_INFO.extras = new Bundle();
         TEST_EDITOR_INFO.extras.putString("testKey", "testValue");
@@ -86,6 +87,8 @@ public class EditorInfoTest {
         TEST_EDITOR_INFO.contentMimeTypes = new String[] {"image/png"};
         TEST_EDITOR_INFO.targetInputMethodUser = UserHandle.of(TEST_USER_ID);
     }
+
+    private final DeviceFlagsValueProvider mFlagsValueProvider = new DeviceFlagsValueProvider();
 
     /**
      * Makes sure that {@code null} {@link EditorInfo#targetInputMethodUser} can be copied via
@@ -504,7 +507,8 @@ public class EditorInfoTest {
                 + "prefix: supportedHandwritingGestureTypes=(none)\n"
                 + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
                 + "prefix: isStylusHandwritingEnabled=false\n"
-                + "prefix: contentMimeTypes=null\n");
+                + "prefix: contentMimeTypes=null\n"
+                + "prefix: writingToolsEnabled=true\n");
     }
 
     @Test
@@ -522,11 +526,13 @@ public class EditorInfoTest {
         info.setSupportedHandwritingGestures(Arrays.asList(SelectGesture.class));
         info.setSupportedHandwritingGesturePreviews(
                 Stream.of(SelectGesture.class).collect(Collectors.toSet()));
-        if (Flags.editorinfoHandwritingEnabled()) {
+        final boolean isStylusHandwritingEnabled =
+                mFlagsValueProvider.getBoolean(Flags.FLAG_EDITORINFO_HANDWRITING_ENABLED);
+        if (isStylusHandwritingEnabled) {
             info.setStylusHandwritingEnabled(true);
         }
         info.packageName = "android.view.inputmethod";
-        info.autofillId = new AutofillId(123);
+        info.setAutofillId(new AutofillId(123));
         info.fieldId = 456;
         info.fieldName = "testField";
         info.extras = new Bundle();
@@ -534,6 +540,7 @@ public class EditorInfoTest {
         info.hintLocales = LocaleList.forLanguageTags("en,es,zh");
         info.contentMimeTypes = new String[] {"image/png"};
         info.targetInputMethodUser = UserHandle.of(10);
+        info.setWritingToolsEnabled(false);
         final StringBuilder sb = new StringBuilder();
         info.dump(new StringBuilderPrinter(sb), "prefix2: ");
         assertThat(sb.toString()).isEqualTo(
@@ -548,10 +555,10 @@ public class EditorInfoTest {
                         + "prefix2: hintLocales=[en,es,zh]\n"
                         + "prefix2: supportedHandwritingGestureTypes=SELECT\n"
                         + "prefix2: supportedHandwritingGesturePreviewTypes=SELECT\n"
-                        + "prefix2: isStylusHandwritingEnabled="
-                                + Flags.editorinfoHandwritingEnabled() + "\n"
+                        + "prefix2: isStylusHandwritingEnabled=" + isStylusHandwritingEnabled + "\n"
                         + "prefix2: contentMimeTypes=[image/png]\n"
-                        + "prefix2: targetInputMethodUserId=10\n");
+                        + "prefix2: targetInputMethodUserId=10\n"
+                        + "prefix2: writingToolsEnabled=false\n");
     }
 
     @Test
@@ -572,7 +579,8 @@ public class EditorInfoTest {
                         + "prefix: supportedHandwritingGestureTypes=(none)\n"
                         + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
                         + "prefix: isStylusHandwritingEnabled=false\n"
-                        + "prefix: contentMimeTypes=null\n");
+                        + "prefix: contentMimeTypes=null\n"
+                        + "prefix: writingToolsEnabled=true\n");
     }
 
     @Test
@@ -593,7 +601,7 @@ public class EditorInfoTest {
     @Test
     public void testKindofEqualsComparesAutofillId() {
         final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
-        infoCopy.autofillId = new AutofillId(42);
+        infoCopy.setAutofillId(new AutofillId(42));
         assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
     }
 
@@ -616,5 +624,10 @@ public class EditorInfoTest {
         final EditorInfo infoCopy = TEST_EDITOR_INFO.createCopyInternal();
         infoCopy.extras.putString("testKey2", "testValue");
         assertFalse(TEST_EDITOR_INFO.kindofEquals(infoCopy));
+    }
+
+    @Test
+    public void testWritingToolsEnabledbyDefault() {
+        assertTrue(TEST_EDITOR_INFO.isWritingToolsEnabled());
     }
 }

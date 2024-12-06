@@ -16,9 +16,12 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.view.KeyEvent
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.input.key.KeyEventType
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.inputmethod.domain.interactor.InputMethodInteractor
 import com.android.systemui.res.R
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -37,7 +40,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Holds UI state and handles user input for the password bouncer UI. */
 class PasswordBouncerViewModel
@@ -81,50 +84,59 @@ constructor(
     val selectedUserId: StateFlow<Int> = _selectedUserId.asStateFlow()
 
     private val requests = Channel<Request>(Channel.BUFFERED)
+    private var wasSuccessfullyAuthenticated = false
 
     override suspend fun onActivated(): Nothing {
-        coroutineScope {
-            launch { super.onActivated() }
-            launch {
-                requests.receiveAsFlow().collect { request ->
-                    when (request) {
-                        is OnImeSwitcherButtonClicked -> {
-                            inputMethodInteractor.showInputMethodPicker(
-                                displayId = request.displayId,
-                                showAuxiliarySubtypes = false,
-                            )
-                        }
-                        is OnImeDismissed -> {
-                            interactor.onImeHiddenByUser()
+        try {
+            coroutineScope {
+                launch { super.onActivated() }
+                launch {
+                    requests.receiveAsFlow().collect { request ->
+                        when (request) {
+                            is OnImeSwitcherButtonClicked -> {
+                                inputMethodInteractor.showInputMethodPicker(
+                                    displayId = request.displayId,
+                                    showAuxiliarySubtypes = false,
+                                )
+                            }
+                            is OnImeDismissed -> {
+                                interactor.onImeHiddenByUser()
+                            }
                         }
                     }
                 }
+                launch {
+                    combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus ->
+                            hasInput && !hasFocus && !wasSuccessfullyAuthenticated
+                        }
+                        .collect { _isTextFieldFocusRequested.value = it }
+                }
+                launch {
+                    selectedUserInteractor.selectedUser.collect { _selectedUserId.value = it }
+                }
+                launch {
+                    // Re-fetch the currently-enabled IMEs whenever the selected user changes, and
+                    // whenever
+                    // the UI subscribes to the `isImeSwitcherButtonVisible` flow.
+                    combine(
+                            // InputMethodManagerService sometimes takes
+                            // some time to update its internal state when the
+                            // selected user changes.
+                            // As a workaround, delay fetching the IME info.
+                            selectedUserInteractor.selectedUser.onEach {
+                                delay(DELAY_TO_FETCH_IMES)
+                            },
+                            _isImeSwitcherButtonVisible.onSubscriberAdded(),
+                        ) { selectedUserId, _ ->
+                            inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(selectedUserId)
+                        }
+                        .collect { _isImeSwitcherButtonVisible.value = it }
+                }
+                awaitCancellation()
             }
-            launch {
-                combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus ->
-                        hasInput && !hasFocus
-                    }
-                    .collect { _isTextFieldFocusRequested.value = it }
-            }
-            launch { selectedUserInteractor.selectedUser.collect { _selectedUserId.value = it } }
-            launch {
-                // Re-fetch the currently-enabled IMEs whenever the selected user changes, and
-                // whenever
-                // the UI subscribes to the `isImeSwitcherButtonVisible` flow.
-                combine(
-                        // InputMethodManagerService sometimes takes some time to update its
-                        // internal
-                        // state when the selected user changes. As a workaround, delay fetching the
-                        // IME
-                        // info.
-                        selectedUserInteractor.selectedUser.onEach { delay(DELAY_TO_FETCH_IMES) },
-                        _isImeSwitcherButtonVisible.onSubscriberAdded()
-                    ) { selectedUserId, _ ->
-                        inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(selectedUserId)
-                    }
-                    .collect { _isImeSwitcherButtonVisible.value = it }
-            }
-            awaitCancellation()
+        } finally {
+            // reset whenever the view model is "deactivated"
+            wasSuccessfullyAuthenticated = false
         }
     }
 
@@ -139,6 +151,21 @@ constructor(
 
     override fun getInput(): List<Any> {
         return _password.value.toCharArray().toList()
+    }
+
+    override fun onKeyEvent(type: KeyEventType, keyCode: Int): Boolean {
+        // Ignore SPACE as a confirm key to allow the space character within passwords.
+        val isKeyboardEnterKey =
+            KeyEvent.isConfirmKey(keyCode) &&
+                keyCode != KeyEvent.KEYCODE_SPACE &&
+                type == KeyEventType.KeyUp
+        // consume confirm key events while on the bouncer. This prevents it from propagating
+        // and avoids other parent elements from receiving it.
+        return isKeyboardEnterKey && ComposeBouncerFlags.isOnlyComposeBouncerEnabled()
+    }
+
+    override fun onSuccessfulAuthentication() {
+        wasSuccessfullyAuthenticated = true
     }
 
     /** Notifies that the user has changed the password input. */

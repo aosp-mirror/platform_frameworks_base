@@ -21,6 +21,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
+import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE;
 
 import static com.android.server.biometrics.sensors.LockoutTracker.LOCKOUT_NONE;
 
@@ -39,6 +40,7 @@ import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.PromptInfo;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -64,6 +66,8 @@ public class PreAuthInfoTest {
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
+    private static final int USER_ID = 0;
+    private static final int OWNER_ID = 10;
     private static final int SENSOR_ID_FINGERPRINT = 0;
     private static final int SENSOR_ID_FACE = 1;
     private static final String TEST_PACKAGE_NAME = "PreAuthInfoTestPackage";
@@ -84,6 +88,8 @@ public class PreAuthInfoTest {
     BiometricService.SettingObserver mSettingObserver;
     @Mock
     BiometricCameraManager mBiometricCameraManager;
+    @Mock
+    UserManager mUserManager;
 
     @Before
     public void setup() throws RemoteException {
@@ -118,9 +124,9 @@ public class PreAuthInfoTest {
         promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
         promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor),
-                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).isEmpty();
     }
@@ -134,9 +140,9 @@ public class PreAuthInfoTest {
         promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
         promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor),
-                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
     }
@@ -151,9 +157,9 @@ public class PreAuthInfoTest {
         promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
         promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor),
-                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
     }
@@ -171,9 +177,9 @@ public class PreAuthInfoTest {
         promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
         promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(faceSensor, fingerprintSensor),
-                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(faceSensor, fingerprintSensor), USER_ID,
+                promptInfo, TEST_PACKAGE_NAME, false /* checkDevicePolicyManager */, mContext,
+                mBiometricCameraManager, mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
         assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
@@ -191,9 +197,9 @@ public class PreAuthInfoTest {
         promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
         promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(faceSensor, fingerprintSensor),
-                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(faceSensor, fingerprintSensor), USER_ID,
+                promptInfo, TEST_PACKAGE_NAME, false /* checkDevicePolicyManager */, mContext,
+                mBiometricCameraManager, mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
         assertThat(preAuthInfo.eligibleSensors.get(0).modality).isEqualTo(TYPE_FINGERPRINT);
@@ -207,10 +213,11 @@ public class PreAuthInfoTest {
 
         final BiometricSensor sensor = getFaceSensor();
         final PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK);
         final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
     }
@@ -222,10 +229,11 @@ public class PreAuthInfoTest {
         when(mTrustManager.isInSignificantPlace()).thenReturn(false);
 
         final PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK);
         final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
     }
@@ -238,11 +246,12 @@ public class PreAuthInfoTest {
 
         final BiometricSensor sensor = getFaceSensor();
         final PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK
                 | BiometricManager.Authenticators.BIOMETRIC_STRONG);
         final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(1);
     }
@@ -255,13 +264,14 @@ public class PreAuthInfoTest {
 
         final BiometricSensor sensor = getFaceSensor();
         final PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK);
         final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
 
         assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
-                BiometricManager.BIOMETRIC_ERROR_MANDATORY_NOT_ACTIVE);
+                BiometricManager.BIOMETRIC_ERROR_IDENTITY_CHECK_NOT_ACTIVE);
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
     }
 
@@ -279,9 +289,9 @@ public class PreAuthInfoTest {
         promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
         promptInfo.setDisallowBiometricsIfPolicyExists(false /* checkDevicePolicy */);
         PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(faceSensor, fingerprintSensor),
-                0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(faceSensor, fingerprintSensor), USER_ID,
+                promptInfo, TEST_PACKAGE_NAME, false /* checkDevicePolicyManager */, mContext,
+                mBiometricCameraManager, mUserManager);
 
         assertThat(preAuthInfo.eligibleSensors).hasSize(0);
         assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(
@@ -296,12 +306,68 @@ public class PreAuthInfoTest {
 
         final BiometricSensor sensor = getFaceSensor();
         final PromptInfo promptInfo = new PromptInfo();
-        promptInfo.setAuthenticators(BiometricManager.Authenticators.MANDATORY_BIOMETRICS);
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK);
         promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
         final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
-                mSettingObserver, List.of(sensor), 0 /* userId */, promptInfo, TEST_PACKAGE_NAME,
-                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager);
+                mSettingObserver, List.of(sensor), USER_ID, promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
         assertThat(promptInfo.getNegativeButtonText()).isEqualTo(TEST_PACKAGE_NAME);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EFFECTIVE_USER_BP)
+    public void testCredentialOwnerIdAsUserId() throws Exception {
+        when(mUserManager.getCredentialOwnerProfile(USER_ID)).thenReturn(OWNER_ID);
+
+        final BiometricSensor sensor = getFaceSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), USER_ID , promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
+
+        assertThat(preAuthInfo.userId).isEqualTo(OWNER_ID);
+        assertThat(preAuthInfo.callingUserId).isEqualTo(USER_ID);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_EFFECTIVE_USER_BP)
+    public void testCredentialOwnerIdAsUserId_forMandatoryBiometrics() throws Exception {
+        when(mUserManager.getCredentialOwnerProfile(USER_ID)).thenReturn(OWNER_ID);
+        when(mSettingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
+                OWNER_ID)).thenReturn(true);
+        when(mSettingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
+                USER_ID)).thenReturn(false);
+        when(mTrustManager.isInSignificantPlace()).thenReturn(false);
+
+        final BiometricSensor sensor = getFaceSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK);
+        promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), USER_ID , promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
+
+        assertThat(preAuthInfo.getIsMandatoryBiometricsAuthentication()).isTrue();
+    }
+
+    @Test
+    public void prioritizeStrengthErrorBeforeCameraUnavailableError() throws Exception {
+        final BiometricSensor sensor = getFaceSensorWithStrength(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK);
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        promptInfo.setNegativeButtonText(TEST_PACKAGE_NAME);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor), USER_ID , promptInfo, TEST_PACKAGE_NAME,
+                false /* checkDevicePolicyManager */, mContext, mBiometricCameraManager,
+                mUserManager);
+
+        assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(BIOMETRIC_ERROR_NO_HARDWARE);
     }
 
     private BiometricSensor getFingerprintSensor() {
@@ -322,9 +388,10 @@ public class PreAuthInfoTest {
         return sensor;
     }
 
-    private BiometricSensor getFaceSensor() {
+    private BiometricSensor getFaceSensorWithStrength(
+            @BiometricManager.Authenticators.Types int sensorStrength) {
         BiometricSensor sensor = new BiometricSensor(mContext, SENSOR_ID_FACE, TYPE_FACE,
-                BiometricManager.Authenticators.BIOMETRIC_STRONG, mFaceAuthenticator) {
+                sensorStrength, mFaceAuthenticator) {
             @Override
             boolean confirmationAlwaysRequired(int userId) {
                 return false;
@@ -337,5 +404,9 @@ public class PreAuthInfoTest {
         };
 
         return sensor;
+    }
+
+    private BiometricSensor getFaceSensor() {
+        return getFaceSensorWithStrength(BiometricManager.Authenticators.BIOMETRIC_STRONG);
     }
 }

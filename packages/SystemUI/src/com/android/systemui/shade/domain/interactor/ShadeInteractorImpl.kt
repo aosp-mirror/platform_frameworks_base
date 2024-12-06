@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -24,7 +25,7 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.DisableFlagsInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -46,7 +47,7 @@ class ShadeInteractorImpl
 constructor(
     @Application val scope: CoroutineScope,
     deviceProvisioningInteractor: DeviceProvisioningInteractor,
-    disableFlagsRepository: DisableFlagsRepository,
+    disableFlagsInteractor: DisableFlagsInteractor,
     dozeParams: DozeParameters,
     keyguardRepository: KeyguardRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -60,30 +61,39 @@ constructor(
     BaseShadeInteractor by baseShadeInteractor,
     ShadeModeInteractor by shadeModeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> =
-        disableFlagsRepository.disableFlags
+        disableFlagsInteractor.disableFlags
             .map { it.isShadeEnabled() }
+            .flowName("isShadeEnabled")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isQsEnabled: StateFlow<Boolean> =
-        disableFlagsRepository.disableFlags
+        disableFlagsInteractor.disableFlags
             .map { it.isQuickSettingsEnabled() }
+            .flowName("isQsEnabled")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isAnyFullyExpanded: StateFlow<Boolean> =
         anyExpansion
             .map { it >= 1f }
             .distinctUntilChanged()
+            .flowName("isAnyFullyExpanded")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isShadeFullyExpanded: Flow<Boolean> =
         baseShadeInteractor.shadeExpansion.map { it >= 1f }.distinctUntilChanged()
+
+    override val isShadeAnyExpanded: StateFlow<Boolean> =
+        baseShadeInteractor.shadeExpansion
+            .map { it > 0 }
+            .flowName("isShadeAnyExpanded")
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isShadeFullyCollapsed: Flow<Boolean> =
         baseShadeInteractor.shadeExpansion.map { it <= 0f }.distinctUntilChanged()
 
     override val isUserInteracting: StateFlow<Boolean> =
         combine(isUserInteractingWithShade, isUserInteractingWithQs) { shade, qs -> shade || qs }
-            .distinctUntilChanged()
+            .flowName("isUserInteracting")
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isShadeTouchable: Flow<Boolean> =
@@ -104,7 +114,7 @@ constructor(
 
     override val isExpandToQsEnabled: Flow<Boolean> =
         combine(
-            disableFlagsRepository.disableFlags,
+            disableFlagsInteractor.disableFlags,
             isShadeEnabled,
             keyguardRepository.isDozing,
             userSetupRepository.isUserSetUp,

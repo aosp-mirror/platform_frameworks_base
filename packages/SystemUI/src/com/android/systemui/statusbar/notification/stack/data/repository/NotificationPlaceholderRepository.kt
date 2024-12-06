@@ -17,7 +17,10 @@
 package com.android.systemui.statusbar.notification.stack.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.stack.shared.model.AccessibilityScrollEvent
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState
+import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -31,6 +34,9 @@ class NotificationPlaceholderRepository @Inject constructor() {
     /** The alpha of the shade in order to show brightness. */
     val alphaForBrightnessMirror = MutableStateFlow(1f)
 
+    /** The alpha of the Notification Stack for lockscreen fade-in */
+    val alphaForLockscreenFadeIn = MutableStateFlow(0f)
+
     /**
      * The bounds of the notification shade scrim / container in the current scene.
      *
@@ -41,9 +47,9 @@ class NotificationPlaceholderRepository @Inject constructor() {
     /** height made available to the notifications in the size-constrained mode of lock screen. */
     val constrainedAvailableSpace = MutableStateFlow(0)
 
-    /**
-     * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
-     * further.
-     */
-    val scrolledToTop = MutableStateFlow(true)
+    /** Scroll state of the notification shade. */
+    val shadeScrollState = MutableStateFlow(ShadeScrollState())
+
+    /** A consumer of [AccessibilityScrollEvent]s. */
+    var accessibilityScrollEventConsumer: Consumer<AccessibilityScrollEvent>? = null
 }

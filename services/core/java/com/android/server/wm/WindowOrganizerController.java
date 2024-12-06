@@ -51,6 +51,7 @@ import static android.window.WindowContainerTransaction.Change.CHANGE_FOCUSABLE;
 import static android.window.WindowContainerTransaction.Change.CHANGE_FORCE_TRANSLUCENT;
 import static android.window.WindowContainerTransaction.Change.CHANGE_HIDDEN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
@@ -67,13 +68,15 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
@@ -108,6 +111,7 @@ import android.os.RemoteException;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
@@ -120,6 +124,7 @@ import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
+import android.window.KeyguardState;
 import android.window.RemoteTransition;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
@@ -130,7 +135,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
@@ -571,7 +576,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // {@link #applySyncTransaction} with Shell transition.
                     // We still want to apply and merge the transaction to the active sync
                     // because {@code shouldApplyIndependently} is {@code false}.
-                    ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    ProtoLog.w(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                             "TaskFragmentTransaction changes are not collected in transition"
                                     + " because there is an ongoing sync for"
                                     + " applySyncTransaction().");
@@ -799,7 +804,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         } finally {
             if (deferTransitionReady) {
-                chain.mTransition.continueTransitionReady();
+                if (chain.mTransition.isCollecting()) {
+                    chain.mTransition.continueTransitionReady();
+                } else {
+                    Slog.wtf(TAG, "Too late, transition : " + chain.mTransition.getSyncId()
+                            + " state: " + chain.mTransition.getState() + " is not collecting");
+                }
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             if (deferResume) {
@@ -872,7 +882,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (windowingMode > -1) {
             if (mService.isInLockTaskMode()
-                    && WindowConfiguration.inMultiWindowMode(windowingMode)) {
+                    && WindowConfiguration.inMultiWindowMode(windowingMode)
+                    && !container.isEmbedded()) {
                 Slog.w(TAG, "Dropping unsupported request to set multi-window windowing mode"
                         + " during locked task mode.");
                 return effects;
@@ -1247,6 +1258,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         caller, errorCallbackToken, organizer);
                 break;
             }
+            case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE: {
+                effects |= applyKeyguardState(hop);
+                break;
+            }
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
                 final Bundle launchOpts = hop.getLaunchOptions();
                 ActivityOptions activityOptions = launchOpts != null
@@ -1320,11 +1335,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK: {
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
-                Task pipTask = container.asTask();
-                if (pipTask == null) {
+                TaskFragment pipTaskFragment = container.asTaskFragment();
+                if (pipTaskFragment == null) {
                     break;
                 }
-                ActivityRecord pipActivity = pipTask.getActivity(
+                ActivityRecord pipActivity = pipTaskFragment.getActivity(
                         (activity) -> activity.pictureInPictureArgs != null);
 
                 if (pipActivity.isState(RESUMED)) {
@@ -1358,16 +1373,56 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: {
-                if (!chain.isFinishing()) break;
+                if (!com.android.wm.shell.Flags.enableShellTopTaskTracking()) {
+                    // Only allow restoring transient order when finishing a transition
+                    if (!chain.isFinishing()) break;
+                }
+                // Validate the container
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
-                if (container == null) break;
+                if (container == null) {
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "Restoring transient order: invalid container");
+                    break;
+                }
                 final Task thisTask = container.asActivityRecord() != null
                         ? container.asActivityRecord().getTask() : container.asTask();
-                if (thisTask == null) break;
-                final Task restoreAt = chain.mTransition.getTransientLaunchRestoreTarget(container);
-                if (restoreAt == null) break;
+                if (thisTask == null) {
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "Restoring transient order: invalid task");
+                    break;
+                }
+
+                // Find the task to restore behind
+                final Pair<Transition, Task> transientRestore =
+                        mTransitionController.getTransientLaunchTransitionAndTarget(container);
+                if (transientRestore == null) {
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                            "Restoring transient order: no restore task");
+                    break;
+                }
+                final Transition transientLaunchTransition = transientRestore.first;
+                final Task restoreAt = transientRestore.second;
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Restoring transient order: restoring behind task=%d", restoreAt.mTaskId);
+
+                // Restore the position of the given container behind the target task
                 final TaskDisplayArea taskDisplayArea = thisTask.getTaskDisplayArea();
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
+
+                if (com.android.wm.shell.Flags.enableShellTopTaskTracking()) {
+                    // Because we are in a transient launch transition, the requested visibility of
+                    // tasks does not actually change for the transient-hide tasks, but we do want
+                    // the restoration of these transient-hide tasks to top to be a part of this
+                    // finish transition
+                    final Transition collectingTransition =
+                            mTransitionController.getCollectingTransition();
+                    if (collectingTransition != null) {
+                        collectingTransition.updateChangesForRestoreTransientHideTasks(
+                                transientLaunchTransition);
+                    }
+                }
+
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
             case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: {
@@ -1438,10 +1493,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 task.setTrimmableFromRecents(hop.isTrimmableFromRecents());
                 break;
             }
+            case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                final Task task = container != null ? container.asTask() : null;
+                if (task == null || !task.isAttached()) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                task.setLaunchAdjacentDisabled(hop.isLaunchAdjacentDisabled());
+                break;
+            }
             case HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION: {
                 if (mService.mBackNavigationController.restoreBackNavigation()) {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
+                break;
+            }
+            case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                if (container == null) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                container.setExcludeInsetsTypes(hop.getExcludeInsetsTypes());
                 break;
             }
         }
@@ -1501,8 +1577,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final IBinder callerActivityToken = operation.getActivityToken();
                 final Intent activityIntent = operation.getActivityIntent();
                 final Bundle activityOptions = operation.getBundle();
+                final SafeActivityOptions safeOptions =
+                        SafeActivityOptions.fromBundle(activityOptions, caller.mPid, caller.mUid);
                 final int result = waitAsyncStart(() -> mService.getActivityStartController()
-                        .startActivityInTaskFragment(taskFragment, activityIntent, activityOptions,
+                        .startActivityInTaskFragment(taskFragment, activityIntent, safeOptions,
                                 callerActivityToken, caller.mUid, caller.mPid,
                                 errorCallbackToken));
                 if (!isStartResultSuccessful(result)) {
@@ -1768,6 +1846,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskFragment.setPinned(pinned);
                 break;
             }
+        }
+        return effects;
+    }
+
+    private int applyKeyguardState(@NonNull WindowContainerTransaction.HierarchyOp hop) {
+        int effects = TRANSACT_EFFECTS_LIFECYCLE;
+
+        final KeyguardState keyguardState = hop.getKeyguardState();
+        if (keyguardState != null) {
+            boolean keyguardShowing = keyguardState.getKeyguardShowing();
+            boolean aodShowing = keyguardState.getAodShowing();
+            mService.setLockScreenShown(keyguardShowing, aodShowing);
         }
         return effects;
     }

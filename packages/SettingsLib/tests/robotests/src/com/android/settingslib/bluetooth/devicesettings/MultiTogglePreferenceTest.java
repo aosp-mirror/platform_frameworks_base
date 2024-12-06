@@ -120,6 +120,7 @@ public final class MultiTogglePreferenceTest {
                         .addToggleInfo(TOGGLE_INFO_1)
                         .addToggleInfo(TOGGLE_INFO_2)
                         .setState(123)
+                        .setIsActive(true)
                         .setAllowChangingState(true)
                         .setExtras(buildBundle("key1", "value1"))
                         .build();
@@ -130,6 +131,7 @@ public final class MultiTogglePreferenceTest {
         assertThat(fromParcel.getToggleInfos().stream().map(ToggleInfo::getLabel).toList())
                 .containsExactly("label1", "label2");
         assertThat(fromParcel.getState()).isEqualTo(preference.getState());
+        assertThat(fromParcel.isActive()).isEqualTo(preference.isActive());
         assertThat(fromParcel.isAllowedChangingState())
                 .isEqualTo(preference.isAllowedChangingState());
         assertThat(fromParcel.getExtras().getString("key1"))

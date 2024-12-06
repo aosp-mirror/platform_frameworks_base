@@ -40,6 +40,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
+import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioDevicePort;
@@ -47,6 +48,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioPort;
+import android.media.AudioProfile;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
@@ -385,11 +387,6 @@ public class AudioDeviceInventory {
                     || !updatedDevice.getDeviceAddress().equals(ads.getDeviceAddress())) {
                 continue;
             }
-            if (mDeviceBroker.isSADevice(updatedDevice) == mDeviceBroker.isSADevice(ads)) {
-                ads.setHasHeadTracker(updatedDevice.hasHeadTracker());
-                ads.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
-                ads.setSAEnabled(updatedDevice.isSAEnabled());
-            }
             ads.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
             mDeviceBroker.postUpdatedAdiDeviceState(ads, false /*initSA*/);
@@ -548,14 +545,17 @@ public class AudioDeviceInventory {
     @GuardedBy("mDevicesLock")
     private final ArrayMap<Integer, String> mApmConnectedDevices = new ArrayMap<>();
 
+    @GuardedBy("mDevicesLock")
     // List of preferred devices for strategies
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mPreferredDevices =
             new ArrayMap<>();
 
+    @GuardedBy("mDevicesLock")
     // List of non-default devices for strategies
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mNonDefaultDevices =
             new ArrayMap<>();
 
+    @GuardedBy("mDevicesLock")
     // List of preferred devices of capture preset
     private final ArrayMap<Integer, List<AudioDeviceAttributes>> mPreferredDevicesForCapturePreset =
             new ArrayMap<>();
@@ -621,6 +621,8 @@ public class AudioDeviceInventory {
         final int mGroupId;
         @NonNull String mPeerDeviceAddress;
         @NonNull String mPeerIdentityDeviceAddress;
+        @NonNull List<AudioProfile> mAudioProfiles;
+        @NonNull List<AudioDescriptor> mAudioDescriptors;
 
         /** Disabled operating modes for this device. Use a negative logic so that by default
          * an empty list means all modes are allowed.
@@ -629,7 +631,8 @@ public class AudioDeviceInventory {
 
         DeviceInfo(int deviceType, String deviceName, String address,
                    String identityAddress, int codecFormat,
-                   int groupId, String peerAddress, String peerIdentityAddress) {
+                   int groupId, String peerAddress, String peerIdentityAddress,
+                   List<AudioProfile> profiles, List<AudioDescriptor> descriptors) {
             mDeviceType = deviceType;
             mDeviceName = TextUtils.emptyIfNull(deviceName);
             mDeviceAddress = TextUtils.emptyIfNull(address);
@@ -641,11 +644,28 @@ public class AudioDeviceInventory {
             mGroupId = groupId;
             mPeerDeviceAddress = TextUtils.emptyIfNull(peerAddress);
             mPeerIdentityDeviceAddress = TextUtils.emptyIfNull(peerIdentityAddress);
+            mAudioProfiles = profiles;
+            mAudioDescriptors = descriptors;
+        }
+
+        DeviceInfo(int deviceType, String deviceName, String address,
+                   String identityAddress, int codecFormat,
+                   int groupId, String peerAddress, String peerIdentityAddress) {
+            this(deviceType, deviceName, address, identityAddress, codecFormat,
+                    groupId, peerAddress, peerIdentityAddress,
+                    new ArrayList<>(), new ArrayList<>());
         }
 
         /** Constructor for all devices except A2DP sink and LE Audio */
         DeviceInfo(int deviceType, String deviceName, String address) {
             this(deviceType, deviceName, address, null, AudioSystem.AUDIO_FORMAT_DEFAULT);
+        }
+
+        /** Constructor for HDMI OUT, HDMI ARC/EARC sink devices */
+        DeviceInfo(int deviceType, String deviceName, String address,
+            List<AudioProfile> profiles, List<AudioDescriptor> descriptors) {
+            this(deviceType, deviceName, address, null, AudioSystem.AUDIO_FORMAT_DEFAULT,
+                BluetoothLeAudio.GROUP_ID_INVALID, null, null, profiles, descriptors);
         }
 
         /** Constructor for A2DP sink devices */
@@ -808,24 +828,18 @@ public class AudioDeviceInventory {
         synchronized (mDevicesLock) {
             mAppliedStrategyRoles.clear();
             mAppliedPresetRoles.clear();
-        }
-        synchronized (mPreferredDevices) {
             mPreferredDevices.forEach((strategy, devices) -> {
                 setPreferredDevicesForStrategy(strategy, devices);
             });
-        }
-        synchronized (mNonDefaultDevices) {
             mNonDefaultDevices.forEach((strategy, devices) -> {
                 addDevicesRoleForStrategy(strategy, AudioSystem.DEVICE_ROLE_DISABLED,
                         devices, false /* internal */);
             });
-        }
-        synchronized (mPreferredDevicesForCapturePreset) {
             mPreferredDevicesForCapturePreset.forEach((capturePreset, devices) -> {
                 setDevicesRoleForCapturePreset(
                         capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
             });
-        }
+       }
     }
 
     /** only public for mocking/spying, do not call outside of AudioService */
@@ -1202,30 +1216,35 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ void onToggleHdmi() {
-        MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "onToggleHdmi")
-                .set(MediaMetrics.Property.DEVICE,
-                        AudioSystem.getDeviceName(AudioSystem.DEVICE_OUT_HDMI));
+        final int[] hdmiDevices = { AudioSystem.DEVICE_OUT_HDMI,
+                AudioSystem.DEVICE_OUT_HDMI_ARC, AudioSystem.DEVICE_OUT_HDMI_EARC };
+
         synchronized (mDevicesLock) {
-            // Is HDMI connected?
-            final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_HDMI, "");
-            final DeviceInfo di = mConnectedDevices.get(key);
-            if (di == null) {
-                Log.e(TAG, "invalid null DeviceInfo in onToggleHdmi");
-                mmi.set(MediaMetrics.Property.EARLY_RETURN, "invalid null DeviceInfo").record();
-                return;
+            for (DeviceInfo di : mConnectedDevices.values()) {
+                boolean isHdmiDevice = Arrays.stream(hdmiDevices).anyMatch(device ->
+                    device == di.mDeviceType);
+                if (isHdmiDevice) {
+                    MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "onToggleHdmi")
+                            .set(MediaMetrics.Property.DEVICE,
+                                    AudioSystem.getDeviceName(di.mDeviceType));
+                    AudioDeviceAttributes ada = new AudioDeviceAttributes(
+                            AudioDeviceAttributes.ROLE_OUTPUT,
+                            AudioDeviceInfo.convertInternalDeviceToDeviceType(di.mDeviceType),
+                            di.mDeviceAddress, di.mDeviceName, di.mAudioProfiles,
+                            di.mAudioDescriptors);
+                    // Toggle HDMI to retrigger broadcast with proper formats.
+                    setWiredDeviceConnectionState(ada,
+                            AudioSystem.DEVICE_STATE_UNAVAILABLE, "onToggleHdmi"); // disconnect
+                    setWiredDeviceConnectionState(ada,
+                            AudioSystem.DEVICE_STATE_AVAILABLE, "onToggleHdmi"); // reconnect
+                    mmi.record();
+                }
             }
-            // Toggle HDMI to retrigger broadcast with proper formats.
-            setWiredDeviceConnectionState(
-                    new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
-                    AudioSystem.DEVICE_STATE_UNAVAILABLE, "android"); // disconnect
-            setWiredDeviceConnectionState(
-                    new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
-                    AudioSystem.DEVICE_STATE_AVAILABLE, "android"); // reconnect
         }
-        mmi.record();
     }
 
-    /*package*/ void onSaveSetPreferredDevices(int strategy,
+    @GuardedBy("mDevicesLock")
+    private void saveSetPreferredDevices(int strategy,
                                                @NonNull List<AudioDeviceAttributes> devices) {
         mPreferredDevices.put(strategy, devices);
         List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
@@ -1243,12 +1262,14 @@ public class AudioDeviceInventory {
         dispatchPreferredDevice(strategy, devices);
     }
 
-    /*package*/ void onSaveRemovePreferredDevices(int strategy) {
+    @GuardedBy("mDevicesLock")
+    private void saveRemovePreferredDevices(int strategy) {
         mPreferredDevices.remove(strategy);
         dispatchPreferredDevice(strategy, new ArrayList<AudioDeviceAttributes>());
     }
 
-    /*package*/ void onSaveSetDeviceAsNonDefault(int strategy,
+    @GuardedBy("mDevicesLock")
+    private void saveSetDeviceAsNonDefault(int strategy,
                                                  @NonNull AudioDeviceAttributes device) {
         List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
         if (nonDefaultDevices == null) {
@@ -1272,7 +1293,8 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveRemoveDeviceAsNonDefault(int strategy,
+    @GuardedBy("mDevicesLock")
+    private void saveRemoveDeviceAsNonDefault(int strategy,
                                                     @NonNull AudioDeviceAttributes device) {
         List<AudioDeviceAttributes> nonDefaultDevices = mNonDefaultDevices.get(strategy);
         if (nonDefaultDevices != null) {
@@ -1282,14 +1304,16 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onSaveSetPreferredDevicesForCapturePreset(
+    @GuardedBy("mDevicesLock")
+    private void saveSetPreferredDevicesForCapturePreset(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
         mPreferredDevicesForCapturePreset.put(capturePreset, devices);
         dispatchDevicesRoleForCapturePreset(
                 capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
     }
 
-    /*package*/ void onSaveClearPreferredDevicesForCapturePreset(int capturePreset) {
+    @GuardedBy("mDevicesLock")
+    private void saveClearPreferredDevicesForCapturePreset(int capturePreset) {
         mPreferredDevicesForCapturePreset.remove(capturePreset);
         dispatchDevicesRoleForCapturePreset(
                 capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED,
@@ -1301,21 +1325,22 @@ public class AudioDeviceInventory {
 
     /*package*/ int setPreferredDevicesForStrategyAndSave(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
-        final int status = setPreferredDevicesForStrategy(strategy, devices);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveSetPreferredDevicesForStrategy(strategy, devices);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status = setPreferredDevicesForStrategy(strategy, devices);
+                if (status == AudioSystem.SUCCESS) {
+                    saveSetPreferredDevices(strategy, devices);
+                }
+                return status;
+            }
         }
-        return status;
     }
     // Only used for external requests coming from an API
     /*package*/ int setPreferredDevicesForStrategy(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
-        int status = AudioSystem.ERROR;
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = setDevicesRoleForStrategy(
-                    strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices, false /* internal */);
-        }
-        return status;
+
+        return setDevicesRoleForStrategy(
+                strategy, AudioSystem.DEVICE_ROLE_PREFERRED, devices, false /* internal */);
     }
     // Only used for internal requests
     /*package*/ int setPreferredDevicesForStrategyInt(int strategy,
@@ -1326,21 +1351,21 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ int removePreferredDevicesForStrategyAndSave(int strategy) {
-        final int status = removePreferredDevicesForStrategy(strategy);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveRemovePreferredDevicesForStrategy(strategy);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status = removePreferredDevicesForStrategy(strategy);
+                if (status == AudioSystem.SUCCESS) {
+                    saveRemovePreferredDevices(strategy);
+                }
+                return status;
+            }
         }
-        return status;
     }
     // Only used for external requests coming from an API
     /*package*/ int removePreferredDevicesForStrategy(int strategy) {
-        int status = AudioSystem.ERROR;
 
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = clearDevicesRoleForStrategy(
+        return clearDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_PREFERRED, false /*internal */);
-        }
-        return status;
     }
     // Only used for internal requests
     /*package*/ int removePreferredDevicesForStrategyInt(int strategy) {
@@ -1351,16 +1376,17 @@ public class AudioDeviceInventory {
     /*package*/ int setDeviceAsNonDefaultForStrategyAndSave(int strategy,
             @NonNull AudioDeviceAttributes device) {
         int status = AudioSystem.ERROR;
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            List<AudioDeviceAttributes> devices = new ArrayList<>();
-            devices.add(device);
-            status = addDevicesRoleForStrategy(
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                List<AudioDeviceAttributes> devices = new ArrayList<>();
+                devices.add(device);
+                status = addDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices, false /* internal */);
-        }
 
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveSetDeviceAsNonDefaultForStrategy(strategy, device);
+                if (status == AudioSystem.SUCCESS) {
+                    saveSetDeviceAsNonDefault(strategy, device);
+                }
+            }
         }
         return status;
     }
@@ -1368,16 +1394,17 @@ public class AudioDeviceInventory {
     /*package*/ int removeDeviceAsNonDefaultForStrategyAndSave(int strategy,
             @NonNull AudioDeviceAttributes device) {
         int status = AudioSystem.ERROR;
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            List<AudioDeviceAttributes> devices = new ArrayList<>();
-            devices.add(device);
-            status = removeDevicesRoleForStrategy(
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                List<AudioDeviceAttributes> devices = new ArrayList<>();
+                devices.add(device);
+                status = removeDevicesRoleForStrategy(
                     strategy, AudioSystem.DEVICE_ROLE_DISABLED, devices, false /* internal */);
-        }
 
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveRemoveDeviceAsNonDefaultForStrategy(strategy, device);
+                if (status == AudioSystem.SUCCESS) {
+                    saveRemoveDeviceAsNonDefault(strategy, device);
+                }
+            }
         }
         return status;
     }
@@ -1405,41 +1432,40 @@ public class AudioDeviceInventory {
 
     /*package*/ int setPreferredDevicesForCapturePresetAndSave(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
-        final int status = setPreferredDevicesForCapturePreset(capturePreset, devices);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveSetPreferredDevicesForCapturePreset(capturePreset, devices);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status = setPreferredDevicesForCapturePreset(capturePreset, devices);
+                if (status == AudioSystem.SUCCESS) {
+                    saveSetPreferredDevicesForCapturePreset(capturePreset, devices);
+                }
+                return status;
+            }
         }
-        return status;
     }
 
     // Only used for external requests coming from an API
     private int setPreferredDevicesForCapturePreset(
             int capturePreset, @NonNull List<AudioDeviceAttributes> devices) {
-        int status = AudioSystem.ERROR;
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = setDevicesRoleForCapturePreset(
+        return setDevicesRoleForCapturePreset(
                     capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED, devices);
-        }
-        return status;
     }
 
     /*package*/ int clearPreferredDevicesForCapturePresetAndSave(int capturePreset) {
-        final int status  = clearPreferredDevicesForCapturePreset(capturePreset);
-        if (status == AudioSystem.SUCCESS) {
-            mDeviceBroker.postSaveClearPreferredDevicesForCapturePreset(capturePreset);
+        synchronized(mDevicesLock){
+            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
+                final int status  = clearPreferredDevicesForCapturePreset(capturePreset);
+                if (status == AudioSystem.SUCCESS) {
+                   saveClearPreferredDevicesForCapturePreset(capturePreset);
+                }
+                return status;
+            }
         }
-        return status;
     }
 
     // Only used for external requests coming from an API
     private int clearPreferredDevicesForCapturePreset(int capturePreset) {
-        int status  = AudioSystem.ERROR;
-
-        try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-            status = clearDevicesRoleForCapturePreset(
+        return clearDevicesRoleForCapturePreset(
                     capturePreset, AudioSystem.DEVICE_ROLE_PREFERRED);
-        }
-        return status;
     }
 
     // Only used for internal requests
@@ -1818,7 +1844,15 @@ public class AudioDeviceInventory {
                             .printSlog(EventLogger.Event.ALOGE, TAG));
                     return false;
                 }
-                mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName, address));
+
+                if (device == AudioSystem.DEVICE_OUT_HDMI ||
+                    device == AudioSystem.DEVICE_OUT_HDMI_ARC ||
+                    device == AudioSystem.DEVICE_OUT_HDMI_EARC) {
+                    mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName,
+                        address, attributes.getAudioProfiles(), attributes.getAudioDescriptors()));
+                } else {
+                    mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName, address));
+                }
                 mDeviceBroker.postAccessoryPlugMediaUnmute(device);
                 status = true;
             } else if (!connect && isConnected) {

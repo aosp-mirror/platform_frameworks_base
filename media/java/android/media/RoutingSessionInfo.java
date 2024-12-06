@@ -22,7 +22,6 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -56,8 +55,6 @@ public final class RoutingSessionInfo implements Parcelable {
                     return new RoutingSessionInfo[size];
                 }
             };
-
-    private static final String TAG = "RoutingSessionInfo";
 
     private static final String KEY_GROUP_ROUTE = "androidx.mediarouter.media.KEY_GROUP_ROUTE";
     private static final String KEY_VOLUME_HANDLING = "volumeHandling";
@@ -142,15 +139,7 @@ public final class RoutingSessionInfo implements Parcelable {
         mVolume = builder.mVolume;
 
         mIsSystemSession = builder.mIsSystemSession;
-
-        boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
-        mVolumeHandling =
-                defineVolumeHandling(
-                        mIsSystemSession,
-                        builder.mVolumeHandling,
-                        mSelectedRoutes,
-                        volumeAdjustmentForRemoteGroupSessions);
+        mVolumeHandling = builder.mVolumeHandling;
 
         mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
         mTransferReason = builder.mTransferReason;
@@ -205,20 +194,6 @@ public final class RoutingSessionInfo implements Parcelable {
         }
         //Return same Bundle.
         return controlHints;
-    }
-
-    @MediaRoute2Info.PlaybackVolume
-    private static int defineVolumeHandling(
-            boolean isSystemSession,
-            @MediaRoute2Info.PlaybackVolume int volumeHandling,
-            List<String> selectedRoutes,
-            boolean volumeAdjustmentForRemoteGroupSessions) {
-        if (!isSystemSession
-                && !volumeAdjustmentForRemoteGroupSessions
-                && selectedRoutes.size() > 1) {
-            return MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
-        }
-        return volumeHandling;
     }
 
     @NonNull
@@ -287,7 +262,8 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the provider id of the session.
+     * Gets the provider ID of the session.
+     *
      * @hide
      */
     @Nullable
@@ -296,7 +272,15 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /**
-     * Gets the list of IDs of selected routes for the session. It shouldn't be empty.
+     * Gets the list of IDs of selected routes for the session.
+     *
+     * <p>Selected routes are the routes that this session is actively routing media to.
+     *
+     * <p>The behavior of a routing session with multiple selected routes is ultimately defined by
+     * the {@link MediaRoute2ProviderService} implementation. However, typically, it's expected that
+     * all the selected routes of a routing session are playing the same media in sync.
+     *
+     * @return A non-empty list of selected route ids.
      */
     @NonNull
     public List<String> getSelectedRoutes() {
@@ -305,6 +289,16 @@ public final class RoutingSessionInfo implements Parcelable {
 
     /**
      * Gets the list of IDs of selectable routes for the session.
+     *
+     * <p>Selectable routes can be added to a routing session (via {@link
+     * MediaRouter2.RoutingController#selectRoute}) in order to add them to the {@link
+     * #getSelectedRoutes() selected routes}, so that media plays on the newly selected route along
+     * with the other selected routes.
+     *
+     * <p>Not to be confused with {@link #getTransferableRoutes() transferable routes}. Transferring
+     * to a route makes it the sole selected route.
+     *
+     * @return A possibly empty list of selectable route ids.
      */
     @NonNull
     public List<String> getSelectableRoutes() {
@@ -313,6 +307,17 @@ public final class RoutingSessionInfo implements Parcelable {
 
     /**
      * Gets the list of IDs of deselectable routes for the session.
+     *
+     * <p>Deselectable routes can be removed from the {@link #getSelectedRoutes() selected routes},
+     * so that the routing session stops routing to the newly deselected route, but continues on any
+     * remaining selected routes.
+     *
+     * <p>Deselectable routes should be a subset of the {@link #getSelectedRoutes() selected
+     * routes}, meaning not all of the selected routes might be deselectable. For example, one of
+     * the selected routes may be a leader device coordinating group playback, which must always
+     * remain selected while the session is active.
+     *
+     * @return A possibly empty list of deselectable route ids.
      */
     @NonNull
     public List<String> getDeselectableRoutes() {
@@ -321,6 +326,24 @@ public final class RoutingSessionInfo implements Parcelable {
 
     /**
      * Gets the list of IDs of transferable routes for the session.
+     *
+     * <p>Transferring to a route (for example, using {@link MediaRouter2#transferTo}) replaces the
+     * list of {@link #getSelectedRoutes() selected routes} with the target route, causing playback
+     * to move from one route to another.
+     *
+     * <p>Note that this is different from {@link #getSelectableRoutes() selectable routes}, because
+     * selecting a route makes it part of the selected routes, while transferring to a route makes
+     * it the selected route. A route can be both transferable and selectable.
+     *
+     * <p>Note that playback may transfer across routes without the target route being in the list
+     * of transferable routes. This can happen by creating a new routing session to the target
+     * route, and releasing the routing session being transferred from. The difference is that a
+     * transfer to a route in the transferable list can happen with no intervention from the app,
+     * with the route provider taking care of the entire operation. A transfer to a route that is
+     * not in the list of transferable routes (by creating a new session) requires the app to move
+     * the playback state from one device to the other.
+     *
+     * @return A possibly empty list of transferable route ids.
      */
     @NonNull
     public List<String> getTransferableRoutes() {

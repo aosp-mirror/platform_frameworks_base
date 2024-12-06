@@ -29,7 +29,7 @@ import com.android.systemui.surfaceeffects.PaintDrawCallback
 import com.android.systemui.surfaceeffects.glowboxeffect.GlowBoxEffect
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class KeyboardDockingIndicationViewBinder
