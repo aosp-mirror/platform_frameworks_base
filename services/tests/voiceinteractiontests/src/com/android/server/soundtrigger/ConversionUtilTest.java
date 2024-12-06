@@ -76,7 +76,7 @@ public class ConversionUtilTest {
 
         var apiconfig = new SoundTrigger.RecognitionConfig.Builder()
             .setCaptureRequested(true)
-            .setAllowMultipleTriggers(false) // must be false
+            .setMultipleTriggersAllowed(false) // must be false
             .setKeyphrases(keyphrases)
             .setData(data)
             .setAudioCapabilities(flags)

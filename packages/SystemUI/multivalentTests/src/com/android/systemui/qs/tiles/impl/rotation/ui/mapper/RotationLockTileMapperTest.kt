@@ -66,13 +66,13 @@ class RotationLockTileMapperTest : SysuiTestCase() {
                         addOverride(com.android.internal.R.bool.config_allowRotationResolver, true)
                         addOverride(
                             com.android.internal.R.array.config_foldedDeviceStates,
-                            intArrayOf() // empty array <=> device is not foldable
+                            intArrayOf(), // empty array <=> device is not foldable
                         )
                     }
                     .resources,
                 context.theme,
                 devicePostureController,
-                deviceStateManager
+                deviceStateManager,
             )
     }
 
@@ -86,7 +86,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
             createRotationLockTileState(
                 QSTileState.ActivationState.ACTIVE,
                 EMPTY_SECONDARY_STRING,
-                R.drawable.qs_auto_rotate_icon_on
+                R.drawable.qs_auto_rotate_icon_on,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -101,7 +101,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
             createRotationLockTileState(
                 QSTileState.ActivationState.ACTIVE,
                 context.getString(R.string.rotation_lock_camera_rotation_on),
-                R.drawable.qs_auto_rotate_icon_on
+                R.drawable.qs_auto_rotate_icon_on,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -116,7 +116,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
             createRotationLockTileState(
                 QSTileState.ActivationState.INACTIVE,
                 EMPTY_SECONDARY_STRING,
-                R.drawable.qs_auto_rotate_icon_off
+                R.drawable.qs_auto_rotate_icon_off,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -167,7 +167,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
         mapper.apply {
             overrideResource(
                 com.android.internal.R.array.config_foldedDeviceStates,
-                intArrayOf(1, 2, 3)
+                intArrayOf(1, 2, 3),
             )
         }
         whenever(deviceStateManager.supportedDeviceStates).thenReturn(kosmos.foldedDeviceStateList)
@@ -176,11 +176,11 @@ class RotationLockTileMapperTest : SysuiTestCase() {
     private fun createRotationLockTileState(
         activationState: QSTileState.ActivationState,
         secondaryLabel: String,
-        iconRes: Int
+        iconRes: Int,
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_rotation_unlocked_label)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -190,7 +190,7 @@ class RotationLockTileMapperTest : SysuiTestCase() {
             secondaryLabel,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 

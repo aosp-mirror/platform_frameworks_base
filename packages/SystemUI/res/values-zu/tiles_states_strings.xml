@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"Kuvaliwe"</item>
     <item msgid="3028994095749238254">"Kuvuliwe"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"Ayitholakali"</item>
+    <item msgid="6419996398343291862">"Valiwe"</item>
+    <item msgid="5908720590832378783">"Vuliwe"</item>
+  </string-array>
 </resources>

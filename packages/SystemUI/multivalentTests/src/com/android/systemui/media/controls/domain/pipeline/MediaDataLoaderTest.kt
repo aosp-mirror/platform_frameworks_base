@@ -29,6 +29,7 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
+import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -69,6 +70,7 @@ private const val SESSION_TITLE = "title"
 private const val SESSION_EMPTY_TITLE = ""
 
 @SmallTest
+@RunWithLooper
 @RunWith(AndroidJUnit4::class)
 class MediaDataLoaderTest : SysuiTestCase() {
 
@@ -80,6 +82,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
     private val fakeFeatureFlags = kosmos.fakeFeatureFlagsClassic
     private val mediaFlags = kosmos.mediaFlags
     private val mediaControllerFactory = kosmos.fakeMediaControllerFactory
+    private lateinit var media3ActionFactory: Media3ActionFactory
     private val session = MediaSession(context, "MediaDataLoaderTestSession")
     private val metadataBuilder =
         MediaMetadata.Builder().apply {
@@ -87,21 +90,26 @@ class MediaDataLoaderTest : SysuiTestCase() {
             putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
         }
 
-    private val underTest: MediaDataLoader =
-        MediaDataLoader(
-            context,
-            testDispatcher,
-            testScope,
-            mediaControllerFactory,
-            mediaFlags,
-            kosmos.imageLoader,
-            statusBarManager,
-        )
+    private lateinit var underTest: MediaDataLoader
 
     @Before
     fun setUp() {
+        media3ActionFactory = kosmos.media3ActionFactory
         mediaControllerFactory.setControllerForToken(session.sessionToken, mediaController)
+        whenever(mediaController.sessionToken).thenReturn(session.sessionToken)
         whenever(mediaController.metadata).then { metadataBuilder.build() }
+
+        underTest =
+            MediaDataLoader(
+                context,
+                testDispatcher,
+                testScope,
+                mediaControllerFactory,
+                mediaFlags,
+                kosmos.imageLoader,
+                statusBarManager,
+                kosmos.media3ActionFactory,
+            )
     }
 
     @Test
@@ -304,7 +312,6 @@ class MediaDataLoaderTest : SysuiTestCase() {
                     }
                     build()
                 }
-
             val result = underTest.loadMediaData(KEY, mediaNotification)
 
             assertThat(result).isNotNull()
@@ -394,6 +401,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
                     mediaFlags,
                     mockImageLoader,
                     statusBarManager,
+                    media3ActionFactory,
                 )
             metadataBuilder.putString(
                 MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
@@ -422,6 +430,7 @@ class MediaDataLoaderTest : SysuiTestCase() {
                     mediaFlags,
                     mockImageLoader,
                     statusBarManager,
+                    media3ActionFactory,
                 )
             metadataBuilder.putString(
                 MediaMetadata.METADATA_KEY_ALBUM_ART_URI,

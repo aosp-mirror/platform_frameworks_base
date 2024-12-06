@@ -15,7 +15,12 @@
  */
 package com.android.server;
 
+import static android.os.PowerExemptionManager.REASON_OTHER;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.NULL_DEFAULT;
+
 import static androidx.test.InstrumentationRegistry.getContext;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -31,6 +36,7 @@ import static com.android.server.DeviceIdleController.LIGHT_STATE_INACTIVE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_OVERRIDE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_WAITING_FOR_NETWORK;
 import static com.android.server.DeviceIdleController.MSG_REPORT_STATIONARY_STATUS;
+import static com.android.server.DeviceIdleController.MSG_TEMP_APP_WHITELIST_TIMEOUT;
 import static com.android.server.DeviceIdleController.STATE_ACTIVE;
 import static com.android.server.DeviceIdleController.STATE_IDLE;
 import static com.android.server.DeviceIdleController.STATE_IDLE_MAINTENANCE;
@@ -41,6 +47,7 @@ import static com.android.server.DeviceIdleController.STATE_QUICK_DOZE_DELAY;
 import static com.android.server.DeviceIdleController.STATE_SENSING;
 import static com.android.server.DeviceIdleController.lightStateToString;
 import static com.android.server.DeviceIdleController.stateToString;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -83,6 +90,8 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.SystemClock;
 import android.os.WearModeManagerInternal;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -90,12 +99,16 @@ import android.telephony.emergency.EmergencyNumber;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.app.IBatteryStats;
+import com.android.server.am.BatteryStatsService;
 import com.android.server.deviceidle.ConstraintController;
+import com.android.server.deviceidle.Flags;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -115,6 +128,9 @@ import java.util.concurrent.Executor;
 @SuppressWarnings("GuardedBy")
 @RunWith(AndroidJUnit4.class)
 public class DeviceIdleControllerTest {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(NULL_DEFAULT);
+
     private DeviceIdleController mDeviceIdleController;
     private DeviceIdleController.MyHandler mHandler;
     private AnyMotionDetectorForTest mAnyMotionDetector;
@@ -157,7 +173,8 @@ public class DeviceIdleControllerTest {
         LocationManager locationManager;
         ConstraintController constraintController;
         // Freeze time for testing.
-        long nowElapsed;
+        volatile long nowElapsed;
+        volatile long nowUptime;
         boolean useMotionSensor = true;
         boolean isLocationPrefetchEnabled = true;
 
@@ -190,6 +207,11 @@ public class DeviceIdleControllerTest {
         @Override
         long getElapsedRealtime() {
             return nowElapsed;
+        }
+
+        @Override
+        long getUptimeMillis() {
+            return nowUptime;
         }
 
         @Override
@@ -314,11 +336,13 @@ public class DeviceIdleControllerTest {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
+                .mockStatic(BatteryStatsService.class)
                 .spyStatic(DeviceConfig.class)
                 .spyStatic(LocalServices.class)
                 .startMocking();
         spyOn(getContext());
         doReturn(null).when(getContext()).registerReceiver(any(), any());
+        doReturn(mock(IBatteryStats.class)).when(() -> BatteryStatsService.getService());
         doReturn(mock(ActivityManagerInternal.class))
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(ActivityTaskManagerInternal.class))
@@ -398,6 +422,46 @@ public class DeviceIdleControllerTest {
         LocalServices.removeServiceForTest(AppStateTracker.class);
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
         LocalServices.removeServiceForTest(PowerAllowlistInternal.class);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_USE_CPU_TIME_FOR_TEMP_ALLOWLIST)
+    public void testTempAllowlistCountsUptime() {
+        doNothing().when(getContext()).sendBroadcastAsUser(any(), any(), any(), any());
+        final int testUid = 12345;
+        final long durationMs = 4300;
+        final long startTime = 100; // Arbitrary starting point in time.
+        mInjector.nowUptime = mInjector.nowElapsed = startTime;
+
+        mDeviceIdleController.addPowerSaveTempWhitelistAppDirectInternal(0, testUid, durationMs,
+                TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED, true, REASON_OTHER, "test");
+
+        assertEquals(startTime + durationMs,
+                mDeviceIdleController.mTempWhitelistAppIdEndTimes.get(testUid).first.value);
+
+        final InOrder inorder = inOrder(mHandler);
+        // mHandler is already stubbed to do nothing on handleMessage.
+        inorder.verify(mHandler).sendMessageDelayed(
+                argThat(m -> m.what == MSG_TEMP_APP_WHITELIST_TIMEOUT && m.arg1 == testUid),
+                eq(durationMs));
+
+        mInjector.nowElapsed += durationMs;
+        mInjector.nowUptime += 2;
+        // Elapsed time moved past the expiration but not uptime. The check should be rescheduled.
+        mDeviceIdleController.checkTempAppWhitelistTimeout(testUid);
+        inorder.verify(mHandler).sendMessageDelayed(
+                argThat(m -> m.what == MSG_TEMP_APP_WHITELIST_TIMEOUT && m.arg1 == testUid),
+                eq(durationMs - 2));
+        assertEquals(startTime + durationMs,
+                mDeviceIdleController.mTempWhitelistAppIdEndTimes.get(testUid).first.value);
+
+        mInjector.nowUptime += durationMs;
+        // Uptime moved past the expiration time. Uid should be removed from the temp allowlist.
+        mDeviceIdleController.checkTempAppWhitelistTimeout(testUid);
+        inorder.verify(mHandler, never()).sendMessageDelayed(
+                argThat(m -> m.what == MSG_TEMP_APP_WHITELIST_TIMEOUT && m.arg1 == testUid),
+                anyLong());
+        assertFalse(mDeviceIdleController.mTempWhitelistAppIdEndTimes.contains(testUid));
     }
 
     @Test

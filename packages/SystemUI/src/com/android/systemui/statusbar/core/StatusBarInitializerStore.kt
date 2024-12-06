@@ -22,6 +22,7 @@ import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.PerDisplayStore
 import com.android.systemui.display.data.repository.PerDisplayStoreImpl
 import com.android.systemui.display.data.repository.SingleDisplayStore
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +38,7 @@ constructor(
     displayRepository: DisplayRepository,
     private val factory: StatusBarInitializer.Factory,
     private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
+    private val statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
 ) :
     StatusBarInitializerStore,
     PerDisplayStoreImpl<StatusBarInitializer>(backgroundApplicationScope, displayRepository) {
@@ -47,7 +49,8 @@ constructor(
 
     override fun createInstanceForDisplay(displayId: Int): StatusBarInitializer {
         return factory.create(
-            statusBarWindowController = statusBarWindowControllerStore.forDisplay(displayId)
+            statusBarWindowController = statusBarWindowControllerStore.forDisplay(displayId),
+            statusBarModePerDisplayRepository = statusBarModeRepositoryStore.forDisplay(displayId),
         )
     }
 

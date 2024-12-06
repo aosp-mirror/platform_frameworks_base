@@ -23,10 +23,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.platform.test.ravenwood.RavenwoodConfig;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -39,8 +40,8 @@ public class SystemPropertiesTest {
     private static final String PERSIST_KEY = "persist.sys.testkey";
     private static final String NONEXIST_KEY = "doesnotexist_2341431";
 
-    @RavenwoodConfig.Config
-    public static final RavenwoodConfig mRavenwood = new RavenwoodConfig.Builder()
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setSystemPropertyMutable(KEY, null)
             .setSystemPropertyMutable(UNSET_KEY, null)
             .setSystemPropertyMutable(PERSIST_KEY, null)

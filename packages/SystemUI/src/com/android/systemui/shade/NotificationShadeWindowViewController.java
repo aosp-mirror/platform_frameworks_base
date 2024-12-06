@@ -88,6 +88,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -193,7 +194,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor,
             BouncerViewBinder bouncerViewBinder,
-            @ShadeDisplayAware ConfigurationForwarder configurationForwarder,
+            @ShadeDisplayAware Provider<ConfigurationForwarder> configurationForwarder,
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
@@ -257,7 +258,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         }
 
         if (ShadeWindowGoesAround.isEnabled()) {
-            mView.setConfigurationForwarder(configurationForwarder);
+            mView.setConfigurationForwarder(configurationForwarder.get());
         }
         dumpManager.registerDumpable(this);
     }

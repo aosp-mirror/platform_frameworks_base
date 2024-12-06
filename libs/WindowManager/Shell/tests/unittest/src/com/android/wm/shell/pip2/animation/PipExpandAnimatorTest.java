@@ -93,6 +93,17 @@ public class PipExpandAnimatorTest {
                 .thenReturn(mMockTransaction);
         when(mMockTransaction.setShadowRadius(any(SurfaceControl.class), anyFloat()))
                 .thenReturn(mMockTransaction);
+        // No-op on the mMockStartTransaction
+        when(mMockStartTransaction.setAlpha(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(mMockFinishTransaction);
+        when(mMockStartTransaction.setCrop(any(SurfaceControl.class), any(Rect.class)))
+                .thenReturn(mMockFinishTransaction);
+        when(mMockStartTransaction.setMatrix(any(SurfaceControl.class), any(Matrix.class), any()))
+                .thenReturn(mMockFinishTransaction);
+        when(mMockStartTransaction.setCornerRadius(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(mMockFinishTransaction);
+        when(mMockStartTransaction.setShadowRadius(any(SurfaceControl.class), anyFloat()))
+                .thenReturn(mMockFinishTransaction);
         // Do the same for mMockFinishTransaction
         when(mMockFinishTransaction.setAlpha(any(SurfaceControl.class), anyFloat()))
                 .thenReturn(mMockFinishTransaction);

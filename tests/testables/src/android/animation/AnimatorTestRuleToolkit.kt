@@ -17,7 +17,13 @@
 package android.animation
 
 import android.animation.AnimatorTestRuleToolkit.Companion.TAG
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.util.Log
+import android.view.View
+import androidx.core.graphics.drawable.toBitmap
+import androidx.test.core.app.ActivityScenario
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,11 +42,43 @@ import platform.test.motion.golden.FrameId
 import platform.test.motion.golden.TimeSeries
 import platform.test.motion.golden.TimeSeriesCaptureScope
 import platform.test.motion.golden.TimestampFrameId
+import platform.test.screenshot.captureToBitmapAsync
 
-class AnimatorTestRuleToolkit(val animatorTestRule: AnimatorTestRule, val testScope: TestScope) {
+class AnimatorTestRuleToolkit(
+    internal val animatorTestRule: AnimatorTestRule,
+    internal val testScope: TestScope,
+    internal val currentActivityScenario: () -> ActivityScenario<*>,
+) {
     internal companion object {
         const val TAG = "AnimatorRuleToolkit"
     }
+}
+
+/** Capture utility to extract a [Bitmap] from a [drawable]. */
+fun captureDrawable(drawable: Drawable): Bitmap {
+    val width = drawable.bounds.right - drawable.bounds.left
+    val height = drawable.bounds.bottom - drawable.bounds.top
+
+    // If either dimension is 0 this will fail, so we set it to 1 pixel instead.
+    return drawable.toBitmap(
+        width =
+        if (width > 0) {
+            width
+        } else {
+            1
+        },
+        height =
+        if (height > 0) {
+            height
+        } else {
+            1
+        },
+    )
+}
+
+/** Capture utility to extract a [Bitmap] from a [view]. */
+fun captureView(view: View): Bitmap {
+    return view.captureToBitmapAsync().get(10, TimeUnit.SECONDS)
 }
 
 /**
@@ -71,24 +109,39 @@ data class AnimatorRuleRecordingSpec<T>(
     /** Time interval between frame captures, in milliseconds. */
     val frameDurationMs: Long = 16L,
 
-    /**  Produces the time-series, invoked on each animation frame. */
+    /** Whether a sequence of screenshots should also be recorded. */
+    val visualCapture: ((captureRoot: T) -> Bitmap)? = null,
+
+    /** Produces the time-series, invoked on each animation frame. */
     val timeSeriesCapture: TimeSeriesCaptureScope<T>.() -> Unit,
 )
 
 /** Records the time-series of the features specified in [recordingSpec]. */
 fun <T> MotionTestRule<AnimatorTestRuleToolkit>.recordMotion(
-    recordingSpec: AnimatorRuleRecordingSpec<T>,
+    recordingSpec: AnimatorRuleRecordingSpec<T>
 ): RecordedMotion {
     with(toolkit.animatorTestRule) {
+        val activityScenario = toolkit.currentActivityScenario()
         val frameIdCollector = mutableListOf<FrameId>()
         val propertyCollector = mutableMapOf<String, MutableList<DataPoint<*>>>()
+        val screenshotCollector =
+            if (recordingSpec.visualCapture != null) {
+                mutableListOf<Bitmap>()
+            } else {
+                null
+            }
 
         fun recordFrame(frameId: FrameId) {
             Log.i(TAG, "recordFrame($frameId)")
             frameIdCollector.add(frameId)
-            recordingSpec.timeSeriesCapture.invoke(
-                TimeSeriesCaptureScope(recordingSpec.captureRoot, propertyCollector)
-            )
+            activityScenario.onActivity {
+                recordingSpec.timeSeriesCapture.invoke(
+                    TimeSeriesCaptureScope(recordingSpec.captureRoot, propertyCollector)
+                )
+            }
+
+            val bitmap = recordingSpec.visualCapture?.invoke(recordingSpec.captureRoot)
+            if (bitmap != null) screenshotCollector!!.add(bitmap)
         }
 
         val motionControl =
@@ -101,10 +154,13 @@ fun <T> MotionTestRule<AnimatorTestRuleToolkit>.recordMotion(
 
         Log.i(TAG, "recordMotion() begin recording")
 
-        val startFrameTime = currentTime
+        var startFrameTime: Long? = null
+        toolkit.currentActivityScenario().onActivity { startFrameTime = currentTime }
         while (!motionControl.recordingEnded) {
-            recordFrame(TimestampFrameId(currentTime - startFrameTime))
-            motionControl.nextFrame()
+            var time: Long? = null
+            toolkit.currentActivityScenario().onActivity { time = currentTime }
+            recordFrame(TimestampFrameId(time!! - startFrameTime!!))
+            toolkit.currentActivityScenario().onActivity { motionControl.nextFrame() }
         }
 
         Log.i(TAG, "recordMotion() end recording")
@@ -115,7 +171,7 @@ fun <T> MotionTestRule<AnimatorTestRuleToolkit>.recordMotion(
                 propertyCollector.entries.map { entry -> Feature(entry.key, entry.value) },
             )
 
-        return create(timeSeries, null)
+        return create(timeSeries, screenshotCollector)
     }
 }
 

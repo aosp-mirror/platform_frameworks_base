@@ -93,9 +93,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/volume_background_bottom"
-                    android:paddingLeft="@dimen/volume_dialog_ringer_rows_padding"
-                    android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding"
-                    android:paddingRight="@dimen/volume_dialog_ringer_rows_padding">
+                    android:paddingBottom="@dimen/volume_dialog_ringer_rows_padding">
                     <com.android.keyguard.AlphaOptimizedImageButton
                         android:id="@+id/settings"
                         android:src="@drawable/horizontal_ellipsis"

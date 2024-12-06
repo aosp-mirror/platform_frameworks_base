@@ -691,6 +691,32 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             verify(logger, never()).logTileUserChanged(TileSpec.create("a"), 0)
         }
 
+
+    @Test
+    fun getTileDetails() =
+        testScope.runTest(USER_INFO_0) {
+            val tiles by collectLastValue(underTest.currentTiles)
+            val tileA = TileSpec.create("a")
+            val tileB = TileSpec.create("b")
+            val tileNoDetails = TileSpec.create("NoDetails")
+
+            val specs = listOf(tileA, tileB, tileNoDetails)
+
+            assertThat(tiles!!.isEmpty()).isTrue()
+
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+            assertThat(tiles!!.size).isEqualTo(3)
+
+            // The third tile doesn't have a details view.
+            assertThat(tiles!![2].spec).isEqualTo(tileNoDetails)
+            (tiles!![2].tile as FakeQSTile).hasDetailsViewModel = false
+
+            assertThat(tiles!![0].tile.detailsViewModel.getTitle()).isEqualTo("a")
+            assertThat(tiles!![1].tile.detailsViewModel.getTitle()).isEqualTo("b")
+            assertThat(tiles!![2].tile.detailsViewModel).isNull()
+        }
+
+
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
         this.state = state
         this.label = label
@@ -770,7 +796,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         private val USER_INFO_0 = UserInfo().apply { id = 0 }
         private val USER_INFO_1 = UserInfo().apply { id = 1 }
 
-        private val VALID_TILES = setOf("a", "b", "c", "d", "e")
+        private val VALID_TILES = setOf("a", "b", "c", "d", "e", "NoDetails")
         private val TEST_COMPONENT = ComponentName("pkg", "cls")
         private val CUSTOM_TILE_SPEC = TileSpec.Companion.create(TEST_COMPONENT)
     }

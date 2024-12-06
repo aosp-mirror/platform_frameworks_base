@@ -29,7 +29,6 @@ import android.view.ContextThemeWrapper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -39,14 +38,18 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import java.io.File
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -55,9 +58,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.io.File
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -70,41 +72,29 @@ class DndTileTest : SysuiTestCase() {
         private const val KEY = Settings.Secure.ZEN_DURATION
     }
 
-    @Mock
-    private lateinit var qsHost: QSHost
+    @Mock private lateinit var qsHost: QSHost
 
-    @Mock
-    private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var metricsLogger: MetricsLogger
 
-    @Mock
-    private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
 
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var activityStarter: ActivityStarter
 
-    @Mock
-    private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var qsLogger: QSLogger
 
-    @Mock
-    private lateinit var uiEventLogger: QsEventLogger
+    @Mock private lateinit var uiEventLogger: QsEventLogger
 
-    @Mock
-    private lateinit var zenModeController: ZenModeController
+    @Mock private lateinit var zenModeController: ZenModeController
 
-    @Mock
-    private lateinit var sharedPreferences: SharedPreferences
+    @Mock private lateinit var sharedPreferences: SharedPreferences
 
-    @Mock
-    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
-    @Mock
-    private lateinit var hostDialog: Dialog
+    @Mock private lateinit var hostDialog: Dialog
 
-    @Mock
-    private lateinit var expandable: Expandable
+    @Mock private lateinit var expandable: Expandable
 
-    @Mock
-    private lateinit var controller: DialogTransitionAnimator.Controller
+    @Mock private lateinit var controller: DialogTransitionAnimator.Controller
 
     private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
@@ -118,31 +108,32 @@ class DndTileTest : SysuiTestCase() {
 
         whenever(qsHost.userId).thenReturn(DEFAULT_USER)
 
-        val wrappedContext = object : ContextWrapper(
-                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
-        ) {
-            override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
-                return sharedPreferences
+        val wrappedContext =
+            object :
+                ContextWrapper(ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)) {
+                override fun getSharedPreferences(file: File?, mode: Int): SharedPreferences {
+                    return sharedPreferences
+                }
             }
-        }
         whenever(qsHost.context).thenReturn(wrappedContext)
         whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
 
-        tile = DndTile(
-            qsHost,
-            uiEventLogger,
-            testableLooper.looper,
-            Handler(testableLooper.looper),
-            FalsingManagerFake(),
-            metricsLogger,
-            statusBarStateController,
-            activityStarter,
-            qsLogger,
-            zenModeController,
-            sharedPreferences,
-            secureSettings,
-            mDialogTransitionAnimator
-        )
+        tile =
+            DndTile(
+                qsHost,
+                uiEventLogger,
+                testableLooper.looper,
+                Handler(testableLooper.looper),
+                FalsingManagerFake(),
+                metricsLogger,
+                statusBarStateController,
+                activityStarter,
+                qsLogger,
+                zenModeController,
+                sharedPreferences,
+                secureSettings,
+                mDialogTransitionAnimator,
+            )
     }
 
     @After
@@ -222,7 +213,7 @@ class DndTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon).isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_dnd_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_dnd_icon_off))
     }
 
     @Test
@@ -232,6 +223,14 @@ class DndTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon).isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_dnd_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_dnd_icon_on))
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }

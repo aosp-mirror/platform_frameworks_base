@@ -34,6 +34,7 @@ import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.TextAnimator
+import com.android.systemui.animation.TypefaceVariantCacheImpl
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.LogcatOnlyMessageBuffer
@@ -98,7 +99,8 @@ constructor(
 
     @VisibleForTesting
     var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator = { layout, invalidateCb ->
-        TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb)
+        val cache = TypefaceVariantCacheImpl(layout.paint.typeface, NUM_CLOCK_FONT_ANIMATION_STEPS)
+        TextAnimator(layout, cache, invalidateCb)
     }
 
     // Used by screenshot tests to provide stability

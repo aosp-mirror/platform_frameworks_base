@@ -22,7 +22,7 @@ import com.android.systemui.screenshot.data.model.DisplayContentModel
 fun interface CapturePolicy {
     /**
      * Test the policy against the current display task state. If the policy applies, Returns a
-     * [PolicyResult.Matched] containing [CaptureParameters] used to alter the request.
+     * [PolicyResult.Matched] containing [LegacyCaptureParameters] used to alter the request.
      */
     suspend fun check(content: DisplayContentModel): PolicyResult
 
@@ -35,7 +35,7 @@ fun interface CapturePolicy {
             /** Why the policy matched. */
             val reason: String,
             /** Details on how to modify the screen capture request. */
-            val parameters: CaptureParameters,
+            val parameters: LegacyCaptureParameters,
         ) : PolicyResult
 
         /** The policy rules do not match the given display content and do not apply. */
@@ -43,7 +43,7 @@ fun interface CapturePolicy {
             /** The name of the policy rule which matched. */
             val policy: String,
             /** Why the policy did not match. */
-            val reason: String
+            val reason: String,
         ) : PolicyResult
     }
 }

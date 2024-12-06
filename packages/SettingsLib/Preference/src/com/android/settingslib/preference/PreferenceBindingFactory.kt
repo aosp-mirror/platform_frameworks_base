@@ -18,7 +18,7 @@ package com.android.settingslib.preference
 
 import androidx.preference.Preference
 import com.android.settingslib.metadata.MainSwitchPreference
-import com.android.settingslib.metadata.PreferenceGroup
+import com.android.settingslib.metadata.PreferenceCategory
 import com.android.settingslib.metadata.PreferenceHierarchyNode
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.SwitchPreference
@@ -45,16 +45,21 @@ interface PreferenceBindingFactory {
 
     /** Returns the [PreferenceBinding] associated with the [PreferenceMetadata]. */
     fun getPreferenceBinding(metadata: PreferenceMetadata): PreferenceBinding?
+
+    companion object {
+        /** Default preference binding factory. */
+        @JvmStatic var defaultFactory: PreferenceBindingFactory = DefaultPreferenceBindingFactory()
+    }
 }
 
 /** Default [PreferenceBindingFactory]. */
-object DefaultPreferenceBindingFactory : PreferenceBindingFactory {
+open class DefaultPreferenceBindingFactory : PreferenceBindingFactory {
 
     override fun getPreferenceBinding(metadata: PreferenceMetadata) =
         metadata as? PreferenceBinding
             ?: when (metadata) {
                 is SwitchPreference -> SwitchPreferenceBinding.INSTANCE
-                is PreferenceGroup -> PreferenceGroupBinding.INSTANCE
+                is PreferenceCategory -> PreferenceCategoryBinding.INSTANCE
                 is PreferenceScreenCreator -> PreferenceScreenBinding.INSTANCE
                 is MainSwitchPreference -> MainSwitchPreferenceBinding.INSTANCE
                 else -> DefaultPreferenceBinding
@@ -66,5 +71,6 @@ class KeyedPreferenceBindingFactory(private val bindings: Map<String, Preference
     PreferenceBindingFactory {
 
     override fun getPreferenceBinding(metadata: PreferenceMetadata) =
-        bindings[metadata.key] ?: DefaultPreferenceBindingFactory.getPreferenceBinding(metadata)
+        bindings[metadata.key]
+            ?: PreferenceBindingFactory.defaultFactory.getPreferenceBinding(metadata)
 }

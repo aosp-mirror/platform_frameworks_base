@@ -289,6 +289,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             }
         verify(smartspaceManager).createSmartspaceSession(capture(smartSpaceConfigBuilderCaptor))
         mediaControllerFactory.setControllerForToken(session.sessionToken, controller)
+        whenever(controller.sessionToken).thenReturn(session.sessionToken)
         whenever(controller.transportControls).thenReturn(transportControls)
         whenever(controller.playbackInfo).thenReturn(playbackInfo)
         whenever(controller.metadata).thenReturn(metadataBuilder.build())
@@ -1599,6 +1600,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testTooManyCompactActions_isTruncated() {
         // GIVEN a notification where too many compact actions were specified
@@ -1635,6 +1637,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .isEqualTo(LegacyMediaDataManagerImpl.MAX_COMPACT_ACTIONS)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testTooManyNotificationActions_isTruncated() {
         // GIVEN a notification where too many notification actions are added
@@ -1670,6 +1673,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .isEqualTo(LegacyMediaDataManagerImpl.MAX_NOTIFICATION_ACTIONS)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_noState_usesNotification() {
         val desc = "Notification Action"
@@ -1703,6 +1707,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(mediaDataCaptor.value!!.actions[0]!!.contentDescription).isEqualTo(desc)
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_hasPrevNext() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
@@ -1746,6 +1751,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[1])
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_noPrevNext_usesCustom() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4", "custom 5")
@@ -1778,6 +1784,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(actions.custom1!!.contentDescription).isEqualTo(customDesc[3])
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_connecting() {
         val stateActions = PlaybackState.ACTION_PLAY
@@ -1797,6 +1804,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .isEqualTo(context.getString(R.string.controls_media_button_connecting))
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_reservedSpace() {
         val customDesc = arrayOf("custom 1", "custom 2", "custom 3", "custom 4")
@@ -1835,6 +1843,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(actions.reservePrev).isTrue()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackActions_playPause_hasButton() {
         val stateActions = PlaybackState.ACTION_PLAY_PAUSE
@@ -1998,6 +2007,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
         }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testPlaybackStateNull_Pause_keyExists_callsListener() {
         whenever(controller.playbackState).thenReturn(null)
@@ -2056,6 +2066,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         assertThat(mediaDataCaptor.value.isClearable).isFalse()
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_notifRemoved_setToResume() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2086,6 +2097,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             )
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_sessionDestroyed_doesNotChange() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)
@@ -2104,6 +2116,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
 
+    @DisableFlags(Flags.FLAG_MEDIA_CONTROLS_BUTTON_MEDIA3)
     @Test
     fun testRetain_notifPlayer_removeWhileActive_fullyRemoved() {
         fakeFeatureFlags.set(MEDIA_RETAIN_SESSIONS, true)

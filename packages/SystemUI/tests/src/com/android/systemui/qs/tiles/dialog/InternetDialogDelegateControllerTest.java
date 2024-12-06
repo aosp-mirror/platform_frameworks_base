@@ -222,7 +222,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         when(SubscriptionManager.getDefaultDataSubscriptionId()).thenReturn(SUB_ID);
         SubscriptionInfo info = mock(SubscriptionInfo.class);
         when(mSubscriptionManager.getActiveSubscriptionInfo(SUB_ID)).thenReturn(info);
-        when(mToastFactory.createToast(any(), anyString(), anyString(), anyInt(), anyInt()))
+        when(mToastFactory.createToast(any(), any(), anyString(), anyString(), anyInt(), anyInt()))
             .thenReturn(mSystemUIToast);
         when(mSystemUIToast.getView()).thenReturn(mToastView);
         when(mSystemUIToast.getGravity()).thenReturn(GRAVITY_FLAGS);
@@ -275,8 +275,8 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory).createToast(any(), eq(TOAST_MESSAGE_STRING), anyString(), anyInt(),
-            anyInt());
+        verify(mToastFactory).createToast(any(), any(), eq(TOAST_MESSAGE_STRING), anyString(),
+                anyInt(), anyInt());
     }
 
     @Test
@@ -288,7 +288,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+        verify(mToastFactory, never()).createToast(any(), any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 
@@ -302,7 +302,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+        verify(mToastFactory, never()).createToast(any(), any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 
@@ -321,7 +321,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
         mInternetDialogController.connectCarrierNetwork();
 
         verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
-        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+        verify(mToastFactory, never()).createToast(any(), any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 

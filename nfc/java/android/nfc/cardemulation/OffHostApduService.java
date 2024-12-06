@@ -96,7 +96,7 @@ import android.os.IBinder;
  *     &lt;intent-filter&gt;
  *         &lt;action android:name="android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE"/&gt;
  *     &lt;/intent-filter&gt;
- *     &lt;meta-data android:name="android.nfc.cardemulation.off_host_apdu_ervice" android:resource="@xml/apduservice"/&gt;
+ *     &lt;meta-data android:name="android.nfc.cardemulation.off_host_apdu_service" android:resource="@xml/apduservice"/&gt;
  * &lt;/service&gt;</pre>
  *
  * This meta-data tag points to an apduservice.xml file.

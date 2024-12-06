@@ -90,9 +90,11 @@ class PrivateProfilePolicyTest {
                 Matched(
                     PrivateProfilePolicy.NAME,
                     PrivateProfilePolicy.PRIVATE_TASK_VISIBLE,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = FullScreen(displayId = 0),
-                        component = ComponentName.unflattenFromString(YOUTUBE),
+                        component =
+                            ComponentName.unflattenFromString(YOUTUBE)
+                                ?: error("Invalid component name"),
                         owner = UserHandle.of(PRIVATE),
                     ),
                 )
@@ -142,7 +144,7 @@ class PrivateProfilePolicyTest {
                 Matched(
                     PrivateProfilePolicy.NAME,
                     PrivateProfilePolicy.PRIVATE_TASK_VISIBLE,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE),
                         owner = UserHandle.of(PRIVATE),
@@ -167,7 +169,7 @@ class PrivateProfilePolicyTest {
                 Matched(
                     PrivateProfilePolicy.NAME,
                     PrivateProfilePolicy.PRIVATE_TASK_VISIBLE,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(FILES),
                         owner = UserHandle.of(PRIVATE),
@@ -188,7 +190,7 @@ class PrivateProfilePolicyTest {
                 Matched(
                     PrivateProfilePolicy.NAME,
                     PrivateProfilePolicy.PRIVATE_TASK_VISIBLE,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE_PIP),
                         owner = UserHandle.of(PRIVATE),
@@ -212,7 +214,7 @@ class PrivateProfilePolicyTest {
                 Matched(
                     PrivateProfilePolicy.NAME,
                     PrivateProfilePolicy.PRIVATE_TASK_VISIBLE,
-                    CaptureParameters(
+                    LegacyCaptureParameters(
                         type = FullScreen(displayId = 0),
                         component = ComponentName.unflattenFromString(YOUTUBE_PIP),
                         owner = UserHandle.of(PRIVATE),

@@ -104,7 +104,7 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
                     eq(tileConfig.tileSpec),
                     eq(userAction),
                     any(),
-                    eq("initial_data")
+                    eq("initial_data"),
                 )
             verify(qsTileAnalytics).trackUserAction(eq(tileConfig), eq(userAction))
         }
@@ -130,7 +130,7 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
                 .logUserActionRejectedByPolicy(
                     eq(userAction),
                     eq(tileConfig.tileSpec),
-                    eq(DISABLED_RESTRICTION)
+                    eq(DISABLED_RESTRICTION),
                 )
             verify(qsTileAnalytics, never()).trackUserAction(any(), any())
         }
@@ -159,7 +159,7 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
                 .logUserActionRejectedByPolicy(
                     eq(userAction),
                     eq(tileConfig.tileSpec),
-                    eq(DISABLED_RESTRICTION)
+                    eq(DISABLED_RESTRICTION),
                 )
             verify(qsTileAnalytics, never()).trackUserAction(any(), any())
         }
@@ -174,7 +174,7 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
                         QSTilePolicy.Restricted(
                             listOf(
                                 DISABLED_RESTRICTION,
-                                FakeDisabledByPolicyInteractor.DISABLED_RESTRICTION_2
+                                FakeDisabledByPolicyInteractor.DISABLED_RESTRICTION_2,
                             )
                         )
                 }
@@ -194,13 +194,13 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
                 .logUserActionRejectedByPolicy(
                     eq(userAction),
                     eq(tileConfig.tileSpec),
-                    eq(DISABLED_RESTRICTION)
+                    eq(DISABLED_RESTRICTION),
                 )
             verify(qsTileLogger, never())
                 .logUserActionRejectedByPolicy(
                     eq(userAction),
                     eq(tileConfig.tileSpec),
-                    eq(FakeDisabledByPolicyInteractor.DISABLED_RESTRICTION_2)
+                    eq(FakeDisabledByPolicyInteractor.DISABLED_RESTRICTION_2),
                 )
             verify(qsTileAnalytics, never()).trackUserAction(any(), any())
         }
@@ -243,10 +243,7 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
             {
                 object : QSTileDataToStateMapper<String> {
                     override fun map(config: QSTileConfig, data: String): QSTileState =
-                        QSTileState.build(
-                            { Icon.Resource(0, ContentDescription.Resource(0)) },
-                            data
-                        ) {}
+                        QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), data) {}
                 }
             },
             disabledByPolicyInteractor,

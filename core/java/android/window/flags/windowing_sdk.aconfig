@@ -100,6 +100,7 @@ flag {
     name: "touch_pass_through_opt_in"
     description: "Requires apps to opt-in to overlay pass through touches and provide APIs to opt-in"
     bug: "358129114"
+    is_exported: true
 }
 
 flag {
@@ -114,4 +115,15 @@ flag {
     name: "better_support_non_match_parent_activity"
     description: "Relax the assumption of non-match parent activity"
     bug: "356277166"
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "allow_multiple_adjacent_task_fragments"
+    description: "Refactor to allow more than 2 adjacent TaskFragments"
+    bug: "373709676"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

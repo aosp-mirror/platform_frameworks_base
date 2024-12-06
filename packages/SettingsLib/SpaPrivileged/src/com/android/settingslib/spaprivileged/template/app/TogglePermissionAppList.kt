@@ -26,6 +26,8 @@ import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spa.framework.util.asyncMapItem
 import com.android.settingslib.spaprivileged.model.app.AppRecord
+import com.android.settingslib.spaprivileged.model.enterprise.EnhancedConfirmation
+import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -37,6 +39,16 @@ interface TogglePermissionAppListModel<T : AppRecord> {
     val footerResId: Int
     val switchRestrictionKeys: List<String>
         get() = emptyList()
+
+    /**
+     * If this is not null, and on a switch UI restricted by admin, the switch's checked status will
+     * be overridden.
+     *
+     * And if there is an admin summary, such as "Enabled by admin" or "Disabled by admin", will
+     * also be overridden.
+     */
+    val switchifBlockedByAdminOverrideCheckedValueTo: Boolean?
+        get() = null
 
     val enhancedConfirmationKey: String?
         get() = null
@@ -101,6 +113,16 @@ fun <T : AppRecord> TogglePermissionAppListModel<T>.isChangeableWithSystemUidChe
     record: T,
 ): Boolean = !record.isSystemOrRootUid() && isChangeable(record)
 
+fun <T : AppRecord> TogglePermissionAppListModel<T>.getRestrictions(
+    userId: Int,
+    packageName: String,
+) =
+    Restrictions(
+        userId = userId,
+        keys = switchRestrictionKeys,
+        enhancedConfirmation =
+            enhancedConfirmationKey?.let { key -> EnhancedConfirmation(key, packageName) },
+    )
 
 interface TogglePermissionAppListProvider {
     val permissionType: String

@@ -946,11 +946,16 @@ public final class InputMethodManager {
                         if (state == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
                             // when losing focus (e.g., by going to another window), we reset the
                             // requestedVisibleTypes of WindowInsetsController by hiding the IME
+                            final var statsToken = ImeTracker.forLogging().onStart(
+                                    ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_CLIENT,
+                                    SoftInputShowHideReason.REASON_HIDE_WINDOW_LOST_FOCUS,
+                                    false /* fromUser */);
                             if (DEBUG) {
                                 Log.d(TAG, "onWindowLostFocus, hiding IME because "
                                         + "of STATE_ALWAYS_HIDDEN");
                             }
-                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime());
+                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime(),
+                                    false /* fromIme */, statsToken);
                         }
                     }
 
@@ -2471,6 +2476,11 @@ public final class InputMethodManager {
                 return;
             }
 
+            if (Flags.refactorInsetsController()) {
+                showSoftInput(rootView, statsToken, flags, resultReceiver, reason);
+                return;
+            }
+
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             // Makes sure to call ImeInsetsSourceConsumer#onShowRequested on the UI thread.
@@ -2621,10 +2631,12 @@ public final class InputMethodManager {
                         // The view is running on a different thread than our own, so
                         // we need to reschedule our work for over there.
                         if (DEBUG) Log.v(TAG, "Hiding soft input: reschedule to view thread");
+                        final var finalStatsToken = statsToken;
                         vh.post(() -> viewRootImpl.getInsetsController().hide(
-                                WindowInsets.Type.ime()));
+                                WindowInsets.Type.ime(), false /* fromIme */, finalStatsToken));
                     } else {
-                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime());
+                        viewRootImpl.getInsetsController().hide(WindowInsets.Type.ime(),
+                                false /* fromIme */, statsToken);
                     }
                 }
                 return true;
@@ -3664,6 +3676,14 @@ public final class InputMethodManager {
         startInputOnWindowFocusGainInternal(StartInputReason.CHECK_FOCUS,
                 null /* focusedView */,
                 0 /* startInputFlags */, 0 /* softInputMode */, 0 /* windowFlags */);
+    }
+
+    /**
+     * Returns the ImeOnBackInvokedDispatcher.
+     * @hide
+     */
+    public ImeOnBackInvokedDispatcher getImeOnBackInvokedDispatcher() {
+        return mImeDispatcher;
     }
 
     /**
@@ -5166,7 +5186,7 @@ public final class InputMethodManager {
         // system can verify the consistency between the uid of this process and package name passed
         // from here. See comment of Context#getOpPackageName() for details.
         editorInfo.packageName = servedView.getContext().getOpPackageName();
-        editorInfo.autofillId = servedView.getAutofillId();
+        editorInfo.setAutofillId(servedView.getAutofillId());
         editorInfo.fieldId = servedView.getId();
         final InputConnection ic = servedView.onCreateInputConnection(editorInfo);
         if (DEBUG) Log.v(TAG, "Starting input: editorInfo=" + editorInfo + " ic=" + ic);
@@ -5175,7 +5195,7 @@ public final class InputMethodManager {
         // This ensures that even disconnected EditorInfos have well-defined attributes,
         // making them consistently and straightforwardly comparable.
         if (ic == null) {
-            editorInfo.autofillId = AutofillId.NO_AUTOFILL_ID;
+            editorInfo.setAutofillId(AutofillId.NO_AUTOFILL_ID);
             editorInfo.fieldId = 0;
         }
         return new Pair<>(ic, editorInfo);

@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.fakeDeviceEntryIconViewModelTransition
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -43,6 +44,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -84,6 +86,12 @@ class UdfpsAccessibilityOverlayViewModelTest(flags: FlagsParameterization) : Sys
     @Before
     fun setup() {
         underTest = kosmos.deviceEntryUdfpsAccessibilityOverlayViewModel
+        overrideResource(R.integer.udfps_padding_debounce_duration, 0)
+    }
+
+    @After
+    fun teardown() {
+        mContext.orCreateTestableResources.removeOverride(R.integer.udfps_padding_debounce_duration)
     }
 
     @Test
@@ -118,6 +126,7 @@ class UdfpsAccessibilityOverlayViewModelTest(flags: FlagsParameterization) : Sys
             runCurrent()
             assertThat(visible).isFalse()
         }
+
     fun fpNotRunning_overlayNotVisible() =
         testScope.runTest {
             val visible by collectLastValue(underTest.visible)

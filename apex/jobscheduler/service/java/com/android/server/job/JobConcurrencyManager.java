@@ -1550,7 +1550,7 @@ class JobConcurrencyManager {
                 mActivePkgStats.add(
                         jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(),
                         packageStats);
-                mService.resetPendingJobReasonCache(jobStatus);
+                mService.resetPendingJobReasonsCache(jobStatus);
             }
             if (mService.getPendingJobQueue().remove(jobStatus)) {
                 mService.mJobPackageTracker.noteNonpending(jobStatus);

@@ -138,6 +138,7 @@ constructor(
                 Overlays.QuickSettingsShade -> false
                 Scenes.Bouncer -> false
                 Scenes.Communal -> true
+                Scenes.Dream -> false
                 Scenes.Gone -> true
                 Scenes.Lockscreen -> true
                 Scenes.QuickSettings -> false

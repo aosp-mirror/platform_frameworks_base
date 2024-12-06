@@ -487,6 +487,20 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         return mHomeTaskOverlayContainer;
     }
 
+    /**
+     * Returns the home task surface, not for wide use.
+     */
+    @Nullable
+    public SurfaceControl getHomeTaskSurface() {
+        for (int i = 0; i < mTasks.size(); i++) {
+            final TaskAppearedInfo info = mTasks.valueAt(i);
+            if (info.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+                return info.getLeash();
+            }
+        }
+        return null;
+    }
+
     @Override
     public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {

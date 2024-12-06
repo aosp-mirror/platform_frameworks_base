@@ -15,6 +15,8 @@
  */
 package android.app;
 
+import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -475,9 +477,10 @@ public final class NotificationChannel implements Parcelable {
         dest.writeBoolean(mImportanceLockedDefaultApp);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
+    @TestApi
+    @NonNull
+    @FlaggedApi(FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT)
     public NotificationChannel copy() {
         NotificationChannel copy = new NotificationChannel(mId, mName, mImportance);
         copy.setDescription(mDesc);
@@ -548,10 +551,10 @@ public final class NotificationChannel implements Parcelable {
         mDeletedTime = time;
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @TestApi
+    @SystemApi
+    @FlaggedApi(FLAG_NOTIFICATION_CONVERSATION_CHANNEL_MANAGEMENT)
     public void setImportantConversation(boolean importantConvo) {
         mImportantConvo = importantConvo;
     }

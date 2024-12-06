@@ -19,4 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="enabled_by_admin" msgid="6630472777476410137">"관리자가 사용 설정함"</string>
     <string name="disabled_by_admin" msgid="4023569940620832713">"관리자가 사용 중지함"</string>
+    <string name="enabled_by_advanced_protection" msgid="6236917660829422499">"고급 보호 기능으로 사용 설정됨"</string>
+    <string name="disabled_by_advanced_protection" msgid="369596009193239632">"고급 보호 기능으로 사용 중지됨"</string>
 </resources>

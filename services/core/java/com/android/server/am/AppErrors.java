@@ -598,7 +598,7 @@ class AppErrors {
         }
 
         if (r != null) {
-            mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode(),
+            mPackageWatchdog.notifyPackageFailure(r.getPackageListWithVersionCode(),
                     PackageWatchdog.FAILURE_REASON_APP_CRASH);
 
             synchronized (mService) {
@@ -1142,7 +1142,7 @@ class AppErrors {
         }
         // Notify PackageWatchdog without the lock held
         if (packageList != null) {
-            mPackageWatchdog.onPackageFailure(packageList,
+            mPackageWatchdog.notifyPackageFailure(packageList,
                     PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
         }
     }

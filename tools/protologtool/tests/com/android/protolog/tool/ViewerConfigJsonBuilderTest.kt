@@ -36,6 +36,8 @@ class ViewerConfigJsonBuilderTest {
         private val GROUP_DISABLED = LogGroup("DEBUG_GROUP", false, true, TAG2)
         private val GROUP_TEXT_DISABLED = LogGroup("DEBUG_GROUP", true, false, TAG2)
         private const val PATH = "/tmp/test.java"
+
+        private val GROUPS = listOf(GROUP1, GROUP2, GROUP3)
     }
 
     private val configBuilder = ViewerConfigJsonBuilder()
@@ -53,7 +55,7 @@ class ViewerConfigJsonBuilderTest {
                 LogCall(TEST3.messageString, LogLevel.ERROR, GROUP3, PATH)))
 
         val parsedConfig = parseConfig(
-            configBuilder.build(logCallRegistry.getStatements()).toString(Charsets.UTF_8))
+            configBuilder.build(GROUPS, logCallRegistry.getStatements()).toString(Charsets.UTF_8))
         assertEquals(3, parsedConfig.size)
         assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH,
 	           TEST1.messageString, LogLevel.INFO, GROUP1)])
@@ -72,7 +74,7 @@ class ViewerConfigJsonBuilderTest {
                 LogCall(TEST1.messageString, LogLevel.INFO, GROUP1, PATH)))
 
         val parsedConfig = parseConfig(
-            configBuilder.build(logCallRegistry.getStatements()).toString(Charsets.UTF_8))
+            configBuilder.build(GROUPS, logCallRegistry.getStatements()).toString(Charsets.UTF_8))
         assertEquals(1, parsedConfig.size)
         assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH, TEST1.messageString,
             LogLevel.INFO, GROUP1)])

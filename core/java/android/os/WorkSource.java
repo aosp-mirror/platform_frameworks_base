@@ -1011,13 +1011,7 @@ public class WorkSource implements Parcelable {
             return mTags.length > 0 ? mTags[0] : null;
         }
 
-        // TODO: The following three trivial getters are purely for testing and will be removed
-        // once we have higher level logic in place, e.g for serializing this WorkChain to a proto,
-        // diffing it etc.
-
-
         /** @hide */
-        @VisibleForTesting
         public int[] getUids() {
             int[] uids = new int[mSize];
             System.arraycopy(mUids, 0, uids, 0, mSize);
@@ -1025,7 +1019,6 @@ public class WorkSource implements Parcelable {
         }
 
         /** @hide */
-        @VisibleForTesting
         public String[] getTags() {
             String[] tags = new String[mSize];
             System.arraycopy(mTags, 0, tags, 0, mSize);
@@ -1033,7 +1026,6 @@ public class WorkSource implements Parcelable {
         }
 
         /** @hide */
-        @VisibleForTesting
         public int getSize() {
             return mSize;
         }

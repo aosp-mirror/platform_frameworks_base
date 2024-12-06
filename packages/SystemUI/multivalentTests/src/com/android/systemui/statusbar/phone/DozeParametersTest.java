@@ -44,6 +44,8 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -59,6 +61,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -88,6 +91,8 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private ConfigurationController mConfigurationController;
     @Mock private UserTracker mUserTracker;
     @Mock private DozeInteractor mDozeInteractor;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Captor private ArgumentCaptor<BatteryStateChangeCallback> mBatteryStateChangeCallback;
 
     /**
@@ -134,6 +139,7 @@ public class DozeParametersTest extends SysuiTestCase {
             mStatusBarStateController,
             mUserTracker,
             mDozeInteractor,
+            mKeyguardTransitionInteractor,
             secureSettings
         );
 
@@ -286,6 +292,18 @@ public class DozeParametersTest extends SysuiTestCase {
         assertTrue(mDozeParameters.shouldControlScreenOff());
     }
 
+    @Test
+    public void shouldDelayDisplayDozeTransition_True_WhenTransitioningToAod() {
+        setShouldControlUnlockedScreenOffForTest(false);
+        when(mScreenOffAnimationController.shouldDelayDisplayDozeTransition()).thenReturn(false);
+        when(mKeyguardTransitionInteractor.getTransitionState().getValue().getTo())
+                .thenReturn(KeyguardState.LOCKSCREEN);
+        assertFalse(mDozeParameters.shouldDelayDisplayDozeTransition());
+
+        when(mKeyguardTransitionInteractor.getTransitionState().getValue().getTo())
+                .thenReturn(KeyguardState.AOD);
+        assertTrue(mDozeParameters.shouldDelayDisplayDozeTransition());
+    }
 
     @Test
     public void keyguardVisibility_changesControlScreenOffAnimation() {

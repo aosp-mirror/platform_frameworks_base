@@ -62,35 +62,14 @@ class SharedElementTest {
                 onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp)
                 onElement(TestElements.Foo).assertSizeIsEqualTo(20.dp, 80.dp)
             }
-            at(0) {
-                // Shared elements are by default placed and drawn only in the scene with highest
-                // zIndex.
+            atAllFrames(4) {
                 onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
                 onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(10.dp, 50.dp)
-                    .assertSizeIsEqualTo(20.dp, 80.dp)
-            }
-            at(16) {
-                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(20.dp, 55.dp)
-                    .assertSizeIsEqualTo(17.5.dp, 70.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(30.dp, 60.dp)
-                    .assertSizeIsEqualTo(15.dp, 60.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
-
-                onElement(TestElements.Foo, TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(40.dp, 65.dp)
-                    .assertSizeIsEqualTo(12.5.dp, 50.dp)
+                    .assertPositionInRootIsEqualTo(
+                        interpolate(10.dp, 50.dp),
+                        interpolate(50.dp, 70.dp),
+                    )
+                    .assertSizeIsEqualTo(interpolate(20.dp, 10.dp), interpolate(80.dp, 40.dp))
             }
             after {
                 onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 70.dp)
@@ -132,29 +111,11 @@ class SharedElementTest {
             },
         ) {
             before { onElement(TestElements.Foo).assertPositionInRootIsEqualTo(10.dp, 50.dp) }
-            at(0) {
+            atAllFrames(4) {
                 onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(10.dp, 50.dp)
+                    .assertPositionInRootIsEqualTo(interpolate(10.dp, 0.dp), 50.dp)
                 onElement(TestElements.Foo, scene = TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(50.dp, 100.dp)
-            }
-            at(16) {
-                onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(7.5.dp, 50.dp)
-                onElement(TestElements.Foo, scene = TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(50.dp, 90.dp)
-            }
-            at(32) {
-                onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(5.dp, 50.dp)
-                onElement(TestElements.Foo, scene = TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(50.dp, 80.dp)
-            }
-            at(48) {
-                onElement(TestElements.Foo, scene = TestScenes.SceneA)
-                    .assertPositionInRootIsEqualTo(2.5.dp, 50.dp)
-                onElement(TestElements.Foo, scene = TestScenes.SceneB)
-                    .assertPositionInRootIsEqualTo(50.dp, 70.dp)
+                    .assertPositionInRootIsEqualTo(50.dp, interpolate(100.dp, 60.dp))
             }
             after { onElement(TestElements.Foo).assertPositionInRootIsEqualTo(50.dp, 60.dp) }
         }

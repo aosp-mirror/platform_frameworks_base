@@ -17,10 +17,8 @@
 package android.hardware.biometrics;
 
 import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_ADVANCED;
-import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
 
 import android.annotation.CallbackExecutor;
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -61,7 +59,6 @@ import java.util.concurrent.Executor;
  *     .build();
  * </pre>
  */
-@FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 public final class PromptContentViewWithMoreOptionsButton implements PromptContentViewParcelable {
     private static final String TAG = "PromptContentViewWithMoreOptionsButton";
     @VisibleForTesting

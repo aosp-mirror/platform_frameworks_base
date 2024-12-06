@@ -235,6 +235,9 @@ public class AppBindingService extends Binder {
             }
 
             final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
 
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 onUserRemoved(userId);

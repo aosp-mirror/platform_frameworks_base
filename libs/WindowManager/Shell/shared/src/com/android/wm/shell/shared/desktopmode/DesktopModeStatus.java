@@ -162,6 +162,21 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Return the maximum size of the window decoration surface control view host pool, or zero if
+     * there should be no pooling.
+     */
+    public static int getWindowDecorScvhPoolSize(@NonNull Context context) {
+        if (!Flags.enableDesktopWindowingScvhCacheBugFix()) return 0;
+        final int maxTaskLimit = getMaxTaskLimit(context);
+        if (maxTaskLimit > 0) {
+            return maxTaskLimit;
+        }
+        // TODO: b/368032552 - task limit equal to 0 means unlimited. Figure out what the pool
+        //  size should be in that case.
+        return 0;
+    }
+
+    /**
      * Return {@code true} if the current device supports desktop mode.
      */
     @VisibleForTesting
@@ -188,6 +203,23 @@ public class DesktopModeStatus {
         if (!isDeviceEligibleForDesktopMode(context)) return false;
 
         return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue();
+    }
+
+    /**
+     * @return {@code true} if this device is requesting to show the app handle despite non
+     * necessarily enabling desktop mode
+     */
+    public static boolean overridesShowAppHandle(@NonNull Context context) {
+        return Flags.showAppHandleLargeScreens()
+                && context.getResources().getBoolean(R.bool.config_enableAppHandle);
+    }
+
+    /**
+     * @return {@code true} if the app handle should be shown because desktop mode is enabled or
+     * the device is overriding {@code R.bool.config_enableAppHandle}
+     */
+    public static boolean canEnterDesktopModeOrShowAppHandle(@NonNull Context context) {
+        return canEnterDesktopMode(context) || overridesShowAppHandle(context);
     }
 
     /**
@@ -264,5 +296,8 @@ public class DesktopModeStatus {
         SystemProperties.Handle maxTaskLimitHandle = SystemProperties.find(MAX_TASK_LIMIT_SYS_PROP);
         pw.print(innerPrefix); pw.print("maxTaskLimit sysprop=");
         pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
+
+        pw.print(innerPrefix); pw.print("showAppHandle config override=");
+        pw.print(context.getResources().getBoolean(R.bool.config_enableAppHandle));
     }
 }

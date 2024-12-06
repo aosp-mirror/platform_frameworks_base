@@ -18,7 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.app.jank.tests">
 
-    <application>
+    <application android:appCategory="news">
         <uses-library android:name="android.test.runner" />
         <activity android:name=".EmptyActivity"
                   android:label="EmptyActivity"

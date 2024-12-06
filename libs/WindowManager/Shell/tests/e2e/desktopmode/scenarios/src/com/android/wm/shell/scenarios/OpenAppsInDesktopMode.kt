@@ -61,7 +61,7 @@ abstract class OpenAppsInDesktopMode(val rotation: Rotation = Rotation.ROTATION_
         tapl.setExpectedRotation(rotation.value)
         tapl.enableTransientTaskbar(false)
         ChangeDisplayOrientationRule.setRotation(rotation)
-        firstApp.enterDesktopWithDrag(wmHelper, device)
+        firstApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test

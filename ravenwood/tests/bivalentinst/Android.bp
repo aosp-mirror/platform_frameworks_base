@@ -27,6 +27,9 @@ android_ravenwood_test {
         "junit",
         "truth",
     ],
+
+    package_name: "com.android.ravenwood.bivalentinsttest_self_inst",
+
     resource_apk: "RavenwoodBivalentInstTest_self_inst_device",
     auto_gen_config: true,
 }
@@ -53,6 +56,10 @@ android_ravenwood_test {
         "truth",
     ],
     resource_apk: "RavenwoodBivalentInstTestTarget",
+
+    package_name: "com.android.ravenwood.bivalentinst_target_app",
+    inst_package_name: "com.android.ravenwood.bivalentinsttest_nonself_inst",
+
     inst_resource_apk: "RavenwoodBivalentInstTest_nonself_inst_device",
     auto_gen_config: true,
 }

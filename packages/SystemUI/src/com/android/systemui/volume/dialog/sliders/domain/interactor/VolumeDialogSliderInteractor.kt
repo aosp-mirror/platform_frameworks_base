@@ -17,22 +17,21 @@
 package com.android.systemui.volume.dialog.sliders.domain.interactor
 
 import com.android.systemui.plugins.VolumeDialogController
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 
 /** Operates a state of particular slider of the Volume Dialog. */
+@VolumeDialogSliderScope
 class VolumeDialogSliderInteractor
-@AssistedInject
+@Inject
 constructor(
-    @Assisted private val sliderType: VolumeDialogSliderType,
+    private val sliderType: VolumeDialogSliderType,
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val volumeDialogController: VolumeDialogController,
 ) {
@@ -55,12 +54,5 @@ constructor(
             setStreamVolume(sliderType.audioStream, userLevel)
             setActiveStream(sliderType.audioStream)
         }
-    }
-
-    @VolumeDialogScope
-    @AssistedFactory
-    interface Factory {
-
-        fun create(sliderType: VolumeDialogSliderType): VolumeDialogSliderInteractor
     }
 }

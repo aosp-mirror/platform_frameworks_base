@@ -41,7 +41,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
@@ -95,7 +94,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var chipbarLogger: ChipbarLogger
     @Mock private lateinit var logger: MediaTttSenderLogger
-    @Mock private lateinit var mediaTttFlags: MediaTttFlags
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var powerManager: PowerManager
     @Mock private lateinit var viewUtil: ViewUtil
@@ -118,7 +116,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(true)
         whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(TIMEOUT)
 
         fakeAppIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
@@ -127,7 +124,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         whenever(
                 packageManager.getApplicationInfo(
                     eq(PACKAGE_NAME),
-                    any<PackageManager.ApplicationInfoFlags>()
+                    any<PackageManager.ApplicationInfoFlags>(),
                 )
             )
             .thenReturn(applicationInfo)
@@ -148,8 +145,11 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
             ChipbarCoordinator(
                 context,
                 chipbarLogger,
-                ViewCaptureAwareWindowManager(windowManager, lazyViewCapture,
-                        isViewCaptureEnabled = false),
+                ViewCaptureAwareWindowManager(
+                    windowManager,
+                    lazyViewCapture,
+                    isViewCaptureEnabled = false,
+                ),
                 fakeExecutor,
                 accessibilityManager,
                 configurationController,
@@ -174,7 +174,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 context,
                 dumpManager,
                 logger,
-                mediaTttFlags,
                 uiEventLogger,
             )
         underTest.start()
@@ -183,30 +182,11 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun commandQueueCallback_flagOff_noCallbackAdded() {
-        reset(commandQueue)
-        whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(false)
-        underTest =
-            MediaTttSenderCoordinator(
-                chipbarCoordinator,
-                commandQueue,
-                context,
-                dumpManager,
-                logger,
-                mediaTttFlags,
-                uiEventLogger,
-            )
-        underTest.start()
-
-        verify(commandQueue, never()).addCallback(any())
-    }
-
-    @Test
     fun commandQueueCallback_almostCloseToStartCast_triggersCorrectChip() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -220,13 +200,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_START_CAST.id)
         verify(vibratorHelper)
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -249,7 +223,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -263,13 +237,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_END_CAST.id)
         verify(vibratorHelper)
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -277,7 +245,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -291,13 +259,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_TRIGGERED.id)
         verify(vibratorHelper)
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -320,7 +282,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -334,13 +296,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_TRIGGERED.id)
         verify(vibratorHelper)
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -350,7 +306,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -364,13 +320,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED.id)
         verify(vibratorHelper, never())
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -380,7 +330,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         // Event index 2 since initially displaying the triggered chip would also log two events.
@@ -397,7 +347,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            /* undoCallback= */ null
+            /* undoCallback= */ null,
         )
 
         val chipbarView = getChipbarView()
@@ -452,7 +402,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -466,13 +416,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED.id)
         verify(vibratorHelper, never())
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -481,7 +425,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
-            /* undoCallback= */ null
+            /* undoCallback= */ null,
         )
 
         val chipbarView = getChipbarView()
@@ -538,7 +482,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -553,13 +497,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED.id)
         verify(vibratorHelper)
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -567,13 +505,13 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
         reset(vibratorHelper)
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
             routeInfo,
-            null
+            null,
         )
 
         val chipbarView = getChipbarView()
@@ -588,13 +526,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(2))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED.id)
         verify(vibratorHelper)
-            .vibrate(
-                any(),
-                any(),
-                any<VibrationEffect>(),
-                any(),
-                any<VibrationAttributes>(),
-            )
+            .vibrate(any(), any(), any<VibrationEffect>(), any(), any<VibrationAttributes>())
     }
 
     @Test
@@ -602,7 +534,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
 
         verify(windowManager, never()).addView(any(), any())
@@ -615,13 +547,13 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
 
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
@@ -635,7 +567,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
 
         assertThat(fakeWakeLock.isHeld).isTrue()
@@ -643,7 +575,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
 
         assertThat(fakeWakeLock.isHeld).isFalse()
@@ -654,7 +586,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
 
         assertThat(fakeWakeLock.isHeld).isFalse()
@@ -672,7 +604,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
         verify(windowManager).addView(any(), any())
         reset(windowManager)
@@ -680,7 +612,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -692,7 +624,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
         verify(windowManager).addView(any(), any())
         reset(windowManager)
@@ -700,7 +632,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -713,14 +645,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
         reset(windowManager)
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -733,14 +665,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
         reset(windowManager)
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -752,7 +684,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
         verify(windowManager).addView(any(), any())
         reset(windowManager)
@@ -760,7 +692,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -772,7 +704,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
             routeInfo,
-            null
+            null,
         )
         verify(windowManager).addView(any(), any())
         reset(windowManager)
@@ -780,7 +712,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -792,7 +724,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
         verify(windowManager).addView(any(), any())
         reset(windowManager)
@@ -800,7 +732,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -812,7 +744,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
             routeInfo,
-            null
+            null,
         )
         verify(windowManager).addView(any(), any())
         reset(windowManager)
@@ -820,7 +752,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logInvalidStateTransitionError(any(), any())
@@ -925,7 +857,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
             routeInfo,
-            null
+            null,
         )
 
         verify(logger).logStateChange(any(), any(), any())
@@ -936,13 +868,13 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
         fakeExecutor.runAllReady()
 
@@ -959,13 +891,13 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
         fakeExecutor.runAllReady()
 
@@ -983,13 +915,13 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
         fakeExecutor.runAllReady()
 
@@ -1007,13 +939,13 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
             routeInfo,
-            null
+            null,
         )
 
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
         fakeExecutor.runAllReady()
 
@@ -1051,7 +983,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
         fakeExecutor.runAllReady()
 
@@ -1091,7 +1023,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
         fakeExecutor.runAllReady()
 
@@ -1116,7 +1048,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 context,
                 dumpManager,
                 logger,
-                mediaTttFlags,
                 uiEventLogger,
             )
         underTest.start()
@@ -1144,7 +1075,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 context,
                 dumpManager,
                 logger,
-                mediaTttFlags,
                 uiEventLogger,
             )
         underTest.start()
@@ -1178,7 +1108,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 context,
                 dumpManager,
                 logger,
-                mediaTttFlags,
                 uiEventLogger,
             )
         underTest.start()
@@ -1211,7 +1140,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 context,
                 dumpManager,
                 logger,
-                mediaTttFlags,
                 uiEventLogger,
             )
         underTest.start()
@@ -1230,7 +1158,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
             routeInfo,
-            null
+            null,
         )
 
         // THEN the media coordinator unregisters the listener
@@ -1248,7 +1176,6 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 context,
                 dumpManager,
                 logger,
-                mediaTttFlags,
                 uiEventLogger,
             )
         underTest.start()
@@ -1549,7 +1476,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     private fun ViewGroup.getUndoButton(): View = this.requireViewById(R.id.end_button)
 
     private fun ChipStateSender.getExpectedStateText(
-        otherDeviceName: String = OTHER_DEVICE_NAME,
+        otherDeviceName: String = OTHER_DEVICE_NAME
     ): String? {
         return this.getChipTextString(context, otherDeviceName).loadText(context)
     }
@@ -1560,7 +1487,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
     }
 
@@ -1570,7 +1497,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         commandQueueCallback.updateMediaTapToTransferSenderDisplay(
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
             routeInfo,
-            null
+            null,
         )
     }
 

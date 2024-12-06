@@ -256,17 +256,23 @@ final class ProcessServiceRecord {
         }
         // Now we need to look at all short-FGS within the process and see if all of them are
         // procstate-timed-out or not.
+        return !hasUndemotedShortForegroundService(nowUptime);
+    }
+
+    boolean hasUndemotedShortForegroundService(long nowUptime) {
         for (int i = mServices.size() - 1; i >= 0; i--) {
             final ServiceRecord sr = mServices.valueAt(i);
             if (!sr.isShortFgs() || !sr.hasShortFgsInfo()) {
                 continue;
             }
             if (sr.getShortFgsInfo().getProcStateDemoteTime() >= nowUptime) {
-                return false;
+                // This short fgs has not timed out yet.
+                return true;
             }
         }
-        return true;
+        return false;
     }
+
 
     int getReportedForegroundServiceTypes() {
         return mRepFgServiceTypes;
@@ -387,6 +393,8 @@ final class ProcessServiceRecord {
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
             } else if (adj < ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
                 adj = ProcessList.PERCEPTIBLE_LOW_APP_ADJ;
+            } else if (Flags.addModifyRawOomAdjServiceLevel() && adj < ProcessList.SERVICE_ADJ) {
+                adj = ProcessList.SERVICE_ADJ;
             } else if (adj < ProcessList.CACHED_APP_MIN_ADJ) {
                 adj = ProcessList.CACHED_APP_MIN_ADJ;
             } else if (adj < ProcessList.CACHED_APP_MAX_ADJ) {

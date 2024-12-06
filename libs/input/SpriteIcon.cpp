@@ -25,6 +25,8 @@
 namespace android {
 
 bool SpriteIcon::draw(sp<Surface> surface) const {
+    LOG_ALWAYS_FATAL_IF(!isValid(), "Cannot draw SpriteIcon: not valid");
+
     ANativeWindow_Buffer outBuffer;
     status_t status = surface->lock(&outBuffer, NULL);
     if (status) {

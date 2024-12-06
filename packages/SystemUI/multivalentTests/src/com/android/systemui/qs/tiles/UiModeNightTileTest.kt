@@ -25,7 +25,6 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -33,8 +32,11 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.LocationController
@@ -95,7 +97,7 @@ class UiModeNightTileTest : SysuiTestCase() {
                 qsLogger,
                 configurationController,
                 batteryController,
-                locationController
+                locationController,
             )
     }
 
@@ -112,8 +114,7 @@ class UiModeNightTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_light_dark_theme_icon_on))
     }
 
     @Test
@@ -124,7 +125,7 @@ class UiModeNightTileTest : SysuiTestCase() {
         tile.handleUpdateState(state, /* arg= */ null)
 
         assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_light_dark_theme_icon_off))
+            .isEqualTo(createExpectedIcon(R.drawable.qs_light_dark_theme_icon_off))
     }
 
     private fun setNightModeOn() {
@@ -135,5 +136,13 @@ class UiModeNightTileTest : SysuiTestCase() {
     private fun setNightModeOff() {
         `when`(uiModeManager.nightMode).thenReturn(UiModeManager.MODE_NIGHT_NO)
         configuration.uiMode = Configuration.UI_MODE_NIGHT_NO
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }

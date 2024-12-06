@@ -25,8 +25,8 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED
 import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN
-import com.android.systemui.tuner.tunerService
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.settings.data.repository.userAwareSecureSettingsRepository
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -37,7 +37,7 @@ val Kosmos.keyguardBypassRepository: KeyguardBypassRepository by Fixture {
         biometricSettingsRepository,
         devicePostureRepository,
         dumpManager,
-        tunerService,
+        userAwareSecureSettingsRepository,
         testDispatcher,
     )
 }

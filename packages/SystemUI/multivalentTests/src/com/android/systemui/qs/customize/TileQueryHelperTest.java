@@ -44,6 +44,7 @@ import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -384,6 +385,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
             return mSpec;
         }
 
+        @NonNull
         @Override
         public State getState() {
             return mState;

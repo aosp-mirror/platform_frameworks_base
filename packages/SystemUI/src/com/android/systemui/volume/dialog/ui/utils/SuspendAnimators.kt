@@ -20,6 +20,8 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.view.ViewPropertyAnimator
+import androidx.dynamicanimation.animation.DynamicAnimation
+import androidx.dynamicanimation.animation.SpringAnimation
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -77,6 +79,27 @@ suspend fun <T> ValueAnimator.awaitAnimation(onValueChanged: (T) -> Unit) {
 
         start()
         continuation.invokeOnCancellation { cancel() }
+    }
+}
+
+/**
+ * Starts spring animation and suspends until it's finished. Cancels the animation if the running
+ * coroutine is cancelled.
+ */
+suspend fun SpringAnimation.suspendAnimate(
+    animationUpdateListener: DynamicAnimation.OnAnimationUpdateListener? = null,
+    animationEndListener: DynamicAnimation.OnAnimationEndListener? = null,
+) = suspendCancellableCoroutine { continuation ->
+    animationUpdateListener?.let(::addUpdateListener)
+    addEndListener { animation, canceled, value, velocity ->
+        continuation.resumeIfCan(Unit)
+        animationEndListener?.onAnimationEnd(animation, canceled, value, velocity)
+    }
+    animateToFinalPosition(1F)
+    continuation.invokeOnCancellation {
+        animationUpdateListener?.let(::removeUpdateListener)
+        animationEndListener?.let(::removeEndListener)
+        cancel()
     }
 }
 

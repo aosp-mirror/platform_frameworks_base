@@ -29,8 +29,10 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
@@ -84,7 +86,7 @@ class DataSaverTileTest : SysuiTestCase() {
                 mQsLogger,
                 dataSaverController,
                 mDialogTransitionAnimator,
-                systemUIDialogFactory
+                systemUIDialogFactory,
             )
     }
 
@@ -100,8 +102,7 @@ class DataSaverTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, true)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_data_saver_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_data_saver_icon_on))
     }
 
     @Test
@@ -110,7 +111,14 @@ class DataSaverTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, false)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_data_saver_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_data_saver_icon_off))
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
     }
 }

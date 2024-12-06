@@ -96,7 +96,7 @@ public final class EfficientParcelableChecker extends BugChecker
             }
             if (WRITE_PARCELABLE.matches(tree, state)) {
                 return buildDescription(tree)
-                        .setMessage("Recommended to use 'item.writeToParcel()' to improve "
+                        .setMessage("Recommended to use 'writeTypedObject()' to improve "
                                 + "efficiency; saves overhead of Parcelable class name")
                         .build();
             }

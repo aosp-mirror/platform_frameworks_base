@@ -3114,6 +3114,12 @@ public class TelephonyManager {
      * For 5G NSA, the network type will be {@link #NETWORK_TYPE_LTE}.
      */
     public static final int NETWORK_TYPE_NR = TelephonyProtoEnums.NETWORK_TYPE_NR; // 20.
+    /**
+     * 3GPP NB-IOT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final int NETWORK_TYPE_NB_IOT_NTN =
+            TelephonyProtoEnums.NETWORK_TYPE_NB_IOT_NTN; // 21
 
     private static final @NetworkType int[] NETWORK_TYPES = {
             NETWORK_TYPE_GPRS,
@@ -3190,6 +3196,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      * @see #NETWORK_TYPE_NR
+     * @see #NETWORK_TYPE_NB_IOT_NTN
      *
      * @hide
      */
@@ -3250,6 +3257,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      * @see #NETWORK_TYPE_NR
+     * @see #NETWORK_TYPE_NB_IOT_NTN
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_RADIO_ACCESS}.
@@ -3400,6 +3408,8 @@ public class TelephonyManager {
                 return "LTE_CA";
             case NETWORK_TYPE_NR:
                 return "NR";
+            case NETWORK_TYPE_NB_IOT_NTN:
+                return "NB_IOT_NTN";
             case NETWORK_TYPE_UNKNOWN:
                 return "UNKNOWN";
             default:
@@ -3450,6 +3460,8 @@ public class TelephonyManager {
                 return NETWORK_TYPE_BITMASK_LTE;
             case NETWORK_TYPE_NR:
                 return NETWORK_TYPE_BITMASK_NR;
+            case NETWORK_TYPE_NB_IOT_NTN:
+                return NETWORK_TYPE_BITMASK_NB_IOT_NTN;
             case NETWORK_TYPE_IWLAN:
                 return NETWORK_TYPE_BITMASK_IWLAN;
             case NETWORK_TYPE_IDEN:
@@ -5241,6 +5253,36 @@ public class TelephonyManager {
             if (info == null)
                 return null;
             return info.getGroupIdLevel1ForSubscriber(subId, mContext.getOpPackageName(),
+                    mContext.getAttributionTag());
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
+        }
+    }
+
+    /**
+     * Returns the Group Identifier Level 2 in hexadecimal format.
+     * @return the Group Identifier Level 2 for the SIM card.
+     *         Return null if it is unavailable.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_GET_GROUP_ID_LEVEL2)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @SystemApi
+    @Nullable
+    public String getGroupIdLevel2() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                return null;
+            }
+            return info.getGroupIdLevel2ForSubscriber(getSubId(), mContext.getOpPackageName(),
                     mContext.getAttributionTag());
         } catch (RemoteException ex) {
             return null;
@@ -8825,9 +8867,6 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
      *          authType.
      */
-    // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
-    // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
-    // it's not public API.
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public String getIccAuthentication(int appType, @AuthType int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
@@ -10133,6 +10172,9 @@ public class TelephonyManager {
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
      *
+     * If device supports satellite service, then
+     * {@link #NETWORK_TYPE_NB_IOT_NTN} is added to allowed network types for reason by default.
+     *
      * @param reason the reason the allowed network type change is taking place
      * @param allowedNetworkTypes The bitmask of allowed network type
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -10181,6 +10223,10 @@ public class TelephonyManager {
      * specific reason.
      * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * If device supports satellite service, then
+     * {@link #NETWORK_TYPE_NB_IOT_NTN} is added to allowed network types for reason by
+     * default.
      *
      * @param reason the reason the allowed network type change is taking place
      * @return the allowed network type bitmask
@@ -10248,7 +10294,7 @@ public class TelephonyManager {
      */
     public static String convertNetworkTypeBitmaskToString(
             @NetworkTypeBitMask long networkTypeBitmask) {
-        String networkTypeName = IntStream.rangeClosed(NETWORK_TYPE_GPRS, NETWORK_TYPE_NR)
+        String networkTypeName = IntStream.rangeClosed(NETWORK_TYPE_GPRS, NETWORK_TYPE_NB_IOT_NTN)
                 .filter(x -> {
                     return (networkTypeBitmask & getBitMaskForNetworkType(x))
                             == getBitMaskForNetworkType(x);
@@ -12239,9 +12285,10 @@ public class TelephonyManager {
      * @param subId Subscription ID
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
-     * Use {@link ImsMmTelManager.RegistrationCallback} instead.
      * @hide
+     * @deprecated Use {@link ImsMmTelManager#getRegistrationState(Executor, Consumer)} instead.
      */
+    @Deprecated
     public boolean isImsRegistered(int subId) {
         try {
             return getITelephony().isImsRegistered(subId);
@@ -12259,8 +12306,10 @@ public class TelephonyManager {
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
      * @see SubscriptionManager#getDefaultSubscriptionId()
+     * @deprecated Use {@link ImsMmTelManager#getRegistrationState(Executor, Consumer)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean isImsRegistered() {
        try {
@@ -12277,9 +12326,10 @@ public class TelephonyManager {
      * @return true if Voice over LTE is available or false if it is unavailable or unknown.
      * @see SubscriptionManager#getDefaultSubscriptionId()
      * <p>
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isVolteAvailable() {
         try {
@@ -12297,9 +12347,10 @@ public class TelephonyManager {
      * used during creation, the default subscription ID will be used. To query the
      * underlying technology that VT is available on, use {@link #getImsRegTechnologyForMmTel}.
      * @return true if VT is available, or false if it is unavailable or unknown.
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isVideoTelephonyAvailable() {
         try {
@@ -12313,9 +12364,10 @@ public class TelephonyManager {
      * Returns the Status of Wi-Fi calling (Voice over WiFi) for the subscription ID specified.
      * @param subId the subscription ID.
      * @return true if VoWiFi is available, or false if it is unavailable or unknown.
-     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
+     * @Deprecated Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public boolean isWifiCallingAvailable() {
        try {
@@ -12336,9 +12388,11 @@ public class TelephonyManager {
      *  other sim's internet, or
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_NONE} if we are not registered or the
      *  result is unavailable.
-     *  Use {@link ImsMmTelManager.RegistrationCallback} instead.
+     *  @Deprecated Use {@link ImsMmTelManager#registerImsRegistrationCallback(Executor, RegistrationCallback)}
+     *      or {@link ImsMmTelManager#getRegistrationTransportType(Executor, Consumer)} instead.
      *  @hide
      */
+    @Deprecated
     public @ImsRegistrationImplBase.ImsRegistrationTech int getImsRegTechnologyForMmTel() {
         try {
             return getITelephony().getImsRegTechnologyForMmTel(getSubId());
@@ -14870,7 +14924,8 @@ public class TelephonyManager {
                     NETWORK_TYPE_BITMASK_LTE_CA,
                     NETWORK_TYPE_BITMASK_NR,
                     NETWORK_TYPE_BITMASK_IWLAN,
-                    NETWORK_TYPE_BITMASK_IDEN
+                    NETWORK_TYPE_BITMASK_IDEN,
+                    NETWORK_TYPE_BITMASK_NB_IOT_NTN
             })
     public @interface NetworkTypeBitMask {}
 
@@ -14971,6 +15026,12 @@ public class TelephonyManager {
      */
     public static final long NETWORK_TYPE_BITMASK_IWLAN = (1 << (NETWORK_TYPE_IWLAN -1));
 
+    /**
+     * network type bitmask indicating the support of readio tech NB IOT NTN.
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final long NETWORK_TYPE_BITMASK_NB_IOT_NTN = (1 << (NETWORK_TYPE_NB_IOT_NTN - 1));
+
     /** @hide */
     public static final long NETWORK_CLASS_BITMASK_2G = NETWORK_TYPE_BITMASK_GSM
                 | NETWORK_TYPE_BITMASK_GPRS
@@ -14999,6 +15060,9 @@ public class TelephonyManager {
     public static final long NETWORK_CLASS_BITMASK_5G = NETWORK_TYPE_BITMASK_NR;
 
     /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_NTN = NETWORK_TYPE_BITMASK_NB_IOT_NTN;
+
+    /** @hide */
     public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP = NETWORK_TYPE_BITMASK_GSM
             | NETWORK_TYPE_BITMASK_GPRS
             | NETWORK_TYPE_BITMASK_EDGE
@@ -15010,7 +15074,8 @@ public class TelephonyManager {
             | NETWORK_TYPE_BITMASK_TD_SCDMA
             | NETWORK_TYPE_BITMASK_LTE
             | NETWORK_TYPE_BITMASK_LTE_CA
-            | NETWORK_TYPE_BITMASK_NR;
+            | NETWORK_TYPE_BITMASK_NR
+            | NETWORK_TYPE_BITMASK_NB_IOT_NTN;
 
     /** @hide */
     public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2 = NETWORK_TYPE_BITMASK_CDMA
@@ -18048,7 +18113,7 @@ public class TelephonyManager {
      */
     public static boolean isNetworkTypeValid(@NetworkType int networkType) {
         return networkType >= TelephonyManager.NETWORK_TYPE_UNKNOWN &&
-                networkType <= TelephonyManager.NETWORK_TYPE_NR;
+                networkType <= TelephonyManager.NETWORK_TYPE_NB_IOT_NTN;
     }
 
     /**
@@ -19593,5 +19658,38 @@ public class TelephonyManager {
             Rlog.e(TAG, "getTestEuiccUiComponent() RemoteException : " + ex);
             throw ex.rethrowAsRuntimeException();
         }
+    }
+
+    /**
+     * Returns carrier id maps to the passing CarrierIdentifier.
+     * To recognize a carrier (including MVNO) as a first-class identity,
+     * Android assigns each carrier with a canonical integer a.k.a. carrier id.
+     * The carrier ID is an Android platform-wide identifier for a carrier.
+     * AOSP maintains carrier ID assignments in
+     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/main/assets/latest_carrier_id/carrier_list.textpb">here</a>
+     *
+     * @param carrierIdentifier {@link CarrierIdentifier}
+     *
+     * @return Carrier id. Return {@link #UNKNOWN_CARRIER_ID} if the carrier cannot be identified.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ID_FROM_CARRIER_IDENTIFIER)
+    @SystemApi
+    @WorkerThread
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public int getCarrierIdFromCarrierIdentifier(@NonNull CarrierIdentifier carrierIdentifier) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCarrierIdFromIdentifier(carrierIdentifier);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
     }
 }

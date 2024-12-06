@@ -24,12 +24,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
 import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialMetricsLogger
+import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
@@ -54,6 +58,7 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        setTitle(getString(R.string.launch_touchpad_tutorial_notification_content))
         setContent {
             PlatformTheme { TouchpadTutorialScreen(vm, closeTutorial = ::finishTutorial) }
         }
@@ -82,13 +87,24 @@ constructor(
 @Composable
 fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> Unit) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
+    var lastSelectedScreen by remember { mutableStateOf(TUTORIAL_SELECTION) }
     when (activeScreen) {
         TUTORIAL_SELECTION ->
             TutorialSelectionScreen(
-                onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
-                onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
-                onRecentAppsTutorialClicked = { vm.goTo(RECENT_APPS_GESTURE) },
+                onBackTutorialClicked = {
+                    lastSelectedScreen = BACK_GESTURE
+                    vm.goTo(BACK_GESTURE)
+                },
+                onHomeTutorialClicked = {
+                    lastSelectedScreen = HOME_GESTURE
+                    vm.goTo(HOME_GESTURE)
+                },
+                onRecentAppsTutorialClicked = {
+                    lastSelectedScreen = RECENT_APPS_GESTURE
+                    vm.goTo(RECENT_APPS_GESTURE)
+                },
                 onDoneButtonClicked = closeTutorial,
+                lastSelectedScreen,
             )
         BACK_GESTURE ->
             BackGestureTutorialScreen(

@@ -48,6 +48,11 @@ class BackAnimationSpecTest : SysuiTestCase() {
         )
         assertBackTransformation(
             backAnimationSpec = backAnimationSpec,
+            backInput = BackInput(progressX = 1f, progressY = 0f, edge = BackEvent.EDGE_NONE),
+            expected = BackTransformation(translateX = 0f, translateY = 0f, scale = minScale),
+        )
+        assertBackTransformation(
+            backAnimationSpec = backAnimationSpec,
             backInput = BackInput(progressX = 1f, progressY = 1f, edge = BackEvent.EDGE_LEFT),
             expected = BackTransformation(translateX = -maxX, translateY = -maxY, scale = minScale),
         )
@@ -77,7 +82,7 @@ class BackAnimationSpecTest : SysuiTestCase() {
                     translateX = Float.NaN,
                     translateY = Float.NaN,
                     scale = 1f,
-                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER
+                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER,
                 ),
         )
         assertBackTransformation(
@@ -88,7 +93,7 @@ class BackAnimationSpecTest : SysuiTestCase() {
                     translateX = Float.NaN,
                     translateY = Float.NaN,
                     scale = minScale,
-                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER
+                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER,
                 ),
         )
         assertBackTransformation(
@@ -99,7 +104,7 @@ class BackAnimationSpecTest : SysuiTestCase() {
                     translateX = Float.NaN,
                     translateY = Float.NaN,
                     scale = minScale,
-                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER
+                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER,
                 ),
         )
         assertBackTransformation(
@@ -110,7 +115,18 @@ class BackAnimationSpecTest : SysuiTestCase() {
                     translateX = Float.NaN,
                     translateY = Float.NaN,
                     scale = minScale,
-                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER
+                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER,
+                ),
+        )
+        assertBackTransformation(
+            backAnimationSpec = backAnimationSpec,
+            backInput = BackInput(progressX = 1f, progressY = 1f, edge = BackEvent.EDGE_NONE),
+            expected =
+                BackTransformation(
+                    translateX = Float.NaN,
+                    translateY = Float.NaN,
+                    scale = minScale,
+                    scalePivotPosition = ScalePivotPosition.BOTTOM_CENTER,
                 ),
         )
     }
@@ -131,7 +147,7 @@ private fun assertBackTransformation(
                 /* swipeEdge = */ backInput.edge,
             ),
         progressY = backInput.progressY,
-        result = actual
+        result = actual,
     )
 
     val tolerance = 0f

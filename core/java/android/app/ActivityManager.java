@@ -1017,6 +1017,12 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 1 << 6;
 
     /**
+     * @hide
+     * Process is guaranteed cpu time (IE. it will not be frozen).
+     */
+    public static final int PROCESS_CAPABILITY_CPU_TIME = 1 << 7;
+
+    /**
      * @hide all capabilities, the ORing of all flags in {@link ProcessCapability}.
      *
      * Don't expose it as TestApi -- we may add new capabilities any time, which could
@@ -1028,7 +1034,8 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
             | PROCESS_CAPABILITY_BFSL
             | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK
-            | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
+            | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL
+            | PROCESS_CAPABILITY_CPU_TIME;
 
     /**
      * All implicit capabilities. This capability set is currently only used for processes under
@@ -1053,6 +1060,7 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
         pw.print((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0 ? 'A' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_CPU_TIME) != 0 ? 'T' : '-');
     }
 
     /** @hide */
@@ -1065,6 +1073,7 @@ public class ActivityManager {
         sb.append((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
         sb.append((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0 ? 'A' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_CPU_TIME) != 0 ? 'T' : '-');
     }
 
     /**
@@ -1178,6 +1187,18 @@ public class ActivityManager {
     @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isForegroundService(int procState) {
         return procState == PROCESS_STATE_FOREGROUND_SERVICE;
+    }
+
+    /** @hide Should this process state be considered jank perceptible? */
+    public static final boolean isProcStateJankPerceptible(int procState) {
+        if (Flags.jankPerceptibleNarrow()) {
+            return procState == PROCESS_STATE_PERSISTENT_UI
+                || procState == PROCESS_STATE_TOP
+                || procState == PROCESS_STATE_IMPORTANT_FOREGROUND
+                || procState == PROCESS_STATE_TOP_SLEEPING;
+        } else {
+            return !isProcStateCached(procState);
+        }
     }
 
     /** @hide requestType for assist context: only basic information. */
@@ -2670,62 +2691,6 @@ public class ActivityManager {
      */
     public static class RecentTaskInfo extends TaskInfo implements Parcelable {
         /**
-         * @hide
-         */
-        public static class PersistedTaskSnapshotData {
-            /**
-             * The bounds of the task when the last snapshot was taken, may be null if the task is
-             * not yet attached to the hierarchy.
-             * @see {@link android.window.TaskSnapshot#mTaskSize}.
-             * @hide
-             */
-            public @Nullable Point taskSize;
-
-            /**
-             * The content insets of the task when the task snapshot was taken.
-             * @see {@link android.window.TaskSnapshot#mContentInsets}.
-             * @hide
-             */
-            public @Nullable Rect contentInsets;
-
-            /**
-             * The size of the last snapshot taken, may be null if there is no associated snapshot.
-             * @see {@link android.window.TaskSnapshot#mSnapshot}.
-             * @hide
-             */
-            public @Nullable Point bufferSize;
-
-            /**
-             * Sets the data from the other data.
-             * @hide
-             */
-            public void set(PersistedTaskSnapshotData other) {
-                taskSize = other.taskSize;
-                contentInsets = other.contentInsets;
-                bufferSize = other.bufferSize;
-            }
-
-            /**
-             * Sets the data from the provided {@param snapshot}.
-             * @hide
-             */
-            public void set(TaskSnapshot snapshot) {
-                if (snapshot == null) {
-                    taskSize = null;
-                    contentInsets = null;
-                    bufferSize = null;
-                    return;
-                }
-                final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-                taskSize = new Point(snapshot.getTaskSize());
-                contentInsets = new Rect(snapshot.getContentInsets());
-                bufferSize = buffer != null
-                        ? new Point(buffer.getWidth(), buffer.getHeight())
-                        : null;
-            }
-        }
-
-        /**
          * If this task is currently running, this is the identifier for it.
          * If it is not running, this will be -1.
          *
@@ -2761,19 +2726,6 @@ public class ActivityManager {
         @Deprecated
         public int affiliatedTaskId;
 
-        /**
-         * Information of organized child tasks.
-         *
-         * @hide
-         */
-        public ArrayList<RecentTaskInfo> childrenTaskInfos = new ArrayList<>();
-
-        /**
-         * Information about the last snapshot taken for this task.
-         * @hide
-         */
-        public PersistedTaskSnapshotData lastSnapshotData = new PersistedTaskSnapshotData();
-
         public RecentTaskInfo() {
         }
 
@@ -2789,22 +2741,14 @@ public class ActivityManager {
         public void readFromParcel(Parcel source) {
             id = source.readInt();
             persistentId = source.readInt();
-            childrenTaskInfos = source.readArrayList(RecentTaskInfo.class.getClassLoader(), android.app.ActivityManager.RecentTaskInfo.class);
-            lastSnapshotData.taskSize = source.readTypedObject(Point.CREATOR);
-            lastSnapshotData.contentInsets = source.readTypedObject(Rect.CREATOR);
-            lastSnapshotData.bufferSize = source.readTypedObject(Point.CREATOR);
-            super.readFromParcel(source);
+            super.readTaskFromParcel(source);
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(persistentId);
-            dest.writeList(childrenTaskInfos);
-            dest.writeTypedObject(lastSnapshotData.taskSize, flags);
-            dest.writeTypedObject(lastSnapshotData.contentInsets, flags);
-            dest.writeTypedObject(lastSnapshotData.bufferSize, flags);
-            super.writeToParcel(dest, flags);
+            super.writeTaskToParcel(dest, flags);
         }
 
         public static final @android.annotation.NonNull Creator<RecentTaskInfo> CREATOR
@@ -2870,11 +2814,6 @@ public class ActivityManager {
                 pw.println(" }");
             }
             pw.print("   ");
-            pw.print(" lastSnapshotData {");
-            pw.print(" taskSize=" + lastSnapshotData.taskSize);
-            pw.print(" contentInsets=" + lastSnapshotData.contentInsets);
-            pw.print(" bufferSize=" + lastSnapshotData.bufferSize);
-            pw.println(" }");
         }
     }
 
@@ -2988,13 +2927,13 @@ public class ActivityManager {
 
         public void readFromParcel(Parcel source) {
             id = source.readInt();
-            super.readFromParcel(source);
+            super.readTaskFromParcel(source);
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
-            super.writeToParcel(dest, flags);
+            super.writeTaskToParcel(dest, flags);
         }
 
         public static final @android.annotation.NonNull Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
@@ -5286,7 +5225,6 @@ public class ActivityManager {
         if (!exported) {
             /*
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid,
                     here);
             */

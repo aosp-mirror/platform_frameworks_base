@@ -94,6 +94,23 @@ public class WindowContext extends ContextWrapper implements WindowProvider {
         mController.attachToDisplayArea(mType, getDisplayId(), mOptions);
     }
 
+    /**
+     * Updates this context to a new displayId.
+     * <p>
+     * Note that this doesn't re-parent previously attached windows (they should be removed and
+     * re-added manually after this is called). Resources associated with this context will have
+     * the correct value and configuration for the new display after this is called.
+     */
+    @Override
+    public void updateDisplay(int displayId) {
+        if (displayId == getDisplayId()) {
+            return;
+        }
+        super.updateDisplay(displayId);
+        mController.detachIfNeeded();
+        mController.attachToDisplayArea(mType, displayId, mOptions);
+    }
+
     @Override
     public Object getSystemService(String name) {
         if (WINDOW_SERVICE.equals(name)) {

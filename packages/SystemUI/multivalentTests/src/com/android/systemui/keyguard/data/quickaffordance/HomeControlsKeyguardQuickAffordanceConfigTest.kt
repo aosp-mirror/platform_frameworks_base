@@ -19,19 +19,20 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,14 +55,11 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
         underTest =
-            HomeControlsKeyguardQuickAffordanceConfig(
-                context = context,
-                component = component,
-            )
+            HomeControlsKeyguardQuickAffordanceConfig(context = context, component = component)
     }
 
     @Test
-    fun state_whenCannotShowWhileLocked_returnsHidden() = runBlockingTest {
+    fun state_whenCannotShowWhileLocked_returnsHidden() = runTest(UnconfinedTestDispatcher()) {
         whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
         whenever(component.isEnabled()).thenReturn(true)
         whenever(component.getTileImageId()).thenReturn(R.drawable.controls_icon)
@@ -81,7 +79,7 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun state_whenListingControllerIsMissing_returnsHidden() = runBlockingTest {
+    fun state_whenListingControllerIsMissing_returnsHidden() = runTest(UnconfinedTestDispatcher()) {
         whenever(component.isEnabled()).thenReturn(true)
         whenever(component.getTileImageId()).thenReturn(R.drawable.controls_icon)
         whenever(component.getTileTitleId()).thenReturn(R.string.quick_controls_title)
@@ -100,23 +98,26 @@ class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun onQuickAffordanceTriggered_canShowWhileLockedSettingIsTrue() = runBlockingTest {
-        whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
+    fun onQuickAffordanceTriggered_canShowWhileLockedSettingIsTrue() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(true))
 
-        val onClickedResult = underTest.onTriggered(expandable)
+            val onClickedResult = underTest.onTriggered(expandable)
 
-        assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
-        assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked).isTrue()
-    }
+            assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
+            assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked)
+                .isTrue()
+        }
 
     @Test
-    fun onQuickAffordanceTriggered_canShowWhileLockedSettingIsFalse() = runBlockingTest {
-        whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
+    fun onQuickAffordanceTriggered_canShowWhileLockedSettingIsFalse() =
+        runTest(UnconfinedTestDispatcher()) {
+            whenever(component.canShowWhileLockedSetting).thenReturn(MutableStateFlow(false))
 
-        val onClickedResult = underTest.onTriggered(expandable)
+            val onClickedResult = underTest.onTriggered(expandable)
 
-        assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
-        assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked)
-            .isFalse()
-    }
+            assertThat(onClickedResult).isInstanceOf(OnTriggeredResult.StartActivity::class.java)
+            assertThat((onClickedResult as OnTriggeredResult.StartActivity).canShowWhileLocked)
+                .isFalse()
+        }
 }

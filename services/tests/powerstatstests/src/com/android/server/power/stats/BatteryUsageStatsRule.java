@@ -41,6 +41,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 
@@ -65,6 +66,7 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(666777, mMockClock);
     private String mTestName;
     private boolean mCreateTempDirectory;
     private File mHistoryDir;
@@ -118,7 +120,7 @@ public class BatteryUsageStatsRule implements TestRule {
             clearDirectory();
         }
         mBatteryStats = new MockBatteryStatsImpl(mBatteryStatsConfigBuilder.build(),
-                mMockClock, mHistoryDir, mHandler, new PowerStatsUidResolver());
+                mMockClock, mMonotonicClock, mHistoryDir, mHandler, new PowerStatsUidResolver());
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
         synchronized (mBatteryStats) {
@@ -142,6 +144,10 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public MockClock getMockClock() {
         return mMockClock;
+    }
+
+    public MonotonicClock getMonotonicClock() {
+        return mMonotonicClock;
     }
 
     public Handler getHandler() {
@@ -423,8 +429,6 @@ public class BatteryUsageStatsRule implements TestRule {
             mBatteryUsageStats = null;
         }
         final String[] customPowerComponentNames = mBatteryStats.getCustomEnergyConsumerNames();
-        final boolean includePowerModels = (query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
         final boolean includeProcessStateData = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
         final boolean includeScreenStateData = (query.getFlags()
@@ -433,7 +437,7 @@ public class BatteryUsageStatsRule implements TestRule {
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE) != 0;
         final double minConsumedPowerThreshold = query.getMinConsumedPowerThreshold();
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customPowerComponentNames, includePowerModels, includeProcessStateData,
+                customPowerComponentNames, includeProcessStateData,
                 includeScreenStateData, includePowerStateData, minConsumedPowerThreshold);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {

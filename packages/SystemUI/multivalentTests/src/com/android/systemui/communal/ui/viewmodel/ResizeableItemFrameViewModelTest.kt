@@ -367,6 +367,39 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun testMaxSpansLessThanCurrentSpan() =
+        testScope.runTest {
+            // heightPerSpan =
+            // (viewportHeightPx - verticalContentPaddingPx - (totalSpans - 1)
+            // * verticalItemSpacingPx) / totalSpans
+            // = 145.3333
+            // maxSpans = (maxHeightPx + verticalItemSpacing) /
+            // (heightPerSpanPx + verticalItemSpacingPx)
+            // = 4.72
+            // This is invalid because the max span calculation comes out to be less than
+            // the current span. Ensure we handle this case correctly.
+            val layout =
+                GridLayout(
+                    verticalItemSpacingPx = 100f,
+                    currentRow = 0,
+                    minHeightPx = 480,
+                    maxHeightPx = 1060,
+                    currentSpan = 6,
+                    resizeMultiple = 3,
+                    totalSpans = 6,
+                    viewportHeightPx = 1600,
+                    verticalContentPaddingPx = 228f,
+                )
+            updateGridLayout(layout)
+
+            val topState = underTest.topDragState
+            val bottomState = underTest.bottomDragState
+
+            assertThat(topState.anchors.toList()).containsExactly(0 to 0f)
+            assertThat(bottomState.anchors.toList()).containsExactly(0 to 0f, -3 to -736f)
+        }
+
+    @Test
     fun testCanExpand_atTopPosition_withMultipleAnchors_returnsTrue() =
         testScope.runTest {
             val twoRowGrid = singleSpanGrid.copy(totalSpans = 2, currentSpan = 1, currentRow = 0)

@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.service.autofill.ConvertCredentialRequest;
 import android.service.autofill.ConvertCredentialResponse;
+import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
@@ -495,6 +496,14 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
                                 mComponentName.getPackageName(), err.getMessage());
                     }
                 }));
+    }
+
+    public void onSessionDestroyed(@Nullable FillEventHistory history) {
+        boolean success = run(service -> {
+            service.onSessionDestroyed(history);
+        });
+
+        if (sVerbose) Slog.v(TAG, "called onSessionDestroyed(): " + success);
     }
 
     void onSavedPasswordCountRequest(IResultReceiver receiver) {

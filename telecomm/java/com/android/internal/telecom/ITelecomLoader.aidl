@@ -24,5 +24,5 @@ import com.android.internal.telecom.IInternalServiceRetriever;
  * Allows the TelecomLoaderService to pass additional dependencies required for creation.
  */
 interface ITelecomLoader {
-    ITelecomService createTelecomService(IInternalServiceRetriever retriever);
+    ITelecomService createTelecomService(IInternalServiceRetriever retriever, String sysUiName);
 }

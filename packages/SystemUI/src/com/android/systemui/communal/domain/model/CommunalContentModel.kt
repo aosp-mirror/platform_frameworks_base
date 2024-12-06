@@ -22,8 +22,8 @@ import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.widget.RemoteViews
+import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import java.util.UUID
 
 /** Encapsulates data for a communal content. */
@@ -36,7 +36,7 @@ sealed interface CommunalContentModel {
 
     /** The minimum size content can be resized to. */
     val minSize: CommunalContentSize
-        get() = CommunalContentSize.HALF
+        get() = fixedHalfOrResponsiveSize()
 
     /**
      * A type of communal content is ongoing / live / ephemeral, and can be sized and ordered
@@ -45,7 +45,12 @@ sealed interface CommunalContentModel {
     sealed interface Ongoing : CommunalContentModel {
         override var size: CommunalContentSize
         override val minSize
-            get() = CommunalContentSize.THIRD
+            get() =
+                if (communalResponsiveGrid()) {
+                    CommunalContentSize.Responsive(1)
+                } else {
+                    CommunalContentSize.FixedSize.THIRD
+                }
 
         /** Timestamp in milliseconds of when the content was created. */
         val createdTimestampMillis: Long
@@ -60,7 +65,6 @@ sealed interface CommunalContentModel {
             override val appWidgetId: Int,
             override val rank: Int,
             val providerInfo: AppWidgetProviderInfo,
-            val appWidgetHost: CommunalAppWidgetHost,
             val inQuietMode: Boolean,
             override val size: CommunalContentSize,
         ) : WidgetContent {
@@ -102,14 +106,16 @@ sealed interface CommunalContentModel {
     class WidgetPlaceholder : CommunalContentModel {
         override val key: String = KEY.widgetPlaceholder()
         // Same as widget size.
-        override val size = CommunalContentSize.HALF
+        override val size: CommunalContentSize
+            get() = fixedHalfOrResponsiveSize()
     }
 
     /** A CTA tile in the glanceable hub view mode which can be dismissed. */
     class CtaTileInViewMode : CommunalContentModel {
         override val key: String = KEY.CTA_TILE_IN_VIEW_MODE_KEY
         // Same as widget size.
-        override val size = CommunalContentSize.HALF
+        override val size: CommunalContentSize
+            get() = fixedHalfOrResponsiveSize()
     }
 
     class Tutorial(id: Int, override var size: CommunalContentSize) : CommunalContentModel {
@@ -120,15 +126,15 @@ sealed interface CommunalContentModel {
         smartspaceTargetId: String,
         val remoteViews: RemoteViews,
         override val createdTimestampMillis: Long,
-        override var size: CommunalContentSize = CommunalContentSize.HALF,
+        override var size: CommunalContentSize = fixedHalfOrResponsiveSize(),
     ) : Ongoing {
         override val key = KEY.smartspace(smartspaceTargetId)
     }
 
     class Umo(
         override val createdTimestampMillis: Long,
-        override var size: CommunalContentSize = CommunalContentSize.HALF,
-        override var minSize: CommunalContentSize = CommunalContentSize.HALF,
+        override var size: CommunalContentSize = fixedHalfOrResponsiveSize(),
+        override var minSize: CommunalContentSize = fixedHalfOrResponsiveSize(),
     ) : Ongoing {
         override val key = KEY.umo()
     }
@@ -172,3 +178,10 @@ sealed interface CommunalContentModel {
 
     fun isLiveContent() = this is Smartspace || this is Umo
 }
+
+private fun fixedHalfOrResponsiveSize() =
+    if (communalResponsiveGrid()) {
+        CommunalContentSize.Responsive(1)
+    } else {
+        CommunalContentSize.FixedSize.HALF
+    }

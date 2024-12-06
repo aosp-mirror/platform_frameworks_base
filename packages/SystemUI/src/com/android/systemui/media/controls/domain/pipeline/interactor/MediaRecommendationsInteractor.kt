@@ -66,14 +66,12 @@ constructor(
             .distinctUntilChanged()
             .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
 
-    val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
-
     fun removeMediaRecommendations(
         key: String,
         dismissIntent: Intent?,
         delayMs: Long,
         eventId: Int,
-        location: Int
+        location: Int,
     ) {
         logSmartspaceCardUserEvent(eventId, location)
         mediaDataProcessor.dismissSmartspaceRecommendation(key, delayMs)
@@ -101,7 +99,7 @@ constructor(
         eventId: Int,
         location: Int,
         interactedSubCardRank: Int,
-        interactedSubCardCardinality: Int
+        interactedSubCardCardinality: Int,
     ) {
         if (interactedSubCardRank == -1) {
             logSmartspaceCardUserEvent(eventId, MediaSmartspaceLogger.getSurface(location))
@@ -111,7 +109,7 @@ constructor(
                 MediaSmartspaceLogger.getSurface(location),
                 interactedSubCardRank = interactedSubCardRank,
                 interactedSubCardCardinality = interactedSubCardCardinality,
-                isRec = true
+                isRec = true,
             )
         }
         if (shouldActivityOpenInForeground(intent)) {
@@ -121,7 +119,7 @@ constructor(
                 0 /* delay */,
                 expandable.activityTransitionController(
                     InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER
-                )
+                ),
             )
         } else {
             // Otherwise, open the activity in background directly.
@@ -133,7 +131,7 @@ constructor(
         repository.logSmartspaceCardUserEvent(
             eventId,
             MediaSmartspaceLogger.getSurface(location),
-            isRec = true
+            isRec = true,
         )
     }
 

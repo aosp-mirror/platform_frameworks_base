@@ -26,6 +26,7 @@ import android.os.VibratorInfo;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -43,19 +44,29 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
     /** @hide */
     public static final int DEFAULT_DELAY_MILLIS = 0;
 
+    /** @hide */
+    public static final int DEFAULT_DELAY_TYPE = VibrationEffect.Composition.DELAY_TYPE_PAUSE;
+
     private final int mPrimitiveId;
     private final float mScale;
     private final int mDelay;
+    private final int mDelayType;
 
     PrimitiveSegment(@NonNull Parcel in) {
-        this(in.readInt(), in.readFloat(), in.readInt());
+        this(in.readInt(), in.readFloat(), in.readInt(), in.readInt());
     }
 
     /** @hide */
     public PrimitiveSegment(int id, float scale, int delay) {
+        this(id, scale, delay, DEFAULT_DELAY_TYPE);
+    }
+
+    /** @hide */
+    public PrimitiveSegment(int id, float scale, int delay, int delayType) {
         mPrimitiveId = id;
         mScale = scale;
         mDelay = delay;
+        mDelayType = delayType;
     }
 
     public int getPrimitiveId() {
@@ -68,6 +79,11 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
 
     public int getDelay() {
         return mDelay;
+    }
+
+    /** @hide */
+    public int getDelayType() {
+        return mDelayType;
     }
 
     @Override
@@ -112,8 +128,7 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
         if (Float.compare(mScale, newScale) == 0) {
             return this;
         }
-
-        return new PrimitiveSegment(mPrimitiveId, newScale, mDelay);
+        return new PrimitiveSegment(mPrimitiveId, newScale, mDelay, mDelayType);
     }
 
     /** @hide */
@@ -124,8 +139,7 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
         if (Float.compare(mScale, newScale) == 0) {
             return this;
         }
-
-        return new PrimitiveSegment(mPrimitiveId, newScale, mDelay);
+        return new PrimitiveSegment(mPrimitiveId, newScale, mDelay, mDelayType);
     }
 
     /** @hide */
@@ -142,6 +156,7 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
                 VibrationEffect.Composition.PRIMITIVE_LOW_TICK, "primitiveId");
         Preconditions.checkArgumentInRange(mScale, 0f, 1f, "scale");
         VibrationEffectSegment.checkDurationArgument(mDelay, "delay");
+        Preconditions.checkArgument(isValidDelayType(mDelayType), "delayType");
     }
 
     @Override
@@ -150,6 +165,7 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
         dest.writeInt(mPrimitiveId);
         dest.writeFloat(mScale);
         dest.writeInt(mDelay);
+        dest.writeInt(mDelayType);
     }
 
     @Override
@@ -163,14 +179,16 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
                 + "primitive=" + VibrationEffect.Composition.primitiveToString(mPrimitiveId)
                 + ", scale=" + mScale
                 + ", delay=" + mDelay
+                + ", delayType=" + VibrationEffect.Composition.delayTypeToString(mDelayType)
                 + '}';
     }
 
     /** @hide */
     @Override
     public String toDebugString() {
-        return String.format("Primitive=%s(scale=%.2f, delay=%dms)",
-                VibrationEffect.Composition.primitiveToString(mPrimitiveId), mScale, mDelay);
+        return String.format(Locale.ROOT, "Primitive=%s(scale=%.2f, %s=%dms)",
+                VibrationEffect.Composition.primitiveToString(mPrimitiveId), mScale,
+                toDelayTypeDebugString(mDelayType), mDelay);
     }
 
     @Override
@@ -180,12 +198,28 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
         PrimitiveSegment that = (PrimitiveSegment) o;
         return mPrimitiveId == that.mPrimitiveId
                 && Float.compare(that.mScale, mScale) == 0
-                && mDelay == that.mDelay;
+                && mDelay == that.mDelay
+                && mDelayType == that.mDelayType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPrimitiveId, mScale, mDelay);
+        return Objects.hash(mPrimitiveId, mScale, mDelay, mDelayType);
+    }
+
+    private static boolean isValidDelayType(int delayType) {
+        return switch (delayType) {
+            case VibrationEffect.Composition.DELAY_TYPE_PAUSE,
+                 VibrationEffect.Composition.DELAY_TYPE_RELATIVE_START_OFFSET -> true;
+            default -> false;
+        };
+    }
+
+    private static String toDelayTypeDebugString(int delayType) {
+        return switch (delayType) {
+            case VibrationEffect.Composition.DELAY_TYPE_RELATIVE_START_OFFSET -> "startOffset";
+            default -> "pause";
+        };
     }
 
     @NonNull

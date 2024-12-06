@@ -19,13 +19,19 @@ package com.android.server.inputmethod;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.InputConfig;
 import android.os.Process;
+import android.util.Slog;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
+import android.view.inputmethod.Flags;
 
 import com.android.server.input.InputManagerService;
 
@@ -39,8 +45,8 @@ final class HandwritingEventReceiverSurface {
     private final SurfaceControl mInputSurface;
     private boolean mIsIntercepting;
 
-    HandwritingEventReceiverSurface(String name, int displayId, @NonNull SurfaceControl sc,
-            @NonNull InputChannel inputChannel) {
+    HandwritingEventReceiverSurface(Context context, String name, int displayId,
+            @NonNull SurfaceControl sc, @NonNull InputChannel inputChannel) {
         mClientChannel = inputChannel;
         mInputSurface = sc;
 
@@ -59,15 +65,31 @@ final class HandwritingEventReceiverSurface {
                         | InputConfig.SPY
                         | InputConfig.INTERCEPTS_STYLUS;
 
-        // Configure the surface to receive stylus events across the entire display.
-        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
+        Rect bounds = null;
+        if (Flags.adaptiveHandwritingBounds()) {
+            mWindowHandle.setTouchableRegionCrop(mInputSurface);
+            // Default touchable area to getMaximumWindowMetrics()
+            WindowMetrics windowMetrics =  context.getSystemService(WindowManager.class)
+                    .getMaximumWindowMetrics();
+            bounds = windowMetrics.getBounds();
+            if (DEBUG) Slog.d(TAG, "initial handwriting touchable bounds: " + bounds);
+            mWindowHandle.setTouchableRegion(windowMetrics.getBounds());
+        } else {
+            // Configure the surface to receive stylus events across the entire display.
+            mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
+        }
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         mWindowHandle.setTrustedOverlay(t, mInputSurface, true);
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
         t.setLayer(mInputSurface, InputManagerService.INPUT_OVERLAY_LAYER_HANDWRITING_SURFACE);
         t.setPosition(mInputSurface, 0, 0);
-        t.setCrop(mInputSurface, null /* crop to parent surface */);
+        if (Flags.adaptiveHandwritingBounds()) {
+            // crop to parent surface if null, else bounds.
+            t.setCrop(mInputSurface, bounds);
+        } else {
+            t.setCrop(mInputSurface, null /* crop to parent surface */);
+        }
         t.show(mInputSurface);
         t.apply();
 
@@ -79,10 +101,21 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.ownerUid = imeUid;
         mWindowHandle.inputConfig &= ~InputConfig.SPY;
 
+        if (Flags.adaptiveHandwritingBounds()) {
+            // watch outside touch to finish handwriting.
+            mWindowHandle.inputConfig |= InputConfig.WATCH_OUTSIDE_TOUCH;
+        }
         new SurfaceControl.Transaction()
                 .setInputWindowInfo(mInputSurface, mWindowHandle)
                 .apply();
         mIsIntercepting = true;
+    }
+
+    void setTouchableRegion(Region touchableRegion) {
+        mWindowHandle.touchableRegion.set(touchableRegion);
+        new SurfaceControl.Transaction()
+                .setInputWindowInfo(mInputSurface, mWindowHandle)
+                .apply();
     }
 
     void setNotTouchable(boolean notTouchable) {

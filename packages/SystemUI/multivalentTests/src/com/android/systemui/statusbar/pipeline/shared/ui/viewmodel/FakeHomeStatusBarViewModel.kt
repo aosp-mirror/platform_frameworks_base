@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import android.view.View
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,11 +54,14 @@ class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
             )
         )
 
-    override val isSystemInfoVisible =
+    override val systemInfoCombinedVis =
         MutableStateFlow(
-            HomeStatusBarViewModel.VisibilityModel(
-                visibility = View.GONE,
-                shouldAnimateChange = false,
+            HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
+                HomeStatusBarViewModel.VisibilityModel(
+                    visibility = View.GONE,
+                    shouldAnimateChange = false,
+                ),
+                Idle,
             )
         )
 

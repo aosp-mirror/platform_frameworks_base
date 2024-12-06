@@ -40,7 +40,6 @@ class ActivityRecordInputSink {
     @ChangeId
     static final long ENABLE_TOUCH_OPAQUE_ACTIVITIES = 194480991L;
 
-    // TODO(b/369605358) Update EnabledSince when SDK 36 version code is available.
     /**
      * If the app's target SDK is 36+, pass-through touches from a cross-uid overlaying activity is
      * blocked by default. The activity may opt in to receive pass-through touches using
@@ -52,7 +51,7 @@ class ActivityRecordInputSink {
      * @see ActivityOptions#setAllowPassThroughOnTouchOutside
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.BAKLAVA)
     static final long ENABLE_OVERLAY_TOUCH_PASS_THROUGH_OPT_IN_ENFORCEMENT = 358129114L;
 
     private final ActivityRecord mActivityRecord;

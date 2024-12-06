@@ -287,6 +287,7 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
                     MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING, transition));
             // Postpone transition splitting to later.
             WindowContainerTransaction out = new WindowContainerTransaction();
+            mPipHandler.augmentRequest(transition, request, out);
             return out;
         } else if (request.getRemoteTransition() != null
                 && TransitionUtil.isOpeningType(request.getType())
@@ -370,7 +371,8 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
         if (mRecentsHandler != null) {
             if (mSplitHandler.isSplitScreenVisible()) {
                 return this::setRecentsTransitionDuringSplit;
-            } else if (mKeyguardHandler.isKeyguardShowing()) {
+            } else if (mKeyguardHandler.isKeyguardShowing()
+                    && !mKeyguardHandler.isKeyguardAnimating()) {
                 return this::setRecentsTransitionDuringKeyguard;
             } else if (mDesktopTasksController != null
                     // Check on the default display. Recents/gesture nav is only available there

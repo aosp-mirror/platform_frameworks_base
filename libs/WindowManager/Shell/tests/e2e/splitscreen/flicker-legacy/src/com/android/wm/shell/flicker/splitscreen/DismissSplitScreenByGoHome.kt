@@ -17,12 +17,16 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.splitscreen.benchmark.DismissSplitScreenByGoHomeBenchmark
 import com.android.wm.shell.flicker.utils.ICommonAssertions
 import com.android.wm.shell.flicker.utils.appWindowBecomesInvisible
@@ -30,6 +34,7 @@ import com.android.wm.shell.flicker.utils.layerBecomesInvisible
 import com.android.wm.shell.flicker.utils.splitAppLayerBoundsBecomesInvisible
 import com.android.wm.shell.flicker.utils.splitScreenDividerBecomesInvisible
 import org.junit.FixMethodOrder
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -44,8 +49,13 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class DismissSplitScreenByGoHome(override val flicker: LegacyFlickerTest) :
     DismissSplitScreenByGoHomeBenchmark(flicker), ICommonAssertions {
+    @JvmField
+    @Rule
+    val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             defaultSetup(this)

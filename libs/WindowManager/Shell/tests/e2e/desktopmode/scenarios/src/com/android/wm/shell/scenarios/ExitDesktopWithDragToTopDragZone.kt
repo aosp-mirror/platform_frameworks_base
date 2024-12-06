@@ -18,6 +18,7 @@ package com.android.wm.shell.scenarios
 
 import android.tools.NavBar
 import android.tools.Rotation
+import com.android.internal.R
 import com.android.window.flags.Flags
 import com.android.wm.shell.Utils
 import org.junit.After
@@ -40,9 +41,12 @@ constructor(
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
+        // Skip the test when the drag-to-maximize is enabled on this device.
+        Assume.assumeFalse(Flags.enableDragToMaximize() &&
+            instrumentation.context.resources.getBoolean(R.bool.config_dragToMaximizeInDesktopMode))
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test

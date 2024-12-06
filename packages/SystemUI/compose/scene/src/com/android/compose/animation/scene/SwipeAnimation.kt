@@ -24,11 +24,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 
 internal fun createSwipeAnimation(
     layoutState: MutableSceneTransitionLayoutStateImpl,
@@ -66,8 +66,9 @@ internal fun createSwipeAnimation(
         val absoluteDistance =
             with(animation.contentTransition.transformationSpec.distance ?: DefaultSwipeDistance) {
                 layoutImpl.userActionDistanceScope.absoluteDistance(
-                    layoutImpl.content(animation.fromContent).targetSize,
-                    orientation,
+                    fromContent = animation.fromContent,
+                    toContent = animation.toContent,
+                    orientation = orientation,
                 )
             }
 
@@ -312,16 +313,27 @@ internal class SwipeAnimation<T : ContentKey>(
 
     fun isAnimatingOffset(): Boolean = offsetAnimation != null
 
+    /** Get the [ContentKey] ([fromContent] or [toContent]) associated to the current [direction] */
+    fun contentByDirection(direction: Float): T {
+        require(direction != 0f) { "Cannot find a content in this direction: $direction" }
+        val isDirectionToContent = (isUpOrLeft && direction < 0) || (!isUpOrLeft && direction > 0)
+        return if (isDirectionToContent) {
+            toContent
+        } else {
+            fromContent
+        }
+    }
+
     /**
      * Animate the offset to a [targetContent], using the [initialVelocity] and an optional [spec]
      *
      * @return the velocity consumed
      */
-    fun animateOffset(
+    suspend fun animateOffset(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
-    ): SuspendedValue<Float> {
+    ): Float {
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
         val initialProgress = progress
@@ -379,7 +391,7 @@ internal class SwipeAnimation<T : ContentKey>(
         if (skipAnimation) {
             // Unblock the job.
             offsetAnimationRunnable.complete(null)
-            return { 0f }
+            return 0f
         }
 
         val isTargetGreater = targetOffset > animatable.value
@@ -440,7 +452,7 @@ internal class SwipeAnimation<T : ContentKey>(
             }
         }
 
-        return { velocityConsumed.await() }
+        return velocityConsumed.await()
     }
 
     /** An exception thrown during the animation to stop it immediately. */
@@ -469,18 +481,22 @@ internal class SwipeAnimation<T : ContentKey>(
     fun freezeAndAnimateToCurrentState() {
         if (isAnimatingOffset()) return
 
-        animateOffset(initialVelocity = 0f, targetContent = currentContent)
+        contentTransition.coroutineScope.launch {
+            animateOffset(initialVelocity = 0f, targetContent = currentContent)
+        }
     }
 }
 
 private object DefaultSwipeDistance : UserActionDistance {
     override fun UserActionDistanceScope.absoluteDistance(
-        fromSceneSize: IntSize,
+        fromContent: ContentKey,
+        toContent: ContentKey,
         orientation: Orientation,
     ): Float {
+        val fromContentSize = checkNotNull(fromContent.targetSize())
         return when (orientation) {
-            Orientation.Horizontal -> fromSceneSize.width
-            Orientation.Vertical -> fromSceneSize.height
+            Orientation.Horizontal -> fromContentSize.width
+            Orientation.Vertical -> fromContentSize.height
         }.toFloat()
     }
 }

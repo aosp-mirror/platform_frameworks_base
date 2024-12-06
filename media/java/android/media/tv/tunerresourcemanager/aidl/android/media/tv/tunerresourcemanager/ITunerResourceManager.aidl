@@ -156,12 +156,13 @@ interface ITunerResourceManager {
      * scenario, when both Resource Holder and Resource Challenger have same processId and same
      * priority.
      *
-     * @param clientId The resourceHolderRetain of the client is updated using client ID.
-     * @param resourceHolderRetain set to true to allow the Resource Holder to retain ownership, or
-     *     false to allow the Resource Challenger to acquire the resource. If not explicitly set,
-     *     resourceHolderRetain is set to false.
+     * @param clientId The client id used to set ownership of resource in case of resource
+     *     challenger situation.
+     * @param enabled Set to {@code true} to allow the Resource Holder to retain ownership,
+     *     or false to allow the Resource Challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
      */
-    void setResourceHolderRetain(int clientId, boolean resourceHolderRetain);
+    void setResourceOwnershipRetention(int clientId, boolean enabled);
 
     /*
      * This API is used by the Tuner framework to request a frontend from the TunerHAL.

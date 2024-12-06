@@ -16,11 +16,21 @@
 
 package com.android.app.viewcapture
 
+import android.view.fakeWindowManager
 import com.android.systemui.kosmos.Kosmos
 import org.mockito.kotlin.mock
 
 val Kosmos.mockViewCaptureAwareWindowManager by
     Kosmos.Fixture { mock<ViewCaptureAwareWindowManager>() }
+
+val Kosmos.realCaptureAwareWindowManager by
+    Kosmos.Fixture {
+        ViewCaptureAwareWindowManager(
+            fakeWindowManager,
+            lazyViewCapture = lazy { mock<ViewCapture>() },
+            isViewCaptureEnabled = false,
+        )
+    }
 
 var Kosmos.viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager by
     Kosmos.Fixture { mockViewCaptureAwareWindowManager }

@@ -15,7 +15,6 @@
  */
 package com.android.systemui.flags
 
-import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
@@ -76,12 +75,6 @@ object Flags {
     @JvmField
     val LOCKSCREEN_CUSTOM_CLOCKS =
         resourceBooleanFlag(R.bool.config_enableLockScreenCustomClocks, "lockscreen_custom_clocks")
-
-    /**
-     * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
-     * the digits when the clock moves.
-     */
-    @JvmField val STEP_CLOCK_ANIMATION = releasedFlag("step_clock_animation")
 
     /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
@@ -220,10 +213,6 @@ object Flags {
     // TODO(b/293380347): Tracking Bug
     @JvmField val COLOR_FIDELITY = unreleasedFlag("color_fidelity")
 
-    // 900 - media
-    // TODO(b/254512697): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER = releasedFlag("media_tap_to_transfer")
-
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag("dream_media_complication")
 
@@ -254,15 +243,6 @@ object Flags {
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
-
-    // TODO(b/254513207): Tracking Bug to delete
-    @Keep
-    @JvmField
-    val WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES =
-        releasedFlag(
-            name = "enable_screen_record_enterprise_policies",
-            namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-        )
 
     // TODO(b/293252410) : Tracking Bug
     @JvmField val LOCKSCREEN_ENABLE_LANDSCAPE = unreleasedFlag("lockscreen.enable_landscape")

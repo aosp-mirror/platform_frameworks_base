@@ -143,7 +143,7 @@ class DisplayWindowSettings {
         }
         // No record is present so use default windowing mode policy.
         final boolean forceFreeForm = mService.mAtmService.mSupportsFreeformWindowManagement
-                && (mService.mIsPc || dc.forceDesktopMode());
+                && (mService.mIsPc || dc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
         if (forceFreeForm) {
             return WindowConfiguration.WINDOWING_MODE_FREEFORM;
         }
@@ -272,6 +272,24 @@ class DisplayWindowSettings {
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mIsHomeSupported = supported;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+    }
+
+    boolean isIgnoreActivitySizeRestrictionsLocked(@NonNull DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        return settings.mIgnoreActivitySizeRestrictions != null
+                && settings.mIgnoreActivitySizeRestrictions;
+    }
+
+    void setIgnoreActivitySizeRestrictionsOnDisplayLocked(@NonNull String displayUniqueId,
+            int displayType, boolean enabled) {
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.uniqueId = displayUniqueId;
+        displayInfo.type = displayType;
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mIgnoreActivitySizeRestrictions = enabled;
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
@@ -474,6 +492,8 @@ class DisplayWindowSettings {
             Boolean mIgnoreDisplayCutout;
             @Nullable
             Boolean mDontMoveToTop;
+            @Nullable
+            Boolean mIgnoreActivitySizeRestrictions;
 
             SettingsEntry() {}
 
@@ -555,6 +575,11 @@ class DisplayWindowSettings {
                 }
                 if (!Objects.equals(other.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = other.mDontMoveToTop;
+                    changed = true;
+                }
+                if (!Objects.equals(other.mIgnoreActivitySizeRestrictions,
+                        mIgnoreActivitySizeRestrictions)) {
+                    mIgnoreActivitySizeRestrictions = other.mIgnoreActivitySizeRestrictions;
                     changed = true;
                 }
                 return changed;
@@ -649,6 +674,11 @@ class DisplayWindowSettings {
                     mDontMoveToTop = delta.mDontMoveToTop;
                     changed = true;
                 }
+                if (delta.mIgnoreActivitySizeRestrictions != null && !Objects.equals(
+                        delta.mIgnoreActivitySizeRestrictions, mIgnoreActivitySizeRestrictions)) {
+                    mIgnoreActivitySizeRestrictions = delta.mIgnoreActivitySizeRestrictions;
+                    changed = true;
+                }
                 return changed;
             }
 
@@ -667,7 +697,8 @@ class DisplayWindowSettings {
                         && mFixedToUserRotation == null
                         && mIgnoreOrientationRequest == null
                         && mIgnoreDisplayCutout == null
-                        && mDontMoveToTop == null;
+                        && mDontMoveToTop == null
+                        && mIgnoreActivitySizeRestrictions == null;
             }
 
             @Override
@@ -691,7 +722,9 @@ class DisplayWindowSettings {
                         && Objects.equals(mFixedToUserRotation, that.mFixedToUserRotation)
                         && Objects.equals(mIgnoreOrientationRequest, that.mIgnoreOrientationRequest)
                         && Objects.equals(mIgnoreDisplayCutout, that.mIgnoreDisplayCutout)
-                        && Objects.equals(mDontMoveToTop, that.mDontMoveToTop);
+                        && Objects.equals(mDontMoveToTop, that.mDontMoveToTop)
+                        && Objects.equals(mIgnoreActivitySizeRestrictions,
+                                that.mIgnoreActivitySizeRestrictions);
             }
 
             @Override
@@ -700,7 +733,7 @@ class DisplayWindowSettings {
                         mForcedHeight, mForcedDensity, mForcedScalingMode, mRemoveContentMode,
                         mShouldShowWithInsecureKeyguard, mShouldShowSystemDecors, mIsHomeSupported,
                         mImePolicy, mFixedToUserRotation, mIgnoreOrientationRequest,
-                        mIgnoreDisplayCutout, mDontMoveToTop);
+                        mIgnoreDisplayCutout, mDontMoveToTop, mIgnoreActivitySizeRestrictions);
             }
 
             @Override
@@ -722,6 +755,7 @@ class DisplayWindowSettings {
                         + ", mIgnoreOrientationRequest=" + mIgnoreOrientationRequest
                         + ", mIgnoreDisplayCutout=" + mIgnoreDisplayCutout
                         + ", mDontMoveToTop=" + mDontMoveToTop
+                        + ", mForceAppsUniversalResizable=" + mIgnoreActivitySizeRestrictions
                         + '}';
             }
         }

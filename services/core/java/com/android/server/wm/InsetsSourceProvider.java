@@ -730,6 +730,10 @@ class InsetsSourceProvider {
         return mFakeControlTarget;
     }
 
+    boolean isServerVisible() {
+        return mServerVisible;
+    }
+
     boolean isClientVisible() {
         return mClientVisible;
     }

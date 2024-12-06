@@ -18,8 +18,6 @@ package com.android.systemui.volume;
 
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 
-import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
-
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
@@ -79,8 +77,12 @@ import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.volume.domain.interactor.AudioSharingInteractor;
+import com.android.systemui.volume.shared.VolumeLogger;
 
 import dalvik.annotation.optimization.NeverCompile;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -155,6 +157,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final VibratorHelper mVibrator;
     private final AudioSharingInteractor mAudioSharingInteractor;
     private final JavaAdapter mJavaAdapter;
+    private final VolumeLogger mVolumeLogger;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
     private boolean mShowVolumeDialog;
@@ -202,7 +205,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             UserTracker userTracker,
             DumpManager dumpManager,
             AudioSharingInteractor audioSharingInteractor,
-            JavaAdapter javaAdapter
+            JavaAdapter javaAdapter,
+            VolumeLogger volumeLogger
     ) {
         mContext = context.getApplicationContext();
         mPackageManager = packageManager;
@@ -216,6 +220,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mMediaSessions = createMediaSessions(mContext, mWorkerLooper, mMediaSessionsCallbacksW);
         mAudioSharingInteractor = audioSharingInteractor;
         mJavaAdapter = javaAdapter;
+        mVolumeLogger = volumeLogger;
         mAudio = audioManager;
         mNoMan = notificationManager;
         mObserver = new SettingObserver(mWorker);
@@ -293,15 +298,28 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         } catch (SecurityException e) {
             Log.w(TAG, "No access to media sessions", e);
         }
-        if (volumeDialogAudioSharingFix()) {
-            Slog.d(TAG, "Start collect volume changes in audio sharing");
-            mJavaAdapter.alwaysCollectFlow(
-                    mAudioSharingInteractor.getVolume(),
-                    this::handleAudioSharingStreamVolumeChanges);
-            mJavaAdapter.alwaysCollectFlow(
-                    mAudioSharingInteractor.isInAudioSharing(),
-                    inSharing -> mInAudioSharing = inSharing);
-        }
+        Function1<Throwable, Unit> errorCallback = (ex) -> {
+            mVolumeLogger.onAudioSharingAvailabilityRequestedError("register()",
+                    ex.getMessage());
+            return null;
+        };
+        var unused =
+                mJavaAdapter.<Context, Boolean>callSuspend(
+                        mAudioSharingInteractor::audioSharingVolumeBarAvailable, mContext,
+                        result -> {
+                            if (result) {
+                                Slog.d(TAG, "Start collect volume changes in audio sharing");
+                                mJavaAdapter.alwaysCollectFlow(
+                                        mAudioSharingInteractor.getVolume(),
+                                        volume -> handleAudioSharingStreamVolumeChanges(volume));
+                                mJavaAdapter.alwaysCollectFlow(
+                                        mAudioSharingInteractor.isInAudioSharing(),
+                                        inSharing -> mInAudioSharing = inSharing);
+                            }
+                            return null;
+                        },
+                        errorCallback,
+                        errorCallback);
     }
 
     public void setVolumePolicy(VolumePolicy policy) {
@@ -588,16 +606,32 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mState.activeStream = activeStream;
         Events.writeEvent(Events.EVENT_ACTIVE_STREAM_CHANGED, activeStream);
         if (D.BUG) Log.d(TAG, "updateActiveStreamW " + activeStream);
-        final int s =
-                activeStream
-                                < (volumeDialogAudioSharingFix()
-                                        ? DYNAMIC_STREAM_BROADCAST
-                                        : DYNAMIC_STREAM_REMOTE_START_INDEX)
-                        ? activeStream
-                        : -1;
-        if (D.BUG) Log.d(TAG, "forceVolumeControlStream " + s);
-        mAudio.forceVolumeControlStream(s);
+        Function1<Throwable, Unit> errorCallback = (ex) -> {
+            mVolumeLogger.onAudioSharingAvailabilityRequestedError(
+                    "updateActiveStreamW",
+                    ex.getMessage());
+            forceVolumeControlStreamW(activeStream, false);
+            return null;
+        };
+        var unused =
+                mJavaAdapter.<Context, Boolean>callSuspend(
+                        mAudioSharingInteractor::audioSharingVolumeBarAvailable, mContext,
+                        result -> {
+                            forceVolumeControlStreamW(activeStream, result);
+                            return null;
+                        },
+                        errorCallback,
+                        errorCallback);
         return true;
+    }
+
+    private void forceVolumeControlStreamW(int activeStream,
+            boolean audioSharingVolumeBarAvailable) {
+        final int dynamicStartIdx = audioSharingVolumeBarAvailable ? DYNAMIC_STREAM_BROADCAST
+                : DYNAMIC_STREAM_REMOTE_START_INDEX;
+        final int s = activeStream < dynamicStartIdx ? activeStream : -1;
+        if (D.BUG) Log.d(TAG, "forceVolumeControlStream " + s);
+        mWorker.post(() -> mAudio.forceVolumeControlStream(s));
     }
 
     private StreamState streamStateW(int stream) {
@@ -773,10 +807,26 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onSetStreamVolumeW(int stream, int level) {
-        if (D.BUG) Log.d(TAG, "onSetStreamVolume " + stream + " level=" + level);
-        if (volumeDialogAudioSharingFix() && stream == DYNAMIC_STREAM_BROADCAST) {
-            Slog.d(TAG, "onSetStreamVolumeW set broadcast stream level = " + level);
-            mAudioSharingInteractor.setStreamVolume(level);
+        if (D.BUG) Log.d(TAG, "onSetStreamVolumeW " + stream + " level=" + level);
+
+        if (stream == DYNAMIC_STREAM_BROADCAST) {
+            Function1<Throwable, Unit> errorCallback = (ex) -> {
+                mVolumeLogger.onAudioSharingAvailabilityRequestedError(
+                        "onSetStreamVolumeW",
+                        ex.getMessage());
+                return null;
+            };
+            var unused =
+                    mJavaAdapter.<Context, Boolean>callSuspend(
+                            mAudioSharingInteractor::audioSharingVolumeBarAvailable, mContext,
+                            result -> {
+                                if (result) {
+                                    mAudioSharingInteractor.setStreamVolume(level);
+                                }
+                                return null;
+                            },
+                            errorCallback,
+                            errorCallback);
             return;
         }
         if (stream >= DYNAMIC_STREAM_REMOTE_START_INDEX) {

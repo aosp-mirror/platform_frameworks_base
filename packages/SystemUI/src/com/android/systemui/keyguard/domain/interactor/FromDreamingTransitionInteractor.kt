@@ -26,6 +26,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -47,8 +48,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -176,6 +175,10 @@ constructor(
                         communalSceneInteractor.changeScene(
                             newScene = CommunalScenes.Communal,
                             loggingReason = "FromDreamingTransitionInteractor",
+                            transitionKey =
+                                if (communalSettingsInteractor.isV2FlagEnabled())
+                                    CommunalTransitionKeys.SimpleFade
+                                else null,
                         )
                     } else {
                         startTransitionTo(
@@ -222,8 +225,15 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .filter { !it }
-                .sample(deviceEntryInteractor.isUnlocked, ::Pair)
+                .filterRelevantKeyguardStateAnd { !it }
+                .sample(
+                    if (SceneContainerFlag.isEnabled) {
+                        deviceEntryInteractor.isUnlocked
+                    } else {
+                        keyguardInteractor.isKeyguardDismissible
+                    },
+                    ::Pair,
+                )
                 .collect { (_, dismissable) ->
                     // TODO(b/349837588): Add check for -> OCCLUDED.
                     if (dismissable) {

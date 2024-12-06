@@ -1,0 +1,137 @@
+//
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+package {
+    default_team: "trendy_team_enigma",
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+filegroup {
+    name: "vcn-utils-platform-sources",
+    srcs: [
+        "src/android/net/vcn/persistablebundleutils/**/*.java",
+        "src/android/net/vcn/util/**/*.java",
+    ],
+    path: "src",
+    visibility: [
+        "//frameworks/base", // For VpnProfile.java and Vpn.java
+    ],
+}
+
+java_defaults {
+    name: "framework-connectivity-b-defaults",
+    sdk_version: "module_current",
+    min_sdk_version: "35", // TODO: Make it Android 25Q2 when this is included in mainline
+    defaults: ["framework-module-defaults"], // This is a boot jar
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.aidl",
+    ],
+
+    libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "app-compat-annotations",
+        "framework-wifi.stubs.module_lib",
+        "unsupportedappusage",
+    ],
+    static_libs: [
+        //TODO:375213246 Use a non-exported flag lib when VCN is in mainline
+        "android.net.vcn.flags-aconfig-java-export",
+    ],
+    aidl: {
+        include_dirs: [
+            // For connectivity-framework classes such as Network.aidl, NetworkCapabilities.aidl
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
+}
+
+java_sdk_library {
+    name: "framework-connectivity-b",
+    defaults: [
+        "framework-connectivity-b-defaults",
+    ],
+
+    //TODO: b/375213246 Use "framework-connectivity-jarjar-rules" when VCN is
+    // in mainline
+    jarjar_rules: "framework-vcn-jarjar-rules.txt",
+
+    permitted_packages: [
+        "android.net",
+        "android.net.vcn",
+        "com.android.server.vcn.util",
+
+    ],
+    api_packages: [
+        "android.net",
+        "android.net.vcn",
+    ],
+
+    // Allow VCN APIs to reference APIs in IKE and Connectivity
+    stub_only_libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "framework-connectivity.stubs.module_lib",
+    ],
+
+    // To use non-jarjard names of utilities such as android.util.IndentingPrintWriter
+    impl_only_libs: [
+        "framework-connectivity-pre-jarjar",
+    ],
+
+    aconfig_declarations: [
+        //TODO:375213246 Use a non-exported flag lib when VCN is in mainline
+        "android.net.vcn.flags-aconfig-java-export",
+    ],
+
+    impl_library_visibility: [
+        // Using for test only
+        "//cts/tests/netlegacy22.api",
+        "//cts/tests/tests/vcn",
+        "//external/sl4a:__subpackages__",
+        "//frameworks/base/core/tests/bandwidthtests",
+        "//frameworks/base/core/tests/benchmarks",
+        "//frameworks/base/core/tests/utillib",
+        "//frameworks/base/services/tests/VpnTests",
+        "//frameworks/base/tests/vcn",
+        "//frameworks/opt/telephony/tests/telephonytests",
+        "//packages/modules/CaptivePortalLogin/tests",
+        "//packages/modules/Connectivity/staticlibs/testutils",
+        "//packages/modules/Connectivity/staticlibs/tests:__subpackages__",
+        "//packages/modules/Connectivity/Tethering/tests:__subpackages__",
+        "//packages/modules/Connectivity/tests:__subpackages__",
+        "//packages/modules/Connectivity/thread/tests:__subpackages__",
+        "//packages/modules/IPsec/tests/iketests",
+        "//packages/modules/NetworkStack",
+        "//packages/modules/NetworkStack/tests:__subpackages__",
+        "//packages/modules/Wifi/service/tests/wifitests",
+    ],
+
+    apex_available: [
+        // TODO: b/374174952 Remove it when VCN modularization is released
+        "//apex_available:platform",
+
+        "com.android.tethering",
+    ],
+}
+
+java_library {
+    name: "framework-connectivity-b-pre-jarjar",
+    defaults: ["framework-connectivity-b-defaults"],
+    libs: [
+        "framework-connectivity-pre-jarjar",
+    ],
+}

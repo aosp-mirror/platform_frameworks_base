@@ -81,7 +81,7 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
             this.fakeKeyguardTransitionRepository =
                 FakeKeyguardTransitionRepository(
                     // This test sends transition steps manually in the test cases.
-                    sendTransitionStepsOnStartTransition = false,
+                    initiallySendTransitionStepsOnStartTransition = false,
                     testScope = testScope,
                 )
 

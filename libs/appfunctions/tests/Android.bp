@@ -25,7 +25,7 @@ android_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "androidx.core_core-ktx",
-        "com.google.android.appfunctions.sidecar.impl",
+        "com.android.extensions.appfunctions.impl",
         "junit",
         "kotlin-test",
         "mockito-target-extended-minus-junit4",

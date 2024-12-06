@@ -15,11 +15,16 @@
  */
 package systemui.shared.clocks.view
 
+import android.graphics.Typeface
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.clocks.ClockMessageBuffers
+import com.android.systemui.plugins.clocks.ClockSettings
+import com.android.systemui.shared.clocks.ClockContext
 import com.android.systemui.shared.clocks.FontTextStyle
 import com.android.systemui.shared.clocks.LogUtil
+import com.android.systemui.shared.clocks.TypefaceCache
 import com.android.systemui.shared.clocks.view.SimpleDigitalClockTextView
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -38,7 +43,23 @@ class SimpleDigitalClockTextViewTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        underTest = SimpleDigitalClockTextView(context, messageBuffer)
+        underTest =
+            SimpleDigitalClockTextView(
+                ClockContext(
+                    context,
+                    context.resources,
+                    ClockSettings(),
+                    TypefaceCache(messageBuffer, 20) {
+                        // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
+                        return@TypefaceCache Typeface.create(
+                            "google-sans-flex-clock",
+                            Typeface.NORMAL,
+                        )
+                    },
+                    ClockMessageBuffers(messageBuffer),
+                    messageBuffer,
+                )
+            )
         underTest.textStyle = FontTextStyle()
         underTest.aodStyle = FontTextStyle()
         underTest.text = "0"

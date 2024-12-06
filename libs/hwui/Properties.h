@@ -345,7 +345,6 @@ public:
     static bool clipSurfaceViews;
     static bool hdr10bitPlus;
     static bool skipTelemetry;
-    static bool resampleGainmapRegions;
     static bool queryGlobalPriority;
 
     static int timeoutMultiplier;
@@ -381,6 +380,7 @@ public:
     static void setDrawingEnabled(bool enable);
 
     static bool initializeGlAlways();
+    static bool resampleGainmapRegions();
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;

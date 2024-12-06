@@ -21,3 +21,10 @@ flag {
     description: "Set reset_on_fork flag."
     bug: "370988407"
 }
+
+flag {
+    name: "cpu_headroom_affinity_check"
+    namespace: "game"
+    description: "Check affinity on CPU headroom."
+    bug: "346604998"
+}

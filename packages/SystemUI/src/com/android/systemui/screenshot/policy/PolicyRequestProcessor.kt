@@ -80,6 +80,7 @@ class PolicyRequestProcessor(
                     Log.i(TAG, "$result")
                     return modify(original, result.parameters)
                 }
+
                 is NotMatched -> Log.i(TAG, "$result")
             }
         }
@@ -89,7 +90,45 @@ class PolicyRequestProcessor(
     }
 
     /** Produce a new [ScreenshotData] using [CaptureParameters] */
-    suspend fun modify(original: ScreenshotData, updates: CaptureParameters): ScreenshotData {
+    suspend fun modify(original: ScreenshotData, params: CaptureParameters): ScreenshotData {
+        Log.d(TAG, "[modify] CaptureParameters = $params")
+        // Update and apply bitmap capture depending on the parameters.
+        when (val type = params.type) {
+            is IsolatedTask -> {
+                Log.i(TAG, "Capturing task snapshot: $params")
+
+                val taskSnapshot =
+                    capture.captureTask(type.taskId) ?: error("Failed to capture task")
+
+                return original.copy(
+                    type = TAKE_SCREENSHOT_PROVIDED_IMAGE,
+                    bitmap = taskSnapshot,
+                    userHandle = params.owner,
+                    taskId = params.contentTask.taskId,
+                    topComponent = params.contentTask.component,
+                    originalScreenBounds = type.taskBounds,
+                )
+            }
+
+            is FullScreen -> {
+                Log.i(TAG, "Capturing screenshot: $params")
+
+                val screenshot =
+                    captureDisplay(type.displayId) ?: error("Failed to capture screenshot")
+                return original.copy(
+                    type = TAKE_SCREENSHOT_FULLSCREEN,
+                    bitmap = screenshot,
+                    userHandle = params.owner,
+                    topComponent = params.contentTask.component,
+                    originalScreenBounds = Rect(0, 0, screenshot.width, screenshot.height),
+                    taskId = params.contentTask.taskId,
+                )
+            }
+        }
+    }
+
+    /** Produce a new [ScreenshotData] using [LegacyCaptureParameters] */
+    suspend fun modify(original: ScreenshotData, updates: LegacyCaptureParameters): ScreenshotData {
         Log.d(TAG, "[modify] CaptureParameters = $updates")
         // Update and apply bitmap capture depending on the parameters.
         val updated =
@@ -102,14 +141,7 @@ class PolicyRequestProcessor(
                         type.taskId,
                         type.taskBounds,
                     )
-                is CaptureType.RootTask ->
-                    replaceWithTaskSnapshot(
-                        original,
-                        updates.component,
-                        updates.owner,
-                        type.parentTaskId,
-                        type.taskBounds,
-                    )
+
                 is FullScreen ->
                     replaceWithScreenshot(
                         original,

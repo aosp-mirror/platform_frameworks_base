@@ -16,9 +16,12 @@
 
 package android.os;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
+import android.app.Instrumentation;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
@@ -54,7 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodRedirectionClass("MessageQueue_host")
+@RavenwoodRedirectionClass("MessageQueue_ravenwood")
 public final class MessageQueue {
     private static final String TAG = "ConcurrentMessageQueue";
     private static final boolean DEBUG = false;
@@ -364,6 +367,28 @@ public final class MessageQueue {
         mPtr = nativeInit();
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static void throwIfNotTest() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            // Only tests can reach here.
+            return;
+        }
+        final Instrumentation instrumentation = activityThread.getInstrumentation();
+        if (instrumentation == null) {
+            // Only tests can reach here.
+            return;
+        }
+        if (instrumentation.isInstrumenting()) {
+            return;
+        }
+        throw new IllegalStateException("Test-only API called not from a test!");
+    }
+
+    private static void throwIfNotTest$ravenwood() {
+        return;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -382,10 +407,11 @@ public final class MessageQueue {
         }
     }
 
-    private class MatchDeliverableMessages extends MessageCompare {
+    private static final class MatchDeliverableMessages extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.when <= when) {
                 return true;
             }
@@ -562,7 +588,7 @@ public final class MessageQueue {
     private static final AtomicLong mMessagesDelivered = new AtomicLong();
     private boolean mMessageDirectlyQueued;
 
-    private Message nextMessage() {
+    private Message nextMessage(boolean peek) {
         int i = 0;
 
         while (true) {
@@ -724,7 +750,7 @@ public final class MessageQueue {
             if (sState.compareAndSet(this, sStackStateActive, nextOp)) {
                 mMessageCounts.clearCounts();
                 if (found != null) {
-                    if (!removeFromPriorityQueue(found)) {
+                    if (!peek && !removeFromPriorityQueue(found)) {
                         /*
                          * RemoveMessages() might be able to pull messages out from under us
                          * However we can detect that here and just loop around if it happens.
@@ -984,7 +1010,7 @@ public final class MessageQueue {
         return token;
     }
 
-    private class MatchBarrierToken extends MessageCompare {
+    private static final class MatchBarrierToken extends MessageCompare {
         int mBarrierToken;
 
         MatchBarrierToken(int token) {
@@ -993,8 +1019,9 @@ public final class MessageQueue {
         }
 
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == null && m.arg1 == mBarrierToken) {
                 return true;
             }
@@ -1039,6 +1066,79 @@ public final class MessageQueue {
         }
     }
 
+    private static final class MatchEarliestMessage extends MessageCompare {
+        MessageNode mEarliest = null;
+
+        @Override
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
+            if (mEarliest == null || mEarliest.mMessage.when > m.when) {
+                mEarliest = n;
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Get the timestamp of the next executable message in our priority queue.
+     * Returns null if there are no messages ready for delivery.
+     *
+     * Caller must ensure that this doesn't race 'next' from the Looper thread.
+     */
+    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
+    Long peekWhenForTest() {
+        throwIfNotTest();
+        Message ret = nextMessage(true);
+        return ret != null ? ret.when : null;
+    }
+
+    /**
+     * Return the next executable message in our priority queue.
+     * Returns null if there are no messages ready for delivery
+     *
+     * Caller must ensure that this doesn't race 'next' from the Looper thread.
+     */
+    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
+    @Nullable
+    Message popForTest() {
+        throwIfNotTest();
+        return nextMessage(false);
+    }
+
+    /**
+     * @return true if we are blocked on a sync barrier
+     */
+    boolean isBlockedOnSyncBarrier() {
+        throwIfNotTest();
+        Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
+        MessageNode queueNode = iterateNext(queueIter);
+
+        if (queueNode.isBarrier()) {
+            long now = SystemClock.uptimeMillis();
+
+            /* Look for a deliverable async node. If one exists we are not blocked. */
+            Iterator<MessageNode> asyncQueueIter = mAsyncPriorityQueue.iterator();
+            MessageNode asyncNode = iterateNext(asyncQueueIter);
+            if (asyncNode != null && now >= asyncNode.getWhen()) {
+                return false;
+            }
+            /*
+             * Look for a deliverable sync node. In this case, if one exists we are blocked
+             * since the barrier prevents delivery of the Message.
+             */
+            while (queueNode.isBarrier()) {
+                queueNode = iterateNext(queueIter);
+            }
+            if (queueNode != null && now >= queueNode.getWhen()) {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
     private StateNode getStateNode(StackNode node) {
         if (node.isMessageNode()) {
             return ((MessageNode) node).mBottomOfStack;
@@ -1058,7 +1158,7 @@ public final class MessageQueue {
      * This class is used to find matches for hasMessages() and removeMessages()
      */
     private abstract static class MessageCompare {
-        public abstract boolean compareMessage(Message m, Handler h, int what, Object object,
+        public abstract boolean compareMessage(MessageNode n, Handler h, int what, Object object,
                 Runnable r, long when);
     }
 
@@ -1165,10 +1265,11 @@ public final class MessageQueue {
         return foundInStack || foundInQueue;
     }
 
-    private static class MatchHandlerWhatAndObject extends MessageCompare {
+    private static final class MatchHandlerWhatAndObject extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.what == what && (object == null || m.obj == object)) {
                 return true;
             }
@@ -1185,10 +1286,11 @@ public final class MessageQueue {
         return findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObject, false);
     }
 
-    private static class MatchHandlerWhatAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerWhatAndObjectEquals extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.what == what && (object == null || object.equals(m.obj))) {
                 return true;
             }
@@ -1206,10 +1308,11 @@ public final class MessageQueue {
                 false);
     }
 
-    private static class MatchHandlerRunnableAndObject extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObject extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.callback == r && (object == null || m.obj == object)) {
                 return true;
             }
@@ -1227,10 +1330,11 @@ public final class MessageQueue {
         return findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject, false);
     }
 
-    private static class MatchHandler extends MessageCompare {
+    private static final class MatchHandler extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == h) {
                 return true;
             }
@@ -1266,10 +1370,11 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject, true);
     }
 
-    private static class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.callback == r && (object == null || object.equals(m.obj))) {
                 return true;
             }
@@ -1285,10 +1390,11 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObjectEquals, true);
     }
 
-    private static class MatchHandlerAndObject extends MessageCompare {
+    private static final class MatchHandlerAndObject extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == h && (object == null || m.obj == object)) {
                 return true;
             }
@@ -1303,10 +1409,11 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObject, true);
     }
 
-    private static class MatchHandlerAndObjectEquals extends MessageCompare {
+    private static final class MatchHandlerAndObjectEquals extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.target == h && (object == null || object.equals(m.obj))) {
                 return true;
             }
@@ -1322,10 +1429,10 @@ public final class MessageQueue {
         findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObjectEquals, true);
     }
 
-    private static class MatchAllMessages extends MessageCompare {
+    private static final class MatchAllMessages extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
             return true;
         }
     }
@@ -1334,10 +1441,11 @@ public final class MessageQueue {
         findOrRemoveMessages(null, -1, null, null, 0, mMatchAllMessages, true);
     }
 
-    private static class MatchAllFutureMessages extends MessageCompare {
+    private static final class MatchAllFutureMessages extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
-                long when) {
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object,
+                Runnable r, long when) {
+            final Message m = n.mMessage;
             if (m.when > when) {
                 return true;
             }

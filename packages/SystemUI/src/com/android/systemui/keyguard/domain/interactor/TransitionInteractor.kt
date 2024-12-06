@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -33,7 +34,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Each TransitionInteractor is responsible for determining under which conditions to notify
@@ -201,9 +201,18 @@ sealed class TransitionInteractor(
             scope.launch {
                 keyguardInteractor.onCameraLaunchDetected.filterRelevantKeyguardState().collect {
                     if (!maybeHandleInsecurePowerGesture()) {
+                        val lastStep = transitionInteractor.transitionState.value
+                        val modeOnCanceled =
+                            if (lastStep.to == KeyguardState.AOD) {
+                                // Enabled smooth transition when double-tap camera cancels
+                                // transition to AOD
+                                TransitionModeOnCanceled.REVERSE
+                            } else {
+                                TransitionModeOnCanceled.RESET
+                            }
                         startTransitionTo(
                             toState = KeyguardState.OCCLUDED,
-                            modeOnCanceled = TransitionModeOnCanceled.RESET,
+                            modeOnCanceled = modeOnCanceled,
                             ownerReason = "keyguardInteractor.onCameraLaunchDetected",
                         )
                     }

@@ -33,7 +33,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
@@ -91,7 +90,6 @@ abstract class ShadeViewProviderModule {
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
             qsSceneAdapter: Provider<QSSceneAdapter>,
-            alternateBouncerDependencies: Provider<AlternateBouncerDependencies>,
         ): WindowRootView {
             return if (SceneContainerFlag.isEnabled) {
                 checkNoSceneDuplicates(scenesProvider.get())
@@ -107,7 +105,6 @@ abstract class ShadeViewProviderModule {
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
                     qsSceneAdapter = qsSceneAdapter,
-                    alternateBouncerDependencies = alternateBouncerDependencies.get(),
                 )
                 sceneWindowRootView
             } else {

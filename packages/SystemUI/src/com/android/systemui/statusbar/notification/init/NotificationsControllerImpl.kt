@@ -129,7 +129,7 @@ constructor(
         } else {
             notificationListener.snoozeNotification(
                 sbn.key,
-                snoozeOption.minutesToSnoozeFor * 60 * 1000.toLong()
+                snoozeOption.minutesToSnoozeFor * 60 * 1000.toLong(),
             )
         }
     }

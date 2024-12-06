@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.zIndex
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
@@ -59,20 +60,21 @@ constructor(
                     Box(modifier = Modifier.fillMaxSize()) {
                         with(communalPopupSection) { Popup() }
                         with(ambientStatusBarSection) {
-                            AmbientStatusBar(modifier = Modifier.fillMaxWidth())
+                            AmbientStatusBar(modifier = Modifier.fillMaxWidth().zIndex(1f))
                         }
                         CommunalHub(
                             viewModel = viewModel,
                             interactionHandler = interactionHandler,
                             dialogFactory = dialogFactory,
                             widgetSection = widgetSection,
-                            modifier = Modifier.element(Communal.Elements.Grid)
+                            modifier = Modifier.element(Communal.Elements.Grid),
+                            sceneScope = this@Content,
                         )
                     }
                     with(lockSection) {
                         LockIcon(
                             overrideColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.element(Communal.Elements.LockIcon)
+                            modifier = Modifier.element(Communal.Elements.LockIcon),
                         )
                     }
                     with(bottomAreaSection) {
@@ -80,17 +82,13 @@ constructor(
                             Modifier.element(Communal.Elements.IndicationArea).fillMaxWidth()
                         )
                     }
-                }
+                },
             ) { measurables, constraints ->
                 val communalGridMeasurable = measurables[0]
                 val lockIconMeasurable = measurables[1]
                 val bottomAreaMeasurable = measurables[2]
 
-                val noMinConstraints =
-                    constraints.copy(
-                        minWidth = 0,
-                        minHeight = 0,
-                    )
+                val noMinConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
                 val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
                 val lockIconBounds =
@@ -109,14 +107,8 @@ constructor(
                     )
 
                 layout(constraints.maxWidth, constraints.maxHeight) {
-                    communalGridPlaceable.place(
-                        x = 0,
-                        y = 0,
-                    )
-                    lockIconPlaceable.place(
-                        x = lockIconBounds.left,
-                        y = lockIconBounds.top,
-                    )
+                    communalGridPlaceable.place(x = 0, y = 0)
+                    lockIconPlaceable.place(x = lockIconBounds.left, y = lockIconBounds.top)
                     bottomAreaPlaceable.place(
                         x = 0,
                         y = constraints.maxHeight - bottomAreaPlaceable.height,

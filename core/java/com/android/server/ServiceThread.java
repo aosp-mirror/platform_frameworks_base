@@ -27,6 +27,7 @@ import android.os.StrictMode;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ServiceThread extends HandlerThread {
     private static final String TAG = "ServiceThread";
 

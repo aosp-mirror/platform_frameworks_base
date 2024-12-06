@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -84,6 +85,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonVi
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
+import com.android.systemui.qs.ui.compose.borderOnFocus
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
 
@@ -259,12 +261,16 @@ private fun RowScope.ForegroundServicesButton(
 
 /** A button with an icon. */
 @Composable
-private fun IconButton(model: FooterActionsButtonViewModel, modifier: Modifier = Modifier) {
+fun IconButton(model: FooterActionsButtonViewModel, modifier: Modifier = Modifier) {
     Expandable(
         color = colorAttr(model.backgroundColor),
         shape = CircleShape,
         onClick = model.onClick,
-        modifier = modifier,
+        modifier =
+            modifier.borderOnFocus(
+                color = MaterialTheme.colorScheme.secondary,
+                CornerSize(percent = 50),
+            ),
     ) {
         val tint = model.iconTint?.let { Color(it) } ?: Color.Unspecified
         Icon(model.icon, tint = tint, modifier = Modifier.size(20.dp))
@@ -291,7 +297,11 @@ private fun NumberButton(
         shape = CircleShape,
         onClick = onClick,
         interactionSource = interactionSource,
-        modifier = modifier,
+        modifier =
+            modifier.borderOnFocus(
+                color = MaterialTheme.colorScheme.secondary,
+                CornerSize(percent = 50),
+            ),
     ) {
         Box(Modifier.size(40.dp)) {
             Box(
@@ -342,7 +352,10 @@ private fun TextButton(
         color = colorAttr(R.attr.underSurface),
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
-        modifier = modifier.padding(horizontal = 4.dp),
+        modifier =
+            modifier
+                .padding(horizontal = 4.dp)
+                .borderOnFocus(color = MaterialTheme.colorScheme.secondary, CornerSize(50)),
         onClick = onClick,
     ) {
         Row(

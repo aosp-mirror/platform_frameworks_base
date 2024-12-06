@@ -35,6 +35,7 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
     private static final String TAG = "SingleVibrationSession";
 
     private final Object mLock = new Object();
+    private final long mSessionId = VibrationSession.nextSessionId();
     private final IBinder mCallerToken;
     private final HalVibration mVibration;
 
@@ -55,6 +56,11 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
 
     public HalVibration getVibration() {
         return mVibration;
+    }
+
+    @Override
+    public long getSessionId() {
+        return mSessionId;
     }
 
     @Override
@@ -155,9 +161,15 @@ final class SingleVibrationSession implements VibrationSession, IBinder.DeathRec
     }
 
     @Override
+    public void notifySessionCallback() {
+        // ignored, external control does not expect callbacks from the vibrator manager for session
+    }
+
+    @Override
     public String toString() {
         return "SingleVibrationSession{"
-                + "callerToken= " + mCallerToken
+                + "sessionId= " + mSessionId
+                + ", callerToken= " + mCallerToken
                 + ", vibration=" + mVibration
                 + '}';
     }

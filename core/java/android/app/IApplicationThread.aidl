@@ -46,6 +46,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
 import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
 import android.view.translation.UiTranslationSpec;
@@ -183,4 +185,6 @@ oneway interface IApplicationThread {
     void scheduleTimeoutService(IBinder token, int startId);
     void scheduleTimeoutServiceForType(IBinder token, int startId, int fgsType);
     void schedulePing(in RemoteCallback pong);
+    void getExecutableMethodFileOffsets(in MethodDescriptor methodDescriptor,
+            in IOffsetCallback resultCallback);
 }

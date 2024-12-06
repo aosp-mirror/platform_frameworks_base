@@ -16,12 +16,16 @@
 
 package android.inputmethodservice;
 
+import static android.view.inputmethod.Flags.verifyKeyEvent;
+
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputChannel;
@@ -41,6 +45,8 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.util.Objects;
+
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
@@ -56,6 +62,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_REMOVE_IME_SURFACE = 130;
     private static final int DO_FINISH_INPUT = 140;
     private static final int DO_INVALIDATE_INPUT = 150;
+    private final Context mContext;
 
 
     @UnsupportedAppUsage
@@ -66,6 +73,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
 
     public IInputMethodSessionWrapper(Context context,
             InputMethodSession inputMethodSession, InputChannel channel) {
+        mContext = context;
         mCaller = new HandlerCaller(context, null,
                 this, true /*asyncHandler*/);
         mInputMethodSession = inputMethodSession;
@@ -233,6 +241,8 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     }
     private final class ImeInputEventReceiver extends InputEventReceiver
             implements InputMethodSession.EventCallback {
+        // Time after which a KeyEvent is invalid
+        private static final long KEY_EVENT_ALLOW_PERIOD_MS = 100L;
         private final SparseArray<InputEvent> mPendingEvents = new SparseArray<InputEvent>();
 
         public ImeInputEventReceiver(InputChannel inputChannel, Looper looper) {
@@ -247,10 +257,23 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 return;
             }
 
+            if (event instanceof KeyEvent keyEvent && needsVerification(keyEvent)) {
+                // any KeyEvent with modifiers (e.g. Ctrl/Alt/Fn) must be verified that
+                // they originated from system.
+                InputManager im = mContext.getSystemService(InputManager.class);
+                Objects.requireNonNull(im);
+                final long age = SystemClock.uptimeMillis() - keyEvent.getEventTime();
+                if (age >= KEY_EVENT_ALLOW_PERIOD_MS && im.verifyInputEvent(keyEvent) == null) {
+                    Log.w(TAG, "Unverified or Invalid KeyEvent injected into IME. Dropping "
+                            + keyEvent);
+                    finishInputEvent(event, false /* handled */);
+                    return;
+                }
+            }
+
             final int seq = event.getSequenceNumber();
             mPendingEvents.put(seq, event);
-            if (event instanceof KeyEvent) {
-                KeyEvent keyEvent = (KeyEvent)event;
+            if (event instanceof KeyEvent keyEvent) {
                 mInputMethodSession.dispatchKeyEvent(seq, keyEvent, this);
             } else {
                 MotionEvent motionEvent = (MotionEvent)event;
@@ -270,6 +293,23 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mPendingEvents.removeAt(index);
                 finishInputEvent(event, handled);
             }
+        }
+
+        private boolean hasKeyModifiers(KeyEvent event) {
+            if (event.hasNoModifiers()) {
+                return false;
+            }
+            return event.isCtrlPressed()
+                    || event.isAltPressed()
+                    || event.isFunctionPressed()
+                    || event.isMetaPressed();
+        }
+
+        private boolean needsVerification(KeyEvent event) {
+            //TODO(b/331730488): Handle a11y events as well.
+            return verifyKeyEvent()
+                    && (hasKeyModifiers(event)
+                            || mInputMethodSession.onShouldVerifyKeyEvent(event));
         }
     }
 }

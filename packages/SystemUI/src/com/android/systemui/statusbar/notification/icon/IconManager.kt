@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.icon
 import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.app.Person
+import android.content.Context
 import android.content.pm.LauncherApps
 import android.graphics.drawable.Icon
 import android.os.Build
@@ -26,6 +27,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.Flags
@@ -35,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -44,7 +47,6 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -68,6 +70,17 @@ constructor(
     @Background private val bgCoroutineContext: CoroutineContext,
     @Main private val mainCoroutineContext: CoroutineContext,
 ) : ConversationIconManager {
+
+    /**
+     * A listener that is notified when a [NotificationEntry] has been updated and the associated
+     * icons have to be updated as well.
+     */
+    fun interface OnIconUpdateRequiredListener {
+        fun onIconUpdateRequired(entry: NotificationEntry)
+    }
+
+    private val onIconUpdateRequiredListeners = mutableSetOf<OnIconUpdateRequiredListener>()
+
     private var unimportantConversationKeys: Set<String> = emptySet()
     /**
      * A map of running jobs for fetching the person avatar from launcher. The key is the
@@ -75,6 +88,16 @@ constructor(
      */
     private var launcherPeopleAvatarIconJobs: ConcurrentHashMap<String, Job> =
         ConcurrentHashMap<String, Job>()
+
+    fun addIconsUpdateListener(listener: OnIconUpdateRequiredListener) {
+        StatusBarConnectedDisplays.assertInNewMode()
+        onIconUpdateRequiredListeners += listener
+    }
+
+    fun removeIconsUpdateListener(listener: OnIconUpdateRequiredListener) {
+        StatusBarConnectedDisplays.assertInNewMode()
+        onIconUpdateRequiredListeners -= listener
+    }
 
     fun attach() {
         notifCollection.addCollectionListener(entryListener)
@@ -112,6 +135,21 @@ constructor(
     }
 
     /**
+     * Inflate the [StatusBarIconView] for the given [NotificationEntry], using the specified
+     * [Context].
+     */
+    fun createSbIconView(context: Context, entry: NotificationEntry): StatusBarIconView =
+        traceSection("IconManager.createSbIconView") {
+            StatusBarConnectedDisplays.assertInNewMode()
+
+            val sbIcon = iconBuilder.createIconView(entry, context)
+            sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
+            val (normalIconDescriptor, _) = getIconDescriptors(entry)
+            setIcon(entry, normalIconDescriptor, sbIcon)
+            return sbIcon
+        }
+
+    /**
      * Inflate icon views for each icon variant and assign appropriate icons to them. Stores the
      * result in [NotificationEntry.getIcons].
      *
@@ -124,7 +162,9 @@ constructor(
             val sbIcon = iconBuilder.createIconView(entry)
             sbIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
             val sbChipIcon: StatusBarIconView?
-            if (Flags.statusBarCallChipNotificationIcon()) {
+            if (
+                Flags.statusBarCallChipNotificationIcon() && !StatusBarConnectedDisplays.isEnabled
+            ) {
                 sbChipIcon = iconBuilder.createIconView(entry)
                 sbChipIcon.scaleType = ImageView.ScaleType.CENTER_INSIDE
             } else {
@@ -152,17 +192,23 @@ constructor(
                 setIcon(entry, sensitiveIconDescriptor, shelfIcon)
                 setIcon(entry, sensitiveIconDescriptor, aodIcon)
                 entry.icons =
-                    IconPack.buildPack(
-                        sbIcon,
-                        sbChipIcon,
-                        shelfIcon,
-                        aodIcon,
-                        entry.icons,
-                    )
+                    IconPack.buildPack(sbIcon, sbChipIcon, shelfIcon, aodIcon, entry.icons)
             } catch (e: InflationException) {
                 entry.icons = IconPack.buildEmptyPack(entry.icons)
                 throw e
             }
+        }
+
+    /** Update the [StatusBarIconView] for the given [NotificationEntry]. */
+    fun updateSbIcon(entry: NotificationEntry, iconView: StatusBarIconView) =
+        traceSection("IconManager.updateSbIcon") {
+            StatusBarConnectedDisplays.assertInNewMode()
+
+            val (normalIconDescriptor, _) = getIconDescriptors(entry)
+            val notificationContentDescription =
+                entry.sbn.notification?.let { iconBuilder.getIconContentDescription(it) }
+            iconView.setNotification(entry.sbn, notificationContentDescription)
+            setIcon(entry, normalIconDescriptor, iconView)
         }
 
     /**
@@ -178,11 +224,15 @@ constructor(
                 return@traceSection
             }
 
+            if (StatusBarConnectedDisplays.isEnabled) {
+                onIconUpdateRequiredListeners.onEach { it.onIconUpdateRequired(entry) }
+            }
+
             if (usingCache && !Flags.notificationsBackgroundIcons()) {
                 Log.wtf(
                     TAG,
                     "Updating using the cache is not supported when the " +
-                        "notifications_background_icons flag is off"
+                        "notifications_background_icons flag is off",
                 )
             }
             if (!usingCache || !Flags.notificationsBackgroundIcons()) {
@@ -249,10 +299,6 @@ constructor(
         val (icon: Icon?, type: StatusBarIcon.Type) =
             if (showPeopleAvatar) {
                 createPeopleAvatar(entry) to StatusBarIcon.Type.PeopleAvatar
-            } else if (
-                android.app.Flags.notificationsUseMonochromeAppIcon() && n.shouldUseAppIcon()
-            ) {
-                n.smallIcon to StatusBarIcon.Type.MaybeMonochromeAppIcon
             } else {
                 n.smallIcon to StatusBarIcon.Type.NotifSmallIcon
             }
@@ -267,33 +313,25 @@ constructor(
 
     private fun getCachedIconDescriptor(
         entry: NotificationEntry,
-        showPeopleAvatar: Boolean
+        showPeopleAvatar: Boolean,
     ): StatusBarIcon? {
         val peopleAvatarDescriptor = entry.icons.peopleAvatarDescriptor
-        val appIconDescriptor = entry.icons.appIconDescriptor
         val smallIconDescriptor = entry.icons.smallIconDescriptor
 
         // If cached, return corresponding cached values
         return when {
             showPeopleAvatar && peopleAvatarDescriptor != null -> peopleAvatarDescriptor
-            android.app.Flags.notificationsUseMonochromeAppIcon() && appIconDescriptor != null ->
-                appIconDescriptor
             smallIconDescriptor != null -> smallIconDescriptor
             else -> null
         }
     }
 
     private fun cacheIconDescriptor(entry: NotificationEntry, descriptor: StatusBarIcon) {
-        if (
-            android.app.Flags.notificationsUseAppIcon() ||
-                android.app.Flags.notificationsUseMonochromeAppIcon()
-        ) {
-            // If either of the new icon flags is enabled, we cache the icon all the time.
+        if (android.app.Flags.notificationsRedesignAppIcons()) {
+            // Although we're not actually using the app icon in the status bar, let's make sure
+            // we cache the icon all the time when the flag is on.
             when (descriptor.type) {
                 StatusBarIcon.Type.PeopleAvatar -> entry.icons.peopleAvatarDescriptor = descriptor
-                // When notificationsUseMonochromeAppIcon is enabled, we use the appIconDescriptor.
-                StatusBarIcon.Type.MaybeMonochromeAppIcon ->
-                    entry.icons.appIconDescriptor = descriptor
                 // When notificationsUseAppIcon is enabled, the app icon overrides the small icon.
                 // But either way, it's a good idea to cache the descriptor.
                 else -> entry.icons.smallIconDescriptor = descriptor
@@ -312,7 +350,7 @@ constructor(
     private fun setIcon(
         entry: NotificationEntry,
         iconDescriptor: StatusBarIcon,
-        iconView: StatusBarIconView
+        iconView: StatusBarIconView,
     ) {
         iconView.setShowsConversation(showsConversation(entry, iconView, iconDescriptor))
         iconView.setTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP)
@@ -323,7 +361,7 @@ constructor(
 
     private fun Icon.toStatusBarIcon(
         entry: NotificationEntry,
-        type: StatusBarIcon.Type
+        type: StatusBarIcon.Type,
     ): StatusBarIcon {
         val n = entry.sbn.notification
         return StatusBarIcon(
@@ -333,7 +371,7 @@ constructor(
             n.iconLevel,
             n.number,
             iconBuilder.getIconContentDescription(n),
-            type
+            type,
         )
     }
 
@@ -347,7 +385,7 @@ constructor(
                 } catch (e: Exception) {
                     Log.e(
                         TAG,
-                        "Error calling LauncherApps#getShortcutIcon for notification $entry: $e"
+                        "Error calling LauncherApps#getShortcutIcon for notification $entry: $e",
                     )
                 }
             }
@@ -431,7 +469,7 @@ constructor(
     private fun showsConversation(
         entry: NotificationEntry,
         iconView: StatusBarIconView,
-        iconDescriptor: StatusBarIcon
+        iconDescriptor: StatusBarIcon,
     ): Boolean {
         val usedInSensitiveContext =
             iconView === entry.icons.shelfIcon || iconView === entry.icons.aodIcon

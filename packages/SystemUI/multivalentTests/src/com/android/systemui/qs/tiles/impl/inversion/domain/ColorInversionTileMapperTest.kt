@@ -49,7 +49,7 @@ class ColorInversionTileMapperTest : SysuiTestCase() {
                     addOverride(R.drawable.qs_invert_colors_icon_on, TestStubDrawable())
                 }
                 .resources,
-            context.theme
+            context.theme,
         )
     }
 
@@ -63,7 +63,7 @@ class ColorInversionTileMapperTest : SysuiTestCase() {
             createColorInversionTileState(
                 QSTileState.ActivationState.INACTIVE,
                 subtitleArray[1],
-                R.drawable.qs_invert_colors_icon_off
+                R.drawable.qs_invert_colors_icon_off,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -78,7 +78,7 @@ class ColorInversionTileMapperTest : SysuiTestCase() {
             createColorInversionTileState(
                 QSTileState.ActivationState.ACTIVE,
                 subtitleArray[2],
-                R.drawable.qs_invert_colors_icon_on
+                R.drawable.qs_invert_colors_icon_on,
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -90,7 +90,7 @@ class ColorInversionTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_inversion_label)
         return QSTileState(
-            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
+            Icon.Loaded(context.getDrawable(iconRes)!!, null),
             iconRes,
             label,
             activationState,
@@ -100,7 +100,7 @@ class ColorInversionTileMapperTest : SysuiTestCase() {
             null,
             QSTileState.SideViewIcon.None,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 }

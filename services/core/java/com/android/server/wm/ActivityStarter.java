@@ -55,6 +55,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.launchModeToString;
 import static android.os.Process.INVALID_UID;
 import static android.security.Flags.preventIntentRedirectAbortOrThrowException;
+import static android.security.Flags.preventIntentRedirectShowToast;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -105,6 +106,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.Overridable;
+import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -128,12 +130,14 @@ import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
+import android.widget.Toast;
 import android.window.RemoteTransition;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.ProtoLog;
+import com.android.server.UiThread;
 import com.android.server.am.ActivityManagerService.IntentCreatorToken;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
@@ -614,7 +618,7 @@ class ActivityStarter {
             // Check if the Intent was redirected
             if ((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN)
                     != 0) {
-                ActivityStarter.logAndThrowExceptionForIntentRedirect(
+                logAndThrowExceptionForIntentRedirect(supervisor.mService.mContext,
                         "Unparceled intent does not have a creator token set.", intent,
                         intentCreatorUid, intentCreatorPackage, resolvedCallingUid,
                         resolvedCallingPackage, null);
@@ -650,7 +654,7 @@ class ActivityStarter {
                                 intentGrants.merge(creatorIntentGrants);
                             }
                         } catch (SecurityException securityException) {
-                            ActivityStarter.logAndThrowExceptionForIntentRedirect(
+                            logAndThrowExceptionForIntentRedirect(supervisor.mService.mContext,
                                     "Creator URI Grant Caused Exception.", intent, intentCreatorUid,
                                     intentCreatorPackage, resolvedCallingUid,
                                     resolvedCallingPackage, securityException);
@@ -674,7 +678,7 @@ class ActivityStarter {
                                 intentGrants.merge(creatorIntentGrants);
                             }
                         } catch (SecurityException securityException) {
-                            ActivityStarter.logAndThrowExceptionForIntentRedirect(
+                            logAndThrowExceptionForIntentRedirect(supervisor.mService.mContext,
                                     "Creator URI Grant Caused Exception.", intent, intentCreatorUid,
                                     intentCreatorPackage, resolvedCallingUid,
                                     resolvedCallingPackage, securityException);
@@ -1033,7 +1037,6 @@ class ActivityStarter {
         mLastStartReason = request.reason;
         mLastStartActivityTimeMs = System.currentTimeMillis();
 
-        final ActivityRecord previousStart = mLastStartActivityRecord;
         final IApplicationThread caller = request.caller;
         Intent intent = request.intent;
         NeededUriGrants intentGrants = request.intentGrants;
@@ -1250,27 +1253,27 @@ class ActivityStarter {
                         requestCode, 0, intentCreatorUid, intentCreatorPackage, "",
                         request.ignoreTargetSecurity, inTask != null, null, resultRecord,
                         resultRootTask)) {
-                    abort = logAndAbortForIntentRedirect(
+                    abort = logAndAbortForIntentRedirect(mService.mContext,
                             "Creator checkStartAnyActivityPermission Caused abortion.",
                             intent, intentCreatorUid, intentCreatorPackage, callingUid,
                             callingPackage);
                 }
             } catch (SecurityException e) {
-                logAndThrowExceptionForIntentRedirect(
+                logAndThrowExceptionForIntentRedirect(mService.mContext,
                         "Creator checkStartAnyActivityPermission Caused Exception.",
                         intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage,
                         e);
             }
             if (!mService.mIntentFirewall.checkStartActivity(intent, intentCreatorUid,
                     0, resolvedType, aInfo.applicationInfo)) {
-                abort = logAndAbortForIntentRedirect(
+                abort = logAndAbortForIntentRedirect(mService.mContext,
                         "Creator IntentFirewall.checkStartActivity Caused abortion.",
                         intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage);
             }
 
             if (!mService.getPermissionPolicyInternal().checkStartActivity(intent,
                     intentCreatorUid, intentCreatorPackage)) {
-                abort = logAndAbortForIntentRedirect(
+                abort = logAndAbortForIntentRedirect(mService.mContext,
                         "Creator PermissionPolicyService.checkStartActivity Caused abortion.",
                         intent, intentCreatorUid, intentCreatorPackage, callingUid, callingPackage);
             }
@@ -1835,7 +1838,7 @@ class ActivityStarter {
                     remoteTransition, null /* displayChange */);
         } else if (result == START_SUCCESS && mStartActivity.isState(RESUMED)) {
             // Do nothing if the activity is started and is resumed directly.
-        } else if (isStarted) {
+        } else if (isStarted && (mBalCode != BAL_BLOCK || mDoResume)) {
             // Make the collecting transition wait until this request is ready.
             if (transition != null) {
                 transition.setReady(started, false);
@@ -2346,7 +2349,8 @@ class ActivityStarter {
         // When there is a reused activity and the current result is a trampoline activity,
         // set the reused activity as the result.
         if (mLastStartActivityRecord != null
-                && (mLastStartActivityRecord.finishing || mLastStartActivityRecord.noDisplay)) {
+                && (mLastStartActivityRecord.finishing
+                    || mLastStartActivityRecord.isNoDisplay())) {
             mLastStartActivityRecord = targetTaskTop;
         }
 
@@ -3596,25 +3600,38 @@ class ActivityStarter {
         pw.println(mInTaskFragment);
     }
 
-    static void logAndThrowExceptionForIntentRedirect(@NonNull String message,
-            @NonNull Intent intent, int intentCreatorUid, @Nullable String intentCreatorPackage,
-            int callingUid, @Nullable String callingPackage,
+    static void logAndThrowExceptionForIntentRedirect(@NonNull Context context,
+            @NonNull String message, @NonNull Intent intent, int intentCreatorUid,
+            @Nullable String intentCreatorPackage, int callingUid, @Nullable String callingPackage,
             @Nullable SecurityException originalException) {
         String msg = getIntentRedirectPreventedLogMessage(message, intent, intentCreatorUid,
                 intentCreatorPackage, callingUid, callingPackage);
         Slog.wtf(TAG, msg);
+        if (preventIntentRedirectShowToast()) {
+            UiThread.getHandler().post(
+                    () -> Toast.makeText(context,
+                            "Activity launch blocked. go/report-bug-intentRedir to report a bug",
+                            Toast.LENGTH_LONG).show());
+        }
         if (preventIntentRedirectAbortOrThrowException() && CompatChanges.isChangeEnabled(
                 ENABLE_PREVENT_INTENT_REDIRECT_TAKE_ACTION, callingUid)) {
             throw new SecurityException(msg, originalException);
         }
     }
 
-    private static boolean logAndAbortForIntentRedirect(@NonNull String message,
-            @NonNull Intent intent, int intentCreatorUid, @Nullable String intentCreatorPackage,
-            int callingUid, @Nullable String callingPackage) {
+    private static boolean logAndAbortForIntentRedirect(@NonNull Context context,
+            @NonNull String message, @NonNull Intent intent, int intentCreatorUid,
+            @Nullable String intentCreatorPackage, int callingUid,
+            @Nullable String callingPackage) {
         String msg = getIntentRedirectPreventedLogMessage(message, intent, intentCreatorUid,
                 intentCreatorPackage, callingUid, callingPackage);
         Slog.wtf(TAG, msg);
+        if (preventIntentRedirectShowToast()) {
+            UiThread.getHandler().post(
+                    () -> Toast.makeText(context,
+                            "Activity launch blocked. go/report-bug-intentRedir to report a bug",
+                            Toast.LENGTH_LONG).show());
+        }
         return preventIntentRedirectAbortOrThrowException() && CompatChanges.isChangeEnabled(
                 ENABLE_PREVENT_INTENT_REDIRECT_TAKE_ACTION, callingUid);
     }

@@ -112,6 +112,18 @@ flag {
 }
 
 flag {
+  name: "app_compat_async_relayout"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether we use the SurfaceViewHost overload to apply a change in /n"
+               "position and size in a Transaction provided by a callback invoked /n"
+               "after the View relayout."
+  bug: "322463856"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "app_compat_refactoring"
   namespace: "large_screen_experiences_app_compat"
   description: "Whether the changes about app compat refactoring are enabled./n"

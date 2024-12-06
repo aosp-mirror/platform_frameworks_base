@@ -148,10 +148,9 @@ import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinatorLogger;
 import com.android.systemui.statusbar.notification.data.repository.NotificationsKeyguardViewStateRepository;
@@ -179,12 +178,12 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
@@ -246,7 +245,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected NotificationPanelView mView;
     @Mock protected LayoutInflater mLayoutInflater;
     @Mock protected DynamicPrivacyController mDynamicPrivacyController;
-    @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock protected ShadeTouchableRegionManager mShadeTouchableRegionManager;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected DozeLog mDozeLog;
     private final ShadeLogger mShadeLog = new ShadeLogger(logcatLogBuffer());
@@ -350,6 +349,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
     @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
+    @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -428,7 +428,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 mKosmos.getDeviceProvisioningInteractor(),
-                new FakeDisableFlagsRepository(),
+                mKosmos.getDisableFlagsInteractor(),
                 mDozeParameters,
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
@@ -703,7 +703,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mMetricsLogger,
                 mShadeLog,
                 mConfigurationController,
-                () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
+                () -> flingAnimationUtilsBuilder, mShadeTouchableRegionManager,
                 mConversationNotificationManager, mMediaHierarchyManager,
                 mStatusBarKeyguardViewManager,
                 mGutsManager,
@@ -819,7 +819,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
                 mShadeHeaderController,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
+                () -> mStatusBarLongPressGestureDetector,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mScrimController,

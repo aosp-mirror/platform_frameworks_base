@@ -17,12 +17,14 @@
 package com.android.systemui.inputdevice.tutorial.domain.interactor
 
 import android.os.SystemProperties
+import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.TOUCHPAD
 import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedulerRepository
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.Companion.LAUNCH_DELAY
 import com.android.systemui.keyboard.data.repository.KeyboardRepository
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
@@ -35,6 +37,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.toKotlinDuration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -96,6 +99,9 @@ constructor(
     private suspend fun waitForDeviceConnection(deviceType: DeviceType) =
         isAnyDeviceConnected[deviceType]!!.filter { it }.first()
 
+    // Only for testing notifications. This should behave independently from scheduling
+    @VisibleForTesting val commandTutorials = MutableStateFlow(TutorialType.NONE)
+
     // Merging two flows ensures that tutorial is launched consecutively to avoid race condition
     val tutorials: Flow<TutorialType> =
         merge(touchpadScheduleFlow, keyboardScheduleFlow).map {
@@ -146,6 +152,15 @@ constructor(
                         pw.println("Touchpad connect time = ${repo.firstConnectionTime(TOUCHPAD)}")
                         pw.println("         launch time = ${repo.launchTime(TOUCHPAD)}")
                     }
+                "notify" -> {
+                    if (args.size != 2) help(pw)
+                    when (args[1]) {
+                        "keyboard" -> commandTutorials.value = TutorialType.KEYBOARD
+                        "touchpad" -> commandTutorials.value = TutorialType.TOUCHPAD
+                        "both" -> commandTutorials.value = TutorialType.BOTH
+                        else -> help(pw)
+                    }
+                }
                 else -> help(pw)
             }
         }
@@ -155,6 +170,7 @@ constructor(
             pw.println("Available commands:")
             pw.println("  clear")
             pw.println("  info")
+            pw.println("  notify [keyboard|touchpad|both]")
         }
     }
 

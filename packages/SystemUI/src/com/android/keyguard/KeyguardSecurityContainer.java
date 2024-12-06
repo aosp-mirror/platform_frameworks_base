@@ -32,6 +32,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
+import static com.android.systemui.Flags.gsfBouncer;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
@@ -51,6 +52,7 @@ import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -1335,6 +1337,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     true);
             mUserSwitcherViewGroup = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
+            if (gsfBouncer()) {
+                mUserSwitcher.setTypeface(Typeface.create("gsf-label-medium", Typeface.NORMAL));
+            }
         }
 
         interface UserSwitcherCallback {

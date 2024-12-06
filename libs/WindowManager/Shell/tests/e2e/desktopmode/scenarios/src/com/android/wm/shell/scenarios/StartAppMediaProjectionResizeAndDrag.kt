@@ -59,7 +59,7 @@ open class StartAppMediaProjectionResizeAndDrag {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(0)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test

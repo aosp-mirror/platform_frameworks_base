@@ -19,6 +19,8 @@ package android.graphics;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -63,6 +65,7 @@ public class ImageFormat {
              RAW_DEPTH10,
              PRIVATE,
              HEIC,
+             HEIC_ULTRAHDR,
              JPEG_R
      })
      public @interface Format {
@@ -832,6 +835,16 @@ public class ImageFormat {
     public static final int HEIC = 0x48454946;
 
     /**
+     * High Efficiency Image File Format (HEIF) with embedded HDR gain map
+     *
+     * <p>This format defines the HEIC brand of High Efficiency Image File
+     * Format as described in ISO/IEC 23008-12:2024 with HDR gain map according
+     * to ISO/CD 21496‐1.</p>
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_HEIF_GAINMAP)
+    public static final int HEIC_ULTRAHDR = 0x1006;
+
+    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
      *
@@ -925,6 +938,11 @@ public class ImageFormat {
         }
         if (android.media.codec.Flags.p210FormatSupport() && format == YCBCR_P210) {
             return true;
+        }
+        if (Flags.cameraHeifGainmap()){
+            if (format == HEIC_ULTRAHDR) {
+                return true;
+            }
         }
         return false;
     }

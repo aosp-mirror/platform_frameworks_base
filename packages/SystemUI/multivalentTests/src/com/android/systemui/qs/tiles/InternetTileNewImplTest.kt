@@ -128,7 +128,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
                 viewModel,
                 dialogManager,
                 wifiStateWorker,
-                accessPointController
+                accessPointController,
             )
 
         underTest.initialize()
@@ -156,10 +156,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         testScope.runTest {
             connectivityRepository.defaultConnections.value = DefaultConnectionModel()
             wifiRepository.wifiScanResults.value =
-                listOf(
-                    WifiScanEntry(ssid = "ssid 1"),
-                    WifiScanEntry(ssid = "ssid 2"),
-                )
+                listOf(WifiScanEntry(ssid = "ssid 1"), WifiScanEntry(ssid = "ssid 2"))
 
             runCurrent()
             looper.processAllMessages()
@@ -204,10 +201,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         testScope.runTest {
             airplaneModeRepository.setIsAirplaneMode(true)
             connectivityRepository.defaultConnections.value =
-                DefaultConnectionModel(
-                    wifi = Wifi(true),
-                    isValidated = true,
-                )
+                DefaultConnectionModel(wifi = Wifi(true), isValidated = true)
             wifiRepository.setIsWifiEnabled(true)
             wifiRepository.setWifiNetwork(ACTIVE_WIFI)
 
@@ -222,10 +216,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
     fun wifiConnected() =
         testScope.runTest {
             connectivityRepository.defaultConnections.value =
-                DefaultConnectionModel(
-                    wifi = Wifi(true),
-                    isValidated = true,
-                )
+                DefaultConnectionModel(wifi = Wifi(true), isValidated = true)
 
             wifiRepository.setIsWifiEnabled(true)
             wifiRepository.setWifiNetwork(ACTIVE_WIFI)
@@ -242,6 +233,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         whenever(wifiStateWorker.isWifiEnabled).thenReturn(true)
 
         underTest.secondaryClick(null)
+        looper.processAllMessages()
 
         verify(wifiStateWorker, times(1)).isWifiEnabled = eq(false)
     }
@@ -251,6 +243,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         whenever(wifiStateWorker.isWifiEnabled).thenReturn(false)
 
         underTest.secondaryClick(null)
+        looper.processAllMessages()
 
         verify(wifiStateWorker, times(1)).isWifiEnabled = eq(true)
     }
@@ -258,10 +251,6 @@ class InternetTileNewImplTest : SysuiTestCase() {
     companion object {
         const val WIFI_SSID = "test ssid"
         val ACTIVE_WIFI =
-            WifiNetworkModel.Active.of(
-                isValidated = true,
-                level = 4,
-                ssid = WIFI_SSID,
-            )
+            WifiNetworkModel.Active.of(isValidated = true, level = 4, ssid = WIFI_SSID)
     }
 }

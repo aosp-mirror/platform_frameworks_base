@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -117,6 +118,7 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
@@ -181,6 +183,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> mFaceAuthenticatorsRegisteredCaptor;
     @Captor
+    private ArgumentCaptor<KeyguardManager.KeyguardLockedStateListener> mKeyguardLockedStateCaptor;
+    @Captor
     private ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
     @Captor
     private ArgumentCaptor<Integer> mModalityCaptor;
@@ -190,6 +194,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private VibratorHelper mVibratorHelper;
+    @Mock
+    private KeyguardManager mKeyguardManager;
     @Mock
     private MSDLPlayer mMSDLPlayer;
 
@@ -270,6 +276,9 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mFpAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(fpProps);
         mFaceAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(faceProps);
+
+        verify(mKeyguardManager).addKeyguardLockedStateListener(any(),
+                mKeyguardLockedStateCaptor.capture());
 
         // Ensures that the operations posted on the handler get executed.
         waitForIdleSync();
@@ -976,6 +985,18 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCloseDialog_whenDeviceLocks() throws Exception {
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+
+        mKeyguardLockedStateCaptor.getValue().onKeyguardLockedStateChanged(
+                true /* isKeyguardLocked */);
+
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
+    }
+
+    @Test
     public void testShowDialog_whenOwnerNotInForeground() {
         PromptInfo promptInfo = createTestPromptInfo();
         promptInfo.setAllowBackgroundAuthentication(false);
@@ -1187,11 +1208,12 @@ public class AuthControllerTest extends SysuiTestCase {
         TestableAuthController(Context context) {
             super(context, null /* applicationCoroutineScope */,
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
-                    mFingerprintManager, mFaceManager, () -> mUdfpsController, mDisplayManager,
+                    mFingerprintManager, mFaceManager, Optional.empty(),
+                    () -> mUdfpsController, mDisplayManager,
                     mWakefulnessLifecycle, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
                     () -> mLogContextInteractor, () -> mPromptSelectionInteractor,
                     () -> mCredentialViewModel, () -> mPromptViewModel, mInteractionJankMonitor,
-                    mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper,
+                    mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper, mKeyguardManager,
                     mLazyViewCapture, mMSDLPlayer);
         }
 

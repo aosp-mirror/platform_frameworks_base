@@ -20,12 +20,15 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.GradientDrawable
 import android.util.FloatProperty
 import android.util.Log
 import android.util.MathUtils
+import android.util.TimeUtils
+import android.view.Choreographer
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
@@ -33,13 +36,14 @@ import android.view.ViewOverlay
 import android.view.animation.Interpolator
 import android.window.WindowAnimationState
 import com.android.app.animation.Interpolators.LINEAR
-import com.android.app.animation.MathUtils.max
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.dynamicanimation.animation.SpringAnimation
 import com.android.internal.dynamicanimation.animation.SpringForce
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
+import com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived
 import java.util.concurrent.Executor
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -91,6 +95,14 @@ class TransitionAnimator(
             )
         }
 
+        /**
+         * Similar to [getProgress] above, bug the delay and duration are expressed as percentages
+         * of the animation duration (between 0f and 1f).
+         */
+        internal fun getProgress(linearProgress: Float, delay: Float, duration: Float): Float {
+            return getProgressInternal(totalDuration = 1f, linearProgress, delay, duration)
+        }
+
         private fun getProgressInternal(
             totalDuration: Float,
             linearProgress: Float,
@@ -104,12 +116,25 @@ class TransitionAnimator(
             )
         }
 
-        internal fun checkReturnAnimationFrameworkFlag() {
-            check(returnAnimationFrameworkLibrary()) {
-                "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag is " +
-                    "disabled"
+        fun assertReturnAnimations() {
+            check(returnAnimationsEnabled()) {
+                "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag " +
+                    "is disabled"
             }
         }
+
+        fun returnAnimationsEnabled() = returnAnimationFrameworkLibrary()
+
+        fun assertLongLivedReturnAnimations() {
+            check(longLivedReturnAnimationsEnabled()) {
+                "Long-lived registrations cannot be used when the " +
+                    "returnAnimationFrameworkLibrary or the " +
+                    "returnAnimationFrameworkLongLived flag are disabled"
+            }
+        }
+
+        fun longLivedReturnAnimationsEnabled() =
+            returnAnimationFrameworkLibrary() && returnAnimationFrameworkLongLived()
 
         internal fun WindowAnimationState.toTransitionState() =
             State().also {
@@ -262,10 +287,10 @@ class TransitionAnimator(
         var centerY: Float,
         var scale: Float = 0f,
 
-        // Cached values.
-        var previousCenterX: Float = -1f,
-        var previousCenterY: Float = -1f,
-        var previousScale: Float = -1f,
+        // Update flags (used to decide whether it's time to update the transition state).
+        var isCenterXUpdated: Boolean = false,
+        var isCenterYUpdated: Boolean = false,
+        var isScaleUpdated: Boolean = false,
 
         // Completion flags.
         var isCenterXDone: Boolean = false,
@@ -286,6 +311,7 @@ class TransitionAnimator(
 
             override fun setValue(state: SpringState, value: Float) {
                 state.centerX = value
+                state.isCenterXUpdated = true
             }
         },
         CENTER_Y {
@@ -295,6 +321,7 @@ class TransitionAnimator(
 
             override fun setValue(state: SpringState, value: Float) {
                 state.centerY = value
+                state.isCenterYUpdated = true
             }
         },
         SCALE {
@@ -304,6 +331,7 @@ class TransitionAnimator(
 
             override fun setValue(state: SpringState, value: Float) {
                 state.scale = value
+                state.isScaleUpdated = true
             }
         };
 
@@ -340,6 +368,7 @@ class TransitionAnimator(
         @get:VisibleForTesting val springY: SpringAnimation,
         @get:VisibleForTesting val springScale: SpringAnimation,
         private val springState: SpringState,
+        private val startFrameTime: Long,
         private val onAnimationStart: Runnable,
     ) : Animation {
         @get:VisibleForTesting
@@ -348,6 +377,42 @@ class TransitionAnimator(
 
         override fun start() {
             onAnimationStart.run()
+
+            // If no start frame time is provided, we start the springs normally.
+            if (startFrameTime < 0) {
+                startSprings()
+                return
+            }
+
+            // This function is not guaranteed to be called inside a frame. We try to access the
+            // frame time immediately, but if we're not inside a frame this will throw an exception.
+            // We must then post a callback to be run at the beginning of the next frame.
+            try {
+                initAndStartSprings(Choreographer.getInstance().frameTime)
+            } catch (_: IllegalStateException) {
+                Choreographer.getInstance().postFrameCallback { frameTimeNanos ->
+                    initAndStartSprings(frameTimeNanos / TimeUtils.NANOS_PER_MS)
+                }
+            }
+        }
+
+        private fun initAndStartSprings(frameTime: Long) {
+            // Initialize the spring as if it had started at the time that its start state
+            // was created.
+            springX.doAnimationFrame(startFrameTime)
+            springY.doAnimationFrame(startFrameTime)
+            springScale.doAnimationFrame(startFrameTime)
+            // Move the spring time forward to the current frame, so it updates its internal state
+            // following the initial momentum over the elapsed time.
+            springX.doAnimationFrame(frameTime)
+            springY.doAnimationFrame(frameTime)
+            springScale.doAnimationFrame(frameTime)
+            // Actually start the spring. We do this after the previous calls because the framework
+            // doesn't like it when you call doAnimationFrame() after start() with an earlier time.
+            startSprings()
+        }
+
+        private fun startSprings() {
             springX.start()
             springY.start()
             springScale.start()
@@ -444,8 +509,10 @@ class TransitionAnimator(
      * punching a hole in the [transition container][Controller.transitionContainer]) iff [drawHole]
      * is true.
      *
-     * If [useSpring] is true, a multi-spring animation will be used instead of the default
-     * interpolators.
+     * If [startVelocity] (expressed in pixels per second) is not null, a multi-spring animation
+     * using it for the initial momentum will be used instead of the default interpolators. In this
+     * case, [startFrameTime] (if non-negative) represents the frame time at which the springs
+     * should be started.
      */
     fun startAnimation(
         controller: Controller,
@@ -453,9 +520,11 @@ class TransitionAnimator(
         windowBackgroundColor: Int,
         fadeWindowBackgroundLayer: Boolean = true,
         drawHole: Boolean = false,
-        useSpring: Boolean = false,
+        startVelocity: PointF? = null,
+        startFrameTime: Long = -1,
     ): Animation {
-        if (!controller.isLaunching || useSpring) checkReturnAnimationFrameworkFlag()
+        if (!controller.isLaunching) assertReturnAnimations()
+        if (startVelocity != null) assertLongLivedReturnAnimations()
 
         // We add an extra layer with the same color as the dialog/app splash screen background
         // color, which is usually the same color of the app background. We first fade in this layer
@@ -474,7 +543,8 @@ class TransitionAnimator(
                 windowBackgroundLayer,
                 fadeWindowBackgroundLayer,
                 drawHole,
-                useSpring,
+                startVelocity,
+                startFrameTime,
             )
             .apply { start() }
     }
@@ -487,7 +557,8 @@ class TransitionAnimator(
         windowBackgroundLayer: GradientDrawable,
         fadeWindowBackgroundLayer: Boolean = true,
         drawHole: Boolean = false,
-        useSpring: Boolean = false,
+        startVelocity: PointF? = null,
+        startFrameTime: Long = -1,
     ): Animation {
         val transitionContainer = controller.transitionContainer
         val transitionContainerOverlay = transitionContainer.overlay
@@ -504,11 +575,13 @@ class TransitionAnimator(
             openingWindowSyncView != null &&
                 openingWindowSyncView.viewRootImpl != controller.transitionContainer.viewRootImpl
 
-        return if (useSpring && springTimings != null && springInterpolators != null) {
+        return if (startVelocity != null && springTimings != null && springInterpolators != null) {
             createSpringAnimation(
                 controller,
                 startState,
                 endState,
+                startVelocity,
+                startFrameTime,
                 windowBackgroundLayer,
                 transitionContainer,
                 transitionContainerOverlay,
@@ -693,6 +766,8 @@ class TransitionAnimator(
         controller: Controller,
         startState: State,
         endState: State,
+        startVelocity: PointF,
+        startFrameTime: Long,
         windowBackgroundLayer: GradientDrawable,
         transitionContainer: View,
         transitionContainerOverlay: ViewGroupOverlay,
@@ -721,19 +796,20 @@ class TransitionAnimator(
 
         fun updateProgress(state: SpringState) {
             if (
-                (!state.isCenterXDone && state.centerX == state.previousCenterX) ||
-                    (!state.isCenterYDone && state.centerY == state.previousCenterY) ||
-                    (!state.isScaleDone && state.scale == state.previousScale)
+                !(state.isCenterXUpdated || state.isCenterXDone) ||
+                    !(state.isCenterYUpdated || state.isCenterYDone) ||
+                    !(state.isScaleUpdated || state.isScaleDone)
             ) {
                 // Because all three springs use the same update method, we only actually update
-                // when all values have changed, avoiding two redundant calls per frame.
+                // when all properties have received their new value (which could be unchanged from
+                // the previous one), avoiding two redundant calls per frame.
                 return
             }
 
-            // Update the latest values for the check above.
-            state.previousCenterX = state.centerX
-            state.previousCenterY = state.centerY
-            state.previousScale = state.scale
+            // Reset the update flags.
+            state.isCenterXUpdated = false
+            state.isCenterYUpdated = false
+            state.isScaleUpdated = false
 
             // Current scale-based values, that will be used to find the new animation bounds.
             val width =
@@ -829,6 +905,7 @@ class TransitionAnimator(
                         }
 
                     setStartValue(startState.centerX)
+                    setStartVelocity(startVelocity.x)
                     setMinValue(min(startState.centerX, endState.centerX))
                     setMaxValue(max(startState.centerX, endState.centerX))
 
@@ -850,6 +927,7 @@ class TransitionAnimator(
                         }
 
                     setStartValue(startState.centerY)
+                    setStartVelocity(startVelocity.y)
                     setMinValue(min(startState.centerY, endState.centerY))
                     setMaxValue(max(startState.centerY, endState.centerY))
 
@@ -880,7 +958,7 @@ class TransitionAnimator(
                     }
                 }
 
-        return MultiSpringAnimation(springX, springY, springScale, springState) {
+        return MultiSpringAnimation(springX, springY, springScale, springState, startFrameTime) {
             onAnimationStart(
                 controller,
                 isExpandingFullyAbove,
@@ -1057,15 +1135,13 @@ class TransitionAnimator(
             interpolators = springInterpolators!!
             val timings = springTimings!!
             fadeInProgress =
-                getProgressInternal(
-                    totalDuration = 1f,
+                getProgress(
                     linearProgress,
                     timings.contentBeforeFadeOutDelay,
                     timings.contentBeforeFadeOutDuration,
                 )
             fadeOutProgress =
-                getProgressInternal(
-                    totalDuration = 1f,
+                getProgress(
                     linearProgress,
                     timings.contentAfterFadeInDelay,
                     timings.contentAfterFadeInDuration,

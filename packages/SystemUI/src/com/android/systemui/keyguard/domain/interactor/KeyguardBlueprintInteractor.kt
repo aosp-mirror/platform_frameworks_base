@@ -19,6 +19,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
@@ -32,6 +33,7 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.Intra
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +41,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class KeyguardBlueprintInteractor
@@ -48,7 +49,7 @@ constructor(
     private val keyguardBlueprintRepository: KeyguardBlueprintRepository,
     @Application private val applicationScope: CoroutineScope,
     shadeInteractor: ShadeInteractor,
-    private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
     private val fingerprintPropertyInteractor: FingerprintPropertyInteractor,
     private val smartspaceSection: SmartspaceSection,
 ) : CoreStartable {

@@ -44,7 +44,7 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
-import android.os.vibrator.PwleSegment;
+import android.os.vibrator.PwlePoint;
 import android.os.vibrator.RampSegment;
 
 import androidx.test.InstrumentationRegistry;
@@ -274,9 +274,9 @@ public class VibratorControllerTest {
         when(mNativeWrapperMock.composePwleV2(any(), anyLong())).thenReturn(15L);
         VibratorController controller = createController();
 
-        PwleSegment[] primitives = new PwleSegment[]{
-                new PwleSegment(/* startAmplitude= */ 0, /* endAmplitude= */ 1,
-                        /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 200, /* duration= */ 10)
+        PwlePoint[] primitives = new PwlePoint[]{
+                new PwlePoint(/*amplitude=*/ 0, /*frequencyHz=*/ 100, /*timeMillis=*/ 0),
+                new PwlePoint(/*amplitude=*/ 1, /*frequencyHz=*/ 200, /*timeMillis=*/ 10)
         };
         assertEquals(15L, controller.on(primitives, 12));
         assertTrue(controller.isVibrating());

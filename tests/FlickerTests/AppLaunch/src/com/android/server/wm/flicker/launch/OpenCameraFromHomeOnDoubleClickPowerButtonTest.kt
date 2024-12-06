@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching camera from launcher by double pressing power button
  *
- * To run this test: `atest FlickerTestsAppLaunch:OpenCameraOnDoubleClickPowerButton`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenCameraFromHomeOnDoubleClickPowerButtonTest`
  *
  * Actions:
  * ```
@@ -140,14 +140,8 @@ class OpenCameraFromHomeOnDoubleClickPowerButtonTest(flicker: LegacyFlickerTest)
 
     @Postsubmit
     @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
-        flicker.assertLayers {
-            this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
-                    listOf(CAMERA_BACKGROUND)
-            )
-        }
-    }
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     @Postsubmit
     @Test
@@ -170,12 +164,5 @@ class OpenCameraFromHomeOnDoubleClickPowerButtonTest(flicker: LegacyFlickerTest)
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams() = LegacyFlickerTestFactory.nonRotationTests()
-
-        private val CAMERA_BACKGROUND =
-            ComponentNameMatcher(
-                "Background for SurfaceView" +
-                    "[com.google.android.GoogleCamera/" +
-                    "com.google.android.apps.camera.legacy.app.activity.main.CameraActivity]"
-            )
     }
 }

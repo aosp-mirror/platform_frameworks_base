@@ -50,6 +50,7 @@ import com.android.internal.util.ArrayUtils;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
+import dalvik.annotation.optimization.NeverInline;
 
 import libcore.util.SneakyThrow;
 
@@ -587,6 +588,17 @@ public final class Parcel {
         return parcel;
     }
 
+    @NeverInline
+    private void errorUsedWhileRecycling() {
+        Log.wtf(TAG, "Parcel used while recycled. "
+                + Log.getStackTraceString(new Throwable())
+                + " Original recycle call (if DEBUG_RECYCLE): ", mStack);
+    }
+
+    private void assertNotRecycled() {
+        if (mRecycled) errorUsedWhileRecycling();
+    }
+
     /**
      * Put a Parcel object back into the pool.  You must not touch
      * the object after this call.
@@ -635,6 +647,7 @@ public final class Parcel {
      * @hide
      */
     public void setReadWriteHelper(@Nullable ReadWriteHelper helper) {
+        assertNotRecycled();
         mReadWriteHelper = helper != null ? helper : ReadWriteHelper.DEFAULT;
     }
 
@@ -644,6 +657,7 @@ public final class Parcel {
      * @hide
      */
     public boolean hasReadWriteHelper() {
+        assertNotRecycled();
         return (mReadWriteHelper != null) && (mReadWriteHelper != ReadWriteHelper.DEFAULT);
     }
 
@@ -670,6 +684,7 @@ public final class Parcel {
      * @hide
      */
     public final void markSensitive() {
+        assertNotRecycled();
         nativeMarkSensitive(mNativePtr);
     }
 
@@ -686,6 +701,7 @@ public final class Parcel {
      * @hide
      */
     public final boolean isForRpc() {
+        assertNotRecycled();
         return nativeIsForRpc(mNativePtr);
     }
 
@@ -693,21 +709,25 @@ public final class Parcel {
     @ParcelFlags
     @TestApi
     public int getFlags() {
+        assertNotRecycled();
         return mFlags;
     }
 
     /** @hide */
     public void setFlags(@ParcelFlags int flags) {
+        assertNotRecycled();
         mFlags = flags;
     }
 
     /** @hide */
     public void addFlags(@ParcelFlags int flags) {
+        assertNotRecycled();
         mFlags |= flags;
     }
 
     /** @hide */
     private boolean hasFlags(@ParcelFlags int flags) {
+        assertNotRecycled();
         return (mFlags & flags) == flags;
     }
 
@@ -720,6 +740,7 @@ public final class Parcel {
     // We don't really need to protect it; even if 3p / non-system apps, nothing would happen.
     // This would only work when used on a reply parcel by a binder object that's allowed-blocking.
     public void setPropagateAllowBlocking() {
+        assertNotRecycled();
         addFlags(FLAG_PROPAGATE_ALLOW_BLOCKING);
     }
 
@@ -727,6 +748,7 @@ public final class Parcel {
      * Returns the total amount of data contained in the parcel.
      */
     public int dataSize() {
+        assertNotRecycled();
         return nativeDataSize(mNativePtr);
     }
 
@@ -735,6 +757,7 @@ public final class Parcel {
      * parcel.  That is, {@link #dataSize}-{@link #dataPosition}.
      */
     public final int dataAvail() {
+        assertNotRecycled();
         return nativeDataAvail(mNativePtr);
     }
 
@@ -743,6 +766,7 @@ public final class Parcel {
      * more than {@link #dataSize}.
      */
     public final int dataPosition() {
+        assertNotRecycled();
         return nativeDataPosition(mNativePtr);
     }
 
@@ -753,6 +777,7 @@ public final class Parcel {
      * data buffer.
      */
     public final int dataCapacity() {
+        assertNotRecycled();
         return nativeDataCapacity(mNativePtr);
     }
 
@@ -764,6 +789,7 @@ public final class Parcel {
      * @param size The new number of bytes in the Parcel.
      */
     public final void setDataSize(int size) {
+        assertNotRecycled();
         nativeSetDataSize(mNativePtr, size);
     }
 
@@ -773,6 +799,7 @@ public final class Parcel {
      * {@link #dataSize}.
      */
     public final void setDataPosition(int pos) {
+        assertNotRecycled();
         nativeSetDataPosition(mNativePtr, pos);
     }
 
@@ -784,11 +811,13 @@ public final class Parcel {
      * with this method.
      */
     public final void setDataCapacity(int size) {
+        assertNotRecycled();
         nativeSetDataCapacity(mNativePtr, size);
     }
 
     /** @hide */
     public final boolean pushAllowFds(boolean allowFds) {
+        assertNotRecycled();
         return nativePushAllowFds(mNativePtr, allowFds);
     }
 
@@ -809,6 +838,7 @@ public final class Parcel {
      * in different versions of the platform.
      */
     public final byte[] marshall() {
+        assertNotRecycled();
         return nativeMarshall(mNativePtr);
     }
 
@@ -816,15 +846,18 @@ public final class Parcel {
      * Fills the raw bytes of this Parcel with the supplied data.
      */
     public final void unmarshall(@NonNull byte[] data, int offset, int length) {
+        assertNotRecycled();
         nativeUnmarshall(mNativePtr, data, offset, length);
     }
 
     public final void appendFrom(Parcel parcel, int offset, int length) {
+        assertNotRecycled();
         nativeAppendFrom(mNativePtr, parcel.mNativePtr, offset, length);
     }
 
     /** @hide */
     public int compareData(Parcel other) {
+        assertNotRecycled();
         return nativeCompareData(mNativePtr, other.mNativePtr);
     }
 
@@ -835,6 +868,7 @@ public final class Parcel {
 
     /** @hide */
     public final void setClassCookie(Class clz, Object cookie) {
+        assertNotRecycled();
         if (mClassCookies == null) {
             mClassCookies = new ArrayMap<>();
         }
@@ -844,11 +878,13 @@ public final class Parcel {
     /** @hide */
     @Nullable
     public final Object getClassCookie(Class clz) {
+        assertNotRecycled();
         return mClassCookies != null ? mClassCookies.get(clz) : null;
     }
 
     /** @hide */
     public void removeClassCookie(Class clz, Object expectedCookie) {
+        assertNotRecycled();
         if (mClassCookies != null) {
             Object removedCookie = mClassCookies.remove(clz);
             if (removedCookie != expectedCookie) {
@@ -866,21 +902,25 @@ public final class Parcel {
      * @hide
      */
     public boolean hasClassCookie(Class clz) {
+        assertNotRecycled();
         return mClassCookies != null && mClassCookies.containsKey(clz);
     }
 
     /** @hide */
     public final void adoptClassCookies(Parcel from) {
+        assertNotRecycled();
         mClassCookies = from.mClassCookies;
     }
 
     /** @hide */
     public Map<Class, Object> copyClassCookies() {
+        assertNotRecycled();
         return new ArrayMap<>(mClassCookies);
     }
 
     /** @hide */
     public void putClassCookies(Map<Class, Object> cookies) {
+        assertNotRecycled();
         if (cookies == null) {
             return;
         }
@@ -892,14 +932,27 @@ public final class Parcel {
 
     /**
      * Report whether the parcel contains any marshalled file descriptors.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      */
     public boolean hasFileDescriptors() {
+        assertNotRecycled();
         return nativeHasFileDescriptors(mNativePtr);
     }
 
     /**
      * Report whether the parcel contains any marshalled file descriptors in the range defined by
      * {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *     {@link #dataSize()}.
@@ -909,6 +962,7 @@ public final class Parcel {
      * @throws IllegalArgumentException if the parameters are out of the permitted ranges.
      */
     public boolean hasFileDescriptors(int offset, int length) {
+        assertNotRecycled();
         return nativeHasFileDescriptorsInRange(mNativePtr, offset, length);
     }
 
@@ -920,6 +974,12 @@ public final class Parcel {
      *
      * <p>For most cases, it will use the self-reported {@link Parcelable#describeContents()} method
      * for that.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @throws IllegalArgumentException if you provide any object not supported by above methods
      *     (including if the unsupported object is inside a nested container).
@@ -990,15 +1050,29 @@ public final class Parcel {
      *
      * @throws UnsupportedOperationException if binder kernel driver was disabled or if method was
      *                                       invoked in case of Binder RPC protocol.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
+     *
      * @hide
      */
     public boolean hasBinders() {
+        assertNotRecycled();
         return nativeHasBinders(mNativePtr);
     }
 
     /**
      * Report whether the parcel contains any marshalled {@link IBinder} objects in the range
      * defined by {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *               {@link #dataSize()}.
@@ -1010,6 +1084,7 @@ public final class Parcel {
      * @hide
      */
     public boolean hasBinders(int offset, int length) {
+        assertNotRecycled();
         return nativeHasBindersInRange(mNativePtr, offset, length);
     }
 
@@ -1020,6 +1095,7 @@ public final class Parcel {
      * at the beginning of transactions as a header.
      */
     public final void writeInterfaceToken(@NonNull String interfaceName) {
+        assertNotRecycled();
         nativeWriteInterfaceToken(mNativePtr, interfaceName);
     }
 
@@ -1030,6 +1106,7 @@ public final class Parcel {
      * should propagate to the caller.
      */
     public final void enforceInterface(@NonNull String interfaceName) {
+        assertNotRecycled();
         nativeEnforceInterface(mNativePtr, interfaceName);
     }
 
@@ -1040,6 +1117,7 @@ public final class Parcel {
      * When used over binder, this exception should propagate to the caller.
      */
     public void enforceNoDataAvail() {
+        assertNotRecycled();
         final int n = dataAvail();
         if (n > 0) {
             throw new BadParcelableException("Parcel data not fully consumed, unread size: " + n);
@@ -1056,6 +1134,7 @@ public final class Parcel {
      * @hide
      */
     public boolean replaceCallingWorkSourceUid(int workSourceUid) {
+        assertNotRecycled();
         return nativeReplaceCallingWorkSourceUid(mNativePtr, workSourceUid);
     }
 
@@ -1072,6 +1151,7 @@ public final class Parcel {
      * @hide
      */
     public int readCallingWorkSourceUid() {
+        assertNotRecycled();
         return nativeReadCallingWorkSourceUid(mNativePtr);
     }
 
@@ -1081,6 +1161,7 @@ public final class Parcel {
      * @param b Bytes to place into the parcel.
      */
     public final void writeByteArray(@Nullable byte[] b) {
+        assertNotRecycled();
         writeByteArray(b, 0, (b != null) ? b.length : 0);
     }
 
@@ -1092,6 +1173,7 @@ public final class Parcel {
      * @param len Number of bytes to write.
      */
     public final void writeByteArray(@Nullable byte[] b, int offset, int len) {
+        assertNotRecycled();
         if (b == null) {
             writeInt(-1);
             return;
@@ -1113,6 +1195,7 @@ public final class Parcel {
      * @see #readBlob()
      */
     public final void writeBlob(@Nullable byte[] b) {
+        assertNotRecycled();
         writeBlob(b, 0, (b != null) ? b.length : 0);
     }
 
@@ -1131,6 +1214,7 @@ public final class Parcel {
      * @see #readBlob()
      */
     public final void writeBlob(@Nullable byte[] b, int offset, int len) {
+        assertNotRecycled();
         if (b == null) {
             writeInt(-1);
             return;
@@ -1149,6 +1233,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeInt(int val) {
+        assertNotRecycled();
         int err = nativeWriteInt(mNativePtr, val);
         if (err != OK) {
             nativeSignalExceptionForError(err);
@@ -1160,6 +1245,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeLong(long val) {
+        assertNotRecycled();
         int err = nativeWriteLong(mNativePtr, val);
         if (err != OK) {
             nativeSignalExceptionForError(err);
@@ -1171,6 +1257,7 @@ public final class Parcel {
      * dataPosition(), growing dataCapacity() if needed.
      */
     public final void writeFloat(float val) {
+        assertNotRecycled();
         int err = nativeWriteFloat(mNativePtr, val);
         if (err != OK) {
             nativeSignalExceptionForError(err);
@@ -1182,6 +1269,7 @@ public final class Parcel {
      * current dataPosition(), growing dataCapacity() if needed.
      */
     public final void writeDouble(double val) {
+        assertNotRecycled();
         int err = nativeWriteDouble(mNativePtr, val);
         if (err != OK) {
             nativeSignalExceptionForError(err);
@@ -1193,16 +1281,19 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeString(@Nullable String val) {
+        assertNotRecycled();
         writeString16(val);
     }
 
     /** {@hide} */
     public final void writeString8(@Nullable String val) {
+        assertNotRecycled();
         mReadWriteHelper.writeString8(this, val);
     }
 
     /** {@hide} */
     public final void writeString16(@Nullable String val) {
+        assertNotRecycled();
         mReadWriteHelper.writeString16(this, val);
     }
 
@@ -1214,16 +1305,19 @@ public final class Parcel {
      * @hide
      */
     public void writeStringNoHelper(@Nullable String val) {
+        assertNotRecycled();
         writeString16NoHelper(val);
     }
 
     /** {@hide} */
     public void writeString8NoHelper(@Nullable String val) {
+        assertNotRecycled();
         nativeWriteString8(mNativePtr, val);
     }
 
     /** {@hide} */
     public void writeString16NoHelper(@Nullable String val) {
+        assertNotRecycled();
         nativeWriteString16(mNativePtr, val);
     }
 
@@ -1235,6 +1329,7 @@ public final class Parcel {
      * for true or false, respectively, but may change in the future.
      */
     public final void writeBoolean(boolean val) {
+        assertNotRecycled();
         writeInt(val ? 1 : 0);
     }
 
@@ -1246,6 +1341,7 @@ public final class Parcel {
     @UnsupportedAppUsage
     @RavenwoodThrow(blockedBy = android.text.Spanned.class)
     public final void writeCharSequence(@Nullable CharSequence val) {
+        assertNotRecycled();
         TextUtils.writeToParcel(val, this, 0);
     }
 
@@ -1254,6 +1350,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeStrongBinder(IBinder val) {
+        assertNotRecycled();
         nativeWriteStrongBinder(mNativePtr, val);
     }
 
@@ -1262,6 +1359,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeStrongInterface(IInterface val) {
+        assertNotRecycled();
         writeStrongBinder(val == null ? null : val.asBinder());
     }
 
@@ -1276,6 +1374,7 @@ public final class Parcel {
      * if {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE} is set.</p>
      */
     public final void writeFileDescriptor(@NonNull FileDescriptor val) {
+        assertNotRecycled();
         nativeWriteFileDescriptor(mNativePtr, val);
     }
 
@@ -1284,6 +1383,7 @@ public final class Parcel {
      * This will be the new name for writeFileDescriptor, for consistency.
      **/
     public final void writeRawFileDescriptor(@NonNull FileDescriptor val) {
+        assertNotRecycled();
         nativeWriteFileDescriptor(mNativePtr, val);
     }
 
@@ -1294,6 +1394,7 @@ public final class Parcel {
      * @param value The array of objects to be written.
      */
     public final void writeRawFileDescriptorArray(@Nullable FileDescriptor[] value) {
+        assertNotRecycled();
         if (value != null) {
             int N = value.length;
             writeInt(N);
@@ -1313,6 +1414,7 @@ public final class Parcel {
      * the future.
      */
     public final void writeByte(byte val) {
+        assertNotRecycled();
         writeInt(val);
     }
 
@@ -1328,6 +1430,7 @@ public final class Parcel {
      * allows you to avoid mysterious type errors at the point of marshalling.
      */
     public final void writeMap(@Nullable Map val) {
+        assertNotRecycled();
         writeMapInternal((Map<String, Object>) val);
     }
 
@@ -1336,6 +1439,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.  The Map keys must be String objects.
      */
     /* package */ void writeMapInternal(@Nullable Map<String,Object> val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1361,6 +1465,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.  The Map keys must be String objects.
      */
     /* package */ void writeArrayMapInternal(@Nullable ArrayMap<String, Object> val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1371,7 +1476,6 @@ public final class Parcel {
         writeInt(N);
         if (DEBUG_ARRAY_MAP) {
             RuntimeException here =  new RuntimeException("here");
-            here.fillInStackTrace();
             Log.d(TAG, "Writing " + N + " ArrayMap entries", here);
         }
         int startPos;
@@ -1391,6 +1495,7 @@ public final class Parcel {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void writeArrayMap(@Nullable ArrayMap<String, Object> val) {
+        assertNotRecycled();
         writeArrayMapInternal(val);
     }
 
@@ -1409,6 +1514,7 @@ public final class Parcel {
      */
     public <T extends Parcelable> void writeTypedArrayMap(@Nullable ArrayMap<String, T> val,
             int parcelableFlags) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1430,6 +1536,7 @@ public final class Parcel {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void writeArraySet(@Nullable ArraySet<? extends Object> val) {
+        assertNotRecycled();
         final int size = (val != null) ? val.size() : -1;
         writeInt(size);
         for (int i = 0; i < size; i++) {
@@ -1442,6 +1549,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeBundle(@Nullable Bundle val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1455,6 +1563,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writePersistableBundle(@Nullable PersistableBundle val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1468,6 +1577,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeSize(@NonNull Size val) {
+        assertNotRecycled();
         writeInt(val.getWidth());
         writeInt(val.getHeight());
     }
@@ -1477,6 +1587,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeSizeF(@NonNull SizeF val) {
+        assertNotRecycled();
         writeFloat(val.getWidth());
         writeFloat(val.getHeight());
     }
@@ -1487,6 +1598,7 @@ public final class Parcel {
      * {@link #writeValue} and must follow the specification there.
      */
     public final void writeList(@Nullable List val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1506,6 +1618,7 @@ public final class Parcel {
      * {@link #writeValue} and must follow the specification there.
      */
     public final void writeArray(@Nullable Object[] val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1526,6 +1639,7 @@ public final class Parcel {
      * specification there.
      */
     public final <T> void writeSparseArray(@Nullable SparseArray<T> val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1541,6 +1655,7 @@ public final class Parcel {
     }
 
     public final void writeSparseBooleanArray(@Nullable SparseBooleanArray val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1559,6 +1674,7 @@ public final class Parcel {
      * @hide
      */
     public final void writeSparseIntArray(@Nullable SparseIntArray val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -1574,6 +1690,7 @@ public final class Parcel {
     }
 
     public final void writeBooleanArray(@Nullable boolean[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1608,6 +1725,7 @@ public final class Parcel {
     }
 
     private void ensureWithinMemoryLimit(int typeSize, @NonNull int... dimensions) {
+        assertNotRecycled();
         // For Multidimensional arrays, Calculate total object
         // which will be allocated.
         int totalObjects = 1;
@@ -1625,6 +1743,7 @@ public final class Parcel {
     }
 
     private void ensureWithinMemoryLimit(int typeSize, int length) {
+        assertNotRecycled();
         int estimatedAllocationSize = 0;
         try {
             estimatedAllocationSize = Math.multiplyExact(typeSize, length);
@@ -1648,6 +1767,7 @@ public final class Parcel {
 
     @Nullable
     public final boolean[] createBooleanArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_BOOLEAN, N);
         // >>2 as a fast divide-by-4 works in the create*Array() functions
@@ -1665,6 +1785,7 @@ public final class Parcel {
     }
 
     public final void readBooleanArray(@NonNull boolean[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1677,6 +1798,7 @@ public final class Parcel {
 
     /** @hide */
     public void writeShortArray(@Nullable short[] val) {
+        assertNotRecycled();
         if (val != null) {
             int n = val.length;
             writeInt(n);
@@ -1691,6 +1813,7 @@ public final class Parcel {
     /** @hide */
     @Nullable
     public short[] createShortArray() {
+        assertNotRecycled();
         int n = readInt();
         ensureWithinMemoryLimit(SIZE_SHORT, n);
         if (n >= 0 && n <= (dataAvail() >> 2)) {
@@ -1706,6 +1829,7 @@ public final class Parcel {
 
     /** @hide */
     public void readShortArray(@NonNull short[] val) {
+        assertNotRecycled();
         int n = readInt();
         if (n == val.length) {
             for (int i = 0; i < n; i++) {
@@ -1717,6 +1841,7 @@ public final class Parcel {
     }
 
     public final void writeCharArray(@Nullable char[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1730,6 +1855,7 @@ public final class Parcel {
 
     @Nullable
     public final char[] createCharArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_CHAR, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
@@ -1744,6 +1870,7 @@ public final class Parcel {
     }
 
     public final void readCharArray(@NonNull char[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1755,6 +1882,7 @@ public final class Parcel {
     }
 
     public final void writeIntArray(@Nullable int[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1768,6 +1896,7 @@ public final class Parcel {
 
     @Nullable
     public final int[] createIntArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_INT, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
@@ -1782,6 +1911,7 @@ public final class Parcel {
     }
 
     public final void readIntArray(@NonNull int[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1793,6 +1923,7 @@ public final class Parcel {
     }
 
     public final void writeLongArray(@Nullable long[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1806,6 +1937,7 @@ public final class Parcel {
 
     @Nullable
     public final long[] createLongArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_LONG, N);
         // >>3 because stored longs are 64 bits
@@ -1821,6 +1953,7 @@ public final class Parcel {
     }
 
     public final void readLongArray(@NonNull long[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1832,6 +1965,7 @@ public final class Parcel {
     }
 
     public final void writeFloatArray(@Nullable float[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1845,6 +1979,7 @@ public final class Parcel {
 
     @Nullable
     public final float[] createFloatArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_FLOAT, N);
         // >>2 because stored floats are 4 bytes
@@ -1860,6 +1995,7 @@ public final class Parcel {
     }
 
     public final void readFloatArray(@NonNull float[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1871,6 +2007,7 @@ public final class Parcel {
     }
 
     public final void writeDoubleArray(@Nullable double[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1884,6 +2021,7 @@ public final class Parcel {
 
     @Nullable
     public final double[] createDoubleArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_DOUBLE, N);
         // >>3 because stored doubles are 8 bytes
@@ -1899,6 +2037,7 @@ public final class Parcel {
     }
 
     public final void readDoubleArray(@NonNull double[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1910,20 +2049,24 @@ public final class Parcel {
     }
 
     public final void writeStringArray(@Nullable String[] val) {
+        assertNotRecycled();
         writeString16Array(val);
     }
 
     @Nullable
     public final String[] createStringArray() {
+        assertNotRecycled();
         return createString16Array();
     }
 
     public final void readStringArray(@NonNull String[] val) {
+        assertNotRecycled();
         readString16Array(val);
     }
 
     /** {@hide} */
     public final void writeString8Array(@Nullable String[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1938,6 +2081,7 @@ public final class Parcel {
     /** {@hide} */
     @Nullable
     public final String[] createString8Array() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
@@ -1953,6 +2097,7 @@ public final class Parcel {
 
     /** {@hide} */
     public final void readString8Array(@NonNull String[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -1965,6 +2110,7 @@ public final class Parcel {
 
     /** {@hide} */
     public final void writeString16Array(@Nullable String[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -1979,6 +2125,7 @@ public final class Parcel {
     /** {@hide} */
     @Nullable
     public final String[] createString16Array() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
@@ -1994,6 +2141,7 @@ public final class Parcel {
 
     /** {@hide} */
     public final void readString16Array(@NonNull String[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -2005,6 +2153,7 @@ public final class Parcel {
     }
 
     public final void writeBinderArray(@Nullable IBinder[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -2029,6 +2178,7 @@ public final class Parcel {
      */
     public final <T extends IInterface> void writeInterfaceArray(
             @SuppressLint("ArrayReturn") @Nullable T[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -2044,6 +2194,7 @@ public final class Parcel {
      * @hide
      */
     public final void writeCharSequenceArray(@Nullable CharSequence[] val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -2059,6 +2210,7 @@ public final class Parcel {
      * @hide
      */
     public final void writeCharSequenceList(@Nullable ArrayList<CharSequence> val) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.size();
             writeInt(N);
@@ -2072,6 +2224,7 @@ public final class Parcel {
 
     @Nullable
     public final IBinder[] createBinderArray() {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
@@ -2086,6 +2239,7 @@ public final class Parcel {
     }
 
     public final void readBinderArray(@NonNull IBinder[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -2107,6 +2261,7 @@ public final class Parcel {
     @Nullable
     public final <T extends IInterface> T[] createInterfaceArray(
             @NonNull IntFunction<T[]> newArray, @NonNull Function<IBinder, T> asInterface) {
+        assertNotRecycled();
         int N = readInt();
         ensureWithinMemoryLimit(SIZE_COMPLEX_TYPE, N);
         if (N >= 0) {
@@ -2131,6 +2286,7 @@ public final class Parcel {
     public final <T extends IInterface> void readInterfaceArray(
             @SuppressLint("ArrayReturn") @NonNull T[] val,
             @NonNull Function<IBinder, T> asInterface) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -2156,6 +2312,7 @@ public final class Parcel {
      * @see Parcelable
      */
     public final <T extends Parcelable> void writeTypedList(@Nullable List<T> val) {
+        assertNotRecycled();
         writeTypedList(val, 0);
     }
 
@@ -2175,6 +2332,7 @@ public final class Parcel {
      */
     public final <T extends Parcelable> void writeTypedSparseArray(@Nullable SparseArray<T> val,
             int parcelableFlags) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2204,6 +2362,7 @@ public final class Parcel {
      * @see Parcelable
      */
     public <T extends Parcelable> void writeTypedList(@Nullable List<T> val, int parcelableFlags) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2229,6 +2388,7 @@ public final class Parcel {
      * @see #readStringList
      */
     public final void writeStringList(@Nullable List<String> val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2254,6 +2414,7 @@ public final class Parcel {
      * @see #readBinderList
      */
     public final void writeBinderList(@Nullable List<IBinder> val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2276,6 +2437,7 @@ public final class Parcel {
      * @see #readInterfaceList
      */
     public final <T extends IInterface> void writeInterfaceList(@Nullable List<T> val) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2297,6 +2459,7 @@ public final class Parcel {
      * @see #readParcelableList(List, ClassLoader)
      */
     public final <T extends Parcelable> void writeParcelableList(@Nullable List<T> val, int flags) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2331,6 +2494,7 @@ public final class Parcel {
      */
     public final <T extends Parcelable> void writeTypedArray(@Nullable T[] val,
             int parcelableFlags) {
+        assertNotRecycled();
         if (val != null) {
             int N = val.length;
             writeInt(N);
@@ -2353,6 +2517,7 @@ public final class Parcel {
      */
     public final <T extends Parcelable> void writeTypedObject(@Nullable T val,
             int parcelableFlags) {
+        assertNotRecycled();
         if (val != null) {
             writeInt(1);
             val.writeToParcel(this, parcelableFlags);
@@ -2390,6 +2555,7 @@ public final class Parcel {
      */
     public <T> void writeFixedArray(@Nullable T val, int parcelableFlags,
             @NonNull int... dimensions) {
+        assertNotRecycled();
         if (val == null) {
             writeInt(-1);
             return;
@@ -2501,6 +2667,7 @@ public final class Parcel {
      * should be used).</p>
      */
     public final void writeValue(@Nullable Object v) {
+        assertNotRecycled();
         if (v instanceof LazyValue) {
             LazyValue value = (LazyValue) v;
             value.writeToParcel(this);
@@ -2618,6 +2785,7 @@ public final class Parcel {
      * @hide
      */
     public void writeValue(int type, @Nullable Object v) {
+        assertNotRecycled();
         switch (type) {
             case VAL_NULL:
                 break;
@@ -2731,6 +2899,7 @@ public final class Parcel {
      * {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
      */
     public final void writeParcelable(@Nullable Parcelable p, int parcelableFlags) {
+        assertNotRecycled();
         if (p == null) {
             writeString(null);
             return;
@@ -2746,6 +2915,7 @@ public final class Parcel {
      * @see #readParcelableCreator
      */
     public final void writeParcelableCreator(@NonNull Parcelable p) {
+        assertNotRecycled();
         String name = p.getClass().getName();
         writeString(name);
     }
@@ -2784,6 +2954,7 @@ public final class Parcel {
      */
     @TestApi
     public boolean allowSquashing() {
+        assertNotRecycled();
         boolean previous = mAllowSquashing;
         mAllowSquashing = true;
         return previous;
@@ -2795,6 +2966,7 @@ public final class Parcel {
      */
     @TestApi
     public void restoreAllowSquashing(boolean previous) {
+        assertNotRecycled();
         mAllowSquashing = previous;
         if (!mAllowSquashing) {
             mWrittenSquashableParcelables = null;
@@ -2851,6 +3023,7 @@ public final class Parcel {
      * @hide
      */
     public boolean maybeWriteSquashed(@NonNull Parcelable p) {
+        assertNotRecycled();
         if (!mAllowSquashing) {
             // Don't squash, and don't put it in the map either.
             writeInt(0);
@@ -2901,6 +3074,7 @@ public final class Parcel {
     @SuppressWarnings("unchecked")
     @Nullable
     public <T extends Parcelable> T readSquashed(SquashReadHelper<T> reader) {
+        assertNotRecycled();
         final int offset = readInt();
         final int pos = dataPosition();
 
@@ -2934,6 +3108,7 @@ public final class Parcel {
      * using the other approaches to writing data in to a Parcel.
      */
     public final void writeSerializable(@Nullable Serializable s) {
+        assertNotRecycled();
         if (s == null) {
             writeString(null);
             return;
@@ -2986,6 +3161,7 @@ public final class Parcel {
      */
     @RavenwoodReplace(blockedBy = AppOpsManager.class)
     public final void writeException(@NonNull Exception e) {
+        assertNotRecycled();
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
         int code = getExceptionCode(e);
@@ -3066,6 +3242,7 @@ public final class Parcel {
 
     /** @hide */
     public void writeStackTrace(@NonNull Throwable e) {
+        assertNotRecycled();
         final int sizePosition = dataPosition();
         writeInt(0); // Header size will be filled in later
         StackTraceElement[] stackTrace = e.getStackTrace();
@@ -3091,6 +3268,7 @@ public final class Parcel {
      */
     @RavenwoodReplace(blockedBy = AppOpsManager.class)
     public final void writeNoException() {
+        assertNotRecycled();
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
         // Despite the name of this function ("write no exception"),
@@ -3134,6 +3312,7 @@ public final class Parcel {
      * @see #writeNoException
      */
     public final void readException() {
+        assertNotRecycled();
         int code = readExceptionCode();
         if (code != 0) {
             String msg = readString();
@@ -3157,6 +3336,7 @@ public final class Parcel {
     @UnsupportedAppUsage
     @TestApi
     public final int readExceptionCode() {
+        assertNotRecycled();
         int code = readInt();
         if (code == EX_HAS_NOTED_APPOPS_REPLY_HEADER) {
             AppOpsManager.readAndLogNotedAppops(this);
@@ -3190,6 +3370,7 @@ public final class Parcel {
      * @param msg The exception message.
      */
     public final void readException(int code, String msg) {
+        assertNotRecycled();
         String remoteStackTrace = null;
         final int remoteStackPayloadSize = readInt();
         if (remoteStackPayloadSize > 0) {
@@ -3220,6 +3401,7 @@ public final class Parcel {
 
     /** @hide */
     public Exception createExceptionOrNull(int code, String msg) {
+        assertNotRecycled();
         switch (code) {
             case EX_PARCELABLE:
                 if (readInt() > 0) {
@@ -3252,6 +3434,7 @@ public final class Parcel {
      * Read an integer value from the parcel at the current dataPosition().
      */
     public final int readInt() {
+        assertNotRecycled();
         return nativeReadInt(mNativePtr);
     }
 
@@ -3259,6 +3442,7 @@ public final class Parcel {
      * Read a long integer value from the parcel at the current dataPosition().
      */
     public final long readLong() {
+        assertNotRecycled();
         return nativeReadLong(mNativePtr);
     }
 
@@ -3267,6 +3451,7 @@ public final class Parcel {
      * dataPosition().
      */
     public final float readFloat() {
+        assertNotRecycled();
         return nativeReadFloat(mNativePtr);
     }
 
@@ -3275,6 +3460,7 @@ public final class Parcel {
      * current dataPosition().
      */
     public final double readDouble() {
+        assertNotRecycled();
         return nativeReadDouble(mNativePtr);
     }
 
@@ -3283,16 +3469,19 @@ public final class Parcel {
      */
     @Nullable
     public final String readString() {
+        assertNotRecycled();
         return readString16();
     }
 
     /** {@hide} */
     public final @Nullable String readString8() {
+        assertNotRecycled();
         return mReadWriteHelper.readString8(this);
     }
 
     /** {@hide} */
     public final @Nullable String readString16() {
+        assertNotRecycled();
         return mReadWriteHelper.readString16(this);
     }
 
@@ -3304,16 +3493,19 @@ public final class Parcel {
      * @hide
      */
     public @Nullable String readStringNoHelper() {
+        assertNotRecycled();
         return readString16NoHelper();
     }
 
     /** {@hide} */
     public @Nullable String readString8NoHelper() {
+        assertNotRecycled();
         return nativeReadString8(mNativePtr);
     }
 
     /** {@hide} */
     public @Nullable String readString16NoHelper() {
+        assertNotRecycled();
         return nativeReadString16(mNativePtr);
     }
 
@@ -3321,6 +3513,7 @@ public final class Parcel {
      * Read a boolean value from the parcel at the current dataPosition().
      */
     public final boolean readBoolean() {
+        assertNotRecycled();
         return readInt() != 0;
     }
 
@@ -3331,6 +3524,7 @@ public final class Parcel {
     @UnsupportedAppUsage
     @Nullable
     public final CharSequence readCharSequence() {
+        assertNotRecycled();
         return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(this);
     }
 
@@ -3338,6 +3532,7 @@ public final class Parcel {
      * Read an object from the parcel at the current dataPosition().
      */
     public final IBinder readStrongBinder() {
+        assertNotRecycled();
         final IBinder result = nativeReadStrongBinder(mNativePtr);
 
         // If it's a reply from a method with @PropagateAllowBlocking, then inherit allow-blocking
@@ -3353,6 +3548,7 @@ public final class Parcel {
      * Read a FileDescriptor from the parcel at the current dataPosition().
      */
     public final ParcelFileDescriptor readFileDescriptor() {
+        assertNotRecycled();
         FileDescriptor fd = nativeReadFileDescriptor(mNativePtr);
         return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
@@ -3360,6 +3556,7 @@ public final class Parcel {
     /** {@hide} */
     @UnsupportedAppUsage
     public final FileDescriptor readRawFileDescriptor() {
+        assertNotRecycled();
         return nativeReadFileDescriptor(mNativePtr);
     }
 
@@ -3370,6 +3567,7 @@ public final class Parcel {
      **/
     @Nullable
     public final FileDescriptor[] createRawFileDescriptorArray() {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -3389,6 +3587,7 @@ public final class Parcel {
      * @return the FileDescriptor array, or null if the array is null.
      **/
     public final void readRawFileDescriptorArray(FileDescriptor[] val) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -3403,6 +3602,7 @@ public final class Parcel {
      * Read a byte value from the parcel at the current dataPosition().
      */
     public final byte readByte() {
+        assertNotRecycled();
         return (byte)(readInt() & 0xff);
     }
 
@@ -3417,6 +3617,7 @@ public final class Parcel {
      */
     @Deprecated
     public final void readMap(@NonNull Map outVal, @Nullable ClassLoader loader) {
+        assertNotRecycled();
         readMapInternal(outVal, loader, /* clazzKey */ null, /* clazzValue */ null);
     }
 
@@ -3430,6 +3631,7 @@ public final class Parcel {
     public <K, V> void readMap(@NonNull Map<? super K, ? super V> outVal,
             @Nullable ClassLoader loader, @NonNull Class<K> clazzKey,
             @NonNull Class<V> clazzValue) {
+        assertNotRecycled();
         Objects.requireNonNull(clazzKey);
         Objects.requireNonNull(clazzValue);
         readMapInternal(outVal, loader, clazzKey, clazzValue);
@@ -3448,6 +3650,7 @@ public final class Parcel {
      */
     @Deprecated
     public final void readList(@NonNull List outVal, @Nullable ClassLoader loader) {
+        assertNotRecycled();
         int N = readInt();
         readListInternal(outVal, N, loader, /* clazz */ null);
     }
@@ -3469,6 +3672,7 @@ public final class Parcel {
      */
     public <T> void readList(@NonNull List<? super T> outVal,
             @Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         int n = readInt();
         readListInternal(outVal, n, loader, clazz);
@@ -3488,6 +3692,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public HashMap readHashMap(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readHashMapInternal(loader, /* clazzKey */ null, /* clazzValue */ null);
     }
 
@@ -3502,6 +3707,7 @@ public final class Parcel {
     @Nullable
     public <K, V> HashMap<K, V> readHashMap(@Nullable ClassLoader loader,
             @NonNull Class<? extends K> clazzKey, @NonNull Class<? extends V> clazzValue) {
+        assertNotRecycled();
         Objects.requireNonNull(clazzKey);
         Objects.requireNonNull(clazzValue);
         return readHashMapInternal(loader, clazzKey, clazzValue);
@@ -3514,6 +3720,7 @@ public final class Parcel {
      */
     @Nullable
     public final Bundle readBundle() {
+        assertNotRecycled();
         return readBundle(null);
     }
 
@@ -3525,6 +3732,7 @@ public final class Parcel {
      */
     @Nullable
     public final Bundle readBundle(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         int length = readInt();
         if (length < 0) {
             if (Bundle.DEBUG) Log.d(TAG, "null bundle: length=" + length);
@@ -3545,6 +3753,7 @@ public final class Parcel {
      */
     @Nullable
     public final PersistableBundle readPersistableBundle() {
+        assertNotRecycled();
         return readPersistableBundle(null);
     }
 
@@ -3556,6 +3765,7 @@ public final class Parcel {
      */
     @Nullable
     public final PersistableBundle readPersistableBundle(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         int length = readInt();
         if (length < 0) {
             if (Bundle.DEBUG) Log.d(TAG, "null bundle: length=" + length);
@@ -3574,6 +3784,7 @@ public final class Parcel {
      */
     @NonNull
     public final Size readSize() {
+        assertNotRecycled();
         final int width = readInt();
         final int height = readInt();
         return new Size(width, height);
@@ -3584,6 +3795,7 @@ public final class Parcel {
      */
     @NonNull
     public final SizeF readSizeF() {
+        assertNotRecycled();
         final float width = readFloat();
         final float height = readFloat();
         return new SizeF(width, height);
@@ -3594,6 +3806,7 @@ public final class Parcel {
      */
     @Nullable
     public final byte[] createByteArray() {
+        assertNotRecycled();
         return nativeCreateByteArray(mNativePtr);
     }
 
@@ -3602,6 +3815,7 @@ public final class Parcel {
      * given byte array.
      */
     public final void readByteArray(@NonNull byte[] val) {
+        assertNotRecycled();
         boolean valid = nativeReadByteArray(mNativePtr, val, (val != null) ? val.length : 0);
         if (!valid) {
             throw new RuntimeException("bad array lengths");
@@ -3614,6 +3828,7 @@ public final class Parcel {
      */
     @Nullable
     public final byte[] readBlob() {
+        assertNotRecycled();
         return nativeReadBlob(mNativePtr);
     }
 
@@ -3624,6 +3839,7 @@ public final class Parcel {
     @UnsupportedAppUsage
     @Nullable
     public final String[] readStringArray() {
+        assertNotRecycled();
         return createString16Array();
     }
 
@@ -3633,6 +3849,7 @@ public final class Parcel {
      */
     @Nullable
     public final CharSequence[] readCharSequenceArray() {
+        assertNotRecycled();
         CharSequence[] array = null;
 
         int length = readInt();
@@ -3655,6 +3872,7 @@ public final class Parcel {
      */
     @Nullable
     public final ArrayList<CharSequence> readCharSequenceList() {
+        assertNotRecycled();
         ArrayList<CharSequence> array = null;
 
         int length = readInt();
@@ -3684,6 +3902,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public ArrayList readArrayList(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readArrayListInternal(loader, /* clazz */ null);
     }
 
@@ -3706,6 +3925,7 @@ public final class Parcel {
     @Nullable
     public <T> ArrayList<T> readArrayList(@Nullable ClassLoader loader,
             @NonNull Class<? extends T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         return readArrayListInternal(loader, clazz);
     }
@@ -3725,6 +3945,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public Object[] readArray(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readArrayInternal(loader, /* clazz */ null);
     }
 
@@ -3746,6 +3967,7 @@ public final class Parcel {
     @SuppressLint({"ArrayReturn", "NullableCollection"})
     @Nullable
     public <T> T[] readArray(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         return readArrayInternal(loader, clazz);
     }
@@ -3765,6 +3987,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readSparseArrayInternal(loader, /* clazz */ null);
     }
 
@@ -3786,6 +4009,7 @@ public final class Parcel {
     @Nullable
     public <T> SparseArray<T> readSparseArray(@Nullable ClassLoader loader,
             @NonNull Class<? extends T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         return readSparseArrayInternal(loader, clazz);
     }
@@ -3797,6 +4021,7 @@ public final class Parcel {
      */
     @Nullable
     public final SparseBooleanArray readSparseBooleanArray() {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -3813,6 +4038,7 @@ public final class Parcel {
      */
     @Nullable
     public final SparseIntArray readSparseIntArray() {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -3837,6 +4063,7 @@ public final class Parcel {
      */
     @Nullable
     public final <T> ArrayList<T> createTypedArrayList(@NonNull Parcelable.Creator<T> c) {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -3860,6 +4087,7 @@ public final class Parcel {
      * @see #writeTypedList
      */
     public final <T> void readTypedList(@NonNull List<T> list, @NonNull Parcelable.Creator<T> c) {
+        assertNotRecycled();
         int M = list.size();
         int N = readInt();
         int i = 0;
@@ -3889,6 +4117,7 @@ public final class Parcel {
      */
     public final @Nullable <T extends Parcelable> SparseArray<T> createTypedSparseArray(
             @NonNull Parcelable.Creator<T> creator) {
+        assertNotRecycled();
         final int count = readInt();
         if (count < 0) {
             return null;
@@ -3918,6 +4147,7 @@ public final class Parcel {
      */
     public final @Nullable <T extends Parcelable> ArrayMap<String, T> createTypedArrayMap(
             @NonNull Parcelable.Creator<T> creator) {
+        assertNotRecycled();
         final int count = readInt();
         if (count < 0) {
             return null;
@@ -3945,6 +4175,7 @@ public final class Parcel {
      */
     @Nullable
     public final ArrayList<String> createStringArrayList() {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -3971,6 +4202,7 @@ public final class Parcel {
      */
     @Nullable
     public final ArrayList<IBinder> createBinderArrayList() {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -3998,6 +4230,7 @@ public final class Parcel {
     @Nullable
     public final <T extends IInterface> ArrayList<T> createInterfaceArrayList(
             @NonNull Function<IBinder, T> asInterface) {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -4018,6 +4251,7 @@ public final class Parcel {
      * @see #writeStringList
      */
     public final void readStringList(@NonNull List<String> list) {
+        assertNotRecycled();
         int M = list.size();
         int N = readInt();
         int i = 0;
@@ -4039,6 +4273,7 @@ public final class Parcel {
      * @see #writeBinderList
      */
     public final void readBinderList(@NonNull List<IBinder> list) {
+        assertNotRecycled();
         int M = list.size();
         int N = readInt();
         int i = 0;
@@ -4061,6 +4296,7 @@ public final class Parcel {
      */
     public final <T extends IInterface> void readInterfaceList(@NonNull List<T> list,
             @NonNull Function<IBinder, T> asInterface) {
+        assertNotRecycled();
         int M = list.size();
         int N = readInt();
         int i = 0;
@@ -4092,6 +4328,7 @@ public final class Parcel {
     @NonNull
     public final <T extends Parcelable> List<T> readParcelableList(@NonNull List<T> list,
             @Nullable ClassLoader cl) {
+        assertNotRecycled();
         return readParcelableListInternal(list, cl, /*clazz*/ null);
     }
 
@@ -4113,6 +4350,7 @@ public final class Parcel {
     @NonNull
     public <T> List<T> readParcelableList(@NonNull List<T> list,
             @Nullable ClassLoader cl, @NonNull Class<? extends T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(list);
         Objects.requireNonNull(clazz);
         return readParcelableListInternal(list, cl, clazz);
@@ -4158,6 +4396,7 @@ public final class Parcel {
      */
     @Nullable
     public final <T> T[] createTypedArray(@NonNull Parcelable.Creator<T> c) {
+        assertNotRecycled();
         int N = readInt();
         if (N < 0) {
             return null;
@@ -4171,6 +4410,7 @@ public final class Parcel {
     }
 
     public final <T> void readTypedArray(@NonNull T[] val, @NonNull Parcelable.Creator<T> c) {
+        assertNotRecycled();
         int N = readInt();
         if (N == val.length) {
             for (int i=0; i<N; i++) {
@@ -4187,6 +4427,7 @@ public final class Parcel {
      */
     @Deprecated
     public final <T> T[] readTypedArray(Parcelable.Creator<T> c) {
+        assertNotRecycled();
         return createTypedArray(c);
     }
 
@@ -4203,6 +4444,7 @@ public final class Parcel {
      */
     @Nullable
     public final <T> T readTypedObject(@NonNull Parcelable.Creator<T> c) {
+        assertNotRecycled();
         if (readInt() != 0) {
             return c.createFromParcel(this);
         } else {
@@ -4229,6 +4471,7 @@ public final class Parcel {
      * @see #readTypedArray
      */
     public <T> void readFixedArray(@NonNull T val) {
+        assertNotRecycled();
         Class<?> componentType = val.getClass().getComponentType();
         if (componentType == boolean.class) {
             readBooleanArray((boolean[]) val);
@@ -4269,6 +4512,7 @@ public final class Parcel {
      */
     public <T, S extends IInterface> void readFixedArray(@NonNull T val,
             @NonNull Function<IBinder, S> asInterface) {
+        assertNotRecycled();
         Class<?> componentType = val.getClass().getComponentType();
         if (IInterface.class.isAssignableFrom(componentType)) {
             readInterfaceArray((S[]) val, asInterface);
@@ -4295,6 +4539,7 @@ public final class Parcel {
      */
     public <T, S extends Parcelable> void readFixedArray(@NonNull T val,
             @NonNull Parcelable.Creator<S> c) {
+        assertNotRecycled();
         Class<?> componentType = val.getClass().getComponentType();
         if (Parcelable.class.isAssignableFrom(componentType)) {
             readTypedArray((S[]) val, c);
@@ -4352,6 +4597,7 @@ public final class Parcel {
      */
     @Nullable
     public <T> T createFixedArray(@NonNull Class<T> cls, @NonNull int... dimensions) {
+        assertNotRecycled();
         // Check if type matches with dimensions
         // If type is one-dimensional array, delegate to other creators
         // Otherwise, create an multi-dimensional array at once and then fill it with readFixedArray
@@ -4425,6 +4671,7 @@ public final class Parcel {
     @Nullable
     public <T, S extends IInterface> T createFixedArray(@NonNull Class<T> cls,
             @NonNull Function<IBinder, S> asInterface, @NonNull int... dimensions) {
+        assertNotRecycled();
         // Check if type matches with dimensions
         // If type is one-dimensional array, delegate to other creators
         // Otherwise, create an multi-dimensional array at once and then fill it with readFixedArray
@@ -4485,6 +4732,7 @@ public final class Parcel {
     @Nullable
     public <T, S extends Parcelable> T createFixedArray(@NonNull Class<T> cls,
             @NonNull Parcelable.Creator<S> c, @NonNull int... dimensions) {
+        assertNotRecycled();
         // Check if type matches with dimensions
         // If type is one-dimensional array, delegate to other creators
         // Otherwise, create an multi-dimensional array at once and then fill it with readFixedArray
@@ -4548,6 +4796,7 @@ public final class Parcel {
      */
     public final <T extends Parcelable> void writeParcelableArray(@Nullable T[] value,
             int parcelableFlags) {
+        assertNotRecycled();
         if (value != null) {
             int N = value.length;
             writeInt(N);
@@ -4566,6 +4815,7 @@ public final class Parcel {
      */
     @Nullable
     public final Object readValue(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readValue(loader, /* clazz */ null);
     }
 
@@ -4621,6 +4871,7 @@ public final class Parcel {
      */
     @Nullable
     public Object readLazyValue(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         int start = dataPosition();
         int type = readInt();
         if (isLengthPrefixed(type)) {
@@ -5023,6 +5274,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public final <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readParcelableInternal(loader, /* clazz */ null);
     }
 
@@ -5042,6 +5294,7 @@ public final class Parcel {
      */
     @Nullable
     public <T> T readParcelable(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         return readParcelableInternal(loader, clazz);
     }
@@ -5070,6 +5323,7 @@ public final class Parcel {
     @Nullable
     public final <T extends Parcelable> T readCreator(@NonNull Parcelable.Creator<?> creator,
             @Nullable ClassLoader loader) {
+        assertNotRecycled();
         if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
           Parcelable.ClassLoaderCreator<?> classLoaderCreator =
               (Parcelable.ClassLoaderCreator<?>) creator;
@@ -5097,6 +5351,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public final Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readParcelableCreatorInternal(loader, /* clazz */ null);
     }
 
@@ -5117,6 +5372,7 @@ public final class Parcel {
     @Nullable
     public <T> Parcelable.Creator<T> readParcelableCreator(
             @Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         return readParcelableCreatorInternal(loader, clazz);
     }
@@ -5239,6 +5495,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public Parcelable[] readParcelableArray(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         return readParcelableArrayInternal(loader, /* clazz */ null);
     }
 
@@ -5259,6 +5516,7 @@ public final class Parcel {
     @SuppressLint({"ArrayReturn", "NullableCollection"})
     @Nullable
     public <T> T[] readParcelableArray(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        assertNotRecycled();
         return readParcelableArrayInternal(loader, requireNonNull(clazz));
     }
 
@@ -5292,6 +5550,7 @@ public final class Parcel {
     @Deprecated
     @Nullable
     public Serializable readSerializable() {
+        assertNotRecycled();
         return readSerializableInternal(/* loader */ null, /* clazz */ null);
     }
 
@@ -5308,6 +5567,7 @@ public final class Parcel {
      */
     @Nullable
     public <T> T readSerializable(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
+        assertNotRecycled();
         Objects.requireNonNull(clazz);
         return readSerializableInternal(
                 loader == null ? getClass().getClassLoader() : loader, clazz);
@@ -5549,6 +5809,7 @@ public final class Parcel {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void readArrayMap(@NonNull ArrayMap<? super String, Object> outVal,
             @Nullable ClassLoader loader) {
+        assertNotRecycled();
         final int N = readInt();
         if (N < 0) {
             return;
@@ -5565,6 +5826,7 @@ public final class Parcel {
      */
     @UnsupportedAppUsage
     public @Nullable ArraySet<? extends Object> readArraySet(@Nullable ClassLoader loader) {
+        assertNotRecycled();
         final int size = readInt();
         if (size < 0) {
             return null;
@@ -5704,6 +5966,7 @@ public final class Parcel {
      * @hide For testing
      */
     public long getOpenAshmemSize() {
+        assertNotRecycled();
         return nativeGetOpenAshmemSize(mNativePtr);
     }
 

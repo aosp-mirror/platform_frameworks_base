@@ -41,7 +41,7 @@ class ZenIconKeys {
 
     private static final ImmutableMap<Integer, ZenIcon.Key> TYPE_DEFAULTS = ImmutableMap.of(
             AutomaticZenRule.TYPE_UNKNOWN,
-            ZenIcon.Key.forSystemResource(R.drawable.ic_zen_mode_type_unknown),
+            ZenIcon.Key.forSystemResource(R.drawable.ic_zen_mode_type_special_dnd),
             AutomaticZenRule.TYPE_OTHER,
             ZenIcon.Key.forSystemResource(R.drawable.ic_zen_mode_type_other),
             AutomaticZenRule.TYPE_SCHEDULE_TIME,
@@ -61,7 +61,7 @@ class ZenIconKeys {
     );
 
     private static final ZenIcon.Key FOR_UNEXPECTED_TYPE =
-            ZenIcon.Key.forSystemResource(R.drawable.ic_zen_mode_type_unknown);
+            ZenIcon.Key.forSystemResource(R.drawable.ic_zen_mode_type_special_dnd);
 
     /** Default icon descriptors per mode {@link AutomaticZenRule.Type}. */
     static ZenIcon.Key forType(@AutomaticZenRule.Type int ruleType) {

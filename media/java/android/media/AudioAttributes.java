@@ -1216,7 +1216,6 @@ public final class AudioAttributes implements Parcelable {
                     break;
                 case AudioSystem.STREAM_BLUETOOTH_SCO:
                     mContentType = CONTENT_TYPE_SPEECH;
-                    mFlags |= FLAG_SCO;
                     break;
                 case AudioSystem.STREAM_DTMF:
                     mContentType = CONTENT_TYPE_SONIFICATION;
@@ -1763,8 +1762,7 @@ public final class AudioAttributes implements Parcelable {
                     AudioSystem.STREAM_SYSTEM : AudioSystem.STREAM_SYSTEM_ENFORCED;
         }
         if ((aa.getAllFlags() & FLAG_SCO) == FLAG_SCO) {
-            return fromGetVolumeControlStream ?
-                    AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_BLUETOOTH_SCO;
+            return AudioSystem.STREAM_VOICE_CALL;
         }
         if ((aa.getAllFlags() & FLAG_BEACON) == FLAG_BEACON) {
             return fromGetVolumeControlStream ?

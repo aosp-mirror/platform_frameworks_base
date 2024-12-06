@@ -28,43 +28,41 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.withArgCaptor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.inOrder
-import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.inOrder
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class RenderStageManagerTest : SysuiTestCase() {
 
-    @Mock private lateinit var shadeListBuilder: ShadeListBuilder
-    @Mock private lateinit var onAfterRenderListListener: OnAfterRenderListListener
-    @Mock private lateinit var onAfterRenderGroupListener: OnAfterRenderGroupListener
-    @Mock private lateinit var onAfterRenderEntryListener: OnAfterRenderEntryListener
+    private val shadeListBuilder: ShadeListBuilder = mock()
+    private val onAfterRenderListListener: OnAfterRenderListListener = mock()
+    private val onAfterRenderGroupListener: OnAfterRenderGroupListener = mock()
+    private val onAfterRenderEntryListener: OnAfterRenderEntryListener = mock()
 
-    private lateinit var onRenderListListener: ShadeListBuilder.OnRenderListListener
-    private lateinit var renderStageManager: RenderStageManager
     private val spyViewRenderer = spy(FakeNotifViewRenderer())
+    private lateinit var onRenderListListener: ShadeListBuilder.OnRenderListListener
+
+    private lateinit var renderStageManager: RenderStageManager
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         renderStageManager = RenderStageManager()
         renderStageManager.attach(shadeListBuilder)
-        onRenderListListener = withArgCaptor {
-            verify(shadeListBuilder).setOnRenderListListener(capture())
-        }
+
+        val captor = argumentCaptor<ShadeListBuilder.OnRenderListListener>()
+        verify(shadeListBuilder).setOnRenderListListener(captor.capture())
+        onRenderListListener = captor.lastValue
     }
 
     private fun setUpRenderer() {
@@ -89,7 +87,7 @@ class RenderStageManagerTest : SysuiTestCase() {
         verifyNoMoreInteractions(
             onAfterRenderListListener,
             onAfterRenderGroupListener,
-            onAfterRenderEntryListener
+            onAfterRenderEntryListener,
         )
     }
 
@@ -171,7 +169,7 @@ class RenderStageManagerTest : SysuiTestCase() {
         verifyNoMoreInteractions(
             onAfterRenderListListener,
             onAfterRenderGroupListener,
-            onAfterRenderEntryListener
+            onAfterRenderEntryListener,
         )
     }
 
@@ -191,30 +189,27 @@ class RenderStageManagerTest : SysuiTestCase() {
         verifyNoMoreInteractions(
             onAfterRenderListListener,
             onAfterRenderGroupListener,
-            onAfterRenderEntryListener
+            onAfterRenderEntryListener,
         )
     }
 
-    private fun listWith2Groups8Entries() = listOf(
-        group(
-            notif(1),
-            notif(2),
-            notif(3)
-        ),
-        notif(4),
-        group(
-            notif(5),
-            notif(6),
-            notif(7)
-        ),
-        notif(8)
-    )
+    private fun listWith2Groups8Entries() =
+        listOf(
+            group(notif(1), notif(2), notif(3)),
+            notif(4),
+            group(notif(5), notif(6), notif(7)),
+            notif(8),
+        )
 
     private class FakeNotifViewRenderer : NotifViewRenderer {
         override fun onRenderList(notifList: List<ListEntry>) {}
+
         override fun getStackController(): NotifStackController = mock()
+
         override fun getGroupController(group: GroupEntry): NotifGroupController = mock()
+
         override fun getRowController(entry: NotificationEntry): NotifRowController = mock()
+
         override fun onDispatchComplete() {}
     }
 

@@ -18,9 +18,11 @@
 
 #include <aidl/android/hardware/power/ChannelConfig.h>
 #include <aidl/android/hardware/power/SessionConfig.h>
+#include <aidl/android/hardware/power/SessionMode.h>
 #include <aidl/android/hardware/power/SessionTag.h>
 #include <aidl/android/hardware/power/WorkDuration.h>
 #include <aidl/android/os/IHintManager.h>
+#include <aidl/android/os/SessionCreationConfig.h>
 #include <android/binder_manager.h>
 #include <android/binder_status.h>
 #include <android/performance_hint.h>
@@ -36,6 +38,7 @@ using namespace std::chrono_literals;
 namespace hal = aidl::android::hardware::power;
 using aidl::android::os::IHintManager;
 using aidl::android::os::IHintSession;
+using aidl::android::os::SessionCreationConfig;
 using ndk::ScopedAStatus;
 using ndk::SpAIBinder;
 using HalChannelMessageContents = hal::ChannelMessage::ChannelMessageContents;
@@ -49,11 +52,13 @@ using namespace testing;
 class MockIHintManager : public IHintManager {
 public:
     MOCK_METHOD(ScopedAStatus, createHintSessionWithConfig,
-                (const SpAIBinder& token, const ::std::vector<int32_t>& tids, int64_t durationNanos,
-                 hal::SessionTag tag, hal::SessionConfig* config,
+                (const SpAIBinder& token, hal::SessionTag tag,
+                 const SessionCreationConfig& creationConfig, hal::SessionConfig* config,
                  std::shared_ptr<IHintSession>* _aidl_return),
                 (override));
     MOCK_METHOD(ScopedAStatus, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
+    MOCK_METHOD(ScopedAStatus, getMaxGraphicsPipelineThreadsCount, (int32_t* _aidl_return),
+                (override));
     MOCK_METHOD(ScopedAStatus, setHintSessionThreads,
                 (const std::shared_ptr<IHintSession>& hintSession,
                  const ::std::vector<int32_t>& tids),
@@ -66,6 +71,19 @@ public:
                  std::optional<hal::ChannelConfig>* _aidl_return),
                 (override));
     MOCK_METHOD(ScopedAStatus, closeSessionChannel, (), (override));
+    MOCK_METHOD(ScopedAStatus, getCpuHeadroom,
+                (const ::aidl::android::os::CpuHeadroomParamsInternal& in_params,
+                 std::optional<hal::CpuHeadroomResult>* _aidl_return),
+                (override));
+    MOCK_METHOD(ScopedAStatus, getCpuHeadroomMinIntervalMillis, (int64_t* _aidl_return),
+                (override));
+    MOCK_METHOD(ScopedAStatus, getGpuHeadroom,
+                (const ::aidl::android::os::GpuHeadroomParamsInternal& in_params,
+                 std::optional<hal::GpuHeadroomResult>* _aidl_return),
+                (override));
+    MOCK_METHOD(ScopedAStatus, getGpuHeadroomMinIntervalMillis, (int64_t* _aidl_return),
+                (override));
+    MOCK_METHOD(ScopedAStatus, passSessionManagerBinder, (const SpAIBinder& sessionManager));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -82,6 +100,8 @@ public:
     MOCK_METHOD(ScopedAStatus, close, (), (override));
     MOCK_METHOD(ScopedAStatus, reportActualWorkDuration2,
                 (const ::std::vector<hal::WorkDuration>& workDurations), (override));
+    MOCK_METHOD(ScopedAStatus, associateToLayers,
+                (const std::vector<::ndk::SpAIBinder>& in_layerTokens), (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -90,7 +110,11 @@ class PerformanceHintTest : public Test {
 public:
     void SetUp() override {
         mMockIHintManager = ndk::SharedRefBase::make<NiceMock<MockIHintManager>>();
+        APerformanceHint_getRateLimiterPropertiesForTesting(&mMaxLoadHintsPerInterval,
+                                                            &mLoadHintInterval);
         APerformanceHint_setIHintManagerForTesting(&mMockIHintManager);
+        APerformanceHint_setUseGraphicsPipelineForTesting(true);
+        APerformanceHint_setUseNewLoadHintBehaviorForTesting(true);
     }
 
     void TearDown() override {
@@ -103,21 +127,22 @@ public:
         APerformanceHint_setUseFMQForTesting(mUsingFMQ);
         ON_CALL(*mMockIHintManager, getHintSessionPreferredRate(_))
                 .WillByDefault(DoAll(SetArgPointee<0>(123L), [] { return ScopedAStatus::ok(); }));
+        ON_CALL(*mMockIHintManager, getMaxGraphicsPipelineThreadsCount(_))
+                .WillByDefault(DoAll(SetArgPointee<0>(5), [] { return ScopedAStatus::ok(); }));
         return APerformanceHint_getManager();
     }
 
     APerformanceHintSession* createSession(APerformanceHintManager* manager,
                                            int64_t targetDuration = 56789L, bool isHwui = false) {
         mMockSession = ndk::SharedRefBase::make<NiceMock<MockIHintSession>>();
-        int64_t sessionId = 123;
+        const int64_t sessionId = 123;
         std::vector<int32_t> tids;
         tids.push_back(1);
         tids.push_back(2);
 
-        ON_CALL(*mMockIHintManager,
-                createHintSessionWithConfig(_, Eq(tids), Eq(targetDuration), _, _, _))
-                .WillByDefault(DoAll(SetArgPointee<4>(hal::SessionConfig({.id = sessionId})),
-                                     SetArgPointee<5>(std::shared_ptr<IHintSession>(mMockSession)),
+        ON_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _))
+                .WillByDefault(DoAll(SetArgPointee<3>(hal::SessionConfig({.id = sessionId})),
+                                     SetArgPointee<4>(std::shared_ptr<IHintSession>(mMockSession)),
                                      [] { return ScopedAStatus::ok(); }));
 
         ON_CALL(*mMockIHintManager, setHintSessionThreads(_, _)).WillByDefault([] {
@@ -140,6 +165,43 @@ public:
                                                           targetDuration, SessionTag::HWUI);
         }
         return APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
+    }
+
+    APerformanceHintSession* createSessionUsingConfig(APerformanceHintManager* manager,
+                                                      SessionCreationConfig config,
+                                                      bool isHwui = false) {
+        mMockSession = ndk::SharedRefBase::make<NiceMock<MockIHintSession>>();
+        const int64_t sessionId = 123;
+
+        ON_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _))
+                .WillByDefault(DoAll(SetArgPointee<3>(hal::SessionConfig({.id = sessionId})),
+                                     SetArgPointee<4>(std::shared_ptr<IHintSession>(mMockSession)),
+                                     [] { return ScopedAStatus::ok(); }));
+
+        ON_CALL(*mMockIHintManager, setHintSessionThreads(_, _)).WillByDefault([] {
+            return ScopedAStatus::ok();
+        });
+        ON_CALL(*mMockSession, sendHint(_)).WillByDefault([] { return ScopedAStatus::ok(); });
+        ON_CALL(*mMockSession, setMode(_, true)).WillByDefault([] { return ScopedAStatus::ok(); });
+        ON_CALL(*mMockSession, close()).WillByDefault([] { return ScopedAStatus::ok(); });
+        ON_CALL(*mMockSession, updateTargetWorkDuration(_)).WillByDefault([] {
+            return ScopedAStatus::ok();
+        });
+        ON_CALL(*mMockSession, reportActualWorkDuration(_, _)).WillByDefault([] {
+            return ScopedAStatus::ok();
+        });
+        ON_CALL(*mMockSession, reportActualWorkDuration2(_)).WillByDefault([] {
+            return ScopedAStatus::ok();
+        });
+
+        if (isHwui) {
+            return APerformanceHint_createSessionUsingConfigInternal(
+                    manager, reinterpret_cast<ASessionCreationConfig*>(&config), SessionTag::HWUI);
+        }
+
+        return APerformanceHint_createSessionUsingConfig(manager,
+                                                         reinterpret_cast<ASessionCreationConfig*>(
+                                                                 &config));
     }
 
     void setFMQEnabled(bool enabled) {
@@ -175,6 +237,9 @@ public:
     hardware::EventFlag* mEventFlag;
     int kMockQueueSize = 20;
     bool mUsingFMQ = false;
+
+    int32_t mMaxLoadHintsPerInterval;
+    int64_t mLoadHintInterval;
 
     template <HalChannelMessageContents::Tag T, class C = HalChannelMessageContents::_at<T>>
     void expectToReadFromFmq(C expected) {
@@ -218,7 +283,6 @@ TEST_F(PerformanceHintTest, TestSession) {
     EXPECT_CALL(*mMockSession, reportActualWorkDuration2(_)).Times(Exactly(1));
     result = APerformanceHint_reportActualWorkDuration(session, actualDurationNanos);
     EXPECT_EQ(0, result);
-
     result = APerformanceHint_updateTargetWorkDuration(session, -1L);
     EXPECT_EQ(EINVAL, result);
     result = APerformanceHint_reportActualWorkDuration(session, -1L);
@@ -228,33 +292,57 @@ TEST_F(PerformanceHintTest, TestSession) {
     EXPECT_CALL(*mMockSession, sendHint(Eq(hintId))).Times(Exactly(1));
     result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
-    usleep(110000); // Sleep for longer than the update timeout.
-    EXPECT_CALL(*mMockSession, sendHint(Eq(hintId))).Times(Exactly(1));
-    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_UP))).Times(Exactly(1));
+    result = APerformanceHint_notifyWorkloadIncrease(session, true, false, "Test hint");
     EXPECT_EQ(0, result);
-    // Expect to get rate limited if we try to send faster than the limiter allows
-    EXPECT_CALL(*mMockSession, sendHint(Eq(hintId))).Times(Exactly(0));
-    result = APerformanceHint_sendHint(session, hintId);
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_RESET))).Times(Exactly(1));
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::GPU_LOAD_RESET))).Times(Exactly(1));
+    result = APerformanceHint_notifyWorkloadReset(session, true, true, "Test hint");
+    EXPECT_EQ(0, result);
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_SPIKE))).Times(Exactly(1));
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::GPU_LOAD_SPIKE))).Times(Exactly(1));
+    result = APerformanceHint_notifyWorkloadSpike(session, true, true, "Test hint");
     EXPECT_EQ(0, result);
 
     result = APerformanceHint_sendHint(session, static_cast<SessionHint>(-1));
     EXPECT_EQ(EINVAL, result);
 
+    Mock::VerifyAndClearExpectations(mMockSession.get());
+    for (int i = 0; i < mMaxLoadHintsPerInterval; ++i) {
+        APerformanceHint_sendHint(session, hintId);
+    }
+
+    // Expect to get rate limited if we try to send faster than the limiter allows
+    EXPECT_CALL(*mMockSession, sendHint(_)).Times(Exactly(0));
+    result = APerformanceHint_notifyWorkloadIncrease(session, true, true, "Test hint");
+    EXPECT_EQ(result, EBUSY);
+    EXPECT_CALL(*mMockSession, sendHint(_)).Times(Exactly(0));
+    result = APerformanceHint_notifyWorkloadReset(session, true, true, "Test hint");
     EXPECT_CALL(*mMockSession, close()).Times(Exactly(1));
     APerformanceHint_closeSession(session);
 }
 
 TEST_F(PerformanceHintTest, TestUpdatedSessionCreation) {
-    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _, _)).Times(1);
+    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _)).Times(1);
     APerformanceHintManager* manager = createManager();
     APerformanceHintSession* session = createSession(manager);
     ASSERT_TRUE(session);
     APerformanceHint_closeSession(session);
 }
 
+TEST_F(PerformanceHintTest, TestSessionCreationUsingConfig) {
+    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, _, _, _, _)).Times(1);
+    SessionCreationConfig config{.tids = std::vector<int32_t>(1, 2),
+                                 .targetWorkDurationNanos = 5678,
+                                 .modesToEnable = std::vector<hal::SessionMode>(0)};
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSessionUsingConfig(manager, config);
+    ASSERT_TRUE(session);
+    APerformanceHint_closeSession(session);
+}
+
 TEST_F(PerformanceHintTest, TestHwuiSessionCreation) {
-    EXPECT_CALL(*mMockIHintManager,
-                createHintSessionWithConfig(_, _, _, hal::SessionTag::HWUI, _, _))
+    EXPECT_CALL(*mMockIHintManager, createHintSessionWithConfig(_, hal::SessionTag::HWUI, _, _, _))
             .Times(1);
     APerformanceHintManager* manager = createManager();
     APerformanceHintSession* session = createSession(manager, 56789L, true);
@@ -419,4 +507,17 @@ TEST_F(PerformanceHintTest, TestReportActualUsingFMQ) {
     APerformanceHint_reportActualWorkDuration2(session,
                                                reinterpret_cast<AWorkDuration*>(&duration));
     expectToReadFromFmq<HalChannelMessageContents::Tag::workDuration>(durationExpected);
+}
+
+TEST_F(PerformanceHintTest, TestASessionCreationConfig) {
+    ASessionCreationConfig* config = ASessionCreationConfig_create();
+    ASSERT_NE(config, nullptr);
+
+    const int32_t testTids[2] = {1, 2};
+    const size_t size = 2;
+    EXPECT_EQ(ASessionCreationConfig_setTids(config, testTids, size), 0);
+    EXPECT_EQ(ASessionCreationConfig_setTargetWorkDurationNanos(config, 20), 0);
+    EXPECT_EQ(ASessionCreationConfig_setPreferPowerEfficiency(config, true), 0);
+    EXPECT_EQ(ASessionCreationConfig_setGraphicsPipeline(config, true), 0);
+    ASessionCreationConfig_release(config);
 }

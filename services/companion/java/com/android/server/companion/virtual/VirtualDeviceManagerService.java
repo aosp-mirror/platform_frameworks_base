@@ -17,6 +17,7 @@
 package com.android.server.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS;
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 
 import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_SERVICE_ORDERED_ID;
@@ -27,6 +28,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.app.compat.CompatChanges;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -41,11 +43,14 @@ import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtualnative.IVirtualDeviceManagerNative;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
@@ -88,7 +93,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-
 @SuppressLint("LongLogTag")
 public class VirtualDeviceManagerService extends SystemService {
 
@@ -101,6 +105,11 @@ public class VirtualDeviceManagerService extends SystemService {
             AssociationRequest.DEVICE_PROFILE_APP_STREAMING,
             AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING);
 
+    /** Enable default device camera access for apps running on virtual devices. */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long ENABLE_DEFAULT_DEVICE_CAMERA_ACCESS = 371173368L;
+
     /**
      * A virtual device association id corresponding to no CDM association.
      */
@@ -110,7 +119,7 @@ public class VirtualDeviceManagerService extends SystemService {
     private final VirtualDeviceManagerImpl mImpl;
     private final VirtualDeviceManagerNativeImpl mNativeImpl;
     private final VirtualDeviceManagerInternal mLocalService;
-    private VirtualDeviceLog mVirtualDeviceLog = new VirtualDeviceLog(getContext());
+    private final VirtualDeviceLog mVirtualDeviceLog = new VirtualDeviceLog(getContext());
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
 
@@ -236,7 +245,7 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    void onCameraAccessBlocked(int appUid) {
+    private void onCameraAccessBlocked(int appUid) {
         ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
         for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
             VirtualDeviceImpl virtualDevice = virtualDevicesSnapshot.get(i);
@@ -248,8 +257,13 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    CameraAccessController getCameraAccessController(UserHandle userHandle) {
-        if (Flags.streamCamera()) {
+    private CameraAccessController getCameraAccessController(UserHandle userHandle,
+            VirtualDeviceParams params, String callingPackage) {
+        if (CompatChanges.isChangeEnabled(ENABLE_DEFAULT_DEVICE_CAMERA_ACCESS, callingPackage,
+                userHandle)
+                && android.companion.virtualdevice.flags.Flags.defaultDeviceCameraAccessPolicy()
+                && (params.getDevicePolicy(POLICY_TYPE_DEFAULT_DEVICE_CAMERA_ACCESS)
+                    == DEVICE_POLICY_DEFAULT)) {
             return null;
         }
         int userId = userHandle.getIdentifier();
@@ -496,7 +510,8 @@ public class VirtualDeviceManagerService extends SystemService {
 
             final UserHandle userHandle = getCallingUserHandle();
             final CameraAccessController cameraAccessController =
-                    getCameraAccessController(userHandle);
+                    getCameraAccessController(userHandle, params,
+                            attributionSource.getPackageName());
             final int deviceId = sNextUniqueIndex.getAndIncrement();
             final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
                     runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
@@ -575,7 +590,6 @@ public class VirtualDeviceManagerService extends SystemService {
                         ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
             }
         }
-
 
         @Override // Binder call
         public int getDeviceIdForDisplayId(int displayId) {
@@ -908,6 +922,22 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public int getDeviceIdForDisplayId(int displayId) {
             return mImpl.getDeviceIdForDisplayId(displayId);
+        }
+
+        @Override
+        public long getDimDurationMillisForDeviceId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice == null ? -1 : virtualDevice.getDimDurationMillis();
+            }
+        }
+
+        @Override
+        public long getScreenOffTimeoutMillisForDeviceId(int deviceId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                return virtualDevice == null ? -1 : virtualDevice.getScreenOffTimeoutMillis();
+            }
         }
 
         @Override

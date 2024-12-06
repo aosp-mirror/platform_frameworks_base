@@ -23,7 +23,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.SysuiTestCase
@@ -71,8 +70,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
-            assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey)
-                .isEqualTo(ToSplitShade)
+            assertThat(userActions?.get(Swipe.Down)?.transitionKey).isEqualTo(ToSplitShade)
         }
 
     @Test
@@ -83,7 +81,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             shadeRepository.setShadeLayoutWide(false)
             runCurrent()
 
-            assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()
+            assertThat(userActions?.get(Swipe.Down)?.transitionKey).isNull()
         }
 
     @Test
@@ -94,7 +92,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             shadeRepository.setShadeLayoutWide(true)
             runCurrent()
 
-            assertThat(userActions?.get(Swipe(SwipeDirection.Down))?.transitionKey).isNull()
+            assertThat(userActions?.get(Swipe.Down)?.transitionKey).isNull()
         }
 
     @Test
@@ -106,7 +104,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers()))
-                .isEqualTo(UserActionResult(Scenes.QuickSettings, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.QuickSettings))
         }
 
     @Test
@@ -118,7 +116,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers()))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
         }
 
     @Test
@@ -132,6 +130,6 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
         }
 
     private fun swipeDownFromTopWithTwoFingers(): UserAction {
-        return Swipe(direction = SwipeDirection.Down, pointerCount = 2, fromSource = Edge.Top)
+        return Swipe.Down(pointerCount = 2, fromSource = Edge.Top)
     }
 }

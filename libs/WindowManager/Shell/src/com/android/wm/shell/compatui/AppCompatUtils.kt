@@ -23,9 +23,15 @@ import android.content.Context
 import com.android.internal.R
 
 // TODO(b/347289970): Consider replacing with API
+/**
+ * If the top activity should be exempt from desktop windowing and forced back to fullscreen.
+ * Currently includes all system ui activities and modal dialogs. However is the top activity is not
+ * being displayed, regardless of its configuration, we will not exempt it as to remain in the
+ * desktop windowing environment.
+ */
 fun isTopActivityExemptFromDesktopWindowing(context: Context, task: TaskInfo) =
-    isSystemUiTask(context, task) || (task.isTopActivityTransparent && task.numActivities == 1
-            && !task.isTopActivityStyleFloating)
+    (isSystemUiTask(context, task) || (task.numActivities > 0 && task.isActivityStackTransparent))
+            && !task.isTopActivityNoDisplay
 
 private fun isSystemUiTask(context: Context, task: TaskInfo): Boolean {
     val sysUiPackageName: String =

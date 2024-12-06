@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification
 
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,6 +37,13 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
     private var scrimOffset = 0f
     private var contentHeight = 0f
     private var isCurrentGestureOverscroll = false
+    private val customFlingBehavior =
+        object : FlingBehavior {
+            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                scrollBy(initialVelocity)
+                return initialVelocity / 2f
+            }
+        }
 
     private val scrollConnection =
         NotificationScrimNestedScrollConnection(
@@ -51,6 +60,7 @@ class NotificationScrimNestedScrollConnectionTest : SysuiTestCase() {
                 wasStarted = true
                 isStarted = false
             },
+            flingBehavior = customFlingBehavior,
         )
 
     @Test

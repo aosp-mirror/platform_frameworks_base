@@ -16,11 +16,14 @@
 
 package com.android.systemui.brightness.ui.viewmodel
 
+import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import com.android.systemui.brightness.domain.interactor.BrightnessPolicyEnforcementInteractor
 import com.android.systemui.brightness.domain.interactor.ScreenBrightnessInteractor
 import com.android.systemui.brightness.shared.model.GammaBrightness
+import com.android.systemui.classifier.Classifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -29,6 +32,7 @@ import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.res.R
 import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor
+import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
 import com.android.systemui.utils.PolicyRestriction
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -50,7 +54,9 @@ constructor(
     private val brightnessPolicyEnforcementInteractor: BrightnessPolicyEnforcementInteractor,
     val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
     private val brightnessMirrorShowingInteractor: BrightnessMirrorShowingInteractor,
+    private val falsingInteractor: FalsingInteractor,
     @Assisted private val supportsMirroring: Boolean,
+    private val brightnessWarningToast: BrightnessWarningToast,
 ) : ExclusiveActivatable() {
 
     private val hydrator = Hydrator("BrightnessSliderViewModel.hydrator")
@@ -73,6 +79,19 @@ constructor(
 
     fun showPolicyRestrictionDialog(restriction: PolicyRestriction.Restricted) {
         brightnessPolicyEnforcementInteractor.startAdminSupportDetailsDialog(restriction)
+    }
+
+    val brightnessOverriddenByWindow = screenBrightnessInteractor.brightnessOverriddenByWindow
+
+    fun showToast(viewContext: Context, @StringRes resId: Int) {
+        if (brightnessWarningToast.isToastActive()) {
+            return
+        }
+        brightnessWarningToast.show(viewContext, resId)
+    }
+
+    fun emitBrightnessTouchForFalsing() {
+        falsingInteractor.isFalseTouch(Classifier.BRIGHTNESS_SLIDER)
     }
 
     /**

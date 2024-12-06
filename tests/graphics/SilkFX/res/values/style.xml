@@ -16,21 +16,16 @@
   -->
 <!-- Styles for immersive actions UI. -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="Theme.BackgroundBlurTheme" parent= "Theme.AppCompat.Dialog">
+    <style name="Theme.BackgroundBlurTheme" parent="Theme.AppCompat.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBlurBehindEnabled">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowElevation">0dp</item>
         <item name="buttonStyle">@style/AppTheme.Button</item>
         <item name="colorAccent">#bbffffff</item>
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
     <style name="AppTheme.Button" parent="Widget.AppCompat.Button">
         <item name="android:textColor">#ffffffff</item>
-    </style>
-
-    <style name="Theme.UsefulDefault" parent="android:Theme.Material">
-        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
 </resources>
