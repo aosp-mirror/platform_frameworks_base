@@ -209,7 +209,7 @@ constructor(
 
     // TODO(b/250618218): Remove this method once we know the root cause of b/250618218.
     fun logTileBackgroundColorUpdateIfInternetTile(
-        tileSpec: String,
+        tileSpec: String?,
         state: Int,
         disabledByPolicy: Boolean,
         color: Int,
