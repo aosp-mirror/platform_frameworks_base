@@ -17,11 +17,15 @@ package com.android.wm.shell.windowdecor.common.viewhost
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.PixelFormat
 import android.graphics.Region
 import android.view.Display
 import android.view.SurfaceControl
 import android.view.View
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+import android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+import android.view.WindowManager.LayoutParams.TYPE_APPLICATION
 import android.widget.FrameLayout
 import androidx.tracing.Trace
 import com.android.internal.annotations.VisibleForTesting
@@ -35,6 +39,9 @@ import kotlinx.coroutines.launch
  * 1) Replacing the root [View], meaning [WindowDecorViewHost.updateView] maybe be called with
  *    different [View] instances. This is useful when reusing [WindowDecorViewHost]s instances for
  *    vastly different view hierarchies, such as Desktop Windowing's App Handles and App Headers.
+ * 2) Pre-warming of the underlying [SurfaceControlViewHostAdapter]s. Useful because their creation
+ *    and first root view assignment are expensive, which is undesirable in latency-sensitive code
+ *    paths like during a shell transition.
  */
 class ReusableWindowDecorViewHost(
     private val context: Context,
@@ -44,13 +51,37 @@ class ReusableWindowDecorViewHost(
     @VisibleForTesting
     val viewHostAdapter: SurfaceControlViewHostAdapter =
         SurfaceControlViewHostAdapter(context, display),
-) : WindowDecorViewHost {
+) : WindowDecorViewHost, Warmable {
     @VisibleForTesting val rootView = FrameLayout(context)
 
     private var currentUpdateJob: Job? = null
 
     override val surfaceControl: SurfaceControl
         get() = viewHostAdapter.rootSurface
+
+    override fun warmUp() {
+        if (viewHostAdapter.isInitialized()) {
+            // Already warmed up.
+            return
+        }
+        Trace.beginSection("$TAG#warmUp")
+        viewHostAdapter.prepareViewHost(context.resources.configuration, touchableRegion = null)
+        viewHostAdapter.updateView(
+            rootView,
+            WindowManager.LayoutParams(
+                    0 /* width*/,
+                    0 /* height */,
+                    TYPE_APPLICATION,
+                    FLAG_NOT_FOCUSABLE or FLAG_SPLIT_TOUCH,
+                    PixelFormat.TRANSPARENT,
+                )
+                .apply {
+                    setTitle("View root of $TAG#$id")
+                    setTrustedOverlay()
+                },
+        )
+        Trace.endSection()
+    }
 
     override fun updateView(
         view: View,

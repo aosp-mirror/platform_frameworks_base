@@ -349,10 +349,13 @@ public abstract class WMShellModule {
     @Provides
     static WindowDecorViewHostSupplier<WindowDecorViewHost> provideWindowDecorViewHostSupplier(
             @NonNull Context context,
-            @ShellMainThread @NonNull CoroutineScope mainScope) {
+            @ShellMainThread @NonNull CoroutineScope mainScope,
+            @NonNull ShellInit shellInit) {
         final int poolSize = DesktopModeStatus.getWindowDecorScvhPoolSize(context);
+        final int preWarmSize = DesktopModeStatus.getWindowDecorPreWarmSize();
         if (DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context) && poolSize > 0) {
-            return new PooledWindowDecorViewHostSupplier(mainScope, poolSize);
+            return new PooledWindowDecorViewHostSupplier(
+                    context, mainScope, shellInit, poolSize, preWarmSize);
         }
         return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
