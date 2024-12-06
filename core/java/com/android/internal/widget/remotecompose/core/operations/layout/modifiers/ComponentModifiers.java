@@ -49,6 +49,7 @@ public class ComponentModifiers extends PaintOperation
         super.apply(context);
         for (ModifierOperation op : mList) {
             op.apply(context);
+            context.incrementOpCount();
         }
     }
 

@@ -57,6 +57,7 @@ public abstract class ListActionsOperation extends PaintOperation
         for (Operation op : mList) {
             if (op instanceof TextData) {
                 op.apply(context);
+                context.incrementOpCount();
             }
         }
     }
