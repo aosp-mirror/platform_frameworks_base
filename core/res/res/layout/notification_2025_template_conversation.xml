@@ -60,11 +60,11 @@
                 <!-- Use layout_marginStart instead of paddingStart to work around strange
                      measurement behavior on lower display densities. -->
                 <include
-                    layout="@layout/notification_template_conversation_header"
+                    layout="@layout/notification_2025_conversation_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="2dp"
-                    android:layout_marginStart="@dimen/conversation_content_start"
+                    android:layout_marginStart="@dimen/notification_2025_content_margin_start"
                     />
 
                 <!-- Messages -->
@@ -86,7 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/notification_content_margin"
-            android:layout_marginStart="@dimen/conversation_content_start"
+            android:layout_marginStart="@dimen/notification_2025_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end" />
         <include layout="@layout/notification_material_action_list" />
     </com.android.internal.widget.RemeasuringLinearLayout>
