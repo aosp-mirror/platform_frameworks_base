@@ -107,7 +107,7 @@ private fun Notification.extractWhen(): When? {
     val countDown = chronometerCountDown()
 
     return when {
-        showsTime -> When(time, When.Mode.Absolute)
+        showsTime -> When(time, When.Mode.BasicTime)
         showsChronometer -> When(time, if (countDown) When.Mode.CountDown else When.Mode.CountUp)
         else -> null
     }

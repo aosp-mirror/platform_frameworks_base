@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -82,21 +83,43 @@ constructor(
                     )
                 }
             }
-        return if (headsUpState == PinnedStatus.PinnedByUser) {
+
+        if (headsUpState == PinnedStatus.PinnedByUser) {
             // If the user tapped the chip to show the HUN, we want to just show the icon because
             // the HUN will show the rest of the information.
-            OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
-        } else {
-            OngoingActivityChipModel.Shown.ShortTimeDelta(
-                icon,
-                colors,
-                time = this.whenTime,
-                onClickListener,
-            )
+            return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
         }
-        // TODO(b/364653005): Use Notification.showWhen to determine if we should show the time.
+
+        if (this.promotedContent.time == null) {
+            return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        }
+        when (this.promotedContent.time.mode) {
+            PromotedNotificationContentModel.When.Mode.BasicTime -> {
+                return OngoingActivityChipModel.Shown.ShortTimeDelta(
+                    icon,
+                    colors,
+                    time = this.promotedContent.time.time,
+                    onClickListener,
+                )
+            }
+            PromotedNotificationContentModel.When.Mode.CountUp -> {
+                return OngoingActivityChipModel.Shown.Timer(
+                    icon,
+                    colors,
+                    startTimeMs = this.promotedContent.time.time,
+                    onClickListener,
+                )
+            }
+            PromotedNotificationContentModel.When.Mode.CountDown -> {
+                // TODO(b/364653005): Support CountDown.
+                return OngoingActivityChipModel.Shown.Timer(
+                    icon,
+                    colors,
+                    startTimeMs = this.promotedContent.time.time,
+                    onClickListener,
+                )
+            }
+        }
         // TODO(b/364653005): If Notification.shortCriticalText is set, use that instead of `when`.
-        // TODO(b/364653005): If the app that posted the notification is in the foreground, don't
-        // show that app's chip.
     }
 }
