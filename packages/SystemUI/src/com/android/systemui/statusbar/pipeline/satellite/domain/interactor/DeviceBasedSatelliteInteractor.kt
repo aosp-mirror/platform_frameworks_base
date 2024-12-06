@@ -161,6 +161,13 @@ constructor(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
 
+    /** True if any known mobile network is currently using a non terrestrial network */
+    val isAnyConnectionNtn =
+        iconsInteractor.icons.aggregateOver(selector = { it.isNonTerrestrial }, false) {
+            nonTerrestrialNetworks ->
+            nonTerrestrialNetworks.any { it == true }
+        }
+
     companion object {
         const val TAG = "DeviceBasedSatelliteInteractor"
 
