@@ -40,6 +40,7 @@ import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.service.autofill.Flags.highlightAutofillSingleField;
+import static android.service.autofill.Flags.improveFillDialogAconfig;
 import static android.view.autofill.AutofillManager.ACTION_RESPONSE_EXPIRED;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
@@ -50,6 +51,7 @@ import static android.view.autofill.AutofillManager.COMMIT_REASON_UNKNOWN;
 import static android.view.autofill.AutofillManager.EXTRA_AUTOFILL_REQUEST_ID;
 import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_EXPLICITLY_REQUESTED;
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_NORMAL_TRIGGER;
@@ -184,6 +186,7 @@ import android.view.autofill.IAutoFillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.widget.RemoteViews;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -195,6 +198,7 @@ import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.autofill.ui.PendingUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -248,6 +252,8 @@ final class Session
     private static final int DEFAULT__FILL_REQUEST_ID_SNAPSHOT = -2;
     private static final int DEFAULT__FIELD_CLASSIFICATION_REQUEST_ID_SNAPSHOT = -2;
 
+    private static final long DEFAULT_UNASSIGNED_TIME = -1;
+
     static final String SESSION_ID_KEY = "autofill_session_id";
     static final String REQUEST_ID_KEY = "autofill_request_id";
 
@@ -291,6 +297,31 @@ final class Session
             value = {STATE_UNKNOWN, STATE_ACTIVE, STATE_FINISHED, STATE_REMOVED})
     @Retention(RetentionPolicy.SOURCE)
     @interface SessionState {}
+
+    /**
+     * Indicates fill dialog will not be shown.
+     */
+    private static final int SHOW_FILL_DIALOG_NO = 0;
+
+    /**
+     * Indicates fill dialog is shown.
+     */
+    private static final int SHOW_FILL_DIALOG_YES = 1;
+
+    /**
+     * Indicates fill dialog can be shown, but we need to wait.
+     * For eg, if the IME animation is happening, we need for it to complete before fill dialog can
+     * be shown.
+     */
+    private static final int SHOW_FILL_DIALOG_WAIT = 2;
+
+    @IntDef(prefix = { "SHOW_FILL_DIALOG_" }, value = {
+            SHOW_FILL_DIALOG_NO,
+            SHOW_FILL_DIALOG_YES,
+            SHOW_FILL_DIALOG_WAIT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface ShowFillDialogState{}
 
     @GuardedBy("mLock")
     private final SessionFlags mSessionFlags;
@@ -575,6 +606,47 @@ final class Session
     private AutofillId[] mLastFillDialogTriggerIds;
 
     private boolean mIgnoreViewStateResetToEmpty;
+
+    /**
+     * Whether improveFillDialog feature is enabled or not.
+     * Configured via device config flag and aconfig flag.
+     */
+    private final boolean mImproveFillDialogEnabled;
+
+    /**
+     * Timeout, after which, fill dialog won't be shown.
+     * Configured via device config flag.
+     */
+    private final long mFillDialogTimeoutMs;
+
+    /**
+     * Time to wait after ime Animation ends before showing up fill dialog.
+     * Configured via device config flag.
+     */
+    private final long mFillDialogMinWaitAfterImeAnimationMs;
+
+    /**
+     * Indicates the need to wait for ime animation to end before showing up fill dialog.
+     * This is set when we receive notification of ime animation start.
+     * Focussing on one input field from another wouldn't cause ime to re-animate. So this will let
+     * us know whether we need to wait for ime animation finish notification.
+     */
+    private boolean mWaitForImeAnimation;
+
+    /**
+     * A runnable set to run when there is a need to wait for ime animation to end before showing
+     * up fill dialog. This is set only if the fill response has been received, and the response
+     * is eligible for showing up fill dialog, but the ime animation hasn't completed. This allows
+     * for this runnable to be scheduled/run when the ime animation ends, in order to show fill
+     * dialog.
+     */
+    private Runnable mFillDialogRunnable;
+
+    private long mImeAnimationFinishTimeMs = DEFAULT_UNASSIGNED_TIME;
+
+    private long mImeAnimationStartTimeMs = DEFAULT_UNASSIGNED_TIME;
+
+    private long mLastInputStartTime = DEFAULT_UNASSIGNED_TIME;
 
     /*
      * Id of the previous view that was entered. Once set, it would only be replaced by non-null
@@ -1493,6 +1565,12 @@ final class Session
         // Now request the assist structure data.
         requestAssistStructureLocked(requestId, flags);
 
+        if (mImproveFillDialogEnabled) {
+            // New request has been sent, so re-enable fill dialog.
+            // Fill dialog is eligible to be shown after each Fill request.
+            enableFillDialog();
+        }
+
         return Optional.of(requestId);
     }
 
@@ -1657,6 +1735,11 @@ final class Session
         mSaveEventLogger = SaveEventLogger.forSessionId(sessionId, mLatencyBaseTime);
         mIsPrimaryCredential = isPrimaryCredential;
         mIgnoreViewStateResetToEmpty = AutofillFeatureFlags.shouldIgnoreViewStateResetToEmpty();
+        mImproveFillDialogEnabled =
+                improveFillDialogAconfig() && AutofillFeatureFlags.isImproveFillDialogEnabled();
+        mFillDialogTimeoutMs = AutofillFeatureFlags.getFillDialogTimeoutMs();
+        mFillDialogMinWaitAfterImeAnimationMs =
+                AutofillFeatureFlags.getFillDialogMinWaitAfterImeAnimationtEndMs();
 
         synchronized (mLock) {
             mSessionFlags = new SessionFlags();
@@ -1681,6 +1764,13 @@ final class Session
                             @Override
                             public void notifyInlineUiHidden(AutofillId autofillId) {
                                 notifyFillUiHidden(autofillId);
+                            }
+
+                            @Override
+                            public void onInputMethodStartInputView() {
+                                // TODO(b/377868687): This method isn't called when IME doesn't
+                                //  support inline suggestion. Handle those cases as well.
+                                onInputMethodStart();
                             }
                         });
 
@@ -3041,6 +3131,12 @@ final class Session
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending fill UI shown notification", e);
             }
+        }
+    }
+
+    private void onInputMethodStart() {
+        synchronized (mLock) {
+            mLastInputStartTime = SystemClock.elapsedRealtime();
         }
     }
 
@@ -5407,6 +5503,15 @@ final class Session
         }
     }
 
+    private void resetImeAnimationState() {
+        synchronized (mLock) {
+            mWaitForImeAnimation = false;
+            mImeAnimationStartTimeMs = DEFAULT_UNASSIGNED_TIME;
+            mImeAnimationFinishTimeMs = DEFAULT_UNASSIGNED_TIME;
+            mLastInputStartTime = DEFAULT_UNASSIGNED_TIME;
+        }
+    }
+
     @Override
     public void onFillReady(
             @NonNull FillResponse response,
@@ -5452,18 +5557,24 @@ final class Session
 
         final AutofillId[] ids = response.getFillDialogTriggerIds();
         if (ids != null && ArrayUtils.contains(ids, filledId)) {
-            if (requestShowFillDialog(response, filledId, filterText, flags)) {
+            @ShowFillDialogState int fillDialogState =
+                    requestShowFillDialog(response, filledId, filterText, flags);
+            if (fillDialogState == SHOW_FILL_DIALOG_YES) {
                 synchronized (mLock) {
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
                 }
-                // Just show fill dialog once, so disabled after shown.
+                // Just show fill dialog once per fill request, so disabled after shown.
                 // Note: Cannot disable before requestShowFillDialog() because the method
-                //       need to check whether fill dialog enabled.
+                //       need to check whether fill dialog is enabled.
                 setFillDialogDisabled();
+                resetImeAnimationState();
                 return;
-            } else {
+            }  else if (fillDialogState == SHOW_FILL_DIALOG_NO) {
+                resetImeAnimationState();
                 setFillDialogDisabled();
+            } else { // SHOW_FILL_DIALOG_WAIT
+                return;
             }
         }
 
@@ -5559,7 +5670,20 @@ final class Session
         }
     }
 
+    private void enableFillDialog() {
+        if (sVerbose) {
+            Slog.v(TAG, "Enabling Fill Dialog....");
+        }
+        synchronized (mLock) {
+            mSessionFlags.mFillDialogDisabled = false;
+        }
+        notifyClientFillDialogTriggerIds(null);
+    }
+
     private void setFillDialogDisabled() {
+        if (sVerbose) {
+            Slog.v(TAG, "Disabling Fill Dialog.");
+        }
         synchronized (mLock) {
             mSessionFlags.mFillDialogDisabled = true;
         }
@@ -5577,24 +5701,28 @@ final class Session
         }
     }
 
-    private boolean requestShowFillDialog(
+    private @ShowFillDialogState int requestShowFillDialog(
             FillResponse response, AutofillId filledId, String filterText, int flags) {
         if (!isFillDialogUiEnabled()) {
+            // TODO(b/377868687): The above check includes credman fields. We may want to show
+            //  credman fields again.
             // Unsupported fill dialog UI
-            if (sDebug) Log.w(TAG, "requestShowFillDialog: fill dialog is disabled");
-            return false;
+            if (sDebug) Log.w(TAG, "requestShowFillDialog(): fill dialog is disabled");
+            return SHOW_FILL_DIALOG_NO;
         }
 
-        if ((flags & FillRequest.FLAG_IME_SHOWING) != 0) {
-            // IME is showing, fallback to normal suggestions UI
-            if (sDebug) Log.w(TAG, "requestShowFillDialog: IME is showing");
-            return false;
-        }
+        if (!mImproveFillDialogEnabled) {
+            if ((flags & FillRequest.FLAG_IME_SHOWING) != 0) {
+                // IME is showing, fallback to normal suggestions UI
+                if (sDebug) Log.w(TAG, "requestShowFillDialog(): IME is showing");
+                return SHOW_FILL_DIALOG_NO;
+            }
 
-        if (mInlineSessionController.isImeShowing()) {
-            // IME is showing, fallback to normal suggestions UI
-            // Note: only work when inline suggestions supported
-            return false;
+            if (mInlineSessionController.isImeShowing()) {
+                // IME is showing, fallback to normal suggestions UI
+                // Note: only work when inline suggestions supported
+                return SHOW_FILL_DIALOG_NO;
+            }
         }
 
         synchronized (mLock) {
@@ -5602,29 +5730,84 @@ final class Session
                     || !ArrayUtils.contains(mLastFillDialogTriggerIds, filledId)) {
                 // Last fill dialog triggered ids are changed.
                 if (sDebug) Log.w(TAG, "Last fill dialog triggered ids are changed.");
-                return false;
+                return SHOW_FILL_DIALOG_NO;
+            }
+
+            if (mImproveFillDialogEnabled && mInlineSessionController.isImeShowing()) {
+                long currentTimestampMs = SystemClock.elapsedRealtime();
+                long durationMs = currentTimestampMs - mLastInputStartTime;
+                if (sVerbose) {
+                    Log.d(TAG, "IME is showing. Checking for elapsed time ");
+                    Log.d(TAG, "IME is showing. Timestamps start: " + mLastInputStartTime
+                            + " current: " +  currentTimestampMs + " duration: " + durationMs
+                            + " mFillDialogTimeoutMs: " + mFillDialogTimeoutMs);
+                }
+
+                // Following situations can arise wrt IME animation.
+                // 1. No animation happening (eg IME already animated). In that case,
+                // mWaitForImeAnimation should be false. This is possible if the IME is already up
+                // on a field, but the user focusses on another field. Under such condition,
+                // since IME has already animated, there won't be another animation. However,
+                // onInputStartInputView is still called.
+                // 2. Animation is still proceeding. We should wait for animation to finish,
+                // and then proceed.
+                // 3. Animation is complete.
+                if (mWaitForImeAnimation) {
+                    // we need to wait for animation to happen. We can't return from here yet.
+                    // This is the situation #2 described above.
+                    Log.d(TAG, "Waiting for ime animation to complete before showing fill dialog");
+                    mFillDialogRunnable = createFillDialogEvalRunnable(
+                            response, filledId, filterText, flags);
+                    return SHOW_FILL_DIALOG_WAIT;
+                }
+
+                // Incorporate situations 1 & 3 discussed above. We calculate the duration from the
+                // max of start input time or the ime finish time
+                long effectiveDuration = currentTimestampMs
+                        - Math.max(mLastInputStartTime, mImeAnimationFinishTimeMs);
+                if (effectiveDuration >= mFillDialogTimeoutMs) {
+                    Log.d(TAG, "Fill dialog not shown since IME has been up for more time than "
+                            + mFillDialogTimeoutMs + "ms");
+                    return SHOW_FILL_DIALOG_NO;
+                } else if (effectiveDuration < mFillDialogMinWaitAfterImeAnimationMs) {
+                    // we need to wait for some time after animation ends
+                    Runnable runnable = createFillDialogEvalRunnable(
+                            response, filledId, filterText, flags);
+                    mHandler.postDelayed(runnable,
+                            mFillDialogMinWaitAfterImeAnimationMs - effectiveDuration);
+                    return SHOW_FILL_DIALOG_WAIT;
+                }
             }
         }
 
+        showFillDialog(response, filledId, filterText);
+        return SHOW_FILL_DIALOG_YES;
+    }
+
+    private Runnable createFillDialogEvalRunnable(
+            @NonNull FillResponse response,
+            @NonNull AutofillId filledId,
+            String filterText,
+            int flags) {
+        return () -> {
+            synchronized (mLock) {
+                AutofillValue value = AutofillValue.forText(filterText);
+                onFillReady(response, filledId, value, flags);
+            }
+        };
+    }
+
+    private void showFillDialog(FillResponse response, AutofillId filledId, String filterText) {
         Drawable serviceIcon = null;
+        PresentationStatsEventLogger logger = null;
         synchronized (mLock) {
             serviceIcon = getServiceIcon(response);
+            logger = mPresentationStatsEventLogger;
         }
 
-        getUiForShowing()
-                .showFillDialog(
-                        filledId,
-                        response,
-                        filterText,
-                        mService.getServicePackageName(),
-                        mComponentName,
-                        serviceIcon,
-                        this,
-                        id,
-                        mCompatMode,
-                        mPresentationStatsEventLogger,
-                        mLock);
-        return true;
+        getUiForShowing().showFillDialog(filledId, response, filterText,
+                mService.getServicePackageName(), mComponentName, serviceIcon, this,
+                id, mCompatMode, logger, mLock);
     }
 
     /**
@@ -7687,6 +7870,30 @@ final class Session
             mSecondaryProviderHandler.destroy();
         }
         mSessionState = STATE_REMOVED;
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationStart(long startTimeMs) {
+        mImeAnimationStartTimeMs = startTimeMs;
+        mWaitForImeAnimation = true;
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationEnd(long endTimeMs) {
+        mImeAnimationFinishTimeMs = endTimeMs;
+        // Make sure to use mRunnable with synchronized
+        if (mFillDialogRunnable != null) {
+            if (sVerbose) {
+                Log.v(TAG, "Ime animation ended, starting fill dialog.");
+            }
+            mHandler.postDelayed(mFillDialogRunnable, mFillDialogMinWaitAfterImeAnimationMs);
+            mFillDialogRunnable = null;
+        } else {
+            if (sVerbose) {
+                Log.v(TAG, "Ime animation ended, no runnable present.");
+            }
+        }
+        mWaitForImeAnimation = false;
     }
 
     void onPendingSaveUi(int operation, @NonNull IBinder token) {

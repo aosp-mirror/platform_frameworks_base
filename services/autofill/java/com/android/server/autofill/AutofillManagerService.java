@@ -2139,6 +2139,32 @@ public final class AutofillManagerService
         }
 
         @Override
+        public void notifyImeAnimationStart(int sessionId, long startTimeMs, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.notifyImeAnimationStart(sessionId, startTimeMs, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "notifyImeAnimationStart(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
+        public void notifyImeAnimationEnd(int sessionId, long endTimeMs, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        peekServiceForUserWithLocalBinderIdentityLocked(userId);
+                if (service != null) {
+                    service.notifyImeAnimationEnd(sessionId, endTimeMs, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "notifyImeAnimationEnd(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
