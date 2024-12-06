@@ -2338,6 +2338,177 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testUpdateToUngroupableSection_cleanupUngrouped() {
+        final String pkg = "package";
+        // Post notification w/o group in a valid section
+        NotificationRecord notification = spy(getNotificationRecord(pkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW));
+        Notification n = mock(Notification.class);
+        StatusBarNotification sbn = spy(getSbn(pkg, 0, "0", UserHandle.SYSTEM));
+        when(notification.getNotification()).thenReturn(n);
+        when(notification.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(n);
+        when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
+        assertThat(GroupHelper.getSection(notification)).isNotNull();
+        mGroupHelper.onNotificationPosted(notification, false);
+
+        // Update notification to invalid section
+        when(n.isStyle(Notification.CallStyle.class)).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification)).isNull();
+        boolean needsAutogrouping = mGroupHelper.onNotificationPosted(notification, false);
+        assertThat(needsAutogrouping).isFalse();
+
+        // Check that GH internal state (ungrouped list) was cleaned-up
+        // Post AUTOGROUP_AT_COUNT-1 notifications => should not autogroup
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            int id = 42 + i;
+            notification = getNotificationRecord(pkg, id, "" + id, mUser,
+                null, false, IMPORTANCE_LOW);
+            mGroupHelper.onNotificationPosted(notification, false);
+        }
+
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testUpdateToUngroupableSection_afterAutogroup_isUngrouped() {
+        final String pkg = "package";
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        // Post notification w/o group in a valid section
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            NotificationRecord notification = spy(getNotificationRecord(pkg, i, "" + i, mUser,
+                    "", false, IMPORTANCE_LOW));
+            Notification n = mock(Notification.class);
+            StatusBarNotification sbn = spy(getSbn(pkg, i, "" + i, UserHandle.SYSTEM));
+            when(notification.getNotification()).thenReturn(n);
+            when(notification.getSbn()).thenReturn(sbn);
+            when(sbn.getNotification()).thenReturn(n);
+            when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
+            assertThat(GroupHelper.getSection(notification)).isNotNull();
+            mGroupHelper.onNotificationPosted(notification, false);
+            notificationList.add(notification);
+        }
+
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+
+        // Update a notification to invalid section
+        Mockito.reset(mCallback);
+        final NotificationRecord notifToInvalidate = notificationList.get(0);
+        when(notifToInvalidate.getNotification().isStyle(Notification.CallStyle.class)).thenReturn(
+                true);
+        assertThat(GroupHelper.getSection(notifToInvalidate)).isNull();
+        boolean needsAutogrouping = mGroupHelper.onNotificationPosted(notifToInvalidate, true);
+        assertThat(needsAutogrouping).isFalse();
+
+        // Check that the updated notification was removed from the autogroup
+        verify(mCallback, times(1)).removeAutoGroup(eq(notifToInvalidate.getKey()));
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(),
+                eq(expectedGroupKey), any());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testUpdateToUngroupableSection_onRemoved_isUngrouped() {
+        final String pkg = "package";
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        // Post notification w/o group in a valid section
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            NotificationRecord notification = spy(getNotificationRecord(pkg, i, "" + i, mUser,
+                    "", false, IMPORTANCE_LOW));
+            Notification n = mock(Notification.class);
+            StatusBarNotification sbn = spy(getSbn(pkg, i, "" + i, UserHandle.SYSTEM));
+            when(notification.getNotification()).thenReturn(n);
+            when(notification.getSbn()).thenReturn(sbn);
+            when(sbn.getNotification()).thenReturn(n);
+            when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
+            assertThat(GroupHelper.getSection(notification)).isNotNull();
+            mGroupHelper.onNotificationPosted(notification, false);
+            notificationList.add(notification);
+        }
+
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+
+        // Update a notification to invalid section and removed it
+        Mockito.reset(mCallback);
+        final NotificationRecord notifToInvalidate = notificationList.get(0);
+        when(notifToInvalidate.getNotification().isStyle(Notification.CallStyle.class)).thenReturn(
+                true);
+        assertThat(GroupHelper.getSection(notifToInvalidate)).isNull();
+        notificationList.remove(notifToInvalidate);
+        mGroupHelper.onNotificationRemoved(notifToInvalidate, notificationList);
+
+        // Check that the autogroup was updated
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(),
+                eq(expectedGroupKey), any());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testUpdateToUngroupableSection_afterForceGrouping_isUngrouped() {
+        final String pkg = "package";
+        final String groupName = "testGroup";
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        // Post valid section summary notifications without children => force group
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            NotificationRecord notification = spy(getNotificationRecord(mPkg, i, "" + i, mUser,
+                    groupName, true, IMPORTANCE_LOW));
+            Notification n = mock(Notification.class);
+            StatusBarNotification sbn = spy(getSbn(pkg, i, "" + i, UserHandle.SYSTEM, groupName));
+            when(notification.getNotification()).thenReturn(n);
+            when(notification.getSbn()).thenReturn(sbn);
+            when(n.getGroup()).thenReturn(groupName);
+            when(sbn.getNotification()).thenReturn(n);
+            when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
+            assertThat(GroupHelper.getSection(notification)).isNotNull();
+            notificationList.add(notification);
+            mGroupHelper.onNotificationPostedWithDelay(notification, notificationList,
+                    summaryByGroup);
+        }
+
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+
+        // Update a notification to invalid section
+        Mockito.reset(mCallback);
+        final NotificationRecord notifToInvalidate = notificationList.get(0);
+        when(notifToInvalidate.getNotification().isStyle(Notification.CallStyle.class)).thenReturn(
+                true);
+        assertThat(GroupHelper.getSection(notifToInvalidate)).isNull();
+        boolean needsAutogrouping = mGroupHelper.onNotificationPosted(notifToInvalidate, true);
+        assertThat(needsAutogrouping).isFalse();
+
+        // Check that GH internal state (ungrouped list) was cleaned-up
+        verify(mCallback, times(1)).removeAutoGroup(eq(notifToInvalidate.getKey()));
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(),
+                eq(expectedGroupKey), any());
+    }
+
+    @Test
     @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testMoveAggregateGroups_updateChannel() {
         final String pkg = "package";

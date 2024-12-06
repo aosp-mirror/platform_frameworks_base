@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.OperationInterface;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.BitmapData;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
@@ -36,6 +38,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 
@@ -53,6 +56,12 @@ public class LayoutComponent extends Component {
     protected float mPaddingRight = 0f;
     protected float mPaddingTop = 0f;
     protected float mPaddingBottom = 0f;
+
+    float mScrollX = 0f;
+    float mScrollY = 0f;
+
+    @Nullable protected ScrollDelegate mHorizontalScrollDelegate = null;
+    @Nullable protected ScrollDelegate mVerticalScrollDelegate = null;
 
     @NonNull protected ComponentModifiers mComponentModifiers = new ComponentModifiers();
 
@@ -111,6 +120,7 @@ public class LayoutComponent extends Component {
     // Should be removed after ImageLayout is in
     private static final boolean USE_IMAGE_TEMP_FIX = true;
 
+    @Override
     public void inflate() {
         ArrayList<TextData> data = new ArrayList<>();
         ArrayList<Operation> supportedOperations = new ArrayList<>();
@@ -144,6 +154,7 @@ public class LayoutComponent extends Component {
                         if (!canvasContent.mList.isEmpty()) {
                             mContent.mList.clear();
                             mChildrenComponents.add(canvasContent);
+                            canvasContent.inflate();
                         }
                     } else {
                         content.getData(data);
@@ -155,6 +166,9 @@ public class LayoutComponent extends Component {
                 if (op instanceof ComponentVisibilityOperation) {
                     ((ComponentVisibilityOperation) op).setParent(this);
                 }
+                if (op instanceof ScrollModifierOperation) {
+                    ((ScrollModifierOperation) op).inflate(this);
+                }
                 mComponentModifiers.add((ModifierOperation) op);
             } else if (op instanceof TextData) {
                 data.add((TextData) op);
@@ -162,6 +176,9 @@ public class LayoutComponent extends Component {
                     || (op instanceof PaintData)
                     || (op instanceof FloatExpression)) {
                 supportedOperations.add(op);
+                if (op instanceof TouchExpression) {
+                    ((TouchExpression) op).setComponent(this);
+                }
             } else {
                 // nothing
             }
@@ -186,8 +203,6 @@ public class LayoutComponent extends Component {
         mPaddingRight = 0f;
         mPaddingBottom = 0f;
 
-        boolean applyHorizontalMargin = true;
-        boolean applyVerticalMargin = true;
         for (OperationInterface op : mComponentModifiers.getList()) {
             if (op instanceof PaddingModifierOperation) {
                 // We are accumulating padding modifiers to compute the margin
@@ -209,6 +224,14 @@ public class LayoutComponent extends Component {
                 mZIndexModifier = (ZIndexModifierOperation) op;
             } else if (op instanceof GraphicsLayerModifierOperation) {
                 mGraphicsLayerModifier = (GraphicsLayerModifierOperation) op;
+            } else if (op instanceof ScrollDelegate) {
+                ScrollDelegate scrollDelegate = (ScrollDelegate) op;
+                if (scrollDelegate.handlesHorizontalScroll()) {
+                    mHorizontalScrollDelegate = scrollDelegate;
+                }
+                if (scrollDelegate.handlesVerticalScroll()) {
+                    mVerticalScrollDelegate = scrollDelegate;
+                }
             }
         }
         if (mWidthModifier == null) {
@@ -217,8 +240,8 @@ public class LayoutComponent extends Component {
         if (mHeightModifier == null) {
             mHeightModifier = new HeightModifierOperation(DimensionModifierOperation.Type.WRAP);
         }
-        setWidth(computeModifierDefinedWidth());
-        setHeight(computeModifierDefinedHeight());
+        setWidth(computeModifierDefinedWidth(null));
+        setHeight(computeModifierDefinedHeight(null));
     }
 
     @NonNull
@@ -228,19 +251,44 @@ public class LayoutComponent extends Component {
     }
 
     @Override
+    public void getLocationInWindow(@NonNull float[] value) {
+        value[0] += mX + mPaddingLeft;
+        value[1] += mY + mPaddingTop;
+        if (mParent != null) {
+            mParent.getLocationInWindow(value);
+        }
+    }
+
+    @Override
     public float getScrollX() {
-        return mComponentModifiers.getScrollX();
+        if (mHorizontalScrollDelegate != null) {
+            return mHorizontalScrollDelegate.getScrollX(mScrollX);
+        }
+        return mScrollX;
+    }
+
+    public void setScrollX(float value) {
+        mScrollX = value;
     }
 
     @Override
     public float getScrollY() {
-        return mComponentModifiers.getScrollY();
+        if (mVerticalScrollDelegate != null) {
+            return mVerticalScrollDelegate.getScrollY(mScrollY);
+        }
+        return mScrollY;
+    }
+
+    public void setScrollY(float value) {
+        mScrollY = value;
     }
 
     @Override
     public void paintingComponent(@NonNull PaintContext context) {
         Component prev = context.getContext().mLastComponent;
-        context.getContext().mLastComponent = this;
+        RemoteContext remoteContext = context.getContext();
+
+        remoteContext.mLastComponent = this;
         context.save();
         context.translate(mX, mY);
         if (context.isVisualDebug()) {
@@ -279,10 +327,20 @@ public class LayoutComponent extends Component {
             ArrayList<Component> sorted = new ArrayList<Component>(mChildrenComponents);
             sorted.sort((a, b) -> (int) (a.getZIndex() - b.getZIndex()));
             for (Component child : sorted) {
+                if (child.isDirty() && child instanceof VariableSupport) {
+                    child.updateVariables(context.getContext());
+                    child.markNotDirty();
+                }
+                remoteContext.incrementOpCount();
                 child.paint(context);
             }
         } else {
             for (Component child : mChildrenComponents) {
+                if (child.isDirty() && child instanceof VariableSupport) {
+                    child.updateVariables(context.getContext());
+                    child.markNotDirty();
+                }
+                remoteContext.incrementOpCount();
                 child.paint(context);
             }
         }
@@ -295,11 +353,15 @@ public class LayoutComponent extends Component {
     }
 
     /** Traverse the modifiers to compute indicated dimension */
-    public float computeModifierDefinedWidth() {
+    public float computeModifierDefinedWidth(@Nullable RemoteContext context) {
         float s = 0f;
         float e = 0f;
         float w = 0f;
         for (OperationInterface c : mComponentModifiers.getList()) {
+            if (context != null && c.isDirty() && c instanceof VariableSupport) {
+                ((VariableSupport) c).updateVariables(context);
+                c.markNotDirty();
+            }
             if (c instanceof WidthModifierOperation) {
                 WidthModifierOperation o = (WidthModifierOperation) c;
                 if (o.getType() == DimensionModifierOperation.Type.EXACT
@@ -339,11 +401,15 @@ public class LayoutComponent extends Component {
     }
 
     /** Traverse the modifiers to compute indicated dimension */
-    public float computeModifierDefinedHeight() {
+    public float computeModifierDefinedHeight(@Nullable RemoteContext context) {
         float t = 0f;
         float b = 0f;
         float h = 0f;
         for (OperationInterface c : mComponentModifiers.getList()) {
+            if (context != null && c.isDirty() && c instanceof VariableSupport) {
+                ((VariableSupport) c).updateVariables(context);
+                c.markNotDirty();
+            }
             if (c instanceof HeightModifierOperation) {
                 HeightModifierOperation o = (HeightModifierOperation) c;
                 if (o.getType() == DimensionModifierOperation.Type.EXACT
@@ -380,6 +446,11 @@ public class LayoutComponent extends Component {
         padding[0] = t;
         padding[1] = b;
         return t + b;
+    }
+
+    @NonNull
+    public ComponentModifiers getComponentModifiers() {
+        return mComponentModifiers;
     }
 
     @NonNull

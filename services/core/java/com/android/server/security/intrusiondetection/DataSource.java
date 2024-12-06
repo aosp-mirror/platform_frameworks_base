@@ -18,11 +18,6 @@ package com.android.server.security.intrusiondetection;
 
 public interface DataSource {
     /**
-     * Initialize the data source.
-     */
-    boolean initialize();
-
-    /**
      * Enable the data collection.
      */
     void enable();

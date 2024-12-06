@@ -32,7 +32,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="88dp"
+        android:minHeight="@dimen/notification_2025_min_height"
         android:orientation="horizontal"
         >
 
@@ -43,8 +43,7 @@
             android:layout_weight="1"
             android:layout_marginStart="@dimen/conversation_content_start"
             android:orientation="vertical"
-            android:minHeight="68dp"
-            android:paddingBottom="@dimen/notification_headerless_margin_twoline"
+            android:paddingBottom="@dimen/notification_2025_margin"
             >
 
             <include

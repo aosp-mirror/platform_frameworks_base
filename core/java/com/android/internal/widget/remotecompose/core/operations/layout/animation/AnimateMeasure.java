@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -103,13 +104,18 @@ public class AnimateMeasure {
 
     @NonNull public PaintBundle paint = new PaintBundle();
 
-    public void apply(@NonNull PaintContext context) {
-        update(context.getContext().currentTime);
-
+    /**
+     * Apply the layout portion of the animation if any
+     *
+     * @param context
+     */
+    public void apply(@NonNull RemoteContext context) {
+        update(context.currentTime);
         mComponent.setX(getX());
         mComponent.setY(getY());
         mComponent.setWidth(getWidth());
         mComponent.setHeight(getHeight());
+        mComponent.updateVariables(context);
 
         float w = mComponent.getWidth();
         float h = mComponent.getHeight();
@@ -120,10 +126,17 @@ public class AnimateMeasure {
                 h -= pop.getTop() + pop.getBottom();
             }
             if (op instanceof DecoratorComponent) {
-                ((DecoratorComponent) op).layout(context.getContext(), w, h);
+                ((DecoratorComponent) op).layout(context, mComponent, w, h);
             }
         }
+    }
 
+    /**
+     * Paint the transition animation for the component owned
+     *
+     * @param context
+     */
+    public void paint(@NonNull PaintContext context) {
         if (mOriginal.getVisibility() != mTarget.getVisibility()) {
             if (mTarget.getVisibility() == Component.Visibility.GONE) {
                 switch (mExitAnimation) {

@@ -137,8 +137,8 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
             return;
         }
         context.mLastComponent = this;
-        mWidth = context.mWidth;
-        mHeight = context.mHeight;
+        setWidth(context.mWidth);
+        setHeight(context.mHeight);
 
         // TODO: reuse MeasurePass
         MeasurePass measurePass = new MeasurePass();
@@ -155,7 +155,9 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     @Override
     public void paint(@NonNull PaintContext context) {
         mNeedsRepaint = false;
-        context.getContext().mLastComponent = this;
+        RemoteContext remoteContext = context.getContext();
+        remoteContext.mLastComponent = this;
+
         context.save();
 
         if (mParent == null) { // root layout
@@ -165,6 +167,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         for (Operation op : mList) {
             if (op instanceof PaintOperation) {
                 ((PaintOperation) op).paint(context);
+                remoteContext.incrementOpCount();
             }
         }
 
@@ -192,6 +195,11 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "RootLayout";
@@ -222,6 +230,11 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         operations.add(new RootLayoutComponent(componentId, 0, 0, 0, 0, null, -1));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")

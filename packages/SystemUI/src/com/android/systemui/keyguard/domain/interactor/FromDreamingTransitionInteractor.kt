@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.app.DreamManager
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -49,7 +48,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -178,7 +176,8 @@ constructor(
                             newScene = CommunalScenes.Communal,
                             loggingReason = "FromDreamingTransitionInteractor",
                             transitionKey =
-                                if (communalHubOnMobile()) CommunalTransitionKeys.SimpleFade
+                                if (communalSettingsInteractor.isV2FlagEnabled())
+                                    CommunalTransitionKeys.SimpleFade
                                 else null,
                         )
                     } else {
@@ -226,8 +225,15 @@ constructor(
 
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .filter { !it }
-                .sample(deviceEntryInteractor.isUnlocked, ::Pair)
+                .filterRelevantKeyguardStateAnd { !it }
+                .sample(
+                    if (SceneContainerFlag.isEnabled) {
+                        deviceEntryInteractor.isUnlocked
+                    } else {
+                        keyguardInteractor.isKeyguardDismissible
+                    },
+                    ::Pair,
+                )
                 .collect { (_, dismissable) ->
                     // TODO(b/349837588): Add check for -> OCCLUDED.
                     if (dismissable) {

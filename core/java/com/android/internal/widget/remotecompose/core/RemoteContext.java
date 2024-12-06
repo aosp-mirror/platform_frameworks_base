@@ -40,6 +40,7 @@ import java.time.ZoneOffset;
  * <p>We also contain a PaintContext, so that any operation can draw as needed.
  */
 public abstract class RemoteContext {
+    private static final int MAX_OP_COUNT = 100_000; // Maximum cmds per frame
     protected @NonNull CoreDocument mDocument =
             new CoreDocument(); // todo: is this a valid way to initialize? bbade@
     public @NonNull RemoteComposeState mRemoteComposeState =
@@ -52,6 +53,7 @@ public abstract class RemoteContext {
 
     int mDebug = 0;
 
+    private int mOpCount;
     private int mTheme = Theme.UNSPECIFIED;
 
     public float mWidth = 0f;
@@ -213,6 +215,13 @@ public abstract class RemoteContext {
      * @param type 0 = none, 1-21 ,see HapticFeedbackConstants
      */
     public abstract void hapticEffect(int type);
+
+    /** Set the repaint flag. This will trigger a repaint of the current document. */
+    public void needsRepaint() {
+        if (mPaintContext != null) {
+            mPaintContext.needsRepaint();
+        }
+    }
 
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
@@ -486,6 +495,9 @@ public abstract class RemoteContext {
 
     public static final int ID_DENSITY = 27;
 
+    /** Defines when the last build was made */
+    public static final int ID_API_LEVEL = 28;
+
     public static final float FLOAT_DENSITY = Utils.asNan(ID_DENSITY);
 
     /** CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600 */
@@ -559,6 +571,9 @@ public abstract class RemoteContext {
     /** Ambient light level in SI lux */
     public static final float FLOAT_LIGHT = Utils.asNan(ID_LIGHT);
 
+    /** When was this player built */
+    public static final float FLOAT_API_LEVEL = Utils.asNan(ID_API_LEVEL);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -618,4 +633,23 @@ public abstract class RemoteContext {
             float right,
             float bottom,
             int metadataId);
+
+    /** increments the count of operations executed in a pass */
+    public void incrementOpCount() {
+        mOpCount++;
+        if (mOpCount > MAX_OP_COUNT) {
+            throw new RuntimeException("Too many operations executed");
+        }
+    }
+
+    /**
+     * Get the last Op Count and clear the count.
+     *
+     * @return the number of ops executed.
+     */
+    public int getLastOpCount() {
+        int count = mOpCount;
+        mOpCount = 0;
+        return count;
+    }
 }

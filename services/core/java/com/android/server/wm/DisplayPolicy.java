@@ -659,7 +659,7 @@ public class DisplayPolicy {
             }
         } else {
             mHasStatusBar = false;
-            mHasNavigationBar = mDisplayContent.supportsSystemDecorations();
+            mHasNavigationBar = mDisplayContent.isSystemDecorationsSupported();
         }
 
         mRefreshRatePolicy = new RefreshRatePolicy(mService,

@@ -4892,13 +4892,16 @@ public class SizeCompatTests extends WindowTestsBase {
 
     @Test
     public void testUniversalResizeable() {
-        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        mWm.mConstants.mIgnoreActivityOrientationRequestSmallScreen = true;
+        mWm.mConstants.mIgnoreActivityOrientationRequestLargeScreen = true;
         setUpApp(mDisplayContent);
         final float maxAspect = 1.8f;
         final float minAspect = 1.5f;
         prepareLimitedBounds(mActivity, maxAspect, minAspect,
                 ActivityInfo.SCREEN_ORIENTATION_NOSENSOR, true /* isUnresizable */);
 
+        assertTrue(ActivityRecord.canBeUniversalResizeable(mActivity.info.applicationInfo,
+                mWm, true /* isLargeScreen */, false /* forActivity */));
         assertTrue(mActivity.isUniversalResizeable());
         assertTrue(mActivity.isResizeable());
         assertFalse(mActivity.shouldCreateAppCompatDisplayInsets());
@@ -4953,6 +4956,8 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setComponent(getUniqueComponentName(mContext.getPackageName()))
                 .setTask(mTask).build();
         assertFalse(optOutAppActivity.isUniversalResizeable());
+        assertFalse(ActivityRecord.canBeUniversalResizeable(mActivity.info.applicationInfo,
+                mWm, true /* isLargeScreen */, false /* forActivity */));
     }
 
 

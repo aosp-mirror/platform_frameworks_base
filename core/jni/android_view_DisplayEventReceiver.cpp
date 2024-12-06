@@ -40,6 +40,7 @@ static struct {
     jmethodID dispatchHotplug;
     jmethodID dispatchHotplugConnectionError;
     jmethodID dispatchModeChanged;
+    jmethodID dispatchModeRejected;
     jmethodID dispatchFrameRateOverrides;
     jmethodID dispatchHdcpLevelsChanged;
 
@@ -95,6 +96,7 @@ private:
     void dispatchHotplugConnectionError(nsecs_t timestamp, int errorCode) override;
     void dispatchModeChanged(nsecs_t timestamp, PhysicalDisplayId displayId, int32_t modeId,
                              nsecs_t renderPeriod) override;
+    void dispatchModeRejected(PhysicalDisplayId displayId, int32_t modeId) override;
     void dispatchFrameRateOverrides(nsecs_t timestamp, PhysicalDisplayId displayId,
                                     std::vector<FrameRateOverride> overrides) override;
     void dispatchNullEvent(nsecs_t timestamp, PhysicalDisplayId displayId) override {}
@@ -271,6 +273,18 @@ void NativeDisplayEventReceiver::dispatchModeChanged(nsecs_t timestamp, Physical
     mMessageQueue->raiseAndClearException(env, "dispatchModeChanged");
 }
 
+void NativeDisplayEventReceiver::dispatchModeRejected(PhysicalDisplayId displayId, int32_t modeId) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    if (receiverObj.get()) {
+        ALOGV("receiver %p ~ Invoking Mode Rejected handler.", this);
+        env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchModeRejected,
+                            displayId.value, modeId);
+        ALOGV("receiver %p ~ Returned from Mode Rejected handler.", this);
+    }
+}
+
 void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
         nsecs_t timestamp, PhysicalDisplayId displayId, std::vector<FrameRateOverride> overrides) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -405,6 +419,9 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
     gDisplayEventReceiverClassInfo.dispatchModeChanged =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchModeChanged",
                              "(JJIJ)V");
+    gDisplayEventReceiverClassInfo.dispatchModeRejected =
+            GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz, "dispatchModeRejected",
+                             "(JI)V");
     gDisplayEventReceiverClassInfo.dispatchFrameRateOverrides =
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.clazz,
                              "dispatchFrameRateOverrides",

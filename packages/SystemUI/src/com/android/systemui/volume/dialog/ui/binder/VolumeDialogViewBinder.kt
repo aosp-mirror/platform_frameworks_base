@@ -25,9 +25,6 @@ import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.InternalInsetsInfo
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.internal.view.RotationPolicy
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.util.children
 import com.android.systemui.volume.SystemUIInterpolators
@@ -44,7 +41,6 @@ import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -61,7 +57,7 @@ class VolumeDialogViewBinder
 @Inject
 constructor(
     private val volumeResources: VolumeDialogResources,
-    private val dialogViewModelFactory: VolumeDialogViewModel.Factory,
+    private val viewModel: VolumeDialogViewModel,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
     private val volumeDialogRingerViewBinder: VolumeDialogRingerViewBinder,
@@ -69,35 +65,27 @@ constructor(
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
 ) {
 
-    fun bind(dialog: Dialog) {
+    fun CoroutineScope.bind(dialog: Dialog) {
         // Root view of the Volume Dialog.
         val root: MotionLayout = dialog.requireViewById(R.id.volume_dialog_root)
         root.alpha = 0f
-        root.repeatWhenAttached {
-            root.viewModel(
-                traceName = "VolumeDialogViewBinder",
-                minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { dialogViewModelFactory.create() },
-            ) { viewModel ->
-                animateVisibility(root, dialog, viewModel.dialogVisibilityModel)
 
-                viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
-                viewModel.motionState
-                    .scan(0) { acc, motionState ->
-                        // don't animate the initial state
-                        root.transitionToState(motionState, animate = acc != 0)
-                        acc + 1
-                    }
-                    .launchIn(this)
+        animateVisibility(root, dialog, viewModel.dialogVisibilityModel)
 
-                launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
-
-                awaitCancellation()
+        viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
+        viewModel.motionState
+            .scan(0) { acc, motionState ->
+                // don't animate the initial state
+                root.transitionToState(motionState, animate = acc != 0)
+                acc + 1
             }
-        }
-        volumeDialogRingerViewBinder.bind(root)
-        slidersViewBinder.bind(root)
-        settingsButtonViewBinder.bind(root)
+            .launchIn(this)
+
+        launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
+
+        with(volumeDialogRingerViewBinder) { bind(root) }
+        with(slidersViewBinder) { bind(root) }
+        with(settingsButtonViewBinder) { bind(root) }
     }
 
     private fun CoroutineScope.animateVisibility(

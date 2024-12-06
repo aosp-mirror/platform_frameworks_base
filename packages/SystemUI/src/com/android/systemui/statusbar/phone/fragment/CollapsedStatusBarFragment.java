@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarCompone
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder;
@@ -376,6 +377,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
         mHomeStatusBarViewBinder.bind(
+                view.getContext().getDisplayId(),
                 mStatusBar,
                 mHomeStatusBarViewModel,
                 /* systemEventChipAnimateIn */ null,
@@ -504,12 +506,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 notificationIconArea.requireViewById(R.id.notificationIcons);
         mNotificationIconAreaInner = notificationIcons;
         int displayId = mHomeStatusBarComponent.getDisplayId();
-        if (displayId == Display.DEFAULT_DISPLAY) {
-            //TODO(b/369337701): implement notification icons for all displays.
-            // Currently if we try to bind for all displays, there is a crash, because the same
-            // notification icon view can't have multiple parents.
-            mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons, displayId);
-        }
+        mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons, displayId);
 
         if (!StatusBarRootModernization.isEnabled()) {
             updateNotificationIconAreaAndOngoingActivityChip(/* animate= */ false);
@@ -965,7 +962,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mOngoingCallController.addCallback(mOngoingCallListener);
         }
         // TODO(b/364653005): Do we also need to set the secondary activity chip?
-        mOngoingCallController.setChipView(mPrimaryOngoingActivityChip);
+        if (!StatusBarChipsModernization.isEnabled()) {
+            mOngoingCallController.setChipView(mPrimaryOngoingActivityChip);
+        }
     }
 
     @Override

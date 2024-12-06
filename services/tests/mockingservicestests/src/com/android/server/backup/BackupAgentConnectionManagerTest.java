@@ -119,6 +119,8 @@ public class BackupAgentConnectionManagerTest {
 
         mTestApplicationInfo = new ApplicationInfo();
         mTestApplicationInfo.packageName = TEST_PACKAGE;
+        mTestApplicationInfo.processName = TEST_PACKAGE;
+        mTestApplicationInfo.uid = Process.FIRST_APPLICATION_UID + 1;
 
         mBackupAgentResult = null;
         mTestThread = null;
@@ -134,8 +136,8 @@ public class BackupAgentConnectionManagerTest {
     @Test
     public void bindToAgentSynchronous_amReturnsFailure_returnsNullAndClearsPendingBackups()
             throws Exception {
-        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(),
-                anyInt(), anyBoolean())).thenReturn(false);
+        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                anyBoolean())).thenReturn(false);
 
         IBackupAgent result = mConnectionManager.bindToAgentSynchronous(mTestApplicationInfo,
                 ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD);
@@ -147,8 +149,8 @@ public class BackupAgentConnectionManagerTest {
     @Test
     public void bindToAgentSynchronous_agentDisconnectedCalled_returnsNullAndClearsPendingBackups()
             throws Exception {
-        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(),
-                anyInt(), anyBoolean())).thenReturn(true);
+        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                anyBoolean())).thenReturn(true);
         // This is so that IBackupAgent.Stub.asInterface() works.
         when(mBackupAgentStub.queryLocalInterface(any())).thenReturn(mBackupAgentStub);
         when(mConnectionManager.getCallingUid()).thenReturn(Process.SYSTEM_UID);
@@ -172,24 +174,7 @@ public class BackupAgentConnectionManagerTest {
 
     @Test
     public void bindToAgentSynchronous_agentConnectedCalled_returnsBackupAgent() throws Exception {
-        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(),
-                anyInt(), anyBoolean())).thenReturn(true);
-        // This is so that IBackupAgent.Stub.asInterface() works.
-        when(mBackupAgentStub.queryLocalInterface(any())).thenReturn(mBackupAgentStub);
-        when(mConnectionManager.getCallingUid()).thenReturn(Process.SYSTEM_UID);
-
-        // This is going to block until it receives the callback so we need to run it on a
-        // separate thread.
-        Thread testThread = new Thread(() -> setBackupAgentResult(
-                mConnectionManager.bindToAgentSynchronous(mTestApplicationInfo,
-                        ApplicationThreadConstants.BACKUP_MODE_FULL, BackupDestination.CLOUD)),
-                "backup-agent-connection-manager-test");
-        testThread.start();
-        // Give the testThread a head start, otherwise agentConnected() might run before
-        // bindToAgentSynchronous() is called.
-        Thread.sleep(500);
-        mConnectionManager.agentConnected(TEST_PACKAGE, mBackupAgentStub);
-        testThread.join();
+        bindAndConnectToTestAppAgent(ApplicationThreadConstants.BACKUP_MODE_FULL);
 
         assertThat(mBackupAgentResult).isEqualTo(mBackupAgentStub);
         verify(mActivityManagerInternal, never()).clearPendingBackup(anyInt());
@@ -198,8 +183,8 @@ public class BackupAgentConnectionManagerTest {
     @Test
     public void bindToAgentSynchronous_unexpectedAgentConnected_doesNotReturnWrongAgent()
             throws Exception {
-        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(),
-                anyInt(), anyBoolean())).thenReturn(true);
+        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                anyBoolean())).thenReturn(true);
         // This is so that IBackupAgent.Stub.asInterface() works.
         when(mBackupAgentStub.queryLocalInterface(any())).thenReturn(mBackupAgentStub);
         when(mConnectionManager.getCallingUid()).thenReturn(Process.SYSTEM_UID);
@@ -390,9 +375,73 @@ public class BackupAgentConnectionManagerTest {
 
     @Test
     public void unbindAgent_callsAmUnbindBackupAgent() throws Exception {
-        mConnectionManager.unbindAgent(mTestApplicationInfo);
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ false);
 
         verify(mActivityManager).unbindBackupAgent(eq(mTestApplicationInfo));
+    }
+
+    @Test
+    public void unbindAgent_doNotAllowKill_doesNotKillApp() throws Exception {
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ false);
+
+        verify(mActivityManager, never()).killApplicationProcess(any(), anyInt());
+    }
+
+    @Test
+    public void unbindAgent_allowKill_isCoreApp_doesNotKillApp() throws Exception {
+        mTestApplicationInfo.uid = 1000;
+
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ true);
+
+        verify(mActivityManager, never()).killApplicationProcess(any(), anyInt());
+    }
+
+    @Test
+    public void unbindAgent_allowKill_notCurrentConnection_killsApp() throws Exception {
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ true);
+
+        verify(mActivityManager).killApplicationProcess(eq(TEST_PACKAGE), anyInt());
+    }
+
+    @Test
+    public void unbindAgent_allowKill_inRestrictedMode_killsApp() throws Exception {
+        bindAndConnectToTestAppAgent(ApplicationThreadConstants.BACKUP_MODE_FULL);
+
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ true);
+
+        verify(mActivityManager).killApplicationProcess(eq(TEST_PACKAGE), anyInt());
+    }
+
+    @Test
+    public void unbindAgent_allowKill_notInRestrictedMode_doesNotKillApp() throws Exception {
+        bindAndConnectToTestAppAgent(ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
+
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ true);
+
+        verify(mActivityManager, never()).killApplicationProcess(any(), anyInt());
+    }
+
+    @Test
+    public void unbindAgent_allowKill_isRestore_noKillAfterRestore_doesNotKillApp()
+            throws Exception {
+        bindAndConnectToTestAppAgent(ApplicationThreadConstants.BACKUP_MODE_RESTORE);
+        mTestApplicationInfo.flags = 0;
+        verify(mActivityManager).bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                /* useRestrictedMode= */ eq(false));
+
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ true);
+
+        verify(mActivityManager, never()).killApplicationProcess(any(), anyInt());
+    }
+
+    @Test
+    public void unbindAgent_allowKill_isRestore_killAfterRestore_killsApp() throws Exception {
+        bindAndConnectToTestAppAgent(ApplicationThreadConstants.BACKUP_MODE_RESTORE);
+        mTestApplicationInfo.flags |= ApplicationInfo.FLAG_KILL_AFTER_RESTORE;
+
+        mConnectionManager.unbindAgent(mTestApplicationInfo, /* allowKill= */ true);
+
+        verify(mActivityManager).killApplicationProcess(eq(TEST_PACKAGE), anyInt());
     }
 
     // Needed because variables can't be assigned directly inside lambdas in Java.
@@ -403,5 +452,24 @@ public class BackupAgentConnectionManagerTest {
     // Needed because variables can't be assigned directly inside lambdas in Java.
     private void setTestThread(Thread thread) {
         mTestThread = thread;
+    }
+
+    private void bindAndConnectToTestAppAgent(int backupMode) throws Exception {
+        when(mActivityManager.bindBackupAgent(eq(TEST_PACKAGE), anyInt(), anyInt(), anyInt(),
+                anyBoolean())).thenReturn(true);
+        // This is going to block until it receives the callback so we need to run it on a
+        // separate thread.
+        Thread testThread = new Thread(() -> setBackupAgentResult(
+                mConnectionManager.bindToAgentSynchronous(mTestApplicationInfo, backupMode,
+                        BackupDestination.CLOUD)), "backup-agent-connection-manager-test");
+        testThread.start();
+        // Give the testThread a head start, otherwise agentConnected() might run before
+        // bindToAgentSynchronous() is called.
+        Thread.sleep(500);
+        when(mConnectionManager.getCallingUid()).thenReturn(Process.SYSTEM_UID);
+        // This is so that IBackupAgent.Stub.asInterface() works.
+        when(mBackupAgentStub.queryLocalInterface(any())).thenReturn(mBackupAgentStub);
+        mConnectionManager.agentConnected(TEST_PACKAGE, mBackupAgentStub);
+        testThread.join();
     }
 }

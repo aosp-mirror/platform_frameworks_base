@@ -821,14 +821,14 @@ public class Notification implements Parcelable
                      R.layout.notification_2025_template_collapsed_call,
                      R.layout.notification_2025_template_expanded_call,
                      R.layout.notification_2025_template_collapsed_messaging,
+                     R.layout.notification_2025_template_expanded_messaging,
                      R.layout.notification_2025_template_collapsed_media,
-                     R.layout.notification_template_material_big_picture,
-                     R.layout.notification_template_material_big_text,
-                     R.layout.notification_template_material_inbox,
-                     R.layout.notification_template_material_big_messaging,
-                     R.layout.notification_template_material_big_media,
-                     R.layout.notification_template_header -> true;
-                case R.layout.notification_template_material_progress -> Flags.apiRichOngoing();
+                     R.layout.notification_2025_template_expanded_media,
+                     R.layout.notification_2025_template_expanded_big_picture,
+                     R.layout.notification_2025_template_expanded_big_text,
+                     R.layout.notification_2025_template_expanded_inbox -> true;
+                case R.layout.notification_2025_template_expanded_progress
+                        -> Flags.apiRichOngoing();
                 default -> false;
             };
         }
@@ -3221,7 +3221,6 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean containsCustomViews() {
         return contentView != null
                 || bigContentView != null
@@ -3235,7 +3234,6 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean hasTitle() {
         return extras != null
                 && (!TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE))
@@ -3245,7 +3243,7 @@ public class Notification implements Parcelable
     /**
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public boolean hasPromotableStyle() {
         final Class<? extends Style> notificationStyle = getNotificationStyle();
 
@@ -3257,11 +3255,16 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @hide
+     * Returns whether the notification has all the characteristics that make it eligible for
+     * {@link #FLAG_PROMOTED_ONGOING}. This method does not factor in other criteria such user
+     * preferences for the app or channel. If this returns true, it does not guarantee that the
+     * notification will be assigned FLAG_PROMOTED_ONGOING by the system, but if this returns false,
+     * it will not.
      */
-    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public boolean hasPromotableCharacteristics() {
         return isColorizedRequested()
+                && isOngoingEvent()
                 && hasTitle()
                 && !isGroupSummary()
                 && !containsCustomViews()
@@ -4153,6 +4156,13 @@ public class Notification implements Parcelable
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public String getShortCriticalText() {
         return extras.getString(EXTRA_SHORT_CRITICAL_TEXT);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isOngoingEvent() {
+        return (flags & FLAG_ONGOING_EVENT) != 0;
     }
 
     /**
@@ -5964,7 +5974,7 @@ public class Notification implements Parcelable
 
         private static void setHeaderlessVerticalMargins(RemoteViews contentView,
                 StandardTemplateParams p, boolean hasSecondLine) {
-            if (!p.mHeaderless) {
+            if (Flags.notificationsRedesignTemplates() || !p.mHeaderless) {
                 return;
             }
             int marginDimen = hasSecondLine
@@ -6445,10 +6455,13 @@ public class Notification implements Parcelable
                 // Clear view padding to allow buttons to start on the left edge.
                 // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
                 big.setViewPadding(R.id.actions, 0, 0, 0, 0);
-                // Add an optional indent that will make buttons start at the correct column when
-                // there is enough space to do so (and fall back to the left edge if not).
-                big.setInt(R.id.actions, "setCollapsibleIndentDimen",
-                        R.dimen.call_notification_collapsible_indent);
+                if (!Flags.notificationsRedesignTemplates()) {
+                    // Add an optional indent that will make buttons start at the correct column
+                    // when there is enough space to do so (and fall back to the left edge if not).
+                    // This is handled directly in NotificationActionListLayout in the new design.
+                    big.setInt(R.id.actions, "setCollapsibleIndentDimen",
+                            R.dimen.call_notification_collapsible_indent);
+                }
                 if (evenlyDividedCallStyleActionLayout()) {
                     if (CallStyle.DEBUG_NEW_ACTION_LAYOUT) {
                         Log.d(TAG, "setting evenly divided mode on action list");
@@ -6761,19 +6774,6 @@ public class Notification implements Parcelable
             resetNotificationHeader(header);
             bindNotificationHeader(header, p);
             return header;
-        }
-
-        /**
-         * Construct a RemoteViews for the ambient version of the notification.
-         *
-         * @hide
-         */
-        public RemoteViews makeAmbientNotification() {
-            RemoteViews headsUpContentView = createHeadsUpContentView(false /* increasedHeight */);
-            if (headsUpContentView != null) {
-                return headsUpContentView;
-            }
-            return createContentView();
         }
 
         /**
@@ -7561,15 +7561,27 @@ public class Notification implements Parcelable
         }
 
         private int getBigPictureLayoutResource() {
-            return R.layout.notification_template_material_big_picture;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_big_picture;
+            } else {
+                return R.layout.notification_template_material_big_picture;
+            }
         }
 
         private int getBigTextLayoutResource() {
-            return R.layout.notification_template_material_big_text;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_big_text;
+            } else {
+                return R.layout.notification_template_material_big_text;
+            }
         }
 
         private int getInboxLayoutResource() {
-            return R.layout.notification_template_material_inbox;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_inbox;
+            } else {
+                return R.layout.notification_template_material_inbox;
+            }
         }
 
         private int getCollapsedMessagingLayoutResource() {
@@ -7581,7 +7593,11 @@ public class Notification implements Parcelable
         }
 
         private int getExpandedMessagingLayoutResource() {
-            return R.layout.notification_template_material_big_messaging;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_messaging;
+            } else {
+                return R.layout.notification_template_material_big_messaging;
+            }
         }
 
         private int getCollapsedMediaLayoutResource() {
@@ -7589,6 +7605,14 @@ public class Notification implements Parcelable
                 return R.layout.notification_2025_template_collapsed_media;
             } else {
                 return R.layout.notification_template_material_media;
+            }
+        }
+
+        private int getExpandedMediaLayoutResource() {
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_media;
+            } else {
+                return R.layout.notification_template_material_big_media;
             }
         }
 
@@ -7617,7 +7641,11 @@ public class Notification implements Parcelable
         }
 
         private int getProgressLayoutResource() {
-            return R.layout.notification_template_material_progress;
+            if (Flags.notificationsRedesignTemplates()) {
+                return R.layout.notification_2025_template_expanded_progress;
+            } else {
+                return R.layout.notification_template_material_progress;
+            }
         }
 
         private int getActionLayoutResource() {
@@ -10541,7 +10569,7 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
             TemplateBindResult result = new TemplateBindResult();
             RemoteViews template = mBuilder.applyStandardTemplate(
-                    R.layout.notification_template_material_big_media, p , result);
+                    mBuilder.getExpandedMediaLayoutResource(), p , result);
 
             for (int i = 0; i < MAX_MEDIA_BUTTONS; i++) {
                 if (i < actionCount) {

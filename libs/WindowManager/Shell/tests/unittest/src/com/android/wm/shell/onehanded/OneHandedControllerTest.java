@@ -48,7 +48,6 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -179,7 +178,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Test
     public void testControllerRegisteresExternalInterface() {
         verify(mMockShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_ONE_HANDED), any(), any());
+                eq(IOneHanded.DESCRIPTOR), any(), any());
     }
 
     @Test

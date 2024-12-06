@@ -20,6 +20,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.SizeF
 import com.android.app.tracing.coroutines.withContextTraced as withContext
+import com.android.systemui.Flags
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.GlanceableHubMultiUserHelper
 import com.android.systemui.communal.widgets.AppWidgetHostListenerDelegate
@@ -30,6 +31,9 @@ import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.qualifiers.UiBackground
 import dagger.Lazy
 import java.util.concurrent.Executor
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -53,7 +57,11 @@ constructor(
         withContext("$TAG#createWidget", uiBgContext) {
             val view =
                 CommunalAppWidgetHostView(context, interactionHandler).apply {
-                    setExecutor(uiBgExecutor)
+                    if (Flags.communalHubUseThreadPoolForWidgets()) {
+                        setExecutor(widgetExecutor)
+                    } else {
+                        setExecutor(uiBgExecutor)
+                    }
                     setAppWidget(model.appWidgetId, model.providerInfo)
                 }
 
@@ -90,5 +98,20 @@ constructor(
 
     private companion object {
         const val TAG = "WidgetViewFactory"
+
+        val poolSize = Runtime.getRuntime().availableProcessors().coerceAtLeast(2)
+
+        /**
+         * This executor is used for widget inflation. Parameters match what launcher uses. See
+         * [com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR].
+         */
+        val widgetExecutor =
+            ThreadPoolExecutor(
+                /*corePoolSize*/ poolSize,
+                /*maxPoolSize*/ poolSize,
+                /*keepAlive*/ 1,
+                /*unit*/ TimeUnit.SECONDS,
+                /*workQueue*/ LinkedBlockingQueue(),
+            )
     }
 }

@@ -60,7 +60,10 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 
-/** A controller to handle the ongoing call chip in the collapsed status bar. */
+/** A controller to handle the ongoing call chip in the collapsed status bar.
+ * @deprecated Use [OngoingCallInteractor] instead, which follows recommended architecture patterns
+ */
+@Deprecated("Use OngoingCallInteractor instead")
 @SysUISingleton
 class OngoingCallController
 @Inject
@@ -165,6 +168,9 @@ constructor(
         }
 
     override fun start() {
+        if (StatusBarChipsModernization.isEnabled)
+            return
+
         dumpManager.registerDumpable(this)
 
         if (Flags.statusBarUseReposForCallChip()) {
@@ -201,6 +207,8 @@ constructor(
      * [com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment].
      */
     fun setChipView(chipView: View) {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         tearDownChipView()
         this.chipView = chipView
         val backgroundView: ChipBackgroundContainer? =
@@ -217,6 +225,8 @@ constructor(
      * Returns true if there's an active ongoing call that should be displayed in a status bar chip.
      */
     fun hasOngoingCall(): Boolean {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         return callNotificationInfo?.isOngoing == true &&
             // When the user is in the phone app, don't show the chip.
             !uidObserver.isCallAppVisible
@@ -224,6 +234,8 @@ constructor(
 
     /** Creates the right [OngoingCallModel] based on the call state. */
     private fun getOngoingCallModel(): OngoingCallModel {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         if (hasOngoingCall()) {
             val currentInfo =
                 callNotificationInfo
@@ -248,6 +260,7 @@ constructor(
                 startTimeMs = currentInfo.callStartTime,
                 notificationIconView = icon,
                 intent = currentInfo.intent,
+                notificationKey = currentInfo.key,
             )
         } else {
             return OngoingCallModel.NoCall
@@ -255,6 +268,8 @@ constructor(
     }
 
     override fun addCallback(listener: OngoingCallListener) {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         synchronized(mListeners) {
             if (!mListeners.contains(listener)) {
                 mListeners.add(listener)
@@ -263,10 +278,14 @@ constructor(
     }
 
     override fun removeCallback(listener: OngoingCallListener) {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         synchronized(mListeners) { mListeners.remove(listener) }
     }
 
     private fun updateInfoFromNotifModel(notifModel: ActiveNotificationModel?) {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         if (notifModel == null) {
             logger.log(TAG, LogLevel.DEBUG, {}, { "NotifInteractorCallModel: null" })
             removeChip()
@@ -310,6 +329,8 @@ constructor(
     }
 
     private fun updateChip() {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         val currentCallNotificationInfo = callNotificationInfo ?: return
 
         val currentChipView = chipView
@@ -360,6 +381,8 @@ constructor(
     }
 
     private fun updateChipClickListener() {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         if (Flags.statusBarScreenSharingChips()) {
             return
         }
@@ -386,10 +409,14 @@ constructor(
 
     /** Returns true if the given [procState] represents a process that's visible to the user. */
     private fun isProcessVisibleToUser(procState: Int): Boolean {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         return procState <= ActivityManager.PROCESS_STATE_TOP
     }
 
     private fun updateGestureListening() {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         if (
             callNotificationInfo == null ||
                 callNotificationInfo?.statusBarSwipedAway == true ||
@@ -404,6 +431,8 @@ constructor(
     }
 
     private fun removeChip() {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         callNotificationInfo = null
         if (!Flags.statusBarScreenSharingChips()) {
             tearDownChipView()
@@ -432,6 +461,8 @@ constructor(
      * detected.
      */
     private fun onSwipeAwayGestureDetected() {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         logger.log(TAG, LogLevel.DEBUG, {}, { "Swipe away gesture detected" })
         callNotificationInfo = callNotificationInfo?.copy(statusBarSwipedAway = true)
         statusBarWindowControllerStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
@@ -441,6 +472,8 @@ constructor(
     }
 
     private fun sendStateChangeEvent() {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         ongoingCallRepository.setOngoingCallState(getOngoingCallModel())
         mListeners.forEach { l -> l.onOngoingCallStateChanged(animate = true) }
     }

@@ -1797,6 +1797,7 @@
   <java-symbol type="bool" name="config_customUserSwitchUi" />
   <java-symbol type="bool" name="config_canRemoveFirstAccount" />
   <java-symbol type="string" name="config_accountTypeToKeepFirstAccount" />
+  <java-symbol type="bool" name="config_allowDockBeforeProvision" />
   <java-symbol type="bool" name="config_deskDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_disableMenuKeyInLockScreen" />
   <java-symbol type="bool" name="config_enableCarDockHomeLaunch" />
@@ -2012,6 +2013,8 @@
   <java-symbol type="array" name="config_locationProviderPackageNames" />
   <java-symbol type="array" name="config_locationDriverAssistancePackageNames" />
   <java-symbol type="array" name="config_locationExtraPackageNames" />
+  <java-symbol type="string" name="config_populationDensityProviderPackageName" />
+  <java-symbol type="bool" name="config_enablePopulationDensityProviderOverlay" />
   <java-symbol type="array" name="config_testLocationProviders" />
   <java-symbol type="array" name="config_defaultNotificationVibePattern" />
   <java-symbol type="array" name="config_defaultNotificationVibeWaveform" />
@@ -2396,6 +2399,12 @@
   <java-symbol type="layout" name="notification_2025_template_header" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_messaging" />
   <java-symbol type="layout" name="notification_2025_template_collapsed_media" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_big_picture" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_inbox" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_media" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_big_text" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_messaging" />
+  <java-symbol type="layout" name="notification_2025_template_expanded_progress" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_compact_heads_up_base" />
@@ -2407,6 +2416,8 @@
   <java-symbol type="layout" name="notification_template_material_big_media" />
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_material_progress" />
+  <java-symbol type="layout" name="notification_template_material_messaging" />
+  <java-symbol type="layout" name="notification_template_material_big_messaging" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
   <java-symbol type="color" name="notification_progress_background_color" />
@@ -3150,9 +3161,8 @@
   <java-symbol type="string" name="config_cameraLaunchGestureSensorStringType" />
   <java-symbol type="integer" name="config_cameraLiftTriggerSensorType" />
   <java-symbol type="string" name="config_cameraLiftTriggerSensorStringType" />
-  <java-symbol type="bool" name="config_doubleTapPowerGestureEnabled" />
   <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
-  <java-symbol type="bool" name="config_walletDoubleTapPowerGestureEnabled" />
+  <java-symbol type="bool" name="config_doubleTapPowerGestureEnabled" />
   <java-symbol type="integer" name="config_defaultDoubleTapPowerGestureAction" />
   <java-symbol type="bool" name="config_emergencyGestureEnabled" />
   <java-symbol type="bool" name="config_defaultEmergencyGestureEnabled" />
@@ -3346,8 +3356,6 @@
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 
   <java-symbol type="layout" name="app_anr_dialog" />
-  <java-symbol type="layout" name="notification_template_material_messaging" />
-  <java-symbol type="layout" name="notification_template_material_big_messaging" />
 
   <java-symbol type="id" name="aerr_wait" />
 
@@ -3359,6 +3367,23 @@
   <java-symbol type="string" name="duration_hours_shortest_future" />
   <java-symbol type="string" name="duration_days_shortest_future" />
   <java-symbol type="string" name="duration_years_shortest_future" />
+  <java-symbol type="string" name="duration_minutes_shortest_past" />
+  <java-symbol type="string" name="duration_hours_shortest_past" />
+  <java-symbol type="string" name="duration_days_shortest_past" />
+  <java-symbol type="string" name="duration_years_shortest_past" />
+
+  <java-symbol type="string" name="duration_minutes_medium" />
+  <java-symbol type="string" name="duration_hours_medium" />
+  <java-symbol type="string" name="duration_days_medium" />
+  <java-symbol type="string" name="duration_years_medium" />
+  <java-symbol type="string" name="duration_minutes_medium_future" />
+  <java-symbol type="string" name="duration_hours_medium_future" />
+  <java-symbol type="string" name="duration_days_medium_future" />
+  <java-symbol type="string" name="duration_years_medium_future" />
+  <java-symbol type="string" name="duration_minutes_medium_past" />
+  <java-symbol type="string" name="duration_hours_medium_past" />
+  <java-symbol type="string" name="duration_days_medium_past" />
+  <java-symbol type="string" name="duration_years_medium_past" />
 
   <java-symbol type="string" name="duration_minutes_relative" />
   <java-symbol type="string" name="duration_hours_relative" />
@@ -3475,6 +3500,7 @@
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
+  <java-symbol type="dimen" name="notification_2025_actions_margin_start"/>
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_actions_padding_start"/>
   <java-symbol type="dimen" name="notification_actions_collapsed_priority_width"/>
@@ -5817,5 +5843,46 @@
   <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
   <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
 
+  <!-- Style for Wear Material3 AlertDialog. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="AlertDialog.DeviceDefault.WearMaterial3" />
+
   <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
+
+  <!-- Material motion spec config tokens -->
+  <java-symbol type="integer" name="config_motionStandardFastSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardFastEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardDefaultSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardDefaultEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardSlowSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionStandardSlowEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveFastSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveFastEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveDefaultSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveDefaultEffectStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveSlowSpatialStiffness"/>
+  <java-symbol type="integer" name="config_motionExpressiveSlowEffectStiffness"/>
+  <java-symbol type="dimen" name="config_motionStandardFastSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardFastEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardDefaultSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardDefaultEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardSlowSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionStandardSlowEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveFastSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveFastEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveDefaultSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveDefaultEffectDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveSlowSpatialDamping"/>
+  <java-symbol type="dimen" name="config_motionExpressiveSlowEffectDamping"/>
+
+  <!-- List of protected packages that require biometric authentication for modification -->
+  <java-symbol type="array" name="config_biometric_protected_package_names" />
+
+  <!-- Material shape spec config tokens -->
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXsmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusSmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusMedium"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusLarge"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXlarge"/>
+
+
 </resources>

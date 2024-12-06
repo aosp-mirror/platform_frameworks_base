@@ -31,8 +31,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_DRAG_AND_DROP;
-
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
@@ -167,7 +165,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         mMainExecutor.executeDelayed(() -> {
             mDisplayController.addDisplayWindowListener(this);
         }, 0);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_DRAG_AND_DROP,
+        mShellController.addExternalInterface(IDragAndDrop.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellTaskOrganizer.addTaskVanishedListener(this);
         mShellCommandHandler.addDumpCallback(this::dump, this);

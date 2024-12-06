@@ -58,6 +58,8 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 /**
@@ -90,8 +92,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             Handler handler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
-            SyncTransactionQueue syncQueue) {
-        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface);
+            SyncTransactionQueue syncQueue,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier) {
+        super(context, userContext, displayController, taskOrganizer, taskInfo,
+                taskSurface, windowDecorViewHostSupplier);
         mHandler = handler;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
@@ -194,6 +198,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @VisibleForTesting
     static void updateRelayoutParams(
             RelayoutParams relayoutParams,
+            @NonNull Context context,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
             boolean shouldSetTaskVisibilityPositionAndCrop,
@@ -206,9 +211,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
-        relayoutParams.mShadowRadiusId = hasGlobalFocus
-                ? R.dimen.freeform_decor_shadow_focused_thickness
-                : R.dimen.freeform_decor_shadow_unfocused_thickness;
+        relayoutParams.mShadowRadius = hasGlobalFocus
+                ? context.getResources().getDimensionPixelSize(
+                        R.dimen.freeform_decor_shadow_focused_thickness)
+                : context.getResources().getDimensionPixelSize(
+                        R.dimen.freeform_decor_shadow_unfocused_thickness);
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
         relayoutParams.mSetTaskVisibilityPositionAndCrop = shouldSetTaskVisibilityPositionAndCrop;
         relayoutParams.mIsCaptionVisible = taskInfo.isFreeform()
@@ -251,7 +258,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
+        updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
                 shouldSetTaskVisibilityPositionAndCrop, mIsStatusBarVisible,
                 mIsKeyguardVisibleAndOccluded,
                 mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus,

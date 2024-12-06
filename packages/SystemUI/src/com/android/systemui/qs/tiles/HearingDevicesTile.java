@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 
@@ -106,7 +107,7 @@ public class HearingDevicesTile extends QSTileImpl<BooleanState> {
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_BLUETOOTH);
 
         state.label = mContext.getString(R.string.quick_settings_hearing_devices_label);
-        state.icon = ResourceIcon.get(R.drawable.qs_hearing_devices_icon);
+        state.icon = maybeLoadResourceIcon(R.drawable.qs_hearing_devices_icon);
         state.forceExpandIcon = true;
 
         boolean isBonded = mDevicesChecker.isAnyPairedHearingDevice();
@@ -124,6 +125,7 @@ public class HearingDevicesTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
             state.secondaryLabel = "";
         }
+        state.expandedAccessibilityClassName = Button.class.getName();
     }
 
     @Nullable

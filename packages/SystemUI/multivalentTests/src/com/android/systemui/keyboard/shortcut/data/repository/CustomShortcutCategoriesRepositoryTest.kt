@@ -18,6 +18,8 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
+import android.hardware.input.InputGestureData
+import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.DisableFlags
@@ -35,14 +37,18 @@ import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestRe
 import com.android.systemui.keyboard.shortcut.customShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.ALL_SUPPORTED_MODIFIERS
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsInputGestureData
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutAddRequest
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutCategory
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allAppsShortcutDeleteRequest
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allCustomizableInputGesturesWithSimpleShortcutCombinations
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.customizableInputGestureWithUnknownKeyGestureType
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedShortcutCategoriesWithSimpleShortcutCombination
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeInputGestureData
-import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardAddCustomShortcutRequestInfo
-import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardDeleteCustomShortcutRequestInfo
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardKeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo.Add
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo.Delete
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testScope
@@ -55,6 +61,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -81,7 +88,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
-    fun categories_emitsCorrectlyConvertedShortcutCategories() {
+    fun categories_correctlyConvertsAPIModelsToShortcutHelperModels() {
         testScope.runTest {
             whenever(inputManager.getCustomInputGestures(/* filter= */ anyOrNull()))
                 .thenReturn(allCustomizableInputGesturesWithSimpleShortcutCombinations)
@@ -187,11 +194,11 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
     @Test
     fun shortcutBeingCustomized_updatedOnCustomizationRequested() {
         testScope.runTest {
-            repo.onCustomizationRequested(standardAddCustomShortcutRequestInfo)
+            repo.onCustomizationRequested(allAppsShortcutAddRequest)
 
             val shortcutBeingCustomized = repo.getShortcutBeingCustomized()
 
-            assertThat(shortcutBeingCustomized).isEqualTo(standardAddCustomShortcutRequestInfo)
+            assertThat(shortcutBeingCustomized).isEqualTo(allAppsShortcutAddRequest)
         }
     }
 
@@ -211,7 +218,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
     fun buildInputGestureDataForShortcutBeingCustomized_noKeyCombinationSelected_returnsNull() {
         testScope.runTest {
             helper.toggle(deviceId = 123)
-            repo.onCustomizationRequested(standardAddCustomShortcutRequestInfo)
+            repo.onCustomizationRequested(allAppsShortcutAddRequest)
 
             val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
 
@@ -223,7 +230,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
     fun buildInputGestureDataForShortcutBeingCustomized_successfullyBuildInputGestureData() {
         testScope.runTest {
             helper.toggle(deviceId = 123)
-            repo.onCustomizationRequested(standardAddCustomShortcutRequestInfo)
+            repo.onCustomizationRequested(allAppsShortcutAddRequest)
             repo.updateUserKeyCombination(standardKeyCombination)
             val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
 
@@ -242,13 +249,107 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
                 .thenReturn(listOf(allAppsInputGestureData, goHomeInputGestureData))
             whenever(inputManager.removeCustomInputGesture(allAppsInputGestureData))
                 .thenReturn(CUSTOM_INPUT_GESTURE_RESULT_SUCCESS)
-
             helper.toggle(deviceId = 123)
-            repo.onCustomizationRequested(standardDeleteCustomShortcutRequestInfo)
 
-            val result = repo.deleteShortcutCurrentlyBeingCustomized()
-
+            val result = customizeShortcut(allAppsShortcutDeleteRequest)
             assertThat(result).isEqualTo(ShortcutCustomizationRequestResult.SUCCESS)
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun categories_isUpdatedAfterCustomShortcutIsDeleted() {
+        testScope.runTest {
+            // TODO(b/380445594) refactor tests and move these stubbing to ShortcutHelperTestHelper
+            var customInputGestures = listOf(allAppsInputGestureData)
+            whenever(inputManager.getCustomInputGestures(anyOrNull())).then {
+                return@then customInputGestures
+            }
+            whenever(inputManager.removeCustomInputGesture(any())).then {
+                val inputGestureToRemove = it.getArgument<InputGestureData>(0)
+                val containsGesture = customInputGestures.contains(inputGestureToRemove)
+                customInputGestures = customInputGestures - inputGestureToRemove
+                return@then if (containsGesture) CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+                else CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
+            }
+            val categories by collectLastValue(repo.categories)
+            helper.toggle(deviceId = 123)
+
+            customizeShortcut(customizationRequest = allAppsShortcutDeleteRequest)
+            assertThat(categories).isEmpty()
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun categories_isUpdatedAfterCustomShortcutIsAdded() {
+        testScope.runTest {
+            // TODO(b/380445594) refactor tests and move these stubbings to ShortcutHelperTestHelper
+            var customInputGestures = listOf<InputGestureData>()
+            whenever(inputManager.getCustomInputGestures(anyOrNull())).then {
+                return@then customInputGestures
+            }
+            whenever(inputManager.addCustomInputGesture(any())).then {
+                val inputGestureToAdd = it.getArgument<InputGestureData>(0)
+                customInputGestures = customInputGestures + inputGestureToAdd
+                return@then CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+            }
+            val categories by collectLastValue(repo.categories)
+            helper.toggle(deviceId = 123)
+
+            customizeShortcut(allAppsShortcutAddRequest, standardKeyCombination)
+            assertThat(categories).containsExactly(allAppsShortcutCategory)
+        }
+    }
+
+    private suspend fun customizeShortcut(
+        customizationRequest: ShortcutCustomizationRequestInfo,
+        keyCombination: KeyCombination? = null
+    ): ShortcutCustomizationRequestResult{
+        repo.onCustomizationRequested(customizationRequest)
+        repo.updateUserKeyCombination(keyCombination)
+
+        return when (customizationRequest) {
+            is Add -> {
+                repo.confirmAndSetShortcutCurrentlyBeingCustomized()
+            }
+
+            is Delete -> {
+                repo.deleteShortcutCurrentlyBeingCustomized()
+            }
+
+            else -> {
+                ShortcutCustomizationRequestResult.ERROR_OTHER
+            }
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun categories_isUpdatedAfterCustomShortcutsAreReset() {
+        testScope.runTest {
+            // TODO(b/380445594) refactor tests and move these stubbings to ShortcutHelperTestHelper
+            var customInputGestures = listOf(allAppsInputGestureData)
+            whenever(inputManager.getCustomInputGestures(anyOrNull())).then {
+                return@then customInputGestures
+            }
+            whenever(
+                    inputManager.removeAllCustomInputGestures(
+                        /* filter = */ InputGestureData.Filter.KEY
+                    )
+                )
+                .then {
+                    customInputGestures = emptyList()
+                    return@then CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+                }
+
+            val categories by collectLastValue(repo.categories)
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
+
+            assertThat(categories).containsExactly(allAppsShortcutCategory)
+            repo.resetAllCustomShortcuts()
+            assertThat(categories).isEmpty()
         }
     }
 }

@@ -24,14 +24,14 @@ import java.time.ZoneOffset;
 
 /** This generates the standard system variables for time. */
 public class TimeVariables {
+    private static final float BUILD = 0.02f;
+
     /**
      * This class populates all time variables in the system
      *
      * @param context
      */
-    public void updateTime(@NonNull RemoteContext context) {
-        LocalDateTime dateTime =
-                LocalDateTime.now(ZoneId.systemDefault()); // TODO, pass in a timezone explicitly?
+    public void updateTime(@NonNull RemoteContext context, ZoneId zoneId, LocalDateTime dateTime) {
         // This define the time in the format
         // seconds run from Midnight=0 quantized to seconds hour 0..3599
         // minutes run from Midnight=0 quantized to minutes 0..1439
@@ -48,8 +48,7 @@ public class TimeVariables {
         float sec = currentSeconds + dateTime.getNano() * 1E-9f;
         int day_week = dateTime.getDayOfWeek().getValue();
 
-        ZoneId zone = ZoneId.systemDefault();
-        OffsetDateTime offsetDateTime = dateTime.atZone(zone).toOffsetDateTime();
+        OffsetDateTime offsetDateTime = dateTime.atZone(zoneId).toOffsetDateTime();
         ZoneOffset offset = offsetDateTime.getOffset();
 
         context.loadFloat(RemoteContext.ID_OFFSET_TO_UTC, offset.getTotalSeconds());
@@ -60,5 +59,18 @@ public class TimeVariables {
         context.loadFloat(RemoteContext.ID_CALENDAR_MONTH, month);
         context.loadFloat(RemoteContext.ID_DAY_OF_MONTH, month);
         context.loadFloat(RemoteContext.ID_WEEK_DAY, day_week);
+        context.loadFloat(RemoteContext.ID_API_LEVEL, CoreDocument.getDocumentApiLevel() + BUILD);
+    }
+
+    /**
+     * This class populates all time variables in the system
+     *
+     * @param context
+     */
+    public void updateTime(@NonNull RemoteContext context) {
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDateTime dateTime = LocalDateTime.now(zone);
+
+        updateTime(context, zone, dateTime);
     }
 }

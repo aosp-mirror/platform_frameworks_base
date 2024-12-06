@@ -103,6 +103,11 @@ public class ValueStringChangeActionOperation extends Operation implements Actio
         operations.add(new ValueStringChangeActionOperation(valueId, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueStringChangeActionOperation")
                 .description(

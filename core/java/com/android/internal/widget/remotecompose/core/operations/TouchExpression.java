@@ -21,6 +21,7 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -30,6 +31,7 @@ import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.AnimatedFloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.utilities.NanMap;
 import com.android.internal.widget.remotecompose.core.operations.utilities.touch.VelocityEasing;
@@ -80,14 +82,41 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
     int mTouchEffects;
     float mVelocityId;
 
+    /** Stop with some deceleration */
     public static final int STOP_GENTLY = 0;
+
+    /** Stop only at the start or end */
     public static final int STOP_ENDS = 2;
+
+    /** Stop on touch up */
     public static final int STOP_INSTANTLY = 1;
+
+    /** Stop at evenly spaced notches */
     public static final int STOP_NOTCHES_EVEN = 3;
+
+    /** Stop at a collection points described in percents of the range */
     public static final int STOP_NOTCHES_PERCENTS = 4;
+
+    /** Stop at a collectiond of point described in abslute cordnates */
     public static final int STOP_NOTCHES_ABSOLUTE = 5;
+
+    /** Jump to the absloute poition of the point */
     public static final int STOP_ABSOLUTE_POS = 6;
 
+    /**
+     * create a touch expression
+     *
+     * @param id The float id the value is output to
+     * @param exp the expression (containing TOUCH_* )
+     * @param defValue the default value
+     * @param min the minimum value
+     * @param max the maximum value
+     * @param touchEffects the type of touch mode
+     * @param velocityId the valocity (not used)
+     * @param stopMode the behavour on touch oup
+     * @param stopSpec the paraameters that affect the touch up behavour
+     * @param easingSpec the easing parameters for coming to a stop
+     */
     public TouchExpression(
             int id,
             float[] exp,
@@ -129,7 +158,6 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
 
     @Override
     public void updateVariables(RemoteContext context) {
-
         if (mPreCalcValue == null || mPreCalcValue.length != mSrcExp.length) {
             mPreCalcValue = new float[mSrcExp.length];
         }
@@ -192,7 +220,9 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
         if (Float.isNaN(mDefValue)) {
             context.listensTo(Utils.idFromNan(mDefValue), this);
         }
-        context.addTouchListener(this);
+        if (mComponent == null) {
+            context.addTouchListener(this);
+        }
         for (float v : mSrcExp) {
             if (Float.isNaN(v)
                     && !AnimatedFloatExpression.isMathOperator(v)
@@ -332,9 +362,26 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
 
     float mScrLeft, mScrRight, mScrTop, mScrBottom;
 
-    @Override
-    public void apply(RemoteContext context) {
-        Component comp = context.mLastComponent;
+    @Nullable Component mComponent;
+
+    /**
+     * Set the component the touch expression is in (if any)
+     *
+     * @param component the component, or null if outside
+     */
+    public void setComponent(@Nullable Component component) {
+        mComponent = component;
+        if (mComponent != null) {
+            try {
+                RootLayoutComponent root = mComponent.getRoot();
+                root.setHasTouchListeners(true);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void updateBounds() {
+        Component comp = mComponent;
         if (comp != null) {
             float x = comp.getX();
             float y = comp.getY();
@@ -351,7 +398,11 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
             mScrRight = w + x;
             mScrBottom = h + y;
         }
-        updateVariables(context);
+    }
+
+    @Override
+    public void apply(RemoteContext context) {
+        updateBounds();
         if (mUnmodified) {
             mCurrentValue = mOutDefValue;
             context.loadFloat(mId, wrap(mCurrentValue));
@@ -371,6 +422,7 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
                 mEasingToStop = false;
             }
             crossNotchCheck(context);
+            context.needsRepaint();
             return;
         }
         if (mTouchDown) {
@@ -395,11 +447,11 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
 
     @Override
     public void touchDown(RemoteContext context, float x, float y) {
-
         if (!(x >= mScrLeft && x <= mScrRight && y >= mScrTop && y <= mScrBottom)) {
             Utils.log("NOT IN WINDOW " + x + ", " + y + " " + mScrLeft + ", " + mScrTop);
             return;
         }
+        mEasingToStop = false;
         mTouchDown = true;
         mUnmodified = false;
         if (mMode == 0) {
@@ -407,6 +459,7 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
             mDownTouchValue =
                     mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length);
         }
+        context.needsRepaint();
     }
 
     @Override
@@ -441,6 +494,7 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
         float time = mMaxTime * Math.abs(dest - value) / (2 * mMaxVelocity);
         mEasyTouch.config(value, dest, slope, time, mMaxAcceleration, mMaxVelocity, null);
         mEasingToStop = true;
+        context.needsRepaint();
     }
 
     @Override
@@ -449,7 +503,7 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
             return;
         }
         apply(context);
-        context.getDocument().getRootLayoutComponent().needsRepaint();
+        context.needsRepaint();
     }
 
     @Override
@@ -494,6 +548,12 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
 
     // ===================== static ======================
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }

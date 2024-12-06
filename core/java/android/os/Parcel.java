@@ -892,6 +892,12 @@ public final class Parcel {
 
     /**
      * Report whether the parcel contains any marshalled file descriptors.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      */
     public boolean hasFileDescriptors() {
         return nativeHasFileDescriptors(mNativePtr);
@@ -900,6 +906,12 @@ public final class Parcel {
     /**
      * Report whether the parcel contains any marshalled file descriptors in the range defined by
      * {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *     {@link #dataSize()}.
@@ -920,6 +932,12 @@ public final class Parcel {
      *
      * <p>For most cases, it will use the self-reported {@link Parcelable#describeContents()} method
      * for that.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @throws IllegalArgumentException if you provide any object not supported by above methods
      *     (including if the unsupported object is inside a nested container).
@@ -990,6 +1008,13 @@ public final class Parcel {
      *
      * @throws UnsupportedOperationException if binder kernel driver was disabled or if method was
      *                                       invoked in case of Binder RPC protocol.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
+     *
      * @hide
      */
     public boolean hasBinders() {
@@ -999,6 +1024,12 @@ public final class Parcel {
     /**
      * Report whether the parcel contains any marshalled {@link IBinder} objects in the range
      * defined by {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *               {@link #dataSize()}.

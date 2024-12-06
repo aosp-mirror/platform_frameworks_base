@@ -28,6 +28,7 @@ import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
 import com.android.internal.widget.remotecompose.core.operations.TextData;
+import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimateMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -64,6 +65,34 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     @NonNull protected HashSet<ComponentValue> mComponentValues = new HashSet<>();
 
     protected float mZIndex = 0f;
+
+    private boolean mNeedsBoundsAnimation = false;
+
+    /**
+     * Mark the component as needing a bounds animation pass
+     */
+    public void markNeedsBoundsAnimation() {
+        mNeedsBoundsAnimation = true;
+        if (mParent != null && !mParent.mNeedsBoundsAnimation) {
+            mParent.markNeedsBoundsAnimation();
+        }
+    }
+
+    /**
+     * Clear the bounds animation pass flag
+     */
+    public void clearNeedsBoundsAnimation() {
+        mNeedsBoundsAnimation = false;
+    }
+
+    /**
+     * True if needs a bounds animation
+     *
+     * @return true if needs a bounds animation pass
+     */
+    public boolean needsBoundsAnimation() {
+        return mNeedsBoundsAnimation;
+    }
 
     public float getZIndex() {
         return mZIndex;
@@ -117,6 +146,17 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     public void setHeight(float value) {
         mHeight = value;
+    }
+
+    @Override
+    public void apply(@NonNull RemoteContext context) {
+        for (Operation op : mList) {
+            if (op instanceof VariableSupport && op.isDirty()) {
+                op.markNotDirty();
+                ((VariableSupport) op).updateVariables(context);
+            }
+        }
+        super.apply(context);
     }
 
     /**
@@ -233,14 +273,6 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         if (!mComponentValues.isEmpty()) {
             updateComponentValues(context);
         }
-        for (Operation o : mList) {
-            if (o instanceof Component) {
-                ((Component) o).updateVariables(context);
-            }
-            if (o instanceof VariableSupport) {
-                o.apply(context);
-            }
-        }
         context.mLastComponent = prev;
     }
 
@@ -248,12 +280,38 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         mComponentValues.add(v);
     }
 
-    public float intrinsicWidth() {
+    /**
+     * Returns the intrinsic width of the layout
+     *
+     * @param context
+     * @return the width in pixels
+     */
+    public float intrinsicWidth(@Nullable RemoteContext context) {
         return getWidth();
     }
 
-    public float intrinsicHeight() {
+    /**
+     * Returns the intrinsic height of the layout
+     *
+     * @param context
+     * @return the height in pixels
+     */
+    public float intrinsicHeight(@Nullable RemoteContext context) {
         return getHeight();
+    }
+
+    /**
+     * This function is called after a component is created, with its mList initialized. This let
+     * the component a chance to do some post-initialization work on its children ops.
+     */
+    public void inflate() {
+        for (Operation op : mList) {
+            if (op instanceof TouchExpression) {
+                // Make sure to set the component of a touch expression that belongs to us!
+                TouchExpression touchExpression = (TouchExpression) op;
+                touchExpression.setComponent(this);
+            }
+        }
     }
 
     public enum Visibility {
@@ -352,10 +410,38 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         } else {
             mVisibility = m.getVisibility();
         }
-        setWidth(m.getW());
-        setHeight(m.getH());
-        setLayoutPosition(m.getX(), m.getY());
+        if (mAnimateMeasure == null) {
+            setWidth(m.getW());
+            setHeight(m.getH());
+            setLayoutPosition(m.getX(), m.getY());
+            updateComponentValues(context);
+            clearNeedsBoundsAnimation();
+        } else {
+            mAnimateMeasure.apply(context);
+            updateComponentValues(context);
+            markNeedsBoundsAnimation();
+        }
         mFirstLayout = false;
+    }
+
+    /**
+     * Animate the bounds of the component as needed
+     * @param context
+     */
+    public void animatingBounds(@NonNull RemoteContext context) {
+        if (mAnimateMeasure != null) {
+            mAnimateMeasure.apply(context);
+            updateComponentValues(context);
+            markNeedsBoundsAnimation();
+        } else {
+            clearNeedsBoundsAnimation();
+        }
+        for (Operation op : mList) {
+            if (op instanceof Measurable) {
+                Measurable m = (Measurable) op;
+                m.animatingBounds(context);
+            }
+        }
     }
 
     @NonNull public float[] locationInWindow = new float[2];
@@ -409,11 +495,23 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             if (op instanceof TouchHandler) {
                 ((TouchHandler) op).onTouchDown(context, document, this, cx, cy);
             }
+            if (op instanceof TouchExpression) {
+                TouchExpression touchExpression = (TouchExpression) op;
+                touchExpression.updateVariables(context);
+                touchExpression.touchDown(context, cx, cy);
+                document.appliedTouchOperation(this);
+            }
         }
     }
 
     public void onTouchUp(
-            RemoteContext context, CoreDocument document, float x, float y, boolean force) {
+            RemoteContext context,
+            CoreDocument document,
+            float x,
+            float y,
+            float dx,
+            float dy,
+            boolean force) {
         if (!force && !contains(x, y)) {
             return;
         }
@@ -421,10 +519,15 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         float cy = y - getScrollY();
         for (Operation op : mList) {
             if (op instanceof Component) {
-                ((Component) op).onTouchUp(context, document, cx, cy, force);
+                ((Component) op).onTouchUp(context, document, cx, cy, dx, dy, force);
             }
             if (op instanceof TouchHandler) {
-                ((TouchHandler) op).onTouchUp(context, document, this, cx, cy);
+                ((TouchHandler) op).onTouchUp(context, document, this, cx, cy, dx, dy);
+            }
+            if (op instanceof TouchExpression) {
+                TouchExpression touchExpression = (TouchExpression) op;
+                touchExpression.updateVariables(context);
+                touchExpression.touchUp(context, cx, cy, dx, dy);
             }
         }
     }
@@ -443,6 +546,11 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             if (op instanceof TouchHandler) {
                 ((TouchHandler) op).onTouchCancel(context, document, this, cx, cy);
             }
+            if (op instanceof TouchExpression) {
+                TouchExpression touchExpression = (TouchExpression) op;
+                touchExpression.updateVariables(context);
+                touchExpression.touchUp(context, cx, cy, 0, 0);
+            }
         }
     }
 
@@ -459,6 +567,11 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             }
             if (op instanceof TouchHandler) {
                 ((TouchHandler) op).onTouchDrag(context, document, this, cx, cy);
+            }
+            if (op instanceof TouchExpression) {
+                TouchExpression touchExpression = (TouchExpression) op;
+                touchExpression.updateVariables(context);
+                touchExpression.touchDrag(context, x, y);
             }
         }
     }
@@ -652,7 +765,17 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             debugBox(this, context);
         }
         for (Operation op : mList) {
-            op.apply(context.getContext());
+            if (op.isDirty() && op instanceof VariableSupport) {
+                ((VariableSupport) op).updateVariables(context.getContext());
+                op.markNotDirty();
+            }
+            if (op instanceof PaintOperation) {
+                ((PaintOperation) op).paint(context);
+                context.getContext().incrementOpCount();
+            } else {
+                op.apply(context.getContext());
+                context.getContext().incrementOpCount();
+            }
         }
         context.restore();
         context.getContext().mLastComponent = prev;
@@ -660,8 +783,8 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     public boolean applyAnimationAsNeeded(@NonNull PaintContext context) {
         if (context.isAnimationEnabled() && mAnimateMeasure != null) {
-            mAnimateMeasure.apply(context);
-            needsRepaint();
+            mAnimateMeasure.paint(context);
+            context.needsRepaint();
             return true;
         }
         return false;

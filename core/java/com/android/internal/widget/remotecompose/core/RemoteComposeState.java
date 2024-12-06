@@ -48,6 +48,10 @@ public class RemoteComposeState implements CollectionsAccess {
     private final IntMap<DataMap> mDataMapMap = new IntMap<>();
     private final IntMap<Object> mObjectMap = new IntMap<>();
 
+    // path information
+    private final IntMap<Object> mPathMap = new IntMap<>();
+    private final IntMap<float[]> mPathData = new IntMap<>();
+
     private final boolean[] mColorOverride = new boolean[MAX_COLORS];
     @NonNull private final IntMap<ArrayAccess> mCollectionMap = new IntMap<>();
 
@@ -131,12 +135,44 @@ public class RemoteComposeState implements CollectionsAccess {
         }
     }
 
-    private final IntMap<float[]> mPathData = new IntMap<>();
-
-    public void putPathData(int id, float[] data) {
-        mPathData.put(id, data);
+    /**
+     * Get the path asociated with the Data
+     *
+     * @param id
+     * @return
+     */
+    public Object getPath(int id) {
+        return mPathMap.get(id);
     }
 
+    /**
+     * Cache a path object. Object will be cleared if you update path data.
+     *
+     * @param id number asociated with path
+     * @param path the path object typically Android Path
+     */
+    public void putPath(int id, Object path) {
+        mPathMap.put(id, path);
+    }
+
+    /**
+     * The path data the Array of floats that is asoicated with the path It also removes the current
+     * path object.
+     *
+     * @param id the integer asociated with the data and path
+     * @param data the array of floats that represents the path
+     */
+    public void putPathData(int id, float[] data) {
+        mPathData.put(id, data);
+        mPathMap.remove(id);
+    }
+
+    /**
+     * Get the path data asociated with the id
+     *
+     * @param id number that represents the path
+     * @return path data
+     */
     public float[] getPathData(int id) {
         return mPathData.get(id);
     }
@@ -283,7 +319,7 @@ public class RemoteComposeState implements CollectionsAccess {
         ArrayList<VariableSupport> v = mVarListeners.get(id);
         if (v != null && mRemoteContext != null) {
             for (VariableSupport c : v) {
-                c.updateVariables(mRemoteContext);
+                c.markDirty();
             }
         }
     }
@@ -297,6 +333,7 @@ public class RemoteComposeState implements CollectionsAccess {
     public void overrideColor(int id, int color) {
         mColorOverride[id] = true;
         mColorMap.put(id, color);
+        updateListeners(id);
     }
 
     /** Clear the color Overrides */
@@ -426,9 +463,6 @@ public class RemoteComposeState implements CollectionsAccess {
      * @return
      */
     public int getOpsToUpdate(@NonNull RemoteContext context) {
-        for (VariableSupport vs : mAllVarListeners) {
-            vs.updateVariables(context);
-        }
         if (mVarListeners.get(RemoteContext.ID_CONTINUOUS_SEC) != null) {
             return 1;
         }

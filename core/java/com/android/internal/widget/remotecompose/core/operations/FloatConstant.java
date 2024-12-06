@@ -51,6 +51,11 @@ public class FloatConstant extends Operation {
         return "FloatConstant[" + mTextId + "] = " + mValue;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

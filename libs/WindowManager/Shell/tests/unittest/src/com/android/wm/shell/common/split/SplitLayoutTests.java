@@ -66,6 +66,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock WindowContainerTransaction mWct;
+    @Mock SplitState mSplitState;
     @Mock Handler mHandler;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
@@ -83,6 +84,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 mDisplayImeController,
                 mTaskOrganizer,
                 SplitLayout.PARALLAX_NONE,
+                mSplitState,
                 mHandler));
     }
 

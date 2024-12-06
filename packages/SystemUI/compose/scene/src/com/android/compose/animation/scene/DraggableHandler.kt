@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("NOTHING_TO_INLINE")
-
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
@@ -29,8 +27,11 @@ import com.android.compose.animation.scene.content.state.TransitionState.HasOver
 import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController
+import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal interface DraggableHandler {
     /**
@@ -97,68 +98,11 @@ internal class DraggableHandlerImpl(
     internal val positionalThreshold
         get() = with(layoutImpl.density) { 56.dp.toPx() }
 
-    /**
-     * Whether we should immediately intercept a gesture.
-     *
-     * Note: if this returns true, then [onDragStarted] will be called with overSlop equal to 0f,
-     * indicating that the transition should be intercepted.
-     */
-    internal fun shouldImmediatelyIntercept(pointersDown: PointersInfo.PointersDown?): Boolean {
-        // We don't intercept the touch if we are not currently driving the transition.
-        val dragController = dragController
-        if (dragController?.isDrivingTransition != true) {
-            return false
-        }
-
-        val swipeAnimation = dragController.swipeAnimation
-
-        // Only intercept the current transition if one of the 2 swipes results is also a transition
-        // between the same pair of contents.
-        val swipes = computeSwipes(pointersDown)
-        val fromContent = layoutImpl.content(swipeAnimation.currentContent)
-        val (upOrLeft, downOrRight) = swipes.computeSwipesResults(fromContent)
-        val currentScene = layoutImpl.state.currentScene
-        val contentTransition = swipeAnimation.contentTransition
-        return (upOrLeft != null &&
-            contentTransition.isTransitioningBetween(
-                fromContent.key,
-                upOrLeft.toContent(currentScene),
-            )) ||
-            (downOrRight != null &&
-                contentTransition.isTransitioningBetween(
-                    fromContent.key,
-                    downOrRight.toContent(currentScene),
-                ))
-    }
-
     override fun onDragStarted(
         pointersDown: PointersInfo.PointersDown?,
         overSlop: Float,
     ): DragController {
-        if (overSlop == 0f) {
-            val oldDragController = dragController
-            check(oldDragController != null && oldDragController.isDrivingTransition) {
-                val isActive = oldDragController?.isDrivingTransition
-                "onDragStarted(overSlop=0f) requires an active dragController, but was $isActive"
-            }
-
-            // This [transition] was already driving the animation: simply take over it.
-            // Stop animating and start from the current offset.
-            val oldSwipeAnimation = oldDragController.swipeAnimation
-
-            // We need to recompute the swipe results since this is a new gesture, and the
-            // fromScene.userActions may have changed.
-            val swipes = oldDragController.swipes
-            swipes.updateSwipesResults(
-                fromContent = layoutImpl.content(oldSwipeAnimation.fromContent)
-            )
-
-            // A new gesture should always create a new SwipeAnimation. This way there cannot be
-            // different gestures controlling the same transition.
-            val swipeAnimation = createSwipeAnimation(oldSwipeAnimation)
-            return updateDragController(swipes, swipeAnimation)
-        }
-
+        check(overSlop != 0f)
         val swipes = computeSwipes(pointersDown)
         val fromContent = layoutImpl.contentForUserActions()
 
@@ -183,7 +127,7 @@ internal class DraggableHandlerImpl(
         return newDragController
     }
 
-    internal fun createSwipeAnimation(swipes: Swipes, result: UserActionResult): SwipeAnimation<*> {
+    private fun createSwipeAnimation(swipes: Swipes, result: UserActionResult): SwipeAnimation<*> {
         val upOrLeftResult = swipes.upOrLeftResult
         val downOrRightResult = swipes.downOrRightResult
         val isUpOrLeft =
@@ -196,7 +140,7 @@ internal class DraggableHandlerImpl(
         return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
     }
 
-    internal fun resolveSwipeSource(startedPosition: Offset): SwipeSource.Resolved? {
+    private fun resolveSwipeSource(startedPosition: Offset): SwipeSource.Resolved? {
         return layoutImpl.swipeSourceDetector.source(
             layoutSize = layoutImpl.lastSize,
             position = startedPosition.round(),
@@ -250,8 +194,14 @@ private class DragControllerImpl(
     private val draggableHandler: DraggableHandlerImpl,
     val swipes: Swipes,
     var swipeAnimation: SwipeAnimation<*>,
-) : DragController {
+) : DragController, SpaceVectorConverter by SpaceVectorConverter(draggableHandler.orientation) {
     val layoutState = draggableHandler.layoutImpl.state
+
+    val overscrollableContent: OverscrollableContent =
+        when (draggableHandler.orientation) {
+            Orientation.Vertical -> draggableHandler.layoutImpl.verticalOverscrollableContent
+            Orientation.Horizontal -> draggableHandler.layoutImpl.horizontalOverscrollableContent
+        }
 
     /**
      * Whether this handle is active. If this returns false, calling [onDrag] and [onStop] will do
@@ -283,113 +233,75 @@ private class DragControllerImpl(
      * @return the consumed delta
      */
     override fun onDrag(delta: Float): Float {
-        return onDrag(delta, swipeAnimation)
+        val initialAnimation = swipeAnimation
+        if (delta == 0f || !isDrivingTransition || initialAnimation.isAnimatingOffset()) {
+            return 0f
+        }
+        // swipeAnimation can change during the gesture, we want to always use the initial reference
+        // during the whole drag gesture.
+        return dragWithOverscroll(delta, animation = initialAnimation)
     }
 
-    private fun <T : ContentKey> onDrag(delta: Float, swipeAnimation: SwipeAnimation<T>): Float {
-        if (delta == 0f || !isDrivingTransition || swipeAnimation.isAnimatingOffset()) {
-            return 0f
+    private fun <T : ContentKey> dragWithOverscroll(
+        delta: Float,
+        animation: SwipeAnimation<T>,
+    ): Float {
+        require(delta != 0f) { "delta should not be 0" }
+        var overscrollEffect = overscrollableContent.currentOverscrollEffect
+
+        // If we're already overscrolling, continue with the current effect for a smooth finish.
+        if (overscrollEffect == null || !overscrollEffect.isInProgress) {
+            // Otherwise, determine the target content (toContent or fromContent) for the new
+            // overscroll effect based on the gesture's direction.
+            val content = animation.contentByDirection(delta)
+            overscrollEffect = overscrollableContent.applyOverscrollEffectOn(content)
         }
 
-        val toContent = swipeAnimation.toContent
-        val distance = swipeAnimation.distance()
-        val previousOffset = swipeAnimation.dragOffset
+        // TODO(b/378470603) Remove this check once NestedDraggable is used to handle drags.
+        if (!overscrollEffect.node.node.isAttached) {
+            return drag(delta, animation)
+        }
+
+        return overscrollEffect
+            .applyToScroll(
+                delta = delta.toOffset(),
+                source = NestedScrollSource.UserInput,
+                performScroll = {
+                    val preScrollAvailable = it.toFloat()
+                    drag(preScrollAvailable, animation).toOffset()
+                },
+            )
+            .toFloat()
+    }
+
+    private fun <T : ContentKey> drag(delta: Float, animation: SwipeAnimation<T>): Float {
+        if (delta == 0f) return 0f
+
+        val distance = animation.distance()
+        val previousOffset = animation.dragOffset
         val desiredOffset = previousOffset + delta
+        val desiredProgress = animation.computeProgress(desiredOffset)
 
-        fun hasReachedToSceneUpOrLeft() =
-            distance < 0 &&
-                desiredOffset <= distance &&
-                swipes.upOrLeftResult?.toContent(layoutState.currentScene) == toContent
-
-        fun hasReachedToSceneDownOrRight() =
-            distance > 0 &&
-                desiredOffset >= distance &&
-                swipes.downOrRightResult?.toContent(layoutState.currentScene) == toContent
-
-        // Considering accelerated swipe: Change fromContent in the case where the user quickly
-        // swiped multiple times in the same direction to accelerate the transition from A => B then
-        // B => C.
-        //
-        // TODO(b/290184746): the second drag needs to pass B to work. Add support for flinging
-        //  twice before B has been reached
-        val hasReachedToContent =
-            swipeAnimation.currentContent == toContent &&
-                (hasReachedToSceneUpOrLeft() || hasReachedToSceneDownOrRight())
-
-        val fromContent: ContentKey
-        val currentTransitionOffset: Float
-        val newOffset: Float
-        val consumedDelta: Float
-        if (hasReachedToContent) {
-            // The new transition will start from the current toContent.
-            fromContent = toContent
-
-            // The current transition is completed (we have reached the full swipe distance).
-            currentTransitionOffset = distance
-
-            // The next transition will start with the remaining offset.
-            newOffset = desiredOffset - distance
-            consumedDelta = delta
-        } else {
-            fromContent = swipeAnimation.fromContent
-            val desiredProgress = swipeAnimation.computeProgress(desiredOffset)
-
-            // Note: the distance could be negative if fromContent is above or to the left of
-            // toContent.
-            currentTransitionOffset =
-                when {
-                    distance == DistanceUnspecified ||
-                        swipeAnimation.contentTransition.isWithinProgressRange(desiredProgress) ->
-                        desiredOffset
-
-                    distance > 0f -> desiredOffset.fastCoerceIn(0f, distance)
-                    else -> desiredOffset.fastCoerceIn(distance, 0f)
-                }
-
-            // If there is a new transition, we will use the same offset
-            newOffset = currentTransitionOffset
-            consumedDelta = newOffset - previousOffset
-        }
-
-        swipeAnimation.dragOffset = currentTransitionOffset
-
-        if (hasReachedToContent) {
-            swipes.updateSwipesResults(draggableHandler.layoutImpl.content(fromContent))
-        }
-        val result = swipes.findUserActionResult(directionOffset = newOffset)
-
-        if (result == null) {
-            onCancel(canChangeContent = true)
-            return 0f
-        }
-
-        val currentTransitionIrreversible =
-            if (swipeAnimation.isUpOrLeft) {
-                swipes.upOrLeftResult?.isIrreversible ?: false
-            } else {
-                swipes.downOrRightResult?.isIrreversible ?: false
+        // Note: the distance could be negative if fromContent is above or to the left of toContent.
+        val newOffset =
+            when {
+                distance == DistanceUnspecified ||
+                    animation.contentTransition.isWithinProgressRange(desiredProgress) ->
+                    desiredOffset
+                distance > 0f -> desiredOffset.fastCoerceIn(0f, distance)
+                else -> desiredOffset.fastCoerceIn(distance, 0f)
             }
 
-        val needNewTransition =
-            !currentTransitionIrreversible &&
-                (hasReachedToContent ||
-                    result.toContent(layoutState.currentScene) != swipeAnimation.toContent ||
-                    result.transitionKey != swipeAnimation.contentTransition.key)
-
-        if (needNewTransition) {
-            // Make sure the current transition will finish to the right current scene.
-            swipeAnimation.currentContent = fromContent
-
-            val newSwipeAnimation = draggableHandler.createSwipeAnimation(swipes, result)
-            newSwipeAnimation.dragOffset = newOffset
-            updateTransition(newSwipeAnimation)
-        }
-
-        return consumedDelta
+        animation.dragOffset = newOffset
+        return newOffset - previousOffset
     }
 
     override suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float {
-        return onStop(velocity, canChangeContent, swipeAnimation)
+        // To ensure that any ongoing animation completes gracefully and avoids an undefined state,
+        // we execute the actual `onStop` logic in a non-cancellable context. This prevents the
+        // coroutine from being cancelled prematurely, which could interrupt the animation.
+        // TODO(b/378470603) Remove this check once NestedDraggable is used to handle drags.
+        return withContext(NonCancellable) { onStop(velocity, canChangeContent, swipeAnimation) }
     }
 
     private suspend fun <T : ContentKey> onStop(
@@ -440,7 +352,22 @@ private class DragControllerImpl(
                 fromContent
             }
 
-        return swipeAnimation.animateOffset(velocity, targetContent)
+        val overscrollEffect = overscrollableContent.applyOverscrollEffectOn(targetContent)
+
+        // TODO(b/378470603) Remove this check once NestedDraggable is used to handle drags.
+        if (!overscrollEffect.node.node.isAttached) {
+            return swipeAnimation.animateOffset(velocity, targetContent)
+        }
+
+        overscrollEffect.applyToFling(
+            velocity = velocity.toVelocity(),
+            performFling = {
+                val velocityLeft = it.toFloat()
+                swipeAnimation.animateOffset(velocityLeft, targetContent).toVelocity()
+            },
+        )
+
+        return velocity
     }
 
     /**
@@ -499,7 +426,9 @@ internal class Swipes(val upOrLeft: Swipe.Resolved, val downOrRight: Swipe.Resol
     var upOrLeftResult: UserActionResult? = null
     var downOrRightResult: UserActionResult? = null
 
-    fun computeSwipesResults(fromContent: Content): Pair<UserActionResult?, UserActionResult?> {
+    private fun computeSwipesResults(
+        fromContent: Content
+    ): Pair<UserActionResult?, UserActionResult?> {
         val upOrLeftResult = fromContent.findActionResultBestMatch(swipe = upOrLeft)
         val downOrRightResult = fromContent.findActionResultBestMatch(swipe = downOrRight)
         return upOrLeftResult to downOrRightResult
@@ -564,48 +493,9 @@ internal class NestedScrollHandlerImpl(
                 .shouldEnableSwipes(draggableHandler.orientation)
         }
 
-        var isIntercepting = false
-
         return PriorityNestedScrollConnection(
             orientation = draggableHandler.orientation,
-            canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
-                val pointersDown: PointersInfo.PointersDown? =
-                    when (val info = pointersInfoOwner.pointersInfo()) {
-                        PointersInfo.MouseWheel -> {
-                            // Do not support mouse wheel interactions
-                            return@PriorityNestedScrollConnection false
-                        }
-
-                        is PointersInfo.PointersDown -> info
-                        null -> null
-                    }
-
-                canChangeScene =
-                    if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
-
-                val canInterceptSwipeTransition =
-                    canChangeScene &&
-                        offsetAvailable != 0f &&
-                        draggableHandler.shouldImmediatelyIntercept(pointersDown)
-                if (!canInterceptSwipeTransition) return@PriorityNestedScrollConnection false
-
-                val layoutImpl = draggableHandler.layoutImpl
-                val threshold = layoutImpl.transitionInterceptionThreshold
-                val hasSnappedToIdle = layoutImpl.state.snapToIdleIfClose(threshold)
-                if (hasSnappedToIdle) {
-                    // If the current swipe transition is closed to 0f or 1f, then we want to
-                    // interrupt the transition (snapping it to Idle) and scroll the list.
-                    return@PriorityNestedScrollConnection false
-                }
-
-                lastPointersDown = pointersDown
-
-                // If the current swipe transition is *not* closed to 0f or 1f, then we want the
-                // scroll events to intercept the current transition to continue the scene
-                // transition.
-                isIntercepting = true
-                true
-            },
+            canStartPreScroll = { _, _, _ -> false },
             canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
                 val behavior: NestedScrollBehavior =
                     when {
@@ -629,29 +519,22 @@ internal class NestedScrollHandlerImpl(
                     }
                 lastPointersDown = pointersDown
 
-                val canStart =
-                    when (behavior) {
-                        NestedScrollBehavior.EdgeNoPreview -> {
-                            canChangeScene = isZeroOffset
-                            isZeroOffset && shouldEnableSwipes()
-                        }
-
-                        NestedScrollBehavior.EdgeWithPreview -> {
-                            canChangeScene = isZeroOffset
-                            shouldEnableSwipes()
-                        }
-
-                        NestedScrollBehavior.EdgeAlways -> {
-                            canChangeScene = true
-                            shouldEnableSwipes()
-                        }
+                when (behavior) {
+                    NestedScrollBehavior.EdgeNoPreview -> {
+                        canChangeScene = isZeroOffset
+                        isZeroOffset && shouldEnableSwipes()
                     }
 
-                if (canStart) {
-                    isIntercepting = false
-                }
+                    NestedScrollBehavior.EdgeWithPreview -> {
+                        canChangeScene = isZeroOffset
+                        shouldEnableSwipes()
+                    }
 
-                canStart
+                    NestedScrollBehavior.EdgeAlways -> {
+                        canChangeScene = true
+                        shouldEnableSwipes()
+                    }
+                }
             },
             canStartPostFling = { velocityAvailable ->
                 val behavior: NestedScrollBehavior =
@@ -676,19 +559,14 @@ internal class NestedScrollHandlerImpl(
                     }
                 lastPointersDown = pointersDown
 
-                val canStart = behavior.canStartOnPostFling && shouldEnableSwipes()
-                if (canStart) {
-                    isIntercepting = false
-                }
-
-                canStart
+                behavior.canStartOnPostFling && shouldEnableSwipes()
             },
             onStart = { firstScroll ->
                 scrollController(
                     dragController =
                         draggableHandler.onDragStarted(
                             pointersDown = lastPointersDown,
-                            overSlop = if (isIntercepting) 0f else firstScroll,
+                            overSlop = firstScroll,
                         ),
                     canChangeScene = canChangeScene,
                     pointersInfoOwner = pointersInfoOwner,

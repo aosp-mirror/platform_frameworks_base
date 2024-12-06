@@ -103,8 +103,7 @@ public class BubbleBarLayerView extends FrameLayout
         mPositioner = mBubbleController.getPositioner();
         mBubbleLogger = bubbleLogger;
 
-        mAnimationHelper = new BubbleBarAnimationHelper(context,
-                this, mPositioner);
+        mAnimationHelper = new BubbleBarAnimationHelper(context, mPositioner);
         mEducationViewController = new BubbleEducationViewController(context, (boolean visible) -> {
             if (mExpandedView == null) return;
             mExpandedView.setObscured(visible);
@@ -183,8 +182,14 @@ public class BubbleBarLayerView extends FrameLayout
             // Already showing this bubble, skip animating
             return;
         }
+        BubbleViewProvider previousBubble = null;
         if (mExpandedBubble != null && !b.getKey().equals(mExpandedBubble.getKey())) {
-            removeView(mExpandedView);
+            if (mIsExpanded) {
+                // Previous expanded view open, keep it visible to animate the switch
+                previousBubble = mExpandedBubble;
+            } else {
+                removeView(mExpandedView);
+            }
             mExpandedView = null;
         }
         if (mExpandedView == null) {
@@ -246,7 +251,8 @@ public class BubbleBarLayerView extends FrameLayout
 
         mIsExpanded = true;
         mBubbleController.getSysuiProxy().onStackExpandChanged(true);
-        mAnimationHelper.animateExpansion(mExpandedBubble, () -> {
+
+        final Runnable afterAnimation = () -> {
             if (mExpandedView == null) return;
             // Touch delegate for the menu
             BubbleBarHandleView view = mExpandedView.getHandleView();
@@ -256,7 +262,18 @@ public class BubbleBarLayerView extends FrameLayout
             mHandleTouchDelegate = new TouchDelegate(mHandleTouchBounds,
                     mExpandedView.getHandleView());
             setTouchDelegate(mHandleTouchDelegate);
-        });
+        };
+
+        if (previousBubble != null) {
+            final BubbleBarExpandedView previousExpandedView =
+                    previousBubble.getBubbleBarExpandedView();
+            mAnimationHelper.animateSwitch(previousBubble, mExpandedBubble, () -> {
+                removeView(previousExpandedView);
+                afterAnimation.run();
+            });
+        } else {
+            mAnimationHelper.animateExpansion(mExpandedBubble, afterAnimation);
+        }
 
         showScrim(true);
     }

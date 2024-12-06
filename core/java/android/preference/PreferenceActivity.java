@@ -16,6 +16,8 @@
 
 package android.preference;
 
+import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
+
 import android.animation.LayoutTransition;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
@@ -54,6 +56,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.window.OnBackInvokedCallback;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.util.XmlUtils;
 
@@ -208,6 +212,11 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private int mPreferenceHeaderItemResId = 0;
     private boolean mPreferenceHeaderRemoveEmptyIcon = false;
+
+    private boolean mIsBackCallbackRegistered = false;
+    private final OnBackInvokedCallback mOnBackInvokedCallback = this::onBackInvoked;
+    private final FragmentManager.OnBackStackChangedListener mOnBackStackChangedListener =
+            this::updateBackCallbackRegistrationState;
 
     /**
      * The starting request code given out to preference framework.
@@ -699,11 +708,36 @@ public abstract class PreferenceActivity extends ListActivity implements
                 skipButton.setVisibility(View.VISIBLE);
             }
         }
+        updateBackCallbackRegistrationState();
+        getFragmentManager().addOnBackStackChangedListener(mOnBackStackChangedListener);
     }
 
     @Override
     public void onBackPressed() {
-        if (mCurHeader != null && mSinglePane && getFragmentManager().getBackStackEntryCount() == 0
+        onBackInvoked();
+    }
+
+    private void updateBackCallbackRegistrationState() {
+        if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)) return;
+        if ((mCurHeader != null && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null
+                && mSinglePane) || getFragmentManager().getBackStackEntryCount() != 0) {
+            if (!mIsBackCallbackRegistered) {
+                getOnBackInvokedDispatcher()
+                        .registerOnBackInvokedCallback(PRIORITY_DEFAULT, mOnBackInvokedCallback);
+                mIsBackCallbackRegistered = true;
+            }
+        } else if (mIsBackCallbackRegistered) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+            mIsBackCallbackRegistered = false;
+        }
+    }
+
+    private void onBackInvoked() {
+        if (WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)
+                && getFragmentManager().getBackStackEntryCount() != 0) {
+            getFragmentManager().popBackStackImmediate();
+        } else if (mCurHeader != null && mSinglePane
+                && getFragmentManager().getBackStackEntryCount() == 0
                 && getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT) == null) {
             mCurHeader = null;
 
@@ -713,9 +747,10 @@ public abstract class PreferenceActivity extends ListActivity implements
                 showBreadCrumbs(mActivityTitle, null);
             }
             getListView().clearChoices();
-        } else {
+        } else if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(this)) {
             super.onBackPressed();
         }
+        updateBackCallbackRegistrationState();
     }
 
     /**
@@ -989,6 +1024,7 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     @Override
     protected void onDestroy() {
+        getFragmentManager().removeOnBackStackChangedListener(mOnBackStackChangedListener);
         mHandler.removeMessages(MSG_BIND_PREFERENCES);
         mHandler.removeMessages(MSG_BUILD_HEADERS);
         super.onDestroy();
@@ -1221,6 +1257,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             getListView().clearChoices();
         }
         showBreadCrumbs(header);
+        updateBackCallbackRegistrationState();
     }
 
     void showBreadCrumbs(Header header) {

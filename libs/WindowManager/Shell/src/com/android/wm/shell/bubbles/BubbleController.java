@@ -35,7 +35,6 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
 
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
@@ -274,8 +273,11 @@ public class BubbleController implements ConfigurationChangeListener,
     private final DragAndDropController mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
-    /** Used to track previous navigation mode to detect switch to buttons navigation. */
-    private boolean mIsPrevNavModeGestures;
+    /**
+     * Used to track previous navigation mode to detect switch to buttons navigation. Set to
+     * true to switch the bubble bar to the opposite side for 3 nav buttons mode on device boot.
+     */
+    private boolean mIsPrevNavModeGestures = true;
     /** Used to send updates to the views from {@link #mBubbleDataListener}. */
     private BubbleViewCallback mBubbleViewCallback;
 
@@ -357,7 +359,6 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         };
         mExpandedViewManager = BubbleExpandedViewManager.fromBubbleController(this);
-        mIsPrevNavModeGestures = ContextUtils.isGestureNavigationMode(mContext);
     }
 
     private void registerOneHandedState(OneHandedController oneHanded) {
@@ -520,7 +521,7 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         mShellController.addConfigurationChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BUBBLES,
+        mShellController.addExternalInterface(IBubbles.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
     }
@@ -593,9 +594,9 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mBubbleStateListener != null) {
             boolean isCurrentNavModeGestures = ContextUtils.isGestureNavigationMode(mContext);
             if (mIsPrevNavModeGestures && !isCurrentNavModeGestures) {
-                BubbleBarLocation navButtonsLocation = ContextUtils.isRtl(mContext)
+                BubbleBarLocation bubbleBarLocation = ContextUtils.isRtl(mContext)
                         ? BubbleBarLocation.RIGHT : BubbleBarLocation.LEFT;
-                mBubblePositioner.setBubbleBarLocation(navButtonsLocation);
+                mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
             }
             mIsPrevNavModeGestures = isCurrentNavModeGestures;
             BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();

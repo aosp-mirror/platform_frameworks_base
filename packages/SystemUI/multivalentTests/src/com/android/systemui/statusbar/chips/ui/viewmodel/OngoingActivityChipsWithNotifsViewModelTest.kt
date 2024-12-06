@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -307,7 +308,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = icon,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
@@ -328,12 +329,14 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
@@ -355,17 +358,20 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "thirdNotif",
                         statusBarChipIcon = thirdIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("thirdNotif").build(),
                     ),
                 )
             )
@@ -386,12 +392,14 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
@@ -412,7 +420,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )

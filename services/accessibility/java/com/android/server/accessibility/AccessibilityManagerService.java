@@ -1028,8 +1028,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
-        Handler receiverHandler =
-                Flags.managerAvoidReceiverTimeout() ? BackgroundThread.getHandler() : null;
+        Handler receiverHandler = BackgroundThread.getHandler();
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -1071,8 +1070,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                         newValue, restoredFromSdk);
                             }
                         }
+                        // Currently in SUW, the user can't see gesture shortcut option as the
+                        // navigation system is set to button navigation. We'll rely on the
+                        // SettingsBackupAgent to restore the settings since we don't
+                        // need to merge an empty gesture target.
                         case Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                             Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
                              Settings.Secure.ACCESSIBILITY_QS_TARGETS,
                              Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
                                 restoreShortcutTargets(newValue,
@@ -2257,10 +2259,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (shortcutType == QUICK_SETTINGS && !android.view.accessibility.Flags.a11yQsShortcut()) {
             return;
         }
-        if (shortcutType == HARDWARE
-                && !android.view.accessibility.Flags.restoreA11yShortcutTargetService()) {
-            return;
-        }
 
         synchronized (mLock) {
             final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
@@ -2269,8 +2267,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             mContext, shortcutType, userState.mUserId))
                     : userState.getShortcutTargetsLocked(shortcutType);
 
-            if (Flags.clearDefaultFromA11yShortcutTargetServiceRestore()
-                    && shortcutType == HARDWARE) {
+            if (shortcutType == HARDWARE) {
                 final String defaultService =
                         mContext.getString(R.string.config_defaultAccessibilityService);
                 final ComponentName defaultServiceComponent = TextUtils.isEmpty(defaultService)
@@ -2930,27 +2927,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final String builderValue = builder.toString();
         final String settingValue = TextUtils.isEmpty(builderValue)
                 ? defaultEmptyString : builderValue;
-        if (android.view.accessibility.Flags.restoreA11yShortcutTargetService()) {
-            final String currentValue = Settings.Secure.getStringForUser(
-                    mContext.getContentResolver(), settingName, userId);
-            if (Objects.equals(settingValue, currentValue)) {
-                // This logic exists to fix a bug where AccessibilityManagerService was writing
-                // `null` to the ACCESSIBILITY_SHORTCUT_TARGET_SERVICE setting during early boot
-                // during setup, due to a race condition in package scanning making A11yMS think
-                // that the default service was not installed.
-                //
-                // Writing `null` was implicitly causing that Setting to have the default
-                // `DEFAULT_OVERRIDEABLE_BY_RESTORE` property, which was preventing B&R for that
-                // Setting altogether.
-                //
-                // The "quick fix" here is to not write `null` if the existing value is already
-                // `null`. The ideal fix would be use the Settings.Secure#putStringForUser overload
-                // that allows override-by-restore, but the full repercussions of using that here
-                // have not yet been evaluated.
-                // TODO: b/333457719 - Evaluate and fix AccessibilityManagerService's usage of
-                //  "overridable by restore" when writing secure settings.
-                return;
-            }
+        final String currentValue = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), settingName, userId);
+        if (Objects.equals(settingValue, currentValue)) {
+            // This logic exists to fix a bug where AccessibilityManagerService was writing
+            // `null` to the ACCESSIBILITY_SHORTCUT_TARGET_SERVICE setting during early boot
+            // during setup, due to a race condition in package scanning making A11yMS think
+            // that the default service was not installed.
+            //
+            // Writing `null` was implicitly causing that Setting to have the default
+            // `DEFAULT_OVERRIDEABLE_BY_RESTORE` property, which was preventing B&R for that
+            // Setting altogether.
+            //
+            // The "quick fix" here is to not write `null` if the existing value is already
+            // `null`. The ideal fix would be use the Settings.Secure#putStringForUser overload
+            // that allows override-by-restore, but the full repercussions of using that here
+            // have not yet been evaluated.
+            // TODO: b/333457719 - Evaluate and fix AccessibilityManagerService's usage of
+            //  "overridable by restore" when writing secure settings.
+            return;
         }
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -6649,28 +6644,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 final AccessibilityUserState userState = mManagerService.getUserStateLocked(userId);
 
-                if (Flags.managerPackageMonitorLogicFix()) {
-                    if (!doit) {
-                        // if we're not handling the stop here, then we only need to know
-                        // if any of the force-stopped packages are currently enabled.
-                        return userState.mEnabledServices.stream().anyMatch(
-                                (comp) -> Arrays.stream(packages).anyMatch(
-                                        (pkg) -> pkg.equals(comp.getPackageName()))
-                        );
-                    } else if (mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
-                        mManagerService.onUserStateChangedLocked(userState);
-                    }
-                    return false;
-                } else {
-                    // this old logic did not properly indicate when base packageMonitor's routine
-                    // should handle stopping the package.
-                    if (doit && mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
-                        mManagerService.onUserStateChangedLocked(userState);
-                        return false;
-                    } else {
-                        return true;
-                    }
+                if (!doit) {
+                    // if we're not handling the stop here, then we only need to know
+                    // if any of the force-stopped packages are currently enabled.
+                    return userState.mEnabledServices.stream().anyMatch(
+                            (comp) -> Arrays.stream(packages).anyMatch(
+                                    (pkg) -> pkg.equals(comp.getPackageName()))
+                    );
+                } else if (mManagerService.onPackagesForceStoppedLocked(packages, userState)) {
+                    mManagerService.onUserStateChangedLocked(userState);
                 }
+                return false;
             }
         }
 

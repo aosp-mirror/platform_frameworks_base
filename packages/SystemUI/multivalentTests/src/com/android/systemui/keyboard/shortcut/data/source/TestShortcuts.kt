@@ -35,6 +35,7 @@ import android.view.KeyEvent.META_SHIFT_RIGHT_ON
 import android.view.KeyEvent.META_SYM_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
+import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperKeys
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
@@ -47,7 +48,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomization
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
-import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
+import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
 import com.android.systemui.res.R
 
 object TestShortcuts {
@@ -56,14 +57,14 @@ object TestShortcuts {
         KeyboardShortcutInfo(
             /* label = */ "Shortcut with repeated label",
             /* keycode = */ KeyEvent.KEYCODE_H,
-            /* modifiers = */ KeyEvent.META_META_ON,
+            /* modifiers = */ META_META_ON,
         )
 
     private val shortcutInfoWithRepeatedLabelAlternate =
         KeyboardShortcutInfo(
             /* label = */ shortcutInfoWithRepeatedLabel.label,
             /* keycode = */ KeyEvent.KEYCODE_L,
-            /* modifiers = */ KeyEvent.META_META_ON,
+            /* modifiers = */ META_META_ON,
         )
 
     private val shortcutInfoWithRepeatedLabelSecondAlternate =
@@ -71,6 +72,27 @@ object TestShortcuts {
             /* label = */ shortcutInfoWithRepeatedLabel.label,
             /* keycode = */ KeyEvent.KEYCODE_M,
             /* modifiers = */ KeyEvent.META_SHIFT_ON,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys =
+        KeyboardShortcutInfo(
+            /* label = */ "Shortcuts with diff size of keys",
+            /* keycode = */ KeyEvent.KEYCODE_HOME,
+            /* modifiers = */ 0,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys2 =
+        KeyboardShortcutInfo(
+            /* label = */ ShortcutsWithDiffSizeOfKeys.label,
+            /* keycode = */ KeyEvent.KEYCODE_1,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val ShortcutsWithDiffSizeOfKeys3 =
+        KeyboardShortcutInfo(
+            /* label = */ ShortcutsWithDiffSizeOfKeys.label,
+            /* keycode = */ KeyEvent.KEYCODE_2,
+            /* modifiers = */ META_META_ON or META_FUNCTION_ON,
         )
 
     private val shortcutWithGroupedRepeatedLabel =
@@ -104,8 +126,43 @@ object TestShortcuts {
         KeyboardShortcutInfo(
             /* label = */ "Standard shortcut 1",
             /* keycode = */ KeyEvent.KEYCODE_N,
-            /* modifiers = */ KeyEvent.META_META_ON,
+            /* modifiers = */ META_META_ON,
         )
+
+    const val CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL = "Cycle forward through recent apps"
+    const val CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL = "Cycle backward through recent apps"
+
+    private val recentAppsCycleForwardShortcutInfo =
+        KeyboardShortcutInfo(
+            /* label = */ CYCLE_FORWARD_THROUGH_RECENT_APPS_SHORTCUT_LABEL,
+            /* keycode = */ KeyEvent.KEYCODE_N,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val recentAppsCycleBackShortcutInfo =
+        KeyboardShortcutInfo(
+            /* label = */ CYCLE_BACK_THROUGH_RECENT_APPS_SHORTCUT_LABEL,
+            /* keycode = */ KeyEvent.KEYCODE_N,
+            /* modifiers = */ META_META_ON,
+        )
+
+    private val recentAppsCycleForwardShortcut =
+        shortcut(recentAppsCycleForwardShortcutInfo.label!!.toString()) {
+            command {
+                key(R.drawable.ic_ksh_key_meta)
+                key("N")
+            }
+            isCustomizable = false
+        }
+
+    private val recentAppsCycleBackShortcut =
+        shortcut(recentAppsCycleBackShortcutInfo.label!!.toString()) {
+            command {
+                key(R.drawable.ic_ksh_key_meta)
+                key("N")
+            }
+            isCustomizable = false
+        }
 
     private val standardShortcut1 =
         shortcut(standardShortcutInfo1.label!!.toString()) {
@@ -164,7 +221,7 @@ object TestShortcuts {
         KeyboardShortcutInfo(
             /* label = */ "Shortcut with unsupported modifiers",
             /* keycode = */ KeyEvent.KEYCODE_A,
-            /* modifiers = */ KeyEvent.META_META_ON or KeyEvent.KEYCODE_SPACE,
+            /* modifiers = */ META_META_ON or KeyEvent.KEYCODE_SPACE,
         )
 
     private val groupWithRepeatedShortcutLabels =
@@ -240,6 +297,12 @@ object TestShortcuts {
             listOf(standardShortcut3),
         )
 
+    val recentAppsGroup =
+        KeyboardShortcutGroup(
+            "Recent apps",
+            listOf(recentAppsCycleForwardShortcutInfo, recentAppsCycleBackShortcutInfo),
+        )
+
     private val standardGroup1 =
         KeyboardShortcutGroup(
             "Standard group 1",
@@ -257,6 +320,12 @@ object TestShortcuts {
 
     private val standardSystemAppSubcategoryWithCustomHomeShortcut =
         ShortcutSubCategory("System controls", listOf(customGoHomeShortcut))
+
+    private val recentAppsSubCategory =
+        ShortcutSubCategory(
+            recentAppsGroup.label!!.toString(),
+            listOf(recentAppsCycleForwardShortcut, recentAppsCycleBackShortcut),
+        )
 
     private val standardSubCategory1 =
         ShortcutSubCategory(
@@ -353,6 +422,9 @@ object TestShortcuts {
                 ),
         )
 
+    val multitaskingCategoryWithRecentAppsGroup =
+        ShortcutCategory(type = MultiTasking, subCategories = listOf(recentAppsSubCategory))
+
     val multitaskingGroups = listOf(standardGroup2, standardGroup1)
     val multitaskingCategory =
         ShortcutCategory(
@@ -378,6 +450,16 @@ object TestShortcuts {
             groupWithStandardShortcutInfo,
             groupWithOnlyUnsupportedModifierShortcut,
             groupWithSupportedAndUnsupportedModifierShortcut,
+        )
+
+    val groupWithDifferentSizeOfShortcutKeys =
+        KeyboardShortcutGroup(
+            "Group with different size of shortcut keys",
+            listOf(
+                ShortcutsWithDiffSizeOfKeys3,
+                ShortcutsWithDiffSizeOfKeys,
+                ShortcutsWithDiffSizeOfKeys2,
+            ),
         )
 
     val subCategoriesWithUnsupportedModifiersRemoved =
@@ -407,6 +489,7 @@ object TestShortcuts {
         category: ShortcutCategoryType,
         subcategoryLabel: String,
         shortcutLabel: String,
+        includeInCustomization: Boolean = true,
     ): ShortcutCategory {
         return ShortcutCategory(
             type = category,
@@ -414,13 +497,13 @@ object TestShortcuts {
                 listOf(
                     ShortcutSubCategory(
                         label = subcategoryLabel,
-                        shortcuts = listOf(simpleShortcut(shortcutLabel)),
+                        shortcuts = listOf(simpleShortcut(shortcutLabel, includeInCustomization)),
                     )
                 ),
         )
     }
 
-    private fun simpleShortcut(label: String) =
+    private fun simpleShortcut(label: String, includeInCustomization: Boolean = true) =
         Shortcut(
             label = label,
             commands =
@@ -435,6 +518,7 @@ object TestShortcuts {
                             ),
                     )
                 ),
+            isCustomizable = includeInCustomization,
         )
 
     val customizableInputGestureWithUnknownKeyGestureType =
@@ -483,24 +567,15 @@ object TestShortcuts {
             ),
             simpleShortcutCategory(System, "System controls", "Show shortcuts"),
             simpleShortcutCategory(System, "System controls", "View recent apps"),
-            simpleShortcutCategory(AppCategories, "Applications", "Calculator"),
-            simpleShortcutCategory(AppCategories, "Applications", "Calendar"),
-            simpleShortcutCategory(AppCategories, "Applications", "Browser"),
-            simpleShortcutCategory(AppCategories, "Applications", "Contacts"),
-            simpleShortcutCategory(AppCategories, "Applications", "Email"),
-            simpleShortcutCategory(AppCategories, "Applications", "Maps"),
-            simpleShortcutCategory(AppCategories, "Applications", "SMS"),
-            simpleShortcutCategory(MultiTasking, "Recent apps", "Cycle forward through recent apps"),
         )
-    val customInputGestureTypeHome =
-        simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+    val customInputGestureTypeHome = simpleInputGestureData(keyGestureType = KEY_GESTURE_TYPE_HOME)
 
     val allCustomizableInputGesturesWithSimpleShortcutCombinations =
         listOf(
             simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT
             ),
-            simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_HOME),
+            simpleInputGestureData(keyGestureType = KEY_GESTURE_TYPE_HOME),
             simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS
             ),
@@ -533,39 +608,18 @@ object TestShortcuts {
             ),
             simpleInputGestureData(keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS),
             simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS
-            ),
-            simpleInputGestureData(
-                keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING
-            ),
-            simpleInputGestureData(
                 keyGestureType = KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
             ),
         )
 
-    val standardAddCustomShortcutRequestInfo =
+    val allAppsShortcutAddRequest =
         ShortcutCustomizationRequestInfo.Add(
             label = "Open apps list",
             categoryType = System,
             subCategoryLabel = "System controls",
         )
 
-    val standardDeleteCustomShortcutRequestInfo =
+    val allAppsShortcutDeleteRequest =
         ShortcutCustomizationRequestInfo.Delete(
             label = "Open apps list",
             categoryType = System,
@@ -610,8 +664,19 @@ object TestShortcuts {
             )
             .build()
 
-    val expectedStandardDeleteShortcutUiState =
-        ShortcutCustomizationUiState.DeleteShortcutDialog(isDialogShowing = false)
+    val allAppsShortcutCategory =
+        shortcutCategory(System) {
+            subCategory("System controls") {
+                shortcut("Open apps list") {
+                    command {
+                        isCustom(true)
+                        key(ShortcutHelperKeys.metaModifierIconResId)
+                        key("Shift")
+                        key("A")
+                    }
+                }
+            }
+        }
 
     val keyDownEventWithoutActionKeyPressed =
         androidx.compose.ui.input.key.KeyEvent(
@@ -652,15 +717,7 @@ object TestShortcuts {
     val standardAddShortcutRequest =
         ShortcutCustomizationRequestInfo.Add(
             label = "Standard shortcut",
-            categoryType = ShortcutCategoryType.System,
+            categoryType = System,
             subCategoryLabel = "Standard subcategory",
-        )
-
-    val expectedStandardAddShortcutUiState =
-        ShortcutCustomizationUiState.AddShortcutDialog(
-            shortcutLabel = "Standard shortcut",
-            defaultCustomShortcutModifierKey =
-                ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
-            isDialogShowing = false,
         )
 }

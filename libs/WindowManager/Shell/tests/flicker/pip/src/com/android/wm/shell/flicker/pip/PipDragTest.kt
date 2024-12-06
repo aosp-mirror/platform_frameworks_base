@@ -49,7 +49,8 @@ class PipDragTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
         val stringExtras = mapOf(ActivityOptions.Pip.EXTRA_ENTER_PIP to "true")
         setup {
             tapl.setEnableRotation(true)
-            pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
+            pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
+            pipApp.waitForPip(wmHelper)
 
             // determine the direction of dragging to test for
             isDraggedLeft = pipApp.isCloserToRightEdge(wmHelper)

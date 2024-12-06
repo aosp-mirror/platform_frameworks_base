@@ -139,6 +139,11 @@ public class FloatExpression extends Operation implements VariableSupport {
         }
     }
 
+    // Keep track of the last computed value when we are animated,
+    // e.g. if FloatAnimation or Spring is used, so that we can
+    // ask for a repaint.
+    float mLastAnimatedValue = Float.NaN;
+
     @Override
     public void apply(@NonNull RemoteContext context) {
         updateVariables(context);
@@ -146,12 +151,23 @@ public class FloatExpression extends Operation implements VariableSupport {
         if (Float.isNaN(mLastChange)) {
             mLastChange = t;
         }
+        float lastComputedValue;
         if (mFloatAnimation != null && !Float.isNaN(mLastCalculatedValue)) {
             float f = mFloatAnimation.get(t - mLastChange);
             context.loadFloat(mId, f);
+            lastComputedValue = f;
+            if (lastComputedValue != mLastAnimatedValue) {
+                mLastAnimatedValue = lastComputedValue;
+                context.needsRepaint();
+            }
         } else if (mSpring != null) {
             float f = mSpring.get(t - mLastChange);
             context.loadFloat(mId, f);
+            lastComputedValue = f;
+            if (lastComputedValue != mLastAnimatedValue) {
+                mLastAnimatedValue = lastComputedValue;
+                context.needsRepaint();
+            }
         } else {
             float v =
                     mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length);
@@ -205,6 +221,11 @@ public class FloatExpression extends Operation implements VariableSupport {
                 + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -236,6 +257,9 @@ public class FloatExpression extends Operation implements VariableSupport {
         buffer.writeInt(id);
 
         int len = value.length;
+        if (len > MAX_EXPRESSION_SIZE) {
+            throw new RuntimeException(AnimatedFloatExpression.toString(value, null) + " to long");
+        }
         if (animation != null) {
             len |= (animation.length << 16);
         }

@@ -47,6 +47,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
+import static android.provider.Settings.Secure.MIRROR_BUILT_IN_DISPLAY;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
@@ -71,6 +72,7 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -534,6 +536,8 @@ public final class DisplayManagerService extends SystemService {
     private final boolean mExtraDisplayEventLogging;
     private final String mExtraDisplayLoggingPackageName;
 
+    private boolean mMirrorBuiltInDisplay;
+
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -668,7 +672,8 @@ public final class DisplayManagerService extends SystemService {
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
         if (mFlags.isDisplayTopologyEnabled()) {
             mDisplayTopologyCoordinator =
-                    new DisplayTopologyCoordinator(this::isExtendedDisplayEnabled);
+                    new DisplayTopologyCoordinator(this::isExtendedDisplayEnabled,
+                            this::deliverTopologyUpdate, new HandlerExecutor(mHandler), mSyncRoot);
         } else {
             mDisplayTopologyCoordinator = null;
         }
@@ -781,7 +786,11 @@ public final class DisplayManagerService extends SystemService {
                 }
                 dpc.onSwitchUser(newUserId, userSerial, newBrightness);
             });
-            handleSettingsChange();
+            handleMinimalPostProcessingAllowedSettingChange();
+
+            if (mFlags.isDisplayContentModeManagementEnabled()) {
+                updateMirrorBuiltInDisplaySettingLocked();
+            }
         }
     }
 
@@ -824,11 +833,14 @@ public final class DisplayManagerService extends SystemService {
             // relevant configuration should be in place.
             recordTopInsetLocked(mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY));
 
-            updateSettingsLocked();
+            updateMinimalPostProcessingAllowedSettingLocked();
             updateUserDisabledHdrTypesFromSettingsLocked();
             updateUserPreferredDisplayModeSettingsLocked();
             if (mIsHdrOutputControlEnabled) {
                 updateHdrConversionModeSettingsLocked();
+            }
+            if (mFlags.isDisplayContentModeManagementEnabled()) {
+                updateMirrorBuiltInDisplaySettingLocked();
             }
         }
 
@@ -1179,25 +1191,59 @@ public final class DisplayManagerService extends SystemService {
             mContext.getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(
                         Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED), false, this);
+
+            if (mFlags.isDisplayContentModeManagementEnabled()) {
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(
+                                MIRROR_BUILT_IN_DISPLAY), false, this, UserHandle.USER_ALL);
+            }
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            handleSettingsChange();
+            if (Settings.Secure.getUriFor(
+                    Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED).equals(uri)) {
+                handleMinimalPostProcessingAllowedSettingChange();
+                return;
+            }
+
+            if (Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY).equals(uri)) {
+                if (mFlags.isDisplayContentModeManagementEnabled()) {
+                    updateMirrorBuiltInDisplaySettingLocked();
+                }
+                return;
+            }
         }
     }
 
-    private void handleSettingsChange() {
+    private void handleMinimalPostProcessingAllowedSettingChange() {
         synchronized (mSyncRoot) {
-            updateSettingsLocked();
+            updateMinimalPostProcessingAllowedSettingLocked();
             scheduleTraversalLocked(false);
         }
     }
 
-    private void updateSettingsLocked() {
+    private void updateMinimalPostProcessingAllowedSettingLocked() {
         setMinimalPostProcessingAllowed(Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
                 1, UserHandle.USER_CURRENT) != 0);
+    }
+
+    private void updateMirrorBuiltInDisplaySettingLocked() {
+        if (!mFlags.isDisplayContentModeManagementEnabled()) {
+            Slog.e(TAG, "MirrorBuiltInDisplay setting shouldn't be updated when the flag is off.");
+            return;
+        }
+
+        synchronized (mSyncRoot) {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean mirrorBuiltInDisplay = Settings.Secure.getIntForUser(resolver,
+                    MIRROR_BUILT_IN_DISPLAY, 0, UserHandle.USER_CURRENT) != 0;
+            if (mMirrorBuiltInDisplay == mirrorBuiltInDisplay) {
+                return;
+            }
+            mMirrorBuiltInDisplay = mirrorBuiltInDisplay;
+        }
     }
 
     private void restoreResolutionFromBackup() {
@@ -1681,7 +1727,12 @@ public final class DisplayManagerService extends SystemService {
         if (android.companion.virtualdevice.flags.Flags.enableLimitedVdmRole()) {
             return checkCallingPermission(ADD_MIRROR_DISPLAY, "canCreateMirrorDisplays");
         }
-        return virtualDevice != null;
+        try {
+            return virtualDevice != null && virtualDevice.canCreateMirrorDisplays();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to query virtual device for permissions", e);
+            return false;
+        }
     }
 
     private boolean canProjectVideo(IMediaProjection projection) {
@@ -3502,6 +3553,28 @@ public final class DisplayManagerService extends SystemService {
         callbackRecord.notifyDisplayEventAsync(displayId, event);
     }
 
+    private void deliverTopologyUpdate(DisplayTopology topology) {
+        if (DEBUG) {
+            Slog.d(TAG, "Delivering topology update");
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+            Trace.instant(Trace.TRACE_TAG_POWER, "deliverTopologyUpdate");
+        }
+
+        // Grab the lock and copy the callbacks.
+        List<CallbackRecord> callbacks = new ArrayList<>();
+        synchronized (mSyncRoot) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                callbacks.add(mCallbacks.valueAt(i));
+            }
+        }
+
+        // After releasing the lock, send the notifications out.
+        for (CallbackRecord callback : callbacks) {
+            callback.notifyTopologyUpdateAsync(topology);
+        }
+    }
+
     private boolean extraLogging(String packageName) {
         return mExtraDisplayEventLogging && mExtraDisplayLoggingPackageName.equals(packageName);
     }
@@ -4137,7 +4210,7 @@ public final class DisplayManagerService extends SystemService {
          * cached or frozen.
          */
         public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
-            if (!shouldSendEvent(event)) {
+            if (!shouldSendDisplayEvent(event)) {
                 if (extraLogging(mPackageName)) {
                     Slog.i(TAG,
                             "Not sending displayEvent: " + event + " due to mask:"
@@ -4191,7 +4264,7 @@ public final class DisplayManagerService extends SystemService {
         /**
          * Return true if the client is interested in this event.
          */
-        private boolean shouldSendEvent(@DisplayEvent int event) {
+        private boolean shouldSendDisplayEvent(@DisplayEvent int event) {
             final long mask = mInternalEventFlagsMask.get();
             switch (event) {
                 case DisplayManagerGlobal.EVENT_DISPLAY_ADDED:
@@ -4250,6 +4323,45 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
             mPendingEvents.add(new Event(displayId, event));
+        }
+
+        /**
+         * @return {@code false} if RemoteException happens; otherwise {@code true} for
+         * success.
+         */
+        boolean notifyTopologyUpdateAsync(DisplayTopology topology) {
+            if ((mInternalEventFlagsMask.get()
+                    & DisplayManagerGlobal.INTERNAL_EVENT_FLAG_TOPOLOGY_UPDATED) == 0) {
+                if (extraLogging(mPackageName)) {
+                    Slog.i(TAG, "Not sending topology update: " + topology + " due to mask: "
+                            + mInternalEventFlagsMask);
+                }
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_POWER)) {
+                    Trace.instant(Trace.TRACE_TAG_POWER,
+                            "notifyTopologyUpdateAsync#notSendingUpdate=" + topology
+                                    + ",mInternalEventFlagsMask=" + mInternalEventFlagsMask);
+                }
+                // The client is not interested in this event, so do nothing.
+                return true;
+            }
+            return transmitTopologyUpdate(topology);
+        }
+
+        /**
+         * Transmit a single display topology update. The client is presumed ready. Return true on
+         * success and false if the client died.
+         */
+        private boolean transmitTopologyUpdate(DisplayTopology topology) {
+            // The client is ready to receive the event.
+            try {
+                mCallback.onTopologyChanged(topology);
+                return true;
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify process "
+                        + mPid + " that display topology changed, assuming it died.", ex);
+                binderDied();
+                return false;
+            }
         }
 
         // Send all pending events.  This can safely be called if the process is not ready, but it

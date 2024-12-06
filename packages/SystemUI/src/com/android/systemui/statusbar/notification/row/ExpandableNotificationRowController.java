@@ -35,7 +35,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginManager;
@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewController;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.dagger.AppName;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationKey;
@@ -59,17 +60,14 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationRowStatsLogger;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.time.SystemClock;
-import com.android.systemui.wmshell.BubblesManager;
 
 import com.google.android.msdl.data.model.MSDLToken;
 import com.google.android.msdl.domain.MSDLPlayer;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -108,10 +106,9 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
     private final FalsingManager mFalsingManager;
-    private final FeatureFlags mFeatureFlags;
+    private final FeatureFlagsClassic mFeatureFlags;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    private final Optional<BubblesManager> mBubblesManagerOptional;
     private final SmartReplyConstants mSmartReplyConstants;
     private final SmartReplyController mSmartReplyController;
     private final ExpandableNotificationRowDragController mDragController;
@@ -271,9 +268,8 @@ public class ExpandableNotificationRowController implements NotifViewController 
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             OnUserInteractionCallback onUserInteractionCallback,
             FalsingManager falsingManager,
-            FeatureFlags featureFlags,
+            FeatureFlagsClassic featureFlags,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
-            Optional<BubblesManager> bubblesManagerOptional,
             NotificationSettingsController settingsController,
             ExpandableNotificationRowDragController dragController,
             NotificationDismissibilityProvider dismissibilityProvider,
@@ -303,7 +299,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mAllowLongPress = allowLongPress;
         mFeatureFlags = featureFlags;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
-        mBubblesManagerOptional = bubblesManagerOptional;
         mSettingsController = settingsController;
         mDragController = dragController;
         mMetricsLogger = metricsLogger;
@@ -340,7 +335,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
-                mBubblesManagerOptional,
                 mNotificationGutsManager,
                 mDismissibilityProvider,
                 mMetricsLogger,
@@ -348,7 +342,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mColorUpdateLogger,
                 mSmartReplyConstants,
                 mSmartReplyController,
-                mFeatureFlags,
                 mStatusBarService,
                 mUiEventLogger
         );

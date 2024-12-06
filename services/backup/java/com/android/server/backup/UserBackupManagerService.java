@@ -314,8 +314,6 @@ public class UserBackupManagerService {
 
     private static final String SERIAL_ID_FILE = "serial_id";
 
-    private static final String SKIP_USER_FACING_PACKAGES = "backup_skip_user_facing_packages";
-
     private final @UserIdInt int mUserId;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private final TransportManager mTransportManager;
@@ -1998,39 +1996,6 @@ public class UserBackupManagerService {
         return mOperationStorage.isBackupOperationInProgress();
     }
 
-    /** Unbind the backup agent and kill the app if it's a non-system app. */
-    public void tearDownAgentAndKill(ApplicationInfo app) {
-        if (app == null) {
-            // Null means the system package, so just quietly move on.  :)
-            return;
-        }
-
-        try {
-            // unbind and tidy up even on timeout or failure, just in case
-            mActivityManager.unbindBackupAgent(app);
-
-            // The agent was running with a stub Application object, so shut it down.
-            // !!! We hardcode the confirmation UI's package name here rather than use a
-            //     manifest flag!  TODO something less direct.
-            if (!UserHandle.isCore(app.uid)
-                    && !app.packageName.equals("com.android.backupconfirm")) {
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, addUserIdToLogMessage(mUserId, "Killing agent host process"));
-                }
-                mActivityManager.killApplicationProcess(app.processName, app.uid);
-            } else {
-                if (MORE_DEBUG) {
-                    Slog.d(
-                            TAG,
-                            addUserIdToLogMessage(
-                                    mUserId, "Not killing after operation: " + app.processName));
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.d(TAG, addUserIdToLogMessage(mUserId, "Lost app trying to shut down"));
-        }
-    }
-
     // ----- Full-data backup scheduling -----
 
     /**
@@ -3534,40 +3499,6 @@ public class UserBackupManagerService {
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
-    }
-
-    /**
-     * We want to skip backup/restore of certain packages if 'backup_skip_user_facing_packages' is
-     * set to true in secure settings. See b/153940088 for details.
-     *
-     * TODO(b/154822946): Remove this logic in the next release.
-     */
-    public List<PackageInfo> filterUserFacingPackages(List<PackageInfo> packages) {
-        if (!shouldSkipUserFacingData()) {
-            return packages;
-        }
-
-        List<PackageInfo> filteredPackages = new ArrayList<>(packages.size());
-        for (PackageInfo packageInfo : packages)  {
-            if (!shouldSkipPackage(packageInfo.packageName)) {
-                filteredPackages.add(packageInfo);
-            } else {
-                Slog.i(TAG, "Will skip backup/restore for " + packageInfo.packageName);
-            }
-        }
-
-        return filteredPackages;
-    }
-
-    @VisibleForTesting
-    public boolean shouldSkipUserFacingData() {
-        return Settings.Secure.getInt(mContext.getContentResolver(), SKIP_USER_FACING_PACKAGES,
-                /* def */ 0) != 0;
-    }
-
-    @VisibleForTesting
-    public boolean shouldSkipPackage(String packageName) {
-        return WALLPAPER_PACKAGE.equals(packageName);
     }
 
     private void updateStateForTransport(String newTransportName) {

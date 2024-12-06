@@ -631,15 +631,15 @@ public class BluetoothUtils {
                 assistantProfile.getAllConnectedDevices().stream()
                         .map(deviceManager::findDevice)
                         .filter(Objects::nonNull)
-                        .map(CachedBluetoothDevice::getGroupId)
+                        .map(BluetoothUtils::getGroupId)
                         .collect(Collectors.toSet());
         Set<Integer> activeGroupIds =
                 leAudioProfile.getActiveDevices().stream()
                         .map(deviceManager::findDevice)
                         .filter(Objects::nonNull)
-                        .map(CachedBluetoothDevice::getGroupId)
+                        .map(BluetoothUtils::getGroupId)
                         .collect(Collectors.toSet());
-        int groupId = cachedDevice.getGroupId();
+        int groupId = getGroupId(cachedDevice);
         return activeGroupIds.size() == 1
                 && !activeGroupIds.contains(groupId)
                 && connectedGroupIds.size() == 2

@@ -41,7 +41,7 @@ import java.util.Map;
  * `/tmp/Ravenwood-stats_[TEST-MODULE=NAME]_latest.csv`.
  */
 public class RavenwoodTestStats {
-    private static final String TAG = "RavenwoodTestStats";
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
     private static final String HEADER = "Module,Class,OuterClass,Passed,Failed,Skipped";
 
     private static RavenwoodTestStats sInstance;

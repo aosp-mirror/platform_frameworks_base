@@ -59,7 +59,8 @@ class PipDragThenSnapTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
                 // Launch the PIP activity and wait for it to enter PiP mode
                 setRotation(Rotation.ROTATION_0)
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
-                pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
+                pipApp.launchViaIntent(wmHelper, stringExtras = stringExtras)
+                pipApp.waitForPip(wmHelper)
 
                 // get the initial region bounds and cache them
                 val initRegion = pipApp.getWindowRect(wmHelper)

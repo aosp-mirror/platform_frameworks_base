@@ -45,15 +45,39 @@ public class BitmapData extends Operation implements SerializableToString {
     short mType;
     short mEncoding;
     @NonNull final byte[] mBitmap;
+
+    /** The max size of width or height */
     public static final int MAX_IMAGE_DIMENSION = 8000;
+
+    /** The data is encoded in the file (default) */
     public static final short ENCODING_INLINE = 0;
+
+    /** The data is encoded in the url */
     public static final short ENCODING_URL = 1;
+
+    /** The data is encoded as a reference to file */
     public static final short ENCODING_FILE = 2;
+
+    /** The data is encoded as PNG_8888 (default) */
     public static final short TYPE_PNG_8888 = 0;
+
+    /** The data is encoded as PNG */
     public static final short TYPE_PNG = 1;
+
+    /** The data is encoded as RAW 8 bit */
     public static final short TYPE_RAW8 = 2;
+
+    /** The data is encoded as RAW 8888 bit */
     public static final short TYPE_RAW8888 = 3;
 
+    /**
+     * create a bitmap structure
+     *
+     * @param imageId the id to store the image
+     * @param width the width of the image
+     * @param height the height of the image
+     * @param bitmap the data
+     */
     public BitmapData(int imageId, int width, int height, @NonNull byte[] bitmap) {
         this.mImageId = imageId;
         this.mImageWidth = width;
@@ -61,10 +85,20 @@ public class BitmapData extends Operation implements SerializableToString {
         this.mBitmap = bitmap;
     }
 
+    /**
+     * The width of the image
+     *
+     * @return the width
+     */
     public int getWidth() {
         return mImageWidth;
     }
 
+    /**
+     * The height of the image
+     *
+     * @return the height
+     */
     public int getHeight() {
         return mImageHeight;
     }
@@ -80,6 +114,11 @@ public class BitmapData extends Operation implements SerializableToString {
         return "BITMAP DATA " + mImageId;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -94,6 +133,15 @@ public class BitmapData extends Operation implements SerializableToString {
         return OP_CODE;
     }
 
+    /**
+     * Add the image to the document
+     *
+     * @param buffer document to write to
+     * @param imageId the id the image will be stored under
+     * @param width the width of the image
+     * @param height the height of the image
+     * @param bitmap the data used to store/encode the image
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int imageId,
@@ -107,6 +155,17 @@ public class BitmapData extends Operation implements SerializableToString {
         buffer.writeBuffer(bitmap);
     }
 
+    /**
+     * Add the image to the document (using the ehanced encoding)
+     *
+     * @param buffer document to write to
+     * @param imageId the id the image will be stored under
+     * @param type the type of image
+     * @param width the width of the image
+     * @param encoding the encoding
+     * @param height the height of the image
+     * @param bitmap the data used to store/encode the image
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int imageId,

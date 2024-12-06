@@ -64,6 +64,8 @@ static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_RGB) ==
               static_cast<int>(android::gui::LutProperties::SamplingKey::RGB));
 static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_MAX_RGB) ==
               static_cast<int>(android::gui::LutProperties::SamplingKey::MAX_RGB));
+static_assert(static_cast<int>(ADISPLAYLUTS_SAMPLINGKEY_CIE_Y) ==
+              static_cast<int>(android::gui::LutProperties::SamplingKey::CIE_Y));
 
 Transaction* ASurfaceTransaction_to_Transaction(ASurfaceTransaction* aSurfaceTransaction) {
     return reinterpret_cast<Transaction*>(aSurfaceTransaction);
@@ -791,28 +793,6 @@ void ASurfaceTransaction_setFrameRateWithChangeStrategy(ASurfaceTransaction* aSu
     CHECK_NOT_NULL(aSurfaceControl);
     Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
     sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-    transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
-}
-
-void ASurfaceTransaction_setFrameRateParams(
-        ASurfaceTransaction* aSurfaceTransaction, ASurfaceControl* aSurfaceControl,
-        float desiredMinRate, float desiredMaxRate, float fixedSourceRate,
-        ANativeWindow_ChangeFrameRateStrategy changeFrameRateStrategy) {
-    CHECK_NOT_NULL(aSurfaceTransaction);
-    CHECK_NOT_NULL(aSurfaceControl);
-    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
-    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
-
-    if (desiredMaxRate < desiredMinRate) {
-        ALOGW("desiredMaxRate must be greater than or equal to desiredMinRate");
-        return;
-    }
-    // TODO(b/362798998): Fix plumbing to send modern params
-    int compatibility = fixedSourceRate == 0 ? ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_DEFAULT
-                                             : ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-    double frameRate = compatibility == ANATIVEWINDOW_FRAME_RATE_COMPATIBILITY_FIXED_SOURCE
-            ? fixedSourceRate
-            : desiredMinRate;
     transaction->setFrameRate(surfaceControl, frameRate, compatibility, changeFrameRateStrategy);
 }
 

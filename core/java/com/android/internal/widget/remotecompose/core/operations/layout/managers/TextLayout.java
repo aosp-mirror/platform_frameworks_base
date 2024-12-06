@@ -34,11 +34,13 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Text component, referencing a text id */
-public class TextLayout extends LayoutManager implements ComponentStartOperation, VariableSupport {
+public class TextLayout extends LayoutManager
+        implements ComponentStartOperation, VariableSupport, AccessibleComponent {
 
     private static final boolean DEBUG = false;
     private int mTextId = -1;
@@ -56,6 +58,12 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     private float mTextH = -1;
 
     @Nullable private String mCachedString = "";
+
+    @Nullable
+    @Override
+    public Integer getTextId() {
+        return mTextId;
+    }
 
     @Override
     public void registerListening(@NonNull RemoteContext context) {
@@ -92,6 +100,13 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         }
         mTextW = -1;
         mTextH = -1;
+
+        if (mHorizontalScrollDelegate != null) {
+            mHorizontalScrollDelegate.reset();
+        }
+        if (mVerticalScrollDelegate != null) {
+            mVerticalScrollDelegate.reset();
+        }
         invalidateMeasure();
     }
 
@@ -175,6 +190,11 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
         int length = mCachedString.length();
         if (mTextW > mWidth) {
             context.save();
+            context.clipRect(
+                    mPaddingLeft,
+                    mPaddingTop,
+                    mWidth - mPaddingLeft - mPaddingRight,
+                    mHeight - mPaddingTop - mPaddingBottom);
             context.translate(getScrollX(), getScrollY());
             context.drawTextRun(mTextId, 0, length, 0, 0, mTextX, mTextY, false);
             context.restore();
@@ -285,15 +305,20 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
     }
 
     @Override
-    public float intrinsicHeight() {
+    public float intrinsicHeight(@Nullable RemoteContext context) {
         return mTextH;
     }
 
     @Override
-    public float intrinsicWidth() {
+    public float intrinsicWidth(@Nullable RemoteContext context) {
         return mTextW;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "TextLayout";
@@ -361,6 +386,11 @@ public class TextLayout extends LayoutManager implements ComponentStartOperation
                         textAlign));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description("Text layout implementation.\n\n")

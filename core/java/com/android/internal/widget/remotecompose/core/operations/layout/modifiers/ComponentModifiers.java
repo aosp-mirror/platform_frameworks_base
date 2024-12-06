@@ -21,6 +21,7 @@ import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
@@ -48,6 +49,7 @@ public class ComponentModifiers extends PaintOperation
         super.apply(context);
         for (ModifierOperation op : mList) {
             op.apply(context);
+            context.incrementOpCount();
         }
     }
 
@@ -86,6 +88,10 @@ public class ComponentModifiers extends PaintOperation
         float tx = 0f;
         float ty = 0f;
         for (ModifierOperation op : mList) {
+            if (op.isDirty() && op instanceof VariableSupport) {
+                ((VariableSupport) op).updateVariables(context.getContext());
+                op.markNotDirty();
+            }
             if (op instanceof PaddingModifierOperation) {
                 PaddingModifierOperation pop = (PaddingModifierOperation) op;
                 context.translate(pop.getLeft(), pop.getTop());
@@ -109,7 +115,8 @@ public class ComponentModifiers extends PaintOperation
     }
 
     @Override
-    public void layout(@NonNull RemoteContext context, float width, float height) {
+    public void layout(
+            @NonNull RemoteContext context, Component component, float width, float height) {
         float w = width;
         float h = height;
         for (ModifierOperation op : mList) {
@@ -119,9 +126,9 @@ public class ComponentModifiers extends PaintOperation
                 h -= pop.getTop() + pop.getBottom();
             }
             if (op instanceof ClickModifierOperation) {
-                ((DecoratorComponent) op).layout(context, width, height);
+                ((DecoratorComponent) op).layout(context, component, width, height);
             } else if (op instanceof DecoratorComponent) {
-                ((DecoratorComponent) op).layout(context, w, h);
+                ((DecoratorComponent) op).layout(context, component, w, h);
             }
         }
     }
@@ -156,10 +163,16 @@ public class ComponentModifiers extends PaintOperation
 
     @Override
     public void onTouchUp(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            RemoteContext context,
+            CoreDocument document,
+            Component component,
+            float x,
+            float y,
+            float dx,
+            float dy) {
         for (ModifierOperation op : mList) {
             if (op instanceof TouchHandler) {
-                ((TouchHandler) op).onTouchUp(context, document, component, x, y);
+                ((TouchHandler) op).onTouchUp(context, document, component, x, y, dx, dy);
             }
         }
     }
@@ -206,32 +219,6 @@ public class ComponentModifiers extends PaintOperation
             }
         }
         return false;
-    }
-
-    public float getScrollX() {
-        float scroll = 0;
-        for (ModifierOperation op : mList) {
-            if (op instanceof ScrollModifierOperation) {
-                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
-                if (scrollModifier.isHorizontalScroll()) {
-                    scroll = Math.min(scroll, scrollModifier.getScrollX());
-                }
-            }
-        }
-        return scroll;
-    }
-
-    public float getScrollY() {
-        float scroll = 0;
-        for (ModifierOperation op : mList) {
-            if (op instanceof ScrollModifierOperation) {
-                ScrollModifierOperation scrollModifier = (ScrollModifierOperation) op;
-                if (scrollModifier.isVerticalScroll()) {
-                    scroll = Math.min(scroll, scrollModifier.getScrollY());
-                }
-            }
-        }
-        return scroll;
     }
 
     public void setHorizontalScrollDimension(float hostDimension, float contentDimension) {

@@ -67,8 +67,8 @@ class LetterboxCommandHandler @Inject constructor(
             return false
         }
         return when (args.size) {
-            1 -> onShellDisplayCommand(args[0], pw)
-            2 -> onShellUpdateCommand(args[0], args[1], pw)
+            1 -> onNoParamsCommand(args[0], pw)
+            2 -> onSingleParamCommand(args[0], args[1], pw)
             else -> {
                 pw.println("Invalid command: " + args[0])
                 return false
@@ -89,11 +89,17 @@ class LetterboxCommandHandler @Inject constructor(
                     $prefix      name, for example, @android:color/system_accent2_50.
                     $prefix backgroundColorReset"
                     $prefix      Resets the background color to the default value."
+                    $prefix cornerRadius"
+                    $prefix      Corners radius (in pixels) for activities in the letterbox mode."
+                    $prefix      If cornerRadius < 0, it will be ignored and corners of the"
+                    $prefix      activity won't be rounded."
+                    $prefix cornerRadiusReset"
+                    $prefix      Resets the rounded corners radius to the default value."
                 """.trimIndent()
         )
     }
 
-    private fun onShellUpdateCommand(command: String, value: String, pw: PrintWriter): Boolean {
+    private fun onSingleParamCommand(command: String, value: String, pw: PrintWriter): Boolean {
         when (command) {
             "backgroundColor" -> {
                 return invokeWhenValid(
@@ -120,10 +126,17 @@ class LetterboxCommandHandler @Inject constructor(
                 }
             )
 
-            "backgroundColorReset" -> {
-                letterboxConfiguration.resetLetterboxBackgroundColor()
-                return true
-            }
+            "cornerRadius" -> return invokeWhenValid(
+                pw,
+                value,
+                ::strToInt{ it >= 0 },
+                { radius ->
+                    letterboxConfiguration.setLetterboxActivityCornersRadius(radius)
+                },
+                { r ->
+                    "$r is not a valid radius. It must be an integer >= 0."
+                }
+            )
 
             else -> {
                 pw.println("Invalid command: $value")
@@ -132,7 +145,7 @@ class LetterboxCommandHandler @Inject constructor(
         }
     }
 
-    private fun onShellDisplayCommand(command: String, pw: PrintWriter): Boolean {
+    private fun onNoParamsCommand(command: String, pw: PrintWriter): Boolean {
         when (command) {
             "backgroundColor" -> {
                 pw.println(
@@ -141,6 +154,24 @@ class LetterboxCommandHandler @Inject constructor(
                             .toArgb()
                     )
                 )
+                return true
+            }
+
+            "backgroundColorReset" -> {
+                letterboxConfiguration.resetLetterboxBackgroundColor()
+                return true
+            }
+
+            "cornerRadius" -> {
+                pw.println(
+                    "    Rounded corners radius: " +
+                        "${letterboxConfiguration.getLetterboxActivityCornersRadius()} px."
+                )
+                return true
+            }
+
+            "cornerRadiusReset" -> {
+                letterboxConfiguration.resetLetterboxActivityCornersRadius()
                 return true
             }
 
@@ -181,4 +212,15 @@ class LetterboxCommandHandler @Inject constructor(
         } catch (e: IllegalArgumentException) {
             null
         }
+
+    // Converts a String to Int which if possible or it returns null otherwise.
+    // If a predicate is set, it also returns [null] if the predicate evaluate to [false].
+    private fun strToInt(predicate: (Int) -> Boolean = { _ -> true }): (String) -> Int? = { str ->
+        try {
+            val value = str.toInt()
+            if (predicate(value)) value else null
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
 }

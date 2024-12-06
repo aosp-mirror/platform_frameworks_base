@@ -57,6 +57,14 @@ public class ViewUIComponent implements UIComponent {
         mView = view;
     }
 
+    /**
+     * @return the view wrapped by this UI component.
+     * @hide
+     */
+    public View getView() {
+        return mView;
+    }
+
     @Override
     public float getAlpha() {
         return mView.getAlpha();
@@ -89,7 +97,6 @@ public class ViewUIComponent implements UIComponent {
         mSurfaceControl =
                 new SurfaceControl.Builder().setName("ViewUIComponent").setBufferSize(w, h).build();
         mSurface = new Surface(mSurfaceControl);
-        forceDraw();
 
         // Attach surface to transition leash
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
@@ -99,7 +106,13 @@ public class ViewUIComponent implements UIComponent {
         mView.getViewTreeObserver().addOnDrawListener(mOnDrawListener);
 
         // Make the view invisible AFTER the surface is shown.
-        t.addTransactionCommittedListener(mView::post, () -> mView.setVisibility(View.INVISIBLE))
+        t.addTransactionCommittedListener(
+                        mView::post,
+                        () -> {
+                            logD("Surface attached!");
+                            forceDraw();
+                            mView.setVisibility(View.INVISIBLE);
+                        })
                 .apply();
     }
 

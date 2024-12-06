@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 
+import com.android.internal.widget.remotecompose.accessibility.RemoteComposeTouchHelper;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
@@ -61,6 +62,15 @@ public class RemoteComposePlayer extends FrameLayout {
     }
 
     /**
+     * Returns true if the document supports drag touch events
+     *
+     * @return true if draggable content, false otherwise
+     */
+    public boolean isDraggable() {
+        return mInner.isDraggable();
+    }
+
+    /**
      * Turn on debug information
      *
      * @param debugFlags 1 to set debug on
@@ -83,8 +93,12 @@ public class RemoteComposePlayer extends FrameLayout {
             } else {
                 Log.e("RemoteComposePlayer", "Unsupported document ");
             }
+
+            RemoteComposeTouchHelper.REGISTRAR.setAccessibilityDelegate(this, value.getDocument());
         } else {
             mInner.setDocument(null);
+
+            RemoteComposeTouchHelper.REGISTRAR.clearAccessibilityDelegate(this);
         }
         mapColors();
         setupSensors();
@@ -96,6 +110,7 @@ public class RemoteComposePlayer extends FrameLayout {
                         provideHapticFeedback(type);
                     }
                 });
+        mInner.checkShaders(mShaderControl);
     }
 
     /**
@@ -235,22 +250,38 @@ public class RemoteComposePlayer extends FrameLayout {
         mInner.clearLocalString("SYSTEM:" + name);
     }
 
-    public interface ClickCallbacks {
-        void click(int id, String metadata);
+    /**
+     * This is the number of ops used to calculate the last frame.
+     *
+     * @return number of ops
+     */
+    public int getOpsPerFrame() {
+        return mInner.getDocument().mDocument.getOpsPerFrame();
+    }
+
+    /** Id action callback interface */
+    public interface IdActionCallbacks {
+        /**
+         * Callback for on action
+         *
+         * @param id the id of the action
+         * @param metadata the metadata of the action
+         */
+        void onAction(int id, String metadata);
     }
 
     /**
-     * Add a callback for handling click events on the document
+     * Add a callback for handling id actions events on the document
      *
-     * @param callback the callback lambda that will be used when a click is detected
+     * @param callback the callback lambda that will be used when a action is executed
      *     <p>The parameter of the callback are:
      *     <ul>
-     *       <li>id : the id of the clicked area
-     *       <li>metadata: a client provided unstructured string associated with that area
+     *       <li>id : the id of the action
+     *       <li>metadata: a client provided unstructured string associated with that id action
      *     </ul>
      */
-    public void addClickListener(ClickCallbacks callback) {
-        mInner.addClickListener((id, metadata) -> callback.click(id, metadata));
+    public void addIdActionListener(IdActionCallbacks callback) {
+        mInner.addIdActionListener((id, metadata) -> callback.onAction(id, metadata));
     }
 
     /**
@@ -668,5 +699,20 @@ public class RemoteComposePlayer extends FrameLayout {
      */
     public float getEvalTime() {
         return mInner.getEvalTime();
+    }
+
+    private CoreDocument.ShaderControl mShaderControl =
+            (shader) -> {
+                return false;
+            };
+
+    /**
+     * Sets the controller for shaders. Note set before loading the document. The default is to not
+     * accept shaders.
+     *
+     * @param ctl the controller
+     */
+    public void setShaderControl(CoreDocument.ShaderControl ctl) {
+        mShaderControl = ctl;
     }
 }

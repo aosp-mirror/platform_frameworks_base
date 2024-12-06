@@ -923,8 +923,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int ENABLE_ROLLBACK_TIMEOUT = 22;
     static final int DEFERRED_NO_KILL_POST_DELETE = 23;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER = 24;
-    static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
-    static final int CHECK_PENDING_INTEGRITY_VERIFICATION = 26;
+    // static final int UNUSED = 25;
+    // static final int UNUSED = 26;
     static final int DOMAIN_VERIFICATION = 27;
     static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
     static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER = 29;
@@ -2118,8 +2118,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mBroadcastHelper);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper, mRemovePackageHelper,
-                mDeletePackageHelper, mBroadcastHelper,
-                injector.getPackageInstallerService().getInstallDependencyHelper());
+                mDeletePackageHelper, mBroadcastHelper);
 
         mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
                 mInjector.getUserManagerInternal(), mDeletePackageHelper);
@@ -7125,12 +7124,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return mSettings.isPermissionUpgradeNeeded(userId);
         }
 
+        @Deprecated
         @Override
         public void setIntegrityVerificationResult(int verificationId, int verificationResult) {
-            final Message msg = mHandler.obtainMessage(INTEGRITY_VERIFICATION_COMPLETE);
-            msg.arg1 = verificationId;
-            msg.obj = verificationResult;
-            mHandler.sendMessage(msg);
+          // Do nothing.
         }
 
         @Override

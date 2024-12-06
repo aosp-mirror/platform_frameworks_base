@@ -514,7 +514,6 @@ applications that come with the platform
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
         <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
-        <permission name="android.permission.READ_DROPBOX_DATA" />
         <permission name="android.permission.READ_LOGS" />
         <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
         <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />

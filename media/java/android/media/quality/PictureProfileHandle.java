@@ -28,11 +28,14 @@ import android.os.Parcelable;
   * A picture profile represents a collection of parameters used to configure picture processing
   * to enhance the quality of graphic buffers.
   *
+  * @see PictureProfile.getHandle
+  *
   * @hide
   */
 @SystemApi
 @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
 public final class PictureProfileHandle implements Parcelable {
+    /** A handle that represents no picture processing configuration. */
     public static final @NonNull PictureProfileHandle NONE = new PictureProfileHandle(0);
 
     private final long mId;
@@ -42,7 +45,16 @@ public final class PictureProfileHandle implements Parcelable {
         mId = id;
     }
 
-    /** @hide */
+    /**
+     * An ID that uniquely identifies the picture profile across the system.
+     *
+     * This ID can be used to construct an NDK PictureProfileHandle to be fed directly into
+     * IGraphicBufferProducer to couple a picture profile to a graphic buffer.
+     *
+     * Note: These IDs are generated randomly and are not stable across reboots.
+     *
+     * @hide
+     */
     @SystemApi
     @FlaggedApi(android.media.tv.flags.Flags.FLAG_APPLY_PICTURE_PROFILES)
     public long getId() {

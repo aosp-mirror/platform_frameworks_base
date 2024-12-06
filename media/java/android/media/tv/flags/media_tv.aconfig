@@ -93,7 +93,7 @@ flag {
     name: "set_resource_holder_retain"
     is_exported: true
     namespace: "media_tv"
-    description: "Feature flag to add setResourceHolderRetain api to MediaCas and Tuner JAVA."
+    description: "Feature flag to add setResourceOwnershipRetention api to MediaCas and Tuner JAVA."
     bug: "372973197"
 }
 

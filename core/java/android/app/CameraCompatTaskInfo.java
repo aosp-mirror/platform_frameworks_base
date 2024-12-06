@@ -16,11 +16,16 @@
 
 package android.app;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_90;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Surface;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -151,6 +156,27 @@ public class CameraCompatTaskInfo implements Parcelable {
         return "CameraCompatTaskInfo { freeformCameraCompatMode="
                 + freeformCameraCompatModeToString(freeformCameraCompatMode)
                 + "}";
+    }
+
+    /**
+     * Returns the sandboxed display rotation based on the given {@code cameraCompatMode}.
+     *
+     * <p>This will be what the app likely expects in its requested orientation while running on a
+     * device with portrait natural orientation: `CAMERA_COMPAT_FREEFORM_PORTRAIT_*` is 0, and
+     * `CAMERA_COMPAT_FREEFORM_LANDSCAPE_*` is 90.
+     *
+     * @return {@link WindowConfiguration#ROTATION_UNDEFINED} if not in camera compat mode.
+     */
+    @Surface.Rotation
+    public static int getDisplayRotationFromCameraCompatMode(@FreeformCameraCompatMode int
+            cameraCompatMode) {
+        return switch (cameraCompatMode) {
+            case CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE,
+                 CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT -> ROTATION_0;
+            case CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE,
+                 CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT -> ROTATION_90;
+            default -> ROTATION_UNDEFINED;
+        };
     }
 
     /** Human readable version of the freeform camera compat mode. */

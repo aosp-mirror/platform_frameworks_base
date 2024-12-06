@@ -812,9 +812,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 // The display is trusted since it is created by system.
                 mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
-                mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
-                mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
+                mInfo.brightnessMinimum = getDisplayDeviceConfig().getBrightnessMinimum();
+                mInfo.brightnessMaximum = getDisplayDeviceConfig().getBrightnessMaximum();
                 mInfo.brightnessDefault = getDisplayDeviceConfig().getBrightnessDefault();
+                mInfo.brightnessDim = getDisplayDeviceConfig().getBrightnessDim();
                 mInfo.hdrSdrRatio = mCurrentHdrSdrRatio;
             }
             return mInfo;

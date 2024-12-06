@@ -256,6 +256,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS,
             Flags::displayListenerPerformanceImprovements
     );
+    private final FlagState mEnableDisplayContentModeManagementFlagState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT,
+            Flags::enableDisplayContentModeManagement
+    );
 
     private final FlagState mSubscribeGranularDisplayEvents = new FlagState(
             Flags.FLAG_SUBSCRIBE_GRANULAR_DISPLAY_EVENTS,
@@ -556,6 +560,10 @@ public class DisplayManagerFlags {
         return mDisplayListenerPerformanceImprovementsFlagState.isEnabled();
     }
 
+    public boolean isDisplayContentModeManagementEnabled() {
+        return mEnableDisplayContentModeManagementFlagState.isEnabled();
+    }
+
     /**
      * @return {@code true} if the flag for subscribing to granular display events is enabled
      */
@@ -618,6 +626,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mEnablePluginManagerFlagState);
         pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
         pw.println(" " + mSubscribeGranularDisplayEvents);
+        pw.println(" " + mEnableDisplayContentModeManagementFlagState);
     }
 
     private static class FlagState {

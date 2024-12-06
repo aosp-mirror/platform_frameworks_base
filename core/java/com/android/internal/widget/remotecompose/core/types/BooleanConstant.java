@@ -68,6 +68,11 @@ public class BooleanConstant extends Operation {
         return "BooleanConstant[" + mId + "] = " + mValue + "";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "OrigamiBoolean";
@@ -108,6 +113,11 @@ public class BooleanConstant extends Operation {
         operations.add(new BooleanConstant(id, value));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, "BooleanConstant")
                 .description("A boolean and its associated id")

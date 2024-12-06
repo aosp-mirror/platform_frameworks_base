@@ -27,6 +27,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
@@ -154,6 +155,10 @@ constructor(
         qsTileViewModel.onUserChanged(UserHandle.of(currentUser))
     }
 
+    override fun getDetailsViewModel(): TileDetailsViewModel? {
+        return qsTileViewModel.detailsViewModel
+    }
+
     @Deprecated(
         "Not needed as {@link com.android.internal.logging.UiEvent} will use #getMetricsSpec",
         replaceWith = ReplaceWith("getMetricsSpec"),
@@ -207,8 +212,9 @@ constructor(
         qsTileViewModel.destroy()
     }
 
-    override fun getState(): QSTile.State? =
+    override fun getState(): QSTile.State =
         qsTileViewModel.currentState?.let { mapState(context, it, qsTileViewModel.config) }
+            ?: QSTile.State()
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
 

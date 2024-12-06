@@ -34,12 +34,12 @@ class FakeStatusBarModeRepository @Inject constructor() : StatusBarModeRepositor
         const val DISPLAY_ID = Display.DEFAULT_DISPLAY
     }
 
-    override val defaultDisplay: FakeStatusBarModePerDisplayRepository =
-        FakeStatusBarModePerDisplayRepository()
+    private val perDisplayRepos = mutableMapOf<Int, FakeStatusBarModePerDisplayRepository>()
 
-    override fun forDisplay(displayId: Int): FakeStatusBarModePerDisplayRepository {
-        return defaultDisplay
-    }
+    override val defaultDisplay: FakeStatusBarModePerDisplayRepository = forDisplay(DISPLAY_ID)
+
+    override fun forDisplay(displayId: Int): FakeStatusBarModePerDisplayRepository =
+        perDisplayRepos.computeIfAbsent(displayId) { FakeStatusBarModePerDisplayRepository() }
 }
 
 class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository {

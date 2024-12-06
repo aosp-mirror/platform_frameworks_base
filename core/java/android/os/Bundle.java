@@ -70,6 +70,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     static final int FLAG_VERIFY_TOKENS_PRESENT = 1 << 13;
 
+    /**
+     * Indicates the bundle definitely contains an Intent.
+     */
+    static final int FLAG_HAS_INTENT = 1 << 14;
+
 
     /**
      * Status when the Bundle can <b>assert</b> that the underlying Parcel DOES NOT contain
@@ -116,6 +121,11 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
 
     /** An unmodifiable {@code Bundle} that is always {@link #isEmpty() empty}. */
     public static final Bundle EMPTY;
+
+    /**
+     * @hide
+     */
+    public static Class<?> intentClass;
 
     /**
      * Special extras used to denote extras have been stripped off.
@@ -388,6 +398,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         if ((bundle.mFlags & FLAG_HAS_BINDERS_KNOWN) == 0) {
             mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
         }
+        mFlags |= bundle.mFlags & FLAG_HAS_INTENT;
     }
 
     /**
@@ -445,6 +456,16 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             mFlags |= FLAG_HAS_BINDERS_KNOWN;
             return STATUS_BINDERS_NOT_PRESENT;
         }
+    }
+
+    /**
+     * Returns if the bundle definitely contains at least an intent. This method returns false does
+     * not guarantee the bundle does not contain a nested intent. An intent could still exist in a
+     * ParcelableArrayList, ParcelableArray, ParcelableList, a bundle in this bundle, etc.
+     * @hide
+     */
+    public boolean hasIntent() {
+        return (mFlags & FLAG_HAS_INTENT) != 0;
     }
 
     /** {@hide} */
@@ -569,6 +590,9 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         mMap.put(key, value);
         mFlags &= ~FLAG_HAS_FDS_KNOWN;
         mFlags &= ~FLAG_HAS_BINDERS_KNOWN;
+        if (intentClass != null && intentClass.isInstance(value)) {
+            mFlags |= FLAG_HAS_INTENT;
+        }
     }
 
     /**

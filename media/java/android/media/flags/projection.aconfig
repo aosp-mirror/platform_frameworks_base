@@ -17,3 +17,15 @@ flag {
      description: "Stops MediaProjection sessions when a call ends"
      bug: "368336349"
 }
+
+flag {
+    name: "media_projection_connected_display_no_virtual_device"
+    namespace: "media_projection"
+    description: "Filter out display associated with a virtual device for media projection use case"
+    bug: "362720120"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+    is_exported: true
+}
+

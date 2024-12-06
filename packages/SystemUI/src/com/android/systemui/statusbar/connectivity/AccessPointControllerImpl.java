@@ -132,13 +132,10 @@ public class AccessPointControllerImpl implements AccessPointController,
         }
 
         if (mWifiPickerTracker != null) {
-            mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.CREATED));
+            mWifiPickerTracker.onStop();
         }
         Context context = mContext.createContextAsUser(UserHandle.of(newUserId), /* flags= */ 0);
         mWifiPickerTracker = mWifiPickerTrackerFactory.create(context, mLifecycle, this, TAG);
-        if (!mCallbacks.isEmpty()) {
-            mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.STARTED));
-        }
     }
 
     @Override
@@ -147,7 +144,11 @@ public class AccessPointControllerImpl implements AccessPointController,
         if (DEBUG) Log.d(TAG, "addCallback " + callback);
         mCallbacks.add(callback);
         if (mCallbacks.size() == 1) {
-            mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.STARTED));
+            if (mWifiPickerTrackerFactory.isSupported()) {
+                mWifiPickerTracker.onStart();
+            } else {
+                mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.STARTED));
+            }
         }
     }
 
@@ -157,7 +158,11 @@ public class AccessPointControllerImpl implements AccessPointController,
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         mCallbacks.remove(callback);
         if (mCallbacks.isEmpty()) {
-            mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.CREATED));
+            if (mWifiPickerTrackerFactory.isSupported()) {
+                mWifiPickerTracker.onStop();
+            } else {
+                mMainExecutor.execute(() -> mLifecycle.setCurrentState(Lifecycle.State.CREATED));
+            }
         }
     }
 

@@ -242,8 +242,7 @@ public class SettingsHelper {
                 // Don't write it to setting. Let the broadcast receiver in
                 // AccessibilityManagerService handle restore/merging logic.
                 return;
-            } else if (android.view.accessibility.Flags.restoreA11yShortcutTargetService()
-                    && Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(name)) {
+            } else if (Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.equals(name)) {
                 // Don't write it to setting. Let the broadcast receiver in
                 // AccessibilityManagerService handle restore/merging logic.
                 return;

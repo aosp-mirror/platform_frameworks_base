@@ -16,12 +16,12 @@
 
 package com.android.server.security.intrusiondetection;
 
+import static android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE;
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE;
 import static android.Manifest.permission.READ_INTRUSION_DETECTION_STATE;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -42,6 +42,9 @@ import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
@@ -52,19 +55,18 @@ import android.security.intrusiondetection.IIntrusionDetectionServiceStateCallba
 import android.security.intrusiondetection.IntrusionDetectionEvent;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.bedstead.harrier.BedsteadJUnit4;
-import com.android.bedstead.harrier.annotations.AfterClass;
-import com.android.bedstead.harrier.annotations.BeforeClass;
 import com.android.bedstead.multiuser.annotations.RequireRunOnSystemUser;
 import com.android.bedstead.nene.TestApis;
 import com.android.bedstead.nene.devicepolicy.DeviceOwner;
-import com.android.bedstead.nene.exceptions.NeneException;
 import com.android.bedstead.permissions.CommonPermissions;
 import com.android.bedstead.permissions.PermissionContext;
 import com.android.bedstead.permissions.annotations.EnsureHasPermission;
+import com.android.coretests.apps.testapp.LocalIntrusionDetectionEventTransport;
 import com.android.server.ServiceThread;
 
 import org.junit.Before;
@@ -111,42 +113,26 @@ public class IntrusionDetectionServiceTest {
     private IntrusionDetectionEventTransportConnection mIntrusionDetectionEventTransportConnection;
     private DataAggregator mDataAggregator;
     private IntrusionDetectionService mIntrusionDetectionService;
+    private IBinder mService;
     private TestLooper mTestLooper;
     private Looper mLooper;
     private TestLooper mTestLooperOfDataAggregator;
     private Looper mLooperOfDataAggregator;
     private FakePermissionEnforcer mPermissionEnforcer;
-
-    @BeforeClass
-    public static void setDeviceOwner() {
-        ComponentName admin =
-                new ComponentName(
-                        ApplicationProvider.getApplicationContext(),
-                        IntrusionDetectionAdminReceiver.class);
-        try {
-            sDeviceOwner = TestApis.devicePolicy().setDeviceOwner(admin);
-        } catch (NeneException e) {
-            fail("Failed to set device owner " + admin.flattenToString() + ": " + e);
-        }
-    }
-
-    @AfterClass
-    public static void removeDeviceOwner() {
-        try {
-            sDeviceOwner.remove();
-        } catch (NeneException e) {
-            fail("Failed to remove device owner : " + e);
-        }
-    }
+    private boolean mBoundToLoggingService = false;
+    private static final String TEST_PKG =
+        "com.android.coretests.apps.testapp";
+    private static final String TEST_SERVICE = TEST_PKG + ".TestLoggingService";
 
     @SuppressLint("VisibleForTests")
     @Before
-    public void setUp() {
-        mContext = spy(ApplicationProvider.getApplicationContext());
+    public void setUp() throws Exception {
+        mContext = ApplicationProvider.getApplicationContext();
 
         mPermissionEnforcer = new FakePermissionEnforcer();
         mPermissionEnforcer.grant(READ_INTRUSION_DETECTION_STATE);
         mPermissionEnforcer.grant(MANAGE_INTRUSION_DETECTION_STATE);
+        mPermissionEnforcer.grant(BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE);
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
@@ -166,6 +152,7 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
+    @EnsureHasPermission(CommonPermissions.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void testRemoveStateCallback_NoPermission() {
         mPermissionEnforcer.revoke(READ_INTRUSION_DETECTION_STATE);
         StateCallback scb = new StateCallback();
@@ -217,6 +204,7 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
+    @Ignore("Unit test does not run as system service UID")
     public void testRemoveStateCallback() throws RemoteException {
         mIntrusionDetectionService.setState(STATE_DISABLED);
         StateCallback scb1 = new StateCallback();
@@ -227,7 +215,6 @@ public class IntrusionDetectionServiceTest {
         assertEquals(STATE_DISABLED, scb1.mState);
         assertEquals(STATE_DISABLED, scb2.mState);
 
-        doReturn(true).when(mDataAggregator).initialize();
         doReturn(true).when(mIntrusionDetectionEventTransportConnection).initialize();
 
         mIntrusionDetectionService.getBinderService().removeStateCallback(scb2);
@@ -240,6 +227,7 @@ public class IntrusionDetectionServiceTest {
         assertNull(ccb.mErrorCode);
     }
 
+    @Ignore("Unit test does not run as system service UID")
     @Test
     public void testEnable_FromDisabled_TwoStateCallbacks() throws RemoteException {
         mIntrusionDetectionService.setState(STATE_DISABLED);
@@ -400,39 +388,13 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
-    @RequireRunOnSystemUser
-    public void testDataSources_Initialize_HasDeviceOwner() throws Exception {
-        NetworkLogSource networkLogSource = new NetworkLogSource(mContext, mDataAggregator);
-        SecurityLogSource securityLogSource = new SecurityLogSource(mContext, mDataAggregator);
-
-        assertTrue(networkLogSource.initialize());
-        assertTrue(securityLogSource.initialize());
-    }
-
-    @Test
-    @RequireRunOnSystemUser
-    public void testDataSources_Initialize_NoDeviceOwner() throws Exception {
-        NetworkLogSource networkLogSource = new NetworkLogSource(mContext, mDataAggregator);
-        SecurityLogSource securityLogSource = new SecurityLogSource(mContext, mDataAggregator);
-        ComponentName admin = sDeviceOwner.componentName();
-
-        try {
-            sDeviceOwner.remove();
-            assertFalse(networkLogSource.initialize());
-            assertFalse(securityLogSource.initialize());
-        } finally {
-            sDeviceOwner = TestApis.devicePolicy().setDeviceOwner(admin);
-        }
-    }
-
-    @Test
+    @Ignore("Unit test does not run as system service UID")
     @RequireRunOnSystemUser
     @EnsureHasPermission(CommonPermissions.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void testDataAggregator_AddSecurityEvent() throws Exception {
         mIntrusionDetectionService.setState(STATE_ENABLED);
         ServiceThread mockThread = spy(ServiceThread.class);
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
-        assertTrue(mDataAggregator.initialize());
 
         // SecurityLogging generates a number of events and callbacks, so create a latch to wait for
         // the given event.
@@ -476,12 +438,12 @@ public class IntrusionDetectionServiceTest {
 
     @Test
     @RequireRunOnSystemUser
+    @Ignore("Unit test does not run as system service UID")
     @EnsureHasPermission(CommonPermissions.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void testDataAggregator_AddNetworkEvent() throws Exception {
         mIntrusionDetectionService.setState(STATE_ENABLED);
         ServiceThread mockThread = spy(ServiceThread.class);
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
-        assertTrue(mDataAggregator.initialize());
 
         // Network logging may log multiple and callbacks, so create a latch to wait for
         // the given event.
@@ -563,6 +525,85 @@ public class IntrusionDetectionServiceTest {
                 urlConnection.disconnect();
             }
         }
+    }
+
+    @Test
+    @RequireRunOnSystemUser
+    @EnsureHasPermission(
+            android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE)
+    public void test_StartIntrusionDetectionEventTransportService() {
+        final String TAG = "test_StartIntrusionDetectionEventTransportService";
+        ServiceConnection serviceConnection = null;
+
+        assertEquals(false, mBoundToLoggingService);
+        try {
+            serviceConnection = startTestService();
+            assertEquals(true, mBoundToLoggingService);
+            assertNotNull(serviceConnection);
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException while starting: ", e);
+            fail("Exception thrown while connecting to service");
+        } catch (InterruptedException e) {
+            Log.e(TAG, "InterruptedException while starting: ", e);
+            fail("Interrupted while connecting to service");
+        } finally {
+            mContext.unbindService(serviceConnection);
+        }
+    }
+
+    private ServiceConnection startTestService() throws SecurityException, InterruptedException {
+        final String TAG = "startTestService";
+        final CountDownLatch latch = new CountDownLatch(1);
+        LocalIntrusionDetectionEventTransport transport =
+                new LocalIntrusionDetectionEventTransport();
+
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            // Called when connection with the service is established.
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                mService = transport.getBinder();
+                mBoundToLoggingService = true;
+                latch.countDown();
+            }
+
+            // Called when the connection with the service disconnects unexpectedly.
+            @Override
+            public void onServiceDisconnected(ComponentName className) {
+                Log.d(TAG, "onServiceDisconnected");
+                mBoundToLoggingService = false;
+            }
+        };
+
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(TEST_PKG, TEST_SERVICE));
+        mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        latch.await(5, TimeUnit.SECONDS);
+
+        // call the methods on the transport object
+        IntrusionDetectionEvent event =
+                new IntrusionDetectionEvent(new SecurityEvent(123, new byte[15]));
+        List<IntrusionDetectionEvent> events = new ArrayList<>();
+        events.add(event);
+        assertTrue(transport.initialize());
+        assertTrue(transport.addData(events));
+        assertTrue(transport.release());
+        assertEquals(1, transport.getEvents().size());
+
+        return serviceConnection;
+    }
+
+    @Test
+    @RequireRunOnSystemUser
+    @EnsureHasPermission(
+            android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE)
+    public void testIntrusionDetectionEventTransportConnection_isValidAndBinds()
+            throws InterruptedException {
+        IntrusionDetectionEventTransportConnection intrusionDetectionEventTransportConnection =
+                new IntrusionDetectionEventTransportConnection(mContext);
+        // In a real scenario, the connection will be initialized by the service.
+        // Just to show that the connection is valid and able to bind,
+        // we initialize it here.
+        assertTrue(intrusionDetectionEventTransportConnection.initialize());
     }
 
     private class MockInjector implements IntrusionDetectionService.Injector {

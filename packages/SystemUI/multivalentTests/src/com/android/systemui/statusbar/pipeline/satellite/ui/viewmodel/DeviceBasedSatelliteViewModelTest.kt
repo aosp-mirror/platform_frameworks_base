@@ -327,10 +327,11 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // GIVEN satellite is allowed
             repo.isSatelliteAllowedForCurrentLocation.value = true
 
-            // GIVEN all icons are OOS
+            // GIVEN all icons are OOS and not ntn
             val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
             i1.isInService.value = false
             i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
 
             // GIVEN apm is disabled
             airplaneModeRepository.setIsAirplaneMode(false)
@@ -341,6 +342,29 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             // THEN icon is non null because the connection state is On, despite the normal OOS icon
             // waiting 10 seconds for hysteresis
             assertThat(latest).isInstanceOf(Icon::class.java)
+        }
+
+    @Test
+    fun icon_nullWhenConnected_mobileNtnConnectionExists() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.icon)
+
+            // GIVEN satellite is allowed
+            repo.isSatelliteAllowedForCurrentLocation.value = true
+
+            // GIVEN ntn connection exists
+            val i1 = mobileIconsInteractor.getMobileConnectionInteractorForSubId(1)
+            i1.isNonTerrestrial.value = true
+
+            // GIVEN apm is disabled
+            airplaneModeRepository.setIsAirplaneMode(false)
+
+            // GIVEN satellite reports that it is Connected
+            repo.connectionState.value = SatelliteConnectionState.On
+
+            // THEN icon is null because despite being connected, the mobile stack is reporting a
+            // nonTerrestrial network, and therefore will have its own icon
+            assertThat(latest).isNull()
         }
 
     @Test

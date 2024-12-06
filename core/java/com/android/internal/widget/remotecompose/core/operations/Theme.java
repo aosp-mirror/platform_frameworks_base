@@ -64,6 +64,7 @@ public class Theme extends Operation implements RemoteComposeOperation {
     @Override
     public void apply(@NonNull RemoteContext context) {
         context.setTheme(mTheme);
+        markDirty();
     }
 
     @NonNull
@@ -72,6 +73,11 @@ public class Theme extends Operation implements RemoteComposeOperation {
         return indent + toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

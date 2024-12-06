@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.composable
 
-import android.view.Display
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +41,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ui.DarkIconManager
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
@@ -151,12 +151,11 @@ fun StatusBarRoot(
                         )
                     iconController.addIconGroup(darkIconManager)
 
-                    // TODO(b/372657935): This won't be needed once OngoingCallController is
-                    // implemented in recommended architecture
-                    ongoingCallController.setChipView(
-                        phoneStatusBarView.requireViewById(R.id.ongoing_activity_chip_primary)
-                    )
-
+                    if (!StatusBarChipsModernization.isEnabled) {
+                        ongoingCallController.setChipView(
+                            phoneStatusBarView.requireViewById(R.id.ongoing_activity_chip_primary)
+                        )
+                    }
                     // For notifications, first inflate the [NotificationIconContainer]
                     val notificationIconArea =
                         phoneStatusBarView.requireViewById<ViewGroup>(R.id.notification_icon_area)
@@ -167,22 +166,17 @@ fun StatusBarRoot(
                             R.id.notificationIcons
                         )
 
-                    // TODO(b/369337701): implement notification icons for all displays.
-                    //  Currently if we try to bind for all displays, there is a crash, because the
-                    //  same notification icon view can't have multiple parents.
-                    val displayId = context.displayId
-                    if (displayId == Display.DEFAULT_DISPLAY) {
-                        scope.launch {
-                            notificationIconsBinder.bindWhileAttached(
-                                notificationIconContainer,
-                                displayId,
-                            )
-                        }
+                    scope.launch {
+                        notificationIconsBinder.bindWhileAttached(
+                            notificationIconContainer,
+                            context.displayId,
+                        )
                     }
 
                     // This binder handles everything else
                     scope.launch {
                         statusBarViewBinder.bind(
+                            context.displayId,
                             phoneStatusBarView,
                             statusBarViewModel,
                             eventAnimationInteractor::animateStatusBarContentForChipEnter,

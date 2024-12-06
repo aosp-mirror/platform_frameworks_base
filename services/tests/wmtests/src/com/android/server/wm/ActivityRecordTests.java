@@ -2670,7 +2670,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_GAME, true);
 
         // Blanket application, also ignoring Target SDK
-        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        mWm.mConstants.mIgnoreActivityOrientationRequestLargeScreen = true;
         assertSetOrientation(Build.VERSION_CODES.VANILLA_ICE_CREAM, CATEGORY_SOCIAL, false);
     }
 

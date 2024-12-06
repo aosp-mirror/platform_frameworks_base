@@ -250,7 +250,7 @@ public class AndroidPaintContext extends PaintContext {
     @Override
     public void getTextBounds(int textId, int start, int end, int flags, @NonNull float[] bounds) {
         String str = getText(textId);
-        if (end == -1) {
+        if (end == -1 || end > str.length()) {
             end = str.length();
         }
 
@@ -505,6 +505,9 @@ public class AndroidPaintContext extends PaintContext {
                             return;
                         }
                         ShaderData data = getShaderData(shaderId);
+                        if (data == null) {
+                            return;
+                        }
                         RuntimeShader shader = new RuntimeShader(getText(data.getShaderTextId()));
                         String[] names = data.getUniformFloatNames();
                         for (int i = 0; i < names.length; i++) {
@@ -757,11 +760,17 @@ public class AndroidPaintContext extends PaintContext {
 
     private Path getPath(int id, float start, float end) {
         AndroidRemoteContext androidContext = (AndroidRemoteContext) mContext;
+        Path p = (Path) androidContext.mRemoteComposeState.getPath(id);
+        if (p != null) {
+            return p;
+        }
         Path path = new Path();
         float[] pathData = androidContext.mRemoteComposeState.getPathData(id);
         if (pathData != null) {
             FloatsToPath.genPath(path, pathData, start, end);
+            androidContext.mRemoteComposeState.putPath(id, path);
         }
+
         return path;
     }
 

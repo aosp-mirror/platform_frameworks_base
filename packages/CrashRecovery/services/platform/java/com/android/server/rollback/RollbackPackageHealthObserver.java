@@ -110,7 +110,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         mTwoPhaseRollbackEnabledFile = new File(dataDir, "two-phase-rollback-enabled");
-        PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
+        PackageWatchdog.getInstance(mContext).registerHealthObserver(this, null);
         mApexManager = apexManager;
 
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
@@ -284,7 +284,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     @AnyThread
     @NonNull
     public void startObservingHealth(@NonNull List<String> packages, @NonNull long durationMs) {
-        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
+        PackageWatchdog.getInstance(mContext).startExplicitHealthCheck(this, packages, durationMs);
     }
 
     @AnyThread

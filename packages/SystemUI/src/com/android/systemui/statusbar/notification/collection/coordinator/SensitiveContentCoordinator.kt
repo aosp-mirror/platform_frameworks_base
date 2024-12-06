@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
 import android.os.UserHandle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.server.notification.Flags.screenshareNotificationHiding
 import com.android.systemui.dagger.qualifiers.Application
@@ -44,9 +47,9 @@ import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @Module(includes = [PrivateSensitiveContentCoordinatorModule::class])
 interface SensitiveContentCoordinatorModule
@@ -80,6 +83,7 @@ constructor(
     DynamicPrivacyController.Listener,
     OnBeforeRenderListListener {
     private var inTransitionFromLockedToGone = false
+    private var canSwipeToEnter = false
 
     private val onSensitiveStateChanged = Runnable() { invalidateList("onSensitiveStateChanged") }
 
@@ -98,7 +102,9 @@ constructor(
         }
 
     override fun attach(pipeline: NotifPipeline) {
-        dynamicPrivacyController.addListener(this)
+        if (!SceneContainerFlag.isEnabled) {
+            dynamicPrivacyController.addListener(this)
+        }
         if (screenshareNotificationHiding()) {
             sensitiveNotificationProtectionController.registerSensitiveStateListener(
                 onSensitiveStateChanged
@@ -127,6 +133,15 @@ constructor(
                         inTransitionFromLockedToGone = it
                         invalidateList("inTransitionFromLockedToGoneChanged")
                     }
+            }
+            scope.launch {
+                deviceEntryInteractor.canSwipeToEnter.collect {
+                    val canSwipeToEnter = it ?: false
+                    if (this@SensitiveContentCoordinatorImpl.canSwipeToEnter != canSwipeToEnter) {
+                        this@SensitiveContentCoordinatorImpl.canSwipeToEnter = canSwipeToEnter
+                        invalidateList("canSwipeToEnterChanged")
+                    }
+                }
             }
         }
     }
@@ -168,7 +183,9 @@ constructor(
             (devicePublic &&
                 !lockscreenUserManager.userAllowsPrivateNotificationsInPublic(currentUserId)) ||
                 isSensitiveContentProtectionActive
-        val dynamicallyUnlocked = dynamicPrivacyController.isDynamicallyUnlocked
+        val dynamicallyUnlocked =
+            if (SceneContainerFlag.isEnabled) canSwipeToEnter
+            else dynamicPrivacyController.isDynamicallyUnlocked
         for (entry in extractAllRepresentativeEntries(entries).filter { it.rowExists() }) {
             val notifUserId = entry.sbn.user.identifier
             val userLockscreen =

@@ -449,6 +449,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private AtomicBoolean mIsSatelliteEnabled;
     private AtomicBoolean mWasSatelliteEnabledNotified;
 
+    private final int mPid = Process.myPid();
+
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
      * type and APN setting. This is the cache to prevent redundant callbacks to the listeners.
@@ -1441,7 +1443,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 if (events.contains(TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)) {
                     try {
-                        r.callback.onCallStatesChanged(mCallStateLists.get(r.phoneId));
+                        if (Flags.passCopiedCallStateList()) {
+                            List<CallState> callList;
+                            if (r.callerPid == mPid) {
+                                callList = List.copyOf(mCallStateLists.get(r.phoneId));
+                            } else {
+                                callList = mCallStateLists.get(r.phoneId);
+                            }
+                            r.callback.onCallStatesChanged(callList);
+                        } else {
+                            r.callback.onCallStatesChanged(mCallStateLists.get(r.phoneId));
+                        }
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2166,7 +2178,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             overrideNetworkType = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE;
         }
         boolean isRoaming = telephonyDisplayInfo.isRoaming();
-        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming);
+        boolean isNtn = telephonyDisplayInfo.isNtn();
+        boolean isSatelliteConstrainedData =
+                telephonyDisplayInfo.isSatelliteConstrainedData();
+        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming,
+                isNtn, isSatelliteConstrainedData);
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {
@@ -2569,12 +2585,25 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
 
                 if (notifyCallState) {
+                    List<CallState> copyList = null;
                     for (Record r : mRecords) {
                         if (r.matchTelephonyCallbackEvent(
                                 TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)
                                 && idMatch(r, subId, phoneId)) {
+                            // If listener is in the same process, original instance can be passed
+                            // to the listener via AIDL without serialization/de-serialization. We
+                            // will pass the copied list. Since the element is newly created instead
+                            // of modification for the change, we can use shallow copy for this.
                             try {
-                                r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                                if (Flags.passCopiedCallStateList()) {
+                                    if (r.callerPid == mPid && copyList == null) {
+                                        copyList = List.copyOf(mCallStateLists.get(phoneId));
+                                    }
+                                    r.callback.onCallStatesChanged(copyList == null
+                                            ? mCallStateLists.get(phoneId) : copyList);
+                                } else {
+                                    r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                                }
                             } catch (RemoteException ex) {
                                 mRemoveList.add(r.binder);
                             }
@@ -2902,13 +2931,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     log("There is no active call to report CallQuality");
                     return;
                 }
-
+                List<CallState> copyList = null;
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)
                             && idMatch(r, subId, phoneId)) {
                         try {
-                            r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                            if (Flags.passCopiedCallStateList()) {
+                                if (r.callerPid == mPid && copyList == null) {
+                                    copyList = List.copyOf(mCallStateLists.get(phoneId));
+                                }
+                                r.callback.onCallStatesChanged(copyList == null
+                                        ? mCallStateLists.get(phoneId) : copyList);
+                            } else {
+                                r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                            }
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }

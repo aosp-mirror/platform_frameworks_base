@@ -43,7 +43,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
-import com.android.systemui.Flags.FLAG_COMMUNAL_HUB_ON_MOBILE
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
@@ -55,13 +55,16 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
 import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
 import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
 import com.android.systemui.dreams.touch.CommunalTouchHandler
 import com.android.systemui.flags.andSceneContainer
@@ -119,8 +122,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val mComplicationComponentFactory = mock<ComplicationComponent.Factory>()
     private val mComplicationHostViewController = mock<ComplicationHostViewController>()
     private val mComplicationVisibilityController = mock<ComplicationLayoutEngine>()
-    private val mDreamComplicationComponentFactory =
-        mock<com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory>()
+    private val mDreamComplicationComponentFactory = mock<DreamComplicationComponent.Factory>()
     private val mHideComplicationTouchHandler = mock<HideComplicationTouchHandler>()
     private val mDreamOverlayComponentFactory = mock<DreamOverlayComponent.Factory>()
     private val mCommunalTouchHandler = mock<CommunalTouchHandler>()
@@ -160,8 +162,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private lateinit var mService: DreamOverlayService
 
     private class EnvironmentComponents(
-        val dreamsComplicationComponent:
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent,
+        val dreamsComplicationComponent: DreamComplicationComponent,
         val dreamOverlayComponent: DreamOverlayComponent,
         val complicationComponent: ComplicationComponent,
         val ambientTouchComponent: AmbientTouchComponent,
@@ -186,8 +187,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
     }
 
     private fun setupComponentFactories(
-        dreamComplicationComponentFactory:
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory,
+        dreamComplicationComponentFactory: DreamComplicationComponent.Factory,
         dreamOverlayComponentFactory: DreamOverlayComponent.Factory,
         complicationComponentFactory: ComplicationComponent.Factory,
         ambientTouchComponentFactory: AmbientTouchComponent.Factory,
@@ -208,8 +208,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         whenever(complicationComponent.getVisibilityController())
             .thenReturn(mComplicationVisibilityController)
 
-        val dreamComplicationComponent =
-            mock<com.android.systemui.dreams.complication.dagger.ComplicationComponent>()
+        val dreamComplicationComponent = mock<DreamComplicationComponent>()
         whenever(dreamComplicationComponent.getHideComplicationTouchHandler())
             .thenReturn(mHideComplicationTouchHandler)
         whenever(dreamOverlayComponent.communalTouchHandler).thenReturn(mCommunalTouchHandler)
@@ -265,6 +264,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
                 mKeyguardUpdateMonitor,
                 mScrimManager,
                 mCommunalInteractor,
+                kosmos.communalSettingsInteractor,
                 kosmos.sceneInteractor,
                 mSystemDialogsCloser,
                 mUiEventLogger,
@@ -1286,7 +1286,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
         environmentComponents.verifyNoMoreInteractions()
     }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun testAmbientTouchHandlersRegistration_registerHideComplicationAndCommunal() {
         val client = client
@@ -1306,9 +1306,11 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
             .containsExactly(mHideComplicationTouchHandler, mCommunalTouchHandler)
     }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun testAmbientTouchHandlersRegistration_v2_registerOnlyHideComplication() {
+        kosmos.setCommunalV2ConfigEnabled(true)
+
         val client = client
 
         // Inform the overlay service of dream starting.

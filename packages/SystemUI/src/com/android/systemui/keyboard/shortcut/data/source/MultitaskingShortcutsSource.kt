@@ -26,11 +26,9 @@ import android.view.KeyEvent.KEYCODE_EQUALS
 import android.view.KeyEvent.KEYCODE_LEFT_BRACKET
 import android.view.KeyEvent.KEYCODE_MINUS
 import android.view.KeyEvent.KEYCODE_RIGHT_BRACKET
-import android.view.KeyEvent.KEYCODE_TAB
 import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
-import android.view.KeyEvent.META_SHIFT_ON
 import android.view.KeyboardShortcutGroup
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -49,13 +47,9 @@ constructor(@Main private val resources: Resources, @Application private val con
     override suspend fun shortcutGroups(deviceId: Int) =
         listOf(
             KeyboardShortcutGroup(
-                resources.getString(R.string.shortcutHelper_category_recent_apps),
-                recentsShortcuts(),
-            ),
-            KeyboardShortcutGroup(
                 resources.getString(R.string.shortcutHelper_category_split_screen),
                 splitScreenShortcuts(),
-            ),
+            )
         )
 
     private fun splitScreenShortcuts() = buildList {
@@ -140,18 +134,4 @@ constructor(@Main private val resources: Resources, @Application private val con
             )
         }
     }
-
-    private fun recentsShortcuts() =
-        listOf(
-            // Cycle through recent apps (forward):
-            //  - Alt + Tab
-            shortcutInfo(resources.getString(R.string.group_system_cycle_forward)) {
-                command(META_ALT_ON, KEYCODE_TAB)
-            },
-            // Cycle through recent apps (back):
-            //  - Shift + Alt + Tab
-            shortcutInfo(resources.getString(R.string.group_system_cycle_back)) {
-                command(META_SHIFT_ON or META_ALT_ON, KEYCODE_TAB)
-            },
-        )
 }

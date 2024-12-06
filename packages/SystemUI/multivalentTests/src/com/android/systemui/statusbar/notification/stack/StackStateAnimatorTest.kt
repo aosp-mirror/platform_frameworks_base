@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack
 
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -24,7 +23,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.row.ExpandableView
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_HEADS_UP_APPEAR
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_HEADS_UP_DISAPPEAR
@@ -60,11 +58,12 @@ class StackStateAnimatorTest : SysuiTestCase() {
     private val viewState: ExpandableViewState =
         ExpandableViewState().apply { height = VIEW_HEIGHT }
     private val runnableCaptor: ArgumentCaptor<Runnable> = argumentCaptor()
+
     @Before
     fun setUp() {
         overrideResource(
             R.dimen.go_to_full_shade_appearing_translation,
-            FULL_SHADE_APPEAR_TRANSLATION
+            FULL_SHADE_APPEAR_TRANSLATION,
         )
         overrideResource(R.dimen.heads_up_appear_y_above_screen, HEADS_UP_ABOVE_SCREEN)
 
@@ -74,7 +73,6 @@ class StackStateAnimatorTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun startAnimationForEvents_headsUpFromTop_startsHeadsUpAppearAnim() {
         val topMargin = 50f
         val expectedStartY = -topMargin - stackStateAnimator.mHeadsUpAppearStartAboveScreen
@@ -90,12 +88,11 @@ class StackStateAnimatorTest : SysuiTestCase() {
                 /* delay= */ 0L,
                 /* duration= */ ANIMATION_DURATION_HEADS_UP_APPEAR.toLong(),
                 /* isHeadsUpAppear= */ true,
-                /* onEndRunnable= */ null
+                /* onEndRunnable= */ null,
             )
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun startAnimationForEvents_headsUpFromBottom_startsHeadsUpAppearAnim() {
         val screenHeight = 2000f
         val expectedStartY = screenHeight + stackStateAnimator.mHeadsUpAppearStartAboveScreen
@@ -114,12 +111,11 @@ class StackStateAnimatorTest : SysuiTestCase() {
                 /* delay= */ 0L,
                 /* duration= */ ANIMATION_DURATION_HEADS_UP_APPEAR.toLong(),
                 /* isHeadsUpAppear= */ true,
-                /* onEndRunnable= */ null
+                /* onEndRunnable= */ null,
             )
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun startAnimationForEvents_startsHeadsUpDisappearAnim() {
         val disappearDuration = ANIMATION_DURATION_HEADS_UP_DISAPPEAR.toLong()
         val event = AnimationEvent(view, AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR)

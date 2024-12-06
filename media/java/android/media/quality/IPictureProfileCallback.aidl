@@ -29,5 +29,5 @@ oneway interface IPictureProfileCallback {
     void onPictureProfileUpdated(in String id, in PictureProfile p);
     void onPictureProfileRemoved(in String id, in PictureProfile p);
     void onParamCapabilitiesChanged(in String id, in List<ParamCapability> caps);
-    void onError(in int err);
+    void onError(in String id, in int err);
 }

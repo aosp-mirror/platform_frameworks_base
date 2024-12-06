@@ -89,6 +89,7 @@
 
 #if defined(__BIONIC__)
 extern "C" void android_reset_stack_guards();
+extern "C" void android_set_16kb_appcompat_mode(bool enable_app_compat);
 #endif
 
 namespace {
@@ -350,6 +351,7 @@ enum RuntimeFlags : uint32_t {
     NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
     DEBUG_ENABLE_PTRACE = 1 << 25,
+    ENABLE_PAGE_SIZE_APP_COMPAT = 1 << 26,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -2117,6 +2119,12 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities,
                     fail_fn);
 
+    if ((runtime_flags & RuntimeFlags::ENABLE_PAGE_SIZE_APP_COMPAT) != 0) {
+        android_set_16kb_appcompat_mode(true);
+        // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
+        // runtime.
+        runtime_flags &= ~RuntimeFlags::ENABLE_PAGE_SIZE_APP_COMPAT;
+    }
     __android_log_close();
     AStatsSocket_close();
 

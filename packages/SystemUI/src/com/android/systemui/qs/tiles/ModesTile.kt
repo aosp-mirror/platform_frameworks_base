@@ -109,6 +109,11 @@ constructor(
         userActionInteractor.handleClick(expandable)
     }
 
+    override fun handleSecondaryClick(expandable: Expandable?) = runBlocking {
+        val model = dataInteractor.getCurrentTileModel()
+        userActionInteractor.handleToggleClick(model)
+    }
+
     override fun getLongClickIntent(): Intent = userActionInteractor.longClickIntent
 
     @VisibleForTesting
@@ -120,11 +125,12 @@ constructor(
         tileState = tileMapper.map(config, model)
         state?.apply {
             this.state = tileState.activationState.legacyState
-            icon = tileState.icon?.asQSTileIcon() ?: ResourceIcon.get(ICON_RES_ID)
+            icon = tileState.icon?.asQSTileIcon() ?: maybeLoadResourceIcon(ICON_RES_ID)
             label = tileLabel
             secondaryLabel = tileState.secondaryLabel
             contentDescription = tileState.contentDescription
             expandedAccessibilityClassName = tileState.expandedAccessibilityClassName
+            handlesSecondaryClick = true
         }
     }
 

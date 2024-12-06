@@ -32,3 +32,6 @@ val Kosmos.shadeDisplaysRepository: MutableShadeDisplaysRepository by
             bgScope = testScope.backgroundScope,
         )
     }
+
+val Kosmos.fakeShadeDisplaysRepository: FakeShadeDisplayRepository by
+    Kosmos.Fixture { FakeShadeDisplayRepository() }

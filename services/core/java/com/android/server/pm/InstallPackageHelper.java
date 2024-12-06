@@ -229,7 +229,6 @@ final class InstallPackageHelper {
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageManagerServiceInjector mInjector;
     private final UpdateOwnershipHelper mUpdateOwnershipHelper;
-    private final InstallDependencyHelper mInstallDependencyHelper;
 
     private final Object mInternalLock = new Object();
     @GuardedBy("mInternalLock")
@@ -240,8 +239,7 @@ final class InstallPackageHelper {
                          AppDataHelper appDataHelper,
                          RemovePackageHelper removePackageHelper,
                          DeletePackageHelper deletePackageHelper,
-                         BroadcastHelper broadcastHelper,
-                         InstallDependencyHelper installDependencyHelper) {
+                         BroadcastHelper broadcastHelper) {
         mPm = pm;
         mInjector = pm.mInjector;
         mAppDataHelper = appDataHelper;
@@ -255,7 +253,6 @@ final class InstallPackageHelper {
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
         mUpdateOwnershipHelper = pm.mInjector.getUpdateOwnershipHelper();
-        mInstallDependencyHelper = installDependencyHelper;
     }
 
     /**
@@ -1208,71 +1205,68 @@ final class InstallPackageHelper {
 
     private boolean scanInstallPackages(List<InstallRequest> requests,
             Map<String, Boolean> createdAppId, Map<String, Settings.VersionInfo> versionInfos) {
-        // TODO(b/362840929): remove locker
-        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
-            final Set<String> scannedPackages = new ArraySet<>(requests.size());
-            for (InstallRequest request : requests) {
-                final ParsedPackage packageToScan = request.getParsedPackage();
-                if (packageToScan == null) {
-                    request.setError(INSTALL_FAILED_SESSION_INVALID,
-                            "Failed to obtain package to scan");
+        final Set<String> scannedPackages = new ArraySet<>(requests.size());
+        for (InstallRequest request : requests) {
+            final ParsedPackage packageToScan = request.getParsedPackage();
+            if (packageToScan == null) {
+                request.setError(INSTALL_FAILED_SESSION_INVALID,
+                        "Failed to obtain package to scan");
+                return false;
+            }
+            request.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
+            final String packageName = packageToScan.getPackageName();
+            try {
+                request.onScanStarted();
+                final ScanResult scanResult = scanPackageTraced(request.getParsedPackage(),
+                        request.getParseFlags(), request.getScanFlags(),
+                        System.currentTimeMillis(), request.getUser(),
+                        request.getAbiOverride());
+                request.setScanResult(scanResult);
+                request.onScanFinished();
+                if (!scannedPackages.add(packageName)) {
+                    request.setError(
+                            PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE,
+                            "Duplicate package "
+                                    + packageName
+                                    + " in multi-package install request.");
                     return false;
                 }
-                request.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
-                final String packageName = packageToScan.getPackageName();
-                try {
-                    request.onScanStarted();
-                    final ScanResult scanResult = scanPackageTracedLI(request.getParsedPackage(),
-                            request.getParseFlags(), request.getScanFlags(),
-                            System.currentTimeMillis(), request.getUser(),
-                            request.getAbiOverride());
-                    request.setScanResult(scanResult);
-                    request.onScanFinished();
-                    if (!scannedPackages.add(packageName)) {
-                        request.setError(
-                                PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE,
-                                "Duplicate package "
-                                        + packageName
-                                        + " in multi-package install request.");
-                        return false;
-                    }
-                    if (!checkNoAppStorageIsConsistent(
-                            request.getScanRequestOldPackage(), packageToScan)) {
-                        // TODO: INSTALL_FAILED_UPDATE_INCOMPATIBLE is about incomptabible
-                        //  signatures. Is there a better error code?
-                        request.setError(
-                                INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                "Update attempted to change value of "
-                                        + PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
-                        return false;
-                    }
-                    final boolean isApex = (request.getScanFlags() & SCAN_AS_APEX) != 0;
-                    final boolean isSdkLibrary = packageToScan.isSdkLibrary();
-                    if (isApex || (isSdkLibrary && disallowSdkLibsToBeApps())) {
-                        request.getScannedPackageSetting().setAppId(Process.INVALID_UID);
-                    } else {
-                        createdAppId.put(packageName, optimisticallyRegisterAppId(request));
-                    }
-                    versionInfos.put(packageName,
-                            mPm.getSettingsVersionForPackage(packageToScan));
-                } catch (PackageManagerException e) {
-                    request.setError("Scanning Failed.", e);
+                if (!checkNoAppStorageIsConsistent(
+                        request.getScanRequestOldPackage(), packageToScan)) {
+                    // TODO: INSTALL_FAILED_UPDATE_INCOMPATIBLE is about incomptabible
+                    //  signatures. Is there a better error code?
+                    request.setError(
+                            INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                            "Update attempted to change value of "
+                                    + PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
                     return false;
                 }
-                if (request.isArchived()) {
-                    final SparseArray<String> responsibleInstallerTitles =
-                            PackageArchiver.getResponsibleInstallerTitles(mContext,
-                                    mPm.snapshotComputer(), request.getInstallSource(),
-                                    request.getUserId(), mPm.mUserManager.getUserIds());
-                    if (responsibleInstallerTitles == null
-                            || responsibleInstallerTitles.size() == 0) {
-                        request.setError(PackageManagerException.ofInternalError(
-                                "Failed to obtain the responsible installer info",
-                                INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE));
-                        return false;
-                    }
-                    request.setResponsibleInstallerTitles(responsibleInstallerTitles);
+                final boolean isApex = (request.getScanFlags() & SCAN_AS_APEX) != 0;
+                final boolean isSdkLibrary = packageToScan.isSdkLibrary();
+                if (isApex || (isSdkLibrary && disallowSdkLibsToBeApps())) {
+                    request.getScannedPackageSetting().setAppId(Process.INVALID_UID);
+                } else {
+                    createdAppId.put(packageName, optimisticallyRegisterAppId(request));
                 }
+                versionInfos.put(packageName,
+                        mPm.getSettingsVersionForPackage(packageToScan));
+            } catch (PackageManagerException e) {
+                request.setError("Scanning Failed.", e);
+                return false;
+            }
+            if (request.isArchived()) {
+                final SparseArray<String> responsibleInstallerTitles =
+                        PackageArchiver.getResponsibleInstallerTitles(mContext,
+                                mPm.snapshotComputer(), request.getInstallSource(),
+                                request.getUserId(), mPm.mUserManager.getUserIds());
+                if (responsibleInstallerTitles == null
+                        || responsibleInstallerTitles.size() == 0) {
+                    request.setError(PackageManagerException.ofInternalError(
+                            "Failed to obtain the responsible installer info",
+                            INTERNAL_ERROR_ARCHIVE_NO_INSTALLER_TITLE));
+                    return false;
+                }
+                request.setResponsibleInstallerTitles(responsibleInstallerTitles);
             }
         }
         return true;
@@ -1367,13 +1361,8 @@ final class InstallPackageHelper {
                 }
             }
         }
-
-        for (InstallRequest request : requests) {
-            mInstallDependencyHelper.notifySessionComplete(request.getSessionId(), success);
-        }
     }
 
-    @GuardedBy("mPm.mInstallLock")
     private boolean checkNoAppStorageIsConsistent(AndroidPackage oldPkg, AndroidPackage newPkg) {
         if (oldPkg == null) {
             // New install, nothing to check against.
@@ -3095,7 +3084,7 @@ final class InstallPackageHelper {
                 mPm.mProcessLoggingHandler.invalidateBaseApkHash(request.getPkg().getBaseApkPath());
             }
 
-            mBroadcastHelper.sendPostInstallBroadcasts(mPm.snapshotComputer(), request, packageName,
+            mBroadcastHelper.sendPostInstallBroadcasts(mPm::snapshotComputer, request, packageName,
                     mPm.mRequiredPermissionControllerPackage, mPm.mRequiredVerifierPackages,
                     mPm.mRequiredInstallerPackage,
                     /* packageSender= */ mPm, launchedForRestore, killApp, update, archived);
@@ -4126,14 +4115,13 @@ final class InstallPackageHelper {
         }
     }
 
-    @GuardedBy("mPm.mInstallLock")
-    private ScanResult scanPackageTracedLI(ParsedPackage parsedPackage,
+    private ScanResult scanPackageTraced(ParsedPackage parsedPackage,
             final @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user, String cpuAbiOverride) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
         try {
-            return scanPackageNewLI(parsedPackage, parseFlags, scanFlags, currentTime, user,
+            return scanPackageNew(parsedPackage, parseFlags, scanFlags, currentTime, user,
                     cpuAbiOverride);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -4210,8 +4198,7 @@ final class InstallPackageHelper {
                 realPkgName, parseFlags, scanFlags, isPlatformPackage, user, cpuAbiOverride);
     }
 
-    @GuardedBy("mPm.mInstallLock")
-    private ScanResult scanPackageNewLI(@NonNull ParsedPackage parsedPackage,
+    private ScanResult scanPackageNew(@NonNull ParsedPackage parsedPackage,
             final @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user, String cpuAbiOverride)
@@ -4242,7 +4229,7 @@ final class InstallPackageHelper {
                     initialScanRequest.mOriginalPkgSetting, initialScanRequest.mRealPkgName,
                     parseFlags, scanFlags, initialScanRequest.mIsPlatformPackage, user,
                     cpuAbiOverride);
-            return ScanPackageUtils.scanPackageOnlyLI(request, mPm.mInjector, mPm.mFactoryTest,
+            return ScanPackageUtils.scanPackageOnly(request, mPm.mInjector, mPm.mFactoryTest,
                     currentTime);
         }
     }
@@ -4296,7 +4283,7 @@ final class InstallPackageHelper {
                 ScanPackageUtils.applyPolicy(parsedPackage, scanFlags,
                         mPm.getPlatformPackage(), true);
                 final ScanResult scanResult =
-                        ScanPackageUtils.scanPackageOnlyLI(request, mPm.mInjector,
+                        ScanPackageUtils.scanPackageOnly(request, mPm.mInjector,
                                 mPm.mFactoryTest, -1L);
                 if (scanResult.mExistingSettingCopied
                         && scanResult.mRequest.mPkgSetting != null) {
@@ -4488,7 +4475,7 @@ final class InstallPackageHelper {
 
         final long firstInstallTime = Flags.fixSystemAppsFirstInstallTime()
                 ? System.currentTimeMillis() : 0;
-        final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags,
+        final ScanResult scanResult = scanPackageNew(parsedPackage, parseFlags,
                 scanFlags | SCAN_UPDATE_SIGNATURE, firstInstallTime, user, null);
         return new Pair<>(scanResult, shouldHideSystemApp);
     }

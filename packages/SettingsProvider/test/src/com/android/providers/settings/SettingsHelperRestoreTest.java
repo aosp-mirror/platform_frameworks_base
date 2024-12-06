@@ -26,8 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.SettingsStringUtil;
 
@@ -37,7 +35,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -51,9 +48,6 @@ import java.util.concurrent.ExecutionException;
  */
 @RunWith(AndroidJUnit4.class)
 public class SettingsHelperRestoreTest {
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final float FLOAT_TOLERANCE = 0.01f;
 
@@ -211,7 +205,6 @@ public class SettingsHelperRestoreTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void restoreAccessibilityShortcutTargetService_broadcastSent()
             throws ExecutionException, InterruptedException {
         BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(

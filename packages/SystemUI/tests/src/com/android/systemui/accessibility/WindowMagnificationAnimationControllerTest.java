@@ -930,6 +930,10 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     }
 
     private void advanceTimeBy(long timeDelta) {
+        if (timeDelta == mWaitAnimationDuration) {
+            mAnimatorTestRule.advanceAnimationDuration(timeDelta);
+            return;
+        }
         mAnimatorTestRule.advanceTimeBy(timeDelta);
     }
 

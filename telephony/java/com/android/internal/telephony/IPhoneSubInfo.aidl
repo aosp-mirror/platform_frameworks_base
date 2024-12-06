@@ -83,6 +83,12 @@ interface IPhoneSubInfo {
     String getGroupIdLevel1ForSubscriber(int subId, String callingPackage,
             String callingFeatureId);
 
+    /**
+     * Retrieves the Group Identifier Level1 for GSM phones of a subId.
+     */
+    String getGroupIdLevel2ForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
+
     /** @deprecared Use {@link getIccSerialNumberWithFeature(String, String)} instead */
     @UnsupportedAppUsage
     String getIccSerialNumber(String callingPackage);

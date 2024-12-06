@@ -59,6 +59,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
+import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
@@ -277,7 +278,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForTopTranslucentActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
-            isTopActivityTransparent = true
+            isActivityStackTransparent = true
             isTopActivityNoDisplay = false
             numActivities = 1
         }
@@ -398,11 +399,12 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         maxOrRestoreListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController).toggleDesktopTaskSize(
-            eq(decor.mTaskInfo),
-            eq(ResizeTrigger.MAXIMIZE_MENU),
-            eq(InputMethod.UNKNOWN_INPUT_METHOD),
-            any(),
-            any()
+            decor.mTaskInfo,
+            ToggleTaskSizeInteraction(
+                ToggleTaskSizeInteraction.Direction.MAXIMIZE,
+                ToggleTaskSizeInteraction.Source.MAXIMIZE_MENU_TO_MAXIMIZE,
+                InputMethod.UNKNOWN_INPUT_METHOD
+            )
         )
     }
 
@@ -778,6 +780,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             times(1)
         ).setAppHandleEducationTooltipCallbacks(openHandleMenuCallbackCaptor.capture(), any())
         openHandleMenuCallbackCaptor.lastValue.invoke(task.taskId)
+        bgExecutor.flushAll()
+        testShellExecutor.flushAll()
 
         verify(decor, times(1)).createHandleMenu(anyBoolean())
     }
@@ -1061,11 +1065,12 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
         verify(mockDesktopTasksController)
             .toggleDesktopTaskSize(
-                eq(decor.mTaskInfo),
-                eq(ResizeTrigger.MAXIMIZE_BUTTON),
-                    eq(InputMethod.UNKNOWN_INPUT_METHOD),
-                any(),
-                any(),
+                decor.mTaskInfo,
+                ToggleTaskSizeInteraction(
+                    ToggleTaskSizeInteraction.Direction.MAXIMIZE,
+                    ToggleTaskSizeInteraction.Source.HEADER_BUTTON_TO_MAXIMIZE,
+                    InputMethod.UNKNOWN_INPUT_METHOD
+                )
             )
     }
 

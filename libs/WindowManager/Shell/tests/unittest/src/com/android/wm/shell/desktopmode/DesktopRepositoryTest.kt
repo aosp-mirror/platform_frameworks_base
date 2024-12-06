@@ -30,7 +30,6 @@ import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
@@ -70,7 +69,6 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Mock private lateinit var testExecutor: ShellExecutor
     @Mock private lateinit var persistentRepository: DesktopPersistentRepository
-    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
     @Before
     fun setUp() {
@@ -80,11 +78,9 @@ class DesktopRepositoryTest : ShellTestCase() {
 
         repo =
             DesktopRepository(
-                context,
-                shellInit,
                 persistentRepository,
-                repositoryInitializer,
-                datastoreScope
+                datastoreScope,
+                DEFAULT_USER_ID
             )
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
             Desktop.getDefaultInstance()
@@ -150,6 +146,14 @@ class DesktopRepositoryTest : ShellTestCase() {
 
         assertThat(listener.activeChangesOnDefaultDisplay).isEqualTo(2)
         assertThat(listener.activeChangesOnSecondaryDisplay).isEqualTo(1)
+    }
+
+    @Test
+    fun addTask_multipleDisplays_moveToAnotherDisplay() {
+        repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+        repo.addTask(SECOND_DISPLAY, taskId = 1, isVisible = true)
+        assertThat(repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)).isEmpty()
+        assertThat(repo.getFreeformTasksInZOrder(SECOND_DISPLAY)).containsExactly(1)
     }
 
     @Test

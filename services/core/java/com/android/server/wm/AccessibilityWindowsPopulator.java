@@ -150,11 +150,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
     @Override
     public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
             DisplayInfo[] displayInfos) {
-        if (com.android.server.accessibility.Flags.removeOnWindowInfosChangedHandler()) {
-            onWindowInfosChangedInternal(windowHandles, displayInfos);
-        } else {
-            mHandler.post(() -> onWindowInfosChangedInternal(windowHandles, displayInfos));
-        }
+        onWindowInfosChangedInternal(windowHandles, displayInfos);
     }
 
     private void onWindowInfosChangedInternal(InputWindowHandle[] windowHandles,

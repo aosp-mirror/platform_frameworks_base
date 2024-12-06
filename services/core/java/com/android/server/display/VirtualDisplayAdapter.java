@@ -43,6 +43,7 @@ import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
+import android.hardware.display.IBrightnessListener;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
@@ -183,8 +184,11 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         if (projection != null) {
             mediaProjectionCallback = new MediaProjectionCallback(appToken);
         }
+
+        Callback callbackDelegate = new Callback(
+                callback, virtualDisplayConfig.getBrightnessListener(), mHandler);
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
-                ownerUid, ownerPackageName, surface, flags, new Callback(callback, mHandler),
+                ownerUid, ownerPackageName, surface, flags, callbackDelegate,
                 projection, mediaProjectionCallback, uniqueId, virtualDisplayConfig);
 
         mVirtualDisplayDevices.put(appToken, device);
@@ -336,7 +340,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private boolean mIsWindowManagerMirroring;
         private final DisplayCutout mDisplayCutout;
         private final float mDefaultBrightness;
+        private final float mDimBrightness;
         private float mCurrentBrightness;
+        private final IBrightnessListener mBrightnessListener;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
@@ -354,7 +360,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mRequestedRefreshRate = virtualDisplayConfig.getRequestedRefreshRate();
             mDisplayCutout = virtualDisplayConfig.getDisplayCutout();
             mDefaultBrightness = virtualDisplayConfig.getDefaultBrightness();
-            mCurrentBrightness = mDefaultBrightness;
+            mDimBrightness = virtualDisplayConfig.getDimBrightness();
+            mCurrentBrightness = PowerManager.BRIGHTNESS_INVALID;
+            mBrightnessListener = virtualDisplayConfig.getBrightnessListener();
             mMode = createMode(mWidth, mHeight, getRefreshRate());
             mSurface = surface;
             mFlags = flags;
@@ -464,6 +472,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 }
             }
             if (android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()
+                    && mBrightnessListener != null
                     && BrightnessUtils.isValidBrightnessValue(brightnessState)
                     && brightnessState != mCurrentBrightness) {
                 mCurrentBrightness = brightnessState;
@@ -638,6 +647,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
                 mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
                 mInfo.brightnessDefault = mDefaultBrightness;
+                mInfo.brightnessDim = mDimBrightness;
 
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;
@@ -661,10 +671,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private static final int MSG_ON_REQUESTED_BRIGHTNESS_CHANGED = 3;
 
         private final IVirtualDisplayCallback mCallback;
+        private final IBrightnessListener mBrightnessListener;
 
-        public Callback(IVirtualDisplayCallback callback, Handler handler) {
+        Callback(IVirtualDisplayCallback callback, IBrightnessListener brightnessListener,
+                Handler handler) {
             super(handler.getLooper());
             mCallback = callback;
+            mBrightnessListener = brightnessListener;
         }
 
         @Override
@@ -681,7 +694,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                         mCallback.onStopped();
                         break;
                     case MSG_ON_REQUESTED_BRIGHTNESS_CHANGED:
-                        mCallback.onRequestedBrightnessChanged((Float) msg.obj);
+                        if (mBrightnessListener != null) {
+                            mBrightnessListener.onBrightnessChanged((Float) msg.obj);
+                        }
                         break;
                 }
             } catch (RemoteException e) {

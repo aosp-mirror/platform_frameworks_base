@@ -1335,11 +1335,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             case HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK: {
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
-                Task pipTask = container.asTask();
-                if (pipTask == null) {
+                TaskFragment pipTaskFragment = container.asTaskFragment();
+                if (pipTaskFragment == null) {
                     break;
                 }
-                ActivityRecord pipActivity = pipTask.getActivity(
+                ActivityRecord pipActivity = pipTaskFragment.getActivity(
                         (activity) -> activity.pictureInPictureArgs != null);
 
                 if (pipActivity.isState(RESUMED)) {
@@ -1851,14 +1851,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyKeyguardState(@NonNull WindowContainerTransaction.HierarchyOp hop) {
-        int effects = TRANSACT_EFFECTS_NONE;
+        int effects = TRANSACT_EFFECTS_LIFECYCLE;
 
         final KeyguardState keyguardState = hop.getKeyguardState();
         if (keyguardState != null) {
-            int displayId = keyguardState.getDisplayId();
             boolean keyguardShowing = keyguardState.getKeyguardShowing();
             boolean aodShowing = keyguardState.getAodShowing();
-            mService.mKeyguardController.setKeyguardShown(displayId, keyguardShowing, aodShowing);
+            mService.setLockScreenShown(keyguardShowing, aodShowing);
         }
         return effects;
     }

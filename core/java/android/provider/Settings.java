@@ -85,6 +85,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.service.voice.VisualQueryDetectedResult;
 import android.speech.tts.TextToSpeech;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -2466,6 +2467,25 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS
             = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
+
+    /**
+     * Activity Action: Show the settings for users to select their preferred SIM subscription
+     * when a new SIM subscription has become available.
+     * <p>
+     * This Activity will only launch successfully if the newly active subscription ID is set as the
+     * value of {@link EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
+     * <p>
+     * Input: {@link #EXTRA_SUB_ID}: the subscription ID of the newly active SIM subscription.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_ACTION_SIM_PREFERENCE_SETTINGS)
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SIM_PREFERENCE_SETTINGS =
+            "android.settings.SIM_PREFERENCE_SETTINGS";
 
     /**
      * Intent Extra: The value of {@link android.app.settings.SettingsEnums#EntryPointType} for
@@ -6289,6 +6309,13 @@ public final class Settings {
         public static final String TOUCHPAD_RIGHT_CLICK_ZONE = "touchpad_right_click_zone";
 
         /**
+         * Whether to enable system gestures (three- and four-finger swipes) on touchpads.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_SYSTEM_GESTURES = "touchpad_system_gestures";
+
+        /**
          * Whether to enable reversed vertical scrolling for connected mice.
          *
          * When enabled, scrolling down on the mouse wheel will move the screen up and vice versa.
@@ -6372,6 +6399,14 @@ public final class Settings {
          * @hide
          */
         public static final String LOCALE_PREFERENCES = "locale_preferences";
+
+        /**
+         * User can change the region from region settings. This records user's preferred region.
+         *
+         * E.g. : if user's locale is en-US, this will record US
+         * @hide
+         */
+        public static final String PREFERRED_REGION = "preferred_region";
 
         /**
          * Setting to enable camera flash notification feature.
@@ -6541,12 +6576,14 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_TO_CLICK);
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_DRAGGING);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
+            PRIVATE_SETTINGS.add(TOUCHPAD_SYSTEM_GESTURES);
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
+            PRIVATE_SETTINGS.add(PREFERRED_REGION);
         }
 
         /**
@@ -10003,6 +10040,12 @@ public final class Settings {
         @Readable
         public static final String MINIMAL_POST_PROCESSING_ALLOWED =
                 "minimal_post_processing_allowed";
+
+        /**
+         * Whether to mirror the built-in display on all connected displays.
+         * @hide
+         */
+        public static final String MIRROR_BUILT_IN_DISPLAY = "mirror_built_in_display";
 
         /**
          * No mode switching will happen.

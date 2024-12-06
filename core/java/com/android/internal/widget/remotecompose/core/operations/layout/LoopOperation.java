@@ -107,9 +107,11 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
 
     @Override
     public void paint(@NonNull PaintContext context) {
+        RemoteContext remoteContext = context.getContext();
         if (mIndexVariableId == 0) {
             for (float i = mFromOut; i < mUntilOut; i += mStepOut) {
                 for (Operation op : mList) {
+                    remoteContext.incrementOpCount();
                     op.apply(context.getContext());
                 }
             }
@@ -117,15 +119,21 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
             for (float i = mFromOut; i < mUntilOut; i += mStepOut) {
                 context.getContext().loadFloat(mIndexVariableId, i);
                 for (Operation op : mList) {
-                    if (op instanceof VariableSupport) {
+                    if (op instanceof VariableSupport && op.isDirty()) {
                         ((VariableSupport) op).updateVariables(context.getContext());
                     }
+                    remoteContext.incrementOpCount();
                     op.apply(context.getContext());
                 }
             }
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "Loop";
@@ -154,6 +162,11 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
         operations.add(new LoopOperation(indexId, from, step, until));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Operations", OP_CODE, name())
                 .description("Loop. This operation execute" + " a list of action in a loop")
@@ -161,5 +174,17 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
                 .field(DocumentedOperation.FLOAT, "from", "values starts at")
                 .field(DocumentedOperation.FLOAT, "step", "value step")
                 .field(DocumentedOperation.FLOAT, "until", "stops less than or equal");
+    }
+
+    /**
+     * Calculate and estimate of the number of iterations
+     *
+     * @return number of loops or 10 if based on variables
+     */
+    public int estimateIterations() {
+        if (!(Float.isNaN(mUntil) || Float.isNaN(mFrom) || Float.isNaN(mStep))) {
+            return (int) (0.5f + (mUntil - mFrom) / mStep);
+        }
+        return 10; // this is a generic estmate if the values are variables;
     }
 }

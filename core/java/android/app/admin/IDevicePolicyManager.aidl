@@ -279,8 +279,9 @@ interface IDevicePolicyManager {
     boolean isNotificationListenerServicePermitted(in String packageName, int userId);
 
     Intent createAdminSupportIntent(in String restriction);
-    Bundle getEnforcingAdminAndUserDetails(int userId,String restriction);
-    List<EnforcingAdmin> getEnforcingAdminsForRestriction(int userId,String restriction);
+    Bundle getEnforcingAdminAndUserDetails(int userId, String restriction);
+    EnforcingAdmin getEnforcingAdmin(int userId, String identifier);
+    List<EnforcingAdmin> getEnforcingAdminsForRestriction(int userId, String restriction);
     boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden, boolean parent);
     boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean parent);
 
@@ -643,4 +644,7 @@ interface IDevicePolicyManager {
     int getPolicySizeForAdmin(String callerPackageName, in EnforcingAdmin admin);
 
     int getHeadlessDeviceOwnerMode(String callerPackageName);
+
+    void setAppFunctionsPolicy(String callerPackageName, int policy);
+    int getAppFunctionsPolicy(String callerPackageName, int userId);
 }

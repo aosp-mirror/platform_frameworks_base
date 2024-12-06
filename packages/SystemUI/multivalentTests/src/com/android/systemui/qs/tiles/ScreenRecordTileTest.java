@@ -23,11 +23,13 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
+import android.media.projection.StopReason;
 import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
@@ -46,6 +48,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -214,7 +217,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleClick(null /* view */);
 
-        verify(mController, times(1)).stopRecording();
+        verify(mController, times(1)).stopRecording(eq(StopReason.STOP_QS_TILE));
     }
 
     @Test
@@ -266,7 +269,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_on));
     }
 
     @Test
@@ -277,7 +280,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_on));
     }
 
     @Test
@@ -288,7 +291,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_off));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_off));
     }
 
     @Test
@@ -312,6 +315,14 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         verify(mPermissionDialogPrompt).show();
         verify(mMediaProjectionMetricsLogger)
                 .notifyPermissionRequestDisplayed(mContext.getUserId());
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 
 }

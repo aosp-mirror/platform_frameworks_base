@@ -26,6 +26,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 
 import java.util.List;
 
+/** The save the matrix state command */
 public class MatrixSave extends PaintOperation {
     private static final int OP_CODE = Operations.MATRIX_SAVE;
     private static final String CLASS_NAME = "MatrixSave";
@@ -52,6 +53,11 @@ public class MatrixSave extends PaintOperation {
         operations.add(op);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

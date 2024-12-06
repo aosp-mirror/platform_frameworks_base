@@ -46,6 +46,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.media.BluetoothRouteController.NoOpBluetoothRouteController;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -378,7 +379,12 @@ import java.util.Objects;
             Slog.e(
                     TAG,
                     "Could not map this selected device attribute type to an available route: "
-                            + selectedDeviceAttributesType);
+                            + selectedDeviceAttributesType
+                            + ". Available types: "
+                            + Arrays.toString(
+                                    Arrays.stream(audioDeviceInfos)
+                                            .map(AudioDeviceInfo::getType)
+                                            .toArray()));
             // We know mRouteIdToAvailableDeviceRoutes is not empty.
             newSelectedRouteHolder = mRouteIdToAvailableDeviceRoutes.values().iterator().next();
         }

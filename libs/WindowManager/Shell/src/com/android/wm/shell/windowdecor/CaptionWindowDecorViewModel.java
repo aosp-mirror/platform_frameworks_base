@@ -63,10 +63,13 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 /**
@@ -89,6 +92,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
     private final Transitions mTransitions;
     private final Region mExclusionRegion = Region.obtain();
     private final InputManager mInputManager;
+    private final WindowDecorViewHostSupplier<WindowDecorViewHost> mWindowDecorViewHostSupplier;
     private TaskOperations mTaskOperations;
     private FocusTransitionObserver mFocusTransitionObserver;
 
@@ -119,8 +123,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
     public CaptionWindowDecorViewModel(
             Context context,
             Handler mainHandler,
+            @ShellMainThread ShellExecutor shellExecutor,
             @ShellBackgroundThread ShellExecutor bgExecutor,
-            ShellExecutor shellExecutor,
             Choreographer mainChoreographer,
             IWindowManager windowManager,
             ShellInit shellInit,
@@ -129,7 +133,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
-            FocusTransitionObserver focusTransitionObserver) {
+            FocusTransitionObserver focusTransitionObserver,
+            WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -142,6 +147,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
         mSyncQueue = syncQueue;
         mTransitions = transitions;
         mFocusTransitionObserver = focusTransitionObserver;
+        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
@@ -331,7 +337,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
                         mMainHandler,
                         mBgExecutor,
                         mMainChoreographer,
-                        mSyncQueue);
+                        mSyncQueue,
+                        mWindowDecorViewHostSupplier);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final FluidResizeTaskPositioner taskPositioner =

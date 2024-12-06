@@ -833,9 +833,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
         // Set the surface of the SurfaceView to black to avoid users seeing the contents below the
         // magnifier when the mirrored surface has an alpha less than 1.
-        if (Flags.addBlackBackgroundForWindowMagnifier()) {
-            mTransaction.setColor(mMirrorSurfaceView.getSurfaceControl(), COLOR_BLACK_ARRAY);
-        }
+        mTransaction.setColor(mMirrorSurfaceView.getSurfaceControl(), COLOR_BLACK_ARRAY);
         mTransaction.show(mMirrorSurface)
                 .reparent(mMirrorSurface, mMirrorSurfaceView.getSurfaceControl());
         modifyWindowMagnification(false);

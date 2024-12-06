@@ -43,7 +43,7 @@ class DesktopWindowLimitRemoteHandler(
     private val rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer,
     remoteTransition: RemoteTransition,
     private val taskIdToMinimize: Int,
-    ) : TransitionHandler {
+) : TransitionHandler {
 
     private val oneShotRemoteHandler = OneShotRemoteHandler(mainExecutor, remoteTransition)
     private var transition: IBinder? = null
@@ -56,7 +56,7 @@ class DesktopWindowLimitRemoteHandler(
 
     override fun handleRequest(
         transition: IBinder,
-        request: TransitionRequestInfo
+        request: TransitionRequestInfo,
     ): WindowContainerTransaction? {
         this.transition = transition
         return oneShotRemoteHandler.handleRequest(transition, request)
@@ -67,7 +67,7 @@ class DesktopWindowLimitRemoteHandler(
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
-        finishCallback: Transitions.TransitionFinishCallback
+        finishCallback: Transitions.TransitionFinishCallback,
     ): Boolean {
         if (transition != this.transition) return false
         val minimizeChange = findMinimizeChange(info, taskIdToMinimize) ?: return false
@@ -76,7 +76,12 @@ class DesktopWindowLimitRemoteHandler(
         // have access to RootTaskDisplayAreaOrganizer.
         applyMinimizeChangeReparenting(info, minimizeChange, startTransaction)
         return oneShotRemoteHandler.startAnimation(
-            transition, info, startTransaction, finishTransaction, finishCallback)
+            transition,
+            info,
+            startTransaction,
+            finishTransaction,
+            finishCallback,
+        )
     }
 
     private fun applyMinimizeChangeReparenting(
@@ -87,14 +92,15 @@ class DesktopWindowLimitRemoteHandler(
         val taskInfo = minimizeChange.taskInfo ?: return
         if (taskInfo.isFreeform && TransitionUtil.isOpeningMode(info.type)) {
             rootTaskDisplayAreaOrganizer.reparentToDisplayArea(
-                taskInfo.displayId, minimizeChange.leash, startTransaction)
+                taskInfo.displayId,
+                minimizeChange.leash,
+                startTransaction,
+            )
         }
     }
 
-    private fun findMinimizeChange(
-        info: TransitionInfo,
-        taskIdToMinimize: Int,
-    ): Change? =
+    private fun findMinimizeChange(info: TransitionInfo, taskIdToMinimize: Int): Change? =
         info.changes.find { change ->
-            change.taskInfo?.taskId == taskIdToMinimize && change.mode == TRANSIT_TO_BACK }
+            change.taskInfo?.taskId == taskIdToMinimize && change.mode == TRANSIT_TO_BACK
+        }
 }

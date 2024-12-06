@@ -19,6 +19,7 @@ package com.android.systemui.keyboard.shortcut.ui.composable
 import android.graphics.drawable.Icon
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +57,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -187,6 +189,7 @@ private fun ActiveShortcutHelper(
             onKeyboardSettingsClicked,
             shortcutsUiState.isShortcutCustomizerFlagEnabled,
             onCustomizationRequested,
+            shortcutsUiState.shouldShowResetButton,
         )
     }
 }
@@ -377,6 +380,7 @@ private fun ShortcutHelperTwoPane(
     onKeyboardSettingsClicked: () -> Unit,
     isShortcutCustomizerFlagEnabled: Boolean,
     onCustomizationRequested: (ShortcutCustomizationRequestInfo) -> Unit = {},
+    shouldShowResetButton: Boolean,
 ) {
     val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
     var isCustomizing by remember { mutableStateOf(false) }
@@ -389,11 +393,14 @@ private fun ShortcutHelperTwoPane(
                     TitleBar(isCustomizing)
                 }
                 if (isShortcutCustomizerFlagEnabled) {
-                    if (isCustomizing) {
-                        DoneButton(onClick = { isCustomizing = false })
-                    } else {
-                        CustomizeButton(onClick = { isCustomizing = true })
-                    }
+                    CustomizationButtonsContainer(
+                        isCustomizing = isCustomizing,
+                        onToggleCustomizationMode = { isCustomizing = !isCustomizing },
+                        onReset = {
+                            onCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
+                        },
+                        shouldShowResetButton = shouldShowResetButton,
+                    )
                 } else {
                     Spacer(modifier = Modifier.width(if (isCustomizing) 69.dp else 133.dp))
                 }
@@ -419,6 +426,38 @@ private fun ShortcutHelperTwoPane(
             )
         }
     }
+}
+
+@Composable
+private fun CustomizationButtonsContainer(
+    isCustomizing: Boolean,
+    shouldShowResetButton: Boolean,
+    onToggleCustomizationMode: () -> Unit,
+    onReset: () -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (isCustomizing) {
+            if (shouldShowResetButton) {
+                ResetButton(onClick = onReset)
+            }
+            DoneButton(onClick = onToggleCustomizationMode)
+        } else {
+            CustomizeButton(onClick = onToggleCustomizationMode)
+        }
+    }
+}
+
+@Composable
+private fun ResetButton(onClick: () -> Unit) {
+    ShortcutHelperButton(
+        onClick = onClick,
+        color = Color.Transparent,
+        width = 99.dp,
+        iconSource = IconSource(imageVector = Icons.Default.Refresh),
+        text = stringResource(id = R.string.shortcut_helper_reset_button_text),
+        contentColor = MaterialTheme.colorScheme.primary,
+        border = BorderStroke(color = MaterialTheme.colorScheme.outlineVariant, width = 1.dp),
+    )
 }
 
 @Composable
@@ -471,6 +510,9 @@ private fun EndSidePanel(
 
                         is ShortcutCustomizationRequestInfo.Delete ->
                             onCustomizationRequested(requestInfo.copy(categoryType = category.type))
+
+                        ShortcutCustomizationRequestInfo.Reset ->
+                            onCustomizationRequested(requestInfo)
                     }
                 },
             )
@@ -523,7 +565,7 @@ private fun SubCategoryContainerDualPane(
                     modifier = Modifier.padding(vertical = 8.dp),
                     searchQuery = searchQuery,
                     shortcut = shortcut,
-                    isCustomizing = isCustomizing,
+                    isCustomizing = isCustomizing && shortcut.isCustomizable,
                     onCustomizationRequested = { requestInfo ->
                         when (requestInfo) {
                             is ShortcutCustomizationRequestInfo.Add ->
@@ -535,6 +577,9 @@ private fun SubCategoryContainerDualPane(
                                 onCustomizationRequested(
                                     requestInfo.copy(subCategoryLabel = subCategory.label)
                                 )
+
+                            ShortcutCustomizationRequestInfo.Reset ->
+                                onCustomizationRequested(requestInfo)
                         }
                     },
                 )
@@ -756,7 +801,10 @@ private fun ShortcutKeyContainer(shortcutKeyContent: @Composable BoxScope.() -> 
 private fun BoxScope.ShortcutTextKey(key: ShortcutKey.Text) {
     Text(
         text = key.value,
-        modifier = Modifier.align(Alignment.Center).padding(horizontal = 12.dp),
+        modifier =
+            Modifier.align(Alignment.Center).padding(horizontal = 12.dp).semantics {
+                hideFromAccessibility()
+            },
         style = MaterialTheme.typography.titleSmall,
     )
 }
@@ -780,7 +828,7 @@ private fun FlowRowScope.ShortcutOrSeparator(spacing: Dp) {
     Spacer(Modifier.width(spacing))
     Text(
         text = stringResource(R.string.shortcut_helper_key_combinations_or_separator),
-        modifier = Modifier.align(Alignment.CenterVertically),
+        modifier = Modifier.align(Alignment.CenterVertically).semantics { hideFromAccessibility() },
         style = MaterialTheme.typography.titleSmall,
     )
     Spacer(Modifier.width(spacing))

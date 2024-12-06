@@ -31,6 +31,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomization
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.AddShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.DeleteShortcutDialog
+import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.ResetShortcutDialog
 import com.android.systemui.res.R
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -72,24 +73,19 @@ constructor(
                         shortcutLabel = requestInfo.label,
                         defaultCustomShortcutModifierKey =
                             shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
-                        isDialogShowing = false,
                         pressedKeys = emptyList(),
                     )
                 shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
 
             is ShortcutCustomizationRequestInfo.Delete -> {
-                _shortcutCustomizationUiState.value = DeleteShortcutDialog(isDialogShowing = false)
+                _shortcutCustomizationUiState.value = DeleteShortcutDialog
                 shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
-        }
-    }
 
-    fun onDialogShown() {
-        _shortcutCustomizationUiState.update { uiState ->
-            (uiState as? AddShortcutDialog)?.copy(isDialogShowing = true)
-                ?: (uiState as? DeleteShortcutDialog)?.copy(isDialogShowing = true)
-                ?: uiState
+            ShortcutCustomizationRequestInfo.Reset -> {
+                _shortcutCustomizationUiState.value = ResetShortcutDialog
+            }
         }
     }
 
@@ -134,8 +130,18 @@ constructor(
     }
 
     suspend fun deleteShortcutCurrentlyBeingCustomized() {
-        val result =
-            shortcutCustomizationInteractor.deleteShortcutCurrentlyBeingCustomized()
+        val result = shortcutCustomizationInteractor.deleteShortcutCurrentlyBeingCustomized()
+
+        _shortcutCustomizationUiState.update { uiState ->
+            when (result) {
+                ShortcutCustomizationRequestResult.SUCCESS -> ShortcutCustomizationUiState.Inactive
+                else -> uiState
+            }
+        }
+    }
+
+    suspend fun resetAllCustomShortcuts() {
+        val result = shortcutCustomizationInteractor.resetAllCustomShortcuts()
 
         _shortcutCustomizationUiState.update { uiState ->
             when (result) {

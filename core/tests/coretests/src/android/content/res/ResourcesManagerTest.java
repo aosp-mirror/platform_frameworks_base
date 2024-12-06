@@ -33,8 +33,6 @@ import android.platform.test.annotations.Postsubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
-import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -65,13 +63,7 @@ public class ResourcesManagerTest {
     private static final String TEST_LIB = "com.android.frameworks.coretests.bdr_helper_app1";
 
     @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            RavenwoodRule.isOnRavenwood()
-                    ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
-                    : DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private ResourcesManager mResourcesManager;
     private Map<Integer, DisplayMetrics> mDisplayMetricsMap;

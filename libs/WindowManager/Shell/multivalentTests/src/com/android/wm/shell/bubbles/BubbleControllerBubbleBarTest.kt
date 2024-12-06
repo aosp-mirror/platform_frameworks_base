@@ -34,6 +34,7 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.wm.shell.Flags
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.WindowManagerShellWrapper
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.properties.ProdBubbleProperties
@@ -41,7 +42,6 @@ import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
-import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
 import com.android.wm.shell.draganddrop.DragAndDropController
@@ -84,16 +84,16 @@ class BubbleControllerBubbleBarTest {
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var bubblePositioner: BubblePositioner
     private lateinit var bubbleData: BubbleData
-    private lateinit var mainExecutor: TestExecutor
-    private lateinit var bgExecutor: TestExecutor
+    private lateinit var mainExecutor: TestShellExecutor
+    private lateinit var bgExecutor: TestShellExecutor
 
     @Before
     fun setUp() {
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
         ProtoLog.init()
 
-        mainExecutor = TestExecutor()
-        bgExecutor = TestExecutor()
+        mainExecutor = TestShellExecutor()
+        bgExecutor = TestShellExecutor()
 
         uiEventLoggerFake = UiEventLoggerFake()
         val bubbleLogger = BubbleLogger(uiEventLoggerFake)
@@ -232,8 +232,8 @@ class BubbleControllerBubbleBarTest {
         bubbleData: BubbleData,
         bubbleLogger: BubbleLogger,
         bubblePositioner: BubblePositioner,
-        mainExecutor: TestExecutor,
-        bgExecutor: TestExecutor,
+        mainExecutor: TestShellExecutor,
+        bgExecutor: TestShellExecutor,
     ): BubbleController {
         val shellCommandHandler = ShellCommandHandler()
         val shellController =
@@ -287,29 +287,6 @@ class BubbleControllerBubbleBarTest {
             mock<IWindowManager>(),
             ProdBubbleProperties,
         )
-    }
-
-    private class TestExecutor : ShellExecutor {
-
-        private val runnables: MutableList<Runnable> = mutableListOf()
-
-        override fun execute(runnable: Runnable) {
-            runnables.add(runnable)
-        }
-
-        override fun executeDelayed(runnable: Runnable, delayMillis: Long) {
-            execute(runnable)
-        }
-
-        override fun removeCallbacks(runnable: Runnable?) {}
-
-        override fun hasCallback(runnable: Runnable?): Boolean = false
-
-        fun flushAll() {
-            while (runnables.isNotEmpty()) {
-                runnables.removeAt(0).run()
-            }
-        }
     }
 
     private class FakeBubblesStateListener : Bubbles.BubbleStateListener {

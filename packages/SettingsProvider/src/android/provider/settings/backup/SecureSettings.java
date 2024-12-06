@@ -99,6 +99,7 @@ public class SecureSettings {
         Settings.Secure.RTT_CALLING_MODE,
         Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
         Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
+        Settings.Secure.MIRROR_BUILT_IN_DISPLAY,
         Settings.Secure.MATCH_CONTENT_FRAME_RATE,
         Settings.Secure.NIGHT_DISPLAY_CUSTOM_START_TIME,
         Settings.Secure.NIGHT_DISPLAY_CUSTOM_END_TIME,

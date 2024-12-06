@@ -20,7 +20,12 @@
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true"/>
         <option name="test-file-name" value="IntrusionDetectionServiceTests.apk"/>
+        <option name="test-file-name" value="TestIntrusionDetectionApp.apk"/>
         <option name="install-arg" value="-t" />
+    </target_preparer>
+
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="setprop intrusiondetection_service_name com.android.coretests.apps.testapp/.TestLoggingService" />
     </target_preparer>
 
     <option name="test-tag" value="IntrusionDetectionServiceTests" />

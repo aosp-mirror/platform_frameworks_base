@@ -21,9 +21,7 @@ import android.hardware.input.InputManager
 import android.hardware.input.KeyGlyphMap
 import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.KEYCODE_BACK
-import android.view.KeyEvent.KEYCODE_DEL
 import android.view.KeyEvent.KEYCODE_DPAD_LEFT
-import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.KeyEvent.KEYCODE_ESCAPE
 import android.view.KeyEvent.KEYCODE_H
 import android.view.KeyEvent.KEYCODE_HOME
@@ -34,8 +32,10 @@ import android.view.KeyEvent.KEYCODE_RECENT_APPS
 import android.view.KeyEvent.KEYCODE_S
 import android.view.KeyEvent.KEYCODE_SLASH
 import android.view.KeyEvent.KEYCODE_TAB
+import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
+import android.view.KeyEvent.META_SHIFT_ON
 import android.view.KeyboardShortcutGroup
 import android.view.KeyboardShortcutInfo
 import com.android.systemui.Flags.shortcutHelperKeyGlyph
@@ -54,7 +54,7 @@ constructor(@Main private val resources: Resources, private val inputManager: In
         listOf(
             KeyboardShortcutGroup(
                 resources.getString(R.string.shortcut_helper_category_system_controls),
-                hardwareShortcuts(deviceId) + systemControlsShortcuts(),
+                systemControlsShortcuts() + hardwareShortcuts(deviceId),
             ),
             KeyboardShortcutGroup(
                 resources.getString(R.string.shortcut_helper_category_system_apps),
@@ -127,27 +127,29 @@ constructor(@Main private val resources: Resources, private val inputManager: In
             },
             // Access home screen:
             //  - Meta + H
-            //  - Meta + Enter
             shortcutInfo(resources.getString(R.string.group_system_access_home_screen)) {
                 command(META_META_ON, KEYCODE_H)
-            },
-            shortcutInfo(resources.getString(R.string.group_system_access_home_screen)) {
-                command(META_META_ON, KEYCODE_ENTER)
             },
             // Overview of open apps:
             //  - Meta + Tab
             shortcutInfo(resources.getString(R.string.group_system_overview_open_apps)) {
                 command(META_META_ON, KEYCODE_TAB)
             },
+            // Cycle through recent apps (forward):
+            //  - Alt + Tab
+            shortcutInfo(resources.getString(R.string.group_system_cycle_forward)) {
+                command(META_ALT_ON, KEYCODE_TAB)
+            },
+            // Cycle through recent apps (back):
+            //  - Shift + Alt + Tab
+            shortcutInfo(resources.getString(R.string.group_system_cycle_back)) {
+                command(META_SHIFT_ON or META_ALT_ON, KEYCODE_TAB)
+            },
             // Back: go back to previous state (back button)
             //  - Meta + Escape OR
-            //  - Meta + Backspace OR
             //  - Meta + Left arrow
             shortcutInfo(resources.getString(R.string.group_system_go_back)) {
                 command(META_META_ON, KEYCODE_ESCAPE)
-            },
-            shortcutInfo(resources.getString(R.string.group_system_go_back)) {
-                command(META_META_ON, KEYCODE_DEL)
             },
             shortcutInfo(resources.getString(R.string.group_system_go_back)) {
                 command(META_META_ON, KEYCODE_DPAD_LEFT)

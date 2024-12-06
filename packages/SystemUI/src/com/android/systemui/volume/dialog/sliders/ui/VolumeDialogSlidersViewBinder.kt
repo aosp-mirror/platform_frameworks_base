@@ -21,58 +21,48 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.compose.ui.util.fastForEachIndexed
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderComponent
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSlidersViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 @VolumeDialogScope
 class VolumeDialogSlidersViewBinder
 @Inject
-constructor(private val viewModelFactory: VolumeDialogSlidersViewModel.Factory) {
+constructor(private val viewModel: VolumeDialogSlidersViewModel) {
 
-    fun bind(view: View) {
-        with(view) {
-            val floatingSlidersContainer: ViewGroup =
-                requireViewById(R.id.volume_dialog_floating_sliders_container)
-            val mainSliderContainer: View =
-                requireViewById(R.id.volume_dialog_main_slider_container)
-            repeatWhenAttached {
-                viewModel(
-                    traceName = "VolumeDialogSlidersViewBinder",
-                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelFactory.create() },
-                ) { viewModel ->
-                    viewModel.sliders
-                        .onEach { uiModel ->
-                            uiModel.sliderComponent.bindSlider(mainSliderContainer)
+    fun CoroutineScope.bind(view: View) {
+        val floatingSlidersContainer: ViewGroup =
+            view.requireViewById(R.id.volume_dialog_floating_sliders_container)
+        val mainSliderContainer: View =
+            view.requireViewById(R.id.volume_dialog_main_slider_container)
+        viewModel.sliders
+            .onEach { uiModel ->
+                bindSlider(uiModel.sliderComponent, mainSliderContainer)
 
-                            val floatingSliderViewBinders = uiModel.floatingSliderComponent
-                            floatingSlidersContainer.ensureChildCount(
-                                viewLayoutId = R.layout.volume_dialog_slider_floating,
-                                count = floatingSliderViewBinders.size,
-                            )
-                            floatingSliderViewBinders.fastForEachIndexed { index, sliderComponent ->
-                                sliderComponent.bindSlider(
-                                    floatingSlidersContainer.getChildAt(index)
-                                )
-                            }
-                        }
-                        .launchIn(this)
+                val floatingSliderViewBinders = uiModel.floatingSliderComponent
+                floatingSlidersContainer.ensureChildCount(
+                    viewLayoutId = R.layout.volume_dialog_slider_floating,
+                    count = floatingSliderViewBinders.size,
+                )
+                floatingSliderViewBinders.fastForEachIndexed { index, sliderComponent ->
+                    bindSlider(sliderComponent, floatingSlidersContainer.getChildAt(index))
                 }
             }
-        }
+            .launchIn(this)
     }
 
-    private fun VolumeDialogSliderComponent.bindSlider(sliderContainer: View) {
-        sliderViewBinder().bind(sliderContainer)
-        sliderTouchesViewBinder().bind(sliderContainer)
+    private fun CoroutineScope.bindSlider(
+        component: VolumeDialogSliderComponent,
+        sliderContainer: View,
+    ) {
+        with(component.sliderViewBinder()) { bind(sliderContainer) }
+        with(component.sliderTouchesViewBinder()) { bind(sliderContainer) }
+        with(component.sliderHapticsViewBinder()) { bind(sliderContainer) }
     }
 }
 

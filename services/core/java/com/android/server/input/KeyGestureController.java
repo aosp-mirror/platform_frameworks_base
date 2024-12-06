@@ -92,6 +92,8 @@ final class KeyGestureController {
                     | KeyEvent.META_SHIFT_ON;
 
     private static final int MSG_NOTIFY_KEY_GESTURE_EVENT = 1;
+    private static final int MSG_PERSIST_CUSTOM_GESTURES = 2;
+    private static final int MSG_LOAD_CUSTOM_GESTURES = 3;
 
     // must match: config_settingsKeyBehavior in config.xml
     private static final int SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY = 0;
@@ -116,6 +118,8 @@ final class KeyGestureController {
     private final SettingsObserver mSettingsObserver;
     private final AppLaunchShortcutManager mAppLaunchShortcutManager;
     private final InputGestureManager mInputGestureManager;
+    @GuardedBy("mInputDataStore")
+    private final InputDataStore mInputDataStore;
     private static final Object mUserLock = new Object();
     @UserIdInt
     @GuardedBy("mUserLock")
@@ -155,7 +159,7 @@ final class KeyGestureController {
     /** Currently fully consumed key codes per device */
     private final SparseArray<Set<Integer>> mConsumedKeysForDevice = new SparseArray<>();
 
-    KeyGestureController(Context context, Looper looper) {
+    KeyGestureController(Context context, Looper looper, InputDataStore inputDataStore) {
         mContext = context;
         mHandler = new Handler(looper, this::handleMessage);
         mSystemPid = Process.myPid();
@@ -175,6 +179,7 @@ final class KeyGestureController {
         mSettingsObserver = new SettingsObserver(mHandler);
         mAppLaunchShortcutManager = new AppLaunchShortcutManager(mContext);
         mInputGestureManager = new InputGestureManager(mContext);
+        mInputDataStore = inputDataStore;
         initBehaviors();
         initKeyCombinationRules();
     }
@@ -434,6 +439,13 @@ final class KeyGestureController {
         mSettingsObserver.observe();
         mAppLaunchShortcutManager.systemRunning();
         mInputGestureManager.systemRunning();
+
+        int userId;
+        synchronized (mUserLock) {
+            userId = mCurrentUserId;
+        }
+        // Load the system user's input gestures.
+        mHandler.obtainMessage(MSG_LOAD_CUSTOM_GESTURES, userId).sendToTarget();
     }
 
     public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
@@ -955,6 +967,7 @@ final class KeyGestureController {
         synchronized (mUserLock) {
             mCurrentUserId = userId;
         }
+        mHandler.obtainMessage(MSG_LOAD_CUSTOM_GESTURES, userId).sendToTarget();
     }
 
     @MainThread
@@ -995,6 +1008,17 @@ final class KeyGestureController {
                 AidlKeyGestureEvent event = (AidlKeyGestureEvent) msg.obj;
                 notifyKeyGestureEvent(event);
                 break;
+            case MSG_PERSIST_CUSTOM_GESTURES: {
+                final int userId = (Integer) msg.obj;
+                persistInputGestures(userId);
+                break;
+            }
+            case MSG_LOAD_CUSTOM_GESTURES: {
+                final int userId = (Integer) msg.obj;
+                loadInputGestures(userId);
+                break;
+            }
+
         }
         return true;
     }
@@ -1040,22 +1064,31 @@ final class KeyGestureController {
     @InputManager.CustomInputGestureResult
     public int addCustomInputGesture(@UserIdInt int userId,
             @NonNull AidlInputGestureData inputGestureData) {
-        return mInputGestureManager.addCustomInputGesture(userId,
+        final int result = mInputGestureManager.addCustomInputGesture(userId,
                 new InputGestureData(inputGestureData));
+        if (result == InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS) {
+            mHandler.obtainMessage(MSG_PERSIST_CUSTOM_GESTURES, userId).sendToTarget();
+        }
+        return result;
     }
 
     @BinderThread
     @InputManager.CustomInputGestureResult
     public int removeCustomInputGesture(@UserIdInt int userId,
             @NonNull AidlInputGestureData inputGestureData) {
-        return mInputGestureManager.removeCustomInputGesture(userId,
+        final int result = mInputGestureManager.removeCustomInputGesture(userId,
                 new InputGestureData(inputGestureData));
+        if (result == InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS) {
+            mHandler.obtainMessage(MSG_PERSIST_CUSTOM_GESTURES, userId).sendToTarget();
+        }
+        return result;
     }
 
     @BinderThread
     public void removeAllCustomInputGestures(@UserIdInt int userId,
             @Nullable InputGestureData.Filter filter) {
         mInputGestureManager.removeAllCustomInputGestures(userId, filter);
+        mHandler.obtainMessage(MSG_PERSIST_CUSTOM_GESTURES, userId).sendToTarget();
     }
 
     @BinderThread
@@ -1163,6 +1196,26 @@ final class KeyGestureController {
     private void onKeyGestureHandlerDied(int pid) {
         synchronized (mKeyGestureHandlerRecords) {
             mKeyGestureHandlerRecords.remove(pid);
+        }
+    }
+
+    private void persistInputGestures(int userId) {
+        synchronized (mInputDataStore) {
+            final List<InputGestureData> inputGestureDataList =
+                    mInputGestureManager.getCustomInputGestures(userId,
+                            null);
+            mInputDataStore.saveInputGestures(userId, inputGestureDataList);
+        }
+    }
+
+    private void loadInputGestures(int userId) {
+        synchronized (mInputDataStore) {
+            mInputGestureManager.removeAllCustomInputGestures(userId, null);
+            final List<InputGestureData> inputGestureDataList = mInputDataStore.loadInputGestures(
+                    userId);
+            for (final InputGestureData inputGestureData : inputGestureDataList) {
+                mInputGestureManager.addCustomInputGesture(userId, inputGestureData);
+            }
         }
     }
 

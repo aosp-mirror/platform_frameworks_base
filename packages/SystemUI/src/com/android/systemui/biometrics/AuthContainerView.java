@@ -27,7 +27,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -64,6 +63,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
+import com.android.systemui.biometrics.plugins.AuthContextPlugins;
 import com.android.systemui.biometrics.shared.model.BiometricModalities;
 import com.android.systemui.biometrics.shared.model.PromptKind;
 import com.android.systemui.biometrics.ui.CredentialView;
@@ -132,6 +132,7 @@ public class AuthContainerView extends LinearLayout
     private final int mEffectiveUserId;
     private final IBinder mWindowToken = new Binder();
     private final ViewCaptureAwareWindowManager mWindowManager;
+    @Nullable private final AuthContextPlugins mAuthContextPlugins;
     private final Interpolator mLinearOutSlowIn;
     private final LockPatternUtils mLockPatternUtils;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -289,6 +290,7 @@ public class AuthContainerView extends LinearLayout
             @Nullable List<FaceSensorPropertiesInternal> faceProps,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull UserManager userManager,
+            @Nullable AuthContextPlugins authContextPlugins,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull InteractionJankMonitor jankMonitor,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
@@ -306,6 +308,7 @@ public class AuthContainerView extends LinearLayout
         WindowManager wm = getContext().getSystemService(WindowManager.class);
         mWindowManager = new ViewCaptureAwareWindowManager(wm, lazyViewCapture,
                 enableViewCaptureTracing());
+        mAuthContextPlugins = authContextPlugins;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mApplicationCoroutineScope = applicationCoroutineScope;
 
@@ -315,16 +318,6 @@ public class AuthContainerView extends LinearLayout
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
         mMSDLPlayer = msdlPlayer;
-
-        // Listener for when device locks from adaptive auth, dismiss prompt
-        getContext().getSystemService(KeyguardManager.class).addKeyguardLockedStateListener(
-                getContext().getMainExecutor(),
-                isKeyguardLocked -> {
-                    if (isKeyguardLocked) {
-                        onStartedGoingToSleep();
-                    }
-                }
-        );
 
         final BiometricModalities biometricModalities = new BiometricModalities(
                 Utils.findFirstSensorProperties(fpProps, mConfig.mSensorIds),
@@ -446,7 +439,7 @@ public class AuthContainerView extends LinearLayout
         final CredentialViewModel vm = mCredentialViewModelProvider.get();
         vm.setAnimateContents(animateContents);
         ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel,
-                mBiometricCallback);
+                mBiometricCallback, mAuthContextPlugins);
 
         mLayout.addView(mCredentialView);
     }
