@@ -18,6 +18,7 @@ package com.android.systemui.clipboardoverlay.dagger;
 
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
+import static com.android.systemui.Flags.clipboardOverlayMultiuser;
 import static com.android.systemui.Flags.enableViewCaptureTracing;
 import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
 
@@ -34,6 +35,7 @@ import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayView;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.settings.UserTracker;
 
 import dagger.Lazy;
 import dagger.Module;
@@ -54,18 +56,28 @@ public interface ClipboardOverlayModule {
     @Provides
     @OverlayWindowContext
     static Context provideWindowContext(DisplayManager displayManager,
-            DisplayTracker displayTracker, Context context) {
+            DisplayTracker displayTracker, Context context, UserTracker userTracker) {
         Display display = displayManager.getDisplay(displayTracker.getDefaultDisplayId());
-        return context.createWindowContext(display, TYPE_SCREENSHOT, null);
+        if (clipboardOverlayMultiuser()) {
+            return userTracker.getUserContext().createWindowContext(display, TYPE_SCREENSHOT, null);
+        } else {
+            return context.createWindowContext(display, TYPE_SCREENSHOT, null);
+        }
     }
 
     /**
      *
      */
     @Provides
-    static ClipboardOverlayView provideClipboardOverlayView(@OverlayWindowContext Context context) {
-        return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
-                R.layout.clipboard_overlay, null);
+    static ClipboardOverlayView provideClipboardOverlayView(
+            @OverlayWindowContext Context overlayContext, Context context) {
+        if (clipboardOverlayMultiuser()) {
+            return (ClipboardOverlayView) LayoutInflater.from(context).inflate(
+                    R.layout.clipboard_overlay, null);
+        } else {
+            return (ClipboardOverlayView) LayoutInflater.from(overlayContext).inflate(
+                    R.layout.clipboard_overlay, null);
+        }
     }
 
     /**
