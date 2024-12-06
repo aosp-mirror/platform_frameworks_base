@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.platform.test.annotations.EnableFlags;
+import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -51,9 +52,13 @@ import java.util.List;
 /** Tests for {@link AccessibilityTargetAdapter}. */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class AccessibilityTargetAdapterTest extends SysuiTestCase {
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
+
+    private static final ComponentName TEST_NAME = new ComponentName("test.pkg", "test.activitty");
+    private static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
 
     @Mock
     private AccessibilityTarget mAccessibilityTarget;
@@ -61,24 +66,21 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
     private Drawable mIcon;
     @Mock
     private Drawable.ConstantState mConstantState;
-    private static final int PAYLOAD_HEARING_STATUS_DRAWABLE = 1;
-
     private ViewHolder mViewHolder;
     private AccessibilityTargetAdapter mAdapter;
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
-    private static final ComponentName TEST_NAME = new ComponentName("test.pkg", "test.activitty");
 
     @Before
     public void setUp() {
-        mTargets.add(mAccessibilityTarget);
-        mAdapter = new AccessibilityTargetAdapter(mTargets);
-
         final View rootView = LayoutInflater.from(mContext).inflate(
                 R.layout.accessibility_floating_menu_item, null);
         mViewHolder = new ViewHolder(rootView);
         when(mAccessibilityTarget.getIcon()).thenReturn(mIcon);
         when(mAccessibilityTarget.getId()).thenReturn(TEST_NAME.flattenToString());
         when(mIcon.getConstantState()).thenReturn(mConstantState);
+
+        mTargets.add(mAccessibilityTarget);
+        mAdapter = new AccessibilityTargetAdapter(mTargets);
     }
 
     @Test
@@ -144,5 +146,47 @@ public class AccessibilityTargetAdapterTest extends SysuiTestCase {
 
         assertThat(mViewHolder.itemView.getStateDescription().toString().contentEquals(
                 "Disconnected")).isTrue();
+    }
+
+    @Test
+    @EnableFlags(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void setBadgeOnLeftSide_false_rightBadgeVisibleAndLeftBadgeInvisible() {
+        when(mAccessibilityTarget.getId()).thenReturn(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+
+        mAdapter.setBadgeOnLeftSide(false);
+        mAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mRightBadgeView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mLeftBadgeView.getVisibility()).isEqualTo(View.INVISIBLE);
+    }
+
+    @Test
+    @EnableFlags(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void setBadgeOnLeftSide_rightBadgeInvisibleAndLeftBadgeVisible() {
+        when(mAccessibilityTarget.getId()).thenReturn(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+
+        mAdapter.setBadgeOnLeftSide(true);
+        mAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mRightBadgeView.getVisibility()).isEqualTo(View.INVISIBLE);
+        assertThat(mViewHolder.mLeftBadgeView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    @EnableFlags(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void setBadgeOnLeftSide_bindViewHolderPayloads_rightBadgeInvisibleAndLeftBadgeVisible() {
+        when(mAccessibilityTarget.getId()).thenReturn(
+                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+
+        mAdapter.setBadgeOnLeftSide(true);
+        mAdapter.onBindViewHolder(mViewHolder, 0, List.of(PAYLOAD_HEARING_STATUS_DRAWABLE));
+
+        assertThat(mViewHolder.mRightBadgeView.getVisibility()).isEqualTo(View.INVISIBLE);
+        assertThat(mViewHolder.mLeftBadgeView.getVisibility()).isEqualTo(View.VISIBLE);
     }
 }
