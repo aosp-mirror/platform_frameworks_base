@@ -941,6 +941,18 @@
     <!-- The size of the importance ring -->
     <dimen name="importance_ring_size">20dp</dimen>
 
+    <!-- The spacing around the app icon badge shown next to the conversation icon -->
+    <dimen name="notification_2025_conversation_icon_badge_padding">2dp</dimen>
+
+    <!-- Top and start margin for the app icon badge shown next to the conversation icon, to align
+        it to the bottom end corner.
+        40dp (conversation icon size) - 16dp (actual size of badge) - 2dp (badge padding) -->
+    <dimen name="notification_2025_conversation_icon_badge_position">22dp</dimen>
+
+    <!-- The size of the app icon badge shown next to the conversation icon, including its padding.
+        The actual size of the icon is 16dp, plus 2dp for each side for the padding. -->
+    <dimen name="notification_2025_conversation_icon_badge_size">20dp</dimen>
+
     <!-- The top padding of the conversation icon container in the regular state-->
     <dimen name="conversation_icon_container_top_padding">20dp</dimen>
 
