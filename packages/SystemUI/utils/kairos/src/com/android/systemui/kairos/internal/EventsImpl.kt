@@ -17,7 +17,7 @@
 package com.android.systemui.kairos.internal
 
 /* Initialized TFlow */
-internal fun interface TFlowImpl<out A> {
+internal fun interface EventsImpl<out A> {
     fun activate(evalScope: EvalScope, downstream: Schedulable): ActivationResult<A>?
 }
 
@@ -26,8 +26,8 @@ internal data class ActivationResult<out A>(
     val needsEval: Boolean,
 )
 
-internal inline fun <A> TFlowCheap(crossinline cheap: CheapNodeSubscribe<A>) =
-    TFlowImpl { scope, ds ->
+internal inline fun <A> EventsImplCheap(crossinline cheap: CheapNodeSubscribe<A>) =
+    EventsImpl { scope, ds ->
         scope.cheap(ds)
     }
 

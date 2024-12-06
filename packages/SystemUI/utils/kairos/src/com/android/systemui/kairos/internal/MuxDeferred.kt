@@ -48,8 +48,8 @@ internal class MuxDeferredNode<W, K, V>(
 ) : MuxNode<W, K, V>(lifecycle, factory) {
 
     val schedulable = Schedulable.M(this)
-    var patches: NodeConnection<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>? = null
-    var patchData: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = null
+    var patches: NodeConnection<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>? = null
+    var patchData: Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>? = null
 
     override fun visit(logIndent: Int, evalScope: EvalScope) {
         check(epoch < evalScope.epoch) { "node unexpectedly visited multiple times in transaction" }
@@ -129,7 +129,7 @@ internal class MuxDeferredNode<W, K, V>(
         // TODO: this logic is very similar to what's in MuxPrompt, maybe turn into an inline fun?
 
         // We have a patch, process additions/updates and removals
-        val adds = mutableListOf<Pair<K, TFlowImpl<V>>>()
+        val adds = mutableListOf<Pair<K, EventsImpl<V>>>()
         val removes = mutableListOf<K>()
         patch.forEach { (k, newUpstream) ->
             when (newUpstream) {
@@ -151,7 +151,7 @@ internal class MuxDeferredNode<W, K, V>(
         }
 
         // add or replace
-        adds.forEach { (k, newUpstream: TFlowImpl<V>) ->
+        adds.forEach { (k, newUpstream: EventsImpl<V>) ->
             // remove old and sever, if present
             switchedIn.remove(k)?.let { branchNode ->
                 val conn = branchNode.upstream
@@ -279,9 +279,9 @@ internal class MuxDeferredNode<W, K, V>(
 
 internal inline fun <A> switchDeferredImplSingle(
     name: String? = null,
-    crossinline getStorage: EvalScope.() -> TFlowImpl<A>,
-    crossinline getPatches: EvalScope.() -> TFlowImpl<TFlowImpl<A>>,
-): TFlowImpl<A> {
+    crossinline getStorage: EvalScope.() -> EventsImpl<A>,
+    crossinline getPatches: EvalScope.() -> EventsImpl<EventsImpl<A>>,
+): EventsImpl<A> {
     val patches = mapImpl(getPatches) { newFlow, _ -> singleOf(just(newFlow)).asIterable() }
     val switchDeferredImpl =
         switchDeferredImpl(
@@ -301,17 +301,17 @@ internal inline fun <A> switchDeferredImplSingle(
 
 internal fun <W, K, V> switchDeferredImpl(
     name: String? = null,
-    getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
-    getPatches: EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
+    getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
+    getPatches: EvalScope.() -> EventsImpl<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>,
     storeFactory: MutableMapK.Factory<W, K>,
-): TFlowImpl<MuxResult<W, K, V>> =
+): EventsImpl<MuxResult<W, K, V>> =
     MuxLifecycle(MuxDeferredActivator(name, getStorage, storeFactory, getPatches))
 
 private class MuxDeferredActivator<W, K, V>(
     private val name: String?,
-    private val getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
+    private val getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
     private val storeFactory: MutableMapK.Factory<W, K>,
-    private val getPatches: EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
+    private val getPatches: EvalScope.() -> EventsImpl<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>,
 ) : MuxActivator<W, K, V> {
     override fun activate(
         evalScope: EvalScope,
@@ -381,11 +381,11 @@ private class MuxDeferredActivator<W, K, V>(
 }
 
 internal inline fun <A> mergeNodes(
-    crossinline getPulse: EvalScope.() -> TFlowImpl<A>,
-    crossinline getOther: EvalScope.() -> TFlowImpl<A>,
+    crossinline getPulse: EvalScope.() -> EventsImpl<A>,
+    crossinline getOther: EvalScope.() -> EventsImpl<A>,
     name: String? = null,
     crossinline f: EvalScope.(A, A) -> A,
-): TFlowImpl<A> {
+): EventsImpl<A> {
     val mergedThese = mergeNodes(name, getPulse, getOther)
     val merged =
         mapImpl({ mergedThese }) { these, _ -> these.merge { thiz, that -> f(thiz, that) } }
@@ -397,9 +397,9 @@ internal fun <T> Iterable<T>.asIterableWithIndex(): Iterable<Map.Entry<Int, T>> 
 
 internal inline fun <A, B> mergeNodes(
     name: String? = null,
-    crossinline getPulse: EvalScope.() -> TFlowImpl<A>,
-    crossinline getOther: EvalScope.() -> TFlowImpl<B>,
-): TFlowImpl<These<A, B>> {
+    crossinline getPulse: EvalScope.() -> EventsImpl<A>,
+    crossinline getOther: EvalScope.() -> EventsImpl<B>,
+): EventsImpl<These<A, B>> {
     val storage =
         listOf(
                 mapImpl(getPulse) { it, _ -> These.thiz<A, B>(it) },
@@ -426,8 +426,8 @@ internal inline fun <A, B> mergeNodes(
 }
 
 internal inline fun <A> mergeNodes(
-    crossinline getPulses: EvalScope.() -> Iterable<TFlowImpl<A>>
-): TFlowImpl<List<A>> {
+    crossinline getPulses: EvalScope.() -> Iterable<EventsImpl<A>>
+): EventsImpl<List<A>> {
     val switchNode =
         switchDeferredImpl(
             getStorage = { getPulses().asIterableWithIndex() },
@@ -443,8 +443,8 @@ internal inline fun <A> mergeNodes(
 }
 
 internal inline fun <A> mergeNodesLeft(
-    crossinline getPulses: EvalScope.() -> Iterable<TFlowImpl<A>>
-): TFlowImpl<A> {
+    crossinline getPulses: EvalScope.() -> Iterable<EventsImpl<A>>
+): EventsImpl<A> {
     val switchNode =
         switchDeferredImpl(
             getStorage = { getPulses().asIterableWithIndex() },

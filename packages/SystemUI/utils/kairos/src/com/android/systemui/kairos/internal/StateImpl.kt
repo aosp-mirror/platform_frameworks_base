@@ -27,15 +27,15 @@ import com.android.systemui.kairos.util.none
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-internal sealed interface TStateImpl<out A> {
+internal sealed interface StateImpl<out A> {
     val name: String?
     val operatorName: String
-    val changes: TFlowImpl<A>
+    val changes: EventsImpl<A>
 
     fun getCurrentWithEpoch(evalScope: EvalScope): Pair<A, Long>
 }
 
-internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) : TStateImpl<A> {
+internal sealed class StateDerived<A>(override val changes: EventsImpl<A>) : StateImpl<A> {
 
     @Volatile
     var invalidatedEpoch = Long.MIN_VALUE
@@ -73,17 +73,17 @@ internal sealed class TStateDerived<A>(override val changes: TFlowImpl<A>) : TSt
     private data object EmptyCache
 }
 
-internal class TStateSource<A>(
+internal class StateSource<A>(
     override val name: String?,
     override val operatorName: String,
     init: Lazy<A>,
-    override val changes: TFlowImpl<A>,
-) : TStateImpl<A> {
+    override val changes: EventsImpl<A>,
+) : StateImpl<A> {
     constructor(
         name: String?,
         operatorName: String,
         init: A,
-        changes: TFlowImpl<A>,
+        changes: EventsImpl<A>,
     ) : this(name, operatorName, CompletableLazy(init), changes)
 
     lateinit var upstreamConnection: NodeConnection<A>
@@ -108,26 +108,26 @@ internal class TStateSource<A>(
         writeEpoch = evalScope.epoch
     }
 
-    override fun toString(): String = "TStateImpl(changes=$changes, current=$_current)"
+    override fun toString(): String = "StateImpl(changes=$changes, current=$_current)"
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getStorageUnsafe(): Maybe<A> = if (_current.isInitialized()) just(_current.value) else none
 }
 
-internal fun <A> constS(name: String?, operatorName: String, init: A): TStateImpl<A> =
-    TStateSource(name, operatorName, init, neverImpl)
+internal fun <A> constState(name: String?, operatorName: String, init: A): StateImpl<A> =
+    StateSource(name, operatorName, init, neverImpl)
 
-internal inline fun <A> activatedTStateSource(
+internal inline fun <A> activatedStateSource(
     name: String?,
     operatorName: String,
     evalScope: EvalScope,
-    crossinline getChanges: EvalScope.() -> TFlowImpl<A>,
+    crossinline getChanges: EvalScope.() -> EventsImpl<A>,
     init: Lazy<A>,
-): TStateImpl<A> {
-    lateinit var state: TStateSource<A>
-    val calm: TFlowImpl<A> =
+): StateImpl<A> {
+    lateinit var state: StateSource<A>
+    val calm: EventsImpl<A> =
         filterImpl(getChanges) { new -> new != state.getCurrentWithEpoch(evalScope = this).first }
-    return TStateSource(name, operatorName, init, calm).also {
+    return StateSource(name, operatorName, init, calm).also {
         state = it
         evalScope.scheduleOutput(
             OneShot {
@@ -143,9 +143,9 @@ internal inline fun <A> activatedTStateSource(
     }
 }
 
-private inline fun <A> TFlowImpl<A>.calm(
-    crossinline getState: () -> TStateDerived<A>
-): TFlowImpl<A> =
+private inline fun <A> EventsImpl<A>.calm(
+    crossinline getState: () -> StateDerived<A>
+): EventsImpl<A> =
     filterImpl({ this@calm }) { new ->
             val state = getState()
             val (current, _) = state.getCurrentWithEpoch(evalScope = this)
@@ -158,11 +158,11 @@ private inline fun <A> TFlowImpl<A>.calm(
         }
         .cached()
 
-internal fun <A, B> TStateImpl<A>.mapCheap(
+internal fun <A, B> StateImpl<A>.mapCheap(
     name: String?,
     operatorName: String,
     transform: EvalScope.(A) -> B,
-): TStateImpl<B> =
+): StateImpl<B> =
     DerivedMapCheap(
         name,
         operatorName,
@@ -174,10 +174,10 @@ internal fun <A, B> TStateImpl<A>.mapCheap(
 internal class DerivedMapCheap<A, B>(
     override val name: String?,
     override val operatorName: String,
-    val upstream: TStateImpl<A>,
-    override val changes: TFlowImpl<B>,
+    val upstream: StateImpl<A>,
+    override val changes: EventsImpl<B>,
     private val transform: EvalScope.(A) -> B,
-) : TStateImpl<B> {
+) : StateImpl<B> {
 
     override fun getCurrentWithEpoch(evalScope: EvalScope): Pair<B, Long> {
         val (a, epoch) = upstream.getCurrentWithEpoch(evalScope)
@@ -187,12 +187,12 @@ internal class DerivedMapCheap<A, B>(
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 }
 
-internal fun <A, B> TStateImpl<A>.map(
+internal fun <A, B> StateImpl<A>.map(
     name: String?,
     operatorName: String,
     transform: EvalScope.(A) -> B,
-): TStateImpl<B> {
-    lateinit var state: TStateDerived<B>
+): StateImpl<B> {
+    lateinit var state: StateDerived<B>
     val mappedChanges = mapImpl({ changes }) { it, _ -> transform(it) }.cached().calm { state }
     state = DerivedMap(name, operatorName, transform, this, mappedChanges)
     return state
@@ -202,9 +202,9 @@ internal class DerivedMap<A, B>(
     override val name: String?,
     override val operatorName: String,
     private val transform: EvalScope.(A) -> B,
-    val upstream: TStateImpl<A>,
-    changes: TFlowImpl<B>,
-) : TStateDerived<B>(changes) {
+    val upstream: StateImpl<A>,
+    changes: EventsImpl<B>,
+) : StateDerived<B>(changes) {
     override fun toString(): String = "${this::class.simpleName}@$hashString"
 
     override fun recalc(evalScope: EvalScope): Pair<B, Long>? {
@@ -217,7 +217,7 @@ internal class DerivedMap<A, B>(
     }
 }
 
-internal fun <A> TStateImpl<TStateImpl<A>>.flatten(name: String?, operator: String): TStateImpl<A> {
+internal fun <A> StateImpl<StateImpl<A>>.flatten(name: String?, operator: String): StateImpl<A> {
     // emits the current value of the new inner state, when that state is emitted
     val switchEvents =
         mapImpl({ changes }) { newInner, _ -> newInner.getCurrentWithEpoch(this).first }
@@ -228,7 +228,7 @@ internal fun <A> TStateImpl<TStateImpl<A>>.flatten(name: String?, operator: Stri
         mapImpl({ changes }) { newInner, _ ->
             mergeNodes({ switchEvents }, { newInner.changes }) { _, new -> new }
         }
-    val switchedChanges: TFlowImpl<A> =
+    val switchedChanges: EventsImpl<A> =
         switchPromptImplSingle(
             getStorage = { this@flatten.getCurrentWithEpoch(evalScope = this).first.changes },
             getPatches = { innerChanges },
@@ -241,9 +241,9 @@ internal fun <A> TStateImpl<TStateImpl<A>>.flatten(name: String?, operator: Stri
 internal class DerivedFlatten<A>(
     override val name: String?,
     override val operatorName: String,
-    val upstream: TStateImpl<TStateImpl<A>>,
-    changes: TFlowImpl<A>,
-) : TStateDerived<A>(changes) {
+    val upstream: StateImpl<StateImpl<A>>,
+    changes: EventsImpl<A>,
+) : StateDerived<A>(changes) {
     override fun recalc(evalScope: EvalScope): Pair<A, Long> {
         val (inner, epoch0) = upstream.getCurrentWithEpoch(evalScope)
         val (a, epoch1) = inner.getCurrentWithEpoch(evalScope)
@@ -254,19 +254,19 @@ internal class DerivedFlatten<A>(
 }
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun <A, B> TStateImpl<A>.flatMap(
+internal inline fun <A, B> StateImpl<A>.flatMap(
     name: String?,
     operatorName: String,
-    noinline transform: EvalScope.(A) -> TStateImpl<B>,
-): TStateImpl<B> = map(null, operatorName, transform).flatten(name, operatorName)
+    noinline transform: EvalScope.(A) -> StateImpl<B>,
+): StateImpl<B> = map(null, operatorName, transform).flatten(name, operatorName)
 
 internal fun <A, B, Z> zipStates(
     name: String?,
     operatorName: String,
-    l1: TStateImpl<A>,
-    l2: TStateImpl<B>,
+    l1: StateImpl<A>,
+    l2: StateImpl<B>,
     transform: EvalScope.(A, B) -> Z,
-): TStateImpl<Z> =
+): StateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B)
     }
@@ -274,11 +274,11 @@ internal fun <A, B, Z> zipStates(
 internal fun <A, B, C, Z> zipStates(
     name: String?,
     operatorName: String,
-    l1: TStateImpl<A>,
-    l2: TStateImpl<B>,
-    l3: TStateImpl<C>,
+    l1: StateImpl<A>,
+    l2: StateImpl<B>,
+    l3: StateImpl<C>,
     transform: EvalScope.(A, B, C) -> Z,
-): TStateImpl<Z> =
+): StateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2, l3)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B, it[2] as C)
     }
@@ -286,12 +286,12 @@ internal fun <A, B, C, Z> zipStates(
 internal fun <A, B, C, D, Z> zipStates(
     name: String?,
     operatorName: String,
-    l1: TStateImpl<A>,
-    l2: TStateImpl<B>,
-    l3: TStateImpl<C>,
-    l4: TStateImpl<D>,
+    l1: StateImpl<A>,
+    l2: StateImpl<B>,
+    l3: StateImpl<C>,
+    l4: StateImpl<D>,
     transform: EvalScope.(A, B, C, D) -> Z,
-): TStateImpl<Z> =
+): StateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2, l3, l4)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST") transform(it[0] as A, it[1] as B, it[2] as C, it[3] as D)
     }
@@ -299,13 +299,13 @@ internal fun <A, B, C, D, Z> zipStates(
 internal fun <A, B, C, D, E, Z> zipStates(
     name: String?,
     operatorName: String,
-    l1: TStateImpl<A>,
-    l2: TStateImpl<B>,
-    l3: TStateImpl<C>,
-    l4: TStateImpl<D>,
-    l5: TStateImpl<E>,
+    l1: StateImpl<A>,
+    l2: StateImpl<B>,
+    l3: StateImpl<C>,
+    l4: StateImpl<D>,
+    l5: StateImpl<E>,
     transform: EvalScope.(A, B, C, D, E) -> Z,
-): TStateImpl<Z> =
+): StateImpl<Z> =
     zipStateList(null, operatorName, listOf(l1, l2, l3, l4, l5)).map(name, operatorName) {
         @Suppress("UNCHECKED_CAST")
         transform(it[0] as A, it[1] as B, it[2] as C, it[3] as D, it[4] as E)
@@ -314,8 +314,8 @@ internal fun <A, B, C, D, E, Z> zipStates(
 internal fun <K, V> zipStateMap(
     name: String?,
     operatorName: String,
-    states: Map<K, TStateImpl<V>>,
-): TStateImpl<Map<K, V>> =
+    states: Map<K, StateImpl<V>>,
+): StateImpl<Map<K, V>> =
     zipStates(
         name = name,
         operatorName = operatorName,
@@ -327,8 +327,8 @@ internal fun <K, V> zipStateMap(
 internal fun <V> zipStateList(
     name: String?,
     operatorName: String,
-    states: List<TStateImpl<V>>,
-): TStateImpl<List<V>> {
+    states: List<StateImpl<V>>,
+): StateImpl<List<V>> {
     val zipped =
         zipStates(
             name = name,
@@ -352,11 +352,11 @@ internal fun <W, K, A> zipStates(
     name: String?,
     operatorName: String,
     numStates: Int,
-    states: Iterable<Map.Entry<K, TStateImpl<A>>>,
+    states: Iterable<Map.Entry<K, StateImpl<A>>>,
     storeFactory: MutableMapK.Factory<W, K>,
-): TStateImpl<MutableMapK<W, K, A>> {
+): StateImpl<MutableMapK<W, K, A>> {
     if (numStates == 0) {
-        return constS(name, operatorName, storeFactory.create(0))
+        return constState(name, operatorName, storeFactory.create(0))
     }
     val stateChanges = states.asSequence().map { (k, v) -> StoreEntry(k, v.changes) }.asIterable()
     lateinit var state: DerivedZipped<W, K, A>
@@ -397,10 +397,10 @@ internal class DerivedZipped<W, K, A>(
     override val name: String?,
     override val operatorName: String,
     private val upstreamSize: Int,
-    val upstream: Iterable<Map.Entry<K, TStateImpl<A>>>,
-    changes: TFlowImpl<MutableMapK<W, K, A>>,
+    val upstream: Iterable<Map.Entry<K, StateImpl<A>>>,
+    changes: EventsImpl<MutableMapK<W, K, A>>,
     private val storeFactory: MutableMapK.Factory<W, K>,
-) : TStateDerived<MutableMapK<W, K, A>>(changes) {
+) : StateDerived<MutableMapK<W, K, A>>(changes) {
     override fun recalc(evalScope: EvalScope): Pair<MutableMapK<W, K, A>, Long> {
         val newEpoch = AtomicLong()
         val store = storeFactory.create<A>(upstreamSize)
@@ -419,10 +419,10 @@ internal class DerivedZipped<W, K, A>(
 internal inline fun <A> zipStates(
     name: String?,
     operatorName: String,
-    states: List<TStateImpl<A>>,
-): TStateImpl<List<A>> =
+    states: List<StateImpl<A>>,
+): StateImpl<List<A>> =
     if (states.isEmpty()) {
-        constS(name, operatorName, emptyList())
+        constState(name, operatorName, emptyList())
     } else {
         zipStateList(null, operatorName, states)
     }

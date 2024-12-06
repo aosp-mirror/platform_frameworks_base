@@ -88,7 +88,7 @@ internal class InputNode<A>(
         }
 }
 
-internal fun <A> InputNode<A>.activated() = TFlowCheap { downstream ->
+internal fun <A> InputNode<A>.activated() = EventsImplCheap { downstream ->
     val input = this@activated
     addDownstreamAndActivateIfNeeded(downstream, evalScope = this)
     ActivationResult(

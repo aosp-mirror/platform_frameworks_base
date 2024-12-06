@@ -340,7 +340,7 @@ internal class DepthTracker {
 internal class DownstreamSet {
 
     val outputs = HashSet<Output<*>>()
-    val stateWriters = mutableListOf<TStateSource<*>>()
+    val stateWriters = mutableListOf<StateSource<*>>()
     val muxMovers = HashSet<MuxDeferredNode<*, *, *>>()
     val nodes = HashSet<SchedulableNode>()
 
@@ -459,7 +459,7 @@ internal class DownstreamSet {
 
 // TODO: remove this indirection
 internal sealed interface Schedulable {
-    data class S constructor(val state: TStateSource<*>) : Schedulable
+    data class S constructor(val state: StateSource<*>) : Schedulable
 
     data class M constructor(val muxMover: MuxDeferredNode<*, *, *>) : Schedulable
 

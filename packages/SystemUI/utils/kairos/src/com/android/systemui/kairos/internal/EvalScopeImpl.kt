@@ -16,49 +16,54 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.FrpDeferredValue
-import com.android.systemui.kairos.FrpTransactionScope
-import com.android.systemui.kairos.TFlow
-import com.android.systemui.kairos.TFlowInit
-import com.android.systemui.kairos.TFlowLoop
-import com.android.systemui.kairos.TState
-import com.android.systemui.kairos.TStateInit
+import com.android.systemui.kairos.DeferredValue
+import com.android.systemui.kairos.Events
+import com.android.systemui.kairos.EventsInit
+import com.android.systemui.kairos.EventsLoop
+import com.android.systemui.kairos.State
+import com.android.systemui.kairos.StateInit
+import com.android.systemui.kairos.TransactionScope
 import com.android.systemui.kairos.Transactional
-import com.android.systemui.kairos.emptyTFlow
+import com.android.systemui.kairos.emptyEvents
 import com.android.systemui.kairos.init
 import com.android.systemui.kairos.mapCheap
-import com.android.systemui.kairos.switch
+import com.android.systemui.kairos.switchEvents
 
 internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope) :
-    EvalScope, NetworkScope by networkScope, DeferScope by deferScope {
+    EvalScope, NetworkScope by networkScope, DeferScope by deferScope, TransactionScope {
 
-    private fun <A> Transactional<A>.sample(): A = impl.sample().sample(this@EvalScopeImpl).value
+    override fun <A> Transactional<A>.sampleDeferred(): DeferredValue<A> =
+        DeferredValue(deferAsync { impl.sample().sample(this@EvalScopeImpl).value })
 
-    private fun <A> TState<A>.sample(): A =
-        init.connect(evalScope = this@EvalScopeImpl).getCurrentWithEpoch(this@EvalScopeImpl).first
+    override fun <A> State<A>.sampleDeferred(): DeferredValue<A> =
+        DeferredValue(
+            deferAsync {
+                init
+                    .connect(evalScope = this@EvalScopeImpl)
+                    .getCurrentWithEpoch(this@EvalScopeImpl)
+                    .first
+            }
+        )
 
-    private val <A> Transactional<A>.deferredValue: FrpDeferredValue<A>
-        get() = FrpDeferredValue(deferAsync { sample() })
+    override fun <R> deferredTransactionScope(block: TransactionScope.() -> R): DeferredValue<R> =
+        DeferredValue(deferAsync { block() })
 
-    private val <A> TState<A>.deferredValue: FrpDeferredValue<A>
-        get() = FrpDeferredValue(deferAsync { sample() })
-
-    private val nowInternal: TFlow<Unit> by lazy {
-        var result by TFlowLoop<Unit>()
+    override val now: Events<Unit> by lazy {
+        var result by EventsLoop<Unit>()
         result =
-            TStateInit(
+            StateInit(
                     constInit(
                         "now",
-                        activatedTStateSource(
+                        activatedStateSource(
                             "now",
                             "now",
                             this,
-                            { result.mapCheap { emptyTFlow }.init.connect(evalScope = this) },
+                            { result.mapCheap { emptyEvents }.init.connect(evalScope = this) },
                             CompletableLazy(
-                                TFlowInit(
+                                EventsInit(
                                     constInit(
                                         "now",
-                                        TFlowCheap {
+                                        EventsImplCheap {
                                             ActivationResult(
                                                 connection = NodeConnection(AlwaysNode, AlwaysNode),
                                                 needsEval = true,
@@ -70,27 +75,7 @@ internal class EvalScopeImpl(networkScope: NetworkScope, deferScope: DeferScope)
                         ),
                     )
                 )
-                .switch()
+                .switchEvents()
         result
-    }
-
-    private fun <R> deferredInternal(block: FrpTransactionScope.() -> R): FrpDeferredValue<R> =
-        FrpDeferredValue(deferAsync { runInTransactionScope(block) })
-
-    override fun <R> runInTransactionScope(block: FrpTransactionScope.() -> R): R = frpScope.block()
-
-    override val frpScope: FrpTransactionScope = FrpTransactionScopeImpl()
-
-    inner class FrpTransactionScopeImpl : FrpTransactionScope {
-        override fun <A> Transactional<A>.sampleDeferred(): FrpDeferredValue<A> = deferredValue
-
-        override fun <A> TState<A>.sampleDeferred(): FrpDeferredValue<A> = deferredValue
-
-        override fun <R> deferredTransactionScope(
-            block: FrpTransactionScope.() -> R
-        ): FrpDeferredValue<R> = deferredInternal(block)
-
-        override val now: TFlow<Unit>
-            get() = nowInternal
     }
 }

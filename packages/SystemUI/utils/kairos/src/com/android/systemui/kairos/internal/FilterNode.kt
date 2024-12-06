@@ -24,8 +24,8 @@ import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 
 internal inline fun <A> filterJustImpl(
-    crossinline getPulse: EvalScope.() -> TFlowImpl<Maybe<A>>
-): TFlowImpl<A> =
+    crossinline getPulse: EvalScope.() -> EventsImpl<Maybe<A>>
+): EventsImpl<A> =
     DemuxImpl(
             mapImpl(getPulse) { maybeResult, _ ->
                 if (maybeResult is Just) {
@@ -40,9 +40,9 @@ internal inline fun <A> filterJustImpl(
         .eventsForKey(Unit)
 
 internal inline fun <A> filterImpl(
-    crossinline getPulse: EvalScope.() -> TFlowImpl<A>,
+    crossinline getPulse: EvalScope.() -> EventsImpl<A>,
     crossinline f: EvalScope.(A) -> Boolean,
-): TFlowImpl<A> {
+): EventsImpl<A> {
     val mapped = mapImpl(getPulse) { it, _ -> if (f(it)) just(it) else none }.cached()
     return filterJustImpl { mapped }
 }

@@ -16,10 +16,6 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.FrpScope
+import com.android.systemui.kairos.KairosScope
 
-internal object NoScope {
-    private object FrpScopeImpl : FrpScope
-
-    fun <R> runInFrpScope(block: FrpScope.() -> R): R = FrpScopeImpl.block()
-}
+internal object NoScope : KairosScope

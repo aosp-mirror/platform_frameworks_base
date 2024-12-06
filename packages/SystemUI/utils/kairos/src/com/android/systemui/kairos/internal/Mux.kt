@@ -272,9 +272,9 @@ internal typealias BranchNode<W, K, V> = MuxNode<W, K, V>.BranchNode
 
 /** Tracks lifecycle of MuxNode in the network. Essentially a mutable ref for MuxLifecycleState. */
 internal class MuxLifecycle<W, K, V>(var lifecycleState: MuxLifecycleState<W, K, V>) :
-    TFlowImpl<MuxResult<W, K, V>> {
+    EventsImpl<MuxResult<W, K, V>> {
 
-    override fun toString(): String = "TFlowMuxLifecycle[$hashString][$lifecycleState]"
+    override fun toString(): String = "MuxLifecycle[$hashString][$lifecycleState]"
 
     override fun activate(
         evalScope: EvalScope,
@@ -332,9 +332,9 @@ internal interface MuxActivator<W, K, V> {
 
 internal inline fun <W, K, V> MuxLifecycle(
     onSubscribe: MuxActivator<W, K, V>
-): TFlowImpl<MuxResult<W, K, V>> = MuxLifecycle(MuxLifecycleState.Inactive(onSubscribe))
+): EventsImpl<MuxResult<W, K, V>> = MuxLifecycle(MuxLifecycleState.Inactive(onSubscribe))
 
-internal fun <K, V> TFlowImpl<MuxResult<MapHolder.W, K, V>>.awaitValues(): TFlowImpl<Map<K, V>> =
+internal fun <K, V> EventsImpl<MuxResult<MapHolder.W, K, V>>.awaitValues(): EventsImpl<Map<K, V>> =
     mapImpl({ this@awaitValues }) { results, logIndent ->
         results.asMapHolder().unwrapped.mapValues { it.value.getPushEvent(logIndent, this) }
     }
@@ -343,15 +343,15 @@ internal fun <K, V> TFlowImpl<MuxResult<MapHolder.W, K, V>>.awaitValues(): TFlow
 
 internal fun <W, K, V> MuxNode<W, K, V>.initializeUpstream(
     evalScope: EvalScope,
-    getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
+    getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
     storeFactory: MutableMapK.Factory<W, K>,
 ) {
     val storage = getStorage(evalScope)
     val initUpstream = buildList {
-        storage.forEach { (key, flow) ->
+        storage.forEach { (key, events) ->
             val branchNode = BranchNode(key)
             add(
-                flow.activate(evalScope, branchNode.schedulable)?.let { (conn, needsEval) ->
+                events.activate(evalScope, branchNode.schedulable)?.let { (conn, needsEval) ->
                     Triple(
                         key,
                         branchNode.apply { upstream = conn },

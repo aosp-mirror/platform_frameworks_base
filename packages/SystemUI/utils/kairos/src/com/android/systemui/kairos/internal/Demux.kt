@@ -205,7 +205,7 @@ internal class DemuxNode<W, K, A>(
 }
 
 internal fun <W, K, A> DemuxImpl(
-    upstream: TFlowImpl<MapK<W, K, A>>,
+    upstream: EventsImpl<MapK<W, K, A>>,
     numKeys: Int?,
     storeFactory: MutableMapK.Factory<W, K>,
 ): DemuxImpl<K, A> =
@@ -216,14 +216,14 @@ internal fun <W, K, A> DemuxImpl(
     )
 
 internal fun <K, A> demuxMap(
-    upstream: EvalScope.() -> TFlowImpl<Map<K, A>>,
+    upstream: EvalScope.() -> EventsImpl<Map<K, A>>,
     numKeys: Int?,
 ): DemuxImpl<K, A> =
     DemuxImpl(mapImpl(upstream) { it, _ -> MapHolder(it) }, numKeys, ConcurrentHashMapK.Factory())
 
 internal class DemuxActivator<W, K, A>(
     private val numKeys: Int?,
-    private val upstream: TFlowImpl<MapK<W, K, A>>,
+    private val upstream: EventsImpl<MapK<W, K, A>>,
     private val storeFactory: MutableMapK.Factory<W, K>,
 ) {
     fun activate(
@@ -246,7 +246,7 @@ internal class DemuxActivator<W, K, A>(
 }
 
 internal class DemuxImpl<in K, out A>(private val dmux: DemuxLifecycle<K, A>) {
-    fun eventsForKey(key: K): TFlowImpl<A> = TFlowCheap { downstream ->
+    fun eventsForKey(key: K): EventsImpl<A> = EventsImplCheap { downstream ->
         dmux.activate(evalScope = this, key)?.let { (branchNode, needsEval) ->
             branchNode.addDownstream(downstream)
             val branchNeedsEval = needsEval && branchNode.hasCurrentValue(0, evalScope = this)

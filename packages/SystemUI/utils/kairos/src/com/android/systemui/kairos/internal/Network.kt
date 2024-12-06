@@ -16,7 +16,7 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.TState
+import com.android.systemui.kairos.State
 import com.android.systemui.kairos.internal.util.HeteroMap
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.internal.util.logLn
@@ -68,7 +68,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
     }
     override val transactionStore = TransactionStore()
 
-    private val stateWrites = ArrayDeque<TStateSource<*>>()
+    private val stateWrites = ArrayDeque<StateSource<*>>()
     private val outputsByDispatcher = HashMap<ContinuationInterceptor, ArrayDeque<Output<*>>>()
     private val muxMovers = ArrayDeque<MuxDeferredNode<*, *, *>>()
     private val deactivations = ArrayDeque<PushNode<*>>()
@@ -86,7 +86,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         muxMovers.add(muxMover)
     }
 
-    override fun schedule(state: TStateSource<*>) {
+    override fun schedule(state: StateSource<*>) {
         stateWrites.add(state)
     }
 
@@ -98,7 +98,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         outputDeactivations.add(output)
     }
 
-    /** Listens for external events and starts FRP transactions. Runs forever. */
+    /** Listens for external events and starts Kairos transactions. Runs forever. */
     suspend fun runInputScheduler() {
         val actions = mutableListOf<ScheduledAction<*>>()
         for (first in inputScheduleChan) {
@@ -161,7 +161,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         block(EvalScopeImpl(this@Network, this))
     }
 
-    /** Performs a transactional update of the FRP network. */
+    /** Performs a transactional update of the Kairos network. */
     private suspend fun doTransaction(logIndent: Int) {
         // Traverse network, then run outputs
         logDuration(logIndent, "traverse network") {
@@ -227,7 +227,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         }
     }
 
-    /** Updates all [TState]es that have changed within this transaction. */
+    /** Updates all [State]es that have changed within this transaction. */
     private fun evalStateWriters(logIndent: Int, evalScope: EvalScope) {
         while (stateWrites.isNotEmpty()) {
             val latch = stateWrites.removeFirst()

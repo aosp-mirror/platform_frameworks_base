@@ -35,13 +35,13 @@ internal class MuxPromptNode<W, K, V>(
     factory: MutableMapK.Factory<W, K>,
 ) : MuxNode<W, K, V>(lifecycle, factory) {
 
-    var patchData: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = null
+    var patchData: Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>? = null
     var patches: PatchNode? = null
 
     override fun visit(logIndent: Int, evalScope: EvalScope) {
         check(epoch < evalScope.epoch) { "node unexpectedly visited multiple times in transaction" }
         logDuration(logIndent, "MuxPrompt.visit") {
-            val patch: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>? = patchData
+            val patch: Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>? = patchData
             patchData = null
 
             // If there's a patch, process it.
@@ -85,12 +85,12 @@ internal class MuxPromptNode<W, K, V>(
 
     // side-effect: this will populate `upstreamData` with any immediately available results
     private fun LogIndent.processPatch(
-        patch: Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>,
+        patch: Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>,
         evalScope: EvalScope,
     ): Boolean {
         var needsReschedule = false
         // We have a patch, process additions/updates and removals
-        val adds = mutableListOf<Pair<K, TFlowImpl<V>>>()
+        val adds = mutableListOf<Pair<K, EventsImpl<V>>>()
         val removes = mutableListOf<K>()
         patch.forEach { (k, newUpstream) ->
             when (newUpstream) {
@@ -115,7 +115,7 @@ internal class MuxPromptNode<W, K, V>(
         }
 
         // add or replace
-        adds.forEach { (k, newUpstream: TFlowImpl<V>) ->
+        adds.forEach { (k, newUpstream: EventsImpl<V>) ->
             // remove old and sever, if present
             switchedIn.remove(k)?.let { oldBranch: BranchNode ->
                 if (name != null) {
@@ -232,7 +232,7 @@ internal class MuxPromptNode<W, K, V>(
 
         val schedulable = Schedulable.N(this)
 
-        lateinit var upstream: NodeConnection<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>
+        lateinit var upstream: NodeConnection<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>
 
         override fun schedule(logIndent: Int, evalScope: EvalScope) {
             logDuration(logIndent, "MuxPromptPatchNode.schedule") {
@@ -304,9 +304,9 @@ internal class MuxPromptNode<W, K, V>(
 }
 
 internal inline fun <A> switchPromptImplSingle(
-    crossinline getStorage: EvalScope.() -> TFlowImpl<A>,
-    crossinline getPatches: EvalScope.() -> TFlowImpl<TFlowImpl<A>>,
-): TFlowImpl<A> {
+    crossinline getStorage: EvalScope.() -> EventsImpl<A>,
+    crossinline getPatches: EvalScope.() -> EventsImpl<EventsImpl<A>>,
+): EventsImpl<A> {
     val switchPromptImpl =
         switchPromptImpl(
             getStorage = { singleOf(getStorage()).asIterable() },
@@ -322,17 +322,17 @@ internal inline fun <A> switchPromptImplSingle(
 
 internal fun <W, K, V> switchPromptImpl(
     name: String? = null,
-    getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
-    getPatches: EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
+    getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
+    getPatches: EvalScope.() -> EventsImpl<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>,
     storeFactory: MutableMapK.Factory<W, K>,
-): TFlowImpl<MuxResult<W, K, V>> =
+): EventsImpl<MuxResult<W, K, V>> =
     MuxLifecycle(MuxPromptActivator(name, getStorage, storeFactory, getPatches))
 
 private class MuxPromptActivator<W, K, V>(
     private val name: String?,
-    private val getStorage: EvalScope.() -> Iterable<Map.Entry<K, TFlowImpl<V>>>,
+    private val getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
     private val storeFactory: MutableMapK.Factory<W, K>,
-    private val getPatches: EvalScope.() -> TFlowImpl<Iterable<Map.Entry<K, Maybe<TFlowImpl<V>>>>>,
+    private val getPatches: EvalScope.() -> EventsImpl<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>,
 ) : MuxActivator<W, K, V> {
     override fun activate(
         evalScope: EvalScope,

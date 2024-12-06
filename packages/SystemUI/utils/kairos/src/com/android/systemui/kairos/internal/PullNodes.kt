@@ -18,7 +18,7 @@ package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.util.logDuration
 
-internal val neverImpl: TFlowImpl<Nothing> = TFlowCheap { null }
+internal val neverImpl: EventsImpl<Nothing> = EventsImplCheap { null }
 
 internal class MapNode<A, B>(val upstream: PullNode<A>, val transform: EvalScope.(A, Int) -> B) :
     PullNode<B> {
@@ -31,9 +31,9 @@ internal class MapNode<A, B>(val upstream: PullNode<A>, val transform: EvalScope
 }
 
 internal inline fun <A, B> mapImpl(
-    crossinline upstream: EvalScope.() -> TFlowImpl<A>,
+    crossinline upstream: EvalScope.() -> EventsImpl<A>,
     noinline transform: EvalScope.(A, Int) -> B,
-): TFlowImpl<B> = TFlowCheap { downstream ->
+): EventsImpl<B> = EventsImplCheap { downstream ->
     upstream().activate(evalScope = this, downstream)?.let { (connection, needsEval) ->
         ActivationResult(
             connection =
@@ -66,9 +66,9 @@ internal class CachedNode<A>(
         }
 }
 
-internal fun <A> TFlowImpl<A>.cached(): TFlowImpl<A> {
+internal fun <A> EventsImpl<A>.cached(): EventsImpl<A> {
     val key = TransactionCache<Lazy<A>>()
-    return TFlowCheap { it ->
+    return EventsImplCheap { it ->
         activate(this, it)?.let { (connection, needsEval) ->
             ActivationResult(
                 connection =
