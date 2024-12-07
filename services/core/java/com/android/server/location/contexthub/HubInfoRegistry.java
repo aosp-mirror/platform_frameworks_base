@@ -198,7 +198,8 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                 removedInfoList.toArray(new HubEndpointInfo[removedInfoList.size()]),
                 (cb, infoList) -> {
                     try {
-                        cb.onEndpointsStopped(infoList, reason);
+                        cb.onEndpointsStopped(
+                                infoList, ContextHubServiceUtil.toAppHubEndpointReason(reason));
                     } catch (RemoteException e) {
                         if (e instanceof DeadObjectException) {
                             Log.w(TAG, "onEndpointStopped: callback died, unregistering");

@@ -276,7 +276,8 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         }
         if (mContextHubEndpointCallback != null) {
             try {
-                mContextHubEndpointCallback.onSessionClosed(sessionId, reason);
+                mContextHubEndpointCallback.onSessionClosed(
+                        sessionId, ContextHubServiceUtil.toAppHubEndpointReason(reason));
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onSessionClosed", e);
             }
