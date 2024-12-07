@@ -49,11 +49,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)
 
-    private val iconsInteractor =
-        FakeMobileIconsInteractor(
-            FakeMobileMappingsProxy(),
-            mock(),
-        )
+    private val iconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 
     private val repo = FakeDeviceBasedSatelliteRepository()
     private val connectivityRepository = FakeConnectivityRepository()
@@ -515,7 +511,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // GIVEN, 2 connection
             val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
-            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
 
             // WHEN all connections are NOT OOS.
             i1.isInService.value = true
@@ -547,7 +543,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             // GIVEN a condition that should return true (all conections OOS)
 
             val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
-            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
 
             i1.isInService.value = true
             i2.isInService.value = true
@@ -578,5 +574,41 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // THEN the interactor returns true due to the wifi network being active
             assertThat(latest).isTrue()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun isAnyConnectionNtn_trueWhenAnyNtn() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAnyConnectionNtn)
+
+            // GIVEN, 2 connection
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
+
+            // WHEN at least one connection is using ntn
+            i1.isNonTerrestrial.value = true
+            i2.isNonTerrestrial.value = false
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun isAnyConnectionNtn_falseWhenNoNtn() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAnyConnectionNtn)
+
+            // GIVEN, 2 connection
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
+
+            // WHEN at no connection is using ntn
+            i1.isNonTerrestrial.value = false
+            i2.isNonTerrestrial.value = false
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isFalse()
         }
 }

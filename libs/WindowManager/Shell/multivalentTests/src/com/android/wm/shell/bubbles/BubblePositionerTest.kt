@@ -602,8 +602,72 @@ class BubblePositionerTest {
         testGetBubbleBarExpandedViewBounds(onLeft = false, isOverflow = true)
     }
 
+    @Test
+    fun getExpandedViewContainerPadding_largeScreen_fitsMaxViewWidth() {
+        val expandedViewWidth = context.resources.getDimensionPixelSize(
+            R.dimen.bubble_expanded_view_largescreen_width
+        )
+        // set the screen size so that it is wide enough to fit the maximum width size
+        val screenWidth = expandedViewWidth * 2
+        positioner.update(
+            defaultDeviceConfig.copy(
+                windowBounds = Rect(0, 0, screenWidth, 2000),
+                isLargeScreen = true,
+                isLandscape = false
+            )
+        )
+        val paddings =
+            positioner.getExpandedViewContainerPadding(/* onLeft= */ true, /* isOverflow= */ false)
+
+        val padding = context.resources.getDimensionPixelSize(
+            R.dimen.bubble_expanded_view_largescreen_landscape_padding
+        )
+        val right = screenWidth - expandedViewWidth - padding
+        assertThat(paddings).isEqualTo(intArrayOf(padding - positioner.pointerSize, 0, right, 0))
+    }
+
+    @Test
+    fun getExpandedViewContainerPadding_largeScreen_doesNotFitMaxViewWidth() {
+        positioner.update(
+            defaultDeviceConfig.copy(
+                windowBounds = Rect(0, 0, 600, 2000),
+                isLargeScreen = true,
+                isLandscape = false
+            )
+        )
+        val paddings =
+            positioner.getExpandedViewContainerPadding(/* onLeft= */ true, /* isOverflow= */ false)
+
+        val padding = context.resources.getDimensionPixelSize(
+            R.dimen.bubble_expanded_view_largescreen_landscape_padding
+        )
+        // the screen is not wide enough to fit the maximum width size, so the view fills the screen
+        // minus left and right padding
+        assertThat(paddings).isEqualTo(intArrayOf(padding - positioner.pointerSize, 0, padding, 0))
+    }
+
+    @Test
+    fun getExpandedViewContainerPadding_smallTablet() {
+        val screenWidth = 500
+        positioner.update(
+            defaultDeviceConfig.copy(
+                windowBounds = Rect(0, 0, screenWidth, 2000),
+                isLargeScreen = true,
+                isSmallTablet = true,
+                isLandscape = false
+            )
+        )
+        val paddings =
+            positioner.getExpandedViewContainerPadding(/* onLeft= */ true, /* isOverflow= */ false)
+
+        // for small tablets, the view width is set to be 0.72 * screen width
+        val viewWidth = (screenWidth * 0.72).toInt()
+        val padding = (screenWidth - viewWidth) / 2
+        assertThat(paddings).isEqualTo(intArrayOf(padding - positioner.pointerSize, 0, padding, 0))
+    }
+
     private fun testGetBubbleBarExpandedViewBounds(onLeft: Boolean, isOverflow: Boolean) {
-        positioner.setShowingInBubbleBar(true)
+        positioner.isShowingInBubbleBar = true
         val windowBounds = Rect(0, 0, 2000, 2600)
         val insets = Insets.of(10, 20, 5, 15)
         val deviceConfig =

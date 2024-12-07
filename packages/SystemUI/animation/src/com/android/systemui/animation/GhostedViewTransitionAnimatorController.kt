@@ -397,6 +397,10 @@ constructor(
             ghostedView.visibility = View.VISIBLE
             ghostedView.invalidate()
         }
+
+        if (isEphemeral) {
+            onDispose()
+        }
     }
 
     companion object {

@@ -296,8 +296,8 @@ public class InsetsState implements Parcelable {
             @SoftInputModeFlags int softInputMode, int windowFlags) {
         final int softInputAdjustMode = softInputMode & SOFT_INPUT_MASK_ADJUST;
         final int visibleInsetsTypes = softInputAdjustMode != SOFT_INPUT_ADJUST_NOTHING
-                ? systemBars() | ime()
-                : systemBars();
+                ? systemBars() | displayCutout() | ime()
+                : systemBars() | displayCutout();
         @InsetsType int forceConsumingTypes = 0;
         Insets insets = Insets.NONE;
         for (int i = mSources.size() - 1; i >= 0; i--) {

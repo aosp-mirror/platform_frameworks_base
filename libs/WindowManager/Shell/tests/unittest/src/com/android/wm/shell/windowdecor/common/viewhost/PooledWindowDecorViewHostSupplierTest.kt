@@ -18,14 +18,19 @@ package com.android.wm.shell.windowdecor.common.viewhost
 import android.content.res.Configuration
 import android.graphics.Region
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
 import android.view.View
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,14 +43,39 @@ import org.mockito.kotlin.mock
  * Build/Install/Run: atest WMShellUnitTests:PooledWindowDecorViewHostSupplierTest
  */
 @SmallTest
+@RunWithLooper
 @RunWith(AndroidTestingRunner::class)
 class PooledWindowDecorViewHostSupplierTest : ShellTestCase() {
+
+    private val testExecutor = TestShellExecutor()
+    private val testShellInit = ShellInit(testExecutor)
 
     private lateinit var supplier: PooledWindowDecorViewHostSupplier
 
     @Test
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun onInit_warmsAndPoolsViewHosts() = runTest {
+        supplier = createSupplier(maxPoolSize = 5, preWarmSize = 2)
+
+        testExecutor.flushAll()
+        advanceUntilIdle()
+
+        val viewHost1 = supplier.acquire(context, context.display) as ReusableWindowDecorViewHost
+        val viewHost2 = supplier.acquire(context, context.display) as ReusableWindowDecorViewHost
+
+        // Acquired warmed up view hosts from the pool.
+        assertThat(viewHost1.viewHostAdapter.isInitialized()).isTrue()
+        assertThat(viewHost2.viewHostAdapter.isInitialized()).isTrue()
+    }
+
+    @Test(expected = Throwable::class)
+    fun onInit_warmUpSizeExceedsPoolSize_throws() = runTest {
+        createSupplier(maxPoolSize = 3, preWarmSize = 4)
     }
 
     @Test
@@ -97,8 +127,9 @@ class PooledWindowDecorViewHostSupplierTest : ShellTestCase() {
         assertThat(viewHost2.released).isTrue()
     }
 
-    private fun CoroutineScope.createSupplier(maxPoolSize: Int) =
-        PooledWindowDecorViewHostSupplier(this, maxPoolSize)
+    private fun CoroutineScope.createSupplier(maxPoolSize: Int, preWarmSize: Int = 0) =
+        PooledWindowDecorViewHostSupplier(context, this, testShellInit, maxPoolSize, preWarmSize)
+            .also { testShellInit.init() }
 
     private class FakeWindowDecorViewHost : WindowDecorViewHost {
         var released = false

@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाएं"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{कोई सूचना नहीं है}=1{{mode} की वजह से सूचना नहीं दिख रही है}=2{{mode} और एक अन्य मोड की वजह से सूचना नहीं दिख रही है}one{{mode} और # अन्य मोड की वजह से सूचना नहीं दिख रही है}other{{mode} और # अन्य मोड के की वजह से सूचनाएं नहीं दिख रही है}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"हेड ट्रैकिंग चालू है"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिंगर मोड बदलने के लिए टैप करें"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"रिंगर मोड"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करें"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्यूट करें"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"वाइब्रेशन की सुविधा चालू करें"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"अपने कीबोर्ड पर ऐक्शन बटन दबाएं"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"बहुत खूब!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"अब आपको हाथ के जेस्चर का इस्तेमाल करके, सभी ऐप्लिकेशन देखने का तरीका पता चल गया है"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड की बैकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d में से %1$d लेवल"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>

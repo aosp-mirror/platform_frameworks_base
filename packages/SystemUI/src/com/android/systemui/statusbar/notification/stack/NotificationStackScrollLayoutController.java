@@ -429,9 +429,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     };
 
     /**
-     * Recalculate sensitiveness without animation; called when waking up while keyguard occluded.
+     * Recalculate sensitiveness without animation; called when waking up while keyguard occluded,
+     * or whenever we update the Lockscreen public mode.
      */
-    public void updateSensitivenessForOccludedWakeup() {
+    public void updateSensitivenessWithoutAnimation() {
         updateSensitivenessWithAnimation(false);
     }
 

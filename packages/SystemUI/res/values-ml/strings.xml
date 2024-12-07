@@ -529,10 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"വിജറ്റ് ഉപയോഗിച്ച് ഒരു ആപ്പ് തുറക്കാൻ, ഇത് നിങ്ങൾ തന്നെയാണെന്ന് പരിശോധിച്ചുറപ്പിക്കേണ്ടതുണ്ട്. നിങ്ങളുടെ ടാബ്‌ലെറ്റ് ലോക്കായിരിക്കുമ്പോഴും എല്ലാവർക്കും അത് കാണാനാകുമെന്നതും ഓർക്കുക. ചില വിജറ്റുകൾ നിങ്ങളുടെ ലോക്ക് സ്‌ക്രീനിന് ഉള്ളതായിരിക്കില്ല, അവ ഇവിടെ ചേർക്കുന്നത് സുരക്ഷിതവുമായിരിക്കില്ല."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"മനസ്സിലായി"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"വിജറ്റുകൾ"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"വിജറ്റുകൾ\" കുറുക്കുവഴി ചേർക്കാൻ, ക്രമീകരണത്തിൽ \"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ കാണിക്കുക\" പ്രവർത്തനക്ഷമമാക്കിയെന്ന് ഉറപ്പാക്കുക."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ക്രമീകരണം"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
@@ -593,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"അറിയിപ്പുകൾ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"സംഭാഷണങ്ങൾ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"എല്ലാ നിശബ്‌ദ അറിയിപ്പുകളും മായ്ക്കുക"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ശല്യപ്പെടുത്തരുത്\' വഴി അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{അറിയിപ്പുകൾ ഒന്നുമില്ല}=1{{mode}, അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തിയിരിക്കുന്നു}=2{{mode} എന്നതും മറ്റൊരു മോഡും, അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തിയിരിക്കുന്നു}other{{mode} എന്നതും മറ്റ് # മോഡുകളും, അറിയിപ്പുകൾ താൽക്കാലികമായി നിർത്തിയിരിക്കുന്നു}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ഇപ്പോൾ ആരംഭിക്കുക"</string>
@@ -707,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ഹെഡ് ട്രാക്കിംഗ്"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"റിംഗർ മോഡ് മാറ്റാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"റിംഗർ മോഡ്"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"മ്യൂട്ട് ചെയ്യുക"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"അൺമ്യൂട്ട് ചെയ്യുക"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"വൈബ്രേറ്റ് ചെയ്യുക"</string>
@@ -1426,12 +1428,10 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"കീബോഡ് കുറുക്കുവഴികൾ"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"കീബോർഡ് കുറുക്കുവഴികൾ ഇഷ്ടാനുസൃതമാക്കുക"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"കുറുക്കുവഴി നീക്കം ചെയ്യണോ?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"ഡിഫോൾട്ടിലേക്ക് തിരികെ റീസെറ്റ് ചെയ്യണോ?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"കുറുക്കുവഴി അസൈൻ ചെയ്യാൻ കീ അമർത്തുക"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ഇത് നിങ്ങളുടെ ഇഷ്‌ടാനുസൃത കുറുക്കുവഴി ശാശ്വതമായി ഇല്ലാതാക്കും."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"നിങ്ങളുടെ എല്ലാ ഇഷ്‍ടാനുസൃത കുറുക്കുവഴികളും ശാശ്വതമായി ഇത് ഇല്ലാതാക്കും."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"തിരയൽ കുറുക്കുവഴികൾ"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"തിരയൽ ഫലങ്ങളൊന്നുമില്ല"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ചുരുക്കൽ ഐക്കൺ"</string>
@@ -1449,8 +1449,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"കീബോർഡ് ക്രമീകരണം"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"കുറുക്കുവഴി സജ്ജീകരിക്കുക"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"നീക്കം ചെയ്യുക"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ഉവ്വ്, റീസെറ്റ് ചെയ്യുക"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"റദ്ദാക്കുക"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"കീ അമർത്തുക"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"കീ കോമ്പിനേഷൻ ഇതിനകം ഉപയോഗത്തിലുണ്ട്. മറ്റൊരു കീ പരീക്ഷിക്കുക."</string>
@@ -1482,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"നിങ്ങളുടെ കീബോർഡിലെ ആക്ഷൻ കീ അമർത്തുക"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"അഭിനന്ദനങ്ങൾ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"\'എല്ലാ ആപ്പുകളും കാണുക\' ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"കീബോഡ് ബാക്ക്‌ലൈറ്റ്"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-ൽ %1$d-ാമത്തെ ലെവൽ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ഹോം കൺട്രോളുകൾ"</string>

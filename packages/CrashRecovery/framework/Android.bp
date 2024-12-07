@@ -14,7 +14,11 @@ java_sdk_library {
     name: "framework-platformcrashrecovery",
     srcs: [":framework-crashrecovery-sources"],
     defaults: ["framework-non-updatable-unbundled-defaults"],
-    permitted_packages: ["android.service.watchdog"],
+    permitted_packages: [
+        "android.service.watchdog",
+        "android.crashrecovery",
+    ],
+    static_libs: ["android.crashrecovery.flags-aconfig-java"],
     aidl: {
         include_dirs: [
             "frameworks/base/core/java",

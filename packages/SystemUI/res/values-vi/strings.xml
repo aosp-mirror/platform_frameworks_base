@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Thông báo"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Cuộc trò chuyện"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Xóa tất cả thông báo im lặng"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Chế độ Không làm phiền đã tạm dừng thông báo"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Không có thông báo}=1{{mode} đã tạm dừng thông báo}=2{{mode} và một chế độ khác đã tạm dừng thông báo}other{{mode} và # chế độ khác đã tạm dừng thông báo}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Bắt đầu ngay"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Theo dõi chuyển động của đầu"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Nhấn để thay đổi chế độ chuông"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"chế độ chuông"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"tắt tiếng"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"bật tiếng"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"rung"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Nhấn phím hành động trên bàn phím"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Rất tốt!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Bạn đã hoàn tất cử chỉ xem tất cả các ứng dụng"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Đèn nền bàn phím"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Độ sáng %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Điều khiển nhà"</string>

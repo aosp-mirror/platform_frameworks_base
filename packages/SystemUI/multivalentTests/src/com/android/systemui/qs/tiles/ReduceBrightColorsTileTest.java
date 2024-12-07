@@ -16,6 +16,10 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -28,10 +32,10 @@ import static org.mockito.Mockito.when;
 import android.os.Handler;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
@@ -59,10 +63,21 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidJUnit4.class)
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ReduceBrightColorsTileTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
+
     @Mock
     private QSHost mHost;
     @Mock
@@ -84,6 +99,11 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
+
+    public ReduceBrightColorsTileTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {

@@ -529,10 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"విడ్జెట్‌ను ఉపయోగించి యాప్‌ను తెరవడానికి, ఇది మీరేనని వెరిఫై చేయాల్సి ఉంటుంది. అలాగే, మీ టాబ్లెట్ లాక్ చేసి ఉన్నప్పటికీ, ఎవరైనా వాటిని చూడగలరని గుర్తుంచుకోండి. కొన్ని విడ్జెట్‌లు మీ లాక్ స్క్రీన్‌కు తగినవి కాకపోవచ్చు, వాటిని ఇక్కడ జోడించడం సురక్షితం కాకపోవచ్చు."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"అర్థమైంది"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"విడ్జెట్‌లు"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"విడ్జెట్‌ల\" షార్ట్‌కట్‌ను జోడించడానికి, సెట్టింగ్‌లలో \"లాక్ స్క్రీన్‌లో విడ్జెట్‌లను చూపండి\" అనే ఆప్షన్‌ను ఎనేబుల్ చేసినట్లు నిర్ధారించుకోండి."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"సెట్టింగ్‌లు"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
@@ -593,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{నోటిఫికేషన్‌లు ఏవీ లేవు}=1{{mode} ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి}=2{నోటిఫికేషన్‌లు, {mode}, మరో ఒక మోడ్ ద్వారా పాజ్ చేయబడ్డాయి}other{నోటిఫికేషన్‌లు, {mode}, మరో # మోడ్‌ల ద్వారా పాజ్ చేయబడ్డాయి}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించండి"</string>
@@ -707,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"హెడ్ ట్రాకింగ్"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"రింగర్ మోడ్‌ను మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"రింగర్ మోడ్"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"అన్‌మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"వైబ్రేట్"</string>
@@ -1426,12 +1428,10 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"కీబోర్డ్ షార్ట్‌కట్‌లను అనుకూలంగా మార్చండి"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"షార్ట్‌కట్‌ను తీసివేయాలా?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"తిరిగి ఆటోమేటిక్ సెట్టింగ్‌కు రీసెట్ చేయాలా?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"షార్ట్‌కట్‌ను కేటాయించడానికి కీని నొక్కండి"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ఇది మీ అనుకూల షార్ట్‌కట్‌ను శాశ్వతంగా తొలగిస్తుంది."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ఇది మీ అనుకూల షార్ట్‌కట్‌లన్నింటిని శాశ్వతంగా తొలగిస్తుంది."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"షార్ట్‌కట్‌లను వెతకండి"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"సెర్చ్ ఫలితాలు ఏవీ లేవు"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"కుదించండి చిహ్నం"</string>
@@ -1449,8 +1449,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"కీబోర్డ్ సెట్టింగ్‌లు"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"షార్ట్‌కట్‌ను సెట్ చేయండి"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"తీసివేయండి"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"అవును, రీసెట్ చేయాలి"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"రద్దు చేయండి"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"కీని నొక్కండి"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"కీ కాంబినేషన్ ఇప్పటికే వినియోగంలో ఉంది. వేరొక కీని ట్రై చేయండి."</string>
@@ -1482,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"చక్కగా చేశారు!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"అన్ని యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dలో %1$dవ స్థాయి"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"హోమ్ కంట్రోల్స్"</string>

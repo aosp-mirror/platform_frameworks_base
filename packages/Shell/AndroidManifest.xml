@@ -740,9 +740,6 @@
     <uses-permission android:name="android.permission.USE_CUSTOM_VIRTUAL_MACHINE" />
     <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
-    <!-- Permission required to access bugreport and screenshot files created by wear.  -->
-    <uses-permission android:name="com.google.wear.permission.ACCESS_BUG_REPORT_FILES" />
-
     <!-- Permission required to run GtsAssistantTestCases -->
     <uses-permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES" />
 
@@ -991,6 +988,10 @@
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
     <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+
+    <!-- Permission for TestClassifier tests to get access to classifier by type -->
+    <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
+        android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
 
     <application
         android:label="@string/app_label"

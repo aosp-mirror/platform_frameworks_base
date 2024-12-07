@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_HEALTH_CHECK_PASSED_PACKAGE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
@@ -35,8 +37,6 @@ public class ExplicitHealthCheckServiceTest {
 
     private ExplicitHealthCheckService mExplicitHealthCheckService;
     private static final String PACKAGE_NAME = "com.test.package";
-    private static final String EXTRA_HEALTH_CHECK_PASSED_PACKAGE =
-            "android.service.watchdog.extra.health_check_passed_package";
 
     @Before
     public void setup() throws Exception {
@@ -52,7 +52,7 @@ public class ExplicitHealthCheckServiceTest {
         IBinder binder = mExplicitHealthCheckService.onBind(new Intent());
         CountDownLatch countDownLatch = new CountDownLatch(1);
         RemoteCallback callback = new RemoteCallback(result -> {
-            assertThat(result.get(EXTRA_HEALTH_CHECK_PASSED_PACKAGE))
+            assertThat(result.getString(EXTRA_HEALTH_CHECK_PASSED_PACKAGE))
                     .isEqualTo(PACKAGE_NAME);
             countDownLatch.countDown();
         });

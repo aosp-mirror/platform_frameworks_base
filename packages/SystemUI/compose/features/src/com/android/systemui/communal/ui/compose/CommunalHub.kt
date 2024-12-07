@@ -187,6 +187,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
+import com.android.systemui.communal.util.ResizeUtils.resizeOngoingItems
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.lifecycle.rememberViewModel
@@ -217,6 +218,7 @@ fun CommunalHub(
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+    var contentOffset: Offset by remember { mutableStateOf(Offset.Zero) }
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
@@ -239,9 +241,7 @@ fun CommunalHub(
             initialValue = !viewModel.isEditMode
         )
 
-    val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
-    val contentOffset = beforeContentPadding(contentPadding).toOffset()
-
+    val minContentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     ObserveScrollEffect(gridState, viewModel)
 
     val context = LocalContext.current
@@ -367,7 +367,7 @@ fun CommunalHub(
     ) {
         AccessibilityContainer(viewModel) {
             if (!viewModel.isEditMode && isEmptyState) {
-                EmptyStateCta(contentPadding = contentPadding, viewModel = viewModel)
+                EmptyStateCta(contentPadding = minContentPadding, viewModel = viewModel)
             } else {
                 val slideOffsetInPx =
                     with(LocalDensity.current) { Dimensions.SlideOffsetY.toPx().toInt() }
@@ -396,10 +396,11 @@ fun CommunalHub(
                         CommunalHubLazyGrid(
                             communalContent = communalContent,
                             viewModel = viewModel,
-                            contentPadding = contentPadding,
+                            minContentPadding = minContentPadding,
                             contentOffset = contentOffset,
                             screenWidth = screenWidth,
                             setGridCoordinates = { gridCoordinates = it },
+                            setContentOffset = { contentOffset = it },
                             updateDragPositionForRemove = { boundingBox ->
                                 val gridOffset = gridCoordinates?.positionInWindow()
                                 val removeButtonCenter =
@@ -741,8 +742,9 @@ fun calculateWidgetSize(
 
 @Composable
 private fun HorizontalGridWrapper(
-    contentPadding: PaddingValues,
+    minContentPadding: PaddingValues,
     gridState: LazyGridState,
+    setContentOffset: (offset: Offset) -> Unit,
     modifier: Modifier = Modifier,
     content: LazyGridScope.(sizeInfo: SizeInfo?) -> Unit,
 ) {
@@ -751,17 +753,26 @@ private fun HorizontalGridWrapper(
             cellAspectRatio = 1.5f,
             modifier = modifier,
             state = gridState,
-            minContentPadding = contentPadding,
+            minContentPadding = minContentPadding,
             minHorizontalArrangement = Dimensions.ItemSpacing,
             minVerticalArrangement = Dimensions.ItemSpacing,
+            setContentOffset = setContentOffset,
             content = content,
         )
     } else {
+        val layoutDirection = LocalLayoutDirection.current
+        val density = LocalDensity.current
+
+        val minStartPadding = minContentPadding.calculateStartPadding(layoutDirection)
+        val minTopPadding = minContentPadding.calculateTopPadding()
+
+        with(density) { setContentOffset(Offset(minStartPadding.toPx(), minTopPadding.toPx())) }
+
         LazyHorizontalGrid(
             modifier = modifier,
             state = gridState,
             rows = GridCells.Fixed(CommunalContentSize.FixedSize.FULL.span),
-            contentPadding = contentPadding,
+            contentPadding = minContentPadding,
             horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
             verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
         ) {
@@ -775,13 +786,14 @@ private fun HorizontalGridWrapper(
 private fun BoxScope.CommunalHubLazyGrid(
     communalContent: List<CommunalContentModel>,
     viewModel: BaseCommunalViewModel,
-    contentPadding: PaddingValues,
+    minContentPadding: PaddingValues,
     selectedKey: State<String?>,
     screenWidth: Int,
     contentOffset: Offset,
     gridState: LazyGridState,
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
+    setContentOffset: (offset: Offset) -> Unit,
     updateDragPositionForRemove: (boundingBox: IntRect) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
@@ -832,10 +844,19 @@ private fun BoxScope.CommunalHubLazyGrid(
     HorizontalGridWrapper(
         modifier = gridModifier,
         gridState = gridState,
-        contentPadding = contentPadding,
+        minContentPadding = minContentPadding,
+        setContentOffset = setContentOffset,
     ) { sizeInfo ->
+        /** Override spans based on the responsive grid size */
+        val finalizedList =
+            if (sizeInfo != null) {
+                resizeOngoingItems(list, sizeInfo.gridSize.height)
+            } else {
+                list
+            }
+
         itemsIndexed(
-            items = list,
+            items = finalizedList,
             key = { _, item -> item.key },
             contentType = { _, item -> item.key },
             span = { _, item -> GridItemSpan(item.getSpanOrMax(sizeInfo?.gridSize?.height)) },
@@ -883,7 +904,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     key = item.key,
                     currentSpan = GridItemSpan(currentItemSpan),
                     gridState = gridState,
-                    gridContentPadding = contentPadding,
+                    gridContentPadding = sizeInfo?.contentPadding ?: minContentPadding,
                     verticalArrangement =
                         Arrangement.spacedBy(
                             sizeInfo?.verticalArrangement ?: Dimensions.ItemSpacing
@@ -1193,6 +1214,7 @@ private fun CommunalContent(
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
+        is CommunalContentModel.Spacer -> Box(Modifier.fillMaxSize())
     }
 }
 
@@ -1723,24 +1745,22 @@ private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): Padd
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenHeight = with(density) { windowMetrics.bounds.height().toDp() }
     val toolbarHeight = with(density) { Dimensions.ToolbarPaddingTop + toolbarSize.height.toDp() }
-    val verticalPadding =
-        ((screenHeight - toolbarHeight - hubDimensions.GridHeight + hubDimensions.GridTopSpacing) /
-                2)
-            .coerceAtLeast(Dimensions.Spacing)
-    return PaddingValues(
-        start = Dimensions.ToolbarPaddingHorizontal,
-        end = Dimensions.ToolbarPaddingHorizontal,
-        top = verticalPadding + toolbarHeight,
-        bottom = verticalPadding,
-    )
-}
-
-@Composable
-private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingInPx {
-    return with(LocalDensity.current) {
-        ContentPaddingInPx(
-            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current).toPx(),
-            top = paddingValues.calculateTopPadding().toPx(),
+    return if (communalResponsiveGrid()) {
+        PaddingValues(
+            start = Dimensions.ToolbarPaddingHorizontal,
+            end = Dimensions.ToolbarPaddingHorizontal,
+            top = hubDimensions.GridTopSpacing,
+        )
+    } else {
+        val verticalPadding =
+            ((screenHeight - toolbarHeight - hubDimensions.GridHeight +
+                    hubDimensions.GridTopSpacing) / 2)
+                .coerceAtLeast(Dimensions.Spacing)
+        PaddingValues(
+            start = Dimensions.ToolbarPaddingHorizontal,
+            end = Dimensions.ToolbarPaddingHorizontal,
+            top = verticalPadding + toolbarHeight,
+            bottom = verticalPadding,
         )
     }
 }
@@ -1759,10 +1779,6 @@ private fun firstIndexAtOffset(gridState: LazyGridState, offset: Offset): Int? =
 /** Returns the key of item if it's editable at the given index. Only widget is editable. */
 private fun keyAtIndexIfEditable(list: List<CommunalContentModel>, index: Int): String? =
     if (index in list.indices && list[index].isWidgetContent()) list[index].key else null
-
-data class ContentPaddingInPx(val start: Float, val top: Float) {
-    fun toOffset(): Offset = Offset(start, top)
-}
 
 class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
