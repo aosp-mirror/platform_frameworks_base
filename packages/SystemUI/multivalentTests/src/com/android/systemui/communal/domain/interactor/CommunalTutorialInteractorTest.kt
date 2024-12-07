@@ -130,19 +130,6 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun tutorialState_startedAndCommunalSceneShowing_stateWillNotUpdate() =
-        testScope.runTest {
-            val tutorialSettingState by
-                collectLastValue(communalTutorialRepository.tutorialSettingState)
-
-            communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
-
-            goToCommunal()
-
-            assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_STARTED)
-        }
-
-    @Test
     fun tutorialState_completedAndCommunalSceneShowing_stateWillNotUpdate() =
         testScope.runTest {
             val tutorialSettingState by

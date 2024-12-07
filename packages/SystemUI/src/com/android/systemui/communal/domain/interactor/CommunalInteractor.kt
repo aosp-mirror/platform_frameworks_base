@@ -285,7 +285,7 @@ constructor(
      * use [isIdleOnCommunal].
      */
     // TODO(b/323215860): rename to something more appropriate after cleaning up usages
-    val isCommunalShowing: Flow<Boolean> =
+    val isCommunalShowing: StateFlow<Boolean> =
         flow { emit(SceneContainerFlag.isEnabled) }
             .flatMapLatest { sceneContainerEnabled ->
                 if (sceneContainerEnabled) {
@@ -304,10 +304,10 @@ constructor(
                 columnName = "isCommunalShowing",
                 initialValue = false,
             )
-            .shareIn(
+            .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                replay = 1,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
             )
 
     /**
