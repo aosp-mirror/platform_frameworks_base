@@ -798,7 +798,7 @@ public class ContextHubService extends IContextHubService.Stub {
             throws RemoteException {
         super.registerEndpoint_enforcePermission();
         if (mEndpointManager == null) {
-            Log.e(TAG, "ContextHubService.registerEndpoint: endpoint manager failed to initialize");
+            Log.e(TAG, "Endpoint manager failed to initialize");
             throw new UnsupportedOperationException("Endpoint registration is not supported");
         }
         return mEndpointManager.registerEndpoint(pendingHubEndpointInfo, callback);
@@ -809,7 +809,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void registerEndpointDiscoveryCallbackId(
             long endpointId, IContextHubEndpointDiscoveryCallback callback) throws RemoteException {
         super.registerEndpointDiscoveryCallbackId_enforcePermission();
-        // TODO(b/375487784): Implement this
+        checkEndpointDiscoveryPreconditions();
+        mHubInfoRegistry.registerEndpointDiscoveryCallback(endpointId, callback);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
@@ -818,7 +819,8 @@ public class ContextHubService extends IContextHubService.Stub {
             String serviceDescriptor, IContextHubEndpointDiscoveryCallback callback)
             throws RemoteException {
         super.registerEndpointDiscoveryCallbackDescriptor_enforcePermission();
-        // TODO(b/375487784): Implement this
+        checkEndpointDiscoveryPreconditions();
+        mHubInfoRegistry.registerEndpointDiscoveryCallback(serviceDescriptor, callback);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
@@ -826,7 +828,15 @@ public class ContextHubService extends IContextHubService.Stub {
     public void unregisterEndpointDiscoveryCallback(IContextHubEndpointDiscoveryCallback callback)
             throws RemoteException {
         super.unregisterEndpointDiscoveryCallback_enforcePermission();
-        // TODO(b/375487784): Implement this
+        checkEndpointDiscoveryPreconditions();
+        mHubInfoRegistry.unregisterEndpointDiscoveryCallback(callback);
+    }
+
+    private void checkEndpointDiscoveryPreconditions() {
+        if (mHubInfoRegistry == null) {
+            Log.e(TAG, "Hub endpoint registry failed to initialize");
+            throw new UnsupportedOperationException("Endpoint discovery is not supported");
+        }
     }
 
     /**

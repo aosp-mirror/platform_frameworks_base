@@ -529,10 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Jos haluat avata sovelluksen käyttämällä widgetiä, sinun täytyy vahvistaa henkilöllisyytesi. Muista myös, että widgetit näkyvät kaikille, vaikka tabletti olisi lukittuna. Jotkin widgetit on ehkä tarkoitettu lukitusnäytölle, ja niiden lisääminen tänne ei välttämättä ole turvallista."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Selvä"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgetit"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Jos haluat lisätä Widgetit-pikakuvakkeen, varmista, että \"Näytä widgetit lukitusnäytöllä\" on käytössä asetuksissa."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Asetukset"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Vaihda käyttäjää"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"alasvetovalikko"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Kaikki sovellukset ja tämän istunnon tiedot poistetaan."</string>
@@ -593,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Ilmoitukset"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Keskustelut"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Tyhjennä kaikki hiljaiset ilmoitukset"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Älä häiritse ‑tila keskeytti ilmoitukset"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Ei ilmoituksia}=1{{mode} keskeytti ilmoitukset}=2{{mode} ja yksi muu tila keskeytti ilmoitukset}other{{mode} ja # muuta tilaa keskeytti ilmoitukset}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Aloita nyt"</string>
@@ -707,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Pään seuranta"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Vaihda soittoäänen tilaa napauttamalla"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"Soittoäänen tila"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"mykistä"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"poista mykistys"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"värinä"</string>
@@ -1426,12 +1428,10 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Pikanäppäimet"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Pikanäppäimien muokkaaminen"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Poistetaanko pikanäppäin?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Palautetaanko oletusasetukset?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Määritä pikanäppäin painamalla näppäintä"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Oma pikanäppäin poistetaan pysyvästi."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Kaikki omat pikanäppäimet poistetaan pysyvästi."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pikahaut"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ei hakutuloksia"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Tiivistyskuvake"</string>
@@ -1449,8 +1449,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Näppäimistön asetukset"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Valitse pikanäppäin"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Poista"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Kyllä, nollaa"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Peru"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Paina näppäintä"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Näppäinyhdistelmä on jo käytössä. Kokeile toista näppäintä."</string>
@@ -1482,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Paina näppäimistön toimintonäppäintä"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Hienoa!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Olet oppinut Näytä kaikki sovellukset ‑eleen."</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Näppämistön taustavalo"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Taso %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kodin ohjaus"</string>

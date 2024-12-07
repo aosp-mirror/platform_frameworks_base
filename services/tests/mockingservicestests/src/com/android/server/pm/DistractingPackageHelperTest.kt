@@ -56,8 +56,8 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
 
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendDistractingPackagesChanged(any(Computer::class.java),
-                pkgListCaptor.capture(), any(), any(), flagsCaptor.capture())
+        verify(broadcastHelper).sendDistractingPackagesChanged(
+            any(), pkgListCaptor.capture(), any(), any(), flagsCaptor.capture())
 
         val modifiedPackages = pkgListCaptor.value
         val distractionFlags = flagsCaptor.value
@@ -158,8 +158,7 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
 
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendDistractingPackagesChanged(
-                any(Computer::class.java), pkgListCaptor.capture(), any(), eq(TEST_USER_ID),
-                flagsCaptor.capture())
+                any(), pkgListCaptor.capture(), any(), eq(TEST_USER_ID), flagsCaptor.capture())
         val modifiedPackages = pkgListCaptor.value
         val distractionFlags = flagsCaptor.value
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -198,12 +197,12 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
 
     @Test
     fun sendDistractingPackagesChanged() {
-        broadcastHelper.sendDistractingPackagesChanged(pms.snapshotComputer(),
+        broadcastHelper.sendDistractingPackagesChanged(pms::snapshotComputer,
                 packagesToChange, uidsToChange, TEST_USER_ID,
                 PackageManager.RESTRICTION_HIDE_NOTIFICATIONS)
         testHandler.flush()
-        verify(broadcastHelper).sendDistractingPackagesChanged(any(Computer::class.java),
-                pkgListCaptor.capture(), uidsCaptor.capture(), eq(TEST_USER_ID), any())
+        verify(broadcastHelper).sendDistractingPackagesChanged(
+                any(), pkgListCaptor.capture(), uidsCaptor.capture(), eq(TEST_USER_ID), any())
 
         var changedPackages = pkgListCaptor.value
         var changedUids = uidsCaptor.value

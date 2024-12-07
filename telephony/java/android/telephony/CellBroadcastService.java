@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -28,6 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -88,9 +90,12 @@ public abstract class CellBroadcastService extends Service {
      * @param slotIndex       the index of the slot which received the message
      * @param bearerData      the CDMA SMS bearer data
      * @param serviceCategory the CDMA SCPT service category
+     * @deprecated Legacy CDMA is unsupported.
      */
-    public abstract void onCdmaCellBroadcastSms(int slotIndex, @NonNull byte[] bearerData,
-            @CdmaSmsCbProgramData.Category int serviceCategory);
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
+    public void onCdmaCellBroadcastSms(int slotIndex, @NonNull byte[] bearerData,
+            @CdmaSmsCbProgramData.Category int serviceCategory) {}
 
     /**
      * Handle a CDMA cell broadcast SMS message forwarded from the system.
@@ -102,10 +107,13 @@ public abstract class CellBroadcastService extends Service {
      * @param callback           a callback to run after each cell broadcast receiver has handled
      *                           the SCP message. The bundle will contain a non-separated
      *                           dial string as and an ArrayList of {@link CdmaSmsCbProgramResults}.
+     * @deprecated Legacy CDMA is unsupported.
      */
-    public abstract void onCdmaScpMessage(int slotIndex,
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
+    public void onCdmaScpMessage(int slotIndex,
             @NonNull List<CdmaSmsCbProgramData> smsCbProgramData,
-            @NonNull String originatingAddress, @NonNull Consumer<Bundle> callback);
+            @NonNull String originatingAddress, @NonNull Consumer<Bundle> callback) {}
 
     /**
      * Get broadcasted area information.

@@ -33,7 +33,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.EmptyActivity;
@@ -48,7 +50,9 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
@@ -64,6 +68,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import com.android.frameworks.coretests.R;
+import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -91,6 +96,8 @@ public class WindowContextTest {
     public ActivityTestRule<EmptyActivity> mActivityRule =
             new ActivityTestRule<>(EmptyActivity.class, false /* initialTouchMode */,
                     false /* launchActivity */);
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
     private final WindowContext mWindowContext = createWindowContext();
@@ -340,17 +347,35 @@ public class WindowContextTest {
     }
 
     @Test
-    public void updateDisplay_wasAttached_detachThenAttachedPropagatedToTokenController() {
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentToDisplayId_wasAttached_reparentToDisplayAreaPropagatedToTokenController() {
         final WindowTokenClientController mockWindowTokenClientController =
                 mock(WindowTokenClientController.class);
+        when(mockWindowTokenClientController.attachToDisplayArea(any(), anyInt(), anyInt(),
+                any())).thenReturn(true);
         WindowTokenClientController.overrideForTesting(mockWindowTokenClientController);
 
-        mWindowContext.updateDisplay(DEFAULT_DISPLAY + 1);
+        mWindowContext.reparentToDisplay(DEFAULT_DISPLAY + 1);
 
-        verify(mockWindowTokenClientController).detachIfNeeded(any());
-        verify(mockWindowTokenClientController).attachToDisplayArea(any(),
-                anyInt(), /* displayId= */ eq(DEFAULT_DISPLAY + 1),
-                any());
+        verify(mockWindowTokenClientController).reparentToDisplayArea(any(),
+                /* displayId= */ eq(DEFAULT_DISPLAY + 1)
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentToDisplayId_sameDisplayId_noReparenting() {
+        final WindowTokenClientController mockWindowTokenClientController =
+                mock(WindowTokenClientController.class);
+        when(mockWindowTokenClientController.attachToDisplayArea(any(), anyInt(), anyInt(),
+                any())).thenReturn(true);
+        WindowTokenClientController.overrideForTesting(mockWindowTokenClientController);
+
+        mWindowContext.reparentToDisplay(DEFAULT_DISPLAY);
+
+        verify(mockWindowTokenClientController, never()).reparentToDisplayArea(any(),
+                /* displayId= */ eq(DEFAULT_DISPLAY)
+        );
     }
 
     private WindowContext createWindowContext() {

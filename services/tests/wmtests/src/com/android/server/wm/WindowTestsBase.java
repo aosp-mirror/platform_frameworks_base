@@ -2039,8 +2039,21 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         return new TestWindowToken(type, dc, persistOnEmpty);
     }
 
+    static TestWindowToken createTestClientWindowToken(int type, DisplayContent dc) {
+        SystemServicesTestRule.checkHoldsLock(dc.mWmService.mGlobalLock);
+
+        return new TestWindowToken(type, dc, false /* persistOnEmpty */, true /* fromClient */);
+    }
+
     /** Used so we can gain access to some protected members of the {@link WindowToken} class */
     static class TestWindowToken extends WindowToken {
+
+        private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty,
+                boolean fromClient) {
+            super(dc.mWmService, mock(IBinder.class), type, persistOnEmpty, dc,
+                    false /* ownerCanManageAppTokens */, false /* roundedCornerOverlay */,
+                    fromClient /* fromClientToken */, null /* options */);
+        }
 
         private TestWindowToken(int type, DisplayContent dc, boolean persistOnEmpty) {
             super(dc.mWmService, mock(IBinder.class), type, persistOnEmpty, dc,

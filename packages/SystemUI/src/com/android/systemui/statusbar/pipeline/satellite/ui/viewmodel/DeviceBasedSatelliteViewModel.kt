@@ -114,34 +114,39 @@ constructor(
 
     private val showIcon =
         if (interactor.isOpportunisticSatelliteIconEnabled) {
-            canShowIcon
-                .flatMapLatest { canShow ->
-                    if (!canShow) {
-                        flowOf(false)
-                    } else {
-                        combine(
-                            shouldShowIconForOosAfterHysteresis,
-                            interactor.connectionState,
-                            interactor.isWifiActive,
-                            airplaneModeRepository.isAirplaneMode,
-                        ) { showForOos, connectionState, isWifiActive, isAirplaneMode ->
-                            if (isWifiActive || isAirplaneMode) {
-                                false
-                            } else {
-                                showForOos ||
-                                    connectionState == SatelliteConnectionState.On ||
-                                    connectionState == SatelliteConnectionState.Connected
+                canShowIcon
+                    .flatMapLatest { canShow ->
+                        if (!canShow) {
+                            flowOf(false)
+                        } else {
+                            combine(
+                                shouldShowIconForOosAfterHysteresis,
+                                interactor.isAnyConnectionNtn,
+                                interactor.connectionState,
+                                interactor.isWifiActive,
+                                airplaneModeRepository.isAirplaneMode,
+                            ) { showForOos, anyNtn, connectionState, isWifiActive, isAirplaneMode ->
+                                // anyNtn means that there is some mobile network using ntn, and the
+                                // mobile icon will show its own satellite icon
+                                if (isWifiActive || isAirplaneMode || anyNtn) {
+                                    false
+                                } else {
+                                    // Show for out of service (which has a hysteresis), or ignore
+                                    // the hysteresis if we're already connected
+                                    showForOos ||
+                                        connectionState == SatelliteConnectionState.On ||
+                                        connectionState == SatelliteConnectionState.Connected
+                                }
                             }
                         }
                     }
-                }
-                .distinctUntilChanged()
-                .logDiffsForTable(
-                    tableLog,
-                    columnPrefix = "vm",
-                    columnName = COL_VISIBLE,
-                    initialValue = false,
-                )
+                    .distinctUntilChanged()
+                    .logDiffsForTable(
+                        tableLog,
+                        columnPrefix = "vm",
+                        columnName = COL_VISIBLE,
+                        initialValue = false,
+                    )
             } else {
                 flowOf(false)
             }
