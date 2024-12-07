@@ -16,6 +16,11 @@
 
 package com.android.server.supervision;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import static com.android.internal.util.Preconditions.checkCallAuthorization;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -31,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.os.Binder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -78,6 +84,9 @@ public class SupervisionService extends ISupervisionManager.Stub {
 
     @Override
     public boolean isSupervisionEnabledForUser(@UserIdInt int userId) {
+        if (UserHandle.getUserId(Binder.getCallingUid()) != userId) {
+            enforcePermission(INTERACT_ACROSS_USERS);
+        }
         synchronized (getLockObject()) {
             return getUserDataLocked(userId).supervisionEnabled;
         }
@@ -151,7 +160,8 @@ public class SupervisionService extends ISupervisionManager.Stub {
 
     /** Returns whether the supervision app has profile owner status. */
     private boolean isProfileOwner(@UserIdInt int userId) {
-        ComponentName profileOwner = mDpmInternal.getProfileOwnerAsUser(userId);
+        ComponentName profileOwner =
+                mDpmInternal != null ? mDpmInternal.getProfileOwnerAsUser(userId) : null;
         return profileOwner != null && isSupervisionAppPackage(profileOwner.getPackageName());
     }
 
@@ -159,6 +169,12 @@ public class SupervisionService extends ISupervisionManager.Stub {
     private boolean isSupervisionAppPackage(String packageName) {
         return packageName.equals(
                 mContext.getResources().getString(R.string.config_systemSupervision));
+    }
+
+    /** Enforces that the caller has the given permission. */
+    private void enforcePermission(String permission) {
+        checkCallAuthorization(
+                mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED);
     }
 
     public static class Lifecycle extends SystemService {
