@@ -19,9 +19,14 @@ package com.android.wm.shell.compatui.letterbox
 import android.content.Context
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
+import android.view.SurfaceControl
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.compatui.letterbox.LetterboxUtils.Maps.runOnItem
+import com.android.wm.shell.compatui.letterbox.LetterboxUtils.Transactions.moveAndCrop
 import java.util.function.Consumer
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -100,6 +105,35 @@ class LetterboxUtilsTest : ShellTestCase() {
         }
     }
 
+    @Test
+    fun `runOnItem executes onFound when an item has been found for a key`() {
+        runTestScenario { r ->
+            r.initMap(1 to 2, 3 to 4)
+            r.runOnItem<Int>(1)
+            r.verifyOnItemInvoked(expectedItem = 2)
+            r.verifyOnMissingNotInvoked()
+        }
+    }
+
+    @Test
+    fun `runOnItem executes onMissing when an item has not been found for a key`() {
+        runTestScenario { r ->
+            r.initMap(1 to 2, 3 to 4)
+            r.runOnItem<Int>(8)
+            r.verifyOnItemNotInvoked()
+            r.verifyOnMissingInvoked(expectedKey = 8)
+        }
+    }
+
+    @Test
+    fun `moveAndCrop invoked Move and then Crop`() {
+        runTestScenario { r ->
+            r.invoke(Rect(1, 2, 51, 62))
+            r.verifySetPosition(expectedX = 1f, expectedY = 2f)
+            r.verifySetWindowCrop(expectedWidth = 50, expectedHeight = 60)
+        }
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
@@ -112,6 +146,14 @@ class LetterboxUtilsTest : ShellTestCase() {
         ctx: Context,
         builder: (LetterboxSurfaceBuilder) -> LetterboxController
     ) : LetterboxControllerRobotTest(ctx, builder) {
+
+        private var testableMap = mutableMapOf<Int, Int>()
+        private var onItemState: Int? = null
+        private var onMissingStateKey: Int? = null
+        private var onMissingStateMap: MutableMap<Int, Int>? = null
+
+        private val transaction = getTransactionMock()
+        private val surface = SurfaceControl()
 
         fun verifyCreateSurfaceInvokedWithRequest(
             target: LetterboxController,
@@ -146,6 +188,47 @@ class LetterboxUtilsTest : ShellTestCase() {
             times: Int = 1
         ) {
             verify(target, times(times)).dump()
+        }
+
+        fun initMap(vararg values: Pair<Int, Int>) = testableMap.putAll(values.toMap())
+
+        fun <T> runOnItem(key: Int) {
+            testableMap.runOnItem(key, onFound = { item ->
+                onItemState = item
+            }, onMissed = { k, m ->
+                onMissingStateKey = k
+                onMissingStateMap = m
+            })
+        }
+
+        fun verifyOnItemInvoked(expectedItem: Int) {
+            assertEquals(expectedItem, onItemState)
+        }
+
+        fun verifyOnItemNotInvoked() {
+            assertNull(onItemState)
+        }
+
+        fun verifyOnMissingInvoked(expectedKey: Int) {
+            assertEquals(expectedKey, onMissingStateKey)
+            assertEquals(onMissingStateMap, testableMap)
+        }
+
+        fun verifyOnMissingNotInvoked() {
+            assertNull(onMissingStateKey)
+            assertNull(onMissingStateMap)
+        }
+
+        fun invoke(rect: Rect) {
+            transaction.moveAndCrop(surface, rect)
+        }
+
+        fun verifySetPosition(expectedX: Float, expectedY: Float) {
+            verify(transaction).setPosition(surface, expectedX, expectedY)
+        }
+
+        fun verifySetWindowCrop(expectedWidth: Int, expectedHeight: Int) {
+            verify(transaction).setWindowCrop(surface, expectedWidth, expectedHeight)
         }
     }
 }

@@ -529,10 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Да бисте отворили апликацију која користи виџет, треба да потврдите да сте то ви. Имајте у виду да свако може да га види, чак и када је таблет закључан. Неки виџети можда нису намењени за закључани екран и можда није безбедно да их тамо додате."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Важи"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виџети"</string>
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
-    <skip />
-    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
-    <skip />
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Да бисте додали пречицу Виџети, уверите се да је у подешавањима омогућено Приказуј виџете на закључаном екрану."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Подешавања"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Замени корисника"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"падајући мени"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Све апликације и подаци у овој сесији ће бити избрисани."</string>
@@ -593,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Обавештења"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Обришите сва нечујна обавештења"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Обавештења су паузирана режимом Не узнемиравај"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Нема обавештења}=1{Обавештења је паузирао {mode}}=2{Обавештења су паузирали {mode} и још један режим}one{Обавештења су паузирали {mode} и још # режим}few{Обавештења су паузирали {mode} и још # режима}other{Обавештења су паузирали {mode} и још # режима}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Започни"</string>
@@ -707,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Праћење главе"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Додирните да бисте променили режим звона"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"режим звона"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"искључите звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"укључите звук"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибрација"</string>
@@ -1426,12 +1428,10 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Тастерске пречице"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Прилагодите тастерске пречице"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Желите да уклоните пречицу?"</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Желите да ресетујете на подразумевано?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Притисните тастер да бисте доделили пречицу"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Овим ћете трајно избрисати прилагођену пречицу."</string>
-    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
-    <skip />
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Тиме ћете трајно избрисати све прилагођене пречице."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Претражите пречице"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Нема резултата претраге"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Икона за скупљање"</string>
@@ -1449,8 +1449,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Подешавања тастатуре"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Подеси пречицу"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Уклони"</string>
-    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
-    <skip />
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Да, ресетуј"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Откажи"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Притисните тастер"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Комбинација тастера се већ користи. Пробајте са другим тастером."</string>
@@ -1482,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Притисните тастер радњи на тастатури"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Одлично!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Довршили сте покрет за приказивање свих апликација."</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Позадинско осветљење тастатуре"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. ниво од %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроле за дом"</string>

@@ -44,6 +44,8 @@ import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
 
+import static com.android.systemui.Flags.notificationShadeBlur;
+
 /**
  * A view which can draw a scrim.  This view maybe be used in multiple windows running on different
  * threads, but is controlled by {@link com.android.systemui.statusbar.phone.ScrimController} so we
@@ -249,6 +251,10 @@ public class ScrimView extends View {
             int mainTinted = mTintColor;
             if (mBlendWithMainColor) {
                 mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor, tintAmount);
+            }
+            if (notificationShadeBlur()) {
+                // TODO(b/370555223): Fix color and transparency to match visual spec exactly
+                mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), Color.GRAY, 0.5f);
             }
             drawable.setColor(mainTinted, animated);
         } else {

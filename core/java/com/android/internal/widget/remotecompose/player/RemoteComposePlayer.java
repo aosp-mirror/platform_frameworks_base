@@ -250,8 +250,23 @@ public class RemoteComposePlayer extends FrameLayout {
         mInner.clearLocalString("SYSTEM:" + name);
     }
 
+    /**
+     * This is the number of ops used to calculate the last frame.
+     *
+     * @return number of ops
+     */
+    public int getOpsPerFrame() {
+        return mInner.getDocument().mDocument.getOpsPerFrame();
+    }
+
     /** Id action callback interface */
     public interface IdActionCallbacks {
+        /**
+         * Callback for on action
+         *
+         * @param id the id of the action
+         * @param metadata the metadata of the action
+         */
         void onAction(int id, String metadata);
     }
 

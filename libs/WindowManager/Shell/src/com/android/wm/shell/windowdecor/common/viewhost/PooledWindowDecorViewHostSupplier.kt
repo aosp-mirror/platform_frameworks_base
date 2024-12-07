@@ -21,24 +21,56 @@ import android.util.Pools
 import android.view.Display
 import android.view.SurfaceControl
 import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.sysui.ShellInit
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A [WindowDecorViewHostSupplier] backed by a pool to allow recycling view hosts which may be
  * expensive to recreate for each new or updated window decoration.
  *
- * Callers can obtain a [WindowDecorViewHost] using [acquire], which will return a pooled
- * object if available, or create a new instance and return it if needed. When finished using a
- * [WindowDecorViewHost], it must be released using [release] to allow it to be sent back
- * into the pool and reused later on.
+ * Callers can obtain a [WindowDecorViewHost] using [acquire], which will return a pooled object if
+ * available, or create a new instance and return it if needed. When finished using a
+ * [WindowDecorViewHost], it must be released using [release] to allow it to be sent back into the
+ * pool and reused later on.
+ *
+ * This class also supports pre-warming [ReusableWindowDecorViewHost] instances, which will be put
+ * into the pool immediately after creation.
  */
 class PooledWindowDecorViewHostSupplier(
+    private val context: Context,
     @ShellMainThread private val mainScope: CoroutineScope,
+    shellInit: ShellInit,
     maxPoolSize: Int,
+    private val preWarmSize: Int,
 ) : WindowDecorViewHostSupplier<WindowDecorViewHost> {
 
     private val pool: Pools.Pool<WindowDecorViewHost> = Pools.SynchronizedPool(maxPoolSize)
     private var nextDecorViewHostId = 0
+
+    init {
+        require(preWarmSize <= maxPoolSize) { "Pre-warm size should not exceed pool size" }
+        shellInit.addInitCallback(this::onShellInit, this)
+    }
+
+    private fun onShellInit() {
+        if (preWarmSize <= 0) {
+            return
+        }
+        preWarmViewHosts(preWarmSize)
+    }
+
+    private fun preWarmViewHosts(preWarmSize: Int) {
+        mainScope.launch {
+            // Applying isn't needed, as the surface was never actually shown.
+            val t = SurfaceControl.Transaction()
+            repeat(preWarmSize) {
+                val warmedViewHost = newInstance(context, context.display).apply { warmUp() }
+                // Put the warmed view host in the pool by releasing it.
+                release(warmedViewHost, t)
+            }
+        }
+    }
 
     override fun acquire(context: Context, display: Display): WindowDecorViewHost {
         val pooledViewHost = pool.acquire()
@@ -64,7 +96,7 @@ class PooledWindowDecorViewHostSupplier(
             context = context,
             mainScope = mainScope,
             display = display,
-            id = nextDecorViewHostId++
+            id = nextDecorViewHostId++,
         )
     }
 }

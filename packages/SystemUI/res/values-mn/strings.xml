@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Мэдэгдлүүд"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Харилцан яриа"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Бүх чимээгүй мэдэгдлийг арилгах"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Бүү саад бол горимын түр зогсоосон мэдэгдэл"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Мэдэгдэл байхгүй}=1{Мэдэгдлийг {mode} түр зогсоосон}=2{Мэдэгдлийг {mode} болон өөр нэг горим түр зогсоосон}other{Мэдэгдлийг {mode} болон өөр # горим түр зогсоосон}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Одоо эхлүүлэх"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Толгой хянах"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Хонхны горимыг өөрчлөхийн тулд товшино уу"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"хонхны горим"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"дууг хаах"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"дууг нээх"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"чичрэх"</string>
@@ -1443,7 +1447,7 @@
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Болсон"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Дэлгэх дүрс тэмдэг"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"эсвэл"</string>
-    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"нэмэх нь"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"болон"</string>
     <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"урагшаа ташуу зураас"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Чирэх бариул"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Гарын тохиргоо"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Гар дээрх тусгай товчлуурыг дарна уу"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Сайн байна!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Та бүх аппыг харах зангааг гүйцэтгэлээ"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Гарын арын гэрэл"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-с %1$d-р түвшин"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Гэрийн удирдлага"</string>

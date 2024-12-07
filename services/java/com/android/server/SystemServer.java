@@ -2933,7 +2933,7 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         // UprobeStats DynamicInstrumentationManager
-        if (com.android.art.flags.Flags.executableMethodFileOffsets()) {
+        if (android.uprobestats.flags.Flags.executableMethodFileOffsets()) {
             t.traceBegin("StartDynamicInstrumentationManager");
             mSystemServiceManager.startService(DynamicInstrumentationManagerService.class);
             t.traceEnd();

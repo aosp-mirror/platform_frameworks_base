@@ -272,6 +272,7 @@ public class BubbleBarAnimationHelper {
         final float startTx = getSwitchAnimationInitialTx(endTx);
         toBbev.setTranslationX(startTx);
         toBbev.getHandleView().setAlpha(0f);
+        toBbev.getHandleView().setHandleInitialColor(fromBbev.getHandleView().getHandleColor());
 
         toBbev.animateExpansionWhenTaskViewVisible(() -> {
             AnimatorSet switchAnim = new AnimatorSet();

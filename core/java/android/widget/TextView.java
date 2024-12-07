@@ -18,6 +18,7 @@ package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.graphics.Paint.NEW_FONT_VARIATION_MANAGEMENT;
 import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
@@ -5542,7 +5543,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         && fontVariationSettings.equals(existingSettings))) {
             return true;
         }
-        boolean effective = mTextPaint.setFontVariationSettings(fontVariationSettings);
+
+        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
+                && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
+        boolean effective;
+        if (useFontVariationStore) {
+            if (mFontWeightAdjustment != 0
+                    && mFontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED) {
+                mTextPaint.setFontVariationSettings(fontVariationSettings, mFontWeightAdjustment);
+            } else {
+                mTextPaint.setFontVariationSettings(fontVariationSettings);
+            }
+            effective = true;
+        } else {
+            effective = mTextPaint.setFontVariationSettings(fontVariationSettings);
+        }
 
         if (effective && mLayout != null) {
             nullLayouts();
@@ -10113,6 +10128,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                     outAttrs.extras.putBoolean(
                             STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY, handwritingEnabled);
+                }
+                if (android.view.inputmethod.Flags.writingTools()) {
+                    // default to same behavior as isSuggestionsEnabled().
+                    outAttrs.setWritingToolsEnabled(isSuggestionsEnabled());
                 }
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);

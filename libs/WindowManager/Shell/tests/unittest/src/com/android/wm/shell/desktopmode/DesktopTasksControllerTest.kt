@@ -3062,20 +3062,21 @@ class DesktopTasksControllerTest : ShellTestCase() {
       .thenReturn(DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR)
 
     // Drag move the task to the top edge
+    val currentDragBounds = Rect(100, 50, 500, 1000)
     spyController.onDragPositioningMove(task, mockSurface, 200f, Rect(100, 200, 500, 1000))
     spyController.onDragPositioningEnd(
       task,
       mockSurface,
       Point(100, 50), /* position */
       PointF(200f, 300f), /* inputCoordinate */
-      Rect(100, 50, 500, 1000), /* currentDragBounds */
+      currentDragBounds,
       Rect(0, 50, 2000, 2000) /* validDragArea */,
       Rect() /* dragStartBounds */,
       motionEvent,
       desktopWindowDecoration)
 
     // Assert bounds set to stable bounds
-    val wct = getLatestToggleResizeDesktopTaskWct()
+    val wct = getLatestToggleResizeDesktopTaskWct(currentDragBounds)
     assertThat(findBoundsChange(wct, task)).isEqualTo(STABLE_BOUNDS)
     // Assert event is properly logged
     verify(desktopModeEventLogger, times(1)).logTaskResizingStarted(

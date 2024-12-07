@@ -823,6 +823,36 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    public void notifyImeAnimationStart(int sessionId, long startTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationStart(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationStart(startTimeMs);
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationEnd(int sessionId, long endTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationEnd(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationEnd(endTimeMs);
+    }
+
+    @GuardedBy("mLock")
     @Override // from PerUserSystemService
     protected void handlePackageUpdateLocked(@NonNull String packageName) {
         final ServiceInfo serviceInfo = mFieldClassificationStrategy.getServiceInfo();

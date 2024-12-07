@@ -38,7 +38,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Laat <xliff:g id="APPLICATION">%1$s</xliff:g> toe om by <xliff:g id="USB_DEVICE">%2$s</xliff:g> in te gaan?\nOpneemtoestemming is nie aan hierdie app verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te hanteer?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Opneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel opneem. As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Opneemtoestemming is nie aan hierdie app verleen nie, maar dit kan oudio deur hierdie USB-toestel opneem. As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Hanteer <xliff:g id="USB_DEVICE">%2$s</xliff:g> met <xliff:g id="APPLICATION">%1$s</xliff:g>?"</string>
@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Kennisgewings"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Gesprekke"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vee alle stil kennisgewings uit"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Kennisgewings onderbreek deur Moenie Steur Nie"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Geen kennisgewings nie}=1{Kennisgewings is deur {mode} onderbreek}=2{Kennisgewings is deur {mode} en een ander modus onderbreek}other{Kennisgewings is deur {mode} en # ander modusse onderbreek}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Begin nou"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Kopnasporing"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tik om luiermodus te verander"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"luiermodus"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"demp"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ontdemp"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibreer"</string>
@@ -1203,8 +1207,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ontkoppel)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Kan nie wissel nie. Tik om weer te probeer."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Koppel ’n toestel"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Maak die program oop om hierdie sessie uit te saai."</string>
-    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende program"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Maak die app oop om hierdie sessie uit te saai."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hou op uitsaai"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Beskikbare toestelle vir oudio-uitsette."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Druk die handelingsleutel op jou sleutelbord"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Welgedaan!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Jy het die Bekyk Onlangse Apps-gebaar voltooi"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Sleutelbordlig"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Vlak %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huiskontroles"</string>

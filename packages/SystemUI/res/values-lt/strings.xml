@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Pranešimai"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pokalbiai"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Išvalyti visus tylius pranešimus"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Pranešimai pristabdyti naudojant netrukdymo režimą"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Nėra pranešimų}=1{Pranešimai pristabdyti naudojant režimą „{mode}“}=2{Pranešimai pristabdyti naudojant režimą „{mode}“ ir dar vieną režimą}one{Pranešimai pristabdyti naudojant režimą „{mode}“ ir dar # režimą}few{Pranešimai pristabdyti naudojant režimą „{mode}“ ir dar # režimus}many{Pranešimai pristabdyti naudojant režimą „{mode}“ ir dar # režimo}other{Pranešimai pristabdyti naudojant režimą „{mode}“ ir dar # režimų}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Pradėti dabar"</string>
@@ -707,6 +709,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Galvos stebėjimas"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Palieskite, kad pakeistumėte skambučio režimą"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"skambučio režimas"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, palieskite, kad pakeistumėte skambučio režimą"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"nutildyti"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"įjungti garsą"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibruoti"</string>
@@ -1482,6 +1485,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Paspauskite klaviatūros veiksmų klavišą"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Puikiai padirbėta!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Atlikote visų programų peržiūros gestą"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Mokomoji animacija. Spustelėkite, kad pristabdytumėte ir tęstumėte atkūrimą."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatūros foninis apšvietimas"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d lygis iš %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Namų sistemos valdymas"</string>

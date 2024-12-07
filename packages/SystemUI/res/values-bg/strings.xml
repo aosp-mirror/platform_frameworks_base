@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известия"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Изчистване на всички беззвучни известия"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известията са поставени на пауза от режима „Не безпокойте“"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Няма известия}=1{Известията са поставени на пауза от {mode}}=2{Известията са поставени на пауза от {mode} и един друг режим}other{Известията са поставени на пауза от {mode} и # други режима}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Стартиране сега"</string>
@@ -707,6 +709,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Прослед. на движенията на главата"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Докоснете, за да промените режима на звънене"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"режим на звънене"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>: докоснете, за да промените режима на звънене"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"спиране"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"пускане"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"вибриране"</string>
@@ -1482,6 +1485,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Натиснете клавиша за действия на клавиатурата си"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Браво!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Изпълнихте жеста за преглед на всички приложения"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Анимация за урока. Кликнете, за да поставите на пауза и да възобновите възпроизвеждането."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка на клавиатурата"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d от %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроли за дома"</string>
