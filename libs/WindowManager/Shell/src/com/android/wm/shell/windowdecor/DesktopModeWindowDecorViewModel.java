@@ -140,6 +140,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
@@ -150,7 +151,9 @@ import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
+import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.MainCoroutineDispatcher;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -177,6 +180,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final ShellController mShellController;
     private final Context mContext;
     private final @ShellMainThread Handler mMainHandler;
+    private final @ShellMainThread MainCoroutineDispatcher mMainDispatcher;
+    private final @ShellBackgroundThread CoroutineScope mBgScope;
     private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
@@ -241,12 +246,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final FocusTransitionObserver mFocusTransitionObserver;
     private final DesktopModeEventLogger mDesktopModeEventLogger;
     private final DesktopModeUiEventLogger mDesktopModeUiEventLogger;
+    private final WindowDecorTaskResourceLoader mTaskResourceLoader;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
             ShellExecutor shellExecutor,
             @ShellMainThread Handler mainHandler,
             Choreographer mainChoreographer,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -273,12 +281,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
-            DesktopModeUiEventLogger desktopModeUiEventLogger) {
+            DesktopModeUiEventLogger desktopModeUiEventLogger,
+            WindowDecorTaskResourceLoader taskResourceLoader) {
         this(
                 context,
                 shellExecutor,
                 mainHandler,
                 mainChoreographer,
+                mainDispatcher,
+                bgScope,
                 bgExecutor,
                 shellInit,
                 shellCommandHandler,
@@ -311,7 +322,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 new TaskPositionerFactory(),
                 focusTransitionObserver,
                 desktopModeEventLogger,
-                desktopModeUiEventLogger);
+                desktopModeUiEventLogger,
+                taskResourceLoader);
     }
 
     @VisibleForTesting
@@ -320,6 +332,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             ShellExecutor shellExecutor,
             @ShellMainThread Handler mainHandler,
             Choreographer mainChoreographer,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -352,11 +366,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             TaskPositionerFactory taskPositionerFactory,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
-            DesktopModeUiEventLogger desktopModeUiEventLogger) {
+            DesktopModeUiEventLogger desktopModeUiEventLogger,
+            WindowDecorTaskResourceLoader taskResourceLoader) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
+        mMainDispatcher = mainDispatcher;
+        mBgScope = bgScope;
         mBgExecutor = bgExecutor;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
@@ -418,6 +435,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mFocusTransitionObserver = focusTransitionObserver;
         mDesktopModeEventLogger = desktopModeEventLogger;
         mDesktopModeUiEventLogger = desktopModeUiEventLogger;
+        mTaskResourceLoader = taskResourceLoader;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -1640,12 +1658,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                                 : mContext,
                         mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
+                        mTaskResourceLoader,
                         mSplitScreenController,
                         mDesktopUserRepositories,
                         mTaskOrganizer,
                         taskInfo,
                         taskSurface,
                         mMainHandler,
+                        mMainExecutor,
+                        mMainDispatcher,
+                        mBgScope,
                         mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue,
