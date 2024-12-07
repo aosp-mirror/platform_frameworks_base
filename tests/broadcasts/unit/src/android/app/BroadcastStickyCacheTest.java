@@ -20,6 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -186,6 +187,22 @@ public class BroadcastStickyCacheTest {
     }
 
     @Test
+    public void getIntent_queryActionTwiceWithNullResult_verifyRegisterReceiverIsCalledOnce()
+            throws RemoteException {
+        setActivityManagerMock(null);
+        final Intent intent = queryIntent(new IntentFilter(Intent.ACTION_DEVICE_STORAGE_FULL));
+        final Intent cachedIntent = queryIntent(
+                new IntentFilter(Intent.ACTION_DEVICE_STORAGE_FULL));
+
+        assertNull(intent);
+        assertNull(cachedIntent);
+
+        verify(mActivityManagerMock, times(1)).registerReceiverWithFeature(
+                eq(mIApplicationThreadMock), anyString(), anyString(), anyString(), any(),
+                any(), anyString(), anyInt(), anyInt());
+    }
+
+    @Test
     public void getIntent_querySameActionWithDifferentFilter_verifyRegisterReceiverCalledTwice()
             throws RemoteException {
         setActivityManagerMock(Intent.ACTION_DEVICE_STORAGE_LOW);
@@ -226,6 +243,6 @@ public class BroadcastStickyCacheTest {
         when(ActivityManager.getService()).thenReturn(mActivityManagerMock);
         when(mActivityManagerMock.registerReceiverWithFeature(any(), anyString(),
                 anyString(), anyString(), any(), any(), anyString(), anyInt(),
-                anyInt())).thenReturn(new Intent(action));
+                anyInt())).thenReturn(action != null ? new Intent(action) : null);
     }
 }

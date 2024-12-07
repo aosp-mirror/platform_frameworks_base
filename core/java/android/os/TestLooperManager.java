@@ -95,8 +95,8 @@ public class TestLooperManager {
     }
 
     /**
-     * Returns the next message that should be executed by this queue, and removes it from the
-     * queue. If the queue is empty or no messages are deliverable, returns null.
+     * Retrieves and removes the next message that should be executed by this queue.
+     * If the queue is empty or no messages are deliverable, returns null.
      * This method never blocks.
      *
      * <p>Callers should always call {@link #recycle(Message)} on the message when all interactions
@@ -104,15 +104,19 @@ public class TestLooperManager {
      */
     @FlaggedApi(Flags.FLAG_MESSAGE_QUEUE_TESTABILITY)
     @Nullable
-    public Message pop() {
+    public Message poll() {
         checkReleased();
-        return mQueue.popForTest();
+        return mQueue.pollForTest();
     }
 
     /**
-     * Returns the values of {@link Message#when} of the next message that should be executed by
-     * this queue. If the queue is empty or no messages are deliverable, returns null.
+     * Retrieves, but does not remove, the values of {@link Message#when} of next message that
+     * should be executed by this queue.
+     * If the queue is empty or no messages are deliverable, returns null.
      * This method never blocks.
+     *
+     * <p>Callers should always call {@link #recycle(Message)} on the message when all interactions
+     * with it have completed.
      */
     @FlaggedApi(Flags.FLAG_MESSAGE_QUEUE_TESTABILITY)
     @SuppressWarnings("AutoBoxing")  // box the primitive long, or return null to indicate no value

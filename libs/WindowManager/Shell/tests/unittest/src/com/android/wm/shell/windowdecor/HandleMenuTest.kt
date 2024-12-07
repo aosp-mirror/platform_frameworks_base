@@ -257,7 +257,7 @@ class HandleMenuTest : ShellTestCase() {
                 if (splitPosition == SPLIT_POSITION_TOP_OR_LEFT) {
                     (SPLIT_LEFT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
                 } else {
-                    (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
+                    SPLIT_LEFT_BOUNDS.width() + (SPLIT_RIGHT_BOUNDS.width() / 2) - (HANDLE_WIDTH / 2)
                 }
             }
             else -> error("Invalid windowing mode")

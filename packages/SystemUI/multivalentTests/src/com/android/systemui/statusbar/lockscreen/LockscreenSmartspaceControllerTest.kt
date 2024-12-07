@@ -1109,6 +1109,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun getCurrentCardTopPadding(): Int {
                 return 0
             }
+
+            override fun setHorizontalPaddings(horizontalPadding: Int) {
+            }
         })
     }
 }
