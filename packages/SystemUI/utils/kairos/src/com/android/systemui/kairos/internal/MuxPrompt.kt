@@ -23,9 +23,9 @@ import com.android.systemui.kairos.internal.store.singleOf
 import com.android.systemui.kairos.internal.util.LogIndent
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.util.logDuration
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 
 internal class MuxPromptNode<W, K, V>(

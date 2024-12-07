@@ -18,8 +18,8 @@ package com.android.systemui.kairos.internal
 
 import com.android.systemui.kairos.internal.store.Single
 import com.android.systemui.kairos.internal.store.SingletonMapK
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
+import com.android.systemui.kairos.util.Maybe.Just
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 

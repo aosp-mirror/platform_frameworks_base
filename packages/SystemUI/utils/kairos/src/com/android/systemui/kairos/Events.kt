@@ -39,9 +39,9 @@ import com.android.systemui.kairos.internal.switchDeferredImplSingle
 import com.android.systemui.kairos.internal.switchPromptImplSingle
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.util.Either
-import com.android.systemui.kairos.util.Left
+import com.android.systemui.kairos.util.Either.Left
+import com.android.systemui.kairos.util.Either.Right
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.Right
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.toMaybe
 import java.util.concurrent.atomic.AtomicReference

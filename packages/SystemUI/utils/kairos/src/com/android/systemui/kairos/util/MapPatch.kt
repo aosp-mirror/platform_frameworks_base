@@ -16,6 +16,10 @@
 
 package com.android.systemui.kairos.util
 
+import com.android.systemui.kairos.util.Either.Left
+import com.android.systemui.kairos.util.Either.Right
+import com.android.systemui.kairos.util.Maybe.Just
+
 /** A "patch" that can be used to batch-update a [Map], via [applyPatch]. */
 typealias MapPatch<K, V> = Map<K, Maybe<V>>
 
@@ -25,8 +29,8 @@ typealias MapPatch<K, V> = Map<K, Maybe<V>>
  * For each entry in [patch]:
  * * a [Just] value will be included in the new map, replacing the entry in the original map with
  *   the same key, if present.
- * * a [None] value will be omitted from the new map, excluding the entry in the original map with
- *   the same key, if present.
+ * * a [Maybe.None] value will be omitted from the new map, excluding the entry in the original map
+ *   with the same key, if present.
  */
 fun <K, V> Map<K, V>.applyPatch(patch: MapPatch<K, V>): Map<K, V> {
     val (adds: List<Pair<K, V>>, removes: List<K>) =

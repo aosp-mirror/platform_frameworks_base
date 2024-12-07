@@ -1,10 +1,10 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.util.Either
-import com.android.systemui.kairos.util.Left
+import com.android.systemui.kairos.util.Either.Left
+import com.android.systemui.kairos.util.Either.Right
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
-import com.android.systemui.kairos.util.Right
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.maybe

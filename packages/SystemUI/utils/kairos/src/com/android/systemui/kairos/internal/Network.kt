@@ -20,8 +20,8 @@ import com.android.systemui.kairos.State
 import com.android.systemui.kairos.internal.util.HeteroMap
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.internal.util.logLn
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
+import com.android.systemui.kairos.util.Maybe.Just
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 import java.util.concurrent.atomic.AtomicLong

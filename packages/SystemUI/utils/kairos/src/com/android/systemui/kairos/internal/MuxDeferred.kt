@@ -27,9 +27,9 @@ import com.android.systemui.kairos.internal.store.singleOf
 import com.android.systemui.kairos.internal.util.hashString
 import com.android.systemui.kairos.internal.util.logDuration
 import com.android.systemui.kairos.internal.util.logLn
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.These
 import com.android.systemui.kairos.util.flatMap
 import com.android.systemui.kairos.util.getMaybe

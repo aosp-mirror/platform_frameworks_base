@@ -16,8 +16,8 @@
 
 package com.android.systemui.kairos
 
-import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
+import com.android.systemui.kairos.util.Maybe.Just
 import com.android.systemui.kairos.util.WithPrev
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map

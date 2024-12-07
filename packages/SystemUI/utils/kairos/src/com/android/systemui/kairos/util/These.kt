@@ -16,6 +16,8 @@
 
 package com.android.systemui.kairos.util
 
+import com.android.systemui.kairos.util.Maybe.Just
+
 /** Contains at least one of two potential values. */
 sealed class These<out A, out B> {
     /** Contains a single potential value. */
@@ -54,7 +56,7 @@ inline fun <A> These<A, A>.merge(f: (A, A) -> A): A =
 fun <A> These<A, *>.maybeThis(): Maybe<A> =
     when (this) {
         is These.Both -> just(thiz)
-        is These.That -> None
+        is These.That -> none
         is These.This -> just(thiz)
     }
 
@@ -74,7 +76,7 @@ fun <A> These<*, A>.maybeThat(): Maybe<A> =
     when (this) {
         is These.Both -> just(that)
         is These.That -> just(that)
-        is These.This -> None
+        is These.This -> none
     }
 
 /**
@@ -92,7 +94,7 @@ fun <A : Any> These<*, A>.thatOrNull(): A? =
 fun <A, B> These<A, B>.maybeBoth(): Maybe<Pair<A, B>> =
     when (this) {
         is These.Both -> just(thiz to that)
-        else -> None
+        else -> none
     }
 
 /** Returns a [These] containing [thiz] and/or [that] if they are present. */
