@@ -66,3 +66,41 @@ infix fun LetterboxController.append(other: LetterboxController) = object : Lett
         other.dump()
     }
 }
+
+object LetterboxUtils {
+    // Utility methods about Maps usage in Letterbox.
+    object Maps {
+        /*
+         * Executes [onFound] on the [item] for a given [key] if present or
+         * [onMissed] if the [key] is not present.
+         */
+        fun <V, K> MutableMap<K, V>.runOnItem(
+            key: K,
+            onFound: (V) -> Unit = { _ -> },
+            onMissed: (
+                K,
+                MutableMap<K, V>
+            ) -> Unit = { _, _ -> }
+        ) {
+            this[key]?.let {
+                return onFound(it)
+            }
+            return onMissed(key, this)
+        }
+    }
+
+    // Utility methods about Transaction usage in Letterbox.
+    object Transactions {
+        // Sets position and crops in one method.
+        fun Transaction.moveAndCrop(
+            surface: SurfaceControl,
+            rect: Rect
+        ): Transaction =
+            setPosition(surface, rect.left.toFloat(), rect.top.toFloat())
+                .setWindowCrop(
+                    surface,
+                    rect.width(),
+                    rect.height()
+                )
+    }
+}

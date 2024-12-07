@@ -40,6 +40,7 @@ import java.time.ZoneOffset;
  * <p>We also contain a PaintContext, so that any operation can draw as needed.
  */
 public abstract class RemoteContext {
+    private static final int MAX_OP_COUNT = 100_000; // Maximum cmds per frame
     protected @NonNull CoreDocument mDocument =
             new CoreDocument(); // todo: is this a valid way to initialize? bbade@
     public @NonNull RemoteComposeState mRemoteComposeState =
@@ -52,6 +53,7 @@ public abstract class RemoteContext {
 
     int mDebug = 0;
 
+    private int mOpCount;
     private int mTheme = Theme.UNSPECIFIED;
 
     public float mWidth = 0f;
@@ -631,4 +633,23 @@ public abstract class RemoteContext {
             float right,
             float bottom,
             int metadataId);
+
+    /** increments the count of operations executed in a pass */
+    public void incrementOpCount() {
+        mOpCount++;
+        if (mOpCount > MAX_OP_COUNT) {
+            throw new RuntimeException("Too many operations executed");
+        }
+    }
+
+    /**
+     * Get the last Op Count and clear the count.
+     *
+     * @return the number of ops executed.
+     */
+    public int getLastOpCount() {
+        int count = mOpCount;
+        mOpCount = 0;
+        return count;
+    }
 }

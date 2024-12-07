@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"දැනුම් දීම්"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"සංවාද"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"සියලු නිහඬ දැනුම්දීම් හිස් කරන්න"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"බාධා නොකරන්න මගින් විරාම කරන ලද දැනුම්දීම්"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{දැනුම්දීම් නැත}=1{{mode} මගින් දැනුම්දීම් විරාම කරන ලදි}=2{{mode} සහ තව එක ප්‍රකාරයක් මගින් දැනුම්දීම් විරාම කරන ලදි}one{{mode} සහ තව ප්‍රකාර #ක් මගින් දැනුම්දීම් විරාම කරන ලදි}other{{mode} සහ තව ප්‍රකාර #ක් මගින් දැනුම්දීම් විරාම කරන ලදි}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"දැන් අරඹන්න"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"හිස ලුහුබැඳීම"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"නාදකය වෙනස් කිරීමට තට්ටු කරන්න"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"හඬ නඟන ආකාරය"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"නිහඬ කරන්න"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"නිශ්ශබ්දතාවය ඉවත් කරන්න"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"කම්පනය"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ඔබේ යතුරු පුවරුවේ ක්‍රියාකාරී යතුර ඔබන්න"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"හොඳින් කළා!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"ඔබ සියලු යෙදුම් ඉංගිත බැලීම සම්පූර්ණ කර ඇත"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"යතුරු පුවරු පසු ආලෝකය"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dන් %1$d වැනි මට්ටම"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"නිවෙස් පාලන"</string>

@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाहरू"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"वार्तालापहरू"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सबै मौन सूचनाहरू हटाउनुहोस्"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"बाधा नपुऱ्याउनुहोस् नामक मोडमार्फत पज पारिएका सूचनाहरू"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{कुनै पनि नोटिफिकेसन छैन}=1{{mode} ले गर्दा नोटिफिकेसनहरू पज गरिएका छन्}=2{{mode} र अन्य एक मोडले गर्दा नोटिफिकेसनहरू पज गरिएका छन्}other{{mode} र अन्य # वटा मोडले गर्दा नोटिफिकेसनहरू पज गरिएका छन्}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"हेड ट्र्याकिङ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिङ्गर मोड बदल्न ट्याप गर्नुहोस्"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"घण्टी बजाउने मोड"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्युट गर्नुहोस्"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"अनम्युट गर्नुहोस्"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"कम्पन गर्नुहोस्"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"आफ्नो किबोर्डमा भएको एक्सन की थिच्नुहोस्"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"स्याबास!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"तपाईंले जेस्चर प्रयोग गरी सबै एपहरू हेर्ने तरिका सिक्नुभएको छ"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कन्ट्रोलहरू"</string>

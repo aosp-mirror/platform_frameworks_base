@@ -416,9 +416,10 @@ public class InternetDialogDelegate implements
         internetContent.mHasEthernet = mInternetDialogController.hasEthernet();
         internetContent.mIsWifiEnabled = mInternetDialogController.isWifiEnabled();
         internetContent.mHasActiveSubIdOnDds = mInternetDialogController.hasActiveSubIdOnDds();
-        internetContent.mIsMobileDataEnabled = mInternetDialogController.isMobileDataEnabled();
         internetContent.mIsDeviceLocked = mInternetDialogController.isDeviceLocked();
         internetContent.mIsWifiScanEnabled = mInternetDialogController.isWifiScanEnabled();
+        internetContent.mActiveAutoSwitchNonDdsSubId =
+                mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
         return internetContent;
     }
 
@@ -433,7 +434,11 @@ public class InternetDialogDelegate implements
 
     private void setOnClickListener(SystemUIDialog dialog) {
         mMobileNetworkLayout.setOnClickListener(v -> {
-            int autoSwitchNonDdsSubId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+            int autoSwitchNonDdsSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+            if (mDataInternetContent.getValue() != null) {
+                autoSwitchNonDdsSubId =
+                        mDataInternetContent.getValue().mActiveAutoSwitchNonDdsSubId;
+            }
             if (autoSwitchNonDdsSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 showTurnOffAutoDataSwitchDialog(dialog, autoSwitchNonDdsSubId);
             }
@@ -524,7 +529,7 @@ public class InternetDialogDelegate implements
             }
         } else {
             mMobileNetworkLayout.setVisibility(View.VISIBLE);
-            mMobileDataToggle.setChecked(internetContent.mIsMobileDataEnabled);
+            mMobileDataToggle.setChecked(mInternetDialogController.isMobileDataEnabled());
             mMobileTitleText.setText(getMobileNetworkTitle(mDefaultDataSubId));
             String summary = getMobileNetworkSummary(mDefaultDataSubId);
             if (!TextUtils.isEmpty(summary)) {
@@ -549,9 +554,9 @@ public class InternetDialogDelegate implements
                     ? R.color.connected_network_primary_color
                     : R.color.disconnected_network_primary_color;
             mMobileToggleDivider.setBackgroundColor(dialog.getContext().getColor(primaryColor));
-
             // Display the info for the non-DDS if it's actively being used
-            int autoSwitchNonDdsSubId = mInternetDialogController.getActiveAutoSwitchNonDdsSubId();
+            int autoSwitchNonDdsSubId = internetContent.mActiveAutoSwitchNonDdsSubId;
+
             int nonDdsVisibility = autoSwitchNonDdsSubId
                     != SubscriptionManager.INVALID_SUBSCRIPTION_ID ? View.VISIBLE : View.GONE;
 
@@ -983,8 +988,8 @@ public class InternetDialogDelegate implements
         boolean mIsCarrierNetworkActive = false;
         boolean mIsWifiEnabled = false;
         boolean mHasActiveSubIdOnDds = false;
-        boolean mIsMobileDataEnabled = false;
         boolean mIsDeviceLocked = false;
         boolean mIsWifiScanEnabled = false;
+        int mActiveAutoSwitchNonDdsSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 }
