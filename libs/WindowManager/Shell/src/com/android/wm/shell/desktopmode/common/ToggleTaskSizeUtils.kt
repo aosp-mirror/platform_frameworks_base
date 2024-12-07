@@ -15,6 +15,7 @@
  */
 package com.android.wm.shell.desktopmode.common
 
+import android.graphics.Rect
 import com.android.internal.jank.Cuj
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
@@ -23,10 +24,13 @@ import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction.Ambiguo
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction.Source
 
 /** Represents a user interaction to toggle a desktop task's size from to maximize or vice versa. */
-data class ToggleTaskSizeInteraction(
+data class ToggleTaskSizeInteraction
+@JvmOverloads
+constructor(
     val direction: Direction,
     val source: Source,
     val inputMethod: InputMethod,
+    val animationStartBounds: Rect? = null,
 ) {
     constructor(
         isMaximized: Boolean,

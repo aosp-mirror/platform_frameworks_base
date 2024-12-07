@@ -5926,9 +5926,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
                     Flags.doNotForceRushExecutionAtBoot());
             pw.println();
-            pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
-                    android.app.job.Flags.backupJobsExemption());
-            pw.println();
             pw.print(android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND,
                     android.app.job.Flags.ignoreImportantWhileForeground());
             pw.println();

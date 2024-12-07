@@ -771,7 +771,7 @@ class ElementTest {
 
     private fun expectedOffset(currentOffset: Dp, density: Density): Dp {
         return with(density) {
-            OffsetOverscrollEffect.computeOffset(this, currentOffset.toPx()).toDp()
+            OffsetOverscrollEffect.computeOffset(density, currentOffset.toPx()).toDp()
         }
     }
 

@@ -137,8 +137,8 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
             return;
         }
         context.mLastComponent = this;
-        mWidth = context.mWidth;
-        mHeight = context.mHeight;
+        setWidth(context.mWidth);
+        setHeight(context.mHeight);
 
         // TODO: reuse MeasurePass
         MeasurePass measurePass = new MeasurePass();
@@ -155,7 +155,9 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
     @Override
     public void paint(@NonNull PaintContext context) {
         mNeedsRepaint = false;
-        context.getContext().mLastComponent = this;
+        RemoteContext remoteContext = context.getContext();
+        remoteContext.mLastComponent = this;
+
         context.save();
 
         if (mParent == null) { // root layout
@@ -165,6 +167,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         for (Operation op : mList) {
             if (op instanceof PaintOperation) {
                 ((PaintOperation) op).paint(context);
+                remoteContext.incrementOpCount();
             }
         }
 

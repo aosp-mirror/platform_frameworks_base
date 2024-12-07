@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -56,12 +58,12 @@ constructor(
     private val interactor: VolumeDialogSliderInteractor,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
     @VolumeDialog private val coroutineScope: CoroutineScope,
+    private val volumeDialogSliderIconProvider: VolumeDialogSliderIconProvider,
     private val systemClock: SystemClock,
 ) {
 
     private val userVolumeUpdates = MutableStateFlow<VolumeUpdate?>(null)
-
-    val model: Flow<VolumeDialogStreamModel> =
+    private val model: Flow<VolumeDialogStreamModel> =
         interactor.slider
             .filter {
                 val lastVolumeUpdateTime = userVolumeUpdates.value?.timestampMillis ?: 0
@@ -69,6 +71,21 @@ constructor(
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
+
+    val state: Flow<VolumeDialogSliderStateModel> =
+        model.flatMapLatest { streamModel ->
+            with(streamModel) {
+                    volumeDialogSliderIconProvider.getStreamIcon(
+                        stream = stream,
+                        level = level,
+                        levelMin = levelMin,
+                        levelMax = levelMax,
+                        isMuted = muted,
+                        isRoutedToBluetooth = routedToBluetooth,
+                    )
+                }
+                .map { icon -> streamModel.toStateModel(icon) }
+        }
 
     init {
         userVolumeUpdates

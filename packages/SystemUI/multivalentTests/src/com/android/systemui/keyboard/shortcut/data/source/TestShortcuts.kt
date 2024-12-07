@@ -543,12 +543,12 @@ object TestShortcuts {
             simpleShortcutCategory(
                 MultiTasking,
                 "Split screen",
-                "Switch from split screen to full screen",
+                "Switch to full screen",
             ),
             simpleShortcutCategory(
                 MultiTasking,
                 "Split screen",
-                "Use split screen with current app on the left",
+                "Use split screen with app on the left",
             ),
             simpleShortcutCategory(
                 MultiTasking,
@@ -558,7 +558,7 @@ object TestShortcuts {
             simpleShortcutCategory(
                 MultiTasking,
                 "Split screen",
-                "Use split screen with current app on the right",
+                "Use split screen with app on the right",
             ),
             simpleShortcutCategory(
                 MultiTasking,

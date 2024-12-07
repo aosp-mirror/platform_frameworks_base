@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"বিজ্ঞপ্তি"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"কথোপকথন"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{কোনও বিজ্ঞপ্তি নেই}=1{{mode}-এর জন্য বিজ্ঞপ্তি পজ করা হয়েছে}=2{{mode} ও অন্য আরেকটি মোডের জন্য বিজ্ঞপ্তি পজ করা হয়েছে}one{{mode} ও অন্য #টি মোডের জন্য বিজ্ঞপ্তি পজ করা হয়েছে}other{{mode} ও অন্য #টি মোডের জন্য বিজ্ঞপ্তি পজ করা হয়েছে}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এখন শুরু করুন"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"হেড ট্র্যাকিং"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"রিঙ্গার মোড পরিবর্তন করতে ট্যাপ করুন"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"রিঙ্গার মোড"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"মিউট করুন"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"আনমিউট করুন"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ভাইব্রেট করান"</string>
@@ -1482,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"আপনার কীবোর্ডে অ্যাকশন কী প্রেস করুন"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"দারুণ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"আপনি \'সব অ্যাপের জেসচার দেখুন\' টিউটোরিয়াল সম্পূর্ণ করেছেন"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"কীবোর্ড ব্যাকলাইট"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-এর মধ্যে %1$d লেভেল"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"হোম কন্ট্রোল"</string>

@@ -593,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Aviseringar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konversationer"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Rensa alla ljudlösa aviseringar"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Aviseringar har pausats via Stör ej"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Inga aviseringar}=1{Aviseringar har pausats av {mode}}=2{Aviseringar har pausats av {mode} och ett annat läge}other{Aviseringar har pausats av {mode} och # andra lägen}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Starta nu"</string>
@@ -707,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Huvudspårning"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tryck för att ändra ringsignalens läge"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"ringsignalläge"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"stänga av ljudet"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"slå på ljudet"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibration"</string>
@@ -1438,8 +1442,7 @@
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikon för åtgärdstangent"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Plusikon"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Anpassa"</string>
-    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
-    <skip />
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Återställ"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Klar"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikonen Utöka"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"eller"</string>
@@ -1482,6 +1485,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tryck på åtgärdstangenten på tangentbordet"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Bra gjort!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Du är klar med rörelsen för att se alla apparna."</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Bakgrundsbelysning för tangentbord"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivå %1$d av %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Hemstyrning"</string>

@@ -197,6 +197,21 @@ public class WindowTokenClientController {
         }
     }
 
+    /**
+     * Reparents a {@link WindowTokenClient} and its associated WindowContainer if there's one.
+     */
+    public void reparentToDisplayArea(@NonNull WindowTokenClient client, int displayId) {
+        try {
+            if (!getWindowManagerService().reparentWindowContextToDisplayArea(mAppThread, client,
+                    displayId)) {
+                Log.e(TAG,
+                        "Didn't succeed reparenting of " + client + " to displayId=" + displayId);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private void onWindowContextTokenAttached(@NonNull WindowTokenClient client,
             @NonNull WindowContextInfo info, boolean shouldReportConfigChange) {
         recordWindowContextToken(client);

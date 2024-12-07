@@ -361,6 +361,26 @@ public class InputRouteManagerTest {
     }
 
     @Test
+    public void onAudioDevicesAdded_doNotActivatePreexistingDevice() {
+        final AudioManager audioManager = mock(AudioManager.class);
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+
+        final AudioDeviceInfo info = mockWiredHeadsetInfo();
+        InputMediaDevice device = createInputMediaDeviceFromDeviceInfo(info);
+        inputRouteManager.mInputMediaDevices.add(device);
+
+        // Trigger onAudioDevicesAdded with a device that already exists in the device list.
+        AudioDeviceInfo[] devices = {info};
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // The device should not be activated.
+        for (@MediaRecorder.Source int preset : PRESETS) {
+            verify(audioManager, never())
+                    .setPreferredDeviceForCapturePreset(preset, getWiredHeadsetDeviceAttributes());
+        }
+    }
+
+    @Test
     public void onAudioDevicesRemoved_shouldApplyDefaultSelectedDeviceToAllPresets() {
         final AudioManager audioManager = mock(AudioManager.class);
         InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);

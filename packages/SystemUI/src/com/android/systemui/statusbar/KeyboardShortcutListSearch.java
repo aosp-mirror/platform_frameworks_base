@@ -768,8 +768,6 @@ public final class KeyboardShortcutListSearch {
                     Intent.CATEGORY_APP_EMAIL,
                     Intent.CATEGORY_APP_CALENDAR,
                     Intent.CATEGORY_APP_MAPS,
-                    Intent.CATEGORY_APP_MUSIC,
-                    Intent.CATEGORY_APP_MESSAGING,
                     Intent.CATEGORY_APP_CALCULATOR,
             };
             String[] shortcutLabels = {
@@ -778,19 +776,15 @@ public final class KeyboardShortcutListSearch {
                     mContext.getString(R.string.keyboard_shortcut_group_applications_email),
                     mContext.getString(R.string.keyboard_shortcut_group_applications_calendar),
                     mContext.getString(R.string.keyboard_shortcut_group_applications_maps),
-                    mContext.getString(R.string.keyboard_shortcut_group_applications_music),
-                    mContext.getString(R.string.keyboard_shortcut_group_applications_sms),
                     mContext.getString(R.string.keyboard_shortcut_group_applications_calculator)
             };
 
             int[] keyCodes = {
                 KeyEvent.KEYCODE_B,
-                KeyEvent.KEYCODE_C,
-                KeyEvent.KEYCODE_E,
-                KeyEvent.KEYCODE_K,
-                KeyEvent.KEYCODE_M,
                 KeyEvent.KEYCODE_P,
-                KeyEvent.KEYCODE_S,
+                KeyEvent.KEYCODE_E,
+                KeyEvent.KEYCODE_C,
+                KeyEvent.KEYCODE_M,
                 KeyEvent.KEYCODE_U,
             };
 
