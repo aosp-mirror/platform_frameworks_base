@@ -215,7 +215,8 @@ public class JankDataProcessor {
 
         try {
             mPendingJankStats.values().forEach(stat -> {
-                        FrameworkStatsLog.write(FrameworkStatsLog.JANK_FRAME_COUNT_BY_WIDGET,
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.JANK_FRAME_COUNT_BY_WIDGET_REPORTED,
                                 /*app uid*/ stat.getUid(),
                                 /*activity name*/ stat.getActivityName(),
                                 /*widget id*/ stat.getWidgetId(),

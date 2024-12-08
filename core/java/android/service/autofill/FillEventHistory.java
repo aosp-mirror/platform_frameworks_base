@@ -341,7 +341,7 @@ public final class FillEventHistory implements Parcelable {
 
         /** Credential Manager suggestions are shown instead of Autofill suggestion */
         @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
-        public static final int UI_TYPE_CREDMAN = 4;
+        public static final int UI_TYPE_CREDENTIAL_MANAGER = 4;
 
         /** @hide */
         @IntDef(prefix = { "UI_TYPE_" }, value = {

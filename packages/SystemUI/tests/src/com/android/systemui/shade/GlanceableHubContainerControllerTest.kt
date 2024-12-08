@@ -33,7 +33,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
-import com.android.systemui.Flags.FLAG_COMMUNAL_HUB_ON_MOBILE
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
@@ -43,7 +43,9 @@ import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepositor
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.domain.interactor.setCommunalV2ConfigEnabled
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -131,20 +133,26 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             underTest =
                 GlanceableHubContainerController(
                     communalInteractor,
+                    communalSettingsInteractor,
                     communalViewModel,
                     keyguardInteractor,
-                    kosmos.keyguardTransitionInteractor,
+                    keyguardTransitionInteractor,
                     shadeInteractor,
                     powerManager,
                     communalColors,
                     ambientTouchComponentFactory,
                     communalContent,
-                    kosmos.sceneDataSourceDelegator,
-                    kosmos.notificationStackScrollLayoutController,
-                    kosmos.keyguardMediaController,
-                    kosmos.lockscreenSmartspaceController,
+                    sceneDataSourceDelegator,
+                    notificationStackScrollLayoutController,
+                    keyguardMediaController,
+                    lockscreenSmartspaceController,
                     logcatLogBuffer("GlanceableHubContainerControllerTest"),
                 )
+
+            // Make below last notification true by default or else touches will be ignored by
+            // default when the hub is not showing.
+            whenever(notificationStackScrollLayoutController.isBelowLastNotification(any(), any()))
+                .thenReturn(true)
         }
         testableLooper = TestableLooper.get(this)
 
@@ -178,6 +186,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 underTest =
                     GlanceableHubContainerController(
                         communalInteractor,
+                        kosmos.communalSettingsInteractor,
                         communalViewModel,
                         keyguardInteractor,
                         kosmos.keyguardTransitionInteractor,
@@ -207,6 +216,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             val underTest =
                 GlanceableHubContainerController(
                     communalInteractor,
+                    kosmos.communalSettingsInteractor,
                     communalViewModel,
                     keyguardInteractor,
                     kosmos.keyguardTransitionInteractor,
@@ -231,6 +241,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             val underTest =
                 GlanceableHubContainerController(
                     communalInteractor,
+                    kosmos.communalSettingsInteractor,
                     communalViewModel,
                     keyguardInteractor,
                     kosmos.keyguardTransitionInteractor,
@@ -631,7 +642,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun onTouchEvent_shadeInteracting_movesNotDispatched() =
         with(kosmos) {
@@ -688,7 +699,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
-    @DisableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun onTouchEvent_bouncerInteracting_movesNotDispatched() =
         with(kosmos) {
@@ -721,11 +732,13 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB_ON_MOBILE)
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun onTouchEvent_onLockscreenAndGlanceableHubV2_touchIgnored() =
         with(kosmos) {
             testScope.runTest {
+                kosmos.setCommunalV2ConfigEnabled(true)
+
                 // On lockscreen.
                 goToScene(CommunalScenes.Blank)
 

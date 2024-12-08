@@ -262,24 +262,6 @@ public class AppOpsManager {
 
     private static final Object sLock = new Object();
 
-    // A map that records noted times for each op.
-    private final ArrayMap<NotedOp, Integer> mPendingNotedOps = new ArrayMap<>();
-    private final HandlerThread mHandlerThread;
-    private final Handler mHandler;
-    private static final int NOTE_OP_BATCHING_DELAY_MILLIS = 1000;
-
-    private boolean isNoteOpBatchingSupported() {
-        // If noteOp is called from system server no IPC is made, hence we don't need batching.
-        if (Process.myUid() == Process.SYSTEM_UID) {
-            return false;
-        }
-        return Flags.noteOpBatchingEnabled();
-    }
-
-    private final Object mBatchedNoteOpLock = new Object();
-    @GuardedBy("mBatchedNoteOpLock")
-    private boolean mIsBatchedNoteOpCallScheduled = false;
-
     /** Current {@link OnOpNotedCallback}. Change via {@link #setOnOpNotedCallback} */
     @GuardedBy("sLock")
     private static @Nullable OnOpNotedCallback sOnOpNotedCallback;
@@ -7484,135 +7466,6 @@ public class AppOpsManager {
     }
 
     /**
-     * A NotedOp is an app op grouped in noteOp API and sent to the system server in a batch
-     *
-     * @hide
-     */
-    public static final class NotedOp implements Parcelable {
-        private final @IntRange(from = 0, to = _NUM_OP - 1) int mOp;
-        private final @IntRange(from = 0) int mUid;
-        private final @Nullable String mPackageName;
-        private final @Nullable String mAttributionTag;
-        private final int mVirtualDeviceId;
-        private final @Nullable String mMessage;
-        private final boolean mShouldCollectAsyncNotedOp;
-        private final boolean mShouldCollectMessage;
-
-        public NotedOp(int op, int uid, @Nullable String packageName,
-                @Nullable String attributionTag, int virtualDeviceId, @Nullable String message,
-                boolean shouldCollectAsyncNotedOp, boolean shouldCollectMessage) {
-            mOp = op;
-            mUid = uid;
-            mPackageName = packageName;
-            mAttributionTag = attributionTag;
-            mVirtualDeviceId = virtualDeviceId;
-            mMessage = message;
-            mShouldCollectAsyncNotedOp = shouldCollectAsyncNotedOp;
-            mShouldCollectMessage = shouldCollectMessage;
-        }
-
-        NotedOp(Parcel source) {
-            mOp = source.readInt();
-            mUid = source.readInt();
-            mPackageName = source.readString();
-            mAttributionTag = source.readString();
-            mVirtualDeviceId = source.readInt();
-            mMessage = source.readString();
-            mShouldCollectAsyncNotedOp = source.readBoolean();
-            mShouldCollectMessage = source.readBoolean();
-        }
-
-        public int getOp() {
-            return mOp;
-        }
-
-        public int getUid() {
-            return mUid;
-        }
-
-        public @Nullable String getPackageName() {
-            return mPackageName;
-        }
-
-        public @Nullable String getAttributionTag() {
-            return mAttributionTag;
-        }
-
-        public int getVirtualDeviceId() {
-            return mVirtualDeviceId;
-        }
-
-        public @Nullable String getMessage() {
-            return mMessage;
-        }
-
-        public boolean getShouldCollectAsyncNotedOp() {
-            return mShouldCollectAsyncNotedOp;
-        }
-
-        public boolean getShouldCollectMessage() {
-            return mShouldCollectMessage;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeInt(mOp);
-            dest.writeInt(mUid);
-            dest.writeString(mPackageName);
-            dest.writeString(mAttributionTag);
-            dest.writeInt(mVirtualDeviceId);
-            dest.writeString(mMessage);
-            dest.writeBoolean(mShouldCollectAsyncNotedOp);
-            dest.writeBoolean(mShouldCollectMessage);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            NotedOp that = (NotedOp) o;
-            return mOp == that.mOp && mUid == that.mUid && Objects.equals(mPackageName,
-                    that.mPackageName) && Objects.equals(mAttributionTag, that.mAttributionTag)
-                    && mVirtualDeviceId == that.mVirtualDeviceId && Objects.equals(mMessage,
-                    that.mMessage) && Objects.equals(mShouldCollectAsyncNotedOp,
-                    that.mShouldCollectAsyncNotedOp) && Objects.equals(mShouldCollectMessage,
-                    that.mShouldCollectMessage);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mOp, mUid, mPackageName, mAttributionTag, mVirtualDeviceId,
-                    mMessage, mShouldCollectAsyncNotedOp, mShouldCollectMessage);
-        }
-
-        @Override
-        public String toString() {
-            return "NotedOp{" + "mOp=" + mOp + ", mUid=" + mUid + ", mPackageName=" + mPackageName
-                    + ", mAttributionTag=" + mAttributionTag + ", mVirtualDeviceId="
-                    + mVirtualDeviceId + ", mMessage=" + mMessage + ", mShouldCollectAsyncNotedOp="
-                    + mShouldCollectAsyncNotedOp + ", mShouldCollectMessage="
-                    + mShouldCollectMessage + "}";
-        }
-
-
-        public static final @NonNull Creator<NotedOp> CREATOR =
-                new Creator<>() {
-                    @Override public NotedOp createFromParcel(Parcel source) {
-                        return new NotedOp(source);
-                    }
-
-                    @Override public NotedOp[] newArray(int size) {
-                        return new NotedOp[size];
-                    }
-                };
-    }
-
-    /**
      * Computes the sum of the counts for the given flags in between the begin and
      * end UID states.
      *
@@ -8126,9 +7979,6 @@ public class AppOpsManager {
     AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
-        mHandlerThread = new HandlerThread("AppOpsManager");
-        mHandlerThread.start();
-        mHandler = mHandlerThread.getThreadHandler();
 
         if (mContext != null) {
             final PackageManager pm = mContext.getPackageManager();
@@ -9465,74 +9315,15 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = null;
-            boolean skipBinderCall = false;
-            if (isNoteOpBatchingSupported()) {
-                int mode = sAppOpModeCache.query(
-                        new AppOpModeQuery(op, uid, packageName, virtualDeviceId, attributionTag,
-                                "noteOpNoThrow"));
-                // For FOREGROUND mode, we still need to make a binder call to the system service
-                // to translate it to ALLOWED or IGNORED. So no batching is needed.
-                if (mode != MODE_FOREGROUND) {
-                    synchronized (mBatchedNoteOpLock) {
-                        NotedOp notedOp = new NotedOp(op, uid, packageName, attributionTag,
-                                virtualDeviceId, message, collectionMode == COLLECT_ASYNC,
-                                shouldCollectMessage);
-
-                        // Batch same noteOp calls and send them with their counters to the system
-                        // service asynchronously. The time window for batching is specified in
-                        // NOTE_OP_BATCHING_DELAY_MILLIS. Always allow the first noteOp call to go
-                        // through binder API. Accumulate subsequent same noteOp calls during the
-                        // time window in mPendingNotedOps.
-                        if (!mPendingNotedOps.containsKey(notedOp)) {
-                            mPendingNotedOps.put(notedOp, 0);
-                        } else {
-                            skipBinderCall = true;
-                            mPendingNotedOps.merge(notedOp, 1, Integer::sum);
-                        }
-
-                        if (!mIsBatchedNoteOpCallScheduled) {
-                            mHandler.postDelayed(() -> {
-                                ArrayMap<NotedOp, Integer> pendingNotedOpsCopy;
-                                synchronized(mBatchedNoteOpLock) {
-                                    mIsBatchedNoteOpCallScheduled = false;
-                                    pendingNotedOpsCopy =
-                                            new ArrayMap<NotedOp, Integer>(mPendingNotedOps);
-                                    mPendingNotedOps.clear();
-                                }
-                                for (int i = pendingNotedOpsCopy.size() - 1; i >= 0; i--) {
-                                    if (pendingNotedOpsCopy.valueAt(i) == 0) {
-                                        pendingNotedOpsCopy.removeAt(i);
-                                    }
-                                }
-                                if (!pendingNotedOpsCopy.isEmpty()) {
-                                    try {
-                                        mService.noteOperationsInBatch(pendingNotedOpsCopy);
-                                    } catch (RemoteException e) {
-                                        throw e.rethrowFromSystemServer();
-                                    }
-                                }
-                            }, NOTE_OP_BATCHING_DELAY_MILLIS);
-
-                            mIsBatchedNoteOpCallScheduled = true;
-                        }
-                    }
-
-                    syncOp = new SyncNotedAppOp(mode, op, attributionTag, packageName);
-                }
+            SyncNotedAppOp syncOp;
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
+                        collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
+            } else {
+                syncOp = mService.noteOperationForDevice(op, uid, packageName, attributionTag,
+                    virtualDeviceId, collectionMode == COLLECT_ASYNC, message,
+                    shouldCollectMessage);
             }
-
-            if (!skipBinderCall) {
-                if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
-                    syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
-                            collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
-                } else {
-                    syncOp = mService.noteOperationForDevice(op, uid, packageName, attributionTag,
-                            virtualDeviceId, collectionMode == COLLECT_ASYNC, message,
-                            shouldCollectMessage);
-                }
-            }
-
             if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
                     collectNotedOpForSelf(syncOp);

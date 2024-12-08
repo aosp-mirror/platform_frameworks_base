@@ -47,12 +47,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
-import com.android.wm.shell.apptoweb.isBrowserApp
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.calculateMenuPosition
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.android.wm.shell.windowdecor.extension.isMultiWindow
 import com.android.wm.shell.windowdecor.extension.isPinned
@@ -240,7 +240,19 @@ class HandleMenu(
         val menuX: Int
         val menuY: Int
         val taskBounds = taskInfo.getConfiguration().windowConfiguration.bounds
-        updateGlobalMenuPosition(taskBounds, captionX, captionY)
+        globalMenuPosition.set(
+            calculateMenuPosition(
+                splitScreenController,
+                taskInfo,
+                marginStart = marginMenuStart,
+                marginMenuTop,
+                captionX,
+                captionY,
+                captionWidth,
+                menuWidth,
+                context.isRtl()
+            )
+        )
         if (layoutResId == R.layout.desktop_mode_app_header) {
             // Align the handle menu to the start of the header.
             menuX = if (context.isRtl()) {
@@ -263,53 +275,6 @@ class HandleMenu(
         }
         // Handle Menu position setup.
         handleMenuPosition.set(menuX.toFloat(), menuY.toFloat())
-    }
-
-    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int, captionY: Int) {
-        val nonFreeformX = captionX + (captionWidth / 2) - (menuWidth / 2)
-        when {
-            taskInfo.isFreeform -> {
-                if (context.isRtl()) {
-                    globalMenuPosition.set(
-                        /* x= */ taskBounds.right - menuWidth - marginMenuStart,
-                        /* y= */ taskBounds.top + captionY + marginMenuTop
-                    )
-                } else {
-                    globalMenuPosition.set(
-                        /* x= */ taskBounds.left + marginMenuStart,
-                        /* y= */ taskBounds.top + captionY + marginMenuTop
-                    )
-                }
-            }
-            taskInfo.isFullscreen -> {
-                globalMenuPosition.set(
-                    /* x = */ nonFreeformX,
-                    /* y = */ marginMenuTop + captionY
-                )
-            }
-            taskInfo.isMultiWindow -> {
-                val splitPosition = splitScreenController.getSplitPosition(taskInfo.taskId)
-                val leftOrTopStageBounds = Rect()
-                val rightOrBottomStageBounds = Rect()
-                splitScreenController.getStageBounds(leftOrTopStageBounds, rightOrBottomStageBounds)
-                // TODO(b/343561161): This needs to be calculated differently if the task is in
-                //  top/bottom split.
-                when (splitPosition) {
-                    SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT -> {
-                        globalMenuPosition.set(
-                            /* x = */ leftOrTopStageBounds.width() + nonFreeformX,
-                            /* y = */ captionY + marginMenuTop
-                        )
-                    }
-                    SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT -> {
-                        globalMenuPosition.set(
-                            /* x = */ nonFreeformX,
-                            /* y = */ captionY + marginMenuTop
-                        )
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -374,8 +339,6 @@ class HandleMenu(
             )
             if (splitScreenController.getSplitPosition(taskInfo.taskId)
                 == SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT) {
-                // TODO(b/343561161): This also needs to be calculated differently if
-                //  the task is in top/bottom split.
                 val leftStageBounds = Rect()
                 splitScreenController.getStageBounds(leftStageBounds, Rect())
                 inputRelativeToMenu.x += leftStageBounds.width().toFloat()

@@ -77,6 +77,10 @@ class DesktopMixedTransitionHandler(
     override fun startMinimizedModeTransition(wct: WindowContainerTransaction?): IBinder =
         freeformTaskTransitionHandler.startMinimizedModeTransition(wct)
 
+    /** Delegates starting PiP transition to [FreeformTaskTransitionHandler]. */
+    override fun startPipTransition(wct: WindowContainerTransaction?): IBinder =
+        freeformTaskTransitionHandler.startPipTransition(wct)
+
     /** Starts close transition and handles or delegates desktop task close animation. */
     override fun startRemoveTransition(wct: WindowContainerTransaction?): IBinder {
         if (

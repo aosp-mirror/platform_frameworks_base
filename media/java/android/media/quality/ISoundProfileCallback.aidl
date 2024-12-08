@@ -29,5 +29,5 @@ oneway interface ISoundProfileCallback {
     void onSoundProfileUpdated(in String id, in SoundProfile p);
     void onSoundProfileRemoved(in String id, in SoundProfile p);
     void onParamCapabilitiesChanged(in String id, in List<ParamCapability> caps);
-    void onError(in int err);
+    void onError(in String id, in int err);
 }

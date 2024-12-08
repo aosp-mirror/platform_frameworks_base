@@ -13,17 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.location;
 
-package com.android.systemui.qs.panels.ui.viewmodel
-
-import com.android.systemui.classifier.domain.interactor.falsingInteractor
-import com.android.systemui.kosmos.Kosmos
-
-val Kosmos.editModeButtonViewModelFactory by
-    Kosmos.Fixture {
-        object : EditModeButtonViewModel.Factory {
-            override fun create(): EditModeButtonViewModel {
-                return EditModeButtonViewModel(editModeViewModel, falsingInteractor)
-            }
-        }
-    }
+parcelable GnssAssistance;

@@ -1397,25 +1397,44 @@ public class TelephonyManager {
     /**
      * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which leaves the roaming
      * mode set to the radio default or to the user's preference if they've indicated one.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CDMA_ROAMING_MODE_RADIO_DEFAULT = -1;
     /**
      * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which only permits
      * connections on home networks.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CDMA_ROAMING_MODE_HOME = 0;
     /**
      * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which permits roaming on
      * affiliated networks.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
     /**
      * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which permits roaming on
      * any network.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int CDMA_ROAMING_MODE_ANY = 2;
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
     @IntDef(prefix = { "CDMA_ROAMING_MODE_" }, value = {
             CDMA_ROAMING_MODE_RADIO_DEFAULT,
             CDMA_ROAMING_MODE_HOME,
@@ -1802,12 +1821,17 @@ public class TelephonyManager {
      * to indicate if the SIM combination in DSDS has limitation or compatible issue.
      * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_SIM_COMBINATION_WARNING_TYPE =
             "android.telephony.extra.SIM_COMBINATION_WARNING_TYPE";
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
     @IntDef({
             EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE,
             EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA
@@ -1818,15 +1842,21 @@ public class TelephonyManager {
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
      * to indicate there's no SIM combination warning.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_NONE = 0;
 
     /**
      * Used as an int value for {@link #EXTRA_DEFAULT_SUBSCRIPTION_SELECT_TYPE}
      * to indicate two active SIMs are both CDMA hence there might be functional limitation.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int EXTRA_SIM_COMBINATION_WARNING_TYPE_DUAL_CDMA = 1;
 
     /**
@@ -1835,6 +1865,7 @@ public class TelephonyManager {
      * e.g. two CDMA SIMs may disrupt each other's voice call in certain scenarios, and the
      * name will be "operator1 & operator2".
      *
+     * TODO(b/379356026): Deprecate if this is CDMA specific
      * @hide
      */
     public static final String EXTRA_SIM_COMBINATION_NAMES =
@@ -2414,13 +2445,17 @@ public class TelephonyManager {
      *     higher, then a SecurityException is thrown.</li>
      * </ul>
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getMeid() {
+        if (Flags.cleanupCdma()) return null;
         return getMeid(getSlotIndex());
     }
 
@@ -2456,13 +2491,17 @@ public class TelephonyManager {
      *
      * @param slotIndex of which MEID is returned
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getMeid(int slotIndex) {
+        if (Flags.cleanupCdma()) return null;
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
 
@@ -2485,12 +2524,16 @@ public class TelephonyManager {
      * Returns the Manufacturer Code from the MEID. Return null if Manufacturer Code is not
      * available.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     @Nullable
     public String getManufacturerCode() {
+        if (Flags.cleanupCdma()) return null;
         return getManufacturerCode(getSlotIndex());
     }
 
@@ -2500,12 +2543,16 @@ public class TelephonyManager {
      *
      * @param slotIndex of which Type Allocation Code is returned
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     @Nullable
     public String getManufacturerCode(int slotIndex) {
+        if (Flags.cleanupCdma()) return null;
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
 
@@ -2648,7 +2695,13 @@ public class TelephonyManager {
     public static final int PHONE_TYPE_NONE = PhoneConstants.PHONE_TYPE_NONE;
     /** Phone radio is GSM. */
     public static final int PHONE_TYPE_GSM = PhoneConstants.PHONE_TYPE_GSM;
-    /** Phone radio is CDMA. */
+    /**
+     * Phone radio is CDMA.
+     *
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int PHONE_TYPE_CDMA = PhoneConstants.PHONE_TYPE_CDMA;
     /** Phone is via SIP. */
     public static final int PHONE_TYPE_SIP = PhoneConstants.PHONE_TYPE_SIP;
@@ -3070,13 +3123,33 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_EDGE = TelephonyProtoEnums.NETWORK_TYPE_EDGE; // = 2.
     /** Current network is UMTS */
     public static final int NETWORK_TYPE_UMTS = TelephonyProtoEnums.NETWORK_TYPE_UMTS; // = 3.
-    /** Current network is CDMA: Either IS95A or IS95B*/
+    /**
+     * Current network is CDMA: Either IS95A or IS95B
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int NETWORK_TYPE_CDMA = TelephonyProtoEnums.NETWORK_TYPE_CDMA; // = 4.
-    /** Current network is EVDO revision 0*/
+    /**
+     * Current network is EVDO revision 0
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int NETWORK_TYPE_EVDO_0 = TelephonyProtoEnums.NETWORK_TYPE_EVDO_0; // = 5.
-    /** Current network is EVDO revision A*/
+    /**
+     * Current network is EVDO revision A
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int NETWORK_TYPE_EVDO_A = TelephonyProtoEnums.NETWORK_TYPE_EVDO_A; // = 6.
-    /** Current network is 1xRTT*/
+    /**
+     * Current network is 1xRTT
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int NETWORK_TYPE_1xRTT = TelephonyProtoEnums.NETWORK_TYPE_1XRTT; // = 7.
     /** Current network is HSDPA */
     public static final int NETWORK_TYPE_HSDPA = TelephonyProtoEnums.NETWORK_TYPE_HSDPA; // = 8.
@@ -3090,11 +3163,21 @@ public class TelephonyManager {
      */
     @Deprecated
     public static final int NETWORK_TYPE_IDEN = TelephonyProtoEnums.NETWORK_TYPE_IDEN; // = 11.
-    /** Current network is EVDO revision B*/
+    /**
+     * Current network is EVDO revision B
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int NETWORK_TYPE_EVDO_B = TelephonyProtoEnums.NETWORK_TYPE_EVDO_B; // = 12.
     /** Current network is LTE */
     public static final int NETWORK_TYPE_LTE = TelephonyProtoEnums.NETWORK_TYPE_LTE; // = 13.
-    /** Current network is eHRPD */
+    /**
+     * Current network is eHRPD
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int NETWORK_TYPE_EHRPD = TelephonyProtoEnums.NETWORK_TYPE_EHRPD; // = 14.
     /** Current network is HSPA+ */
     public static final int NETWORK_TYPE_HSPAP = TelephonyProtoEnums.NETWORK_TYPE_HSPAP; // = 15.
@@ -3114,6 +3197,12 @@ public class TelephonyManager {
      * For 5G NSA, the network type will be {@link #NETWORK_TYPE_LTE}.
      */
     public static final int NETWORK_TYPE_NR = TelephonyProtoEnums.NETWORK_TYPE_NR; // 20.
+    /**
+     * 3GPP NB-IOT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final int NETWORK_TYPE_NB_IOT_NTN =
+            TelephonyProtoEnums.NETWORK_TYPE_NB_IOT_NTN; // 21
 
     private static final @NetworkType int[] NETWORK_TYPES = {
             NETWORK_TYPE_GPRS,
@@ -3190,6 +3279,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      * @see #NETWORK_TYPE_NR
+     * @see #NETWORK_TYPE_NB_IOT_NTN
      *
      * @hide
      */
@@ -3250,6 +3340,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
      * @see #NETWORK_TYPE_NR
+     * @see #NETWORK_TYPE_NB_IOT_NTN
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_RADIO_ACCESS}.
@@ -3400,6 +3491,8 @@ public class TelephonyManager {
                 return "LTE_CA";
             case NETWORK_TYPE_NR:
                 return "NR";
+            case NETWORK_TYPE_NB_IOT_NTN:
+                return "NB_IOT_NTN";
             case NETWORK_TYPE_UNKNOWN:
                 return "UNKNOWN";
             default:
@@ -3450,6 +3543,8 @@ public class TelephonyManager {
                 return NETWORK_TYPE_BITMASK_LTE;
             case NETWORK_TYPE_NR:
                 return NETWORK_TYPE_BITMASK_NR;
+            case NETWORK_TYPE_NB_IOT_NTN:
+                return NETWORK_TYPE_BITMASK_NB_IOT_NTN;
             case NETWORK_TYPE_IWLAN:
                 return NETWORK_TYPE_BITMASK_IWLAN;
             case NETWORK_TYPE_IDEN:
@@ -6761,9 +6856,13 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"ERI_"}, value = {
+            -1,
             ERI_ON,
             ERI_OFF,
             ERI_FLASH
@@ -6773,24 +6872,37 @@ public class TelephonyManager {
     /**
      * ERI (Enhanced Roaming Indicator) is ON i.e value 0 defined by
      * 3GPP2 C.R1001-H v1.0 Table 8.1-1.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int ERI_ON = 0;
 
     /**
      * ERI (Enhanced Roaming Indicator) is OFF i.e value 1 defined by
      * 3GPP2 C.R1001-H v1.0 Table 8.1-1.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int ERI_OFF = 1;
 
     /**
      * ERI (Enhanced Roaming Indicator) is FLASH i.e value 2 defined by
      * 3GPP2 C.R1001-H v1.0 Table 8.1-1.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final int ERI_FLASH = 2;
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"ERI_ICON_MODE_"}, value = {
+            -1,
             ERI_ICON_MODE_NORMAL,
             ERI_ICON_MODE_FLASH
     })
@@ -6802,7 +6914,9 @@ public class TelephonyManager {
      *
      * Note: ERI is defined 3GPP2 C.R1001-H Table 8.1-1
      * @hide
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @Deprecated
     public static final int ERI_ICON_MODE_NORMAL = 0;
 
     /**
@@ -6811,7 +6925,9 @@ public class TelephonyManager {
      *
      * Note: ERI is defined 3GPP2 C.R1001-H Table 8.1-1
      * @hide
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @Deprecated
     public static final int ERI_ICON_MODE_FLASH = 1;
 
     /**
@@ -6819,24 +6935,31 @@ public class TelephonyManager {
      * 3GPP2 C.R1001-H v1.0 Table 8.1-1. Additionally carriers define their own ERI display numbers.
      * Defined values are {@link #ERI_ON}, {@link #ERI_OFF}, and {@link #ERI_FLASH}.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public @EriIconIndex int getCdmaEnhancedRoamingIndicatorDisplayNumber() {
+        if (Flags.cleanupCdma()) return -1;
         return getCdmaEriIconIndex(getSubId());
     }
 
     /**
      * Returns the CDMA ERI icon index to display for a subscription.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public @EriIconIndex int getCdmaEriIconIndex(int subId) {
+        if (Flags.cleanupCdma()) return -1;
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
@@ -6856,11 +6979,14 @@ public class TelephonyManager {
      * 0 - ON
      * 1 - FLASHING
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public @EriIconMode int getCdmaEriIconMode(int subId) {
+        if (Flags.cleanupCdma()) return -1;
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
@@ -6878,21 +7004,27 @@ public class TelephonyManager {
     /**
      * Returns the CDMA ERI text,
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getCdmaEriText() {
+        if (Flags.cleanupCdma()) return null;
         return getCdmaEriText(getSubId());
     }
 
     /**
      * Returns the CDMA ERI text, of a subscription
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     @UnsupportedAppUsage
     public String getCdmaEriText(int subId) {
+        if (Flags.cleanupCdma()) return null;
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
@@ -8166,10 +8298,13 @@ public class TelephonyManager {
      * @param itemID the ID of the item to read.
      * @return the NV item as a String, or null on any failure.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage
     public String nvReadItem(int itemID) {
+        if (Flags.cleanupCdma()) return "";
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
@@ -8194,9 +8329,12 @@ public class TelephonyManager {
      * @param itemValue the value to write, as a String.
      * @return true on success; false on any failure.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public boolean nvWriteItem(int itemID, String itemValue) {
+        if (Flags.cleanupCdma()) return false;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
@@ -8220,9 +8358,12 @@ public class TelephonyManager {
      * @param preferredRoamingList byte array containing the new PRL.
      * @return true on success; false on any failure.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public boolean nvWriteCdmaPrl(byte[] preferredRoamingList) {
+        if (Flags.cleanupCdma()) return false;
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
@@ -8248,12 +8389,19 @@ public class TelephonyManager {
      * {@link #resetRadioConfig()} for reset type 3 (b/116476729)
      *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
+     * @deprecated NV APIs are deprecated starting from Android U.
      * @return true on success; false on any failure.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
     public boolean nvResetConfig(int resetType) {
+        if (Flags.cleanupCdma()) {
+            if (resetType != 1) {  // 1: reload NV reset (reboot modem)
+                return false;
+            }
+        }
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -8283,14 +8431,20 @@ public class TelephonyManager {
      *
      * @return {@code true} on success; {@code false} on any failure.
      *
+     * @deprecated NV APIs are deprecated starting from Android U.
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_RADIO_ACCESS}.
      * @hide
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
     public boolean resetRadioConfig() {
+        if (Flags.cleanupCdma()) {
+            return false;
+        }
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -8319,6 +8473,7 @@ public class TelephonyManager {
      *          {@link PackageManager#FEATURE_TELEPHONY_RADIO_ACCESS}.
      * @hide
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
@@ -9272,20 +9427,26 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is CDMA and EvDo (auto mode, according to PRL).
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_CDMA_EVDO = RILConstants.NETWORK_MODE_CDMA;
 
     /**
      * Preferred network mode is CDMA only.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_CDMA_NO_EVDO = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
 
     /**
      * Preferred network mode is EvDo only.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
 
     /**
@@ -9296,8 +9457,10 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is LTE, CDMA and EvDo.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_LTE_CDMA_EVDO = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO;
 
     /**
@@ -9308,8 +9471,10 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is LTE, CDMA, EvDo, GSM/WCDMA.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA =
             RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
 
@@ -9379,14 +9544,18 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is TD-SCDMA,EvDo,CDMA,GSM/WCDMA.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
             RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
     /**
      * Preferred network mode is TD-SCDMA/LTE/GSM/WCDMA, CDMA, and EvDo.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
             RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
 
@@ -9404,8 +9573,10 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is NR 5G, LTE, CDMA and EvDo.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_NR_LTE_CDMA_EVDO =
             RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO;
 
@@ -9418,8 +9589,10 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is NR 5G, LTE, CDMA, EvDo, GSM and WCDMA.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA =
             RILConstants.NETWORK_MODE_NR_LTE_CDMA_EVDO_GSM_WCDMA;
 
@@ -9458,8 +9631,10 @@ public class TelephonyManager {
 
     /**
      * Preferred network mode is NR 5G, LTE, TD-SCDMA, CDMA, EVDO, GSM and WCDMA.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final int NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
             RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
 
@@ -10160,6 +10335,9 @@ public class TelephonyManager {
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
      *
+     * If device supports satellite service, then
+     * {@link #NETWORK_TYPE_NB_IOT_NTN} is added to allowed network types for reason by default.
+     *
      * @param reason the reason the allowed network type change is taking place
      * @param allowedNetworkTypes The bitmask of allowed network type
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -10208,6 +10386,10 @@ public class TelephonyManager {
      * specific reason.
      * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * If device supports satellite service, then
+     * {@link #NETWORK_TYPE_NB_IOT_NTN} is added to allowed network types for reason by
+     * default.
      *
      * @param reason the reason the allowed network type change is taking place
      * @return the allowed network type bitmask
@@ -10275,7 +10457,7 @@ public class TelephonyManager {
      */
     public static String convertNetworkTypeBitmaskToString(
             @NetworkTypeBitMask long networkTypeBitmask) {
-        String networkTypeName = IntStream.rangeClosed(NETWORK_TYPE_GPRS, NETWORK_TYPE_NR)
+        String networkTypeName = IntStream.rangeClosed(NETWORK_TYPE_GPRS, NETWORK_TYPE_NB_IOT_NTN)
                 .filter(x -> {
                     return (networkTypeBitmask & getBitMaskForNetworkType(x))
                             == getBitMaskForNetworkType(x);
@@ -10533,24 +10715,32 @@ public class TelephonyManager {
     /**
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getCdmaMdn() {
+        if (Flags.cleanupCdma()) return null;
         return getCdmaMdn(getSubId());
     }
 
     /**
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getCdmaMdn(int subId) {
+        if (Flags.cleanupCdma()) return null;
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
@@ -10566,24 +10756,32 @@ public class TelephonyManager {
     /**
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getCdmaMin() {
+        if (Flags.cleanupCdma()) return null;
         return getCdmaMin(getSubId());
     }
 
     /**
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getCdmaMin(int subId) {
+        if (Flags.cleanupCdma()) return null;
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null)
@@ -11868,12 +12066,16 @@ public class TelephonyManager {
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public @CdmaRoamingMode int getCdmaRoamingMode() {
+        if (Flags.cleanupCdma()) return CDMA_ROAMING_MODE_RADIO_DEFAULT;
         int mode = CDMA_ROAMING_MODE_RADIO_DEFAULT;
         try {
             ITelephony telephony = getITelephony();
@@ -11912,12 +12114,16 @@ public class TelephonyManager {
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public void setCdmaRoamingMode(@CdmaRoamingMode int mode) {
+        if (Flags.cleanupCdma()) return;
         if (getPhoneType() != PHONE_TYPE_CDMA) {
             throw new IllegalStateException("Phone does not support CDMA.");
         }
@@ -11935,7 +12141,10 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
     @IntDef(prefix = { "CDMA_SUBSCRIPTION_" }, value = {
             CDMA_SUBSCRIPTION_UNKNOWN,
             CDMA_SUBSCRIPTION_RUIM_SIM,
@@ -11946,22 +12155,31 @@ public class TelephonyManager {
 
     /**
      * Used for CDMA subscription mode, it'll be UNKNOWN if there is no Subscription source.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     public static final int CDMA_SUBSCRIPTION_UNKNOWN  = -1;
 
     /**
      * Used for CDMA subscription mode: RUIM/SIM (default)
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0;
 
     /**
      * Used for CDMA subscription mode: NV -> non-volatile memory
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     public static final int CDMA_SUBSCRIPTION_NV       = 1;
 
@@ -11982,12 +12200,16 @@ public class TelephonyManager {
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public @CdmaSubscription int getCdmaSubscriptionMode() {
+        if (Flags.cleanupCdma()) return CDMA_SUBSCRIPTION_UNKNOWN;
         int mode = CDMA_SUBSCRIPTION_RUIM_SIM;
         try {
             ITelephony telephony = getITelephony();
@@ -12022,12 +12244,16 @@ public class TelephonyManager {
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public void setCdmaSubscriptionMode(@CdmaSubscription int mode) {
+        if (Flags.cleanupCdma()) return;
         if (getPhoneType() != PHONE_TYPE_CDMA) {
             throw new IllegalStateException("Phone does not support CDMA.");
         }
@@ -13747,11 +13973,15 @@ public class TelephonyManager {
      *
      * @throws UnsupportedOperationException If the device does not have
      *          {@link PackageManager#FEATURE_TELEPHONY_CDMA}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CDMA)
     public String getCdmaPrlVersion() {
+        if (Flags.cleanupCdma()) return null;
         return getCdmaPrlVersion(getSubId());
     }
 
@@ -13762,9 +13992,12 @@ public class TelephonyManager {
      *
      * @param subId the subscription ID that this request applies to.
      * @return PRLVersion or null if error.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public String getCdmaPrlVersion(int subId) {
+        if (Flags.cleanupCdma()) return null;
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -14905,7 +15138,8 @@ public class TelephonyManager {
                     NETWORK_TYPE_BITMASK_LTE_CA,
                     NETWORK_TYPE_BITMASK_NR,
                     NETWORK_TYPE_BITMASK_IWLAN,
-                    NETWORK_TYPE_BITMASK_IDEN
+                    NETWORK_TYPE_BITMASK_IDEN,
+                    NETWORK_TYPE_BITMASK_NB_IOT_NTN
             })
     public @interface NetworkTypeBitMask {}
 
@@ -14928,7 +15162,10 @@ public class TelephonyManager {
     public static final long NETWORK_TYPE_BITMASK_EDGE = (1 << (NETWORK_TYPE_EDGE -1));
     /**
      * network type bitmask indicating the support of radio tech CDMA(IS95A/IS95B).
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final long NETWORK_TYPE_BITMASK_CDMA = (1 << (NETWORK_TYPE_CDMA -1));
     /**
      * network type bitmask indicating the support of radio tech 1xRTT.
@@ -14950,7 +15187,10 @@ public class TelephonyManager {
     public static final long NETWORK_TYPE_BITMASK_EVDO_B = (1 << (NETWORK_TYPE_EVDO_B -1));
     /**
      * network type bitmask indicating the support of radio tech EHRPD.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final long NETWORK_TYPE_BITMASK_EHRPD = (1 << (NETWORK_TYPE_EHRPD -1));
     /**
      * network type bitmask indicating the support of radio tech HSUPA.
@@ -15006,6 +15246,12 @@ public class TelephonyManager {
      */
     public static final long NETWORK_TYPE_BITMASK_IWLAN = (1 << (NETWORK_TYPE_IWLAN -1));
 
+    /**
+     * network type bitmask indicating the support of readio tech NB IOT NTN.
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final long NETWORK_TYPE_BITMASK_NB_IOT_NTN = (1 << (NETWORK_TYPE_NB_IOT_NTN - 1));
+
     /** @hide */
     public static final long NETWORK_CLASS_BITMASK_2G = NETWORK_TYPE_BITMASK_GSM
                 | NETWORK_TYPE_BITMASK_GPRS
@@ -15034,6 +15280,9 @@ public class TelephonyManager {
     public static final long NETWORK_CLASS_BITMASK_5G = NETWORK_TYPE_BITMASK_NR;
 
     /** @hide */
+    public static final long NETWORK_CLASS_BITMASK_NTN = NETWORK_TYPE_BITMASK_NB_IOT_NTN;
+
+    /** @hide */
     public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP = NETWORK_TYPE_BITMASK_GSM
             | NETWORK_TYPE_BITMASK_GPRS
             | NETWORK_TYPE_BITMASK_EDGE
@@ -15045,9 +15294,13 @@ public class TelephonyManager {
             | NETWORK_TYPE_BITMASK_TD_SCDMA
             | NETWORK_TYPE_BITMASK_LTE
             | NETWORK_TYPE_BITMASK_LTE_CA
-            | NETWORK_TYPE_BITMASK_NR;
+            | NETWORK_TYPE_BITMASK_NR
+            | NETWORK_TYPE_BITMASK_NB_IOT_NTN;
 
-    /** @hide */
+    /** @hide
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
     public static final long NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2 = NETWORK_TYPE_BITMASK_CDMA
             | NETWORK_TYPE_BITMASK_1xRTT
             | NETWORK_TYPE_BITMASK_EVDO_0
@@ -18083,7 +18336,7 @@ public class TelephonyManager {
      */
     public static boolean isNetworkTypeValid(@NetworkType int networkType) {
         return networkType >= TelephonyManager.NETWORK_TYPE_UNKNOWN &&
-                networkType <= TelephonyManager.NETWORK_TYPE_NR;
+                networkType <= TelephonyManager.NETWORK_TYPE_NB_IOT_NTN;
     }
 
     /**

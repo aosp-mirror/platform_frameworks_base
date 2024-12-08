@@ -2983,7 +2983,7 @@ final class InstallPackageHelper {
         }
     }
 
-    public void sendPendingBroadcasts() {
+    public void sendPendingBroadcasts(String reasonForTrace) {
         String[] packages;
         ArrayList<String>[] components;
         int numBroadcasts = 0, numUsers;
@@ -3027,7 +3027,8 @@ final class InstallPackageHelper {
         // Send broadcasts
         for (int i = 0; i < numBroadcasts; i++) {
             mBroadcastHelper.sendPackageChangedBroadcast(snapshot, packages[i],
-                    true /* dontKillApp */, components[i], uids[i], null /* reason */);
+                    true /* dontKillApp */, components[i], uids[i], null /* reason */,
+                    reasonForTrace);
         }
     }
 
@@ -3084,7 +3085,7 @@ final class InstallPackageHelper {
                 mPm.mProcessLoggingHandler.invalidateBaseApkHash(request.getPkg().getBaseApkPath());
             }
 
-            mBroadcastHelper.sendPostInstallBroadcasts(mPm.snapshotComputer(), request, packageName,
+            mBroadcastHelper.sendPostInstallBroadcasts(mPm::snapshotComputer, request, packageName,
                     mPm.mRequiredPermissionControllerPackage, mPm.mRequiredVerifierPackages,
                     mPm.mRequiredInstallerPackage,
                     /* packageSender= */ mPm, launchedForRestore, killApp, update, archived);

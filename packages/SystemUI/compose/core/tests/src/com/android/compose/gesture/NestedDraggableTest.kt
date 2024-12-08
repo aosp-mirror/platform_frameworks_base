@@ -344,6 +344,45 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         assertThat(draggable.onDragStoppedCalled).isTrue()
     }
 
+    @Test
+    fun enabled() {
+        val draggable = TestDraggable()
+        var enabled by mutableStateOf(false)
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedDraggable(draggable, orientation, enabled = enabled)
+                )
+            }
+
+        assertThat(draggable.onDragStartedCalled).isFalse()
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(touchSlop.toOffset())
+        }
+
+        assertThat(draggable.onDragStartedCalled).isFalse()
+        assertThat(draggable.onDragStoppedCalled).isFalse()
+
+        enabled = true
+        rule.onRoot().performTouchInput {
+            // Release previously up finger.
+            up()
+
+            down(center)
+            moveBy(touchSlop.toOffset())
+        }
+
+        assertThat(draggable.onDragStartedCalled).isTrue()
+        assertThat(draggable.onDragStoppedCalled).isFalse()
+
+        enabled = false
+        rule.waitForIdle()
+        assertThat(draggable.onDragStoppedCalled).isTrue()
+    }
+
     private fun ComposeContentTestRule.setContentWithTouchSlop(
         content: @Composable () -> Unit
     ): Float {

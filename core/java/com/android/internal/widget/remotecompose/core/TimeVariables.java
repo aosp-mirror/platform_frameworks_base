@@ -24,7 +24,7 @@ import java.time.ZoneOffset;
 
 /** This generates the standard system variables for time. */
 public class TimeVariables {
-    private static final float BUILD = 0.01f;
+    private static final float BUILD = 0.02f;
 
     /**
      * This class populates all time variables in the system

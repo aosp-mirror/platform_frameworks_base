@@ -53,6 +53,7 @@ import android.os.Handler;
 import android.os.PowerExemptionManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
@@ -78,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * Helper class to send broadcasts for various situations.
@@ -216,7 +218,7 @@ public final class BroadcastHelper {
                 filterExtrasForReceiver, bOptions);
     }
 
-    void sendResourcesChangedBroadcast(@NonNull Computer snapshot,
+    void sendResourcesChangedBroadcast(@NonNull Supplier<Computer> snapshotSupplier,
                                        boolean mediaStatus,
                                        boolean replacing,
                                        @NonNull String[] pkgNames,
@@ -236,7 +238,7 @@ public final class BroadcastHelper {
                 null /* targetPkg */, null /* finishedReceiver */, null /* userIds */,
                 null /* instantUserIds */, null /* broadcastAllowList */,
                 (callingUid, intentExtras) -> filterExtrasChangedPackageList(
-                        snapshot, callingUid, intentExtras),
+                        snapshotSupplier, callingUid, intentExtras),
                 null /* bOptions */, null /* requiredPermissions */);
     }
 
@@ -357,9 +359,14 @@ public final class BroadcastHelper {
             @Nullable int[] instantUserIds,
             @Nullable SparseArray<int[]> broadcastAllowList,
             @NonNull AndroidPackage pkg,
-            @NonNull String[] sharedUidPackages) {
+            @NonNull String[] sharedUidPackages,
+            @NonNull String reasonForTrace) {
         final boolean isForWholeApp = componentNames.contains(packageName);
         if (isForWholeApp || !android.content.pm.Flags.reduceBroadcastsForComponentStateChanges()) {
+            tracePackageChangedBroadcastEvent(
+                    android.content.pm.Flags.reduceBroadcastsForComponentStateChanges(),
+                    reasonForTrace, "all" /* targetName */, "whole" /* targetComponent */,
+                    componentNames.size());
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp, componentNames,
                     packageUid, reason, userIds, instantUserIds, broadcastAllowList,
                     null /* targetPackageName */, null /* requiredPermissions */);
@@ -381,6 +388,9 @@ public final class BroadcastHelper {
 
             // First, send the PACKAGE_CHANGED broadcast to the system.
             if (!TextUtils.equals(packageName, "android")) {
+                tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
+                        "system" /* targetName */, "notExported" /* targetComponent */,
+                        notExportedComponentNames.size());
                 sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                         notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
                         broadcastAllowList, "android" /* targetPackageName */,
@@ -389,6 +399,9 @@ public final class BroadcastHelper {
             }
 
             // Second, send the PACKAGE_CHANGED broadcast to the application itself.
+            tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
+                    "applicationItself" /* targetName */, "notExported" /* targetComponent */,
+                    notExportedComponentNames.size());
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                     notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
                     broadcastAllowList, packageName /* targetPackageName */,
@@ -400,6 +413,9 @@ public final class BroadcastHelper {
                 if (TextUtils.equals(packageName, sharedPackage)) {
                     continue;
                 }
+                tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
+                        "sharedUidPackages" /* targetName */, "notExported" /* targetComponent */,
+                        notExportedComponentNames.size());
                 sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                         notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
                         broadcastAllowList, sharedPackage /* targetPackageName */,
@@ -409,6 +425,9 @@ public final class BroadcastHelper {
         }
 
         if (!exportedComponentNames.isEmpty()) {
+            tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
+                    "all" /* targetName */, "exported" /* targetComponent */,
+                    exportedComponentNames.size());
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                     exportedComponentNames, packageUid, reason, userIds, instantUserIds,
                     broadcastAllowList, null /* targetPackageName */,
@@ -544,7 +563,7 @@ public final class BroadcastHelper {
         });
     }
 
-    void sendPostInstallBroadcasts(@NonNull Computer snapshot,
+    void sendPostInstallBroadcasts(@NonNull Supplier<Computer> snapshotSupplier,
                                    @NonNull InstallRequest request,
                                    @NonNull String packageName,
                                    @NonNull String requiredPermissionControllerPackage,
@@ -567,8 +586,8 @@ public final class BroadcastHelper {
                 final int[] uids = new int[]{request.getRemovedInfo().mUid};
                 notifyResourcesChanged(
                         false /* mediaStatus */, true /* replacing */, pkgNames, uids);
-                sendResourcesChangedBroadcast(
-                        snapshot, false /* mediaStatus */, true /* replacing */, pkgNames, uids);
+                sendResourcesChangedBroadcast(snapshotSupplier,
+                        false /* mediaStatus */, true /* replacing */, pkgNames, uids);
             }
             sendPackageRemovedBroadcasts(
                     request.getRemovedInfo(), packageSender, isKillApp, false /*removedBySystem*/,
@@ -608,6 +627,7 @@ public final class BroadcastHelper {
                     null /* broadcastAllowList */, null);
         }
 
+        final Computer snapshot = snapshotSupplier.get();
         // Send installed broadcasts if the package is not a static shared lib.
         if (staticSharedLibraryName == null) {
             // Send PACKAGE_ADDED broadcast for users that see the package for the first time
@@ -732,7 +752,7 @@ public final class BroadcastHelper {
                 if (!isArchived) {
                     final String[] pkgNames = new String[]{packageName};
                     final int[] uids = new int[]{request.getPkg().getUid()};
-                    sendResourcesChangedBroadcast(snapshot,
+                    sendResourcesChangedBroadcast(snapshotSupplier,
                             true /* mediaStatus */, true /* replacing */, pkgNames, uids);
                     notifyResourcesChanged(true /* mediaStatus */,
                             true /* replacing */, pkgNames, uids);
@@ -749,7 +769,8 @@ public final class BroadcastHelper {
                     sendPackageChangedBroadcast(snapshot, pkg.getPackageName(),
                             dontKillApp,
                             new ArrayList<>(Collections.singletonList(pkg.getPackageName())),
-                            pkg.getUid(), null);
+                            pkg.getUid(), null /* reason */,
+                            "static_shared_library_changed" /* reasonForTrace */);
                 }
             }
         }
@@ -860,8 +881,8 @@ public final class BroadcastHelper {
      * access all the packages in the extras.
      */
     @Nullable
-    private static Bundle filterExtrasChangedPackageList(@NonNull Computer snapshot, int callingUid,
-            @NonNull Bundle extras) {
+    private static Bundle filterExtrasChangedPackageList(
+            @NonNull Supplier<Computer> snapshotSupplier, int callingUid, @NonNull Bundle extras) {
         if (UserHandle.isCore(callingUid)) {
             // see all
             return extras;
@@ -873,6 +894,7 @@ public final class BroadcastHelper {
         final int userId = extras.getInt(
                 Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(callingUid));
         final int[] uids = extras.getIntArray(Intent.EXTRA_CHANGED_UID_LIST);
+        final Computer snapshot = snapshotSupplier.get();
         final Pair<String[], int[]> filteredPkgs =
                 filterPackages(snapshot, pkgs, uids, callingUid, userId);
         if (ArrayUtils.isEmpty(filteredPkgs.first)) {
@@ -939,7 +961,8 @@ public final class BroadcastHelper {
                                      boolean dontKillApp,
                                      @NonNull ArrayList<String> componentNames,
                                      int packageUid,
-                                     @NonNull String reason) {
+                                     @NonNull String reason,
+                                     @NonNull String reasonForTrace) {
         PackageStateInternal setting = snapshot.getPackageStateInternal(packageName,
                 Process.SYSTEM_UID);
         if (setting == null || setting.getPkg() == null) {
@@ -952,10 +975,12 @@ public final class BroadcastHelper {
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
         final SparseArray<int[]> broadcastAllowList =
                 isInstantApp ? null : snapshot.getVisibilityAllowLists(packageName, userIds);
+        final String[] sharedUserPackages =
+                snapshot.getSharedUserPackagesForPackage(packageName, userId);
         mHandler.post(() -> sendPackageChangedBroadcastInternal(
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
                 instantUserIds, broadcastAllowList, setting.getPkg(),
-                snapshot.getSharedUserPackagesForPackage(packageName, userId)));
+                sharedUserPackages, reasonForTrace));
         mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
                 packageUid, reason, userIds, instantUserIds, broadcastAllowList, mHandler);
     }
@@ -1120,7 +1145,7 @@ public final class BroadcastHelper {
      * @param uidList The uids of packages which have suspension changes.
      * @param userId The user where packages reside.
      */
-    void sendPackagesSuspendedOrUnsuspendedForUser(@NonNull Computer snapshot,
+    void sendPackagesSuspendedOrUnsuspendedForUser(@NonNull Supplier<Computer> snapshotSupplier,
                                                    @NonNull String intent,
                                                    @NonNull String[] pkgList,
                                                    @NonNull int[] uidList,
@@ -1138,7 +1163,7 @@ public final class BroadcastHelper {
                 .toBundle();
         BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver =
                 (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
-                        snapshot, callingUid, intentExtras);
+                        snapshotSupplier, callingUid, intentExtras);
         mHandler.post(() -> sendPackageBroadcast(intent, null /* pkg */,
                 extras, flags, null /* targetPkg */, null /* finishedReceiver */,
                 new int[]{userId}, null /* instantUserIds */, null /* broadcastAllowList */,
@@ -1148,7 +1173,7 @@ public final class BroadcastHelper {
                 null /* instantUserIds */, null /* broadcastAllowList */, filterExtrasForReceiver);
     }
 
-    void sendMyPackageSuspendedOrUnsuspended(@NonNull Computer snapshot,
+    void sendMyPackageSuspendedOrUnsuspended(@NonNull Supplier<Computer> snapshotSupplier,
                                              @NonNull String[] affectedPackages,
                                              boolean suspended,
                                              int userId) {
@@ -1163,6 +1188,7 @@ public final class BroadcastHelper {
                 return;
             }
             final int[] targetUserIds = new int[] {userId};
+            final Computer snapshot = snapshotSupplier.get();
             for (String packageName : affectedPackages) {
                 final Bundle appExtras = suspended
                         ? SuspendPackageHelper.getSuspendedPackageAppExtras(
@@ -1192,7 +1218,7 @@ public final class BroadcastHelper {
      * @param uidList The uids of packages which have suspension changes.
      * @param userId The user where packages reside.
      */
-    void sendDistractingPackagesChanged(@NonNull Computer snapshot,
+    void sendDistractingPackagesChanged(@NonNull Supplier<Computer> snapshotSupplier,
                                         @NonNull String[] pkgList,
                                         @NonNull int[] uidList,
                                         int userId,
@@ -1208,11 +1234,11 @@ public final class BroadcastHelper {
                 null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
                 null /* broadcastAllowList */,
                 (callingUid, intentExtras) -> filterExtrasChangedPackageList(
-                        snapshot, callingUid, intentExtras),
+                        snapshotSupplier, callingUid, intentExtras),
                 null /* bOptions */, null /* requiredPermissions */));
     }
 
-    void sendResourcesChangedBroadcastAndNotify(@NonNull Computer snapshot,
+    void sendResourcesChangedBroadcastAndNotify(@NonNull Supplier<Computer> snapshotSupplier,
                                                 boolean mediaStatus,
                                                 boolean replacing,
                                                 @NonNull ArrayList<AndroidPackage> packages) {
@@ -1224,7 +1250,7 @@ public final class BroadcastHelper {
             packageNames[i] = pkg.getPackageName();
             packageUids[i] = pkg.getUid();
         }
-        sendResourcesChangedBroadcast(snapshot, mediaStatus,
+        sendResourcesChangedBroadcast(snapshotSupplier, mediaStatus,
                 replacing, packageNames, packageUids);
         notifyResourcesChanged(mediaStatus, replacing, packageNames, packageUids);
     }
@@ -1246,5 +1272,23 @@ public final class BroadcastHelper {
                                 @NonNull int[] uids) {
         mPackageMonitorCallbackHelper.notifyResourcesChanged(mediaStatus, replacing, pkgNames,
                 uids, mHandler);
+    }
+
+    private static void tracePackageChangedBroadcastEvent(boolean applyFlag, String reasonForTrace,
+            String targetName, String targetComponent, int componentSize) {
+
+        if (!Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+            return;
+        }
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append("broadcastPackageChanged; ");
+        builder.append("af="); builder.append(applyFlag);
+        builder.append(",rft="); builder.append(reasonForTrace);
+        builder.append(",tn="); builder.append(targetName);
+        builder.append(",tc="); builder.append(targetComponent);
+        builder.append(",cs="); builder.append(componentSize);
+
+        Trace.instant(Trace.TRACE_TAG_SYSTEM_SERVER, builder.toString());
     }
 }

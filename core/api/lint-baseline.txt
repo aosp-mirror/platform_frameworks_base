@@ -1,10 +1,4 @@
 // Baseline format: 1.0
-ActionValue: android.view.ViewStructure#EXTRA_VIRTUAL_STRUCTURE_TYPE:
-    Inconsistent extra value; expected `android.view.extra.VIRTUAL_STRUCTURE_TYPE`, was `android.view.ViewStructure.extra.VIRTUAL_STRUCTURE_TYPE`
-ActionValue: android.view.ViewStructure#EXTRA_VIRTUAL_STRUCTURE_VERSION_NUMBER:
-    Inconsistent extra value; expected `android.view.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER`, was `android.view.ViewStructure.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER`
-
-
 BroadcastBehavior: android.app.AlarmManager#ACTION_NEXT_ALARM_CLOCK_CHANGED:
     Field 'ACTION_NEXT_ALARM_CLOCK_CHANGED' is missing @BroadcastBehavior
 BroadcastBehavior: android.app.AlarmManager#ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
@@ -1191,10 +1185,6 @@ UnflaggedApi: android.R.dimen#system_corner_radius_xlarge:
     New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_xlarge
 UnflaggedApi: android.R.dimen#system_corner_radius_xsmall:
     New API must be flagged with @FlaggedApi: field android.R.dimen.system_corner_radius_xsmall
-UnflaggedApi: android.R.integer#status_bar_notification_info_maxnum:
-    Changes from not deprecated to deprecated must be flagged with @FlaggedApi: field android.R.integer.status_bar_notification_info_maxnum
-UnflaggedApi: android.R.string#status_bar_notification_info_overflow:
-    Changes from not deprecated to deprecated must be flagged with @FlaggedApi: field android.R.string.status_bar_notification_info_overflow
 UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INTERNAL_ERROR:
     New API must be flagged with @FlaggedApi: field android.accessibilityservice.AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR
 UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INVALID:

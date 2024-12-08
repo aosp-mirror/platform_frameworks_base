@@ -512,6 +512,11 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
     }
 
+    /** Get the parent-based coordinates for split stages. */
+    public void getRefStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        mStageCoordinator.getRefStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
+    }
+
     public void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         mStageCoordinator.registerSplitScreenListener(listener);
     }

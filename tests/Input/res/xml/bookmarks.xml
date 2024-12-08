@@ -23,7 +23,7 @@
         androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        androidprv:keycode="KEYCODE_C"
+        androidprv:keycode="KEYCODE_P"
         androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_EMAIL"
@@ -31,19 +31,11 @@
         androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CALENDAR"
-        androidprv:keycode="KEYCODE_K"
+        androidprv:keycode="KEYCODE_C"
         androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_MAPS"
         androidprv:keycode="KEYCODE_M"
-        androidprv:modifierState="META" />
-    <bookmark
-        category="android.intent.category.APP_MUSIC"
-        androidprv:keycode="KEYCODE_P"
-        androidprv:modifierState="META" />
-    <bookmark
-        role="android.app.role.SMS"
-        androidprv:keycode="KEYCODE_S"
         androidprv:modifierState="META" />
     <bookmark
         category="android.intent.category.APP_CALCULATOR"
@@ -57,7 +49,7 @@
 
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        androidprv:keycode="KEYCODE_C"
+        androidprv:keycode="KEYCODE_P"
         shift="true" />
 
     <bookmark

@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel.toolbar
 
-import com.android.systemui.haptics.msdl.tileHapticsViewModelFactoryProvider
+import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.detailsViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridViewModelFactory
+import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
 
-val Kosmos.infiniteGridLayout by
+val Kosmos.editModeButtonViewModelFactory by
     Kosmos.Fixture {
-        InfiniteGridLayout(
-            detailsViewModel,
-            iconTilesViewModel,
-            infiniteGridViewModelFactory,
-            tileHapticsViewModelFactoryProvider,
-        )
+        object : EditModeButtonViewModel.Factory {
+            override fun create(): EditModeButtonViewModel {
+                return EditModeButtonViewModel(editModeViewModel, falsingInteractor)
+            }
+        }
     }

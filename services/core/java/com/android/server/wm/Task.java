@@ -3864,6 +3864,9 @@ class Task extends TaskFragment {
         if (mLaunchAdjacentDisabled) {
             pw.println(prefix + "mLaunchAdjacentDisabled=true");
         }
+        if (mReparentLeafTaskIfRelaunch) {
+            pw.println(prefix + "mReparentLeafTaskIfRelaunch=true");
+        }
     }
 
     @Override
@@ -4489,7 +4492,7 @@ class Task extends TaskFragment {
     }
 
     void onPictureInPictureParamsChanged() {
-        if (inPinnedWindowingMode()) {
+        if (inPinnedWindowingMode() || Flags.enableDesktopWindowingPip()) {
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
     }

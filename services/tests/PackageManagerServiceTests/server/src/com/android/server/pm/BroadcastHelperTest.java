@@ -233,6 +233,6 @@ public class BroadcastHelperTest {
 
         mBroadcastHelper.sendPackageChangedBroadcast(mMockSnapshot,
                 PACKAGE_CHANGED_TEST_PACKAGE_NAME, true /* dontKillApp */, componentNames,
-                UserHandle.USER_SYSTEM, "test" /* reason */);
+                UserHandle.USER_SYSTEM, "test" /* reason */, "test" /* reasonForTrace */);
     }
 }

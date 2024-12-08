@@ -111,22 +111,24 @@ fun Modifier.nestedDraggable(
     draggable: NestedDraggable,
     orientation: Orientation,
     overscrollEffect: OverscrollEffect? = null,
+    enabled: Boolean = true,
 ): Modifier {
     return this.thenIf(overscrollEffect != null) { Modifier.overscroll(overscrollEffect) }
-        .then(NestedDraggableElement(draggable, orientation, overscrollEffect))
+        .then(NestedDraggableElement(draggable, orientation, overscrollEffect, enabled))
 }
 
 private data class NestedDraggableElement(
     private val draggable: NestedDraggable,
     private val orientation: Orientation,
     private val overscrollEffect: OverscrollEffect?,
+    private val enabled: Boolean,
 ) : ModifierNodeElement<NestedDraggableNode>() {
     override fun create(): NestedDraggableNode {
-        return NestedDraggableNode(draggable, orientation, overscrollEffect)
+        return NestedDraggableNode(draggable, orientation, overscrollEffect, enabled)
     }
 
     override fun update(node: NestedDraggableNode) {
-        node.update(draggable, orientation, overscrollEffect)
+        node.update(draggable, orientation, overscrollEffect, enabled)
     }
 }
 
@@ -134,6 +136,7 @@ private class NestedDraggableNode(
     private var draggable: NestedDraggable,
     override var orientation: Orientation,
     private var overscrollEffect: OverscrollEffect?,
+    private var enabled: Boolean,
 ) :
     DelegatingNode(),
     PointerInputModifierNode,
@@ -179,14 +182,22 @@ private class NestedDraggableNode(
         draggable: NestedDraggable,
         orientation: Orientation,
         overscrollEffect: OverscrollEffect?,
+        enabled: Boolean,
     ) {
         this.draggable = draggable
         this.orientation = orientation
         this.overscrollEffect = overscrollEffect
+        this.enabled = enabled
 
         trackDownPositionDelegate?.resetPointerInputHandler()
         detectDragsDelegate?.resetPointerInputHandler()
         nestedScrollController?.ensureOnDragStoppedIsCalled()
+
+        if (!enabled && trackDownPositionDelegate != null) {
+            check(detectDragsDelegate != null)
+            trackDownPositionDelegate = null
+            detectDragsDelegate = null
+        }
     }
 
     override fun onPointerEvent(
@@ -194,6 +205,8 @@ private class NestedDraggableNode(
         pass: PointerEventPass,
         bounds: IntSize,
     ) {
+        if (!enabled) return
+
         if (trackDownPositionDelegate == null) {
             check(detectDragsDelegate == null)
             trackDownPositionDelegate = SuspendingPointerInputModifierNode { trackDownPosition() }

@@ -21,6 +21,7 @@ import static android.system.OsConstants.O_ACCMODE;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.PROT_READ;
 
+import android.annotation.SuppressLint;
 import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
@@ -328,6 +329,7 @@ public class BundleUtil {
                 (value instanceof Boolean) || (value instanceof boolean[]);
     }
 
+    @SuppressLint("NewApi")
     private static void ensureValidBundle(Bundle bundle) {
         if (bundle == null) {
             throw new IllegalArgumentException("Request passed is expected to be non-null");
