@@ -67,6 +67,11 @@ class PreferenceScreenBindingHelper(
 
             override fun <T : Any> requirePreference(key: String) = findPreference<T>(key)!!
 
+            override fun getKeyValueStore(key: String) =
+                (findPreference<Preference>(key)?.preferenceDataStore
+                        as? PreferenceDataStoreAdapter)
+                    ?.keyValueStore
+
             override fun notifyPreferenceChange(key: String) =
                 notifyChange(key, CHANGE_REASON_STATE)
 
