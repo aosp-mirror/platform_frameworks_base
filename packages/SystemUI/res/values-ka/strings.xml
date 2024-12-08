@@ -529,7 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"უნდა დაადასტუროთ თქვენი ვინაობა, რათა გახსნათ აპი ვიჯეტის გამოყენებით. გაითვალისწინეთ, რომ ნებისმიერს შეუძლია მათი ნახვა, მაშინაც კი, როცა ტაბლეტი დაბლოკილია. ზოგი ვიჯეტი შეიძლება არ იყოს გათვლილი თქვენი დაბლოკილი ეკრანისთვის და მათი აქ დამატება შეიძლება სახიფათო იყოს."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"გასაგებია"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ვიჯეტები"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"ჩაკეტილ ეკრანზე ვიჯეტის მალსახმობის სახით დასამატებლად დარწმუნდით, რომ ის ჩართულია პარამეტრებიდან."</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"„ვიჯეტების“ მალსახმობის დასამატებლად დარწმუნდით, რომ პარამეტრებში ჩართულია „დაბლოკილ ეკრანზე ვიჯეტების ჩვენება“."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"პარამეტრები"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"მომხმარებლის გადართვა"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ჩამოშლადი მენიუ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ამ სესიის ყველა აპი და მონაცემი წაიშლება."</string>
@@ -590,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"შეტყობინებები"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"საუბრები"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ყველა ჩუმი შეტყობინების გასუფთავება"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"შეტყობინებები დაპაუზდა „არ შემაწუხოთ“ რეჟიმის მეშვეობით"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{შეტყობინებები არ არის}=1{შეტყობინებები შეჩერებულია {mode}-ის გამო}=2{შეტყობინებები შეჩერებულია {mode}-ის და ერთი სხვა რეჟიმის გამო}other{შეტყობინებები შეჩერებულია {mode}-ის და # სხვა რეჟიმის გამო}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"დაწყება ახლავე"</string>
@@ -704,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ხმის მიდევნებით"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"შეეხეთ მრეკავის რეჟიმის შესაცვლელად"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"მრეკავის რეჟიმი"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"დადუმება"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"დადუმების მოხსნა"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ვიბრაცია"</string>
@@ -1415,7 +1420,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"სისტემის მართვის საშუალებები"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"სისტემის აპები"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"მრავალამოცანიანი რეჟიმი"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"ბოლოდროინდელი აპები"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"ეკრანის გაყოფა"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"შეყვანა"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"აპის მალსახმობები"</string>
@@ -1424,14 +1428,18 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"კლავიატურის მალსახმობები"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"კლავიატურის მალსახმობების მორგება"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"გსურთ მალსახმობის წაშლა?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"გსურთ ნაგულისხმევზე გადაყენება?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"მალსახმობის მინიჭებისთვის დააჭირეთ კლავიშს"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ეს თქვენს მორგებულ მალსახმობებს სამუდამოდ წაშლის."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ეს სამუდამოდ წაშლის თქვენს ყველა მორგებულ მალსახმობს."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ძიების მალსახმობები"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ძიების შედეგები არ არის"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ხატულის ჩაკეცვა"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"მოქმედების ან მეტა კლავიშის ხატულა"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"პლუსის ხატულა"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"მორგება"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"მზადაა"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ხატულის გაფართოება"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ან"</string>
@@ -1441,6 +1449,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"კლავიატურის პარამეტრები"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"მალსახმობის დაყენება"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"ამოშლა"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"დიახ, გადაყენდეს"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"გაუქმება"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"დააჭირეთ კლავიშს"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"კლავიშების კომბინაცია უკვე გამოიყენება. ცადეთ სხვა კლავიში."</string>
@@ -1472,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"დააჭირეთ მოქმედების კლავიშს თქვენს კლავიატურაზე"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ყოჩაღ!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"თქვენ დაასრულეთ ყველა აპის ნახვის ჟესტი"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"კლავიატურის შენათება"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"დონე: %1$d %2$d-დან"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"სახლის კონტროლი"</string>

@@ -26,6 +26,7 @@ import android.os.RemoteException;
 public class ContextHubHalEndpointCallback
         extends android.hardware.contexthub.IEndpointCallback.Stub {
     private final IEndpointLifecycleCallback mEndpointLifecycleCallback;
+    private final IEndpointSessionCallback mEndpointSessionCallback;
 
     /** Interface for listening for endpoint start and stop events. */
     public interface IEndpointLifecycleCallback {
@@ -36,8 +37,27 @@ public class ContextHubHalEndpointCallback
         void onEndpointStopped(HubEndpointInfo.HubEndpointIdentifier[] endpointIds, byte reason);
     }
 
-    ContextHubHalEndpointCallback(IEndpointLifecycleCallback endpointLifecycleCallback) {
+    /** Interface for listening for endpoint session events. */
+    public interface IEndpointSessionCallback {
+        /** Called when an endpoint session open is requested by the HAL. */
+        void onEndpointSessionOpenRequest(
+                int sessionId,
+                HubEndpointInfo.HubEndpointIdentifier destinationId,
+                HubEndpointInfo.HubEndpointIdentifier initiatorId,
+                String serviceDescriptor);
+
+        /** Called when a endpoint close session is completed. */
+        void onCloseEndpointSession(int sessionId, byte reason);
+
+        /** Called when a requested endpoint open session is completed */
+        void onEndpointSessionOpenComplete(int sessionId);
+    }
+
+    ContextHubHalEndpointCallback(
+            IEndpointLifecycleCallback endpointLifecycleCallback,
+            IEndpointSessionCallback endpointSessionCallback) {
         mEndpointLifecycleCallback = endpointLifecycleCallback;
+        mEndpointSessionCallback = endpointSessionCallback;
     }
 
     @Override
@@ -48,7 +68,7 @@ public class ContextHubHalEndpointCallback
         }
         HubEndpointInfo[] endpointInfos = new HubEndpointInfo[halEndpointInfos.length];
         for (int i = 0; i < halEndpointInfos.length; i++) {
-            endpointInfos[i++] = new HubEndpointInfo(halEndpointInfos[i]);
+            endpointInfos[i] = new HubEndpointInfo(halEndpointInfos[i]);
         }
         mEndpointLifecycleCallback.onEndpointStarted(endpointInfos);
     }
@@ -72,14 +92,23 @@ public class ContextHubHalEndpointCallback
 
     @Override
     public void onEndpointSessionOpenRequest(
-            int i, EndpointId endpointId, EndpointId endpointId1, String s)
-            throws RemoteException {}
+            int i, EndpointId destination, EndpointId initiator, String s) throws RemoteException {
+        HubEndpointInfo.HubEndpointIdentifier destinationId =
+                new HubEndpointInfo.HubEndpointIdentifier(destination.hubId, destination.id);
+        HubEndpointInfo.HubEndpointIdentifier initiatorId =
+                new HubEndpointInfo.HubEndpointIdentifier(initiator.hubId, initiator.id);
+        mEndpointSessionCallback.onEndpointSessionOpenRequest(i, destinationId, initiatorId, s);
+    }
 
     @Override
-    public void onCloseEndpointSession(int i, byte b) throws RemoteException {}
+    public void onCloseEndpointSession(int i, byte b) throws RemoteException {
+        mEndpointSessionCallback.onCloseEndpointSession(i, b);
+    }
 
     @Override
-    public void onEndpointSessionOpenComplete(int i) throws RemoteException {}
+    public void onEndpointSessionOpenComplete(int i) throws RemoteException {
+        mEndpointSessionCallback.onEndpointSessionOpenComplete(i);
+    }
 
     @Override
     public int getInterfaceVersion() throws RemoteException {

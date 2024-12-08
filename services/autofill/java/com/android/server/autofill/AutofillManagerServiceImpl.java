@@ -61,6 +61,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.InlineSuggestionRenderService;
 import android.service.autofill.SaveInfo;
@@ -100,6 +101,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
  * app's {@link IAutoFillService} implementation.
@@ -748,6 +750,22 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void removeSessionLocked(int sessionId) {
         mSessions.remove(sessionId);
+        if (Flags.autofillSessionDestroyed()) {
+            if (sVerbose) {
+                Slog.v(
+                        TAG,
+                        "removeSessionLocked(): removed " + sessionId);
+            }
+            RemoteFillService remoteService =
+                    new RemoteFillService(
+                            getContext(),
+                            mInfo.getServiceInfo().getComponentName(),
+                            mUserId,
+                            /* callbacks= */ null,
+                            mMaster.isInstantServiceAllowed(),
+                            /* credentialAutofillService= */ null);
+            remoteService.onSessionDestroyed(null);
+        }
     }
 
     /**
@@ -802,6 +820,36 @@ final class AutofillManagerServiceImpl
                     + DebugUtils.flagsToString(AutofillManager.class, "PENDING_UI_OPERATION_",
                             operation));
         }
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationStart(int sessionId, long startTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationStart(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationStart(startTimeMs);
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationEnd(int sessionId, long endTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationEnd(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationEnd(endTimeMs);
     }
 
     @GuardedBy("mLock")

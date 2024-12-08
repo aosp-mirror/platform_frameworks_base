@@ -231,7 +231,7 @@ public class MobileStatusTracker {
         public SignalStrength signalStrength;
         public TelephonyDisplayInfo telephonyDisplayInfo =
                 new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false);
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE, false, false, false);
 
         /**
          * Empty constructor

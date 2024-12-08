@@ -17,10 +17,11 @@
 package com.android.systemui.qs.tiles
 
 import android.os.Handler
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.service.quicksettings.Tile
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -29,6 +30,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
@@ -62,12 +64,18 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
-@RunWith(AndroidJUnit4::class)
-class InternetTileNewImplTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     lateinit var underTest: InternetTileNewImpl
 
     private val testDispatcher = StandardTestDispatcher()
@@ -128,7 +136,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
                 viewModel,
                 dialogManager,
                 wifiStateWorker,
-                accessPointController
+                accessPointController,
             )
 
         underTest.initialize()
@@ -156,10 +164,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         testScope.runTest {
             connectivityRepository.defaultConnections.value = DefaultConnectionModel()
             wifiRepository.wifiScanResults.value =
-                listOf(
-                    WifiScanEntry(ssid = "ssid 1"),
-                    WifiScanEntry(ssid = "ssid 2"),
-                )
+                listOf(WifiScanEntry(ssid = "ssid 1"), WifiScanEntry(ssid = "ssid 2"))
 
             runCurrent()
             looper.processAllMessages()
@@ -204,10 +209,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         testScope.runTest {
             airplaneModeRepository.setIsAirplaneMode(true)
             connectivityRepository.defaultConnections.value =
-                DefaultConnectionModel(
-                    wifi = Wifi(true),
-                    isValidated = true,
-                )
+                DefaultConnectionModel(wifi = Wifi(true), isValidated = true)
             wifiRepository.setIsWifiEnabled(true)
             wifiRepository.setWifiNetwork(ACTIVE_WIFI)
 
@@ -222,10 +224,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
     fun wifiConnected() =
         testScope.runTest {
             connectivityRepository.defaultConnections.value =
-                DefaultConnectionModel(
-                    wifi = Wifi(true),
-                    isValidated = true,
-                )
+                DefaultConnectionModel(wifi = Wifi(true), isValidated = true)
 
             wifiRepository.setIsWifiEnabled(true)
             wifiRepository.setWifiNetwork(ACTIVE_WIFI)
@@ -242,6 +241,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         whenever(wifiStateWorker.isWifiEnabled).thenReturn(true)
 
         underTest.secondaryClick(null)
+        looper.processAllMessages()
 
         verify(wifiStateWorker, times(1)).isWifiEnabled = eq(false)
     }
@@ -251,6 +251,7 @@ class InternetTileNewImplTest : SysuiTestCase() {
         whenever(wifiStateWorker.isWifiEnabled).thenReturn(false)
 
         underTest.secondaryClick(null)
+        looper.processAllMessages()
 
         verify(wifiStateWorker, times(1)).isWifiEnabled = eq(true)
     }
@@ -258,10 +259,12 @@ class InternetTileNewImplTest : SysuiTestCase() {
     companion object {
         const val WIFI_SSID = "test ssid"
         val ACTIVE_WIFI =
-            WifiNetworkModel.Active.of(
-                isValidated = true,
-                level = 4,
-                ssid = WIFI_SSID,
-            )
+            WifiNetworkModel.Active.of(isValidated = true, level = 4, ssid = WIFI_SSID)
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
+        }
     }
 }

@@ -427,6 +427,18 @@ flag {
     }
 }
 
+
+flag {
+    name: "status_bar_chips_modernization"
+    namespace: "systemui"
+    description: "Deprecate OngoingCallController and implement OngoingActivityChips"
+    "in compose"
+    bug: "372657935"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
 flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
@@ -1204,17 +1216,17 @@ flag {
 }
 
 flag {
+  name: "communal_responsive_grid"
+  namespace: "systemui"
+  description: "Enables responsive grid on glanceable hub"
+  bug: "378171351"
+}
+
+flag {
   name: "communal_standalone_support"
   namespace: "systemui"
   description: "Support communal features without a dock"
   bug: "352301247"
-}
-
-flag {
-  name: "communal_hub_on_mobile"
-  namespace: "systemui"
-  description: "Brings the glanceable hub experience to mobile phones"
-  bug: "375689917"
 }
 
 flag {
@@ -1782,16 +1794,6 @@ flag {
 }
 
 flag {
-  name: "ensure_enr_views_visibility"
-  namespace: "systemui"
-  description: "Ensures public and private visibilities"
-  bug: "361552380"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "shade_expands_on_status_bar_long_press"
   namespace: "systemui"
   description: "Expands the shade on long press of any status bar"
@@ -1862,4 +1864,18 @@ flag {
     namespace: "systemui"
     description: "Implement the depth push scaling effect on Launcher when users pull down shade."
     bug: "370562309"
+}
+
+flag {
+    name: "spatial_model_app_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on the current app when users pull down shade."
+    bug: "370560660"
+}
+
+flag {
+    name: "expanded_privacy_indicators_on_large_screen"
+    namespace: "systemui"
+    description: "Larger privacy indicators on large screen"
+    bug: "381864715"
 }

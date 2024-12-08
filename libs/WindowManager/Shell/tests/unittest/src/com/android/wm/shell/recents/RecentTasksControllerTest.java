@@ -22,11 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.launcher3.Flags.FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL;
+import static com.android.launcher3.Flags.FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
-
-import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -59,7 +57,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.UserManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -80,7 +77,6 @@ import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.shared.GroupedTaskInfo;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -186,7 +182,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Test
     public void instantiateController_addExternalInterface() {
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS), any(), any());
+                eq(IRecentTasks.DESCRIPTOR), any(), any());
     }
 
     @Test
@@ -254,7 +250,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 t3.taskId, -1);
     }
 
-    @EnableFlags(FLAG_ENABLE_REFACTOR_TASK_THUMBNAIL)
+    @EnableFlags(FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK)
     @Test
     public void testGetRecentTasks_removesDesktopWallpaperActivity() {
         RecentTaskInfo t1 = makeTaskInfo(1);

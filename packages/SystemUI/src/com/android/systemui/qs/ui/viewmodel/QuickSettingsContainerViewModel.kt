@@ -22,6 +22,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.toolbar.ToolbarViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -38,6 +39,7 @@ constructor(
     val tileGridViewModel: TileGridViewModel,
     val editModeViewModel: EditModeViewModel,
     val detailsViewModel: DetailsViewModel,
+    val toolbarViewModelFactory: ToolbarViewModel.Factory,
 ) : ExclusiveActivatable() {
 
     val brightnessSliderViewModel =

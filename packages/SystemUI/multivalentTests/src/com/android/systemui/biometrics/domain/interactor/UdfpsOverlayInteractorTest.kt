@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.graphics.Rect
+import android.hardware.fingerprint.FingerprintManager
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.view.MotionEvent
 import android.view.Surface
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -24,6 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.authController
+import com.android.systemui.biometrics.fingerprintManager
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -39,6 +42,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
@@ -57,6 +62,8 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
     private val testScope: TestScope = kosmos.testScope
 
     private val authController: AuthController = kosmos.authController
+    private val fingerprintManager: FingerprintManager = kosmos.fingerprintManager
+    @Mock private lateinit var fingerprintSensorProperties: FingerprintSensorPropertiesInternal
     @Captor private lateinit var authControllerCallback: ArgumentCaptor<AuthController.Callback>
 
     @Mock private lateinit var udfpsOverlayParams: UdfpsOverlayParams
@@ -120,6 +127,20 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
 
             assertThat(padding).isEqualTo(0)
             context.orCreateTestableResources.removeOverride(R.dimen.pixel_pitch)
+        }
+
+    @Test
+    fun testSetIgnoreDisplayTouches() =
+        testScope.runTest {
+            createUdfpsOverlayInteractor()
+            whenever(authController.isUdfpsSupported).thenReturn(true)
+            whenever(authController.udfpsProps).thenReturn(listOf(fingerprintSensorProperties))
+
+            underTest.setHandleTouches(false)
+            verify(fingerprintManager).setIgnoreDisplayTouches(anyLong(), anyInt(), eq(true))
+
+            underTest.setHandleTouches(true)
+            verify(fingerprintManager).setIgnoreDisplayTouches(anyLong(), anyInt(), eq(false))
         }
 
     private fun createUdfpsOverlayInteractor() {

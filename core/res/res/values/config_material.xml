@@ -75,4 +75,14 @@
     <integer name="config_motionExpressiveSlowSpatialStiffness">200</integer>
     <item name="config_motionExpressiveSlowEffectDamping" format="float" type="dimen">1.0</item>
     <integer name="config_motionExpressiveSlowEffectStiffness">800</integer>
+
+    <!--
+        Material rounded corner configs
+        Values from https://carbon.googleplex.com/google-material-3/tokens/designSystems/20543ce18892f7d9/tokenSets/21c40db4e4f5af15
+    -->
+    <dimen name="config_shapeCornerRadiusXsmall">4dp</dimen>
+    <dimen name="config_shapeCornerRadiusSmall">8dp</dimen>
+    <dimen name="config_shapeCornerRadiusMedium">12dp</dimen>
+    <dimen name="config_shapeCornerRadiusLarge">16dp</dimen>
+    <dimen name="config_shapeCornerRadiusXlarge">28dp</dimen>
 </resources>

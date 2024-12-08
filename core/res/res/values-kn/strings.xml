@@ -561,13 +561,13 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5884738958581810253">"ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಇನ್‌ಫ್ರಾರೆಡ್ ಸಂವಾಹಕವನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3278506969529173281">"ನಿಮ್ಮ Android TV ಸಾಧನದ ಇನ್‌ಫ್ರಾರೆಡ್ ಟ್ರಾನ್ಸ್‌ಮೀಟರ್ ಅನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_transmitIr" product="default" msgid="8484193849295581808">"ಫೋನ್‌ನ ಇನ್‌ಫ್ರಾರೆಡ್ ಸಂವಾಹಕವನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_setWallpaper" msgid="6959514622698794511">"ವಾಲ್‌ಪೇಪರ್ ಹೊಂದಿಸಿ"</string>
+    <string name="permlab_setWallpaper" msgid="6959514622698794511">"ವಾಲ್‌ಪೇಪರ್ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="permdesc_setWallpaper" msgid="2973996714129021397">"ಸಿಸ್ಟಂ ವಾಲ್‌ಪೇಪರ್‌ ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"ಮರೆಮಾಡಲಾದ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
     <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"ಮರೆಮಾಡಲಾದ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ನಿಮ್ಮ ವಾಲ್‍ಪೇಪರ್ ಗಾತ್ರವನ್ನು ಸರಿಹೊಂದಿಸಿ"</string>
     <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"ಸಿಸ್ಟಂ ವಾಲ್‌ಪೇಪರ್‌‌ ಗಾತ್ರದ ಸುಳಿವುಗಳನ್ನು ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_setTimeZone" msgid="7922618798611542432">"ಸಮಯದ ವಲಯವನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="permlab_setTimeZone" msgid="7922618798611542432">"ಸಮಯದ ವಲಯವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"ಟ್ಯಾಬ್ಲೆಟ್‌‌ನ ಸಮಯ ವಲಯವನ್ನು ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"ನಿಮ್ಮ Android TV ಸಾಧನದ ಸಮಯವಲಯವನ್ನು ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4611828585759488256">"ಫೋನ್‌ನ ಸಮಯ ವಲಯವನ್ನು ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -837,7 +837,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ಬಳಕೆದಾರರ ಕ್ರಿಯೆಯಿಲ್ಲದೆ ಈ ಹಿಂದೆ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲು ಹೋಲ್ಡರ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"ಇತರ ಆ್ಯಪ್‌ಗಳ ಮಾಲೀಕತ್ವದ E2EE ಸಂಪರ್ಕ ಕೀಗಳ ಪರಿಶೀಲನೆಯ ಸ್ಥಿತಿಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಿ"</string>
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"ಇತರ ಆ್ಯಪ್‌ಗಳ ಮಾಲೀಕತ್ವದ E2EE ಸಂಪರ್ಕ ಕೀಗಳ ಪರಿಶೀಲನೆಯ ಸ್ಥಿತಿಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
-    <string name="policylab_limitPassword" msgid="4851829918814422199">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="policylab_limitPassword" msgid="4851829918814422199">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ಸ್ಕ್ರೀನ್ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ಪರದೆಯ ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"ಸ್ಕ್ರೀನ್ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಾಗ ತಪ್ಪಾಗಿ ಟೈಪ್‌ ಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ, ಮತ್ತು ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್‌ ಮಾಡಿದ್ದರೆ ಟ್ಯಾಬ್ಲೆಟ್‌ ಅನ್ನು ಲಾಕ್‌ ಮಾಡಿ ಅಥವಾ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
@@ -863,11 +863,11 @@
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"ಎಚ್ಚರಿಕೆ ಇಲ್ಲದೆ ಈ Android TV ಸಾಧನದಲ್ಲಿನ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕುತ್ತದೆ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"ಎಚ್ಚರಿಕೆಯಿಲ್ಲದೆ ಈ ಇನ್ಫೋಟೈನ್‌ಮೆಂಟ್ ಸಿಸ್ಟಂನಲ್ಲಿ ಈ ಪ್ರೊಫೈಲ್‌ನ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"ಯಾವುದೇ ಸೂಚನೆ ಇಲ್ಲದೆ ಈ ಫೋನ್‌ನಲ್ಲಿ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
-    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ಸಾಧನವನ್ನು ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಗೆ ಹೊಂದಿಸಿ"</string>
-    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ನೀತಿಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಬಳಸಬೇಕಾದ ಸಾಧನದ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಿ. ಸಾಧನದ ಮಾಲೀಕರು ಮಾತ್ರ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಬಹುದಾಗಿರುತ್ತದೆ."</string>
-    <string name="policylab_expirePassword" msgid="6015404400532459169">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್ ಮುಕ್ತಾಯವನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"ಸಾಧನವನ್ನು ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಗೆ ಸೆಟ್ ಮಾಡಿ"</string>
+    <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"ನೀತಿಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಬಳಸಬೇಕಾದ ಸಾಧನದ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಸೆಟ್ ಮಾಡಿ. ಸಾಧನದ ಮಾಲೀಕರು ಮಾತ್ರ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಬಹುದಾಗಿರುತ್ತದೆ."</string>
+    <string name="policylab_expirePassword" msgid="6015404400532459169">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್ ಮುಕ್ತಾಯವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್, ಪಿನ್, ಅಥವಾ ನಮೂನೆಯನ್ನು ಹೆಚ್ಚು ಪದೆ ಪದೇ ಬದಲಾಯಿಸಬೇಕಾಗಿರುತ್ತದೆ ಎಂಬುದನ್ನು ಬದಲಾಯಿಸಿ."</string>
-    <string name="policylab_encryptedStorage" msgid="9012936958126670110">"ಸಂಗ್ರಹಣೆ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಹೊಂದಿಸಿ"</string>
+    <string name="policylab_encryptedStorage" msgid="9012936958126670110">"ಸಂಗ್ರಹಣೆ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"ಸಂಗ್ರಹಿಸಿರುವ ಆ್ಯಪ್ ಡೇಟಾವನ್ನು ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಬೇಕಾದ ಅಗತ್ಯವಿದೆ."</string>
     <string name="policylab_disableCamera" msgid="5749486347810162018">"ಕ್ಯಾಮರಾಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"ಎಲ್ಲಾ ಸಾಧನ ಕ್ಯಾಮರಾಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
@@ -1103,7 +1103,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ಈ ಪುಟದಲ್ಲಿಯೇ ಇರಿ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nನೀವು ಈ ಪುಟದಿಂದಾಚೆಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಲು ಖಚಿತವಾಗಿ ಬಯಸುವಿರಾ?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ಸಹಾಯದಿಂದ ಸ್ವಯಂ-ಭರ್ತಿ"</string>
-    <string name="permlab_setAlarm" msgid="1158001610254173567">"ಅಲಾರಮ್ ಹೊಂದಿಸಿ"</string>
+    <string name="permlab_setAlarm" msgid="1158001610254173567">"ಅಲಾರಮ್ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"ಸ್ಥಾಪಿಸಲಾದ ಅಲಾರಮ್ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಅಲಾರಮ್ ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಕೆಲವು ಅಲಾರಮ್ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸದಿರಬಹುದು."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"ಧ್ವನಿಮೇಲ್ ಸೇರಿಸಿ"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"ನಿಮ್ಮ ದ್ವನಿಮೇಲ್‌ ಇನ್‌‌ಬಾಕ್ಸ್‌‌ಗೆ ಸಂದೇಶಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -1158,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>ಗಂ ಯಲ್ಲಿ"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>ದಿ ದಲ್ಲಿ"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>ವ ದಲ್ಲಿ"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g>ನಿಮಿಷದ ಹಿಂದೆ"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g>ಗಂಟೆ ಹಿಂದೆ"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g>ದಿನಗಳ ಹಿಂದೆ"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g>ವರ್ಷದ ಹಿಂದೆ"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>ನಿಮಿಷ"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>ಗಂಟೆ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g>ದಿನ"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g>ವರ್ಷ"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g>ನಿಮಿಷದಲ್ಲಿ"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g>ಗಂಟೆಯಲ್ಲಿ"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g>ದಿನದಲ್ಲಿ"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g>ವರ್ಷದಲ್ಲಿ"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g>ನಿಮಿಷದ ಹಿಂದೆ"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g>ಗಂಟೆ ಹಿಂದೆ"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g>ದಿನಗಳ ಹಿಂದೆ"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g>ವರ್ಷದ ಹಿಂದೆ"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# ನಿಮಿಷದ ಹಿಂದೆ}one{# ನಿಮಿಷಗಳ ಹಿಂದೆ}other{# ನಿಮಿಷಗಳ ಹಿಂದೆ}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ಗಂಟೆಯ ಹಿಂದೆ}one{# ಗಂಟೆಗಳ ಹಿಂದೆ}other{# ಗಂಟೆಗಳ ಹಿಂದೆ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ದಿನದ ಹಿಂದೆ}one{# ದಿನಗಳ ಹಿಂದೆ}other{# ದಿನಗಳ ಹಿಂದೆ}}"</string>
@@ -1389,7 +1405,7 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ಆ್ಯಪ್‌ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ಹೊಸ ಸಿಮ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ಇದನ್ನು ಸ್ಥಾಪಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="time_picker_dialog_title" msgid="9053376764985220821">"ಸಮಯವನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="time_picker_dialog_title" msgid="9053376764985220821">"ಸಮಯವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ದಿನಾಂಕವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ಹೊಂದಿಸು"</string>
     <string name="date_time_done" msgid="8363155889402873463">"ಆಯಿತು"</string>
@@ -1590,7 +1606,7 @@
     <string name="time_picker_increment_hour_button" msgid="3063572723197178242">"ಗಂಟೆಯನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
     <string name="time_picker_decrement_hour_button" msgid="584101766855054412">"ಗಂಟೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ"</string>
     <string name="time_picker_increment_set_pm_button" msgid="5889149366900376419">"PM ಹೊಂದಿಸು"</string>
-    <string name="time_picker_decrement_set_am_button" msgid="1422608001541064087">"AM ಹೊಂದಿಸಿ"</string>
+    <string name="time_picker_decrement_set_am_button" msgid="1422608001541064087">"AM ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="date_picker_increment_month_button" msgid="3447263316096060309">"ತಿಂಗಳನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
     <string name="date_picker_decrement_month_button" msgid="6531888937036883014">"ತಿಂಗಳು ಕಡಿಮೆಮಾಡಿ"</string>
     <string name="date_picker_increment_day_button" msgid="4349336637188534259">"ದಿನವನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
@@ -2076,7 +2092,7 @@
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ಗಂಟೆ"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"ನಿಮಿಷ"</string>
-    <string name="time_picker_header_text" msgid="9073802285051516688">"ಸಮಯವನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="time_picker_header_text" msgid="9073802285051516688">"ಸಮಯವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="time_picker_input_error" msgid="8386271930742451034">"ಮಾನ್ಯವಾದ ಸಮಯವನ್ನು ನಮೂದಿಸಿ"</string>
     <string name="time_picker_prompt_label" msgid="303588544656363889">"ಸಮಯ ಟೈಪ್ ಮಾಡಿ"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"ಸಮಯವನ್ನು ನಮೂದಿಸಲು ಪಠ್ಯದ ನಮೂನೆಗೆ ಬದಲಿಸಿ."</string>

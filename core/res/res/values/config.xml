@@ -815,6 +815,11 @@
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
 
+    <!-- Control for allowing the dock rotation functionality before provision like
+         when the SetupWizard is being shown to the user. This defaults to false to
+         preserve existing behavior. -->
+    <bool name="config_allowDockBeforeProvision">false</bool>
+
     <!-- Car dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a car dock.
@@ -2367,7 +2372,7 @@
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
     <!-- Flag indicating whether the current device supports "Ask every time" for sms-->
-    <bool name="config_sms_ask_every_time_support">true</bool>
+    <bool name="config_sms_ask_every_time_support">false</bool>
 
     <!-- Flag indicating whether the current device allows acknowledgement of SIM operation like
          SM-PP or saving SMS to SIM can be done via the IMS interfaces.
@@ -4223,13 +4228,12 @@
          must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
 
-    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
-    <bool name="config_doubleTapPowerGestureEnabled">true</bool>
     <!-- Allow the gesture to double tap the power button twice to start the camera while the device
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
-    <!-- Allow the gesture to double tap the power button twice to launch the wallet. -->
-    <bool name="config_walletDoubleTapPowerGestureEnabled">true</bool>
+
+    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
+    <bool name="config_doubleTapPowerGestureEnabled">true</bool>
     <!-- Default target action for double tap of the power button gesture.
          0: Launch camera
          1: Launch wallet -->
@@ -7267,4 +7271,13 @@
         POLICY_DOZE can also dim the screen unless parameter useNormalBrightnessForDoze of
         DreamService#setDozeScreenState requests an exception. -->
     <bool name="config_allowNormalBrightnessForDozePolicy">false</bool>
+
+    <!-- List of protected packages that require biometric authentication for modification
+         (Disable, force-stop or uninstalling updates). -->
+    <string-array name="config_biometric_protected_package_names" translatable="false" />
+
+    <!-- Package name of the on-device intelligent processor for vendor specific
+         features. Examples include the search functionality or the app
+         predictor. -->
+    <string name="config_systemVendorIntelligence" translatable="false"></string>
 </resources>

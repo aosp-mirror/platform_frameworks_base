@@ -214,6 +214,20 @@ TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
   ASSERT_EQ(idmap->GetHeader()->GetOverlayName(), TestConstants::OVERLAY_NAME_ALL_POLICIES);
 }
 
+TEST(IdmapTests, TargetContainerWorksAfterError) {
+  auto target = TargetResourceContainer::FromPath(GetTestDataPath() + "/target/target-bad.apk");
+  ASSERT_TRUE(target);
+
+  auto crc = target->get()->GetCrc();
+  ASSERT_TRUE(crc);
+
+  // This call tries to construct the full ApkAssets state, and fails.
+  ASSERT_FALSE(target->get()->DefinesOverlayable());
+  auto crc2 = target->get()->GetCrc();
+  ASSERT_TRUE(crc2);
+  EXPECT_EQ(*crc, *crc2);
+}
+
 TEST(IdmapTests, CreateIdmapDataFromApkAssets) {
   std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
   std::string overlay_apk_path = GetTestDataPath() + "/overlay/overlay.apk";

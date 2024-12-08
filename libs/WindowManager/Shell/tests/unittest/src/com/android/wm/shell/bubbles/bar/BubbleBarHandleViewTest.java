@@ -15,9 +15,12 @@
  */
 package com.android.wm.shell.bubbles.bar;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import android.graphics.Color;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -59,6 +62,20 @@ public class BubbleBarHandleViewTest extends ShellTestCase {
         assertFalse(mHandleView.getClipToOutline());
         int handleColor = mHandleView.mHandlePaint.getColor();
         assertEquals(handleColor,
+                ContextCompat.getColor(mContext, R.color.bubble_bar_expanded_view_handle_light));
+    }
+
+    @Test
+    public void testSetHandleInitialColor_beforeUpdateHandleColor_updatesColor() {
+        mHandleView.setHandleInitialColor(Color.RED);
+        assertThat(mHandleView.getHandleColor()).isEqualTo(Color.RED);
+    }
+
+    @Test
+    public void testSetHandleInitialColor_afterUpdateHandleColor_doesNotUpdateColor() {
+        mHandleView.updateHandleColor(/* isRegionDark= */ true, /* animated= */ false);
+        mHandleView.setHandleInitialColor(Color.RED);
+        assertThat(mHandleView.getHandleColor()).isEqualTo(
                 ContextCompat.getColor(mContext, R.color.bubble_bar_expanded_view_handle_light));
     }
 }

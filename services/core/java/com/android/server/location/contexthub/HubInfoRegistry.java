@@ -18,7 +18,9 @@ package com.android.server.location.contexthub;
 
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubServiceInfo;
+import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.location.HubInfo;
+import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
@@ -29,6 +31,9 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
 class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycleCallback {
     private static final String TAG = "HubInfoRegistry";
@@ -42,6 +47,56 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
     @GuardedBy("mLock")
     private final ArrayMap<HubEndpointInfo.HubEndpointIdentifier, HubEndpointInfo>
             mHubEndpointInfos = new ArrayMap<>();
+
+    /**
+     * A wrapper class that is used to store arguments to
+     * ContextHubManager.registerEndpointCallback.
+     */
+    private static class DiscoveryCallback {
+        private final IContextHubEndpointDiscoveryCallback mCallback;
+        private final Optional<Long> mEndpointId;
+        private final Optional<String> mServiceDescriptor;
+
+        DiscoveryCallback(IContextHubEndpointDiscoveryCallback callback, long endpointId) {
+            mCallback = callback;
+            mEndpointId = Optional.of(endpointId);
+            mServiceDescriptor = Optional.empty();
+        }
+
+        DiscoveryCallback(IContextHubEndpointDiscoveryCallback callback, String serviceDescriptor) {
+            mCallback = callback;
+            mEndpointId = Optional.empty();
+            mServiceDescriptor = Optional.of(serviceDescriptor);
+        }
+
+        public IContextHubEndpointDiscoveryCallback getCallback() {
+            return mCallback;
+        }
+
+        /**
+         * @param info The hub endpoint info to check
+         * @return true if info matches
+         */
+        public boolean isMatch(HubEndpointInfo info) {
+            if (mEndpointId.isPresent()) {
+                return mEndpointId.get() == info.getIdentifier().getEndpoint();
+            }
+            if (mServiceDescriptor.isPresent()) {
+                for (HubServiceInfo serviceInfo : info.getServiceInfoCollection()) {
+                    if (mServiceDescriptor.get().equals(serviceInfo.getServiceDescriptor())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    /* The list of discovery callbacks registered with the service */
+    @GuardedBy("mCallbackLock")
+    private final List<DiscoveryCallback> mEndpointDiscoveryCallbacks = new ArrayList<>();
+
+    private final Object mCallbackLock = new Object();
 
     HubInfoRegistry(IContextHubWrapper contextHubWrapper) {
         mContextHubWrapper = contextHubWrapper;
@@ -87,6 +142,12 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
         }
     }
 
+    public HubEndpointInfo getEndpointInfo(HubEndpointInfo.HubEndpointIdentifier id) {
+        synchronized (mLock) {
+            return mHubEndpointInfos.get(id);
+        }
+    }
+
     /** Invoked when HAL restarts */
     public void onHalRestart() {
         synchronized (mLock) {
@@ -103,16 +164,50 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                 mHubEndpointInfos.put(endpointInfo.getIdentifier(), endpointInfo);
             }
         }
+
+        invokeForMatchingEndpoints(
+                endpointInfos,
+                (cb, infoList) -> {
+                    try {
+                        cb.onEndpointsStarted(infoList);
+                    } catch (RemoteException e) {
+                        if (e instanceof DeadObjectException) {
+                            Log.w(TAG, "onEndpointStarted: callback died, unregistering");
+                            unregisterEndpointDiscoveryCallback(cb);
+                        } else {
+                            Log.e(TAG, "Exception while calling onEndpointsStarted", e);
+                        }
+                    }
+                });
     }
 
     @Override
     public void onEndpointStopped(
             HubEndpointInfo.HubEndpointIdentifier[] endpointIds, byte reason) {
+        ArrayList<HubEndpointInfo> removedInfoList = new ArrayList<>();
         synchronized (mLock) {
             for (HubEndpointInfo.HubEndpointIdentifier endpointId : endpointIds) {
-                mHubEndpointInfos.remove(endpointId);
+                HubEndpointInfo info = mHubEndpointInfos.remove(endpointId);
+                if (info != null) {
+                    removedInfoList.add(info);
+                }
             }
         }
+
+        invokeForMatchingEndpoints(
+                removedInfoList.toArray(new HubEndpointInfo[removedInfoList.size()]),
+                (cb, infoList) -> {
+                    try {
+                        cb.onEndpointsStopped(infoList, reason);
+                    } catch (RemoteException e) {
+                        if (e instanceof DeadObjectException) {
+                            Log.w(TAG, "onEndpointStopped: callback died, unregistering");
+                            unregisterEndpointDiscoveryCallback(cb);
+                        } else {
+                            Log.e(TAG, "Exception while calling onEndpointsStopped", e);
+                        }
+                    }
+                });
     }
 
     /** Return a list of {@link HubEndpointInfo} that represents endpoints with the matching id. */
@@ -143,6 +238,77 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
             }
         }
         return searchResult;
+    }
+
+    /* package */
+    void registerEndpointDiscoveryCallback(
+            long endpointId, IContextHubEndpointDiscoveryCallback callback) {
+        Objects.requireNonNull(callback, "callback cannot be null");
+        synchronized (mCallbackLock) {
+            checkCallbackAlreadyRegistered(callback);
+            mEndpointDiscoveryCallbacks.add(new DiscoveryCallback(callback, endpointId));
+        }
+    }
+
+    /* package */
+    void registerEndpointDiscoveryCallback(
+            String serviceDescriptor, IContextHubEndpointDiscoveryCallback callback) {
+        Objects.requireNonNull(callback, "callback cannot be null");
+        synchronized (mCallbackLock) {
+            checkCallbackAlreadyRegistered(callback);
+            mEndpointDiscoveryCallbacks.add(new DiscoveryCallback(callback, serviceDescriptor));
+        }
+    }
+
+    /* package */
+    void unregisterEndpointDiscoveryCallback(IContextHubEndpointDiscoveryCallback callback) {
+        Objects.requireNonNull(callback, "callback cannot be null");
+        synchronized (mCallbackLock) {
+            for (DiscoveryCallback discoveryCallback : mEndpointDiscoveryCallbacks) {
+                if (discoveryCallback.getCallback().asBinder() == callback.asBinder()) {
+                    mEndpointDiscoveryCallbacks.remove(discoveryCallback);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void checkCallbackAlreadyRegistered(
+            IContextHubEndpointDiscoveryCallback callback) {
+        synchronized (mCallbackLock) {
+            for (DiscoveryCallback discoveryCallback : mEndpointDiscoveryCallbacks) {
+                if (discoveryCallback.mCallback.asBinder() == callback.asBinder()) {
+                    throw new IllegalArgumentException("Callback is already registered");
+                }
+            }
+        }
+    }
+
+    /**
+     * Iterates through all registered discovery callbacks and invokes a given callback for those
+     * that match the endpoints the callback is targeted for.
+     *
+     * @param endpointInfos The list of endpoint infos to check for a match.
+     * @param consumer The callback to invoke, which consumes the callback object and the list of
+     *     matched endpoint infos.
+     */
+    private void invokeForMatchingEndpoints(
+            HubEndpointInfo[] endpointInfos,
+            BiConsumer<IContextHubEndpointDiscoveryCallback, HubEndpointInfo[]> consumer) {
+        synchronized (mCallbackLock) {
+            for (DiscoveryCallback discoveryCallback : mEndpointDiscoveryCallbacks) {
+                ArrayList<HubEndpointInfo> infoList = new ArrayList<>();
+                for (HubEndpointInfo endpointInfo : endpointInfos) {
+                    if (discoveryCallback.isMatch(endpointInfo)) {
+                        infoList.add(endpointInfo);
+                    }
+                }
+
+                consumer.accept(
+                        discoveryCallback.getCallback(),
+                        infoList.toArray(new HubEndpointInfo[infoList.size()]));
+            }
+        }
     }
 
     void dump(IndentingPrintWriter ipw) {

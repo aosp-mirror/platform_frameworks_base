@@ -19,6 +19,7 @@ package com.android.systemui.shade.domain.interactor
 import android.content.Context
 import android.util.Log
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams
 import androidx.annotation.UiThread
 import com.android.app.tracing.coroutines.launchTraced
 import com.android.app.tracing.traceSection
@@ -28,7 +29,6 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeDisplayAware
-import com.android.systemui.shade.ShadeWindowLayoutParams
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.util.kotlin.getOrNull
@@ -46,13 +46,11 @@ constructor(
     optionalShadeRootView: Optional<WindowRootView>,
     private val shadePositionRepository: ShadeDisplaysRepository,
     @ShadeDisplayAware private val shadeContext: Context,
+    @ShadeDisplayAware private val shadeLayoutParams: LayoutParams,
     @ShadeDisplayAware private val wm: WindowManager,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainThreadContext: CoroutineContext,
 ) : CoreStartable {
-
-    private val shadeLayoutParams: WindowManager.LayoutParams =
-        ShadeWindowLayoutParams.create(shadeContext)
 
     private val shadeRootView =
         optionalShadeRootView.getOrNull()

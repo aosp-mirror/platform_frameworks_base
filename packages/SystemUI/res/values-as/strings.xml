@@ -529,7 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"এটা ৱিজেট ব্যৱহাৰ কৰি কোনো এপ্ খুলিবলৈ, এয়া আপুনিয়েই বুলি সত্যাপন পৰীক্ষা কৰিব লাগিব। লগতে, মনত ৰাখিব যে যিকোনো লোকেই সেইবোৰ চাব পাৰে, আনকি আপোনাৰ টেবলেটটো লক হৈ থাকিলেও। কিছুমান ৱিজেট হয়তো আপোনাৰ লক স্ক্ৰীনৰ বাবে কৰা হোৱা নাই আৰু ইয়াত যোগ কৰাটো অসুৰক্ষিত হ’ব পাৰে।"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"বুজি পালোঁ"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ৱিজেট"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"লক স্ক্ৰীনৰ ৱিজেট সুবিধাটো শ্বৰ্টকাট হিচাপে যোগ দিবলৈ ছেটিঙত সেয়া সক্ষম হৈ থকাটো নিশ্চিত কৰক।"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"ৱিজেট\"ৰ শ্বৰ্টকাট যোগ দিবলৈ, ছেটিঙত \"লক স্ক্ৰীনত ৱিজেট দেখুৱাওক\" সক্ষম কৰি থোৱাটো নিশ্চিত কৰক।"</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ছেটিং"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যৱহাৰকাৰী সলনি কৰক"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"পুল-ডাউনৰ মেনু"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
@@ -590,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"জাননীসমূহ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"বাৰ্তালাপ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"আটাইবোৰ নীৰৱ জাননী মচক"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{কোনো জাননী নাই}=1{{mode}এ জাননী পজ কৰিছে}=2{{mode} আৰু আন এটা ম’ডে জাননী পজ কৰিছে}one{{mode} আৰু আন # টা ম’ডে জাননী পজ কৰিছে}other{{mode} আৰু আন # টা ম’ডে জাননী পজ কৰিছে}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এতিয়াই আৰম্ভ কৰক"</string>
@@ -704,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"হে’ড ট্ৰেকিং"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ৰিংগাৰ ম’ড সলনি কৰিবলৈ টিপক"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"ৰিংগাৰ ম’ড"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"মিউট কৰক"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"আনমিউট কৰক"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"কম্পন কৰক"</string>
@@ -875,14 +880,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"বিভাজিত স্ক্ৰীন ব্যৱহাৰ কৰাৰ সময়ত বাওঁফালে অথবা ওপৰত থকা এপলৈ সলনি কৰক"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"বিভাজিত স্ক্ৰীনৰ ব্যৱহাৰ কৰাৰ সময়ত: কোনো এপ্ এখন স্ক্ৰীনৰ পৰা আনখনলৈ নিয়ক"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"ডিছপ্লে’সমূহৰ মাজত সক্রিয় হৈ থকা ৱিণ্ড’ সলনা সলনিকৈ ব্যৱহাৰ কৰক"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"ৱিণ্ড’ বাওঁফাললৈ স্থানান্তৰ কৰক"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"ৱিণ্ড’ সোঁফাললৈ স্থানান্তৰ কৰক"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"ৱিণ্ড’ মেক্সিমাইজ কৰক"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"ৱিণ্ড’ মিনিমাইজ কৰক"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ইনপুট"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"পৰৱৰ্তী ভাষাটোলৈ সলনি কৰক"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"পূৰ্বৰ ভাষালৈ সলনি কৰক"</string>
@@ -1419,7 +1420,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"ছিষ্টেমৰ নিয়ন্ত্ৰণ"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"ছিষ্টেম এপ্‌"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"মাল্টিটাস্কিং"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"শেহতীয়া এপ্‌সমূহ"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"বিভাজিত স্ক্ৰীন"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ইনপুট"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"এপ্ শ্বৰ্টকাটসমূহ"</string>
@@ -1428,25 +1428,28 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"কীব’ৰ্ডৰ শ্বৰ্টকাট"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"কীব’ৰ্ডৰ শ্বৰ্টকাট কাষ্টমাইজ কৰক"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"শ্বৰ্টকাট আঁতৰাবনে?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"ডিফ\'ল্ট হিচাপে পুনৰ ৰিছেট কৰিবনে?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"শ্বৰ্টকাটৰ ভূমিকা অৰ্পণ কৰিবলৈ কী টিপক"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"এইটোৱে আপোনাৰ কাষ্টম শ্বৰ্টকাট মচিব।"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"এইটোৱে আপোনাৰ আটাইবোৰ কাষ্টম শ্বৰ্টকাট স্থায়ীভাৱে মচিব।"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"সন্ধানৰ শ্বৰ্টকাট"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"সন্ধানৰ কোনো ফলাফল নাই"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"সংকোচন কৰাৰ চিহ্ন"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"কাৰ্য বা মেটা কীৰ চিহ্ন"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"যোগ চিনৰ চিহ্ন"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"কাষ্টমাইজ কৰক"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"হ’ল"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"বিস্তাৰ কৰাৰ চিহ্ন"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"অথবা"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"যোগ চিন"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"ফৰৱাৰ্ড শ্লেশ্ব"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ড্ৰেগ হেণ্ডেল"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"কীব’ৰ্ডৰ ছেটিং"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"শ্বৰ্টকাট ছেট কৰক"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"আঁতৰাওক"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"হয়, ৰিছেট কৰক"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"বাতিল কৰক"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"কী টিপক"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"কীৰ মিশ্ৰণ ইতিমধ্যে ব্যৱহাৰ হৈ আছে। অন্য এটা কী ব্যৱহাৰ কৰি চাওক।"</string>
@@ -1478,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"আপোনাৰ কীব’ৰ্ডৰ কাৰ্য কীটোত টিপক"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"বঢ়িয়া!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"আপুনি আটাইবোৰ এপ্ চোৱাৰ নিৰ্দেশনাটো সম্পূৰ্ণ কৰিছে"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"কীব’ৰ্ডৰ বেকলাইট"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dৰ %1$d স্তৰ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ঘৰৰ সা-সৰঞ্জামৰ নিয়ন্ত্ৰণ"</string>

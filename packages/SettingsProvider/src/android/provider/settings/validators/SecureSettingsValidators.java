@@ -150,6 +150,7 @@ public class SecureSettingsValidators {
                 Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                 new DiscreteValueValidator(new String[] {"1", "2"}));
         VALIDATORS.put(Secure.MINIMAL_POST_PROCESSING_ALLOWED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.MIRROR_BUILT_IN_DISPLAY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.MATCH_CONTENT_FRAME_RATE,
                 new DiscreteValueValidator(new String[] {"0", "1", "2"}));

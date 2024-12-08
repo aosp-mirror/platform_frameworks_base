@@ -385,6 +385,9 @@
          is ready -->
     <uses-permission android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
 
+    <!-- To be able to decipher default applications for certain roles in shortcut helper -->
+    <uses-permission android:name="android.permission.MANAGE_DEFAULT_APPLICATIONS" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -459,7 +462,7 @@
                   android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
-        <service android:name=".screenshot.ScreenshotProxyService"
+        <service android:name=".screenshot.proxy.ScreenshotProxyService"
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
@@ -490,6 +493,7 @@
         <activity android:name=".touchpad.tutorial.ui.view.TouchpadTutorialActivity"
             android:exported="true"
             android:showForAllUsers="true"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
@@ -500,6 +504,7 @@
         <activity android:name=".inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity"
             android:exported="true"
             android:showForAllUsers="true"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>

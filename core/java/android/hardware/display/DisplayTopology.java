@@ -91,6 +91,15 @@ public final class DisplayTopology implements Parcelable {
     @VisibleForTesting
     public DisplayTopology(TreeNode root, int primaryDisplayId) {
         mRoot = root;
+        if (mRoot != null) {
+            // Set mRoot's position and offset to predictable values, just so we don't leak state
+            // from some previous arrangement the node was used in, or leak arbitrary values passed
+            // to the TreeNode constructor. The position and offset don't mean anything because
+            // mRoot doesn't have a parent.
+            mRoot.mPosition = POSITION_LEFT;
+            mRoot.mOffset = 0f;
+        }
+
         mPrimaryDisplayId = primaryDisplayId;
     }
 
@@ -422,6 +431,14 @@ public final class DisplayTopology implements Parcelable {
                 }
             }
         }
+
+        // Sort children lists by display ID.
+        final Comparator<TreeNode> idComparator = (d1, d2) -> {
+            return Integer.compare(d1.mDisplayId, d2.mDisplayId);
+        };
+        for (TreeNode display : displays) {
+            display.mChildren.sort(idComparator);
+        }
     }
 
     /**
@@ -580,6 +597,15 @@ public final class DisplayTopology implements Parcelable {
                         depth + 1);
             }
         }
+    }
+
+    /** Returns the graph representation of the topology */
+    public DisplayTopologyGraph getGraph() {
+        // TODO(b/364907904): implement
+        return new DisplayTopologyGraph(mPrimaryDisplayId,
+                new DisplayTopologyGraph.DisplayNode[] { new DisplayTopologyGraph.DisplayNode(
+                        mRoot == null ? Display.DEFAULT_DISPLAY : mRoot.mDisplayId,
+                        new DisplayTopologyGraph.AdjacentDisplay[0])});
     }
 
     /**

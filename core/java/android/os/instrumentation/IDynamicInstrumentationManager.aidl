@@ -16,7 +16,7 @@
 
 package android.os.instrumentation;
 
-import android.os.instrumentation.ExecutableMethodFileOffsets;
+import android.os.instrumentation.IOffsetCallback;
 import android.os.instrumentation.MethodDescriptor;
 import android.os.instrumentation.TargetProcess;
 
@@ -28,6 +28,7 @@ import android.os.instrumentation.TargetProcess;
 interface IDynamicInstrumentationManager {
     /** Provides ART metadata about the described compiled method within the target process */
     @PermissionManuallyEnforced
-    @nullable ExecutableMethodFileOffsets getExecutableMethodFileOffsets(
-            in TargetProcess targetProcess, in MethodDescriptor methodDescriptor);
+    void getExecutableMethodFileOffsets(
+            in TargetProcess targetProcess, in MethodDescriptor methodDescriptor,
+            in IOffsetCallback callback);
 }

@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
 import com.android.systemui.statusbar.window.MultiDisplayStatusBarWindowControllerStore
@@ -63,11 +64,6 @@ interface StatusBarModule {
 
     @Binds
     @IntoMap
-    @ClassKey(OngoingCallController::class)
-    fun bindOngoingCallController(impl: OngoingCallController): CoreStartable
-
-    @Binds
-    @IntoMap
     @ClassKey(LightBarController::class)
     fun lightBarControllerAsCoreStartable(controller: LightBarController): CoreStartable
 
@@ -90,6 +86,18 @@ interface StatusBarModule {
     ): LightBarController.Factory
 
     companion object {
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(OngoingCallController::class)
+        fun ongoingCallController(
+            controller: OngoingCallController
+        ): CoreStartable =
+            if (StatusBarChipsModernization.isEnabled) {
+                CoreStartable.NOP
+            } else {
+                controller
+            }
 
         @Provides
         @SysUISingleton

@@ -366,6 +366,7 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
 
     /**
      * Set the component the touch expression is in (if any)
+     *
      * @param component the component, or null if outside
      */
     public void setComponent(@Nullable Component component) {

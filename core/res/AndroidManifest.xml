@@ -1139,6 +1139,16 @@
                 android:protectionLevel="signature|privileged|vendorPrivileged"
                 android:featureFlag="android.media.tv.flags.media_quality_fw"/>
 
+    <!--
+        @FlaggedApi(android.media.tv.flags.Flags.FLAG_MEDIA_QUALITY_FW)
+        Allows an application to read the aggregated color zones on the screen for use cases like
+        TV ambient backlight usages.
+        <p> Protection level: normal
+    -->
+    <permission android:name="android.permission.READ_COLOR_ZONES"
+                android:protectionLevel="normal"
+                android:featureFlag="android.media.tv.flags.media_quality_fw"/>
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
     <!-- ====================================================================== -->
@@ -2144,6 +2154,21 @@
     -->
     <permission android:name="android.permission.CONTROL_AUTOMOTIVE_GNSS"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi @hide Allows an application to bind to a
+         android.service.PopulationDensityProviderService for the purpose of
+         querying population density. This prevents arbitrary clients connecting
+         to the service. The system server checks that the provider's intent
+         service explicitly sets this permission via the android:permission
+         attribute of the service.
+         This is only expected to be possessed by the system server outside of
+         tests.
+         @FlaggedApi(android.location.flags.Flags.FLAG_POPULATION_DENSITY_PROVIDER)
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_POPULATION_DENSITY_PROVIDER_SERVICE"
+        android:featureFlag="android.location.flags.population_density_provider"
+        android:protectionLevel="signature" />
 
     <!-- ======================================= -->
     <!-- Permissions for accessing networks -->
@@ -4123,6 +4148,14 @@
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_CONTENT_PROTECTION"
                 android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to AppFunctions.
+        <p>Protection level: internal|role
+        @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS"
+        android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
+        android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set policy related to subscriptions downloaded by an admin.
         <p>{@link Manifest.permission#MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL} is required to call
@@ -6820,6 +6853,13 @@
     <permission android:name="android.permission.BATTERY_STATS"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- @SystemApi @hide Allows an application to collect high-precision PowerMonitor readings
+         <p>Protection level: signature|privileged|development
+         @FlaggedApi(android.permission.flags.Flags.FLAG_FINE_POWER_MONITOR_PERMISSION) -->
+    <permission android:name="android.permission.ACCESS_FINE_POWER_MONITORS"
+        android:protectionLevel="signature|privileged|development"
+        android:featureFlag="android.permission.flags.fine_power_monitor_permission" />
+
     <!--Allows an application to manage statscompanion.
     <p>Not for use by third-party applications.
          @hide -->
@@ -7008,6 +7048,13 @@
     <!-- @SystemApi @hide Allows an application to manage carrier subscription plans. -->
     <permission android:name="android.permission.MANAGE_SUBSCRIPTION_PLANS"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi @hide Allows for reading subscription plan fields for status and end date.
+         @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    -->
+    <permission android:name="android.permission.READ_SUBSCRIPTION_PLANS"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="com.android.internal.telephony.flags.subscription_plan_allow_status_and_end_date" />
 
     <!-- C2DM permission.
          @hide Used internally.
@@ -8751,6 +8798,17 @@
     <permission android:name="android.permission.SINGLE_USER_TIS_ACCESS"
         android:protectionLevel="signature|privileged|vendorPrivileged"
         android:featureFlag="android.media.tv.flags.kids_mode_tvdb_sharing"/>
+
+    <!-- @SystemApi
+        @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled")
+        This permission is required to access the specific text classifier you need from the
+        TextClassificationManager.
+        <p>Protection level: signature|role
+    @hide
+    -->
+    <permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
+        android:protectionLevel="signature|role"
+        android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

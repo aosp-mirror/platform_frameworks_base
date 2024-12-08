@@ -127,6 +127,7 @@ java_library_static {
         "android.hardware.power-java_shared",
         "latest_android_hardware_broadcastradio_java_static",
         "services_crashrecovery_stubs_conditionally",
+        "ondeviceintelligence_conditionally",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -157,8 +158,8 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V3-java",
+        "androidx.annotation_annotation",
         "app-compat-annotations",
-        "art_exported_aconfig_flags_lib",
         "framework-tethering.stubs.module_lib",
         "keepanno-annotations",
         "service-art.stubs.system_server",
@@ -221,6 +222,7 @@ java_library_static {
         "securebox",
         "apache-commons-math",
         "battery_saver_flag_lib",
+        "guava",
         "notification_flags_lib",
         "power_hint_flags_lib",
         "biometrics_flags_lib",
@@ -244,6 +246,7 @@ java_library_static {
         "locksettings_flags_lib",
         "profiling_flags_lib",
         "android.adpf.sessionmanager_aidl-java",
+        "uprobestats_flags_java_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

@@ -260,6 +260,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RegionUtils;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -1272,7 +1273,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @Override
     void migrateToNewSurfaceControl(Transaction t) {
         t.remove(mSurfaceControl);
-
+        // Reset the recording displays which were mirroring this display.
+        for (int i = mRootWindowContainer.getChildCount() - 1; i >= 0; i--) {
+            final ContentRecorder recorder = mRootWindowContainer.getChildAt(i).mContentRecorder;
+            if (recorder != null) {
+                recorder.resetRecordingDisplay(mDisplayId);
+            }
+        }
         mLastSurfacePosition.set(0, 0);
         mLastDeltaRotation = Surface.ROTATION_0;
 
@@ -1384,11 +1391,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mTokenMap.put(binder, token);
 
         if (token.asActivityRecord() == null) {
-            // Set displayContent for non-app token to prevent same token will add twice after
-            // onDisplayChanged.
-            // TODO: Check if it's fine that super.onDisplayChanged of WindowToken
-            //  (WindowsContainer#onDisplayChanged) may skipped when token.mDisplayContent assigned.
-            token.mDisplayContent = this;
+            // Setting the mDisplayContent to the token is not needed: it is done by da.addChild
+            // below, that also calls onDisplayChanged once moved.
+            if (!Flags.reparentWindowTokenApi()) {
+                // Set displayContent for non-app token to prevent same token will add twice after
+                // onDisplayChanged.
+                // TODO: Check if it's fine that super.onDisplayChanged of WindowToken
+                //  (WindowsContainer#onDisplayChanged) may skipped when token.mDisplayContent
+                //  assigned.
+                token.mDisplayContent = this;
+            }
             // Add non-app token to container hierarchy on the display. App tokens are added through
             // the parent container managing them (e.g. Tasks).
             final DisplayArea.Tokens da = findAreaForToken(token).asTokens();
@@ -2274,7 +2286,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (shellTransitions) {
             // Before setDisplayProjection is applied by the start transaction of transition,
             // set the transform hint to avoid using surface in old rotation.
-            getPendingTransaction().setFixedTransformHint(mSurfaceControl, rotation);
+            setFixedTransformHint(getPendingTransaction(), mSurfaceControl, rotation);
             // The sync transaction should already contains setDisplayProjection, so unset the
             // hint to restore the natural state when the transaction is applied.
             transaction.unsetFixedTransformHint(mSurfaceControl);
@@ -2282,6 +2294,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         scheduleAnimation();
 
         mWmService.mRotationWatcherController.dispatchDisplayRotationChange(mDisplayId, rotation);
+    }
+
+    void setFixedTransformHint(Transaction t, SurfaceControl sc, int rotation) {
+        t.setFixedTransformHint(sc, (rotation + mDisplayInfo.installOrientation) % 4);
     }
 
     void configureDisplayPolicy() {
@@ -7109,9 +7125,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         /**
          * @see #getRequestedVisibleTypes()
          */
-        void setRequestedVisibleTypes(@InsetsType int requestedVisibleTypes) {
-            if (mRequestedVisibleTypes != requestedVisibleTypes) {
-                mRequestedVisibleTypes = requestedVisibleTypes;
+        void updateRequestedVisibleTypes(@InsetsType int visibleTypes, @InsetsType int mask) {
+            int newRequestedVisibleTypes =
+                    (mRequestedVisibleTypes & ~mask) | (visibleTypes & mask);
+            if (mRequestedVisibleTypes != newRequestedVisibleTypes) {
+                mRequestedVisibleTypes = newRequestedVisibleTypes;
             }
         }
     }

@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелмеген"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Бұл қолданба 16 КБ көлеміне қолдау көрсетпейді. APK туралау тексерісі орындалмады. Бұл қолданба бет өлшемімен сәйкестік режимінде іске қосылады. Сәйкестікті жақсарту үшін қолданбаны 16 КБ көлемін қолдайтындай етіп қайта құрастырыңыз. Қосымша ақпарат алу үшін &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; сілтемесін қарап шығыңыз."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Бұл қолданба 16 КБ көлеміне қолдау көрсетпейді. ELF туралау тексерісі орындалмады. Бұл қолданба бет өлшемімен сәйкестік режимінде іске қосылады. Сәйкестікті жақсарту үшін қолданбаны 16 КБ көлемін қолдайтындай етіп қайта құрастырыңыз. Қосымша ақпарат алу үшін &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; сілтемесін қарап шығыңыз."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Бұл қолданба 16 КБ көлеміне қолдау көрсетпейді. APK және ELF файлдарының туралау тексерісі орындалмады. Бұл қолданба бет өлшемімен сәйкестік режимінде іске қосылады. Сәйкестікті жақсарту үшін қолданбаны 16 КБ көлемін қолдайтындай етіп қайта құрастырыңыз. Қосымша ақпарат алу үшін &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; сілтемесін қарап шығыңыз."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Қызмет ұсынылмаған."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Қоңырау шалушы идентификаторы параметрін өзгерту мүмкін емес."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Деректер <xliff:g id="CARRIERDISPLAY">%s</xliff:g> операторына ауыстырылды"</string>
@@ -1161,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> сағ кейін"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> күннен кейін"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> жылдан кейін"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> мин бұрын"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> сағ бұрын"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> күн бұрын"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> жыл бұрын"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> сағ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> күн"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> жыл"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> минуттан кейін"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> сағаттан кейін"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> күннен кейін"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> жылдан кейін"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> мин бұрын"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> сағ бұрын"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> күн бұрын"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> жыл бұрын"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# минут бұрын}other{# минут бұрын}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# сағат бұрын}other{# сағат бұрын}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# күн бұрын}other{# күн бұрын}}"</string>

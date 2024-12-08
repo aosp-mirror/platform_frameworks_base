@@ -265,10 +265,6 @@ package android.media.session {
 
 package android.net {
 
-  @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public final class ConnectivityFrameworkInitializerBaklava {
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public static void registerServiceWrappers();
-  }
-
   public class LocalSocket implements java.io.Closeable {
     ctor public LocalSocket(@NonNull java.io.FileDescriptor);
   }
@@ -324,25 +320,6 @@ package android.net.netstats {
     field public static final String PREFIX_UID = "uid";
     field public static final String PREFIX_UID_TAG = "uid_tag";
     field public static final String PREFIX_XT = "xt";
-  }
-
-}
-
-package android.net.vcn {
-
-  @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public final class VcnTransportInfo implements android.os.Parcelable android.net.TransportInfo {
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public int describeContents();
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public long getApplicableRedactions();
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public int getMinUdpPort4500NatTimeoutSeconds();
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") @NonNull public android.net.TransportInfo makeCopy(long);
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @FlaggedApi("android.net.vcn.mainline_vcn_module_api") @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnTransportInfo> CREATOR;
-  }
-
-  @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public static final class VcnTransportInfo.Builder {
-    ctor @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public VcnTransportInfo.Builder();
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") @NonNull public android.net.vcn.VcnTransportInfo build();
-    method @FlaggedApi("android.net.vcn.mainline_vcn_module_api") @NonNull public android.net.vcn.VcnTransportInfo.Builder setMinUdpPort4500NatTimeoutSeconds(@IntRange(from=0x78) int);
   }
 
 }
@@ -503,6 +480,10 @@ package android.os {
     method public static void traceCounter(long, @NonNull String, int);
     method public static void traceEnd(long);
     field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
+  }
+
+  public class UpdateEngine {
+    method @FlaggedApi("android.os.update_engine_api") public void triggerPostinstall(@NonNull String);
   }
 
 }

@@ -2469,6 +2469,25 @@ public final class Settings {
             = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
 
     /**
+     * Activity Action: Show the settings for users to select their preferred SIM subscription
+     * when a new SIM subscription has become available.
+     * <p>
+     * This Activity will only launch successfully if the newly active subscription ID is set as the
+     * value of {@link EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
+     * <p>
+     * Input: {@link #EXTRA_SUB_ID}: the subscription ID of the newly active SIM subscription.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @FlaggedApi(com.android.internal.telephony.flags.Flags.FLAG_ACTION_SIM_PREFERENCE_SETTINGS)
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SIM_PREFERENCE_SETTINGS =
+            "android.settings.SIM_PREFERENCE_SETTINGS";
+
+    /**
      * Intent Extra: The value of {@link android.app.settings.SettingsEnums#EntryPointType} for
      * settings metrics that logs the entry point about physical keyboard settings.
      * <p>
@@ -10021,6 +10040,12 @@ public final class Settings {
         @Readable
         public static final String MINIMAL_POST_PROCESSING_ALLOWED =
                 "minimal_post_processing_allowed";
+
+        /**
+         * Whether to mirror the built-in display on all connected displays.
+         * @hide
+         */
+        public static final String MIRROR_BUILT_IN_DISPLAY = "mirror_built_in_display";
 
         /**
          * No mode switching will happen.

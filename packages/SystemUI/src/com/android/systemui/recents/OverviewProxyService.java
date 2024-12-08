@@ -26,11 +26,6 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.window.BackEvent.EDGE_NONE;
 
-import static com.android.window.flags.Flags.predictiveBackSwipeEdgeNoneApi;
-import static com.android.window.flags.Flags.predictiveBackThreeButtonNav;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
-import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_AWAKE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_COMMUNAL_HUB_SHOWING;
@@ -42,6 +37,9 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_S
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION;
+import static com.android.systemui.shared.system.QuickStepContract.addInterface;
+import static com.android.window.flags.Flags.predictiveBackSwipeEdgeNoneApi;
+import static com.android.window.flags.Flags.predictiveBackThreeButtonNav;
 
 import android.annotation.FloatRange;
 import android.annotation.Nullable;
@@ -559,13 +557,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
 
             Bundle params = new Bundle();
-            params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
-            params.putBinder(KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
-                    mSysuiUnlockAnimationController.asBinder());
-            mUnfoldTransitionProgressForwarder.ifPresent(
-                    unfoldProgressForwarder -> params.putBinder(
-                            KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER,
-                            unfoldProgressForwarder.asBinder()));
+            addInterface(mSysUiProxy, params);
+            addInterface(mSysuiUnlockAnimationController, params);
+            addInterface(mUnfoldTransitionProgressForwarder.orElse(null), params);
             // Add all the interfaces exposed by the shell
             mShellInterface.createExternalInterfaces(params);
 

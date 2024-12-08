@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams
 import android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
@@ -75,6 +76,13 @@ object ShadeDisplayAwareModule {
         } else {
             context
         }
+    }
+
+    @Provides
+    @ShadeDisplayAware
+    @SysUISingleton
+    fun provideShadeWindowLayoutParams(@ShadeDisplayAware context: Context): LayoutParams {
+        return ShadeWindowLayoutParams.create(context)
     }
 
     @Provides

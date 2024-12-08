@@ -32,7 +32,6 @@ import static com.android.window.flags.Flags.migratePredictiveBackTransition;
 import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.window.flags.Flags.unifyBackNavigationTransition;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -215,6 +214,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         }
                         ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Navigation window gone.");
                         setTriggerBack(false);
+                        // Trigger close transition if necessary.
+                        if (Flags.migratePredictiveBackTransition()) {
+                            mBackTransitionHandler.onAnimationFinished();
+                        }
                         resetTouchTracker();
                         // Don't wait for animation start
                         mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
@@ -308,7 +311,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
         updateEnableAnimationFromFlags();
         createAdapter();
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
+        mShellController.addExternalInterface(IBackAnimation.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mShellController.addConfigurationChangeListener(this);
@@ -552,6 +555,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     // start animation immediately for non-gestural sources (without ACTION_MOVE
                     // events)
                     mThresholdCrossed = true;
+                    mPointersPilfered = true;
                     onGestureStarted(touchX, touchY, swipeEdge);
                     mShouldStartOnNextMoveEvent = false;
                 } else {
@@ -731,6 +735,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             callback.onBackStarted(backEvent);
             if (mBackTransitionHandler.canHandOffAnimation()) {
                 callback.setHandoffHandler(mHandoffHandler);
+            } else {
+                callback.setHandoffHandler(null);
             }
             mOnBackStartDispatched = true;
         } catch (RemoteException e) {
@@ -1273,14 +1279,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            final boolean isPrepareTransition =
-                    info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
-            if (isPrepareTransition) {
-                if (checkTakeoverFlags()) {
-                    mTakeoverHandler = mTransitions.getHandlerForTakeover(transition, info);
-                }
-                kickStartAnimation();
-            }
             // Both mShellExecutor and Transitions#mMainExecutor are ShellMainThread, so we don't
             // need to post to ShellExecutor when called.
             if (info.getType() == WindowManager.TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION) {
@@ -1308,7 +1306,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                     // animation never start, consume directly
                     applyAndFinish(st, ft, finishCallback);
                     return true;
-                } else if (mClosePrepareTransition == null && isPrepareTransition) {
+                } else if (mClosePrepareTransition == null
+                        && info.getType() == WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION) {
                     // Gesture animation was cancelled before prepare transition ready, create
                     // the close prepare transition
                     createClosePrepareTransition();
@@ -1316,6 +1315,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             if (handlePrepareTransition(info, st, ft, finishCallback)) {
+                if (checkTakeoverFlags()) {
+                    mTakeoverHandler = mTransitions.getHandlerForTakeover(transition, info);
+                }
+                kickStartAnimation();
                 return true;
             }
             return handleCloseTransition(info, st, ft, finishCallback);

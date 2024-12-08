@@ -306,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Usar Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Conectado"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Compartilhamento de áudio"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Compatível com compartilhamento de áudio"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Aceita compartilhamento de áudio"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Salvo"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconectar"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ativar"</string>
@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para abrir um app usando um widget, você precisa confirmar sua identidade. E não se esqueça que qualquer pessoa pode ver os widgets, mesmo com o tablet bloqueado. Além disso, alguns apps não foram criados para a tela de bloqueio, é melhor manter a segurança."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Entendi"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Para adicionar o recurso \"Widgets na tela de bloqueio\" como um atalho, verifique se os atalhos estão ativados nas configurações."</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Trocar usuário"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu suspenso"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
@@ -590,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificações"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Apagar todas as notificações silenciosas"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificações pausadas pelo modo \"Não perturbe\""</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Sem notificações}=1{Notificações pausadas pelo modo {mode}}=2{Notificações pausadas por {mode} e mais um modo}one{Notificações pausadas por {mode} e mais # modo}many{Notificações pausadas por {mode} e mais # de modos}other{Notificações pausadas por {mode} e mais # modos}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
@@ -704,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Rastreamento de cabeça"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Toque para mudar o modo da campainha"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"modo da campainha"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desativar o som"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ativar o som"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
@@ -875,14 +882,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Mudar para o app à esquerda ou acima ao usar a tela dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Com a tela dividida: substituir um app por outro"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Mover janela ativa entre telas"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Mover janela para a esquerda"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Mover janela para a direita"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Maximizar janela"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Minimizar janela"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Mudar para o próximo idioma"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Mudar para o idioma anterior"</string>
@@ -1419,7 +1422,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Controles do sistema"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Apps do sistema"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitarefas"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Apps recentes"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Tela dividida"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Entrada"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Atalhos de apps"</string>
@@ -1428,25 +1430,30 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Atalhos do teclado"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalizar atalhos de teclado"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Remover atalho?"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Pressione a tecla para atribuir o atalho"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Essa ação vai excluir permanentemente seu atalho personalizado."</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pesquisar atalhos"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nenhum resultado de pesquisa"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícone \"Fechar\""</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ícone da tecla de ação"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ícone de adição"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizar"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Redefinir"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Concluir"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícone \"Abrir\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"mais"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"barra para a direita"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Alça de arrastar"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Configurações do teclado"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Definir atalho"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Remover"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancelar"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pressione a tecla"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Essa combinação de teclas já está em uso. Tente outra tecla."</string>
@@ -1478,6 +1485,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pressione a tecla de ação no teclado"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Muito bem!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Você concluiu o gesto para ver todos os apps"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Luz de fundo do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nível %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Automação residencial"</string>

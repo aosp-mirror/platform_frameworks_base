@@ -43,6 +43,8 @@ public final class KeyGestureEvent {
     private static final int LOG_EVENT_UNSPECIFIED =
             FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__UNSPECIFIED;
 
+    // These values should not change and values should not be re-used as this data is persisted to
+    // long term storage and must be kept backwards compatible.
     public static final int KEY_GESTURE_TYPE_UNSPECIFIED = 0;
     public static final int KEY_GESTURE_TYPE_HOME = 1;
     public static final int KEY_GESTURE_TYPE_RECENT_APPS = 2;

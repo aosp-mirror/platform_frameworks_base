@@ -195,6 +195,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
     fun setSurfaceBehindVisibility_goesAwayFirst_andIgnoresSecondCall_with_keyguard_shell_transitions() {
         underTest.setLockscreenShown(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, false)
         underTest.setSurfaceBehindVisibility(true)
         verify(keyguardTransitions).startKeyguardTransition(false, false)
 

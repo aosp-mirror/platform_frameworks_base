@@ -24,42 +24,56 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.intrusiondetection.IIntrusionDetectionEventTransport;
 import android.security.intrusiondetection.IntrusionDetectionEvent;
+import android.security.intrusiondetection.IIntrusionDetectionEventTransport;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.infra.AndroidFuture;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.Process;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.TimeUnit;
 
 public class IntrusionDetectionEventTransportConnection implements ServiceConnection {
+    private static final String PRODUCTION_BUILD = "user";
+    private static final String PROPERTY_BUILD_TYPE = "ro.build.type";
+    private static final String PROPERTY_INTRUSION_DETECTION_SERVICE_NAME =
+            "debug.intrusiondetection_package_name";
+    private static final long FUTURE_TIMEOUT_MILLIS = 60 * 1000; // 1 min
     private static final String TAG = "IntrusionDetectionEventTransportConnection";
-    private static final long FUTURE_TIMEOUT_MILLIS = 60 * 1000; // 1 mins
     private final Context mContext;
     private String mIntrusionDetectionEventTransportConfig;
     volatile IIntrusionDetectionEventTransport mService;
 
+
     public IntrusionDetectionEventTransportConnection(Context context) {
         mContext = context;
-        mService = null;
     }
 
     /**
      * Initialize the IntrusionDetectionEventTransport binder service.
-     * @return Whether the initialization succeed.
+     *
+     * @return Whether the initialization succeeds.
      */
     public boolean initialize() {
+        Slog.d(TAG, "initialize");
         if (!bindService()) {
             return false;
         }
+        // Wait for the service to be connected before calling initialize.
+        waitForConnection();
         AndroidFuture<Boolean> resultFuture = new AndroidFuture<>();
         try {
             mService.initialize(resultFuture);
@@ -74,6 +88,20 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
         } else {
             unbindService();
             return false;
+        }
+    }
+
+    private void waitForConnection() {
+        synchronized (this) {
+            while (mService == null) {
+                Slog.d(TAG, "waiting for connection to service...");
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    /* never interrupted */
+                }
+            }
+            Slog.d(TAG, "connected to service");
         }
     }
 
@@ -118,11 +146,42 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
         }
     }
 
+    private String getSystemPropertyValue(String propertyName) {
+        String commandString = "getprop " + propertyName;
+        try {
+            Process process = Runtime.getRuntime().exec(commandString);
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String propertyValue = reader.readLine();
+            reader.close();
+            return propertyValue;
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to get system property value:", e);
+            return null;
+        }
+    }
+
     private boolean bindService() {
-        mIntrusionDetectionEventTransportConfig = mContext.getString(
-                com.android.internal.R.string.config_intrusionDetectionEventTransport);
+        String buildType = getSystemPropertyValue(PROPERTY_BUILD_TYPE);
+        mIntrusionDetectionEventTransportConfig =
+                mContext.getString(
+                        com.android.internal.R.string.config_intrusionDetectionEventTransport);
+
+        // If the build type is not production, and a property value is set, use it instead.
+        // This allows us to test the service with a different config.
+        if (!buildType.equals(PRODUCTION_BUILD)
+                && !TextUtils.isEmpty(
+                        getSystemPropertyValue(PROPERTY_INTRUSION_DETECTION_SERVICE_NAME))) {
+            mIntrusionDetectionEventTransportConfig =
+                    getSystemPropertyValue(PROPERTY_INTRUSION_DETECTION_SERVICE_NAME);
+        }
+        Slog.d(
+                TAG,
+                "mIntrusionDetectionEventTransportConfig: "
+                        + mIntrusionDetectionEventTransportConfig);
+
         if (TextUtils.isEmpty(mIntrusionDetectionEventTransportConfig)) {
-            Slog.e(TAG, "config_intrusionDetectionEventTransport is empty");
+            Slog.e(TAG, "Unable to find a valid config for the transport service");
             return false;
         }
 
@@ -163,11 +222,19 @@ public class IntrusionDetectionEventTransportConnection implements ServiceConnec
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mService = IIntrusionDetectionEventTransport.Stub.asInterface(service);
+        synchronized (this) {
+            mService = IIntrusionDetectionEventTransport.Stub.asInterface(service);
+            Slog.d(TAG, "connected to service");
+            this.notifyAll();
+        }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        mService = null;
+        synchronized (this) {
+            mService = null;
+            Slog.d(TAG, "disconnected from service");
+            this.notifyAll();
+        }
     }
 }

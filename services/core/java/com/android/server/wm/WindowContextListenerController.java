@@ -167,6 +167,22 @@ class WindowContextListenerController {
         return true;
     }
 
+    boolean assertCallerCanReparentListener(@NonNull IBinder clientToken,
+            boolean callerCanManageAppTokens, int callingUid, int displayId) {
+        if (!assertCallerCanModifyListener(clientToken, callerCanManageAppTokens, callingUid)) {
+            return false;
+        }
+
+        final WindowContainer<?> container = getContainer(clientToken);
+        if (container != null && container.getDisplayContent() != null
+                && container.getDisplayContent().mDisplayId == displayId) {
+            ProtoLog.i(WM_DEBUG_ADD_REMOVE,
+                    "The listener has already been attached to the same display id");
+            return false;
+        }
+        return true;
+    }
+
     boolean hasListener(IBinder clientToken) {
         return mListeners.containsKey(clientToken);
     }

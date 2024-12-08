@@ -308,10 +308,16 @@ public class TaskInfo {
     public boolean isSleeping;
 
     /**
-     * Whether the top activity fillsParent() is false
+     * Whether the top activity fillsParent() is false.
      * @hide
      */
     public boolean isTopActivityTransparent;
+
+    /**
+     * Whether fillsParent() is false for every activity in the tasks stack.
+     * @hide
+     */
+    public boolean isActivityStackTransparent;
 
     /**
      * The last non-fullscreen bounds the task was launched in or resized to.
@@ -489,6 +495,7 @@ public class TaskInfo {
                 && parentTaskId == that.parentTaskId
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
+                && isActivityStackTransparent == that.isActivityStackTransparent
                 && Objects.equals(lastNonFullscreenBounds, that.lastNonFullscreenBounds)
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
@@ -567,6 +574,7 @@ public class TaskInfo {
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
+        isActivityStackTransparent = source.readBoolean();
         lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
@@ -623,6 +631,7 @@ public class TaskInfo {
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
+        dest.writeBoolean(isActivityStackTransparent);
         dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
@@ -668,6 +677,7 @@ public class TaskInfo {
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
+                + " isActivityStackTransparent=" + isActivityStackTransparent
                 + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp

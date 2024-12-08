@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +48,7 @@ import com.android.systemui.res.R
 @Composable
 internal fun PeopleScreenEmpty(onGotItClicked: () -> Unit) {
     Column(
-        Modifier.fillMaxSize().padding(PeopleSpacePadding),
+        Modifier.fillMaxSize().safeContentPadding().padding(PeopleSpacePadding),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(

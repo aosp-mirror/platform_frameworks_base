@@ -1981,7 +1981,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getNumAppliedFlexibleConstraints(),
                     jobStatus.getNumDroppedFlexibleConstraints(),
                     jobStatus.getFilteredTraceTag(),
-                    jobStatus.getFilteredDebugTags());
+                    jobStatus.getFilteredDebugTags(),
+                    jobStatus.getNumAbandonedFailures(),
+                    /* 0 is reserved for UNKNOWN_POLICY */
+                    jobStatus.getJob().getBackoffPolicy() + 1,
+                    shouldUseAggressiveBackoff(jobStatus.getNumAbandonedFailures()));
+
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -2422,7 +2427,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getNumAppliedFlexibleConstraints(),
                     cancelled.getNumDroppedFlexibleConstraints(),
                     cancelled.getFilteredTraceTag(),
-                    cancelled.getFilteredDebugTags());
+                    cancelled.getFilteredDebugTags(),
+                    cancelled.getNumAbandonedFailures(),
+                    /* 0 is reserved for UNKNOWN_POLICY */
+                    cancelled.getJob().getBackoffPolicy() + 1,
+                    shouldUseAggressiveBackoff(cancelled.getNumAbandonedFailures()));
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -5916,9 +5925,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
                     Flags.doNotForceRushExecutionAtBoot());
-            pw.println();
-            pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
-                    android.app.job.Flags.backupJobsExemption());
             pw.println();
             pw.print(android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND,
                     android.app.job.Flags.ignoreImportantWhileForeground());

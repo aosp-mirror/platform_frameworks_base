@@ -34,11 +34,12 @@ interface IContextHubEndpoint {
      * Request system service to open a session with a specific destination.
      *
      * @param destination A valid HubEndpointInfo representing the destination.
+     * @param serviceDescriptor An optional descriptor of the service to scope this session to.
      *
      * @throws IllegalArgumentException If the HubEndpointInfo is not valid.
      * @throws IllegalStateException If there are too many opened sessions.
      */
-    int openSession(in HubEndpointInfo destination, in @nullable HubServiceInfo serviceInfo);
+    int openSession(in HubEndpointInfo destination, in @nullable String serviceDescriptor);
 
     /**
      * Request system service to close a specific session

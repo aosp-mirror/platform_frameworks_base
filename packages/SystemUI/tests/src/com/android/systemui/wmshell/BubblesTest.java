@@ -113,7 +113,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.SceneContainerFlagParameterizationKt;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
@@ -368,7 +368,7 @@ public class BubblesTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
 
     private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
 
     private UserHandle mUser0;
 
@@ -444,7 +444,8 @@ public class BubblesTest extends SysuiTestCase {
                 mUserTracker,
                 mNotificationShadeWindowModel,
                 new FakeSettings(),
-                mKosmos::getCommunalInteractor
+                mKosmos::getCommunalInteractor,
+                mKosmos.getShadeLayoutParams()
         );
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();

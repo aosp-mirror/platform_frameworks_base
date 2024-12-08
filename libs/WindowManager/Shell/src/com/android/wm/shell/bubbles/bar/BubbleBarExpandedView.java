@@ -85,6 +85,22 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         }
     };
 
+    /**
+     * Property to set alpha for the task view
+     */
+    public static final FloatProperty<BubbleBarExpandedView> TASK_VIEW_ALPHA = new FloatProperty<>(
+            "taskViewAlpha") {
+        @Override
+        public void setValue(BubbleBarExpandedView bbev, float alpha) {
+            bbev.setTaskViewAlpha(alpha);
+        }
+
+        @Override
+        public Float get(BubbleBarExpandedView bbev) {
+            return bbev.mTaskView != null ? bbev.mTaskView.getAlpha() : bbev.getAlpha();
+        }
+    };
+
     private static final String TAG = BubbleBarExpandedView.class.getSimpleName();
     private static final int INVALID_TASK_ID = -1;
 
@@ -588,6 +604,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             return;
         }
         mTaskView.setZOrderedOnTop(onTop, true /* allowDynamicChange */);
+    }
+
+    @VisibleForTesting
+    boolean isSurfaceZOrderedOnTop() {
+        return mTaskView != null && mTaskView.isZOrderedOnTop();
     }
 
     /**

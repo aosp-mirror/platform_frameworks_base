@@ -2594,6 +2594,7 @@ public class NotificationManagerService extends SystemService {
                     intent.setPackage(pkg);
                     intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, id);
                     intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_STATUS, status);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                     getContext().sendBroadcastAsUser(intent, UserHandle.of(userId));
                 });
             }

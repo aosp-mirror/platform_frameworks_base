@@ -26,6 +26,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AIRPLANE_MODE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_FUNCTIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT;
@@ -126,6 +127,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEV
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED;
+import static android.app.admin.DevicePolicyManager.APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.CONTENT_PROTECTION_DISABLED;
 import static android.app.admin.DevicePolicyManager.ContentProtectionPolicy;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
@@ -332,6 +334,7 @@ import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyDrawableResource;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.AppFunctionsPolicy;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.OperationSafetyReason;
@@ -9085,11 +9088,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         CallerIdentity caller = getCallerIdentity(who);
 
-        if (!Flags.setAutoTimeEnabledCoexistence()) {
+        if (Flags.setAutoTimeEnabledCoexistence()) {
+            Preconditions.checkCallAuthorization(hasPermission(SET_TIME, callerPackageName));
+        } else {
             Objects.requireNonNull(who, "ComponentName is null");
-        }
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(caller));
+        }
 
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) > 0;
     }
@@ -9147,7 +9152,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                 /* who */ null,
                 SET_TIME,
-                caller.getPackageName(),
+                callerPackageName,
                 UserHandle.USER_ALL
         );
         Integer state = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
@@ -9166,10 +9171,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who);
-
-        if (!Flags.setAutoTimeZoneEnabledCoexistence()) {
-            Objects.requireNonNull(who, "ComponentName is null");
-        }
+        Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
                 caller));
@@ -9193,10 +9195,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller = getCallerIdentity(who);
-        Objects.requireNonNull(who, "ComponentName is null");
-        Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
+        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
+            Preconditions.checkCallAuthorization(
+                hasPermission(SET_TIME_ZONE, callerPackageName));
+        } else {
+            Objects.requireNonNull(who, "ComponentName is null");
+            Preconditions.checkCallAuthorization(isProfileOwnerOnUser0(caller)
                 || isProfileOwnerOfOrganizationOwnedDevice(caller) || isDefaultDeviceOwner(
                 caller));
+        }
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
 
@@ -9248,7 +9255,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                 /* who */ null,
                 SET_TIME_ZONE,
-                caller.getPackageName(),
+                callerPackageName,
                 UserHandle.USER_ALL
         );
         Integer state = mDevicePolicyEngine.getGlobalPolicySetByAdmin(
@@ -22970,6 +22977,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
             MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
             MANAGE_DEVICE_POLICY_APPS_CONTROL,
+            MANAGE_DEVICE_POLICY_APP_FUNCTIONS,
             MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
             MANAGE_DEVICE_POLICY_AUDIO_OUTPUT,
             MANAGE_DEVICE_POLICY_AUTOFILL,
@@ -23057,6 +23065,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT,
                     MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL,
                     MANAGE_DEVICE_POLICY_APPS_CONTROL,
+                    MANAGE_DEVICE_POLICY_APP_FUNCTIONS,
                     MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
                     MANAGE_DEVICE_POLICY_AUDIO_OUTPUT,
                     MANAGE_DEVICE_POLICY_AUTOFILL,
@@ -23305,6 +23314,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_WIPE_DATA,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS);
         CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_CONTENT_PROTECTION,
+                MANAGE_DEVICE_POLICY_ACROSS_USERS);
+        CROSS_USER_PERMISSIONS.put(MANAGE_DEVICE_POLICY_APP_FUNCTIONS,
                 MANAGE_DEVICE_POLICY_ACROSS_USERS);
 
         // These permissions may grant access to user data and therefore must be protected with
@@ -23969,6 +23980,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             return policy;
         }
+    }
+
+    @Override
+    public void setAppFunctionsPolicy(String callerPackageName, @AppFunctionsPolicy int policy) {
+        if (!android.app.appfunctions.flags.Flags.enableAppFunctionManager()) {
+            return;
+        }
+
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        int userId = caller.getUserId();
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_APP_FUNCTIONS_POLICY);
+        EnforcingAdmin enforcingAdmin =
+                enforcePermissionAndGetEnforcingAdmin(
+                        /* who */null, MANAGE_DEVICE_POLICY_APP_FUNCTIONS,
+                        callerPackageName, userId);
+
+        if (policy == APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY) {
+            mDevicePolicyEngine.removeLocalPolicy(
+                    PolicyDefinition.APP_FUNCTIONS, enforcingAdmin, userId);
+        } else {
+            mDevicePolicyEngine.setLocalPolicy(
+                    PolicyDefinition.APP_FUNCTIONS,
+                    enforcingAdmin, new IntegerPolicyValue(policy),
+                    userId);
+        }
+    }
+
+    @Override
+    public @AppFunctionsPolicy int getAppFunctionsPolicy(String callerPackageName, int userId) {
+        if (!android.app.appfunctions.flags.Flags.enableAppFunctionManager()) {
+            return APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY;
+        }
+
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforceCanQuery(MANAGE_DEVICE_POLICY_APP_FUNCTIONS, callerPackageName, userId);
+        Integer policy =
+                mDevicePolicyEngine.getResolvedPolicy(PolicyDefinition.APP_FUNCTIONS, userId);
+        if (policy == null) {
+            return APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY;
+        }
+        return policy;
     }
 
     private void updateContentProtectionPolicyCache(@UserIdInt int userId) {

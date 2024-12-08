@@ -474,3 +474,31 @@ flag {
     description: "Enable cross-user roles platform API"
     bug: "367732307"
 }
+
+flag {
+    name: "rate_limit_batched_note_op_async_callbacks_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Rate limit async noteOp callbacks for batched noteOperation binder call"
+    bug: "366013082"
+}
+
+flag {
+    name: "system_vendor_intelligence_role_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "This flag is used to enable the role system_vendor_intelligence"
+    bug: "377553620"
+}
+
+flag {
+    name: "fine_power_monitor_permission"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Add support for fine-grained PowerMonitor readings"
+    bug: "341941666"
+}
+

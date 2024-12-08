@@ -85,6 +85,10 @@ package android.nfc {
     field public static final int HCE_ACTIVATE = 1; // 0x1
     field public static final int HCE_DATA_TRANSFERRED = 2; // 0x2
     field public static final int HCE_DEACTIVATE = 3; // 0x3
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int NFCEE_TECH_A = 1; // 0x1
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int NFCEE_TECH_B = 2; // 0x2
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int NFCEE_TECH_F = 4; // 0x4
+    field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int NFCEE_TECH_NONE = 0; // 0x0
     field public static final int POLLING_STATE_CHANGE_ALREADY_IN_REQUESTED_STATE = 2; // 0x2
     field public static final int POLLING_STATE_CHANGE_SUCCEEDED = 1; // 0x1
     field public static final int STATUS_OK = 0; // 0x0
@@ -124,6 +128,7 @@ package android.nfc {
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public abstract class NfcRoutingTableEntry {
     method public int getNfceeId();
+    method public int getRouteType();
     method public int getType();
     field public static final int TYPE_AID = 0; // 0x0
     field public static final int TYPE_PROTOCOL = 1; // 0x1
@@ -249,6 +254,7 @@ package android.nfc.cardemulation {
     field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID = 1; // 0x1
     field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED = 3; // 0x3
     field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_SUCCESS = 0; // 0x0
+    field @FlaggedApi("android.nfc.enable_card_emulation_euicc") public static final int SET_SUBSCRIPTION_ID_STATUS_UNKNOWN = -1; // 0xffffffff
   }
 
 }

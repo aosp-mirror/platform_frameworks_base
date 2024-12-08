@@ -156,8 +156,7 @@ class InputManagerServiceTests {
                 }
 
                 override fun getKeyboardBacklightController(
-                    nativeService: NativeInputManagerService?,
-                    dataStore: PersistentDataStore?
+                    nativeService: NativeInputManagerService?
                 ): InputManagerService.KeyboardBacklightControllerInterface {
                     return kbdController
                 }
@@ -542,7 +541,8 @@ class InputManagerServiceTests {
                 0
             },
             "title",
-            /* uid = */0
+            /* uid = */0,
+            /* inputFeatureFlags = */ 0
         )
         whenever(windowManagerInternal.getKeyInterceptionInfoFromToken(any())).thenReturn(info)
     }

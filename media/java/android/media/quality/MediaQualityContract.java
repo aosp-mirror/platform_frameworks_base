@@ -75,11 +75,9 @@ public class MediaQualityContract {
         public static final String PARAMETER_SATURATION = "saturation";
 
         /**
-         * @hide
-         */
-        public static final String PARAMETER_COLOR = "color";
-        /**
-         * @hide
+         * The hue.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_HUE = "hue";
 
@@ -89,47 +87,77 @@ public class MediaQualityContract {
         public static final String PARAMETER_BACKLIGHT = "backlight";
 
         /**
-         * @hide
+         * Adjust brightness in advance color engine. Similar to a "brightness" control on a TV
+         * but acts at a lower level.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_BRIGHTNESS = "color_tuner_brightness";
 
         /**
-         * @hide
+         * Adjust saturation in advance color engine. Similar to a "saturation" control on a TV
+         * but acts at a lower level.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_SATURATION = "color_tuner_saturation";
 
         /**
-         * @hide
+         * Adjust hue in advance color engine. Similar to a "hue" control on a TV but acts at a
+         * lower level.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_HUE = "color_tuner_hue";
 
         /**
-         * @hide
+         * Advance setting for red offset. Adjust the black level of red color channels, it
+         * controls the minimum intensity of each color, affecting the shadows and
+         * dark areas of the image.
+         *
+         * <p>Type: INTEGER
          */
-        public static final String PARAMETER_COLOR_TUNER_REDO_FFSET = "color_tuner_red_offset";
+        public static final String PARAMETER_COLOR_TUNER_RED_OFFSET = "color_tuner_red_offset";
 
         /**
-         * @hide
+         * Advance setting for green offset. Adjust the black level of green color channels, it
+         * controls the minimum intensity of each color, affecting the shadows and dark
+         * areas of the image.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_GREEN_OFFSET = "color_tuner_green_offset";
 
         /**
-         * @hide
+         * Advance setting for blue offset. Adjust the black level of blue color channels, it
+         * controls the minimum intensity of each color, affecting the shadows and dark areas
+         * of the image.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_BLUE_OFFSET = "color_tuner_blue_offset";
 
         /**
-         * @hide
+         * Advance setting for red gain. Adjust the gain or amplification of the red color channels.
+         * They control the overall intensity and white balance of red.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_RED_GAIN = "color_tuner_red_gain";
 
         /**
-         * @hide
+         * Advance setting for green gain. Adjust the gain or amplification of the green color
+         * channels. They control the overall intensity and white balance of green.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_GREEN_GAIN = "color_tuner_green_gain";
 
         /**
-         * @hide
+         * Advance setting for blue gain. Adjust the gain or amplification of the blue color
+         * channels.They control the overall intensity and white balance of blue.
+         *
+         * <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TUNER_BLUE_GAIN = "color_tuner_blue_gain";
 
@@ -143,33 +171,54 @@ public class MediaQualityContract {
          */
         public static final String PARAMETER_AI_SUPER_RESOLUTION = "ai_super_resolution";
 
-        /**
-         * @hide
+        /** Noise reduction.
+         * (Off, Low, Medium, High)
+         * @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_NOISE_REDUCTION = "noise_reduction";
 
         /**
-         * @hide
-         */
+         *  MPEG (moving picture experts group) noise reduction
+         *  (Off, Low, Medium, High)
+         *  @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         *  <p>Type: STRING
+         *  */
         public static final String PARAMETER_MPEG_NOISE_REDUCTION = "mpeg_noise_reduction";
 
         /**
-         * @hide
+         * Refine the flesh colors in the pictures without affecting the other colors on the screen.
+         * (Off, Low, Medium, High)
+         * @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_FLESH_TONE = "flesh_tone";
 
         /**
-         * @hide
+         * Contour noise reduction.
+         * (Off, Low, Medium, High)
+         * @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         * <p>Type: STRING
          */
         public static final String PARAMETER_DECONTOUR = "decontour";
 
         /**
-         * @hide
+         *  Dynamically change picture luma to enhance contrast.
+         *  (Off, Low, Medium, High)
+         *  @see android.hardware.tv.mediaquality.QualityLevel
+         *
+         *  <p>Type: STRING
          */
         public static final String PARAMETER_DYNAMIC_LUMA_CONTROL = "dynamic_luma_control";
 
         /**
-         * @hide
+         *  Enable/disable film mode
+         *
+         *  <p>Type: BOOLEAN
          */
         public static final String PARAMETER_FILM_MODE = "film_mode";
 
@@ -179,24 +228,49 @@ public class MediaQualityContract {
         public static final String PARAMETER_BLACK_STRETCH = "black_stretch";
 
         /**
-         * @hide
+         *  Enable/disable blue color auto stretch
+         *
+         *  <p>Type: BOOLEAN
          */
         public static final String PARAMETER_BLUE_STRETCH = "blue_stretch";
 
         /**
-         * @hide
+         *  Enable/disable the overall color tuning feature.
+         *
+         *  <p>Type: BOOLEAN
          */
         public static final String PARAMETER_COLOR_TUNE = "color_tune";
 
         /**
-         * @hide
+         *  Adjust color temperature type
+         *
+         *  <p>Type: INTEGER
          */
         public static final String PARAMETER_COLOR_TEMPERATURE = "color_temperature";
 
         /**
-         * @hide
+         *  Enable/disable globe dimming.
+         *
+         *  <p>Type: BOOLEAN
          */
         public static final String PARAMETER_GLOBAL_DIMMING = "global_dimming";
+
+        /**
+         *  Enable/disable auto adjust picture parameter based on the TV content.
+         *
+         *  <p>Type: BOOLEAN
+         */
+        public static final String PARAMETER_AUTO_PICTURE_QUALITY_ENABLED =
+                "auto_picture_quality_enabled";
+
+        /**
+         * Enable/disable auto upscaling the picture quality. It analyzes the lower-resolution
+         * image and uses its knowledge to invent the missing pixel, make the image look sharper.
+         *
+         * <p>Type: BOOLEAN
+         */
+        public static final String PARAMETER_AUTO_SUPER_RESOLUTION_ENABLED =
+                "auto_super_resolution_enabled";
 
         private PictureQuality() {
         }

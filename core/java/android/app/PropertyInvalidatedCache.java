@@ -80,6 +80,17 @@ import java.util.concurrent.atomic.AtomicLong;
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
+     * A method to report if the PermissionManager notifications can be separated from cache
+     * invalidation.  The feature relies on a series of flags; the dependency is captured in this
+     * method.
+     * @hide
+     */
+    public static boolean separatePermissionNotificationsEnabled() {
+        return isSharedMemoryAvailable()
+                && Flags.picSeparatePermissionNotifications();
+    }
+
+    /**
      * This is a configuration class that customizes a cache instance.
      * @hide
      */
@@ -1283,6 +1294,13 @@ public class PropertyInvalidatedCache<Query, Result> {
     public static record Args(@NonNull String mModule, @Nullable String mApi,
             int mMaxEntries, boolean mIsolateUids, boolean mTestMode, boolean mCacheNulls) {
 
+        /**
+         * Default values for fields.
+         */
+        public static final int DEFAULT_MAX_ENTRIES = 32;
+        public static final boolean DEFAULT_ISOLATE_UIDS = true;
+        public static final boolean DEFAULT_CACHE_NULLS = false;
+
         // Validation: the module must be one of the known module strings and the maxEntries must
         // be positive.
         public Args {
@@ -1297,10 +1315,10 @@ public class PropertyInvalidatedCache<Query, Result> {
         public Args(@NonNull String module) {
             this(module,
                     null,       // api
-                    32,         // maxEntries
-                    true,       // isolateUids
+                    DEFAULT_MAX_ENTRIES,
+                    DEFAULT_ISOLATE_UIDS,
                     false,      // testMode
-                    true        // allowNulls
+                    DEFAULT_CACHE_NULLS
                  );
         }
 
@@ -1350,7 +1368,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Burst a property name into module and api.  Throw if the key is invalid.  This method is
      * used in to transition legacy cache constructors to the args constructor.
      */
-    private static Args parseProperty(@NonNull String name) {
+    private static Args argsFromProperty(@NonNull String name) {
         throwIfInvalidCacheKey(name);
         // Strip off the leading well-known prefix.
         String base = name.substring(CACHE_KEY_PREFIX.length() + 1);
@@ -1373,8 +1391,9 @@ public class PropertyInvalidatedCache<Query, Result> {
      *
      * @hide
      */
+    @Deprecated
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName) {
-        this(parseProperty(propertyName).maxEntries(maxEntries), propertyName, null);
+        this(argsFromProperty(propertyName).maxEntries(maxEntries), propertyName, null);
     }
 
     /**
@@ -1388,9 +1407,10 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @param cacheName Name of this cache in debug and dumpsys
      * @hide
      */
+    @Deprecated
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName,
             @NonNull String cacheName) {
-        this(parseProperty(propertyName).maxEntries(maxEntries), cacheName, null);
+        this(argsFromProperty(propertyName).maxEntries(maxEntries), cacheName, null);
     }
 
     /**
@@ -1846,6 +1866,14 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
+     * Invalidate caches in all processes that have the module and api specified in the args.
+     * @hide
+     */
+    public static void invalidateCache(@NonNull Args args) {
+        invalidateCache(createPropertyName(args.mModule, args.mApi));
+    }
+
+    /**
      * Invalidate PropertyInvalidatedCache caches in all processes that are keyed on
      * {@var name}. This function is synchronous: caches are invalidated upon return.
      *
@@ -1921,6 +1949,10 @@ public class PropertyInvalidatedCache<Query, Result> {
         }
 
         public AutoCorker(@NonNull String propertyName, int autoCorkDelayMs) {
+            if (separatePermissionNotificationsEnabled()) {
+                throw new IllegalStateException("AutoCorking is unavailable");
+            }
+
             mPropertyName = propertyName;
             mAutoCorkDelayMs = autoCorkDelayMs;
             // We can't initialize mHandler here: when we're created, the main loop might not

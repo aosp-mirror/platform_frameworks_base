@@ -117,7 +117,7 @@
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"ஓர் ஆப்ஸை ரெக்கார்டு செய்யும்போது அதில் காட்டப்படும் அல்லது பிளே செய்யப்படும் அனைத்தும் ரெக்கார்டு செய்யப்படும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"திரையை ரெக்கார்டு செய்"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ரெக்கார்டு செய்ய ஆப்ஸைத் தேர்வுசெய்தல்"</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"ஆடியோவை ரெக்கார்டு செய்"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"ஆடியோவை ரெக்கார்டு செய்தல்"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"சாதன ஆடியோ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"இசை, அழைப்புகள், ரிங்டோன்கள் போன்ற உங்கள் சாதனத்திலிருந்து வரும் ஒலி"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"மைக்ரோஃபோன்"</string>
@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"விட்ஜெட்டைப் பயன்படுத்தி ஆப்ஸைத் திறக்க, அது நீங்கள்தான் என்பதை உறுதிசெய்ய வேண்டும். அத்துடன், உங்கள் டேப்லெட் பூட்டப்பட்டிருந்தாலும்கூட அவற்றை யார் வேண்டுமானாலும் பார்க்கலாம் என்பதை நினைவில்கொள்ளுங்கள். சில விட்ஜெட்கள் உங்கள் பூட்டுத் திரைக்காக உருவாக்கப்பட்டவை அல்ல என்பதையும் அவற்றை இங்கே சேர்ப்பது பாதுகாப்பற்றதாக இருக்கக்கூடும் என்பதையும் நினைவில்கொள்ளுங்கள்."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"சரி"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"விட்ஜெட்கள்"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"\'பூட்டுத் திரையில் விட்ஜெட்கள்\' அம்சத்தை ஷார்ட்கட்டாகச் சேர்க்க, அமைப்புகளில் அது இயக்கப்பட்டுள்ளதை உறுதிப்படுத்தவும்."</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"பயனரை மாற்று"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"கீழ் இழுக்கும் மெனு"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"இந்த அமர்வின் எல்லா ஆப்ஸும் தரவும் நீக்கப்படும்."</string>
@@ -590,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"அறிவிப்புகள்"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"சைலன்ட் அறிவிப்புகள் அனைத்தையும் அழிக்கும்"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{அறிவிப்புகள் இல்லை}=1{{mode} பயன்முறையால் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன}=2{{mode} மற்றும் வேறொரு பயன்முறையால் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன}other{{mode} மற்றும் வேறு # பயன்முறைகளால் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
@@ -704,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ஹெட் டிராக்கிங்"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ரிங்கர் பயன்முறையை மாற்ற தட்டவும்"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"ரிங்கர் பயன்முறை"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ஒலியடக்கும்"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ஒலி இயக்கும்"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"அதிர்வுறும்"</string>
@@ -875,14 +882,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"திரைப் பிரிப்பைப் பயன்படுத்தும்போது இடது/மேலே உள்ள ஆப்ஸுக்கு மாறுதல்"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"திரைப் பிரிப்பின்போது: ஓர் ஆப்ஸுக்குப் பதிலாக மற்றொன்றை மாற்றுதல்"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"காட்சிகளுக்கு இடையே செயலில் உள்ள சாளரத்தை நகர்த்துதல்"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"சாளரத்தை இடதுபுறமாக நகர்த்துதல்"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"சாளரத்தை வலதுபுறமாக நகர்த்துதல்"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"சாளரத்தைப் பெரிதாக்குதல்"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"சாளரத்தைச் சிறிதாக்குதல்"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"உள்ளீடு"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"அடுத்த மொழிக்கு மாற்றுதல்"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"முந்தைய மொழிக்கு மாற்றுதல்"</string>
@@ -1419,7 +1422,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"சிஸ்டம் கட்டுப்பாடுகள்"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"சிஸ்டம் ஆப்ஸ்"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"பல வேலைகளைச் செய்தல்"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"சமீபத்திய ஆப்ஸ்"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"திரைப் பிரிப்பு"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"உள்ளீடு"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"ஆப்ஸ் ஷார்ட்கட்கள்"</string>
@@ -1428,25 +1430,31 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"கீபோர்டு ஷார்ட்கட்கள்"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"கீபோர்டு ஷார்ட்கட்களைப் பிரத்தியேகப்படுத்துதல்"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ஷார்ட்கட்டை அகற்றவா?"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ஷார்ட்கட்டை அமைக்க பட்டனை அழுத்துங்கள்"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"இது உங்கள் பிரத்தியேக ஷார்ட்கட்டை நிரந்தரமாக நீக்கும்."</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ஷார்ட்கட்களைத் தேடுக"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"தேடல் முடிவுகள் இல்லை"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"சுருக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ஆக்‌ஷன்/மெட்டா பட்டன் ஐகான்"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"பிளஸ் ஐகான்"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"பிரத்தியேகப்படுத்தும்"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"முடிந்தது"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"விரிவாக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"அல்லது"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"மற்றும்"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"ஃபார்வர்டு ஸ்லாஷ்"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"இழுப்பதற்கான ஹேண்டில்"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"கீபோர்டு அமைப்புகள்"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ஷார்ட்கட்டை அமையுங்கள்"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"அகற்று"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ரத்துசெய்"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"பட்டனை அழுத்துங்கள்"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"பட்டன் சேர்க்கை ஏற்கெனவே பயன்பாட்டில் உள்ளது. வேறொரு பட்டனைப் பயன்படுத்திப் பார்க்கவும்."</string>
@@ -1478,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"உங்கள் கீபோர்டில் ஆக்‌ஷன் பட்டனை அழுத்தவும்"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"அருமை!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"அனைத்து ஆப்ஸையும் பார்ப்பதற்கான சைகை பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>

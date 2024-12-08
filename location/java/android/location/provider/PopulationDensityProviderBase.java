@@ -17,6 +17,7 @@
 package android.location.provider;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -89,17 +90,18 @@ public abstract class PopulationDensityProviderBase {
      * Called upon receiving a new request for population density at a specific latitude/longitude,
      * expressed in degrees.
      * The answer is at least one S2CellId corresponding to the coarsening level at the specified
-     * location. This must be the first element of the result array. Optionally, additional nearby
-     * S2CellIds can be returned. One use for the optional nearby cells is when the client has a
-     * local cache that needs to be filled with the local area around a certain latitude/longitude.
-     * The callback {@link OutcomeReceiver#onResult} should be called with the result; or, in case
-     * an error occurs, {@link OutcomeReceiver#onError} should be called.
-     * The callback is single-use, calling more than any one of these two methods throws an
-     * AssertionException.
+     * location. This must be the first element of the result array. Optionally, if
+     * numAdditionalCells is greater than zero, additional nearby S2CellIds can be returned. One use
+     * for the optional nearby cells is when the client has a local cache that needs to be filled
+     * with the local area around a certain latitude/longitude. The callback
+     * {@link OutcomeReceiver#onResult} should be called with the result; or, in case an error
+     * occurs, {@link OutcomeReceiver#onError} should be called. The callback is single-use, calling
+     * more than any one of these two methods throws an AssertionException.
      *
      * @param callback A single-use callback that either returns S2CellIds, or an error.
      */
-    public abstract void onGetCoarsenedS2Cell(double latitudeDegrees, double longitudeDegrees,
+    public abstract void onGetCoarsenedS2Cells(double latitudeDegrees, double longitudeDegrees,
+            @IntRange(from = 0) int numAdditionalCells,
             @NonNull OutcomeReceiver<long[], Throwable> callback);
 
     private final class Service extends IPopulationDensityProvider.Stub {
@@ -119,10 +121,10 @@ public abstract class PopulationDensityProviderBase {
         }
 
         @Override
-        public void getCoarsenedS2Cell(double latitudeDegrees, double longitudeDegrees,
-                @NonNull IS2CellIdsCallback callback) {
+        public void getCoarsenedS2Cells(double latitudeDegrees, double longitudeDegrees,
+                int numAdditionalCells, @NonNull IS2CellIdsCallback callback) {
             try {
-                onGetCoarsenedS2Cell(latitudeDegrees, longitudeDegrees,
+                onGetCoarsenedS2Cells(latitudeDegrees, longitudeDegrees, numAdditionalCells,
                         new SingleUseS2CellIdsCallback(callback));
             } catch (RuntimeException e) {
                 // exceptions on one-way binder threads are dropped - move to a different thread

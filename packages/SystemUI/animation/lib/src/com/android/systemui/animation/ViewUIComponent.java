@@ -18,8 +18,11 @@ package com.android.systemui.animation;
 
 import android.annotation.Nullable;
 import android.graphics.Canvas;
+import android.graphics.Outline;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
 import android.view.Surface;
@@ -44,6 +47,9 @@ import java.util.concurrent.Executor;
 public class ViewUIComponent implements UIComponent {
     private static final String TAG = "ViewUIComponent";
     private static final boolean DEBUG = Build.IS_USERDEBUG || Log.isLoggable(TAG, Log.DEBUG);
+    private final Path mClippingPath = new Path();
+    private final Outline mClippingOutline = new Outline();
+
     private final OnDrawListener mOnDrawListener = this::postDraw;
     private final View mView;
 
@@ -55,6 +61,14 @@ public class ViewUIComponent implements UIComponent {
 
     public ViewUIComponent(View view) {
         mView = view;
+    }
+
+    /**
+     * @return the view wrapped by this UI component.
+     * @hide
+     */
+    public View getView() {
+        return mView;
     }
 
     @Override
@@ -174,6 +188,17 @@ public class ViewUIComponent implements UIComponent {
             canvas.scale(
                     (float) renderBounds.width() / realBounds.width(),
                     (float) renderBounds.height() / realBounds.height());
+
+            if (mView.getClipToOutline()) {
+                mView.getOutlineProvider().getOutline(mView, mClippingOutline);
+                mClippingPath.reset();
+                RectF rect = new RectF(0, 0, mView.getWidth(), mView.getHeight());
+                final float cornerRadius = mClippingOutline.getRadius();
+                mClippingPath.addRoundRect(rect, cornerRadius, cornerRadius, Path.Direction.CW);
+                mClippingPath.close();
+                canvas.clipPath(mClippingPath);
+            }
+
             canvas.saveLayerAlpha(null, (int) (255 * mView.getAlpha()));
             mView.draw(canvas);
             canvas.restore();

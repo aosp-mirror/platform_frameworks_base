@@ -318,6 +318,20 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::setContentProtectionPolicy,
             new IntegerPolicySerializer());
 
+    static PolicyDefinition<Integer> APP_FUNCTIONS = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.APP_FUNCTIONS_POLICY),
+            new MostRestrictive<>(
+                    List.of(
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.APP_FUNCTIONS_DISABLED),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.APP_FUNCTIONS_DISABLED_CROSS_PROFILE),
+                            new IntegerPolicyValue(
+                                    DevicePolicyManager.APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY))),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::noOp,
+            new IntegerPolicySerializer());
+
     static PolicyDefinition<Integer> PASSWORD_COMPLEXITY = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.PASSWORD_COMPLEXITY_POLICY),
             new MostRestrictive<>(
@@ -398,6 +412,8 @@ final class PolicyDefinition<V> {
                 USB_DATA_SIGNALING);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.CONTENT_PROTECTION_POLICY,
                 CONTENT_PROTECTION);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.APP_FUNCTIONS_POLICY,
+                APP_FUNCTIONS);
         // Intentionally not flagged since if the flag is flipped off on a device already
         // having PASSWORD_COMPLEXITY policy in the on-device XML, it will cause the
         // deserialization logic to break due to seeing an unknown tag.
@@ -654,10 +670,6 @@ final class PolicyDefinition<V> {
             throw new UnsupportedOperationException("Non-coexistable global policies not supported,"
                     + "please add support.");
         }
-    }
-
-    void saveToXml(TypedXmlSerializer serializer) throws IOException {
-        mPolicyKey.saveToXml(serializer);
     }
 
     @Nullable

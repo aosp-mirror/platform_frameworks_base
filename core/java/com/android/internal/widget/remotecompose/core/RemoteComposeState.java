@@ -333,6 +333,7 @@ public class RemoteComposeState implements CollectionsAccess {
     public void overrideColor(int id, int color) {
         mColorOverride[id] = true;
         mColorMap.put(id, color);
+        updateListeners(id);
     }
 
     /** Clear the color Overrides */

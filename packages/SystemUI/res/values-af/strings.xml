@@ -35,14 +35,14 @@
     <string name="extreme_battery_saver_text" msgid="8455810156739865335">"Ekstreem"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Outodraai skerm"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Laat <xliff:g id="APPLICATION">%1$s</xliff:g> toe om by <xliff:g id="USB_DEVICE">%2$s</xliff:g> in te gaan?\nOpneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
+    <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Laat <xliff:g id="APPLICATION">%1$s</xliff:g> toe om by <xliff:g id="USB_DEVICE">%2$s</xliff:g> in te gaan?\nOpneemtoestemming is nie aan hierdie app verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
     <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te hanteer?"</string>
-    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Opneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel opneem. As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Opneemtoestemming is nie aan hierdie app verleen nie, maar dit kan oudio deur hierdie USB-toestel opneem. As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"As jy <xliff:g id="APPLICATION">%1$s</xliff:g> met hierdie toestel gebruik, kan dit verhinder dat jy oproepe, kennisgewings en wekkers hoor."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Gee <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Hanteer <xliff:g id="USB_DEVICE">%2$s</xliff:g> met <xliff:g id="APPLICATION">%1$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te hanteer?\nOpneemtoestemming is nie aan hierdie program verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Maak <xliff:g id="APPLICATION">%1$s</xliff:g> oop om <xliff:g id="USB_DEVICE">%2$s</xliff:g> te hanteer?\nOpneemtoestemming is nie aan hierdie app verleen nie, maar dit kan oudio deur hierdie USB-toestel vasvang."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Hanteer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> met <xliff:g id="APPLICATION">%1$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Geen geïnstalleerde programme werk met hierdie USB-toebehoorsel nie. Vind meer uit oor hierdie toebehoorsel by <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-toebehoorsel"</string>
@@ -83,7 +83,7 @@
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Toestel moet ontsluit word voordat skermkiekie gestoor kan word"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Probeer weer skermkiekie neem"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Kan nie skermkiekie stoor nie"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Die program of jou organisasie laat nie toe dat skermkiekies geneem word nie"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Die app of jou organisasie laat nie toe dat skermkiekies geneem word nie"</string>
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Die neem van skermskote word deur jou IT-admin geblokkeer"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Wysig"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Wysig skermkiekie"</string>
@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Om ’n app met ’n legstuk oop te maak, sal jy moet verifieer dat dit jy is. Hou ook in gedagte dat enigeen dit kan bekyk, selfs wanneer jou tablet gesluit is. Sommige legstukke is moontlik nie vir jou sluitskerm bedoel nie en dit kan onveilig wees om dit hier by te voeg."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Het dit"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Legstukke"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"As jy legstukke as ’n kortpad op die sluitskerm wil byvoeg, moet jy seker maak dit is in instellings geaktiveer."</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Wissel gebruiker"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"aftrekkieslys"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle programme en data in hierdie sessie sal uitgevee word."</string>
@@ -590,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Kennisgewings"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Gesprekke"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vee alle stil kennisgewings uit"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Kennisgewings onderbreek deur Moenie Steur Nie"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Geen kennisgewings nie}=1{Kennisgewings is deur {mode} onderbreek}=2{Kennisgewings is deur {mode} en een ander modus onderbreek}other{Kennisgewings is deur {mode} en # ander modusse onderbreek}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Begin nou"</string>
@@ -704,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Kopnasporing"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tik om luiermodus te verander"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"luiermodus"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"demp"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ontdemp"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibreer"</string>
@@ -875,14 +882,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Skakel oor na app links of bo terwyl jy verdeelde skerm gebruik"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Tydens verdeelde skerm: verplaas ’n app van een skerm na ’n ander"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Skuif aktiewe venster tussen skerms"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Skuif venster na links"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Skuif venster na regs"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Maak venster groot"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Maak venster klein"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Invoer"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Skakel oor na volgende taal"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Skakel oor na vorige taal"</string>
@@ -996,7 +999,7 @@
     <string name="tuner_left" msgid="5758862558405684490">"Links"</string>
     <string name="tuner_right" msgid="8247571132790812149">"Regs"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Kieslys"</string>
-    <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g>-program"</string>
+    <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g>-app"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Opletberigte"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Battery"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skermkiekies"</string>
@@ -1007,8 +1010,8 @@
     <string name="notification_channel_accessibility" msgid="8956203986976245820">"Toeganklikheid"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Kitsapps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> loop tans"</string>
-    <string name="instant_apps_message" msgid="6112428971833011754">"Program is oopgemaak sonder dat dit geïnstalleer is."</string>
-    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Program is oopgemaak sonder dat dit geïnstalleer is. Tik om meer te wete te kom."</string>
+    <string name="instant_apps_message" msgid="6112428971833011754">"App is oopgemaak sonder dat dit geïnstalleer is."</string>
+    <string name="instant_apps_message_with_help" msgid="1816952263531203932">"App is oopgemaak sonder dat dit geïnstalleer is. Tik om meer inligting te kry."</string>
     <string name="app_info" msgid="5153758994129963243">"Appinligting"</string>
     <string name="go_to_web" msgid="636673528981366511">"Gaan na blaaier"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiele data"</string>
@@ -1019,8 +1022,8 @@
     <string name="dnd_is_off" msgid="3185706903793094463">"Moenie Steur Nie is af"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Moenie Steur Nie is aan"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\'n Outomatiese reël (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\'n Program (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\'n Outomatiese reël of program het Moenie Steur Nie aangeskakel."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\'n App (<xliff:g id="ID_1">%s</xliff:g>) het Moenie Steur Nie aangeskakel."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\'n Outomatiese reël of app het Moenie Steur Nie aangeskakel."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Programme wat op die agtergrond loop"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tik vir besonderhede oor battery- en datagebruik"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Skakel mobiele data af?"</string>
@@ -1030,11 +1033,11 @@
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Mobiele data sal nie outomaties op grond van beskikbaarheid oorskakel nie"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Nee, dankie"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ja, skakel oor"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"Instellings kan nie jou antwoord verifieer nie omdat \'n program \'n toestemmingversoek verberg."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"Instellings kan nie jou antwoord verifieer nie omdat \'n app \'n toestemmingversoek verberg."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Laat <xliff:g id="APP_0">%1$s</xliff:g> toe om <xliff:g id="APP_2">%2$s</xliff:g>-skyfies te wys?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"– Dit kan inligting van <xliff:g id="APP">%1$s</xliff:g> af lees"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"– Dit kan handelinge binne <xliff:g id="APP">%1$s</xliff:g> uitvoer"</string>
-    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om skyfies uit enige program te gebruik"</string>
+    <string name="slice_permission_checkbox" msgid="4242888137592298523">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om skyfies uit enige app te gebruik"</string>
     <string name="slice_permission_allow" msgid="6340449521277951123">"Laat toe"</string>
     <string name="slice_permission_deny" msgid="6870256451658176895">"Weier"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tik om Batterybespaarder te skeduleer"</string>
@@ -1204,8 +1207,8 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ontkoppel)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Kan nie wissel nie. Tik om weer te probeer."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Koppel ’n toestel"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Maak die program oop om hierdie sessie uit te saai."</string>
-    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende program"</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Maak die app oop om hierdie sessie uit te saai."</string>
+    <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hou op uitsaai"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Beskikbare toestelle vir oudio-uitsette."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
@@ -1419,7 +1422,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Stelselkontroles"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Stelselapps"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Verrigting van veelvuldige take"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Onlangse apps"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Verdeelde skerm"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Invoer"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Appkortpaaie"</string>
@@ -1428,25 +1430,31 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Kortpadsleutels"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Pasmaak kortpadsleutels"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Verwyder kortpad?"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Druk sleutel om kortpad toe te wys"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Dit sal jou gepasmaakte kortpad permanent uitvee."</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Soekkortpaaie"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Geen soekresultate nie"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Vou ikoon in"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikoon vir Handeling- of Meta-sleutel"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Plusikoon"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Pasmaak"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Klaar"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Vou ikoon uit"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"of"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"plus"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"vorentoe-skuinsstreep"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Sleephandvatsel"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Sleutelbordinstellings"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Stel kortpad"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Verwyder"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Kanselleer"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Druk sleutel"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Sleutelkombinasie is reeds in gebruik. Probeer ’n ander sleutel."</string>
@@ -1478,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Druk die handelingsleutel op jou sleutelbord"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Welgedaan!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Jy het die Bekyk Onlangse Apps-gebaar voltooi"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Sleutelbordlig"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Vlak %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huiskontroles"</string>

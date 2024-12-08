@@ -30,7 +30,7 @@ import com.android.internal.R
  * desktop windowing environment.
  */
 fun isTopActivityExemptFromDesktopWindowing(context: Context, task: TaskInfo) =
-    (isSystemUiTask(context, task) || (task.isTopActivityTransparent && task.numActivities == 1))
+    (isSystemUiTask(context, task) || (task.numActivities > 0 && task.isActivityStackTransparent))
             && !task.isTopActivityNoDisplay
 
 private fun isSystemUiTask(context: Context, task: TaskInfo): Boolean {

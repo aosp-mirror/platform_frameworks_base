@@ -21,7 +21,6 @@ import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
@@ -192,7 +191,6 @@ fun LargeTileLabels(
     }
 }
 
-@OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
 fun SmallTileContent(
     modifier: Modifier = Modifier,
@@ -229,6 +227,7 @@ fun SmallTileContent(
                         }
                     }
                 }
+
                 is Icon.Loaded -> {
                     LaunchedEffect(loadedDrawable) {
                         if (loadedDrawable is AnimatedVectorDrawable) {

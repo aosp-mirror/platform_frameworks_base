@@ -10332,7 +10332,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 .isVisibilityUnknown(this)) {
             return false;
         }
-        if (!isVisibleRequested()) return true;
+        if (!isVisibleRequested()) {
+            // TODO(b/294925498): Remove this finishing check once we have accurate ready tracking.
+            if (task != null && task.getPausingActivity() == this) {
+                // Visibility of starting activities isn't calculated until pause-complete, so if
+                // this is not paused yet, don't consider it ready.
+                return false;
+            }
+            return true;
+        }
         if (mPendingRelaunchCount > 0) return false;
         // Wait for attach. That is the earliest time where we know if there will be an associated
         // display rotation. If we don't wait, the starting-window can finishDrawing first and

@@ -1159,6 +1159,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"em <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"em <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"em <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"há <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"há <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"há <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"há <xliff:g id="COUNT">%d</xliff:g> ano(s)"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ano(s)"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"dentro de <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"dentro de <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"dentro de <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"dentro de <xliff:g id="COUNT">%d</xliff:g> ano(s)"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"há <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"há <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"há <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"há <xliff:g id="COUNT">%d</xliff:g> ano(s)"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Há # minuto}many{Há # minutos}other{Há # minutos}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{há # hora}many{há # horas}other{há # horas}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Há # dia}many{Há # dias}other{Há # dias}}"</string>

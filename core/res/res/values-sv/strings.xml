@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nummerpresentatörens standardinställning är blockerad. Nästa samtal: Inte blockerad"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Blockerad"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Inte blockerad"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Den här appen är inte kompatibel med 16 KB. APK-justeringskontrollen misslyckades. Appen körs i kompatibilitetsläget för sidstorlek. För bästa möjliga kompatibilitet bör du kompilera appen igen med stöd för 16 kB. Läs mer på &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Den här appen är inte kompatibel med 16 KB. ELF-justeringskontrollen misslyckades. Appen körs i kompatibilitetsläget för sidstorlek. För bästa möjliga kompatibilitet bör du kompilera appen igen med stöd för 16 kB. Läs mer på &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Den här appen är inte kompatibel med 16 kB. APK- och ELF-justeringskontrollerna misslyckades. Appen körs i kompatibilitetsläget för sidstorlek. För bästa möjliga kompatibilitet bör du kompilera appen igen med stöd för 16 kB. Läs mer på &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjänsten är inte etablerad."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Det går inte att ändra inställningen för nummerpresentatör."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Du har bytt mobildata till <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1161,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"om <xliff:g id="COUNT">%d</xliff:g> tim"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"för <xliff:g id="COUNT">%d</xliff:g> m sedan"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"för <xliff:g id="COUNT">%d</xliff:g> h sedan"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"för <xliff:g id="COUNT">%d</xliff:g> d sedan"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"för <xliff:g id="COUNT">%d</xliff:g> år sedan"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> år"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"om <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"om <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"om <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"för <xliff:g id="COUNT">%d</xliff:g> min sedan"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"för <xliff:g id="COUNT">%d</xliff:g> h sedan"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"för <xliff:g id="COUNT">%d</xliff:g> d sedan"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"för <xliff:g id="COUNT">%d</xliff:g> år sedan"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{För # minut sedan}other{För # minuter sedan}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{För # timme sedan}other{För # timmar sedan}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{För # dag sedan}other{För # dagar sedan}}"</string>

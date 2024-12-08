@@ -161,3 +161,10 @@ flag {
     description: "Flag for gating the density-based coarse locations"
     bug: "376198890"
 }
+
+flag {
+    name: "gnss_assistance_interface"
+    namespace: "location"
+    description: "Flag for GNSS assistance interface"
+    bug: "209078566"
+}

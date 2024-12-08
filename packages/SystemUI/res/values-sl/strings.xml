@@ -529,7 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Če želite aplikacijo odpreti s pripomočkom, morate potrditi, da ste to vi. Upoštevajte tudi, da si jih lahko ogledajo vsi, tudi ko je tablični računalnik zaklenjen. Nekateri pripomočki morda niso predvideni za uporabo na zaklenjenem zaslonu, zato jih tukaj morda ni varno dodati."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Razumem"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Pripomočki"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Če želite na zaklenjen zaslon dodati pripomočke kot bližnjico, morate to omogočiti v nastavitvah."</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Če želite dodati bližnjico »Pripomočki«, v nastavitvah omogočite možnost »Prikaz pripomočkov na zaklenjenem zaslonu«."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Nastavitve"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Preklop med uporabniki"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"spustni meni"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Vse aplikacije in podatki v tej seji bodo izbrisani."</string>
@@ -590,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obvestila"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pogovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Brisanje vseh tihih obvestil"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Prikazovanje obvestil je začasno zaustavljeno z načinom »ne moti«"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Ni obvestil}=1{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode}}=2{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še enim drugim načinom}one{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugim načinom}two{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugima načinoma}few{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugimi načini}other{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugimi načini}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Začni zdaj"</string>
@@ -704,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Spremljanje glave"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Dotaknite se, če želite spremeniti način zvonjenja."</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"način zvonjenja"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"izklop zvoka"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"vklop zvoka"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibriranje"</string>
@@ -1415,7 +1420,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Sistemski kontrolniki"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Sistemske aplikacije"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Večopravilnost"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Nedavne aplikacije"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Razdeljen zaslon"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Vnos"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Bližnjice do aplikacij"</string>
@@ -1424,14 +1428,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Bližnjične tipke"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Prilagajanje bližnjičnih tipk"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Želite odstraniti bližnjico?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Želite ponastaviti na privzete bližnjice?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Pritisnite tipko za dodelitev bližnjice"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"S tem boste trajno izbrisali bližnjico po meri."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"S tem boste trajno izbrisali vse bližnjice po meri."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Iskanje po bližnjicah"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ni rezultatov iskanja"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona za strnitev"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikona tipke za dejanje ali metapodatke"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ikona znaka plus"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Prilagodi"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Ponastavi"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Končano"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona za razširitev"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ali"</string>
@@ -1441,6 +1448,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Nastavitve tipkovnice"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Nastavite bližnjico"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Odstrani"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Da, ponastavi"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Prekliči"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Pritisnite tipko"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinacija tipk je že v uporabi. Poskusite z drugo tipko."</string>
@@ -1472,6 +1480,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipko za dejanja na tipkovnici"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Odlično!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Izvedli ste potezo za ogled vseh aplikacij"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Osvetlitev tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Stopnja %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrolniki za dom"</string>

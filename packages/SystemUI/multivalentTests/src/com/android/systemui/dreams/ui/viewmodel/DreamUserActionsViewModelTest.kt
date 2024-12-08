@@ -86,8 +86,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             )
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
-            assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Down)).isEqualTo(UserActionResult(Scenes.Shade))
             assertThat(actions?.get(Swipe.Start)).isNull()
             assertThat(actions?.get(Swipe.End)).isNull()
 
@@ -105,8 +104,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             )
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
-            assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Down)).isEqualTo(UserActionResult(Scenes.Shade))
             assertThat(actions?.get(Swipe.Start)).isNull()
             assertThat(actions?.get(Swipe.End)).isNull()
         }
@@ -127,7 +125,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
             assertThat(actions?.get(Swipe.Start)).isNull()
             assertThat(actions?.get(Swipe.End)).isNull()
 
@@ -146,7 +144,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
             assertThat(actions?.get(Swipe.Start)).isNull()
             assertThat(actions?.get(Swipe.End)).isNull()
         }
@@ -167,9 +165,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(
-                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
-                )
+                .isEqualTo(UserActionResult.ShowOverlay(Overlays.NotificationsShade))
             assertThat(actions?.get(Swipe.Start)).isNull()
             assertThat(actions?.get(Swipe.End)).isNull()
 
@@ -184,9 +180,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(
-                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
-                )
+                .isEqualTo(UserActionResult.ShowOverlay(Overlays.NotificationsShade))
             assertThat(actions?.get(Swipe.Start)).isNull()
             assertThat(actions?.get(Swipe.End)).isNull()
         }
@@ -206,8 +200,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             )
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
-            assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Down)).isEqualTo(UserActionResult(Scenes.Shade))
             assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
             assertThat(actions?.get(Swipe.End)).isNull()
 
@@ -225,8 +218,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             )
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
-            assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Down)).isEqualTo(UserActionResult(Scenes.Shade))
             assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
             assertThat(actions?.get(Swipe.End)).isNull()
         }
@@ -247,7 +239,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
             assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
             assertThat(actions?.get(Swipe.End)).isNull()
 
@@ -266,7 +258,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
             assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
             assertThat(actions?.get(Swipe.End)).isNull()
         }
@@ -287,9 +279,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(
-                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
-                )
+                .isEqualTo(UserActionResult.ShowOverlay(Overlays.NotificationsShade))
             assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
             assertThat(actions?.get(Swipe.End)).isNull()
 
@@ -304,9 +294,7 @@ class DreamUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(
-                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
-                )
+                .isEqualTo(UserActionResult.ShowOverlay(Overlays.NotificationsShade))
             assertThat(actions?.get(Swipe.Start)).isEqualTo(UserActionResult(Scenes.Communal))
             assertThat(actions?.get(Swipe.End)).isNull()
         }

@@ -28,13 +28,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTileView
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.Arrays
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -45,7 +46,6 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Arrays
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -62,16 +62,13 @@ class TileRequestDialogTest : SysuiTestCase() {
 
     private lateinit var dialog: TileRequestDialog
 
-    @Mock
-    private lateinit var ugm: IUriGrantsManager
+    @Mock private lateinit var ugm: IUriGrantsManager
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         // Create in looper so we can make sure that the tile is fully updated
-        TestableLooper.get(this).runWithLooper {
-            dialog = TileRequestDialog(mContext)
-        }
+        TestableLooper.get(this).runWithLooper { dialog = TileRequestDialog(mContext) }
     }
 
     @After
@@ -84,7 +81,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_hasCorrectViews() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -99,7 +96,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_hasCorrectAppName() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -112,7 +109,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_hasCorrectLabel() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -127,7 +124,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_hasIcon() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -141,7 +138,7 @@ class TileRequestDialogTest : SysuiTestCase() {
 
     @Test
     fun setTileData_nullIcon_hasIcon() {
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, null, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, null, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -156,7 +153,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_hasNoStateDescription() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -172,7 +169,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_tileNotClickable() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -189,7 +186,7 @@ class TileRequestDialogTest : SysuiTestCase() {
     @Test
     fun setTileData_tileHasCorrectContentDescription() {
         val icon = Icon.createWithResource(mContext, R.drawable.cloud)
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -206,20 +203,14 @@ class TileRequestDialogTest : SysuiTestCase() {
     fun uriIconLoadSuccess_correctIcon() {
         val tintColor = Color.BLACK
         val icon = Mockito.mock(Icon::class.java)
-        val drawable = context.getDrawable(R.drawable.cloud)!!.apply {
-            setTint(tintColor)
-        }
+        val drawable = context.getDrawable(R.drawable.cloud)!!.apply { setTint(tintColor) }
         whenever(icon.loadDrawable(any())).thenReturn(drawable)
-        whenever(icon.loadDrawableCheckingUriGrant(
-            any(),
-            eq(ugm),
-            anyInt(),
-            anyString())
-        ).thenReturn(drawable)
+        whenever(icon.loadDrawableCheckingUriGrant(any(), eq(ugm), anyInt(), anyString()))
+            .thenReturn(drawable)
 
         val size = 100
 
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -231,9 +222,7 @@ class TileRequestDialogTest : SysuiTestCase() {
         val content = dialog.requireViewById<ViewGroup>(TileRequestDialog.CONTENT_ID)
         val tile = content.getChildAt(1) as QSTileView
 
-        val iconDrawable = (tile.icon.iconView as ImageView).drawable.apply {
-            setTint(tintColor)
-        }
+        val iconDrawable = (tile.icon.iconView as ImageView).drawable.apply { setTint(tintColor) }
 
         assertThat(areDrawablesEqual(iconDrawable, drawable, size)).isTrue()
     }
@@ -242,20 +231,14 @@ class TileRequestDialogTest : SysuiTestCase() {
     fun uriIconLoadFail_defaultIcon() {
         val tintColor = Color.BLACK
         val icon = Mockito.mock(Icon::class.java)
-        val drawable = context.getDrawable(R.drawable.cloud)!!.apply {
-            setTint(tintColor)
-        }
+        val drawable = context.getDrawable(R.drawable.cloud)!!.apply { setTint(tintColor) }
         whenever(icon.loadDrawable(any())).thenReturn(drawable)
-        whenever(icon.loadDrawableCheckingUriGrant(
-            any(),
-            eq(ugm),
-            anyInt(),
-            anyString())
-        ).thenReturn(null)
+        whenever(icon.loadDrawableCheckingUriGrant(any(), eq(ugm), anyInt(), anyString()))
+            .thenReturn(null)
 
         val size = 100
 
-        val tileData = TileRequestDialog.TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
+        val tileData = TileData(UID, APP_NAME, LABEL, icon, PACKAGE)
 
         dialog.setTileData(tileData, ugm)
         dialog.show()
@@ -267,13 +250,9 @@ class TileRequestDialogTest : SysuiTestCase() {
         val content = dialog.requireViewById<ViewGroup>(TileRequestDialog.CONTENT_ID)
         val tile = content.getChildAt(1) as QSTileView
 
-        val iconDrawable = (tile.icon.iconView as ImageView).drawable.apply {
-            setTint(tintColor)
-        }
+        val iconDrawable = (tile.icon.iconView as ImageView).drawable.apply { setTint(tintColor) }
 
-        val defaultIcon = context.getDrawable(DEFAULT_ICON)!!.apply {
-            setTint(tintColor)
-        }
+        val defaultIcon = context.getDrawable(DEFAULT_ICON)!!.apply { setTint(tintColor) }
 
         assertThat(areDrawablesEqual(iconDrawable, defaultIcon, size)).isTrue()
     }
@@ -308,4 +287,3 @@ private fun equalBitmaps(a: Bitmap, b: Bitmap): Boolean {
     b.getPixels(bPix, 0, w, 0, 0, w, h)
     return Arrays.equals(aPix, bPix)
 }
-

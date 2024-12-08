@@ -16,6 +16,8 @@
 
 package com.android.internal.view;
 
+import static android.view.flags.Flags.scrollCaptureRelaxScrollViewCriteria;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
@@ -49,7 +51,7 @@ public class ScrollCaptureInternal {
     public static final int TYPE_FIXED = 0;
 
     /**
-     * Slides a single child view using mScrollX/mScrollY.
+     * Moves the viewport across absolute positioned child views using the scrollY property.
      */
     public static final int TYPE_SCROLLING = 1;
 
@@ -63,7 +65,7 @@ public class ScrollCaptureInternal {
     /**
      * Unknown scrollable view with no child views (or not a subclass of ViewGroup).
      */
-    private static final int TYPE_OPAQUE = 3;
+    public static final int TYPE_OPAQUE = 3;
 
     /**
      * Performs tests on the given View and determines:
@@ -73,7 +75,7 @@ public class ScrollCaptureInternal {
      * This needs to be fast and not alloc memory. It's called on everything in the tree not marked
      * as excluded during scroll capture search.
      */
-    private static int detectScrollingType(View view) {
+    public static int detectScrollingType(View view) {
         // Confirm that it can scroll.
         if (!(view.canScrollVertically(DOWN) || view.canScrollVertically(UP))) {
             // Nothing to scroll here, move along.
@@ -95,25 +97,25 @@ public class ScrollCaptureInternal {
         if (DEBUG_VERBOSE) {
             Log.v(TAG, "hint: is a subclass of ViewGroup");
         }
-
-        // ScrollViews accept only a single child.
-        if (((ViewGroup) view).getChildCount() > 1) {
-            if (DEBUG_VERBOSE) {
-                Log.v(TAG, "hint: scrollable with multiple children");
+        // Flag: Optionally allow ScrollView-like ViewGroups which have more than one child view.
+        if (!scrollCaptureRelaxScrollViewCriteria()) {
+            // ScrollViews accept only a single child.
+            if (((ViewGroup) view).getChildCount() > 1) {
+                if (DEBUG_VERBOSE) {
+                    Log.v(TAG, "hint: scrollable with multiple children");
+                }
+                return TYPE_RECYCLING;
             }
-            return TYPE_RECYCLING;
         }
         // At least one child view is required.
-        if (((ViewGroup) view).getChildCount() < 1) {
-            if (DEBUG_VERBOSE) {
-                Log.v(TAG, "scrollable with no children");
-            }
+        if (((ViewGroup) view).getChildCount() == 0) {
+            Log.w(TAG, "scrollable but no children!");
             return TYPE_OPAQUE;
         }
         if (DEBUG_VERBOSE) {
             Log.v(TAG, "hint: single child view");
         }
-        //Because recycling containers don't use scrollY, a non-zero value means Scroll view.
+        // Because recycling containers don't use scrollY, a non-zero value means Scroll view.
         if (view.getScrollY() != 0) {
             if (DEBUG_VERBOSE) {
                 Log.v(TAG, "hint: scrollY != 0");
@@ -132,7 +134,7 @@ public class ScrollCaptureInternal {
             Log.v(TAG, "hint: cannot be scrolled up");
         }
 
-        // canScrollVertically(UP) == false, getScrollY() == 0, getChildCount() == 1.
+        // canScrollVertically(UP) == false, getScrollY() == 0, getChildCount() >= 1.
         // For Recycling containers, this should be a no-op (RecyclerView logs a warning)
         view.scrollTo(view.getScrollX(), 1);
 

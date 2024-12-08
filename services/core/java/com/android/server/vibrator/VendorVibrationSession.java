@@ -119,6 +119,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
 
     @Override
     public void finishSession() {
+        Slog.d(TAG, "Session finish requested, ending vibration session...");
         // Do not abort session in HAL, wait for ongoing vibration requests to complete.
         // This might take a while to end the session, but it can be aborted by cancelSession.
         requestEndSession(Status.FINISHED, /* shouldAbort= */ false, /* isVendorRequest= */ true);
@@ -126,6 +127,7 @@ final class VendorVibrationSession extends IVibrationSession.Stub
 
     @Override
     public void cancelSession() {
+        Slog.d(TAG, "Session cancel requested, aborting vibration session...");
         // Always abort session in HAL while cancelling it.
         // This might be triggered after finishSession was already called.
         requestEndSession(Status.CANCELLED_BY_USER, /* shouldAbort= */ true,
@@ -228,13 +230,14 @@ final class VendorVibrationSession extends IVibrationSession.Stub
     @Override
     public void notifySessionCallback() {
         synchronized (mLock) {
+            Slog.d(TAG, "Session callback received, ending vibration session...");
             // If end was not requested then the HAL has cancelled the session.
             maybeSetEndRequestLocked(Status.CANCELLED_BY_UNKNOWN_REASON,
                     /* isVendorRequest= */ false);
             maybeSetStatusToRequestedLocked();
             clearVibrationConductor();
+            mHandler.post(() -> mManagerHooks.onSessionReleased(mSessionId));
         }
-        mHandler.post(() -> mManagerHooks.onSessionReleased(mSessionId));
     }
 
     @Override

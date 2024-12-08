@@ -33,6 +33,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -86,7 +88,6 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -254,7 +255,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void instantiateController_addExternalInterface() {
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION), any(), any());
+                eq(IBackAnimation.DESCRIPTOR), any(), any());
     }
 
     @Test
@@ -635,7 +636,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         releaseBackGesture();
         mShellExecutor.flushAll();
 
-        verify(mAppCallback).setHandoffHandler(any());
+        verify(mAppCallback).setHandoffHandler(notNull());
     }
 
     @Test
@@ -655,7 +656,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         releaseBackGesture();
         mShellExecutor.flushAll();
 
-        verify(mAppCallback, never()).setHandoffHandler(any());
+        verify(mAppCallback).setHandoffHandler(isNull());
     }
 
     @Test

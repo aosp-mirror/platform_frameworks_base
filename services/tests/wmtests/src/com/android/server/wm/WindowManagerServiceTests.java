@@ -29,6 +29,7 @@ import static android.view.Display.FLAG_OWN_FOCUS;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
@@ -38,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
@@ -46,6 +48,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.hardware.input.Flags.FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
@@ -68,6 +71,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,6 +79,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -83,10 +88,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
@@ -147,9 +152,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Rule
     public Expect mExpect = Expect.create();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @After
     public void tearDown() {
@@ -1136,6 +1138,53 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+    public void testUpdateInputChannel_sanitizeWithoutPermission_ThrowsError() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
+
+
+        final InputChannel inputChannel = new InputChannel();
+
+        assertThrows(IllegalArgumentException.class, () ->
+                mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY,
+                        surfaceControl, window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE,
+                        0 /* privateFlags */,
+                        INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS,
+                        TYPE_APPLICATION, null /* windowToken */, inputTransferToken,
+                        "TestInputChannel", inputChannel));
+    }
+
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_OVERRIDE_POWER_KEY_BEHAVIOR_IN_FOCUSED_WINDOW)
+    public void testUpdateInputChannel_sanitizeWithPermission_doesNotThrowError() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IBinder window = new Binder();
+        final InputTransferToken inputTransferToken = mock(InputTransferToken.class);
+
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mWm.mContext).checkPermission(
+                android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW,
+                callingPid,
+                callingUid);
+
+        final InputChannel inputChannel = new InputChannel();
+
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, 0 /* privateFlags */,
+                INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS,
+                TYPE_APPLICATION, null /* windowToken */, inputTransferToken, "TestInputChannel",
+                inputChannel);
+    }
+
+    @Test
     public void testUpdateInputChannel_allowSpyWindowForInputMonitorPermission() {
         final Session session = mock(Session.class);
         final int callingUid = Process.SYSTEM_UID;
@@ -1361,6 +1410,84 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         assertThat(result).isEqualTo(WindowManagerGlobal.ADD_INVALID_DISPLAY);
     }
+
+    /** Mocks some deps to associate a display content to a specific display id. */
+    private void setupReparentWindowContextToDisplayAreaTest(WindowToken windowToken,
+            DisplayContent dc, int displayId) {
+        spyOn(mWm.mWindowContextListenerController);
+        doReturn(dc).when(mWm.mRoot).getDisplayContentOrCreate(displayId);
+        doReturn(true).when(mWm.mWindowContextListenerController).assertCallerCanReparentListener(
+                any(), anyBoolean(), anyInt(), eq(displayId));
+        doReturn(windowToken).when(mWm.mWindowContextListenerController).getContainer(
+                eq(windowToken.token));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContextToDisplayArea_newDisplay_reparented() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+
+        assertThat(windowToken.getDisplayContent()).isEqualTo(mDisplayContent);
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isTrue();
+
+        assertThat(windowToken.getDisplayContent()).isNotEqualTo(mDisplayContent);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContextToDisplayArea_newDisplayButFlagDisabled_notReparented() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isFalse();
+
+        assertThat(windowToken.getDisplayContent()).isEqualTo(mDisplayContent);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContext_afterReparent_DCNeedsLayout() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isTrue();
+
+        assertThat(dc.isLayoutNeeded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContext_afterReparent_traversalScheduled() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+        spyOn(mWm.mWindowPlacerLocked);
+        reset(mWm.mWindowPlacerLocked);
+
+        verify(mWm.mWindowPlacerLocked, never()).requestTraversal();
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isTrue();
+
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
+    }
+
 
     class TestResultReceiver implements IResultReceiver {
         public android.os.Bundle resultData;

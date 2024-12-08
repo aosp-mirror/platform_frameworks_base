@@ -32,6 +32,7 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.util.IndentingPrintWriter;
 import android.util.Spline;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
@@ -58,6 +59,7 @@ public class BrightnessClamperController {
     private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
     private final Handler mHandler;
     private final LightSensorController mLightSensorController;
+    private int mDisplayState = Display.STATE_OFF;
 
     private final ClamperChangeListener mClamperChangeListenerExternal;
     private final Executor mExecutor;
@@ -81,6 +83,8 @@ public class BrightnessClamperController {
                 }
             };
 
+    private volatile boolean mStarted = false;
+
     public BrightnessClamperController(Handler handler,
             ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context,
             DisplayManagerFlags flags, SensorManager sensorManager, float currentBrightness) {
@@ -100,10 +104,10 @@ public class BrightnessClamperController {
         mClamperChangeListenerExternal = clamperChangeListener;
         mExecutor = new HandlerExecutor(handler);
 
-        Runnable clamperChangeRunnableInternal = this::recalculateBrightnessCap;
+        Runnable modifiersChangeRunnableInternal = this::recalculateModifiersState;
         ClamperChangeListener clamperChangeListenerInternal = () -> {
-            if (!mHandler.hasCallbacks(clamperChangeRunnableInternal)) {
-                mHandler.post(clamperChangeRunnableInternal);
+            if (mStarted && !mHandler.hasCallbacks(modifiersChangeRunnableInternal)) {
+                mHandler.post(modifiersChangeRunnableInternal);
             }
         };
 
@@ -147,16 +151,13 @@ public class BrightnessClamperController {
     public DisplayBrightnessState clamp(DisplayBrightnessState displayBrightnessState,
             DisplayManagerInternal.DisplayPowerRequest request,
             float brightnessValue, boolean slowChange, int displayState) {
+        mDisplayState = displayState;
         DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(
                 displayBrightnessState);
         builder.setIsSlowChange(slowChange);
         builder.setBrightness(brightnessValue);
 
-        if (displayState != STATE_ON) {
-            mLightSensorController.stop();
-        } else {
-            adjustLightSensorSubscription();
-        }
+        adjustLightSensorSubscription();
 
         for (int i = 0; i < mModifiers.size(); i++) {
             mModifiers.get(i).apply(request, builder);
@@ -187,6 +188,7 @@ public class BrightnessClamperController {
      * Called in DisplayControllerHandler
      */
     public void stop() {
+        mStarted = false;
         mDeviceConfigParameterProvider.removeOnPropertiesChangedListener(
                 mOnPropertiesChangedListener);
         mLightSensorController.stop();
@@ -195,9 +197,9 @@ public class BrightnessClamperController {
 
 
     // Called in DisplayControllerHandler
-    private void recalculateBrightnessCap() {
+    private void recalculateModifiersState() {
         ModifiersAggregatedState newAggregatedState = new ModifiersAggregatedState();
-        mStatefulModifiers.forEach((clamper) -> clamper.applyStateChange(newAggregatedState));
+        mStatefulModifiers.forEach((modifier) -> modifier.applyStateChange(newAggregatedState));
 
         if (needToNotifyExternalListener(mModifiersAggregatedState, newAggregatedState)) {
             mClamperChangeListenerExternal.onChanged();
@@ -223,10 +225,12 @@ public class BrightnessClamperController {
                     mExecutor, mOnPropertiesChangedListener);
         }
         adjustLightSensorSubscription();
+        mStarted = true;
     }
 
     private void adjustLightSensorSubscription() {
-        if (mModifiers.stream().anyMatch(BrightnessStateModifier::shouldListenToLightSensor)) {
+        if (mDisplayState == STATE_ON && mModifiers.stream()
+                .anyMatch(BrightnessStateModifier::shouldListenToLightSensor)) {
             mLightSensorController.restart();
         } else {
             mLightSensorController.stop();
@@ -267,7 +271,7 @@ public class BrightnessClamperController {
                 }
             }
 
-            modifiers.add(new DisplayDimModifier(context));
+            modifiers.add(new DisplayDimModifier(data.mDisplayId, context));
             modifiers.add(new BrightnessLowPowerModeModifier());
             if (flags.isEvenDimmerEnabled() && data.mDisplayDeviceConfig.isEvenDimmerAvailable()) {
                 modifiers.add(new BrightnessLowLuxModifier(handler, listener, context,

@@ -4,9 +4,10 @@ import android.bluetooth.BluetoothDevice
 import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.telephony.flags.Flags
@@ -22,8 +23,11 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
+import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.android.systemui.util.mockito.any
@@ -41,11 +45,17 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class BluetoothTileTest : SysuiTestCase() {
+class BluetoothTileTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var qsHost: QSHost
@@ -81,7 +91,7 @@ class BluetoothTileTest : SysuiTestCase() {
                 qsLogger,
                 bluetoothController,
                 featureFlags,
-                bluetoothTileDialogViewModel
+                bluetoothTileDialogViewModel,
             )
 
         tile.initialize()
@@ -109,8 +119,7 @@ class BluetoothTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_bluetooth_icon_off))
     }
 
     @Test
@@ -121,8 +130,7 @@ class BluetoothTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_off))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_bluetooth_icon_off))
     }
 
     @Test
@@ -133,8 +141,7 @@ class BluetoothTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_on))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_bluetooth_icon_on))
     }
 
     @Test
@@ -145,8 +152,7 @@ class BluetoothTileTest : SysuiTestCase() {
 
         tile.handleUpdateState(state, /* arg= */ null)
 
-        assertThat(state.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_bluetooth_icon_search))
+        assertThat(state.icon).isEqualTo(createExpectedIcon(R.drawable.qs_bluetooth_icon_search))
     }
 
     @Test
@@ -161,11 +167,10 @@ class BluetoothTileTest : SysuiTestCase() {
             .isEqualTo(
                 mContext.getString(
                     R.string.quick_settings_bluetooth_secondary_label_battery_level,
-                    Utils.formatPercentage(50)
+                    Utils.formatPercentage(50),
                 )
             )
-        verify(bluetoothController)
-            .addOnMetadataChangedListener(eq(cachedDevice), any(), any())
+        verify(bluetoothController).addOnMetadataChangedListener(eq(cachedDevice), any(), any())
     }
 
     @Test
@@ -186,7 +191,7 @@ class BluetoothTileTest : SysuiTestCase() {
             .isEqualTo(
                 mContext.getString(
                     R.string.quick_settings_bluetooth_secondary_label_battery_level,
-                    Utils.formatPercentage(25)
+                    Utils.formatPercentage(25),
                 )
             )
         verify(bluetoothController, times(1))
@@ -197,7 +202,7 @@ class BluetoothTileTest : SysuiTestCase() {
     fun handleClick_hasSatelliteFeatureButNoQsTileDialogAndClickIsProcessing_doNothing() {
         mSetFlagsRule.enableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
-                .thenReturn(false)
+            .thenReturn(false)
         `when`(clickJob.isCompleted).thenReturn(false)
         tile.mClickJob = clickJob
 
@@ -210,7 +215,7 @@ class BluetoothTileTest : SysuiTestCase() {
     fun handleClick_noSatelliteFeatureAndNoQsTileDialog_directSetBtEnable() {
         mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
-                .thenReturn(false)
+            .thenReturn(false)
 
         tile.handleClick(null)
 
@@ -221,7 +226,7 @@ class BluetoothTileTest : SysuiTestCase() {
     fun handleClick_noSatelliteFeatureButHasQsTileDialog_showDialog() {
         mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
-                .thenReturn(true)
+            .thenReturn(true)
 
         tile.handleClick(null)
 
@@ -265,7 +270,7 @@ class BluetoothTileTest : SysuiTestCase() {
         qsLogger: QSLogger,
         bluetoothController: BluetoothController,
         featureFlags: FeatureFlagsClassic,
-        bluetoothTileDialogViewModel: BluetoothTileDialogViewModel
+        bluetoothTileDialogViewModel: BluetoothTileDialogViewModel,
     ) :
         BluetoothTile(
             qsHost,
@@ -279,13 +284,13 @@ class BluetoothTileTest : SysuiTestCase() {
             qsLogger,
             bluetoothController,
             featureFlags,
-            bluetoothTileDialogViewModel
+            bluetoothTileDialogViewModel,
         ) {
         var restrictionChecked: String? = null
 
         override fun checkIfRestrictionEnforcedByAdminOnly(
             state: QSTile.State?,
-            userRestriction: String?
+            userRestriction: String?,
         ) {
             restrictionChecked = userRestriction
         }
@@ -321,7 +326,7 @@ class BluetoothTileTest : SysuiTestCase() {
     fun listenToDeviceMetadata(
         state: QSTile.BooleanState,
         cachedDevice: CachedBluetoothDevice,
-        batteryLevel: Int
+        batteryLevel: Int,
     ) {
         val btDevice = mock<BluetoothDevice>()
         whenever(cachedDevice.device).thenReturn(btDevice)
@@ -331,5 +336,21 @@ class BluetoothTileTest : SysuiTestCase() {
         setBluetoothConnected()
         addConnectedDevice(cachedDevice)
         tile.handleUpdateState(state, /* arg= */ null)
+    }
+
+    private fun createExpectedIcon(resId: Int): QSTile.Icon {
+        return if (isEnabled) {
+            DrawableIconWithRes(mContext.getDrawable(resId), resId)
+        } else {
+            QSTileImpl.ResourceIcon.get(resId)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
+        }
     }
 }

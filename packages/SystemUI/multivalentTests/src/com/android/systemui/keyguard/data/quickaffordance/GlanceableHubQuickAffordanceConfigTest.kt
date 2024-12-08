@@ -25,7 +25,8 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.domain.interactor.setCommunalEnabled
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.andSceneContainer
@@ -38,7 +39,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,7 +48,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-@EnableFlags(Flags.FLAG_GLANCEABLE_HUB_SHORTCUT_BUTTON)
+@EnableFlags(Flags.FLAG_GLANCEABLE_HUB_SHORTCUT_BUTTON, Flags.FLAG_GLANCEABLE_HUB_V2)
 @RunWith(ParameterizedAndroidJunit4::class)
 class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos = testKosmos()
@@ -69,6 +69,7 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
                 context = context,
                 communalInteractor = kosmos.communalInteractor,
                 communalSceneRepository = kosmos.communalSceneRepository,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 sceneInteractor = kosmos.sceneInteractor,
             )
     }
@@ -76,28 +77,30 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
     @Test
     fun lockscreenState_whenGlanceableHubEnabled_returnsVisible() =
         testScope.runTest {
-            kosmos.setCommunalEnabled(true)
+            kosmos.setCommunalV2Enabled(true)
             runCurrent()
 
             val lockScreenState by collectLastValue(underTest.lockScreenState)
 
-            assertTrue(lockScreenState is KeyguardQuickAffordanceConfig.LockScreenState.Visible)
+            assertThat(lockScreenState)
+                .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Visible::class.java)
         }
 
     @Test
     fun lockscreenState_whenGlanceableHubDisabled_returnsHidden() =
         testScope.runTest {
-            kosmos.setCommunalEnabled(false)
+            kosmos.setCommunalV2Enabled(false)
             val lockScreenState by collectLastValue(underTest.lockScreenState)
             runCurrent()
 
-            assertTrue(lockScreenState is KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+            assertThat(lockScreenState)
+                .isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
         }
 
     @Test
     fun pickerScreenState_whenGlanceableHubEnabled_returnsDefault() =
         testScope.runTest {
-            kosmos.setCommunalEnabled(true)
+            kosmos.setCommunalV2Enabled(true)
             runCurrent()
 
             assertThat(underTest.getPickerScreenState())
@@ -107,7 +110,7 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
     @Test
     fun pickerScreenState_whenGlanceableHubDisabled_returnsDisabled() =
         testScope.runTest {
-            kosmos.setCommunalEnabled(false)
+            kosmos.setCommunalV2Enabled(false)
             runCurrent()
 
             assertThat(
@@ -143,7 +146,8 @@ class GlanceableHubQuickAffordanceConfigTest(flags: FlagsParameterization?) : Sy
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
             return FlagsParameterization.allCombinationsOf(
-                    Flags.FLAG_GLANCEABLE_HUB_SHORTCUT_BUTTON
+                    Flags.FLAG_GLANCEABLE_HUB_SHORTCUT_BUTTON,
+                    Flags.FLAG_GLANCEABLE_HUB_V2,
                 )
                 .andSceneContainer()
         }

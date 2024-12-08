@@ -237,6 +237,9 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar (2025 redesign version) -->
+    <dimen name="notification_2025_header_height">@*android:dimen/notification_2025_header_height</dimen>
+
+    <!-- Height of a small notification in the status bar (2025 redesign version) -->
     <dimen name="notification_2025_min_height">@*android:dimen/notification_2025_min_height</dimen>
 
     <!-- Height of a small notification in the status bar-->
@@ -1220,6 +1223,9 @@
     <!--  Blur radius on status bar window and power menu  -->
     <dimen name="min_window_blur_radius">1px</dimen>
     <dimen name="max_window_blur_radius">23px</dimen>
+
+    <!-- Blur radius behind Notification Shade -->
+    <dimen name="max_shade_window_blur_radius">60dp</dimen>
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>

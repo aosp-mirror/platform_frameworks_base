@@ -20,6 +20,8 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
+import androidx.lifecycle.LifecycleCoroutineScope
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Interface to provide dynamic preference title.
@@ -123,7 +125,12 @@ interface PreferenceLifecycleProvider {
      *
      * @return true if the result is handled
      */
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean = false
+    fun onActivityResult(
+        context: PreferenceLifecycleContext,
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ): Boolean = false
 }
 
 /**
@@ -132,6 +139,13 @@ interface PreferenceLifecycleProvider {
  * A preference fragment is associated with a [PreferenceLifecycleContext] only.
  */
 abstract class PreferenceLifecycleContext(context: Context) : ContextWrapper(context) {
+
+    /**
+     * [CoroutineScope] tied to the lifecycle, which is cancelled when the lifecycle is destroyed.
+     *
+     * @see [androidx.lifecycle.lifecycleScope]
+     */
+    abstract val lifecycleScope: LifecycleCoroutineScope
 
     /** Returns the preference widget object associated with given key. */
     abstract fun <T> findPreference(key: String): T?

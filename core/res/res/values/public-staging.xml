@@ -154,6 +154,9 @@
     <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_CROSS_USER_ROLE_PLATFORM_API_ENABLED)
          @hide @SystemApi -->
     <public name="config_defaultReservedForTestingProfileGroupExclusivity" />
+    <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_SYSTEM_VENDOR_INTELLIGENCE_ROLE_ENABLED)
+         @hide @SystemApi -->
+    <public name="config_systemVendorIntelligence" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
@@ -181,6 +184,16 @@
     <public name="config_motionExpressiveSlowSpatialDamping"/>
     <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
     <public name="config_motionExpressiveSlowEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusXsmall"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusSmall"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusMedium"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusLarge"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusXlarge"/>
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b20000">
