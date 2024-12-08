@@ -24,6 +24,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.hardware.display.ColorDisplayManager;
 import android.icu.util.ULocale;
@@ -31,6 +33,7 @@ import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.media.Utils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -48,6 +51,7 @@ import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManage
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -67,6 +71,9 @@ public class SettingsHelper {
     private static final int LONG_PRESS_POWER_FOR_ASSISTANT = 5;
     /** See frameworks/base/core/res/res/values/config.xml#config_keyChordPowerVolumeUp **/
     private static final int KEY_CHORD_POWER_VOLUME_UP_GLOBAL_ACTIONS = 2;
+    @VisibleForTesting
+    static final String HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION =
+            "com.android.settings.accessibility.ACTION_HIGH_CONTRAST_TEXT_RESTORED";
 
     private Context mContext;
     private AudioManager mAudioManager;
@@ -246,6 +253,23 @@ public class SettingsHelper {
                 // Don't write it to setting. Let the broadcast receiver in
                 // AccessibilityManagerService handle restore/merging logic.
                 return;
+            } else if (com.android.graphics.hwui.flags.Flags.highContrastTextSmallTextRect()
+                    && Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED.equals(name)) {
+                final boolean currentlyEnabled = Settings.Secure.getInt(
+                        context.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, 0) == 1;
+                final boolean enabledInRestore = value != null && Integer.parseInt(value) == 1;
+
+                // If restoring from Android 15 or earlier and the user didn't already enable HCT
+                // on this new device, then don't restore and trigger custom migration logic.
+                final boolean needsCustomMigration = !currentlyEnabled
+                        && restoredFromSdkInt < Build.VERSION_CODES.BAKLAVA
+                        && enabledInRestore;
+                if (needsCustomMigration) {
+                    migrateHighContrastText(context);
+                    return;
+                }
+                // fall through to the ordinary write to settings
             }
 
             // Default case: write the restored value to settings
@@ -521,6 +545,30 @@ public class SettingsHelper {
             Settings.Global.putInt(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
                     powerVolumeUpDefaultBehavior);
         }
+    }
+
+    private static void migrateHighContrastText(Context context) {
+        final Intent intent = new Intent(HIGH_CONTRAST_TEXT_RESTORED_BROADCAST_ACTION)
+                .setPackage(getSettingsAppPackage(context));
+        context.sendBroadcastAsUser(intent, context.getUser(), null);
+    }
+
+    /**
+     * Returns the System Settings application's package name
+     */
+    private static String getSettingsAppPackage(Context context) {
+        String settingsAppPackage = null;
+        PackageManager packageManager = context.getPackageManager();
+        if (packageManager != null) {
+            List<ResolveInfo> results = packageManager.queryIntentActivities(
+                    new Intent(Settings.ACTION_SETTINGS),
+                    PackageManager.MATCH_SYSTEM_ONLY);
+            if (!results.isEmpty()) {
+                settingsAppPackage = results.getFirst().activityInfo.applicationInfo.packageName;
+            }
+        }
+
+        return !TextUtils.isEmpty(settingsAppPackage) ? settingsAppPackage : "com.android.settings";
     }
 
     /* package */ byte[] getLocaleData() {
