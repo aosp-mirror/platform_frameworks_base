@@ -224,7 +224,7 @@ public class BrightnessSynchronizerTest {
         mSynchronizer.startSynchronizing();
         verify(mDisplayManagerMock).registerDisplayListener(mDisplayListenerCaptor.capture(),
                 isA(Handler.class), eq(0L),
-                eq(DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS));
+                eq(DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS));
         mDisplayListener = mDisplayListenerCaptor.getValue();
 
         verify(mContentResolverSpy).registerContentObserver(eq(BRIGHTNESS_URI), eq(false),

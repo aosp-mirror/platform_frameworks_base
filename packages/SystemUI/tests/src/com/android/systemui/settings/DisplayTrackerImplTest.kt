@@ -17,7 +17,7 @@
 package com.android.systemui.settings
 
 import android.hardware.display.DisplayManager
-import android.hardware.display.DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS
+import android.hardware.display.DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS
 import android.hardware.display.DisplayManagerGlobal
 import android.os.Handler
 import android.testing.AndroidTestingRunner
@@ -98,7 +98,7 @@ class DisplayTrackerImplTest : SysuiTestCase() {
                 any(),
                 any(),
                 eq(0L),
-                eq(PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS),
+                eq(PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS),
             )
     }
 

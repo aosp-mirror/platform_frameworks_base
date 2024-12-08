@@ -601,7 +601,7 @@ public class BrightnessSynchronizer {
             cr.registerContentObserver(BRIGHTNESS_URI, false,
                     createBrightnessContentObserver(handler), UserHandle.USER_ALL);
             mDisplayManager.registerDisplayListener(mListener, handler, /* eventFlags */ 0,
-                    DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS);
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS);
             mIsObserving = true;
         }
     }

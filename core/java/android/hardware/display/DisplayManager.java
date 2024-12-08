@@ -578,73 +578,82 @@ public final class DisplayManager {
     /**
      * @hide
      */
-    @LongDef(flag = true, prefix = {"EVENT_FLAG_"}, value = {
-            EVENT_FLAG_DISPLAY_ADDED,
-            EVENT_FLAG_DISPLAY_CHANGED,
-            EVENT_FLAG_DISPLAY_REMOVED,
-            EVENT_FLAG_DISPLAY_REFRESH_RATE,
-            EVENT_FLAG_DISPLAY_STATE
+    @LongDef(flag = true, prefix = {"EVENT_TYPE_"}, value = {
+            EVENT_TYPE_DISPLAY_ADDED,
+            EVENT_TYPE_DISPLAY_CHANGED,
+            EVENT_TYPE_DISPLAY_REMOVED,
+            EVENT_TYPE_DISPLAY_REFRESH_RATE,
+            EVENT_TYPE_DISPLAY_STATE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface EventFlag {}
+    public @interface EventType {}
 
     /**
      * @hide
      */
-    @LongDef(flag = true, prefix = {"PRIVATE_EVENT_FLAG_"}, value = {
-            PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS,
-            PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED,
-            PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+    @LongDef(flag = true, prefix = {"PRIVATE_EVENT_TYPE_"}, value = {
+            PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS,
+            PRIVATE_EVENT_TYPE_HDR_SDR_RATIO_CHANGED,
+            PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface PrivateEventFlag {}
+    public @interface PrivateEventType {}
 
     /**
-     * Event type for when a new display is added.
+     * Event type for when a new display is added. This notification is sent
+     * through the {@link DisplayListener#onDisplayAdded} callback method
      *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      *
      */
     @FlaggedApi(FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public static final long EVENT_FLAG_DISPLAY_ADDED = 1L << 0;
+    public static final long EVENT_TYPE_DISPLAY_ADDED = 1L << 0;
 
     /**
-     * Event type for when a display is removed.
+     * Event type for when a display is removed. This notification is sent
+     * through the {@link DisplayListener#onDisplayRemoved} callback method
      *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      *
      */
     @FlaggedApi(FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public static final long EVENT_FLAG_DISPLAY_REMOVED = 1L << 1;
+    public static final long EVENT_TYPE_DISPLAY_REMOVED = 1L << 1;
 
     /**
-     * Event type for when a display is changed.
+     * Event type for when a display is changed. {@link DisplayListener#onDisplayChanged} callback
+     * is triggered whenever the properties of a {@link android.view.Display}, such as size,
+     * state, density are modified.
      *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      *
      */
     @FlaggedApi(FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public static final long EVENT_FLAG_DISPLAY_CHANGED = 1L << 2;
-
+    public static final long EVENT_TYPE_DISPLAY_CHANGED = 1L << 2;
 
     /**
-     * Event flag to register for a display's refresh rate changes.
+     * Event type for when a display's refresh rate changes.
+     * {@link DisplayListener#onDisplayChanged} callback is triggered whenever the refresh rate
+     * of the display changes. New refresh rate values can be retrieved via
+     * {@link Display#getRefreshRate()}.
      *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      */
     @FlaggedApi(FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public static final long EVENT_FLAG_DISPLAY_REFRESH_RATE = 1L << 3;
+    public static final long EVENT_TYPE_DISPLAY_REFRESH_RATE = 1L << 3;
 
     /**
-     * Event flag to register for a display state changes.
+     * Event type for when a display state changes.
+     * {@link DisplayListener#onDisplayChanged} callback is triggered whenever the state
+     * of the display changes. New state values can be retrieved via
+     * {@link Display#getState()}.
      *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      */
     @FlaggedApi(FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public static final long EVENT_FLAG_DISPLAY_STATE = 1L << 4;
+    public static final long EVENT_TYPE_DISPLAY_STATE = 1L << 4;
 
     /**
-     * Event flag to register for a display's brightness changes. This notification is sent
+     * Event type to register for a display's brightness changes. This notification is sent
      * through the {@link DisplayListener#onDisplayChanged} callback method. New brightness
      * values can be retrieved via {@link android.view.Display#getBrightnessInfo()}.
      *
@@ -652,10 +661,10 @@ public final class DisplayManager {
      *
      * @hide
      */
-    public static final long PRIVATE_EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 0;
+    public static final long PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS = 1L << 0;
 
     /**
-     * Event flag to register for a display's hdr/sdr ratio changes. This notification is sent
+     * Event type to register for a display's hdr/sdr ratio changes. This notification is sent
      * through the {@link DisplayListener#onDisplayChanged} callback method. New hdr/sdr
      * values can be retrieved via {@link Display#getHdrSdrRatio()}.
      *
@@ -665,15 +674,15 @@ public final class DisplayManager {
      *
      * @hide
      */
-    public static final long PRIVATE_EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 1;
+    public static final long PRIVATE_EVENT_TYPE_HDR_SDR_RATIO_CHANGED = 1L << 1;
 
     /**
-     * Event flag to register for a display's connection changed.
+     * Event type to register for a display's connection changed.
      *
      * @see #registerDisplayListener(DisplayListener, Handler, long)
      * @hide
      */
-    public static final long PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 2;
+    public static final long PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED = 1L << 2;
 
 
     /** @hide */
@@ -800,8 +809,8 @@ public final class DisplayManager {
      * @see #unregisterDisplayListener
      */
     public void registerDisplayListener(DisplayListener listener, Handler handler) {
-        registerDisplayListener(listener, handler, EVENT_FLAG_DISPLAY_ADDED
-                | EVENT_FLAG_DISPLAY_CHANGED | EVENT_FLAG_DISPLAY_REMOVED);
+        registerDisplayListener(listener, handler, EVENT_TYPE_DISPLAY_ADDED
+                | EVENT_TYPE_DISPLAY_CHANGED | EVENT_TYPE_DISPLAY_REMOVED);
     }
 
     /**
@@ -810,7 +819,7 @@ public final class DisplayManager {
      * @param listener The listener to register.
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
-     * @param eventFlags A bitmask of the event types for which this listener is subscribed.
+     * @param eventFilter A bitmask of the event types for which this listener is subscribed.
      *
      * @see #registerDisplayListener(DisplayListener, Handler)
      * @see #unregisterDisplayListener
@@ -818,9 +827,9 @@ public final class DisplayManager {
      * @hide
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @Nullable Handler handler, @EventFlag long eventFlags) {
+            @Nullable Handler handler, @EventType long eventFilter) {
         mGlobal.registerDisplayListener(listener, handler,
-                mGlobal.mapFlagsToInternalEventFlag(eventFlags, 0),
+                mGlobal.mapFiltersToInternalEventFlag(eventFilter, 0),
                 ActivityThread.currentPackageName());
     }
 
@@ -829,17 +838,17 @@ public final class DisplayManager {
      *
      * @param listener The listener to register.
      * @param executor Executor for the thread that will be receiving the callbacks. Cannot be null.
-     * @param eventFlags A bitmask of the event types for which this listener is subscribed.
+     * @param eventFilter A bitmask of the event types for which this listener is subscribed.
      *
      * @see #registerDisplayListener(DisplayListener, Handler)
      * @see #unregisterDisplayListener
      *
      */
     @FlaggedApi(FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS)
-    public void registerDisplayListener(@NonNull Executor executor, @EventFlag long eventFlags,
+    public void registerDisplayListener(@NonNull Executor executor, @EventType long eventFilter,
             @NonNull DisplayListener listener) {
         mGlobal.registerDisplayListener(listener, executor,
-                mGlobal.mapFlagsToInternalEventFlag(eventFlags, 0),
+                mGlobal.mapFiltersToInternalEventFlag(eventFilter, 0),
                 ActivityThread.currentPackageName());
     }
 
@@ -849,8 +858,8 @@ public final class DisplayManager {
      * @param listener The listener to register.
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
-     * @param eventFlags A bitmask of the event types for which this listener is subscribed.
-     * @param privateEventFlags A bitmask of the private event types for which this listener
+     * @param eventFilter A bitmask of the event types for which this listener is subscribed.
+     * @param privateEventFilter A bitmask of the private event types for which this listener
      *                          is subscribed.
      *
      * @see #registerDisplayListener(DisplayListener, Handler)
@@ -859,10 +868,10 @@ public final class DisplayManager {
      * @hide
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @Nullable Handler handler, @EventFlag long eventFlags,
-            @PrivateEventFlag long privateEventFlags) {
+            @Nullable Handler handler, @EventType long eventFilter,
+            @PrivateEventType long privateEventFilter) {
         mGlobal.registerDisplayListener(listener, handler,
-                mGlobal.mapFlagsToInternalEventFlag(eventFlags, privateEventFlags),
+                mGlobal.mapFiltersToInternalEventFlag(eventFilter, privateEventFilter),
                 ActivityThread.currentPackageName());
     }
 

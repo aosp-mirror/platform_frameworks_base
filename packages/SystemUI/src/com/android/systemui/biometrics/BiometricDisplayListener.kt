@@ -25,23 +25,25 @@ import com.android.app.tracing.traceSection
 import com.android.systemui.biometrics.BiometricDisplayListener.SensorType.Generic
 
 /**
- * A listener for keeping overlays for biometric sensors aligned with the physical device
- * device's screen. The [onChanged] will be dispatched on the [handler]
- * whenever a relevant change to the device's configuration (orientation, fold, display change,
- * etc.) may require the UI to change for the given [sensorType].
+ * A listener for keeping overlays for biometric sensors aligned with the physical device device's
+ * screen. The [onChanged] will be dispatched on the [handler] whenever a relevant change to the
+ * device's configuration (orientation, fold, display change, etc.) may require the UI to change for
+ * the given [sensorType].
  */
 class BiometricDisplayListener(
     private val context: Context,
     private val displayManager: DisplayManager,
     private val handler: Handler,
     private val sensorType: SensorType = SensorType.Generic,
-    private val onChanged: () -> Unit
+    private val onChanged: () -> Unit,
 ) : DisplayManager.DisplayListener {
 
     private var cachedDisplayInfo = DisplayInfo()
 
     override fun onDisplayAdded(displayId: Int) {}
+
     override fun onDisplayRemoved(displayId: Int) {}
+
     override fun onDisplayChanged(displayId: Int) {
         traceSection({ "BiometricDisplayListener($sensorType)#onDisplayChanged" }) {
             val rotationChanged = didRotationChange()
@@ -69,7 +71,7 @@ class BiometricDisplayListener(
         displayManager.registerDisplayListener(
             this,
             handler,
-            DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+            DisplayManager.EVENT_TYPE_DISPLAY_CHANGED,
         )
     }
 
@@ -81,14 +83,15 @@ class BiometricDisplayListener(
     /**
      * Type of sensor to determine what kind of display changes require layouts.
      *
-     * The [Generic] type should be used in cases where the modality can vary, such as
-     * biometric prompt (and this object will likely change as multi-mode auth is added).
+     * The [Generic] type should be used in cases where the modality can vary, such as biometric
+     * prompt (and this object will likely change as multi-mode auth is added).
      */
     sealed class SensorType {
         data object Generic : SensorType()
+
         data object UnderDisplayFingerprint : SensorType()
-        data class SideFingerprint(
-            val properties: FingerprintSensorPropertiesInternal
-        ) : SensorType()
+
+        data class SideFingerprint(val properties: FingerprintSensorPropertiesInternal) :
+            SensorType()
     }
 }

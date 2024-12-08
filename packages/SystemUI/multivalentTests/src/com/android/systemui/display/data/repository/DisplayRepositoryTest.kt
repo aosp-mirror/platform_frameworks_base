@@ -541,7 +541,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
                 connectedDisplayListener.capture(),
                 eq(testHandler),
                 eq(0),
-                eq(DisplayManager.PRIVATE_EVENT_FLAG_DISPLAY_CONNECTION_CHANGED),
+                eq(DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED),
             )
         return flowValue
     }
@@ -558,9 +558,9 @@ class DisplayRepositoryTest : SysuiTestCase() {
                 displayListener.capture(),
                 eq(testHandler),
                 eq(
-                    DisplayManager.EVENT_FLAG_DISPLAY_ADDED or
-                        DisplayManager.EVENT_FLAG_DISPLAY_CHANGED or
-                        DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
+                    DisplayManager.EVENT_TYPE_DISPLAY_ADDED or
+                        DisplayManager.EVENT_TYPE_DISPLAY_CHANGED or
+                        DisplayManager.EVENT_TYPE_DISPLAY_REMOVED
                 ),
             )
     }

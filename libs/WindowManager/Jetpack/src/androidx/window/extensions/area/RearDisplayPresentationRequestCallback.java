@@ -43,10 +43,7 @@ public class RearDisplayPresentationRequestCallback implements DeviceStateReques
     public RearDisplayPresentationRequestCallback(@NonNull Context context,
             @NonNull RearDisplayPresentationController rearDisplayPresentationController) {
         mDisplayManager = context.getSystemService(DisplayManager.class);
-        mDisplayManager.registerDisplayListener(mRearDisplayListener,
-                context.getMainThreadHandler(), DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED);
-
+        registerDisplayListener(context);
         mRearDisplayPresentationController = rearDisplayPresentationController;
     }
 
@@ -111,5 +108,11 @@ public class RearDisplayPresentationRequestCallback implements DeviceStateReques
 
             mRearDisplayPresentationController.startSession(rearDisplay);
         }
+    }
+
+    private void registerDisplayListener(Context context) {
+        mDisplayManager.registerDisplayListener(mRearDisplayListener,
+                context.getMainThreadHandler(), DisplayManager.EVENT_TYPE_DISPLAY_ADDED
+                        | DisplayManager.EVENT_TYPE_DISPLAY_CHANGED);
     }
 }
