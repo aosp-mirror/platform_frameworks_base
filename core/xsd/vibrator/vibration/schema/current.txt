@@ -62,17 +62,41 @@ package com.android.internal.vibrator.persistence {
     enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName tick;
   }
 
+  public class RepeatingEffect {
+    ctor public RepeatingEffect();
+    method public com.android.internal.vibrator.persistence.RepeatingEffectEntry getPreamble();
+    method public com.android.internal.vibrator.persistence.RepeatingEffectEntry getRepeating();
+    method public void setPreamble(com.android.internal.vibrator.persistence.RepeatingEffectEntry);
+    method public void setRepeating(com.android.internal.vibrator.persistence.RepeatingEffectEntry);
+  }
+
+  public class RepeatingEffectEntry {
+    ctor public RepeatingEffectEntry();
+    method public com.android.internal.vibrator.persistence.BasicEnvelopeEffect getBasicEnvelopeEffect_optional();
+    method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
+    method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEntry getWaveformEntry_optional();
+    method public com.android.internal.vibrator.persistence.WaveformEnvelopeEffect getWaveformEnvelopeEffect_optional();
+    method public void setBasicEnvelopeEffect_optional(com.android.internal.vibrator.persistence.BasicEnvelopeEffect);
+    method public void setPredefinedEffect_optional(com.android.internal.vibrator.persistence.PredefinedEffect);
+    method public void setPrimitiveEffect_optional(com.android.internal.vibrator.persistence.PrimitiveEffect);
+    method public void setWaveformEntry_optional(com.android.internal.vibrator.persistence.WaveformEntry);
+    method public void setWaveformEnvelopeEffect_optional(com.android.internal.vibrator.persistence.WaveformEnvelopeEffect);
+  }
+
   public class VibrationEffect {
     ctor public VibrationEffect();
     method public com.android.internal.vibrator.persistence.BasicEnvelopeEffect getBasicEnvelopeEffect_optional();
     method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
     method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
+    method public com.android.internal.vibrator.persistence.RepeatingEffect getRepeatingEffect_optional();
     method public byte[] getVendorEffect_optional();
     method public com.android.internal.vibrator.persistence.WaveformEffect getWaveformEffect_optional();
     method public com.android.internal.vibrator.persistence.WaveformEnvelopeEffect getWaveformEnvelopeEffect_optional();
     method public void setBasicEnvelopeEffect_optional(com.android.internal.vibrator.persistence.BasicEnvelopeEffect);
     method public void setPredefinedEffect_optional(com.android.internal.vibrator.persistence.PredefinedEffect);
     method public void setPrimitiveEffect_optional(com.android.internal.vibrator.persistence.PrimitiveEffect);
+    method public void setRepeatingEffect_optional(com.android.internal.vibrator.persistence.RepeatingEffect);
     method public void setVendorEffect_optional(byte[]);
     method public void setWaveformEffect_optional(com.android.internal.vibrator.persistence.WaveformEffect);
     method public void setWaveformEnvelopeEffect_optional(com.android.internal.vibrator.persistence.WaveformEnvelopeEffect);

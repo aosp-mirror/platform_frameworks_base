@@ -45,8 +45,10 @@ public final class XmlConstants {
     public static final String TAG_WAVEFORM_ENVELOPE_EFFECT = "waveform-envelope-effect";
     public static final String TAG_BASIC_ENVELOPE_EFFECT = "basic-envelope-effect";
     public static final String TAG_WAVEFORM_EFFECT = "waveform-effect";
+    public static final String TAG_REPEATING_EFFECT = "repeating-effect";
     public static final String TAG_WAVEFORM_ENTRY = "waveform-entry";
     public static final String TAG_REPEATING = "repeating";
+    public static final String TAG_PREAMBLE = "preamble";
     public static final String TAG_CONTROL_POINT = "control-point";
 
     public static final String ATTRIBUTE_NAME = "name";

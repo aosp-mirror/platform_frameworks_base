@@ -60,6 +60,30 @@
             <!-- Basic envelope effect -->
             <xs:element name="basic-envelope-effect" type="BasicEnvelopeEffect"/>
 
+            <!-- Repeating vibration effect -->
+            <xs:element name="repeating-effect" type="RepeatingEffect"/>
+
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="RepeatingEffect">
+        <xs:sequence>
+            <xs:element name="preamble" maxOccurs="1" minOccurs="0" type="RepeatingEffectEntry" />
+            <xs:element name="repeating" maxOccurs="1" minOccurs="1" type="RepeatingEffectEntry" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RepeatingEffectEntry">
+        <xs:choice>
+            <xs:element name="predefined-effect" type="PredefinedEffect" />
+            <xs:element name="waveform-envelope-effect" type="WaveformEnvelopeEffect" />
+            <xs:element name="basic-envelope-effect" type="BasicEnvelopeEffect" />
+            <xs:sequence>
+                <xs:element name="waveform-entry" type="WaveformEntry" />
+            </xs:sequence>
+            <xs:sequence>
+                <xs:element name="primitive-effect" type="PrimitiveEffect" />
+            </xs:sequence>
         </xs:choice>
     </xs:complexType>
 

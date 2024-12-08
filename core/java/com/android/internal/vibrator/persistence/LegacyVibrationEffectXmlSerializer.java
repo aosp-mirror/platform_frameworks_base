@@ -53,7 +53,7 @@ import java.util.List;
  *
  * @hide
  */
-public final class VibrationEffectXmlSerializer {
+public final class LegacyVibrationEffectXmlSerializer {
 
     /**
      * Creates a serialized representation of the input {@code vibration}.

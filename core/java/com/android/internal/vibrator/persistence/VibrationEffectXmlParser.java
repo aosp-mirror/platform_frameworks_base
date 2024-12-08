@@ -19,6 +19,7 @@ package com.android.internal.vibrator.persistence;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_BASIC_ENVELOPE_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PREDEFINED_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PRIMITIVE_EFFECT;
+import static com.android.internal.vibrator.persistence.XmlConstants.TAG_REPEATING_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_VENDOR_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_VIBRATION_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_WAVEFORM_EFFECT;
@@ -120,6 +121,26 @@ import java.util.List;
  *     }
  * </pre>
  *
+ * * Repeating effects
+ *
+ * <pre>
+ *     {@code
+ *       <vibration-effect>
+ *          <repeating-effect>
+ *            <preamble>
+ *                <primitive-effect name="click" />
+ *            </preamble>
+ *            <repeating>
+ *              <basic-envelope-effect>
+ *                <control-point intensity="0.3" sharpness="0.4" durationMs="25" />
+ *                <control-point intensity="0.0" sharpness="0.5" durationMs="30" />
+ *              </basic-envelope-effect>
+ *            </repeating>
+ *          </repeating-effect>
+ *       </vibration-effect>
+ *     }
+ * </pre>
+ *
  * @hide
  */
 public class VibrationEffectXmlParser {
@@ -189,6 +210,12 @@ public class VibrationEffectXmlParser {
                 if (Flags.normalizedPwleEffects()) {
                     serializedVibration = new SerializedComposedEffect(
                             SerializedBasicEnvelopeEffect.Parser.parseNext(parser, flags));
+                    break;
+                } // else fall through
+            case TAG_REPEATING_EFFECT:
+                if (Flags.normalizedPwleEffects()) {
+                    serializedVibration = new SerializedComposedEffect(
+                            SerializedRepeatingEffect.Parser.parseNext(parser, flags));
                     break;
                 } // else fall through
             default:
