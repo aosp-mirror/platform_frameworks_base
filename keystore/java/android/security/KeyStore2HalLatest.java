@@ -23,7 +23,7 @@ package android.security;
 * and KeyMint (V4) are used.
 */
 class KeyStore2HalVersion {
-    public byte[] getSupplementaryAttestationInfoHelper(int tag, KeyStore2 ks)
+    public static byte[] getSupplementaryAttestationInfoHelper(int tag, KeyStore2 ks)
             throws KeyStoreException {
         return ks.handleRemoteExceptionWithRetry(
             (service) -> service.getSupplementaryAttestationInfo(tag));

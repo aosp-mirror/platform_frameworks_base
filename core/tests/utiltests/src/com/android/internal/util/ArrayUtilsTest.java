@@ -496,4 +496,58 @@ public class ArrayUtilsTest {
             // expected
         }
     }
+
+    // Note: the zeroize() tests only test the behavior that can be tested from a Java test.
+    // They do not verify that no copy of the data is left anywhere.
+
+    @Test
+    @SmallTest
+    public void testZeroizeNonMovableByteArray() {
+        final int length = 10;
+        byte[] array = ArrayUtils.newNonMovableByteArray(length);
+        assertArrayEquals(array, new byte[length]);
+        Arrays.fill(array, (byte) 0xff);
+        ArrayUtils.zeroize(array);
+        assertArrayEquals(array, new byte[length]);
+    }
+
+    @Test
+    @SmallTest
+    public void testZeroizeRegularByteArray() {
+        final int length = 10;
+        byte[] array = new byte[length];
+        assertArrayEquals(array, new byte[length]);
+        Arrays.fill(array, (byte) 0xff);
+        ArrayUtils.zeroize(array);
+        assertArrayEquals(array, new byte[length]);
+    }
+
+    @Test
+    @SmallTest
+    public void testZeroizeNonMovableCharArray() {
+        final int length = 10;
+        char[] array = ArrayUtils.newNonMovableCharArray(length);
+        assertArrayEquals(array, new char[length]);
+        Arrays.fill(array, (char) 0xff);
+        ArrayUtils.zeroize(array);
+        assertArrayEquals(array, new char[length]);
+    }
+
+    @Test
+    @SmallTest
+    public void testZeroizeRegularCharArray() {
+        final int length = 10;
+        char[] array = new char[length];
+        assertArrayEquals(array, new char[length]);
+        Arrays.fill(array, (char) 0xff);
+        ArrayUtils.zeroize(array);
+        assertArrayEquals(array, new char[length]);
+    }
+
+    @Test
+    @SmallTest
+    public void testZeroize_acceptsNull() {
+        ArrayUtils.zeroize((byte[]) null);
+        ArrayUtils.zeroize((char[]) null);
+    }
 }

@@ -18,18 +18,19 @@
 
 #include <errno.h>
 #include <fcntl.h>
-
-#include <utils/Log.h>
-
+#include <genfslabelsversion.h>
 #include <nativehelper/JNIPlatformHelp.h>
-#include "jni.h"
-#include "core_jni_helpers.h"
-#include "selinux/selinux.h"
-#include "selinux/android.h"
-#include <memory>
-#include <atomic>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <utils/Log.h>
+
+#include <atomic>
+#include <memory>
+
+#include "core_jni_helpers.h"
+#include "jni.h"
+#include "selinux/android.h"
+#include "selinux/selinux.h"
 
 namespace android {
 namespace {
@@ -404,8 +405,19 @@ static jboolean native_restorecon(JNIEnv *env, jobject, jstring pathnameStr, jin
 }
 
 /*
+ * Function: getGenfsLabelsVersion
+ * Purpose: get which genfs labels version /vendor uses
+ * Returns: int: genfs labels version of /vendor
+ * Exceptions: none
+ */
+static jint getGenfsLabelsVersion(JNIEnv *, jclass) {
+    return get_genfs_labels_version();
+}
+
+/*
  * JNI registration.
  */
+// clang-format off
 static const JNINativeMethod method_table[] = {
     /* name,                     signature,                    funcPtr */
     { "checkSELinuxAccess"       , "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z" , (void*)checkSELinuxAccess },
@@ -420,7 +432,9 @@ static const JNINativeMethod method_table[] = {
     { "setFileContext"           , "(Ljava/lang/String;Ljava/lang/String;)Z"      , (void*)setFileCon       },
     { "setFSCreateContext"       , "(Ljava/lang/String;)Z"                        , (void*)setFSCreateCon   },
     { "fileSelabelLookup"        , "(Ljava/lang/String;)Ljava/lang/String;"       , (void*)fileSelabelLookup},
+    { "getGenfsLabelsVersion"    , "()I"                                          , (void *)getGenfsLabelsVersion},
 };
+// clang-format on
 
 static int log_callback(int type, const char *fmt, ...) {
     va_list ap;

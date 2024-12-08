@@ -19,6 +19,7 @@ package android.nfc;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.nfc.cardemulation.CardEmulation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,6 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class NfcRoutingTableEntry {
     private final int mNfceeId;
     private final int mType;
+    private final int mRouteType;
 
     /**
      * AID routing table type.
@@ -67,9 +69,11 @@ public abstract class NfcRoutingTableEntry {
     public @interface RoutingTableType {}
 
     /** @hide */
-    protected NfcRoutingTableEntry(int nfceeId, @RoutingTableType int type) {
+    protected NfcRoutingTableEntry(int nfceeId, @RoutingTableType int type,
+            @CardEmulation.ProtocolAndTechnologyRoute int routeType) {
         mNfceeId = nfceeId;
         mType = type;
+        mRouteType = routeType;
     }
 
     /**
@@ -87,5 +91,15 @@ public abstract class NfcRoutingTableEntry {
     @RoutingTableType
     public int getType() {
         return mType;
+    }
+
+    /**
+     * Get the route type of this entry.
+     * @return an integer defined in
+     * {@link android.nfc.cardemulation.CardEmulation.ProtocolAndTechnologyRoute}
+     */
+    @CardEmulation.ProtocolAndTechnologyRoute
+    public int getRouteType() {
+        return mRouteType;
     }
 }
