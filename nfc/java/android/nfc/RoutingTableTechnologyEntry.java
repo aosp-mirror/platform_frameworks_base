@@ -18,6 +18,7 @@ package android.nfc;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.nfc.cardemulation.CardEmulation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -77,8 +78,9 @@ public class RoutingTableTechnologyEntry extends NfcRoutingTableEntry {
     private final @TechnologyValue int mValue;
 
     /** @hide */
-    public RoutingTableTechnologyEntry(int nfceeId, @TechnologyValue int value) {
-        super(nfceeId, TYPE_TECHNOLOGY);
+    public RoutingTableTechnologyEntry(int nfceeId, @TechnologyValue int value,
+            @CardEmulation.ProtocolAndTechnologyRoute int routeType) {
+        super(nfceeId, TYPE_TECHNOLOGY, routeType);
         this.mValue = value;
     }
 

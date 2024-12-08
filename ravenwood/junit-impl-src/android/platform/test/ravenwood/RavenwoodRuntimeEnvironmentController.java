@@ -552,7 +552,7 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static void dumpCommandLineArgs() {
-        Log.i(TAG, "JVM arguments:");
+        Log.v(TAG, "JVM arguments:");
 
         // Note, we use the wrapper in JUnit4, not the actual class (
         // java.lang.management.ManagementFactory), because we can't see the later at the build
@@ -561,7 +561,7 @@ public class RavenwoodRuntimeEnvironmentController {
         var args = ManagementFactory.getRuntimeMXBean().getInputArguments();
 
         for (var arg : args) {
-            Log.i(TAG, "  " + arg);
+            Log.v(TAG, "  " + arg);
         }
     }
 }
