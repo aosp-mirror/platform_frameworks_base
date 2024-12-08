@@ -2014,7 +2014,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 Supplier<SurfaceControl.Transaction> transactionFactory,
                 Handler handler) {
             final TaskPositioner taskPositioner = DesktopModeStatus.isVeiledResizeEnabled()
-                    ? new VeiledResizeTaskPositioner(
+                    // TODO(b/383632995): Update when the flag is launched.
+                    ? (Flags.enableConnectedDisplaysWindowDrag()
+                        ? new MultiDisplayVeiledResizeTaskPositioner(
                             taskOrganizer,
                             windowDecoration,
                             displayController,
@@ -2022,6 +2024,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             transitions,
                             interactionJankMonitor,
                             handler)
+                        : new VeiledResizeTaskPositioner(
+                            taskOrganizer,
+                            windowDecoration,
+                            displayController,
+                            dragEventListener,
+                            transitions,
+                            interactionJankMonitor,
+                            handler))
                     : new FluidResizeTaskPositioner(
                             taskOrganizer,
                             transitions,
