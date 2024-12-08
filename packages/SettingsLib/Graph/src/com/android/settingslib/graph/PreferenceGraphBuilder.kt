@@ -55,9 +55,9 @@ import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.metadata.ReadWritePermit
 import com.android.settingslib.preference.PreferenceScreenFactory
 import com.android.settingslib.preference.PreferenceScreenProvider
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 private const val TAG = "PreferenceGraphBuilder"
 
@@ -399,15 +399,11 @@ fun PreferenceMetadata.toProto(
             value = preferenceValueProto {
                 when (metadata) {
                     is BooleanValue ->
-                        metadata
-                            .storage(context)
-                            .getValue(metadata.key, Boolean::class.javaObjectType)
-                            ?.let { booleanValue = it }
+                        metadata.storage(context).getBoolean(metadata.key)?.let {
+                            booleanValue = it
+                        }
                     is RangeValue -> {
-                        metadata
-                            .storage(context)
-                            .getValue(metadata.key, Int::class.javaObjectType)
-                            ?.let { intValue = it }
+                        metadata.storage(context).getInt(metadata.key)?.let { intValue = it }
                     }
                     else -> {}
                 }
