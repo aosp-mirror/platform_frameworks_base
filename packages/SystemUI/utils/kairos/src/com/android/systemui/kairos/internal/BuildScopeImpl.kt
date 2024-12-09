@@ -36,6 +36,7 @@ import com.android.systemui.kairos.init
 import com.android.systemui.kairos.internal.util.childScope
 import com.android.systemui.kairos.internal.util.mapValuesParallel
 import com.android.systemui.kairos.launchEffect
+import com.android.systemui.kairos.mergeLeft
 import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.None
@@ -85,7 +86,6 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
     ): TFlow<A> {
         var job: Job? = null
         val stopEmitter = newStopEmitter()
-        val handle = this.job.invokeOnCompletion { stopEmitter.emit(Unit) }
         // Create a child scope that will be kept alive beyond the end of this transaction.
         val childScope = coroutineScope.childScope()
         lateinit var emitter: Pair<T, S>
@@ -97,7 +97,6 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                         reenterBuildScope(this@BuildScopeImpl, childScope).runInBuildScope {
                             launchEffect {
                                 builder(emitter.second)
-                                handle.dispose()
                                 stopEmitter.emit(Unit)
                             }
                         }
@@ -108,7 +107,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                 },
             )
         emitter = constructFlow(inputNode)
-        return with(frpScope) { emitter.first.takeUntil(stopEmitter) }
+        return with(frpScope) { emitter.first.takeUntil(mergeLeft(stopEmitter, endSignal)) }
     }
 
     private fun <T> tFlowInternal(builder: suspend FrpProducerScope<T>.() -> Unit): TFlow<T> =
@@ -299,12 +298,14 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         childScope.coroutineContext.job.invokeOnCompletion { stopEmitter.emit(Unit) }
         // Ensure that once this transaction is done, the new child scope enters the completing
         // state (kept alive so long as there are child jobs).
-        scheduleOutput(
-            OneShot {
-                // TODO: don't like this cast
-                (childScope.coroutineContext.job as CompletableJob).complete()
-            }
-        )
+        // TODO: need to keep the scope alive if it's used to accumulate state.
+        //  Otherwise, stopEmitter will emit early, due to the call to complete().
+        //        scheduleOutput(
+        //            OneShot {
+        //                // TODO: don't like this cast
+        //                (childScope.coroutineContext.job as CompletableJob).complete()
+        //            }
+        //        )
         return BuildScopeImpl(
             stateScope = StateScopeImpl(evalScope = stateScope.evalScope, endSignal = stopEmitter),
             coroutineScope = childScope,
