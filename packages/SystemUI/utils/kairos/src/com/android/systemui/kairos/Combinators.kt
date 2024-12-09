@@ -70,16 +70,6 @@ fun <A, B, C> TFlow<A>.samplePromptly(
         }
 
 /**
- * Returns a [TState] containing a map with a snapshot of the current state of each [TState] in the
- * original map.
- */
-fun <K, A> Map<K, TState<A>>.combineValues(): TState<Map<K, A>> =
-    asIterable()
-        .map { (k, state) -> state.map { v -> k to v } }
-        .combine()
-        .map { entries -> entries.toMap() }
-
-/**
  * Returns a cold [Flow] that, when collected, emits from this [TFlow]. [network] is needed to
  * transactionally connect to / disconnect from the [TFlow] when collection starts/stops.
  */
