@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyboard.docking.ui.viewmodel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.view.Surface
 import android.view.WindowManager
@@ -37,10 +36,10 @@ import kotlinx.coroutines.flow.asStateFlow
 class KeyboardDockingIndicationViewModel
 @Inject
 constructor(
-    @SuppressLint("ShadeDisplayAwareContextChecker") @Main private val windowManager: WindowManager,
-    @SuppressLint("ShadeDisplayAwareContextChecker") @Main private val context: Context,
+    @Main private val windowManager: WindowManager,
+    @Main private val context: Context,
     keyboardDockingIndicationInteractor: KeyboardDockingIndicationInteractor,
-    @SuppressLint("ShadeDisplayAwareContextChecker") @Main configurationInteractor: ConfigurationInteractor,
+    @Main configurationInteractor: ConfigurationInteractor,
     @Background private val backgroundScope: CoroutineScope,
 ) {
 
