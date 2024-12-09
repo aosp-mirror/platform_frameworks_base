@@ -64,6 +64,8 @@
                 android:contentDescription="@string/accessibility_clear_all"
                 android:focusable="true"
                 android:text="@string/clear_all_notifications_text"
+                android:ellipsize="end"
+                android:maxLines="1"
                 app:layout_constraintEnd_toStartOf="@id/settings_button"
                 app:layout_constraintStart_toEndOf="@id/history_button" />
 
