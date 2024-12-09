@@ -121,7 +121,7 @@ fun <A, B, C> TState<A>.combineWith(
 
 /**
  * Splits a [TState] of pairs into a pair of [TFlows][TState], where each returned [TState] holds
- * hald of the original.
+ * half of the original.
  *
  * Shorthand for:
  * ```kotlin
