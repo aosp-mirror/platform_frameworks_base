@@ -57,7 +57,7 @@ flag {
     is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
-    description: "enable enhanced confirmation incall apis"
+    description: "DEPRECATED, does not gate any apis"
     bug: "364535720"
 }
 
