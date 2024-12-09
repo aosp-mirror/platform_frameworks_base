@@ -418,7 +418,7 @@ fun <A> TState<A>.selector(numDistinctValues: Int? = null): TStateSelector<A> =
  * @see selector
  */
 @ExperimentalFrpApi
-class TStateSelector<A>
+class TStateSelector<in A>
 internal constructor(
     private val upstream: TState<A>,
     private val groupedChanges: GroupedTFlow<A, Boolean>,
