@@ -372,6 +372,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_mobile_icon_kairos"
+    namespace: "systemui"
+    description: "Refactors the mobile connection icon in the status bar to use the Kairos library"
+    bug: "383172066"
+}
+
+flag {
     name: "status_bar_monochrome_icons_fix"
     namespace: "systemui"
     description: "Fixes the status bar icon size when drawing InsetDrawables (ie. monochrome icons)"
