@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import com.android.build.api.dsl.CommonExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidBasePlugin
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.kotlin.android) apply false
 }
 
@@ -49,25 +48,6 @@ subprojects {
             toolchain {
                 languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
             }
-        }
-    }
-
-    afterEvaluate {
-        plugins.withType<AndroidBasePlugin> {
-            the(CommonExtension::class).apply {
-                if (buildFeatures.compose == true) {
-                    composeOptions {
-                        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-                    }
-                }
-            }
-        }
-    }
-
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = libs.versions.jvm.get()
-            freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }
 }
