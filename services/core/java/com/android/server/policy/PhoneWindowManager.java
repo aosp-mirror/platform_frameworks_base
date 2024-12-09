@@ -91,7 +91,7 @@ import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
-import static com.android.server.GestureLauncherService.DOUBLE_POWER_TAP_COUNT_THRESHOLD;
+import static com.android.server.GestureLauncherService.CAMERA_POWER_TAP_COUNT_THRESHOLD;
 import static com.android.server.flags.Flags.modifierShortcutManagerMultiuser;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
@@ -4150,7 +4150,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Intercept keys (don't send to app) for 3x, 4x, 5x gestures)
-        if (mPowerButtonConsecutiveTaps > DOUBLE_POWER_TAP_COUNT_THRESHOLD) {
+        if (mPowerButtonConsecutiveTaps > CAMERA_POWER_TAP_COUNT_THRESHOLD) {
             setDeferredKeyActionsExecutableAsync(KEYCODE_POWER, event.getDownTime());
             return true;
         }
@@ -5954,7 +5954,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return powerTapInterval < POWER_MULTI_PRESS_TIMEOUT_MILLIS
-                && mPowerButtonConsecutiveTaps == DOUBLE_POWER_TAP_COUNT_THRESHOLD;
+                && mPowerButtonConsecutiveTaps == CAMERA_POWER_TAP_COUNT_THRESHOLD;
     }
 
     // The camera gesture will be detected by GestureLauncherService.
