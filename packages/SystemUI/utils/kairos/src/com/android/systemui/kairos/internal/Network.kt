@@ -95,9 +95,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
     }
 
     /** Listens for external events and starts FRP transactions. Runs forever. */
-    suspend fun runInputScheduler() = coroutineScope {
-        launch { scheduler.activate() }
-        launch { compactor.activate() }
+    suspend fun runInputScheduler() {
         val actions = mutableListOf<ScheduledAction<*>>()
         for (first in inputScheduleChan) {
             // Drain and conflate all transaction requests into a single transaction
