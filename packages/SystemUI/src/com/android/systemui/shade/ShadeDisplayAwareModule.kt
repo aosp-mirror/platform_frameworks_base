@@ -48,6 +48,7 @@ import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import javax.inject.Provider
+import javax.inject.Qualifier
 
 /**
  * Module responsible for managing display-specific components and resources for the notification
@@ -203,7 +204,9 @@ object ShadeDisplayAwareModule {
     @Provides
     @IntoMap
     @ClassKey(ShadePrimaryDisplayCommand::class)
-    fun provideShadePrimaryDisplayCommand(impl: Provider<ShadePrimaryDisplayCommand>): CoreStartable {
+    fun provideShadePrimaryDisplayCommand(
+        impl: Provider<ShadePrimaryDisplayCommand>
+    ): CoreStartable {
         return if (ShadeWindowGoesAround.isEnabled) {
             impl.get()
         } else {
@@ -221,9 +224,23 @@ object ShadeDisplayAwareModule {
             CoreStartable.NOP
         }
     }
+
+    @Provides
+    @ShadeOnDefaultDisplayWhenLocked
+    fun provideShadeOnDefaultDisplayWhenLocked(): Boolean = true
 }
 
 @Module
 internal interface OptionalShadeDisplayAwareBindings {
     @BindsOptionalOf fun bindOptionalOfWindowRootView(): WindowRootView
 }
+
+/**
+ * Annotates the boolean value that defines whether the shade window should go back to the default
+ * display when the keyguard is visible.
+ *
+ * As of today (Dec 2024), This is a configuration parameter provided in the dagger graph as the
+ * final policy around keyguard display is still under discussion, and will be evaluated based on
+ * how well this solution behaves from the performance point of view.
+ */
+@Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class ShadeOnDefaultDisplayWhenLocked
