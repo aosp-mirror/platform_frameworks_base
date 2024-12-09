@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
+
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -1186,17 +1188,23 @@ public final class PowerManager {
         }
     }
 
-    private static final String CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY =
-            PropertyInvalidatedCache.createSystemCacheKey("is_power_save_mode");
+    private static final String CACHE_KEY_IS_POWER_SAVE_MODE_API = "is_power_save_mode";
 
-    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY =
-            PropertyInvalidatedCache.createSystemCacheKey("is_interactive");
+    private static final String CACHE_KEY_IS_INTERACTIVE_API = "is_interactive";
 
     private static final int MAX_CACHE_ENTRIES = 1;
 
+    private static PropertyInvalidatedCache.Args getCacheArgs(String api) {
+        return new PropertyInvalidatedCache.Args(MODULE_SYSTEM)
+                .maxEntries(MAX_CACHE_ENTRIES)
+                .isolateUids(false)
+                .cacheNulls(false)
+                .api(api);
+    }
+
     private final PropertyInvalidatedCache<Void, Boolean> mPowerSaveModeCache =
-            new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
-                CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY) {
+            new PropertyInvalidatedCache<>(getCacheArgs(CACHE_KEY_IS_POWER_SAVE_MODE_API),
+                    CACHE_KEY_IS_POWER_SAVE_MODE_API, null) {
                 @Override
                 public Boolean recompute(Void query) {
                     try {
@@ -1208,8 +1216,8 @@ public final class PowerManager {
             };
 
     private final PropertyInvalidatedCache<Integer, Boolean> mInteractiveCache =
-            new PropertyInvalidatedCache<Integer, Boolean>(MAX_CACHE_ENTRIES,
-                CACHE_KEY_IS_INTERACTIVE_PROPERTY) {
+            new PropertyInvalidatedCache<>(getCacheArgs(CACHE_KEY_IS_INTERACTIVE_API),
+                    CACHE_KEY_IS_INTERACTIVE_API, null) {
                 @Override
                 public Boolean recompute(Integer displayId) {
                     try {
@@ -4322,13 +4330,13 @@ public final class PowerManager {
      * @hide
      */
     public static void invalidatePowerSaveModeCaches() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY);
+        PropertyInvalidatedCache.invalidateCache(MODULE_SYSTEM, CACHE_KEY_IS_POWER_SAVE_MODE_API);
     }
 
     /**
      * @hide
      */
     public static void invalidateIsInteractiveCaches() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_INTERACTIVE_PROPERTY);
+        PropertyInvalidatedCache.invalidateCache(MODULE_SYSTEM, CACHE_KEY_IS_INTERACTIVE_API);
     }
 }
