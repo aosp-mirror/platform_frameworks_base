@@ -22,6 +22,8 @@ import static com.android.compatibility.common.util.PollingCheck.waitFor;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -919,6 +921,41 @@ public final class DeviceStateManagerServiceTest {
                     DEFAULT_DEVICE_STATE_IDENTIFIER,
                     0 /* flags */);
         });
+    }
+
+    @Test
+    public void shouldShowRdmEduDialog1() {
+        // RDM V1 Cases
+        assertTrue(DeviceStateManagerService.shouldShowRdmEduDialog(
+                false /* hasControlDeviceStatePermission */,
+                false /* requestingRdmOuterDefault */,
+                false /* isDeviceClosed (no-op) */));
+
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                true /* hasControlDeviceStatePermission */,
+                false /* requestingRdmOuterDefault */,
+                true /* isDeviceClosed (no-op) */));
+
+        // RDM V2 Cases
+        // hasControlDeviceStatePermission = false
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                false /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                false /* isDeviceClosed */));
+        assertTrue(DeviceStateManagerService.shouldShowRdmEduDialog(
+                false /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                true /* isDeviceClosed */));
+
+        // hasControlDeviceStatePermission = true
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                true /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                false /* isDeviceClosed */));
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                true /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                true /* isDeviceClosed */));
     }
 
     /**

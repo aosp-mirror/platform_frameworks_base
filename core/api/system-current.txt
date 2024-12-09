@@ -12713,14 +12713,14 @@ package android.security.authenticationpolicy {
   }
 
   @FlaggedApi("android.security.secure_lockdown") public final class DisableSecureLockDeviceParams implements android.os.Parcelable {
-    ctor public DisableSecureLockDeviceParams(@NonNull String);
+    ctor public DisableSecureLockDeviceParams(@NonNull CharSequence);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.security.authenticationpolicy.DisableSecureLockDeviceParams> CREATOR;
   }
 
   @FlaggedApi("android.security.secure_lockdown") public final class EnableSecureLockDeviceParams implements android.os.Parcelable {
-    ctor public EnableSecureLockDeviceParams(@NonNull String);
+    ctor public EnableSecureLockDeviceParams(@NonNull CharSequence);
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.security.authenticationpolicy.EnableSecureLockDeviceParams> CREATOR;

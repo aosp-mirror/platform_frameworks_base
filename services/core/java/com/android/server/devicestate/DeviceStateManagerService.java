@@ -19,17 +19,19 @@ package com.android.server.devicestate;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
-import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
-import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
 import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FEATURE_DUAL_DISPLAY;
 import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FEATURE_REAR_DISPLAY;
 import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
 import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
@@ -98,7 +100,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -854,7 +855,7 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private void requestStateInternal(int state, int flags, int callingPid, int callingUid,
+    private void requestStateInternal(int requestedState, int flags, int callingPid, int callingUid,
             @NonNull IBinder token, boolean hasControlDeviceStatePermission) {
         synchronized (mLock) {
             final ProcessRecord processRecord = mProcessRecords.get(callingPid);
@@ -869,19 +870,30 @@ public final class DeviceStateManagerService extends SystemService {
                         + " token: " + token);
             }
 
-            final Optional<DeviceState> deviceState = getStateLocked(state);
-            if (!deviceState.isPresent()) {
-                throw new IllegalArgumentException("Requested state: " + state
+            final Optional<DeviceState> requestedDeviceState = getStateLocked(requestedState);
+            if (requestedDeviceState.isEmpty()) {
+                throw new IllegalArgumentException("Requested state: " + requestedState
                         + " is not supported.");
             }
 
-            OverrideRequest request = new OverrideRequest(token, callingPid, callingUid,
-                    deviceState.get(), flags, OVERRIDE_REQUEST_TYPE_EMULATED_STATE);
+            final OverrideRequest request = new OverrideRequest(token, callingPid, callingUid,
+                    requestedDeviceState.get(), flags, OVERRIDE_REQUEST_TYPE_EMULATED_STATE);
 
             if (Flags.deviceStatePropertyMigration()) {
-                // If we don't have the CONTROL_DEVICE_STATE permission, we want to show the overlay
-                if (!hasControlDeviceStatePermission && deviceState.get().hasProperty(
-                        PROPERTY_FEATURE_REAR_DISPLAY)) {
+                final boolean isRequestingRdm = requestedDeviceState.get()
+                        .hasProperty(PROPERTY_FEATURE_REAR_DISPLAY);
+                final boolean isRequestingRdmOuterDefault = requestedDeviceState.get()
+                        .hasProperty(PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT);
+
+                final boolean isDeviceClosed = mCommittedState.isEmpty() ? false
+                        : mCommittedState.get().hasProperty(
+                                PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED);
+
+                final boolean shouldShowRdmEduDialog = isRequestingRdm && shouldShowRdmEduDialog(
+                        hasControlDeviceStatePermission, isRequestingRdmOuterDefault,
+                        isDeviceClosed);
+
+                if (shouldShowRdmEduDialog) {
                     showRearDisplayEducationalOverlayLocked(request);
                 } else {
                     mOverrideRequestController.addRequest(request);
@@ -889,12 +901,34 @@ public final class DeviceStateManagerService extends SystemService {
             } else {
                 // If we don't have the CONTROL_DEVICE_STATE permission, we want to show the overlay
                 if (!hasControlDeviceStatePermission && mRearDisplayState != null
-                        && state == mRearDisplayState.getIdentifier()) {
+                        && requestedState == mRearDisplayState.getIdentifier()) {
                     showRearDisplayEducationalOverlayLocked(request);
                 } else {
                     mOverrideRequestController.addRequest(request);
                 }
             }
+        }
+    }
+
+    /**
+     * Determines if the system should show an educational dialog before entering rear display mode
+     * @param hasControlDeviceStatePermission If the app has the CONTROL_DEVICE_STATE permission, we
+     *                                        don't need to show the overlay
+     * @param requestingRdmOuterDefault True if the system is requesting
+     *                                  PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT
+     * @param isDeviceClosed True if the device is closed (folded) when the request was made
+     */
+    @VisibleForTesting
+    static boolean shouldShowRdmEduDialog(boolean hasControlDeviceStatePermission,
+            boolean requestingRdmOuterDefault, boolean isDeviceClosed) {
+        if (hasControlDeviceStatePermission) {
+            return false;
+        }
+
+        if (requestingRdmOuterDefault) {
+            return isDeviceClosed;
+        } else {
+            return true;
         }
     }
 
