@@ -235,8 +235,7 @@ fun isTaskWidthOrHeightEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
 
 /** Returns true if task bound is equal to stable bounds else returns false. */
 fun isTaskBoundsEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
-    return taskBounds.width() == stableBounds.width() &&
-        taskBounds.height() == stableBounds.height()
+    return taskBounds == stableBounds
 }
 
 /**

@@ -145,7 +145,6 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     protected val mockCaptionHandleRepository = mock<WindowDecorCaptionHandleRepository>()
     protected val mockDesktopRepository: DesktopRepository = mock<DesktopRepository>()
     protected val motionEvent = mock<MotionEvent>()
-    val displayController = mock<DisplayController>()
     val displayLayout = mock<DisplayLayout>()
     protected lateinit var spyContext: TestableContext
     private lateinit var desktopModeEventLogger: DesktopModeEventLogger
@@ -250,7 +249,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             argumentCaptor<DesktopModeKeyguardChangeListener>()
         verify(mockShellController).addKeyguardChangeListener(keyguardChangedCaptor.capture())
         desktopModeOnKeyguardChangedListener = keyguardChangedCaptor.firstValue
-        whenever(displayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
+        whenever(mockDisplayController.getDisplayLayout(anyInt())).thenReturn(displayLayout)
         whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
             (i.arguments.first() as Rect).set(STABLE_BOUNDS)
         }
