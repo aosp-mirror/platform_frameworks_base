@@ -591,7 +591,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         verify(mockDesktopTasksController).moveTaskToDesktop(
             eq(decor.mTaskInfo.taskId),
             any(),
-            eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON)
+            eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON),
+            anyOrNull()
         )
     }
 
@@ -824,7 +825,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         )
 
         verify(mockDesktopTasksController, times(1))
-            .moveTaskToDesktop(any(), any(), any())
+            .moveTaskToDesktop(any(), any(), any(), anyOrNull())
     }
 
     @Test
