@@ -165,11 +165,9 @@ public abstract class JobServiceEngine {
                 case MSG_EXECUTE_JOB: {
                     final JobParameters params = (JobParameters) msg.obj;
                     try {
-                        if (Flags.handleAbandonedJobs()) {
-                            params.enableCleaner();
-                        }
+                        params.enableCleaner();
                         boolean workOngoing = JobServiceEngine.this.onStartJob(params);
-                        if (Flags.handleAbandonedJobs() && !workOngoing) {
+                        if (!workOngoing) {
                             params.disableCleaner();
                         }
                         ackStartMessage(params, workOngoing);
@@ -196,9 +194,7 @@ public abstract class JobServiceEngine {
                     IJobCallback callback = params.getCallback();
                     if (callback != null) {
                         try {
-                            if (Flags.handleAbandonedJobs()) {
-                                params.disableCleaner();
-                            }
+                            params.disableCleaner();
                             callback.jobFinished(params.getJobId(), needsReschedule);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error reporting job finish to system: binder has gone" +
