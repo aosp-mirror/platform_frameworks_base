@@ -17,6 +17,7 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.util.These
+import com.android.systemui.kairos.util.WithPrev
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 import kotlinx.coroutines.flow.Flow
@@ -238,3 +239,14 @@ val <A> FrpStatefulMode<A>.compiledStateful: FrpStateful<TState<A>>
  */
 fun <A> FrpBuildScope.rebuildOn(rebuildSignal: TFlow<*>, spec: FrpSpec<A>): TState<A> =
     rebuildSignal.map { spec }.holdLatestSpec(spec)
+
+/**
+ * Like [stateChanges] but also includes the old value of this [TState].
+ *
+ * Shorthand for:
+ * ``` kotlin
+ *     stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
+ * ```
+ */
+val <A> TState<A>.transitions: TFlow<WithPrev<A, A>>
+    get() = stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }

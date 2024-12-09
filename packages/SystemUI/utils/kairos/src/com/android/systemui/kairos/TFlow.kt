@@ -520,16 +520,14 @@ internal constructor(internal val network: Network, internal val impl: InputNode
     @ExperimentalFrpApi
     suspend fun emit(value: T) {
         coroutineScope {
+            var jobOrNull: Job? = null
             val newEmit =
                 async(start = CoroutineStart.LAZY) {
+                    jobOrNull?.join()
                     network.transaction { impl.visit(this, value) }.await()
                 }
-            val jobOrNull = storage.getAndSet(newEmit)
-            if (jobOrNull?.isActive != true) {
-                newEmit.await()
-            } else {
-                jobOrNull.join()
-            }
+            jobOrNull = storage.getAndSet(newEmit)
+            newEmit.await()
         }
     }
 
