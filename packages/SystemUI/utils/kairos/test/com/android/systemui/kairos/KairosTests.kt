@@ -1300,6 +1300,26 @@ class KairosTests {
     }
 
     @Test
+    fun buildScope_stateAccumulation() = runFrpTest { network ->
+        val input = network.mutableTFlow<Unit>()
+        var observedCount: Int? = null
+        activateSpec(network) {
+            val (c, j) = asyncScope { input.fold(0) { _, x -> x + 1 } }
+            deferredBuildScopeAction { c.get().observe { observedCount = it } }
+        }
+        runCurrent()
+        assertEquals(0, observedCount)
+
+        input.emit(Unit)
+        runCurrent()
+        assertEquals(1, observedCount)
+
+        input.emit(Unit)
+        runCurrent()
+        assertEquals(2, observedCount)
+    }
+
+    @Test
     fun effect() = runFrpTest { network ->
         val input = network.mutableTFlow<Unit>()
         var effectRunning = false
