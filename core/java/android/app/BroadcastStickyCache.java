@@ -214,8 +214,7 @@ public class BroadcastStickyCache {
             // We only need 1 entry per cache but just to be on the safer side we are choosing 32
             // although we don't expect more than 1.
             sActionConfigMap.put(action,
-                    new Config(32, IpcDataCache.MODULE_SYSTEM,
-                            sActionApiNameMap.get(action)).cacheNulls(true));
+                    new Config(32, IpcDataCache.MODULE_SYSTEM, sActionApiNameMap.get(action)));
         }
 
         return sActionConfigMap.get(action);

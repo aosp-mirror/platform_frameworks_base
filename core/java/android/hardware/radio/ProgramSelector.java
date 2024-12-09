@@ -43,20 +43,22 @@ import java.util.stream.Stream;
  *     <li>DAB channel info</li>
  * </ui>
  *
- * <p>Except for DAB radio, two selectors with different secondary IDs, but the same primary
- * ID are considered equal. In particular, secondary IDs vector may get updated for
+ * <p>The primary ID uniquely identifies a station and can be used for equality
+ * check. The secondary IDs are supplementary and can speed up tuning process,
+ * but the primary ID is sufficient (ie. after a full band scan).
+ *
+ * <p>Two selectors with different secondary IDs, but the same primary ID are
+ * considered equal. In particular, secondary IDs vector may get updated for
  * an entry on the program list (ie. when a better frequency for a given
- * station is found). For DAB radio, two selectors with the same primary ID and the same
- * DAB frequency and DAB ensemble secondary IDs (if exist) are considered equal.
+ * station is found).
  *
  * <p>The primaryId of a given programType MUST be of a specific type:
  * <ui>
- *     <li>AM, FM: {@link #IDENTIFIER_TYPE_RDS_PI} if the station broadcasts RDS,
- *     {@link #IDENTIFIER_TYPE_AMFM_FREQUENCY} otherwise;</li>
- *     <li>AM_HD, FM_HD: {@link #IDENTIFIER_TYPE_HD_STATION_ID_EXT};</li>
- *     <li>DAB: {@link #IDENTIFIER_TYPE_DAB_SID_EXT} or
- *     {@link #IDENTIFIER_TYPE_DAB_DMB_SID_EXT};</li>
- *     <li>DRMO: {@link #IDENTIFIER_TYPE_DRMO_SERVICE_ID};</li>
+ *     <li>AM, FM: RDS_PI if the station broadcasts RDS, AMFM_FREQUENCY otherwise;</li>
+ *     <li>AM_HD, FM_HD: HD_STATION_ID_EXT;</li>
+ *     <li>DAB: DAB_SIDECC;</li>
+ *     <li>DRMO: DRMO_SERVICE_ID;</li>
+ *     <li>SXM: SXM_SERVICE_ID;</li>
  *     <li>VENDOR: VENDOR_PRIMARY.</li>
  * </ui>
  * @hide
@@ -595,9 +597,9 @@ public final class ProgramSelector implements Parcelable {
      * negatives. In particular, it may be way off for certain regions.
      * The main purpose is to avoid passing improper units, ie. MHz instead of kHz.
      *
-     * @param isAm {@code true}, if AM, {@code false} if FM.
+     * @param isAm true, if AM, false if FM.
      * @param frequencyKhz the frequency in kHz.
-     * @return {@code true}, if the frequency is roughly valid.
+     * @return true, if the frequency is roughly valid.
      */
     private static boolean isValidAmFmFrequency(boolean isAm, int frequencyKhz) {
         if (isAm) {
@@ -783,8 +785,8 @@ public final class ProgramSelector implements Parcelable {
          * ProgramLists for category entries.
          *
          * @see ProgramList.Filter#areCategoriesIncluded
-         * @return {@link false} if this identifier's type is not tunable (e.g. DAB ensemble or
-         *         vendor-specified type). {@link true} otherwise.
+         * @return False if this identifier's type is not tunable (e.g. DAB ensemble or
+         *         vendor-specified type). True otherwise.
          */
         public boolean isCategoryType() {
             return (mType >= IDENTIFIER_TYPE_VENDOR_START && mType <= IDENTIFIER_TYPE_VENDOR_END)

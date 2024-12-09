@@ -1,9 +1,9 @@
 package com.android.systemui.qs.tiles
 
+import android.content.Context
 import android.os.Handler
-import android.platform.test.flag.junit.FlagsParameterization
-import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -13,7 +13,6 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
-import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
@@ -28,17 +27,13 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameters
 
-@RunWith(ParameterizedAndroidJunit4::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class FlashlightTileTest(flags: FlagsParameterization) : SysuiTestCase() {
+class FlashlightTileTest : SysuiTestCase() {
 
-    init {
-        mSetFlagsRule.setFlagsParameterization(flags)
-    }
+    @Mock private lateinit var mockContext: Context
 
     @Mock private lateinit var qsLogger: QSLogger
 
@@ -63,7 +58,7 @@ class FlashlightTileTest(flags: FlagsParameterization) : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
 
-        Mockito.`when`(qsHost.context).thenReturn(mContext)
+        Mockito.`when`(qsHost.context).thenReturn(mockContext)
 
         tile =
             FlashlightTile(
@@ -125,14 +120,6 @@ class FlashlightTileTest(flags: FlagsParameterization) : SysuiTestCase() {
             DrawableIconWithRes(mContext.getDrawable(resId), resId)
         } else {
             QSTileImpl.ResourceIcon.get(resId)
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameters(name = "{0}")
-        fun getParams(): List<FlagsParameterization> {
-            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
         }
     }
 }

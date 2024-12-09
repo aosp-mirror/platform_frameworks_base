@@ -33,8 +33,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
-import com.android.systemui.res.R as R
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.res.R as R
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import dagger.Lazy
@@ -113,9 +113,8 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
-        val dateWeatherPaddingStart = KeyguardSmartspaceViewModel.getDateWeatherStartMargin(context)
-        val smartspaceHorizontalPadding =
-            KeyguardSmartspaceViewModel.getSmartspaceHorizontalMargin(context)
+        val horizontalPaddingStart = KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
+        val horizontalPaddingEnd = KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
         constraintSet.apply {
             // migrate addDateWeatherView, addWeatherView from KeyguardClockSwitchController
             constrainHeight(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
@@ -125,7 +124,7 @@ constructor(
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                dateWeatherPaddingStart,
+                horizontalPaddingStart,
             )
 
             // migrate addSmartspaceView from KeyguardClockSwitchController
@@ -136,7 +135,7 @@ constructor(
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
-                smartspaceHorizontalPadding,
+                horizontalPaddingStart,
             )
             connect(
                 sharedR.id.bc_smartspace_view,
@@ -144,7 +143,7 @@ constructor(
                 if (keyguardSmartspaceViewModel.isShadeLayoutWide.value) R.id.split_shade_guideline
                 else ConstraintSet.PARENT_ID,
                 ConstraintSet.END,
-                smartspaceHorizontalPadding,
+                horizontalPaddingEnd,
             )
 
             if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {

@@ -32,7 +32,6 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 import java.lang.ref.Reference;
 
@@ -96,20 +95,20 @@ public class WindowContext extends ContextWrapper implements WindowProvider {
     }
 
     /**
-     * Moves this context to another display.
+     * Updates this context to a new displayId.
      * <p>
-     * Note that this re-parents all the previously attached windows. Resources associated with this
-     * context will have the correct value and configuration for the new display after this is
-     * called.
+     * Note that this doesn't re-parent previously attached windows (they should be removed and
+     * re-added manually after this is called). Resources associated with this context will have
+     * the correct value and configuration for the new display after this is called.
      */
-    public void reparentToDisplay(int displayId) {
-        if (Flags.reparentWindowTokenApi()) {
-            if (displayId == getDisplayId()) {
-                return;
-            }
-            super.updateDisplay(displayId);
-            mController.reparentToDisplayArea(mType, displayId, mOptions);
+    @Override
+    public void updateDisplay(int displayId) {
+        if (displayId == getDisplayId()) {
+            return;
         }
+        super.updateDisplay(displayId);
+        mController.detachIfNeeded();
+        mController.attachToDisplayArea(mType, displayId, mOptions);
     }
 
     @Override

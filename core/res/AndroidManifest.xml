@@ -6853,13 +6853,6 @@
     <permission android:name="android.permission.BATTERY_STATS"
         android:protectionLevel="signature|privileged|development" />
 
-    <!-- @SystemApi @hide Allows an application to collect high-precision PowerMonitor readings
-         <p>Protection level: signature|privileged|development
-         @FlaggedApi(android.permission.flags.Flags.FLAG_FINE_POWER_MONITOR_PERMISSION) -->
-    <permission android:name="android.permission.ACCESS_FINE_POWER_MONITORS"
-        android:protectionLevel="signature|privileged|development"
-        android:featureFlag="android.permission.flags.fine_power_monitor_permission" />
-
     <!--Allows an application to manage statscompanion.
     <p>Not for use by third-party applications.
          @hide -->
@@ -8798,17 +8791,6 @@
     <permission android:name="android.permission.SINGLE_USER_TIS_ACCESS"
         android:protectionLevel="signature|privileged|vendorPrivileged"
         android:featureFlag="android.media.tv.flags.kids_mode_tvdb_sharing"/>
-
-    <!-- @SystemApi
-        @FlaggedApi("android.permission.flags.text_classifier_choice_api_enabled")
-        This permission is required to access the specific text classifier you need from the
-        TextClassificationManager.
-        <p>Protection level: signature|role
-    @hide
-    -->
-    <permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
-        android:protectionLevel="signature|role"
-        android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>

@@ -1102,7 +1102,7 @@ public final class MessageQueue {
      */
     @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
     @Nullable
-    Message pollForTest() {
+    Message popForTest() {
         throwIfNotTest();
         return nextMessage(false);
     }

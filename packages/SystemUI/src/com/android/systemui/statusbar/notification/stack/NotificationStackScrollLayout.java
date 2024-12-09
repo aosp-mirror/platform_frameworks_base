@@ -2630,7 +2630,6 @@ public class NotificationStackScrollLayout
     private void updateContentHeight() {
         if (SceneContainerFlag.isEnabled()) {
             updateIntrinsicStackHeight();
-            updateStackEndHeightAndStackHeight(mAmbientState.getExpansionFraction());
             return;
         }
 

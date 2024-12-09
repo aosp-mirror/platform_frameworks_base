@@ -2234,9 +2234,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
             // If the state didn't change, we may still need to update public mode
             mLockscreenUserManager.updatePublicMode();
-            if (SceneContainerFlag.isEnabled()) {
-                mStackScrollerController.updateSensitivenessWithoutAnimation();
-            }
         }
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
@@ -2684,7 +2681,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 // So if AOD is off or unsupported we need to trigger these updates at screen on
                 // when the keyguard is occluded.
                 mLockscreenUserManager.updatePublicMode();
-                mStackScrollerController.updateSensitivenessWithoutAnimation();
+                mStackScrollerController.updateSensitivenessForOccludedWakeup();
             }
             if (mLaunchCameraWhenFinishedWaking) {
                 startLaunchTransitionTimeout();

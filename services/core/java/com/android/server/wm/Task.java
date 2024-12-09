@@ -3864,9 +3864,6 @@ class Task extends TaskFragment {
         if (mLaunchAdjacentDisabled) {
             pw.println(prefix + "mLaunchAdjacentDisabled=true");
         }
-        if (mReparentLeafTaskIfRelaunch) {
-            pw.println(prefix + "mReparentLeafTaskIfRelaunch=true");
-        }
     }
 
     @Override

@@ -4684,12 +4684,6 @@ public class AudioService extends IAudioService.Stub
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
-                // TODO(b/382704431): remove to allow STREAM_VOICE_CALL to drive abs volume
-                //  over A2DP
-                if (getDeviceForStream(AudioSystem.STREAM_VOICE_CALL)
-                        == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                    return AudioSystem.STREAM_MUSIC;
-                }
                 return AudioSystem.STREAM_VOICE_CALL;
             case AudioSystem.MODE_CALL_SCREENING:
             case AudioSystem.MODE_COMMUNICATION_REDIRECT:
@@ -4701,20 +4695,15 @@ public class AudioService extends IAudioService.Stub
                 // other conditions will influence the stream type choice, read on...
                 break;
         }
-
-        if (voiceActivityCanOverride && mVoicePlaybackActive.get()) {
-            // TODO(b/382704431): remove to allow STREAM_VOICE_CALL to drive abs volume over A2DP
-            if (getDeviceForStream(AudioSystem.STREAM_VOICE_CALL)
-                    == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                return AudioSystem.STREAM_MUSIC;
-            }
+        if (voiceActivityCanOverride
+                && mVoicePlaybackActive.get()) {
             return AudioSystem.STREAM_VOICE_CALL;
         }
         return AudioSystem.STREAM_MUSIC;
     }
 
-    private final AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
-    private final AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
+    private AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
+    private AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
 
     private final IPlaybackConfigDispatcher mPlaybackActivityMonitor =
             new IPlaybackConfigDispatcher.Stub() {
@@ -4934,7 +4923,7 @@ public class AudioService extends IAudioService.Stub
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
 
-        Slog.i(TAG,
+        Log.i(TAG,
                 "onUpdateContextualVolumes: absolute volume driving streams " + streamType
                 + " avrcp supported: " + mAvrcpAbsVolSupported);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
@@ -4943,7 +4932,7 @@ public class AudioService extends IAudioService.Stub
                 if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                     if (!enabled) {
-                        Slog.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
+                        Log.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
                     }
                 }
                 if (stream != streamType) {
@@ -4971,7 +4960,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         if (absVolumeDevices.size() > 1) {
-            Slog.w(TAG, "onUpdateContextualVolumes too many active devices: "
+            Log.w(TAG, "onUpdateContextualVolumes too many active devices: "
                     + absVolumeDevices.stream().map(AudioSystem::getOutputDeviceName)
                         .collect(Collectors.joining(","))
                     + ", for stream: " + streamType);
@@ -4982,7 +4971,7 @@ public class AudioService extends IAudioService.Stub
         final int index = getStreamVolume(streamType, device);
 
         if (DEBUG_VOL) {
-            Slog.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
+            Log.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
                     + ", device: " + AudioSystem.getOutputDeviceName(device)
                     + ", index: " + index);
         }

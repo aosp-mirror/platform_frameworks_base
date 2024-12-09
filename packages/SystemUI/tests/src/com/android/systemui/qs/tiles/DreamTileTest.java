@@ -16,10 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
-
-import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
-
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -36,12 +32,12 @@ import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.platform.test.flag.junit.FlagsParameterization;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -69,20 +65,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
-
-@RunWith(ParameterizedAndroidJunit4.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class DreamTileTest extends SysuiTestCase {
-
-    @Parameters(name = "{0}")
-    public static List<FlagsParameterization> getParams() {
-        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
-    }
 
     @Mock
     private ActivityStarter mActivityStarter;
@@ -116,11 +102,6 @@ public class DreamTileTest extends SysuiTestCase {
 
     private final String mExpectedTileLabel = mContext.getResources().getString(
             R.string.quick_settings_screensaver_label);
-
-    public DreamTileTest(FlagsParameterization flags) {
-        super();
-        mSetFlagsRule.setFlagsParameterization(flags);
-    }
 
     @Before
     public void setUp() throws Exception {

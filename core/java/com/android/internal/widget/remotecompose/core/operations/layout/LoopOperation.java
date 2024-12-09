@@ -107,11 +107,9 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
 
     @Override
     public void paint(@NonNull PaintContext context) {
-        RemoteContext remoteContext = context.getContext();
         if (mIndexVariableId == 0) {
             for (float i = mFromOut; i < mUntilOut; i += mStepOut) {
                 for (Operation op : mList) {
-                    remoteContext.incrementOpCount();
                     op.apply(context.getContext());
                 }
             }
@@ -122,7 +120,6 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
                     if (op instanceof VariableSupport && op.isDirty()) {
                         ((VariableSupport) op).updateVariables(context.getContext());
                     }
-                    remoteContext.incrementOpCount();
                     op.apply(context.getContext());
                 }
             }
@@ -174,17 +171,5 @@ public class LoopOperation extends PaintOperation implements VariableSupport {
                 .field(DocumentedOperation.FLOAT, "from", "values starts at")
                 .field(DocumentedOperation.FLOAT, "step", "value step")
                 .field(DocumentedOperation.FLOAT, "until", "stops less than or equal");
-    }
-
-    /**
-     * Calculate and estimate of the number of iterations
-     *
-     * @return number of loops or 10 if based on variables
-     */
-    public int estimateIterations() {
-        if (!(Float.isNaN(mUntil) || Float.isNaN(mFrom) || Float.isNaN(mStep))) {
-            return (int) (0.5f + (mUntil - mFrom) / mStep);
-        }
-        return 10; // this is a generic estmate if the values are variables;
     }
 }

@@ -749,7 +749,7 @@ public class PackageManagerServiceUtils {
                     null /*abiOverride*/, false /*isIncremental*/);
         } catch (IOException e) {
             logCriticalInfo(Log.ERROR, "Failed to extract native libraries"
-                    + "; pkg: " + packageName + "; err: " + e.getMessage());
+                    + "; pkg: " + packageName);
             return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
         } finally {
             IoUtils.closeQuietly(handle);

@@ -27,7 +27,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
-import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
@@ -536,9 +535,7 @@ constructor(
                 // Order by creation time descending.
                 ongoingContent.sortByDescending { it.createdTimestampMillis }
                 // Resize the items.
-                if (!communalResponsiveGrid()) {
-                    ongoingContent.resizeItems()
-                }
+                ongoingContent.resizeItems()
 
                 // Return the sorted and resized items.
                 ongoingContent

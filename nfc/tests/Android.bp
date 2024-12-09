@@ -25,36 +25,17 @@ package {
 android_test {
     name: "NfcManagerTests",
     static_libs: [
-        "androidx.test.core",
-        "androidx.test.rules",
-        "androidx.test.runner",
         "androidx.test.ext.junit",
-        "framework-nfc.impl",
-        "mockito-target-extended-minus-junit4",
-        "frameworks-base-testutils",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
         "truth",
-        "androidx.annotation_annotation",
-        "androidx.appcompat_appcompat",
-        "flag-junit",
-        "platform-test-annotations",
-        "testables",
     ],
     libs: [
-        "android.test.base.stubs.system",
-        "android.test.mock.stubs.system",
+        "framework-nfc.impl",
         "android.test.runner.stubs.system",
-    ],
-    jni_libs: [
-        // Required for ExtendedMockito
-        "libdexmakerjvmtiagent",
-        "libstaticjvmtiagent",
     ],
     srcs: ["src/**/*.java"],
     platform_apis: true,
     certificate: "platform",
-    test_suites: [
-        "device-tests",
-        "mts-nfc",
-    ],
-    min_sdk_version: "35", // Should be 36 later.
+    test_suites: ["device-tests"],
 }

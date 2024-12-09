@@ -66,34 +66,6 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     protected float mZIndex = 0f;
 
-    private boolean mNeedsBoundsAnimation = false;
-
-    /**
-     * Mark the component as needing a bounds animation pass
-     */
-    public void markNeedsBoundsAnimation() {
-        mNeedsBoundsAnimation = true;
-        if (mParent != null && !mParent.mNeedsBoundsAnimation) {
-            mParent.markNeedsBoundsAnimation();
-        }
-    }
-
-    /**
-     * Clear the bounds animation pass flag
-     */
-    public void clearNeedsBoundsAnimation() {
-        mNeedsBoundsAnimation = false;
-    }
-
-    /**
-     * True if needs a bounds animation
-     *
-     * @return true if needs a bounds animation pass
-     */
-    public boolean needsBoundsAnimation() {
-        return mNeedsBoundsAnimation;
-    }
-
     public float getZIndex() {
         return mZIndex;
     }
@@ -410,38 +382,10 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         } else {
             mVisibility = m.getVisibility();
         }
-        if (mAnimateMeasure == null) {
-            setWidth(m.getW());
-            setHeight(m.getH());
-            setLayoutPosition(m.getX(), m.getY());
-            updateComponentValues(context);
-            clearNeedsBoundsAnimation();
-        } else {
-            mAnimateMeasure.apply(context);
-            updateComponentValues(context);
-            markNeedsBoundsAnimation();
-        }
+        setWidth(m.getW());
+        setHeight(m.getH());
+        setLayoutPosition(m.getX(), m.getY());
         mFirstLayout = false;
-    }
-
-    /**
-     * Animate the bounds of the component as needed
-     * @param context
-     */
-    public void animatingBounds(@NonNull RemoteContext context) {
-        if (mAnimateMeasure != null) {
-            mAnimateMeasure.apply(context);
-            updateComponentValues(context);
-            markNeedsBoundsAnimation();
-        } else {
-            clearNeedsBoundsAnimation();
-        }
-        for (Operation op : mList) {
-            if (op instanceof Measurable) {
-                Measurable m = (Measurable) op;
-                m.animatingBounds(context);
-            }
-        }
     }
 
     @NonNull public float[] locationInWindow = new float[2];
@@ -754,6 +698,9 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     }
 
     public void paintingComponent(@NonNull PaintContext context) {
+        if (!mComponentValues.isEmpty()) {
+            updateComponentValues(context.getContext());
+        }
         if (mPreTranslate != null) {
             mPreTranslate.paint(context);
         }
@@ -771,10 +718,8 @@ public class Component extends PaintOperation implements Measurable, Serializabl
             }
             if (op instanceof PaintOperation) {
                 ((PaintOperation) op).paint(context);
-                context.getContext().incrementOpCount();
             } else {
                 op.apply(context.getContext());
-                context.getContext().incrementOpCount();
             }
         }
         context.restore();
@@ -783,7 +728,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     public boolean applyAnimationAsNeeded(@NonNull PaintContext context) {
         if (context.isAnimationEnabled() && mAnimateMeasure != null) {
-            mAnimateMeasure.paint(context);
+            mAnimateMeasure.apply(context);
             context.needsRepaint();
             return true;
         }

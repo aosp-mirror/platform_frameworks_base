@@ -44,11 +44,4 @@ public interface Measurable {
      * @return true if need to remeasured, false otherwise
      */
     boolean needsMeasure();
-
-    /**
-     * Animate bounds of the component
-     *
-     * @param context
-     */
-    void animatingBounds(RemoteContext context);
 }

@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.os.Binder;
@@ -40,6 +41,7 @@ public final class BroadcastFilter extends IntentFilter {
      * ({@link IntentFilter#SYSTEM_LOW_PRIORITY}, {@link IntentFilter#SYSTEM_HIGH_PRIORITY}).
      */
     @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
     @VisibleForTesting
     static final long RESTRICT_PRIORITY_VALUES = 371309185L;
 

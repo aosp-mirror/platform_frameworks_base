@@ -17,17 +17,18 @@
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import com.android.systemui.coroutines.newTracingContext
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 /** Creates a [CoroutineScope] for the [QSTileViewModelImpl]. */
 class QSTileCoroutineScopeFactory
 @Inject
-constructor(@Background private val bgDispatcher: CoroutineDispatcher) {
+constructor(@Application private val applicationScope: CoroutineScope) {
 
     fun create(): CoroutineScope =
-        CoroutineScope(bgDispatcher + SupervisorJob() + newTracingContext("QSTileScope"))
+        CoroutineScope(
+            applicationScope.coroutineContext + SupervisorJob() + newTracingContext("QSTileScope")
+        )
 }

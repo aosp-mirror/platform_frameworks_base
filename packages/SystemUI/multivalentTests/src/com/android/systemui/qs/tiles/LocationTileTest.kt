@@ -16,10 +16,10 @@
 
 package com.android.systemui.qs.tiles
 
+import android.content.Context
 import android.os.Handler
-import android.platform.test.flag.junit.FlagsParameterization
-import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -29,7 +29,6 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
-import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
@@ -49,18 +48,13 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameters
 
-@RunWith(ParameterizedAndroidJunit4::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class LocationTileTest(flags: FlagsParameterization) : SysuiTestCase() {
+class LocationTileTest : SysuiTestCase() {
 
-    init {
-        mSetFlagsRule.setFlagsParameterization(flags)
-    }
-
+    @Mock private lateinit var mockContext: Context
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var qsHost: QSHost
     @Mock private lateinit var metricsLogger: MetricsLogger
@@ -79,7 +73,7 @@ class LocationTileTest(flags: FlagsParameterization) : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        `when`(qsHost.context).thenReturn(mContext)
+        `when`(qsHost.context).thenReturn(mockContext)
 
         tile =
             LocationTile(
@@ -143,14 +137,6 @@ class LocationTileTest(flags: FlagsParameterization) : SysuiTestCase() {
             DrawableIconWithRes(mContext.getDrawable(resId), resId)
         } else {
             QSTileImpl.ResourceIcon.get(resId)
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        @Parameters(name = "{0}")
-        fun getParams(): List<FlagsParameterization> {
-            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
         }
     }
 }

@@ -65,12 +65,8 @@ import java.util.concurrent.ConcurrentHashMap;
     /** Variables for managing endpoint ID creation */
     private final Object mEndpointLock = new Object();
 
-    /**
-     * The next available endpoint ID to register. Per EndpointId.aidl definition, dynamic
-     * endpoint IDs must have the left-most bit as 1, and the values 0/-1 are invalid.
-     */
     @GuardedBy("mEndpointLock")
-    private long mNextEndpointId = -2;
+    private long mNextEndpointId = 0;
 
     /** The minimum session ID reservable by endpoints (retrieved from HAL) */
     private final int mMinSessionId;
@@ -286,10 +282,10 @@ import java.util.concurrent.ConcurrentHashMap;
     /** @return an available endpoint ID */
     private long getNewEndpointId() {
         synchronized (mEndpointLock) {
-            if (mNextEndpointId >= 0) {
+            if (mNextEndpointId == Long.MAX_VALUE) {
                 throw new IllegalStateException("Too many endpoints connected");
             }
-            return mNextEndpointId--;
+            return mNextEndpointId++;
         }
     }
 

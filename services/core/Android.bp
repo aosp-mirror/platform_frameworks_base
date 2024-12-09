@@ -160,6 +160,7 @@ java_library_static {
         "android.hardware.vibrator-V3-java",
         "androidx.annotation_annotation",
         "app-compat-annotations",
+        "art_exported_aconfig_flags_lib",
         "framework-tethering.stubs.module_lib",
         "keepanno-annotations",
         "service-art.stubs.system_server",
@@ -246,7 +247,6 @@ java_library_static {
         "locksettings_flags_lib",
         "profiling_flags_lib",
         "android.adpf.sessionmanager_aidl-java",
-        "uprobestats_flags_java_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

@@ -43,6 +43,7 @@ import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.BroadcastOptions.DeliveryGroupPolicy;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -85,6 +86,7 @@ final class BroadcastRecord extends Binder {
      * will only influence the order of broadcast delivery within the same process.
      */
     @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
     @VisibleForTesting
     static final long LIMIT_PRIORITY_SCOPE = 371307720L;
 

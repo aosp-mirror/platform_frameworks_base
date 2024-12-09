@@ -22,7 +22,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.STATE_ON;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
-import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyLong;
@@ -46,14 +45,10 @@ import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_SHUT
 import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.timeout;
@@ -90,9 +85,7 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
-import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.telecom.TelecomManager;
-import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.InputEvent;
 import android.view.KeyCharacterMap;
@@ -102,12 +95,9 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
-import com.android.server.SystemService;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -130,7 +120,6 @@ import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.quality.Strictness;
-import org.mockito.stubbing.Answer;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -143,8 +132,6 @@ class TestPhoneWindowManager {
 
     private PhoneWindowManager mPhoneWindowManager;
     private Context mContext;
-    private GestureLauncherService mGestureLauncherService;
-
 
     @Mock private WindowManagerInternal mWindowManagerInternal;
     @Mock private ActivityManagerInternal mActivityManagerInternal;
@@ -176,9 +163,7 @@ class TestPhoneWindowManager {
     @Mock private DisplayRotation mDisplayRotation;
     @Mock private DisplayPolicy mDisplayPolicy;
     @Mock private WindowManagerPolicy.ScreenOnListener mScreenOnListener;
-    @Mock private QuickAccessWalletClient mQuickAccessWalletClient;
-    @Mock private MetricsLogger mMetricsLogger;
-    @Mock private UiEventLogger mUiEventLogger;
+    @Mock private GestureLauncherService mGestureLauncherService;
     @Mock private GlobalActions mGlobalActions;
     @Mock private AccessibilityShortcutController mAccessibilityShortcutController;
 
@@ -206,8 +191,6 @@ class TestPhoneWindowManager {
     private Intent mSmsIntent;
 
     private int mKeyEventPolicyFlags = FLAG_INTERACTIVE;
-
-    private int mProcessPowerKeyDownCount = 0;
 
     private class TestTalkbackShortcutController extends TalkbackShortcutController {
         TestTalkbackShortcutController(Context context) {
@@ -277,8 +260,6 @@ class TestPhoneWindowManager {
         MockitoAnnotations.initMocks(this);
         mHandler = new Handler(mTestLooper.getLooper());
         mContext = mockingDetails(context).isSpy() ? context : spy(context);
-        mGestureLauncherService = spy(new GestureLauncherService(mContext, mMetricsLogger,
-                mQuickAccessWalletClient, mUiEventLogger));
         setUp(supportSettingsUpdate);
         mTestLooper.dispatchAll();
     }
@@ -291,7 +272,6 @@ class TestPhoneWindowManager {
         mMockitoSession = mockitoSession()
                 .mockStatic(LocalServices.class, spyStubOnly)
                 .mockStatic(KeyCharacterMap.class)
-                .mockStatic(GestureLauncherService.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
@@ -314,16 +294,6 @@ class TestPhoneWindowManager {
                 () -> LocalServices.getService(eq(PowerManagerInternal.class)));
         doReturn(mDisplayManagerInternal).when(
                 () -> LocalServices.getService(eq(DisplayManagerInternal.class)));
-        doReturn(true).when(
-                () -> GestureLauncherService.isCameraDoubleTapPowerSettingEnabled(any(), anyInt())
-        );
-        doReturn(true).when(
-                () -> GestureLauncherService.isEmergencyGestureSettingEnabled(any(), anyInt())
-        );
-        doReturn(true).when(
-                () -> GestureLauncherService.isGestureLauncherEnabled(any())
-        );
-        mGestureLauncherService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
         doReturn(mGestureLauncherService).when(
                 () -> LocalServices.getService(eq(GestureLauncherService.class)));
         doReturn(mUserManagerInternal).when(
@@ -405,8 +375,7 @@ class TestPhoneWindowManager {
         doNothing().when(mContext).startActivityAsUser(any(), any());
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
 
-        KeyInterceptionInfo interceptionInfo = new KeyInterceptionInfo(0, 0, null, 0,
-                /* inputFeatureFlags = */ 0);
+        KeyInterceptionInfo interceptionInfo = new KeyInterceptionInfo(0, 0, null, 0);
         doReturn(interceptionInfo)
                 .when(mWindowManagerInternal).getKeyInterceptionInfoFromToken(any());
 
@@ -424,8 +393,6 @@ class TestPhoneWindowManager {
                 eq(TEST_BROWSER_ROLE_PACKAGE_NAME));
         doReturn(mSmsIntent).when(mPackageManager).getLaunchIntentForPackage(
                 eq(TEST_SMS_ROLE_PACKAGE_NAME));
-        mProcessPowerKeyDownCount = 0;
-        captureProcessPowerKeyDownCount();
 
         Mockito.reset(mContext);
     }
@@ -671,12 +638,6 @@ class TestPhoneWindowManager {
                 .when(mButtonOverridePermissionChecker).canAppOverrideSystemKey(any(), anyInt());
     }
 
-    void overrideCanWindowOverridePowerKey(boolean granted) {
-        doReturn(granted)
-                .when(mButtonOverridePermissionChecker).canWindowOverridePowerKey(any(), anyInt(),
-                        anyInt());
-    }
-
     void overrideKeyEventPolicyFlags(int flags) {
         mKeyEventPolicyFlags = flags;
     }
@@ -752,58 +713,12 @@ class TestPhoneWindowManager {
         verify(mPowerManager, never()).goToSleep(anyLong(), anyInt(), anyInt());
     }
 
-    void assertDoublePowerLaunch() {
-        ArgumentCaptor<MutableBoolean> valueCaptor = ArgumentCaptor.forClass(MutableBoolean.class);
-
+    void assertCameraLaunch() {
         mTestLooper.dispatchAll();
-        verify(mGestureLauncherService, atLeast(2))
-                .interceptPowerKeyDown(any(), anyBoolean(), valueCaptor.capture());
-        verify(mGestureLauncherService, atMost(4))
-                .interceptPowerKeyDown(any(), anyBoolean(), valueCaptor.capture());
-
-        if (overridePowerKeyBehaviorInFocusedWindow()) {
-            assertTrue(mProcessPowerKeyDownCount >= 2 && mProcessPowerKeyDownCount <= 4);
-        }
-
-        List<Boolean> capturedValues = valueCaptor.getAllValues().stream()
-                .map(mutableBoolean -> mutableBoolean.value)
-                .toList();
-
-        assertTrue(capturedValues.contains(true));
+        // GestureLauncherService should receive interceptPowerKeyDown twice.
+        verify(mGestureLauncherService, times(2))
+                .interceptPowerKeyDown(any(), anyBoolean(), any());
     }
-
-    void assertNoDoublePowerLaunch() {
-        ArgumentCaptor<MutableBoolean> valueCaptor = ArgumentCaptor.forClass(MutableBoolean.class);
-
-        mTestLooper.dispatchAll();
-        verify(mGestureLauncherService, atLeast(0))
-                .interceptPowerKeyDown(any(), anyBoolean(), valueCaptor.capture());
-
-        List<Boolean> capturedValues = valueCaptor.getAllValues().stream()
-                .map(mutableBoolean -> mutableBoolean.value)
-                .toList();
-
-        assertTrue(capturedValues.stream().noneMatch(value -> value));
-    }
-
-    void assertEmergencyLaunch() {
-        ArgumentCaptor<MutableBoolean> valueCaptor = ArgumentCaptor.forClass(MutableBoolean.class);
-
-        mTestLooper.dispatchAll();
-        verify(mGestureLauncherService, atLeast(1))
-                .interceptPowerKeyDown(any(), anyBoolean(), valueCaptor.capture());
-
-        if (overridePowerKeyBehaviorInFocusedWindow()) {
-            assertEquals(mProcessPowerKeyDownCount, 5);
-        }
-
-        List<Boolean> capturedValues = valueCaptor.getAllValues().stream()
-                .map(mutableBoolean -> mutableBoolean.value)
-                .toList();
-
-        assertTrue(capturedValues.getLast());
-    }
-
 
     void assertSearchManagerLaunchAssist() {
         mTestLooper.dispatchAll();
@@ -1013,13 +928,5 @@ class TestPhoneWindowManager {
     void assertKeyGestureEventSentToKeyGestureController(int gestureType) {
         verify(mInputManagerInternal)
                 .handleKeyGestureInKeyGestureController(anyInt(), any(), anyInt(), eq(gestureType));
-    }
-
-    private void captureProcessPowerKeyDownCount() {
-        doAnswer((Answer<Void>) invocation -> {
-            invocation.callRealMethod();
-            mProcessPowerKeyDownCount++;
-            return null;
-        }).when(mGestureLauncherService).processPowerKeyDown(any());
     }
 }

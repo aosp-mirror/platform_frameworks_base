@@ -65,7 +65,6 @@ public class BubbleBarHandleView extends View {
     @Nullable
     private ObjectAnimator mColorChangeAnim;
     private @ColorInt int mRegionSamplerColor;
-    private boolean mHasSampledColor;
 
     public BubbleBarHandleView(Context context) {
         this(context, null /* attrs */);
@@ -103,11 +102,7 @@ public class BubbleBarHandleView extends View {
         invalidate();
     }
 
-    /**
-     * Get current color value for the handle
-     */
-    @ColorInt
-    public int getHandleColor() {
+    private int getHandleColor() {
         return mHandlePaint.getColor();
     }
 
@@ -133,16 +128,6 @@ public class BubbleBarHandleView extends View {
     }
 
     /**
-     * Set initial color for the handle. Takes effect if the
-     * {@link #updateHandleColor(boolean, boolean)} has not been called.
-     */
-    public void setHandleInitialColor(@ColorInt int color) {
-        if (!mHasSampledColor) {
-            setHandleColor(color);
-        }
-    }
-
-    /**
      * Updates the handle color.
      *
      * @param isRegionDark Whether the background behind the handle is dark, and thus the handle
@@ -154,7 +139,6 @@ public class BubbleBarHandleView extends View {
         if (newColor == mRegionSamplerColor) {
             return;
         }
-        mHasSampledColor = true;
         mRegionSamplerColor = newColor;
         if (mColorChangeAnim != null) {
             mColorChangeAnim.cancel();

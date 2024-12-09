@@ -53,7 +53,6 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.sign
-import com.android.systemui.Flags.notificationShadeBlur
 
 /**
  * Responsible for blurring the notification shade window, and applying a zoom effect to the
@@ -221,9 +220,7 @@ constructor(
 
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
-            if (!notificationShadeBlur()) {
-                blur = 0
-            }
+            blur = 0
             zoomOut = 0f
         }
 
@@ -243,7 +240,7 @@ constructor(
         Choreographer.FrameCallback {
             updateScheduled = false
             val (blur, zoomOut) = computeBlurAndZoomOut()
-            val opaque = if (notificationShadeBlur()) false else scrimsVisible && !blursDisabledForAppLaunch
+            val opaque = scrimsVisible && !blursDisabledForAppLaunch
             Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
             blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
             lastAppliedBlur = blur
