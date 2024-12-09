@@ -740,7 +740,7 @@ public final class MessageQueue {
         return true;
     }
 
-    private Message legacyPeekOrPop(boolean peek) {
+    private Message legacyPeekOrPoll(boolean peek) {
         synchronized (this) {
             // Try to retrieve the next message.  Return if found.
             final long now = SystemClock.uptimeMillis();
@@ -795,7 +795,7 @@ public final class MessageQueue {
     @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
     Long peekWhenForTest() {
         throwIfNotTest();
-        Message ret = legacyPeekOrPop(true);
+        Message ret = legacyPeekOrPoll(true);
         return ret != null ? ret.when : null;
     }
 
@@ -807,9 +807,9 @@ public final class MessageQueue {
      */
     @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
     @Nullable
-    Message popForTest() {
+    Message pollForTest() {
         throwIfNotTest();
-        return legacyPeekOrPop(false);
+        return legacyPeekOrPoll(false);
     }
 
     /**

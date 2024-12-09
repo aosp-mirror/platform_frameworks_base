@@ -38,23 +38,30 @@ public final class EnableSecureLockDeviceParams implements Parcelable {
     /**
      * Client message associated with the request to enable secure lock on the device. This message
      * will be shown on the device when secure lock mode is enabled.
+     *
+     * Since this text is shown in a restricted lockscreen state, typeface properties such as color,
+     * font weight, or other formatting may not be honored.
      */
-    private final @NonNull String mMessage;
+    private final @NonNull CharSequence mMessage;
 
     /**
      * Creates EnableSecureLockDeviceParams with the given params.
      *
      * @param message Allows clients to pass in a message with information about the request to
      *                enable secure lock on the device. This message will be shown to the user when
-     *                secure lock mode is enabled. If an empty string is provided, it will default
-     *                to a system-defined string (e.g. "Device is securely locked remotely.")
+     *                secure lock mode is enabled. If an empty CharSequence is provided, it will
+     *                default to a system-defined CharSequence (e.g. "Device is securely locked
+     *                remotely.")
+     *
+     *                Since this text is shown in a restricted lockscreen state, typeface properties
+     *                such as color, font weight, or other formatting may not be honored.
      */
-    public EnableSecureLockDeviceParams(@NonNull String message) {
+    public EnableSecureLockDeviceParams(@NonNull CharSequence message) {
         mMessage = message;
     }
 
     private EnableSecureLockDeviceParams(@NonNull Parcel in) {
-        mMessage = Objects.requireNonNull(in.readString8());
+        mMessage = Objects.requireNonNull(in.readCharSequence());
     }
 
     public static final @NonNull Creator<EnableSecureLockDeviceParams> CREATOR =
@@ -77,6 +84,6 @@ public final class EnableSecureLockDeviceParams implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString8(mMessage);
+        dest.writeCharSequence(mMessage);
     }
 }
