@@ -1076,9 +1076,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             @Nullable TransitionHandler skip
     ) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
-            if (mHandlers.get(i) == skip) continue;
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try handler %s",
-                    mHandlers.get(i));
+            if (mHandlers.get(i) == skip) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " skip handler %s",
+                        mHandlers.get(i));
+                continue;
+            }
             boolean consumed = mHandlers.get(i).startAnimation(transition, info, startT, finishT,
                     finishCB);
             if (consumed) {
