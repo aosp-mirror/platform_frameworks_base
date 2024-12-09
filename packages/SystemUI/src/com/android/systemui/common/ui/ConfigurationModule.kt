@@ -21,7 +21,6 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Binds
@@ -54,7 +53,7 @@ interface ConfigurationModule {
         fun provideGlobalConfigurationState(
             configStateFactory: ConfigurationStateImpl.Factory,
             configurationController: ConfigurationController,
-            @Application context: Context,
+            @Main context: Context,
         ): ConfigurationState {
             return configStateFactory.create(context, configurationController)
         }
