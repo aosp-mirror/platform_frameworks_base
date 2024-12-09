@@ -228,7 +228,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
-        @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         boolean mImeRequestedVisible =
                 (WindowInsets.Type.defaultVisible() & WindowInsets.Type.ime()) != 0;
         InsetsSourceControl mImeSourceControl = null;
@@ -415,9 +414,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
-                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */);
+                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */,
+                        statsToken);
 
-                setVisibleDirectly(mImeRequestedVisible || mAnimation != null, statsToken);
+                // In case of a hide, the statsToken should not been send yet (as the animation
+                // is still ongoing). It will be sent at the end of the animation
+                boolean hideAnimOngoing = !mImeRequestedVisible && mAnimation != null;
+                setVisibleDirectly(mImeRequestedVisible || mAnimation != null,
+                        hideAnimOngoing ? null : statsToken);
             }
         }
 
@@ -426,12 +430,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         private void setVisibleDirectly(boolean visible, @Nullable ImeTracker.Token statsToken) {
             mInsetsState.setSourceVisible(InsetsSource.ID_IME, visible);
-            mRequestedVisibleTypes = visible
-                    ? mRequestedVisibleTypes | WindowInsets.Type.ime()
-                    : mRequestedVisibleTypes & ~WindowInsets.Type.ime();
+            int visibleTypes = visible ? WindowInsets.Type.ime() : 0;
             try {
                 mWmService.updateDisplayWindowRequestedVisibleTypes(mDisplayId,
-                        mRequestedVisibleTypes, statsToken);
+                        visibleTypes, WindowInsets.Type.ime(), statsToken);
             } catch (RemoteException e) {
             }
         }

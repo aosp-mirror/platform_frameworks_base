@@ -27,7 +27,6 @@ import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.ZenModeConfig
 import android.util.Log
 import com.android.settingslib.notification.modes.EnableZenModeDialog
-import com.android.settingslib.notification.modes.ZenMode
 import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -99,15 +98,6 @@ constructor(
     private var oldIsAvailable = false
     private var settingsValue: Int = 0
 
-    private val dndMode: StateFlow<ZenMode?> by lazy {
-        ModesUi.assertInNewMode()
-        interactor.dndMode.stateIn(
-            scope = backgroundScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null,
-        )
-    }
-
     private val isAvailable: StateFlow<Boolean> by lazy {
         ModesUi.assertInNewMode()
         interactor.isZenAvailable.stateIn(
@@ -146,7 +136,7 @@ constructor(
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         if (ModesUi.isEnabled) {
-            combine(isAvailable, dndMode) { isAvailable, dndMode ->
+            combine(isAvailable, interactor.dndMode) { isAvailable, dndMode ->
                 if (!isAvailable) {
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden
                 } else if (dndMode?.isActive == true) {
@@ -222,7 +212,7 @@ constructor(
             if (!isAvailable.value) {
                 KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
             } else {
-                val dnd = dndMode.value
+                val dnd = interactor.dndMode.value
                 if (dnd == null) {
                     Log.wtf(TAG, "Triggered DND but it's null!?")
                     return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled

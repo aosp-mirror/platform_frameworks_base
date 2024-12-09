@@ -38,7 +38,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.CameraCompatTaskInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.os.RemoteException;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -180,9 +182,26 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         if (activity != null) {
             activity.recomputeConfiguration();
             mCameraTask.dispatchTaskInfoChangedIfNeeded(/* force= */ true);
+            updateCompatibilityInfo(activity);
             activity.ensureActivityConfiguration(/* ignoreVisibility= */ true);
         } else {
             mCameraTask.dispatchTaskInfoChangedIfNeeded(/* force= */ true);
+        }
+    }
+
+    private void updateCompatibilityInfo(@NonNull ActivityRecord activityRecord) {
+        final CompatibilityInfo compatibilityInfo = activityRecord.mAtmService
+                .compatibilityInfoForPackageLocked(activityRecord.info.applicationInfo);
+        compatibilityInfo.applicationDisplayRotation =
+                CameraCompatTaskInfo.getDisplayRotationFromCameraCompatMode(
+                        getCameraCompatMode(activityRecord));
+        try {
+            // TODO(b/380840084): Consider using a ClientTransaction for this update.
+            activityRecord.app.getThread().updatePackageCompatibilityInfo(
+                    activityRecord.packageName, compatibilityInfo);
+        } catch (RemoteException e) {
+            ProtoLog.w(WmProtoLogGroups.WM_DEBUG_STATES,
+                    "Unable to update CompatibilityInfo for app %s", activityRecord.app);
         }
     }
 
@@ -191,7 +210,9 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity) {
-        return activity.inFreeformWindowingMode()
+        return  activity.mAppCompatController.getAppCompatCameraOverrides()
+                .shouldApplyFreeformTreatmentForCameraCompat()
+                && activity.inFreeformWindowingMode()
                 && mCameraStateMonitor.isCameraRunningForActivity(activity);
     }
 

@@ -29,9 +29,11 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -75,7 +77,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = null,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
@@ -94,15 +96,39 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = icon,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
 
             assertThat(latest).hasSize(1)
             val chip = latest!![0]
-            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
             assertThat(chip.icon).isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarView(icon))
+        }
+
+    @Test
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun chips_onePromotedNotif_connectedDisplaysFlagEnabled_statusBarIconMatches() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val notifKey = "notif"
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = notifKey,
+                        statusBarChipIcon = null,
+                        promotedContent = PromotedNotificationContentModel.Builder(notifKey).build(),
+                    )
+                )
+            )
+
+            assertThat(latest).hasSize(1)
+            val chip = latest!![0]
+            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+            assertThat(chip.icon)
+                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(notifKey))
         }
 
     @Test
@@ -117,17 +143,17 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif1",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif1").build(),
                     ),
                     activeNotificationModel(
                         key = "notif2",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif2").build(),
                     ),
                     activeNotificationModel(
                         key = "notif3",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = false,
+                        promotedContent = null,
                     ),
                 )
             )
@@ -135,6 +161,41 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             assertThat(latest).hasSize(2)
             assertIsNotifChip(latest!![0], firstIcon)
             assertIsNotifChip(latest!![1], secondIcon)
+        }
+
+    @Test
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun chips_connectedDisplaysFlagEnabled_onlyForPromotedNotifs() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val firstKey = "notif1"
+            val secondKey = "notif2"
+            val thirdKey = "notif3"
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = firstKey,
+                        statusBarChipIcon = null,
+                        promotedContent = PromotedNotificationContentModel.Builder(firstKey).build(),
+                    ),
+                    activeNotificationModel(
+                        key = secondKey,
+                        statusBarChipIcon = null,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder(secondKey).build(),
+                    ),
+                    activeNotificationModel(
+                        key = thirdKey,
+                        statusBarChipIcon = null,
+                        promotedContent = null,
+                    ),
+                )
+            )
+
+            assertThat(latest).hasSize(2)
+            assertIsNotifKey(latest!![0], firstKey)
+            assertIsNotifKey(latest!![1], secondKey)
         }
 
     @Test
@@ -151,7 +212,8 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "clickTest",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("clickTest").build(),
                     )
                 )
             )
@@ -171,9 +233,17 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
     companion object {
         fun assertIsNotifChip(latest: OngoingActivityChipModel?, expectedIcon: StatusBarIconView) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
+            assertThat(latest)
+                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
                 .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarView(expectedIcon))
+        }
+
+        fun assertIsNotifKey(latest: OngoingActivityChipModel?, expectedKey: String) {
+            assertThat(latest)
+                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(expectedKey))
         }
     }
 }

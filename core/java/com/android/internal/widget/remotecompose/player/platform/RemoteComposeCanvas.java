@@ -205,19 +205,46 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         return count;
     }
 
+    /**
+     * set a float externally
+     *
+     * @param id
+     * @param value
+     */
     public void setExternalFloat(int id, float value) {
         mARContext.loadFloat(id, value);
+    }
+
+    /**
+     * Returns true if the document supports drag touch events
+     *
+     * @return true if draggable content, false otherwise
+     */
+    public boolean isDraggable() {
+        if (mDocument == null) {
+            return false;
+        }
+        return mDocument.getDocument().hasTouchListener();
+    }
+
+    /**
+     * Check shaders and disable them
+     *
+     * @param shaderControl the callback to validate the shader
+     */
+    public void checkShaders(CoreDocument.ShaderControl shaderControl) {
+        mDocument.getDocument().checkShaders(mARContext, shaderControl);
     }
 
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
 
-    public void addClickListener(ClickCallbacks callback) {
+    public void addIdActionListener(ClickCallbacks callback) {
         if (mDocument == null) {
             return;
         }
-        mDocument.getDocument().addClickListener((id, metadata) -> callback.click(id, metadata));
+        mDocument.getDocument().addIdActionListener((id, metadata) -> callback.click(id, metadata));
     }
 
     public int getTheme() {
@@ -267,6 +294,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                     invalidate();
                     return true;
                 }
+                return false;
 
             case MotionEvent.ACTION_UP:
                 mInActionDown = false;
@@ -280,6 +308,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                     invalidate();
                     return true;
                 }
+                return false;
 
             case MotionEvent.ACTION_MOVE:
                 if (mInActionDown) {
@@ -293,6 +322,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                     }
                     return true;
                 }
+                return false;
         }
         return false;
     }

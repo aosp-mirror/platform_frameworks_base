@@ -51,6 +51,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
@@ -181,6 +182,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
     private static final int MSG_CURRENT_USER_CHANGED = 4;
+    private static final int MSG_SYSTEM_READY = 5;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -351,6 +353,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
+    // Manages storage and retrieval of input data.
+    private final InputDataStore mInputDataStore;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -471,11 +476,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         KeyboardBacklightControllerInterface getKeyboardBacklightController(
-                NativeInputManagerService nativeService, PersistentDataStore dataStore) {
-            return InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
-                    ? new KeyboardBacklightController(mContext, nativeService, dataStore,
-                    mLooper, mUEventManager)
-                    : new KeyboardBacklightControllerInterface() {};
+                NativeInputManagerService nativeService) {
+            return new KeyboardBacklightController(mContext, nativeService, mLooper,
+                    mUEventManager);
         }
     }
 
@@ -500,9 +503,11 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
-        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative, mDataStore);
+        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative);
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
+        mInputDataStore = new InputDataStore();
+        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper(),
+                mInputDataStore);
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -564,6 +569,14 @@ public class InputManagerService extends IInputManager.Stub
 
         // Add ourselves to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+    }
+
+    private void onBootPhase(int phase) {
+        // On ActivityManager thread, shift to handler to avoid blocking other system services in
+        // this boot phase.
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
+        }
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -646,6 +659,10 @@ public class InputManagerService extends IInputManager.Stub
         // Attempt to update the default pointer display when the viewports change.
         // Take care to not make calls to window manager while holding internal locks.
         mNative.setPointerDisplayId(mWindowManagerCallbacks.getPointerDisplayId());
+    }
+
+    private void setDisplayTopologyInternal(DisplayTopology topology) {
+        mNative.setDisplayTopology(topology.getGraph());
     }
 
     /**
@@ -3222,6 +3239,9 @@ public class InputManagerService extends IInputManager.Stub
                 case MSG_CURRENT_USER_CHANGED:
                     handleCurrentUserChanged((int) msg.obj);
                     break;
+                case MSG_SYSTEM_READY:
+                    systemRunning();
+                    break;
             }
         }
     }
@@ -3426,10 +3446,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void onBootPhase(int phase) {
-            // Called on ActivityManager thread.
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemRunning();
-            }
+            mService.onBootPhase(phase);
         }
 
         @Override
@@ -3446,6 +3463,11 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setDisplayViewports(List<DisplayViewport> viewports) {
             setDisplayViewportsInternal(viewports);
+        }
+
+        @Override
+        public void setDisplayTopology(DisplayTopology topology) {
+            setDisplayTopologyInternal(topology);
         }
 
         @Override

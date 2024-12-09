@@ -90,6 +90,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.clearInvocations
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -528,6 +529,8 @@ class ClockEventControllerTest : SysuiTestCase() {
     fun listenForDnd_onDndChange_updatesClockZenMode() =
         testScope.runTest {
             underTest.listenForDnd(testScope.backgroundScope)
+            runCurrent()
+            clearInvocations(events)
 
             zenModeRepository.activateMode(dndModeId)
             runCurrent()

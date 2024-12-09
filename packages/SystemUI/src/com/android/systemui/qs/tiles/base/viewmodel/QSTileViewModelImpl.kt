@@ -17,8 +17,10 @@
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import android.os.UserHandle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Dumpable
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.DisabledByPolicyInteractor
@@ -58,11 +60,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
-import com.android.app.tracing.coroutines.launchTraced as launch
-import kotlinx.coroutines.withContext
 
 /**
  * Provides a hassle-free way to implement new tiles according to current System UI architecture
@@ -90,36 +89,38 @@ class QSTileViewModelImpl<DATA_TYPE>(
 
     private val users: MutableStateFlow<UserHandle> =
         MutableStateFlow(userRepository.getSelectedUserInfo().userHandle)
+
     private val userInputs: MutableSharedFlow<QSTileUserAction> = MutableSharedFlow()
+
     private val forceUpdates: MutableSharedFlow<Unit> = MutableSharedFlow()
     private val spec
         get() = config.tileSpec
 
-    private val tileData: SharedFlow<DATA_TYPE> = createTileDataFlow()
+    private val tileData: SharedFlow<DATA_TYPE?> = createTileDataFlow()
 
     override val state: StateFlow<QSTileState?> =
         tileData
             .map { data ->
-                withContext(uiBackgroundDispatcher) { mapper().map(config, data) }
-                    .also { state -> qsTileLogger.logStateUpdate(spec, state, data) }
+                data?.let {
+                    mapper().map(config, it).also { state ->
+                        qsTileLogger.logStateUpdate(spec, state, it)
+                    }
+                }
             }
-            .stateIn(
-                tileScope,
-                SharingStarted.WhileSubscribed(),
-                null,
-            )
+            .flowOn(uiBackgroundDispatcher)
+            .stateIn(tileScope, SharingStarted.WhileSubscribed(), null)
+
     override val isAvailable: StateFlow<Boolean> =
         users
             .flatMapLatest { tileDataInteractor().availability(it) }
             .flowOn(backgroundDispatcher)
-            .stateIn(
-                tileScope,
-                SharingStarted.WhileSubscribed(),
-                true,
-            )
+            .stateIn(tileScope, SharingStarted.WhileSubscribed(), true)
+
+    override val detailsViewModel: TileDetailsViewModel?
+        get() = userActionInteractor().detailsViewModel
 
     override fun forceUpdate() {
-        tileScope.launch { forceUpdates.emit(Unit) }
+        tileScope.launch(context = backgroundDispatcher) { forceUpdates.emit(Unit) }
     }
 
     override fun onUserChanged(user: UserHandle) {
@@ -131,9 +132,9 @@ class QSTileViewModelImpl<DATA_TYPE>(
             userAction,
             spec,
             tileData.replayCache.isNotEmpty(),
-            state.replayCache.isNotEmpty()
+            state.replayCache.isNotEmpty(),
         )
-        tileScope.launch { userInputs.emit(userAction) }
+        tileScope.launch(context = backgroundDispatcher) { userInputs.emit(userAction) }
     }
 
     override fun destroy() {
@@ -147,7 +148,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
             println(state.replayCache.lastOrNull().toString())
         }
 
-    private fun createTileDataFlow(): SharedFlow<DATA_TYPE> =
+    private fun createTileDataFlow(): SharedFlow<DATA_TYPE?> =
         users
             .transformLatest { user ->
                 coroutineScope {
@@ -159,6 +160,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
                                     .onEach { qsTileLogger.logForceUpdate(spec) },
                             )
                             .onStart { qsTileLogger.logInitialRequest(spec) }
+                            .flowOn(backgroundDispatcher)
                             .stateIn(this, SharingStarted.Eagerly, DataUpdateTrigger.InitialRequest)
                     tileDataInteractor()
                         .tileData(user, updateTriggers)
@@ -171,11 +173,8 @@ class QSTileViewModelImpl<DATA_TYPE>(
                 }
             }
             .distinctUntilChanged()
-            .shareIn(
-                tileScope,
-                SharingStarted.WhileSubscribed(),
-                replay = 1, // we only care about the most recent value
-            )
+            .flowOn(backgroundDispatcher)
+            .stateIn(tileScope, SharingStarted.WhileSubscribed(), null)
 
     /**
      * Creates a user input flow which:

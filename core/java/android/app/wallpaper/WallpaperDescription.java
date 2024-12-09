@@ -20,6 +20,7 @@ import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 
 import android.annotation.FlaggedApi;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
@@ -153,6 +154,7 @@ public final class WallpaperDescription implements Parcelable {
      * {@link Builder#setCropHints(SparseArray)}
      * @hide
      */
+    @SystemApi
     @NonNull
     public SparseArray<Rect> getCropHints() {
         return mCropHints;

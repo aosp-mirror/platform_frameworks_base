@@ -72,12 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O identificador de chamadas assume o padrão de restrito. Próxima chamada: Não restrita"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Restrita"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Não restrita"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Este app não é compatível com 16 KB. Falha na verificação de alinhamento do APK. Este app será executado usando o modo compatível com o tamanho da página. Para melhorar a compatibilidade, é preciso recompilar o aplicativo com suporte a 16 KB. Para mais informações, consulte &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Este app não é compatível com 16 KB. Falha na verificação de alinhamento ELF. Este app será executado usando o modo compatível com o tamanho da página. Para melhorar a compatibilidade, é preciso recompilar o aplicativo com suporte a 16 KB. Para mais informações, consulte &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Este app não é compatível com 16 KB. Falha nas verificações de alinhamento do APK e do ELF. Este app será executado usando o modo compatível com o tamanho da página. Para melhorar a compatibilidade, é preciso recompilar o aplicativo com suporte a 16 KB. Para mais informações, consulte &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"O serviço não foi habilitado."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Não é possível alterar a configuração do identificador de chamadas."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Dados da <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ativados"</string>
@@ -1162,6 +1159,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"em <xliff:g id="COUNT">%d</xliff:g>h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"em <xliff:g id="COUNT">%d</xliff:g> dias"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"em <xliff:g id="COUNT">%d</xliff:g>a"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"há <xliff:g id="COUNT">%d</xliff:g>min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"há <xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"há <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"há <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"em <xliff:g id="COUNT">%d</xliff:g>min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"em <xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"em <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"em <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"há <xliff:g id="COUNT">%d</xliff:g>min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"há <xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"há <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"há <xliff:g id="COUNT">%d</xliff:g> a"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto atrás}one{# minuto atrás}many{# minutos atrás}other{# minutos atrás}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# hora atrás}one{# hora atrás}many{# horas atrás}other{# horas atrás}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# dia atrás}one{# dia atrás}many{# dias atrás}other{# dias atrás}}"</string>

@@ -529,7 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Para abrir uma app através de um widget, vai ter de validar a sua identidade. Além disso, tenha em atenção que qualquer pessoa pode ver os widgets, mesmo quando o tablet estiver bloqueado. Alguns widgets podem não se destinar ao ecrã de bloqueio e pode ser inseguro adicioná-los aqui."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Para adicionar widgets ao ecrã de bloqueio como um atalho, certifique-se de que estão ativados nas definições."</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Para adicionar o atalho \"Widgets\", certifique-se de que a opção \"Mostrar widgets no ecrã de bloqueio\" está ativada nas definições."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Definições"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mudar utilizador"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu pendente"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as apps e dados desta sessão serão eliminados."</string>
@@ -590,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificações"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Limpar todas as notificações silenciosas"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificações colocadas em pausa pelo modo Não incomodar."</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Sem notificações}=1{Notificações pausadas pelo modo {mode}}=2{Notificações pausadas pelo modo {mode} e mais um modo}many{Notificações pausadas pelo modo {mode} e mais # modos}other{Notificações pausadas pelo modo {mode} e mais # modos}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Começar agora"</string>
@@ -704,6 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Posição da cabeça"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Toque para alterar o modo de campainha"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"modo de som"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, toque para alterar o modo de som"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"desativar som"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"reativar som"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrar"</string>
@@ -1415,7 +1419,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Controlos do sistema"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Apps do sistema"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Execução de várias tarefas em simultâneo"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Apps recentes"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Ecrã dividido"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Entrada"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Atalhos de apps"</string>
@@ -1424,14 +1427,17 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Atalhos de teclado"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalize os atalhos de teclado"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Remover atalho?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Repor para a predefinição?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Prima a tecla para atribuir o atalho"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Esta ação elimina o atalho personalizado permanentemente."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Esta ação elimina todos os seus atalhos personalizados permanentemente."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Pesquisar atalhos"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Nenhum resultado da pesquisa"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ícone de reduzir"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ícone da tecla Meta ou de ação"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ícone de mais"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Personalizar"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Repor"</string>
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Concluir"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ícone de expandir"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ou"</string>
@@ -1441,6 +1447,7 @@
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Definições do teclado"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Configurar atalho"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Remover"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Sim, repor"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Cancelar"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Prima a tecla"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"A combinação de teclas já está a ser usada. Experimente outra tecla."</string>
@@ -1472,6 +1479,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Prima a tecla de ação no teclado"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Muito bem!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Concluiu o gesto para ver todas as apps"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animação do tutorial, clique para pausar e retomar a reprodução."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Luz do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nível %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controlos domésticos"</string>

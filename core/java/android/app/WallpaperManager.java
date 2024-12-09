@@ -2092,7 +2092,7 @@ public class WallpaperManager {
 
     /**
      * Returns the description of the designated wallpaper. Returns null if the lock screen
-     * wallpaper is requested lock screen wallpaper is not set.
+     * wallpaper is requested and lock screen wallpaper is not set.
 
      * @param which Specifies wallpaper to request (home or lock).
      * @throws IllegalArgumentException if {@code which} is not exactly one of
@@ -2733,7 +2733,7 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
-    @TestApi
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public int setStreamWithDescription(@NonNull InputStream bitmapData,
             @NonNull WallpaperDescription description, boolean allowBackup,

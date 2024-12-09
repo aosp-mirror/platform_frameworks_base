@@ -83,7 +83,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
@@ -99,7 +98,6 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -110,6 +108,8 @@ import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyS
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpUtil;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -126,7 +126,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrol
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
@@ -2630,6 +2629,7 @@ public class NotificationStackScrollLayout
     private void updateContentHeight() {
         if (SceneContainerFlag.isEnabled()) {
             updateIntrinsicStackHeight();
+            updateStackEndHeightAndStackHeight(mAmbientState.getExpansionFraction());
             return;
         }
 
@@ -4729,10 +4729,10 @@ public class NotificationStackScrollLayout
      * Update colors of section headers, shade footer, and empty shade views.
      */
     void updateDecorViews() {
-        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.materialColorOnSurface);
-        final @ColorInt int onSurfaceVariant = Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.materialColorOnSurfaceVariant);
+        final @ColorInt int onSurface = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurface);
+        final @ColorInt int onSurfaceVariant = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurfaceVariant);
 
         ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
         if (colorUpdateLogger != null) {
@@ -6860,7 +6860,7 @@ public class NotificationStackScrollLayout
             mExpandedGroupView = changedRow;
             mNeedsAnimation = true;
         }
-        changedRow.setChildrenExpanded(expanded, animated);
+        changedRow.setChildrenExpanded(expanded);
         onChildHeightChanged(changedRow, false /* needsAnimation */);
 
         runAfterAnimationFinished(new Runnable() {

@@ -22,14 +22,8 @@ import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_BACK
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_HOME
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS
-import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN
@@ -74,13 +68,7 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to MultiTasking,
 
             // App Category
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to AppCategories,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to AppCategories,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to AppCategories,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to AppCategories,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to AppCategories,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to AppCategories,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to AppCategories,
+            KEY_GESTURE_TYPE_LAUNCH_APPLICATION to AppCategories,
         )
 
     val gestureToInternalKeyboardShortcutGroupLabelResIdMap =
@@ -116,20 +104,14 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
                 R.string.shortcutHelper_category_split_screen,
 
             // App Category
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to
-                R.string.keyboard_shortcut_group_applications,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to
-                R.string.keyboard_shortcut_group_applications,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to
-                R.string.keyboard_shortcut_group_applications,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to
-                R.string.keyboard_shortcut_group_applications,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to R.string.keyboard_shortcut_group_applications,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to R.string.keyboard_shortcut_group_applications,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to
+            KEY_GESTURE_TYPE_LAUNCH_APPLICATION to
                 R.string.keyboard_shortcut_group_applications,
         )
 
+    /**
+     * App Category shortcut labels are mapped dynamically based on intent
+     * see [InputGestureDataAdapter.fetchShortcutLabelByAppLaunchData]
+     */
     val gestureToInternalKeyboardShortcutInfoLabelResIdMap =
         mapOf(
             // System Category
@@ -154,26 +136,6 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to R.string.system_multitasking_lhs,
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to R.string.system_multitasking_rhs,
             KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to R.string.system_multitasking_full_screen,
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT to
-                R.string.system_multitasking_splitscreen_focus_lhs,
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to
-                R.string.system_multitasking_splitscreen_focus_rhs,
-
-            // App Category
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR to
-                R.string.keyboard_shortcut_group_applications_calculator,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR to
-                R.string.keyboard_shortcut_group_applications_calendar,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER to
-                R.string.keyboard_shortcut_group_applications_browser,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS to
-                R.string.keyboard_shortcut_group_applications_contacts,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL to
-                R.string.keyboard_shortcut_group_applications_email,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS to
-                R.string.keyboard_shortcut_group_applications_maps,
-            KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING to
-                R.string.keyboard_shortcut_group_applications_sms,
         )
 
     val shortcutLabelToKeyGestureTypeMap: Map<String, Int>

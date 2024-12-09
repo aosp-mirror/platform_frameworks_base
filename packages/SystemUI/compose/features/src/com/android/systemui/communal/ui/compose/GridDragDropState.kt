@@ -94,7 +94,7 @@ internal constructor(
     private val scope: CoroutineScope,
     private val updateDragPositionForRemove: (draggingBoundingBox: IntRect) -> Boolean,
 ) {
-    var draggingItemKey by mutableStateOf<String?>(null)
+    var draggingItemKey by mutableStateOf<Any?>(null)
         private set
 
     var isDraggingToRemove by mutableStateOf(false)
@@ -138,7 +138,7 @@ internal constructor(
             // before content padding from the initial pointer position
             .firstItemAtOffset(normalizedOffset - contentOffset)
             ?.apply {
-                draggingItemKey = key as String
+                draggingItemKey = key
                 draggingItemInitialOffset = this.offset.toOffset()
                 return true
             }
@@ -284,9 +284,7 @@ fun Modifier.dragContainer(
                             contentOffset,
                         )
                     ) {
-                        // draggingItemKey is guaranteed to be non-null here because it is set in
-                        // onDragStart()
-                        viewModel.onReorderWidgetStart(dragDropState.draggingItemKey!!)
+                        viewModel.onReorderWidgetStart()
                     }
                 },
                 onDragEnd = {

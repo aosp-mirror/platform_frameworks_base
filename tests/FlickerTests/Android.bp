@@ -41,6 +41,7 @@ java_defaults {
         "platform-test-annotations",
         "wm-flicker-common-app-helpers",
         "wm-shell-flicker-utils",
+        "systemui-tapl",
     ],
     data: [":FlickerTestApp"],
 }

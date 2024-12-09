@@ -644,4 +644,7 @@ interface IDevicePolicyManager {
     int getPolicySizeForAdmin(String callerPackageName, in EnforcingAdmin admin);
 
     int getHeadlessDeviceOwnerMode(String callerPackageName);
+
+    void setAppFunctionsPolicy(String callerPackageName, int policy);
+    int getAppFunctionsPolicy(String callerPackageName, int userId);
 }

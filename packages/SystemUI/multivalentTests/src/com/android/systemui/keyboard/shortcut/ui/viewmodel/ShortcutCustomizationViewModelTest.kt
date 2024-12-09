@@ -108,7 +108,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             viewModel.onShortcutCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
 
-            assertThat(uiState).isEqualTo(ResetShortcutDialog())
+            assertThat(uiState).isEqualTo(ResetShortcutDialog)
         }
     }
 
@@ -118,45 +118,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
 
-            assertThat(uiState).isEqualTo(DeleteShortcutDialog())
-        }
-    }
-
-    @Test
-    fun uiState_consumedOnAddDialogShown() {
-        testScope.runTest {
-            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            viewModel.onDialogShown()
-
-            assertThat((uiState as AddShortcutDialog).isDialogShowing)
-                .isTrue()
-        }
-    }
-
-    @Test
-    fun uiState_consumedOnDeleteDialogShown() {
-        testScope.runTest {
-            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
-            viewModel.onDialogShown()
-
-            assertThat(
-                    (uiState as DeleteShortcutDialog).isDialogShowing
-                )
-                .isTrue()
-        }
-    }
-
-    @Test
-    fun uiState_consumedOnResetDialogShown() {
-        testScope.runTest {
-            val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
-            viewModel.onShortcutCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
-            viewModel.onDialogShown()
-
-            assertThat((uiState as ResetShortcutDialog).isDialogShowing)
-                .isTrue()
+            assertThat(uiState).isEqualTo(DeleteShortcutDialog)
         }
     }
 
@@ -165,7 +127,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            viewModel.onDialogShown()
             viewModel.onDialogDismissed()
             assertThat(uiState).isEqualTo(ShortcutCustomizationUiState.Inactive)
         }
@@ -199,7 +160,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
-            viewModel.onDialogShown()
 
             assertThat((uiState as AddShortcutDialog).errorMessage)
                 .isEmpty()
@@ -339,7 +299,6 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
 
     private suspend fun openAddShortcutDialogAndSetShortcut() {
         viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
-        viewModel.onDialogShown()
 
         viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
         viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
@@ -349,14 +308,12 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
 
     private suspend fun openDeleteShortcutDialogAndDeleteShortcut() {
         viewModel.onShortcutCustomizationRequested(allAppsShortcutDeleteRequest)
-        viewModel.onDialogShown()
 
         viewModel.deleteShortcutCurrentlyBeingCustomized()
     }
 
     private suspend fun openResetShortcutDialogAndResetAllCustomShortcuts() {
         viewModel.onShortcutCustomizationRequested(ShortcutCustomizationRequestInfo.Reset)
-        viewModel.onDialogShown()
 
         viewModel.resetAllCustomShortcuts()
     }

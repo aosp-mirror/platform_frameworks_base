@@ -66,6 +66,7 @@ import com.android.systemui.scene.shared.model.sceneDataSource
 import com.android.systemui.settings.brightness.domain.interactor.brightnessMirrorShowingInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeLayoutParams
 import com.android.systemui.shade.domain.interactor.shadeModeInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.ui.viewmodel.notificationShadeWindowModel
@@ -133,6 +134,7 @@ class KosmosJavaAdapter() {
     val simBouncerInteractor by lazy { kosmos.simBouncerInteractor }
     val statusBarStateController by lazy { kosmos.statusBarStateController }
     val statusBarModePerDisplayRepository by lazy { kosmos.fakeStatusBarModePerDisplayRepository }
+    val shadeLayoutParams by lazy { kosmos.shadeLayoutParams }
     val autoHideControllerStore by lazy { kosmos.fakeAutoHideControllerStore }
     val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
     val fakeSceneContainerConfig by lazy { kosmos.sceneContainerConfig }

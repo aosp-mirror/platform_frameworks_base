@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="android.nfc">
 
-    <application>
+    <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
     </application>
 

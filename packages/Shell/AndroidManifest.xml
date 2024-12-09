@@ -65,7 +65,6 @@
     <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL" />
     <uses-permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
     <uses-permission android:name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
-    <uses-permission android:name="android.permission.READ_DROPBOX_DATA" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -989,6 +988,10 @@
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
     <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+
+    <!-- Permission for TestClassifier tests to get access to classifier by type -->
+    <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
+        android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
 
     <application
         android:label="@string/app_label"

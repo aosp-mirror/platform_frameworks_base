@@ -63,8 +63,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
-import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.Voice;
@@ -73,7 +71,6 @@ import android.view.Display;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
 import android.widget.Toast;
 
@@ -86,7 +83,6 @@ import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -104,8 +100,6 @@ import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityShortcutControllerTest {
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final String SERVICE_NAME_STRING = "fake.package/fake.service.name";
     private static final CharSequence PACKAGE_NAME_STRING = "Service name";
     private static final String SERVICE_NAME_SUMMARY = "Summary";
@@ -535,7 +529,6 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_RESTORE_A11Y_SHORTCUT_TARGET_SERVICE)
     public void testOnAccessibilityShortcut_settingNull_dialogShown_enablesDefaultShortcut()
             throws Exception {
         configureDefaultAccessibilityService();

@@ -24,7 +24,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
 import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -174,11 +173,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mTextWatcher = new SendButtonTextWatcher();
         mEditorActionHandler = new EditorActionHandler();
         mUiEventLogger = Dependency.get(UiEventLogger.class);
-        TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
-                com.android.internal.R.attr.materialColorSurfaceDim,
-        });
-        mLastBackgroundColor = ta.getColor(0, 0);
-        ta.recycle();
+        mLastBackgroundColor = getContext().getColor(
+                com.android.internal.R.color.materialColorSurfaceDim);
     }
 
     // TODO(b/193539698): move to Controller, since we're just directly accessing a system service
@@ -229,13 +225,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             textColor = mContext.getColorStateList(R.color.remote_input_text);
             hintColor = mContext.getColor(R.color.remote_input_hint);
             deleteFgColor = textColor.getDefaultColor();
-            try (TypedArray ta = getContext().getTheme().obtainStyledAttributes(new int[]{
-                    com.android.internal.R.attr.materialColorSurfaceDim,
-                    com.android.internal.R.attr.materialColorSurfaceVariant
-            })) {
-                editBgColor = ta.getColor(0, backgroundColor);
-                deleteBgColor = ta.getColor(1, Color.GRAY);
-            }
+            editBgColor = getContext().getColor(
+                    com.android.internal.R.color.materialColorSurfaceDim);
+            deleteBgColor = getContext().getColor(
+                    com.android.internal.R.color.materialColorSurfaceVariant);
         }
 
         mEditText.setTextColor(textColor);

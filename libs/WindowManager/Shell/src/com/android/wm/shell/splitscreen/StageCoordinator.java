@@ -1776,6 +1776,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         outBottomOrRightBounds.set(mSplitLayout.getBottomRightBounds());
     }
 
+    void getRefStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        outTopOrLeftBounds.set(mSplitLayout.getTopLeftRefBounds());
+        outBottomOrRightBounds.set(mSplitLayout.getBottomRightRefBounds());
+    }
+
     private void runForActiveStages(Consumer<StageTaskListener> consumer) {
         mStageOrderOperator.getActiveStages().forEach(consumer);
     }
@@ -2150,8 +2155,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.setForceTranslucent(mRootTaskInfo.token, translucent);
     }
 
-    /** Callback when split roots visiblility changed.
-     * NOTICE: This only be called on legacy transition. */
+    /** Callback when split roots visiblility changed. */
     @Override
     public void onStageVisibilityChanged(StageTaskListener stageListener) {
         // If split didn't active, just ignore this callback because we should already did these

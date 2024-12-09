@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+  name: "improve_fill_dialog_aconfig"
+  namespace: "autofill"
+  description: "Improvements for Fill Dialog. Guard DeviceConfig rollout "
+  bug: "382493181"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "fill_fields_from_current_session_only"
   namespace: "autofill"
   description: "Only fill autofill fields that are part of the current session."

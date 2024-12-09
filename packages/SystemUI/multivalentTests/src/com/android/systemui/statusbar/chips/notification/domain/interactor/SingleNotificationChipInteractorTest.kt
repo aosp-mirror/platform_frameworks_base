@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.notification.domain.interactor
 
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,6 +26,8 @@ import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -42,7 +45,8 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
     fun notificationChip_startsWithStartingModel() =
         kosmos.runTest {
             val icon = mock<StatusBarIconView>()
-            val startingNotif = activeNotificationModel(key = "notif1", statusBarChipIcon = icon)
+            val startingNotif =
+                activeNotificationModel(key = "notif1", statusBarChipIcon = icon, whenTime = 5432)
 
             val underTest = factory.create(startingNotif)
 
@@ -50,6 +54,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest!!.key).isEqualTo("notif1")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(icon)
+            assertThat(latest!!.whenTime).isEqualTo(5432)
         }
 
     @Test
@@ -65,11 +70,16 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
 
             val newIconView = mock<StatusBarIconView>()
             underTest.setNotification(
-                activeNotificationModel(key = "notif1", statusBarChipIcon = newIconView)
+                activeNotificationModel(
+                    key = "notif1",
+                    statusBarChipIcon = newIconView,
+                    whenTime = 6543,
+                )
             )
 
             assertThat(latest!!.key).isEqualTo("notif1")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(newIconView)
+            assertThat(latest!!.whenTime).isEqualTo(6543)
         }
 
     @Test
@@ -104,6 +114,27 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChip_cdEnabled_missingStatusBarIconChipView_inConstructor_emitsNotNull() =
+        kosmos.runTest {
+            val underTest =
+                factory.create(
+                    activeNotificationModel(
+                        key = "notif1",
+                        statusBarChipIcon = null,
+                        whenTime = 123L,
+                    )
+                )
+
+            val latest by collectLastValue(underTest.notificationChip)
+
+            assertThat(latest)
+                .isEqualTo(
+                    NotificationChipModel("notif1", statusBarChipIconView = null, whenTime = 123L)
+                )
+        }
+
+    @Test
     fun notificationChip_missingStatusBarIconChipView_inSet_emitsNull() =
         kosmos.runTest {
             val startingNotif = activeNotificationModel(key = "notif1", statusBarChipIcon = mock())
@@ -116,6 +147,29 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
             )
 
             assertThat(latest).isNull()
+        }
+
+    @Test
+    @EnableFlags(StatusBarConnectedDisplays.FLAG_NAME)
+    fun notificationChip_missingStatusBarIconChipView_inSet_cdEnabled_emitsNotNull() =
+        kosmos.runTest {
+            val startingNotif = activeNotificationModel(key = "notif1", statusBarChipIcon = mock())
+            val underTest = factory.create(startingNotif)
+            val latest by collectLastValue(underTest.notificationChip)
+            assertThat(latest).isNotNull()
+
+            underTest.setNotification(
+                activeNotificationModel(key = "notif1", statusBarChipIcon = null, whenTime = 123L)
+            )
+
+            assertThat(latest)
+                .isEqualTo(
+                    NotificationChipModel(
+                        key = "notif1",
+                        statusBarChipIconView = null,
+                        whenTime = 123L,
+                    )
+                )
         }
 
     @Test

@@ -32,7 +32,6 @@ import static com.android.wm.shell.common.split.SplitScreenUtils.isValidToSplit;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.KEY_EXTRA_WIDGET_INTENT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_0;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_1;
@@ -282,7 +281,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mShellCommandHandler.addCommandCallback("splitscreen", mSplitScreenShellCommandHandler,
                 this);
         mShellController.addKeyguardChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SPLIT_SCREEN,
+        mShellController.addExternalInterface(ISplitScreen.DESCRIPTOR,
                 this::createExternalInterface, this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
@@ -511,6 +510,11 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
 
     public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
         mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
+    }
+
+    /** Get the parent-based coordinates for split stages. */
+    public void getRefStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        mStageCoordinator.getRefStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
     }
 
     public void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {

@@ -19,18 +19,10 @@
 
        <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING"     />
        <uses-permission android:name="android.permission.INTERNET"/>
+       <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE" />
 
     <application android:testOnly="true" android:debuggable="true" android:usesCleartextTraffic="true">
       <uses-library android:name="android.test.runner"/>
-        <receiver android:name="com.android.server.security.intrusiondetection.IntrusionDetectionAdminReceiver"
-             android:permission="android.permission.BIND_DEVICE_ADMIN"
-             android:exported="true">
-            <meta-data android:name="android.app.device_admin"
-                 android:resource="@xml/device_admin"/>
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
-            </intent-filter>
-        </receiver>
     </application>
 
     <queries>

@@ -24,7 +24,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.wm.shell.Flags.enableShellTopTaskTracking;
 import static com.android.wm.shell.desktopmode.DesktopWallpaperActivity.isWallpaperTask;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_OBSERVER;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_RECENT_TASKS;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
@@ -181,7 +180,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     @RequiresPermission(Manifest.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)
     void onInit() {
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_RECENT_TASKS,
+        mShellController.addExternalInterface(IRecentTasks.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mUserId = ActivityManager.getCurrentUser();
@@ -551,7 +550,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 groupedTasks.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
-                if (Flags.enableRefactorTaskThumbnail() && isWallpaperTask(taskInfo)) {
+                if (
+                        Flags.enableUseTopVisibleActivityForExcludeFromRecentTask()
+                                && isWallpaperTask(taskInfo)) {
                     // Don't add the wallpaper task as an entry in grouped tasks
                     continue;
                 }

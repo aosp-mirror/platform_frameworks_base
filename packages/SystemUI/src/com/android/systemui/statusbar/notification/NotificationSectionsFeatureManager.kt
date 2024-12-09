@@ -18,13 +18,14 @@ package com.android.systemui.statusbar.notification
 
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.Utils
 import javax.inject.Inject
 
 @SysUISingleton
 class NotificationSectionsFeatureManager
 @Inject
-constructor(val context: Context) {
+constructor(@ShadeDisplayAware val context: Context) {
 
     fun isMediaControlsEnabled(): Boolean {
         return Utils.useQsMediaPlayer(context)

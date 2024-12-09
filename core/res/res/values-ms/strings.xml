@@ -71,12 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID pemanggil secara lalainya ditetapkan kepada terhad. Panggilan seterusnya: Tidak terhad"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID pemanggil secara lalainya ditetapkan kepada tidak terhad. Panggilan seterusnya: Terhad"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pemanggil secara lalainya ditetapkan kepada tidak dihadkan. Panggilan seterusnya: Tidak terhad"</string>
-    <!-- no translation found for page_size_compat_apk_warning (2982396798449041224) -->
-    <skip />
-    <!-- no translation found for page_size_compat_elf_warning (6753874059564812651) -->
-    <skip />
-    <!-- no translation found for page_size_compat_apk_and_elf_warning (7628675779500605390) -->
-    <skip />
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Apl ini tidak serasi untuk 16 KB. Semakan penjajaran APK gagal. Apl ini akan dijalankan menggunakan mod serasi saiz halaman. Untuk keserasian yang terbaik, sila susun semula aplikasi dengan sokongan 16 KB. Untuk mendapatkan maklumat lanjut, lihat &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Apl ini tidak serasi untuk 16 KB. Semakan penjajaran ELF gagal. Apl ini akan dijalankan menggunakan mod serasi saiz halaman. Untuk keserasian yang terbaik, sila susun semula aplikasi dengan sokongan 16 KB. Untuk mendapatkan maklumat lanjut, lihat &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Apl ini tidak serasi untuk 16 KB. Semakan penjajaran APK dan ELF gagal. Apl ini akan dijalankan menggunakan mod serasi saiz halaman. Untuk keserasian yang terbaik, sila susun semula aplikasi dengan sokongan 16 KB. Untuk mendapatkan maklumat lanjut, lihat &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Perkhidmatan yang tidak diuntukkan."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak boleh mengubah tetapan ID pemanggil."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Data ditukar kepada <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1161,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"dalam <xliff:g id="COUNT">%d</xliff:g>j"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"dalam <xliff:g id="COUNT">%d</xliff:g>h"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"dalam <xliff:g id="COUNT">%d</xliff:g>t"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g>m yang lalu"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g>j yang lalu"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g>h yang lalu"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g>t yang lalu"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>jam"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g>thn"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"selepas <xliff:g id="COUNT">%d</xliff:g>minit"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"selepas <xliff:g id="COUNT">%d</xliff:g>jam"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"dalam <xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"selepas <xliff:g id="COUNT">%d</xliff:g>thn"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g>minit yang lalu"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g>jam yang lalu"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g>h yang lalu"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g>thn yang lalu"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minit yang lalu}other{# minit yang lalu}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# jam yang lalu}other{# jam yang lalu}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# hari yang lalu}other{# hari yang lalu}}"</string>

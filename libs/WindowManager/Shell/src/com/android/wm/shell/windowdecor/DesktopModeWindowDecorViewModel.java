@@ -79,6 +79,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
@@ -139,6 +140,8 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -217,6 +220,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private boolean mInImmersiveMode;
     private final String mSysUIPackageName;
     private final AssistContentRequester mAssistContentRequester;
+    private final WindowDecorViewHostSupplier<WindowDecorViewHost> mWindowDecorViewHostSupplier;
 
     private final DisplayChangeController.OnDisplayChangingListener mOnDisplayChangingListener;
     private final ISystemGestureExclusionListener mGestureExclusionListener =
@@ -260,6 +264,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             InteractionJankMonitor interactionJankMonitor,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
@@ -289,6 +294,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 desktopImmersiveController,
                 genericLinksParser,
                 assistContentRequester,
+                windowDecorViewHostSupplier,
                 multiInstanceHelper,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
@@ -329,6 +335,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             DesktopImmersiveController desktopImmersiveController,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier,
             MultiInstanceHelper multiInstanceHelper,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
@@ -381,6 +388,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
         mActivityOrientationChangeHandler = activityOrientationChangeHandler;
         mAssistContentRequester = assistContentRequester;
+        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         mOnDisplayChangingListener = (displayId, fromRotation, toRotation, displayAreaInfo, t) -> {
             DesktopModeWindowDecoration decoration;
             RunningTaskInfo taskInfo;
@@ -580,8 +588,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
 
     private void openHandleMenu(int taskId) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
-        decoration.createHandleMenu(checkNumberOfOtherInstances(decoration.mTaskInfo)
-                >= MANAGE_WINDOWS_MINIMUM_INSTANCES);
+        // TODO(b/379873022): Run the instance check and the AssistContent request in
+        //  createHandleMenu on the same bg thread dispatch.
+        mBgExecutor.execute(() -> {
+            final int numOfInstances = checkNumberOfOtherInstances(decoration.mTaskInfo);
+            mMainExecutor.execute(() -> {
+                decoration.createHandleMenu(
+                        numOfInstances >= MANAGE_WINDOWS_MINIMUM_INSTANCES
+                );
+            });
+        });
     }
 
     private void onToggleSizeInteraction(
@@ -701,7 +717,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         // App sometimes draws before the insets from WindowDecoration#relayout have
         // been added, so they must be added here
         decoration.addCaptionInset(wct);
-        mDesktopTasksController.moveTaskToDesktop(taskId, wct, source);
+        mDesktopTasksController.moveTaskToDesktop(taskId, wct, source,
+                /* remoteTransition= */ null);
         decoration.closeHandleMenu();
 
         if (source == DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON) {
@@ -755,12 +772,20 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             return;
         }
         decoration.closeHandleMenu();
-        decoration.createManageWindowsMenu(getTaskSnapshots(decoration.mTaskInfo),
-                /* onIconClickListener= */(Integer requestedTaskId) -> {
-                    decoration.closeManageWindowsMenu();
-                    mDesktopTasksController.openInstance(decoration.mTaskInfo, requestedTaskId);
-                    return Unit.INSTANCE;
-                });
+        mBgExecutor.execute(() -> {
+            final ArrayList<Pair<Integer, TaskSnapshot>> snapshotList =
+                    getTaskSnapshots(decoration.mTaskInfo);
+            mMainExecutor.execute(() -> decoration.createManageWindowsMenu(
+                    snapshotList,
+                    /* onIconClickListener= */ (Integer requestedTaskId) -> {
+                        decoration.closeManageWindowsMenu();
+                        mDesktopTasksController.openInstance(decoration.mTaskInfo,
+                                requestedTaskId);
+                        return Unit.INSTANCE;
+                    }
+                )
+            );
+        });
     }
 
     private ArrayList<Pair<Integer, TaskSnapshot>> getTaskSnapshots(
@@ -965,8 +990,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             }
             if (mInputManager != null
                     && !Flags.enableAccessibleCustomHeaders()) {
-                // Pilfer so that windows below receive cancellations for this gesture.
-                mInputManager.pilferPointers(v.getViewRootImpl().getInputToken());
+                ViewRootImpl viewRootImpl = v.getViewRootImpl();
+                if (viewRootImpl != null) {
+                    // Pilfer so that windows below receive cancellations for this gesture.
+                    mInputManager.pilferPointers(viewRootImpl.getInputToken());
+                }
             }
             if (isUpOrCancel) {
                 // Gesture is finished, reset state.
@@ -1607,7 +1635,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         }
         final DesktopModeWindowDecoration windowDecoration =
                 mDesktopModeWindowDecorFactory.create(
-                        mContext,
+                        Flags.enableBugFixesForSecondaryDisplay()
+                                ? mDisplayController.getDisplayContext(taskInfo.displayId)
+                                : mContext,
                         mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mSplitScreenController,
@@ -1623,6 +1653,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                         mRootTaskDisplayAreaOrganizer,
                         mGenericLinksParser,
                         mAssistContentRequester,
+                        mWindowDecorViewHostSupplier,
                         mMultiInstanceHelper,
                         mWindowDecorCaptionHandleRepository,
                         mDesktopModeEventLogger);
@@ -1802,11 +1833,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         // TODO(b/336289597): Rather than returning number of instances, return a list of valid
         //  instances, then refer to the list's size and reuse the list for Manage Windows menu.
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
-        final IActivityManager activityManager = ActivityManager.getService();
         try {
             return activityTaskManager.getRecentTasks(Integer.MAX_VALUE,
                     ActivityManager.RECENT_WITH_EXCLUDED,
-                    activityManager.getCurrentUserId()).getList().stream().filter(
+                    info.userId).getList().stream().filter(
                             recentTaskInfo -> (recentTaskInfo.taskId != info.taskId
                                     && recentTaskInfo.baseActivity != null
                                     && recentTaskInfo.baseActivity.getPackageName()

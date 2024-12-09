@@ -40,6 +40,7 @@ import android.os.test.TestLooper
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
+import android.util.AtomicFile
 import android.view.InputDevice
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -50,6 +51,9 @@ import com.android.internal.R
 import com.android.internal.annotations.Keep
 import com.android.internal.util.FrameworkStatsLog
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 import org.junit.After
@@ -123,6 +127,8 @@ class KeyGestureControllerTests {
     private lateinit var keyGestureController: KeyGestureController
     private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private lateinit var testLooper: TestLooper
+    private lateinit var tempFile: File
+    private lateinit var inputDataStore: InputDataStore
     private var events = mutableListOf<KeyGestureEvent>()
 
     @Before
@@ -133,6 +139,31 @@ class KeyGestureControllerTests {
         setupBehaviors()
         testLooper = TestLooper()
         currentPid = Process.myPid()
+        tempFile = File.createTempFile("input_gestures", ".xml")
+        inputDataStore =
+            InputDataStore(object : InputDataStore.FileInjector("input_gestures.xml") {
+                private val atomicFile: AtomicFile = AtomicFile(tempFile)
+
+                override fun openRead(userId: Int): InputStream? {
+                    return atomicFile.openRead()
+                }
+
+                override fun startWrite(userId: Int): FileOutputStream? {
+                    return atomicFile.startWrite()
+                }
+
+                override fun finishWrite(userId: Int, fos: FileOutputStream?, success: Boolean) {
+                    if (success) {
+                        atomicFile.finishWrite(fos)
+                    } else {
+                        atomicFile.failWrite(fos)
+                    }
+                }
+
+                override fun getAtomicFileForUserId(userId: Int): AtomicFile {
+                    return atomicFile
+                }
+            })
     }
 
     @After
@@ -174,10 +205,12 @@ class KeyGestureControllerTests {
     }
 
     private fun setupKeyGestureController() {
-        keyGestureController = KeyGestureController(context, testLooper.looper)
+        keyGestureController =
+            KeyGestureController(context, testLooper.looper, inputDataStore)
         Mockito.`when`(iInputManager.getAppLaunchBookmarks())
             .thenReturn(keyGestureController.appLaunchBookmarks)
         keyGestureController.systemRunning()
+        testLooper.dispatchAll()
     }
 
     private fun notifyHomeGestureCompleted() {
@@ -542,9 +575,9 @@ class KeyGestureControllerTests {
             ),
             TestData(
                 "META + C -> Launch Default Contacts",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_P),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
@@ -560,9 +593,9 @@ class KeyGestureControllerTests {
             ),
             TestData(
                 "META + K -> Launch Default Calendar",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_K),
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_K),
+                intArrayOf(KeyEvent.KEYCODE_C),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
@@ -575,24 +608,6 @@ class KeyGestureControllerTests {
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MAPS)
-            ),
-            TestData(
-                "META + P -> Launch Default Music",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_P),
-                KeyEvent.META_META_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
-            ),
-            TestData(
-                "META + S -> Launch Default SMS",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_S),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_S),
-                KeyEvent.META_META_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_SMS)
             ),
             TestData(
                 "META + U -> Launch Default Calculator",
@@ -839,10 +854,10 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
             ),
             TestData(
-                "META + C -> Launch Default Contacts",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
+                "META + P -> Launch Default Contacts",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_P),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
@@ -857,10 +872,10 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_EMAIL)
             ),
             TestData(
-                "META + K -> Launch Default Calendar",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_K),
+                "META + C -> Launch Default Calendar",
+                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_C),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_K),
+                intArrayOf(KeyEvent.KEYCODE_C),
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CALENDAR)
@@ -873,24 +888,6 @@ class KeyGestureControllerTests {
                 KeyEvent.META_META_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MAPS)
-            ),
-            TestData(
-                "META + P -> Launch Default Music",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_P),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_P),
-                KeyEvent.META_META_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_MUSIC)
-            ),
-            TestData(
-                "META + S -> Launch Default SMS",
-                intArrayOf(KeyEvent.KEYCODE_META_LEFT, KeyEvent.KEYCODE_S),
-                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_S),
-                KeyEvent.META_META_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
-                AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_SMS)
             ),
             TestData(
                 "META + U -> Launch Default Calculator",
@@ -915,14 +912,14 @@ class KeyGestureControllerTests {
                 AppLaunchData.createLaunchDataForRole(RoleManager.ROLE_BROWSER)
             ),
             TestData(
-                "META + SHIFT + C -> Launch Default Contacts",
+                "META + SHIFT + P -> Launch Default Contacts",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
                     KeyEvent.KEYCODE_SHIFT_LEFT,
-                    KeyEvent.KEYCODE_C
+                    KeyEvent.KEYCODE_P
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION,
-                intArrayOf(KeyEvent.KEYCODE_C),
+                intArrayOf(KeyEvent.KEYCODE_P),
                 KeyEvent.META_META_ON or KeyEvent.META_SHIFT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE),
                 AppLaunchData.createLaunchDataForCategory(Intent.CATEGORY_APP_CONTACTS)
@@ -1424,6 +1421,45 @@ class KeyGestureControllerTests {
         testKeyGestureInternal(test)
     }
 
+    @Test
+    @Parameters(method = "customInputGesturesTestArguments")
+    fun testCustomKeyGesturesSavedAndLoadedByController(test: TestData) {
+        val userId = 10
+        setupKeyGestureController()
+        val builder = InputGestureData.Builder()
+            .setKeyGestureType(test.expectedKeyGestureType)
+            .setTrigger(
+                InputGestureData.createKeyTrigger(
+                    test.expectedKeys[0],
+                    test.expectedModifierState
+                )
+            )
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
+        val inputGestureData = builder.build()
+
+        keyGestureController.setCurrentUserId(userId)
+        testLooper.dispatchAll()
+        keyGestureController.addCustomInputGesture(userId, inputGestureData.aidlData)
+        testLooper.dispatchAll()
+
+        // Reinitialize the gesture controller simulating a login/logout for the user.
+        setupKeyGestureController()
+        keyGestureController.setCurrentUserId(userId)
+        testLooper.dispatchAll()
+        val savedInputGestures = keyGestureController.getCustomInputGestures(userId, null)
+        assertEquals(
+            "Test: $test doesn't produce correct number of saved input gestures",
+            1,
+            savedInputGestures.size
+        )
+        assertEquals(
+            "Test: $test doesn't produce correct input gesture data", inputGestureData,
+            InputGestureData(savedInputGestures[0])
+        )
+    }
+
     class TouchpadTestData(
         val name: String,
         val touchpadGestureType: Int,
@@ -1500,6 +1536,39 @@ class KeyGestureControllerTests {
         )
 
         keyGestureController.unregisterKeyGestureHandler(handler, 0)
+    }
+
+    @Test
+    @Parameters(method = "customTouchpadGesturesTestArguments")
+    fun testCustomTouchpadGesturesSavedAndLoadedByController(test: TouchpadTestData) {
+        val userId = 10
+        setupKeyGestureController()
+        val builder = InputGestureData.Builder()
+            .setKeyGestureType(test.expectedKeyGestureType)
+            .setTrigger(InputGestureData.createTouchpadTrigger(test.touchpadGestureType))
+        if (test.expectedAppLaunchData != null) {
+            builder.setAppLaunchData(test.expectedAppLaunchData)
+        }
+        val inputGestureData = builder.build()
+        keyGestureController.setCurrentUserId(userId)
+        testLooper.dispatchAll()
+        keyGestureController.addCustomInputGesture(userId, inputGestureData.aidlData)
+        testLooper.dispatchAll()
+
+        // Reinitialize the gesture controller simulating a login/logout for the user.
+        setupKeyGestureController()
+        keyGestureController.setCurrentUserId(userId)
+        testLooper.dispatchAll()
+        val savedInputGestures = keyGestureController.getCustomInputGestures(userId, null)
+        assertEquals(
+            "Test: $test doesn't produce correct number of saved input gestures",
+            1,
+            savedInputGestures.size
+        )
+        assertEquals(
+            "Test: $test doesn't produce correct input gesture data", inputGestureData,
+            InputGestureData(savedInputGestures[0])
+        )
     }
 
     private fun testKeyGestureInternal(test: TestData) {

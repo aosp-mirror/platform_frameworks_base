@@ -317,8 +317,10 @@ public class CarrierConfigManager {
      * If this is set as false and the supplementary service menu is visible, the associated setting
      * will be enabled and disabled based on the availability of supplementary services over UT. See
      * {@link #KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL}.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_SUPPORT_SS_OVER_CDMA_BOOL = "support_ss_over_cdma_bool";
 
     /**
@@ -536,7 +538,11 @@ public class CarrierConfigManager {
      */
     public static final String KEY_4G_ONLY_BOOL = "4g_only_bool";
 
-    /** Show cdma network mode choices 1x, 3G, global etc. */
+    /** Show cdma network mode choices 1x, 3G, global etc.
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
     public static final String KEY_SHOW_CDMA_CHOICES_BOOL = "show_cdma_choices_bool";
 
     /** CDMA activation goes through HFA */
@@ -544,9 +550,12 @@ public class CarrierConfigManager {
 
     /**
      * CDMA activation goes through OTASP.
+     * @deprecated Legacy CDMA is unsupported.
      */
     // TODO: This should be combined with config_use_hfa_for_provisioning and implemented as an enum
     // (NONE, HFA, OTASP).
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final String KEY_USE_OTASP_FOR_PROVISIONING_BOOL =
             "use_otasp_for_provisioning_bool";
 
@@ -556,10 +565,20 @@ public class CarrierConfigManager {
     /** Does not display additional call setting for IMS phone based on GSM Phone */
     public static final String KEY_ADDITIONAL_CALL_SETTING_BOOL = "additional_call_setting_bool";
 
-    /** Show APN Settings for some CDMA carriers */
+    /**
+     * Show APN Settings for some CDMA carriers
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
     public static final String KEY_SHOW_APN_SETTING_CDMA_BOOL = "show_apn_setting_cdma_bool";
 
-    /** After a CDMA conference call is merged, the swap button should be displayed. */
+    /**
+     * After a CDMA conference call is merged, the swap button should be displayed.
+     * @deprecated Legacy CDMA is unsupported.
+     */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
     public static final String KEY_SUPPORT_SWAP_AFTER_MERGE_BOOL = "support_swap_after_merge_bool";
 
     /**
@@ -597,7 +616,10 @@ public class CarrierConfigManager {
     /**
      * Disables dialing "*228" (OTASP provisioning) on CDMA carriers where it is not supported or is
      * potentially harmful by locking the SIM to 3G.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
     public static final String KEY_DISABLE_CDMA_ACTIVATION_CODE_BOOL =
             "disable_cdma_activation_code_bool";
 
@@ -675,14 +697,20 @@ public class CarrierConfigManager {
     /**
      * Override the platform's notion of a network operator being considered roaming.
      * Value is string array of SIDs to be considered roaming for 3GPP2 RATs.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final String
             KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY = "cdma_roaming_networks_string_array";
 
     /**
      * Override the platform's notion of a network operator being considered non roaming.
      * Value is string array of SIDs to be considered not roaming for 3GPP2 RATs.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final String
             KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY = "cdma_nonroaming_networks_string_array";
 
@@ -1243,8 +1271,10 @@ public class CarrierConfigManager {
 
     /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_CARRIER_ERI_FILE_NAME_STRING = "carrier_eri_file_name_string";
 
     /* The following 3 fields are related to carrier visual voicemail. */
@@ -1386,7 +1416,10 @@ public class CarrierConfigManager {
      * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
      * non-zero value is specified, the UE shall wait for the specified amount of time before it
      * sends out successive DTMF tones on the network.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final String KEY_CDMA_DTMF_TONE_DELAY_INT = "cdma_dtmf_tone_delay_int";
 
     /**
@@ -1804,8 +1837,10 @@ public class CarrierConfigManager {
      * If this bit is not set, the carrier name display string will be selected from the carrier
      * display name resolver which doesn't apply the ERI rules.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_ALLOW_ERI_BOOL = "allow_cdma_eri_bool";
 
     /**
@@ -1849,8 +1884,10 @@ public class CarrierConfigManager {
      * If true, then the registered PLMN name (only for CDMA/CDMA-LTE and only when not roaming)
      * will be #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING. If false, or if phone type is not
      * CDMA/CDMA-LTE or if roaming, then #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING will be ignored.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL =
             "cdma_home_registered_plmn_name_override_bool";
 
@@ -1858,8 +1895,10 @@ public class CarrierConfigManager {
      * String to identify registered PLMN name in CarrierConfig app. This string overrides
      * registered PLMN name if #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL is true, phone type
      * is CDMA/CDMA-LTE and device is not in roaming state; otherwise, it will be ignored.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING =
             "cdma_home_registered_plmn_name_string";
 
@@ -2440,7 +2479,10 @@ public class CarrierConfigManager {
      * For carriers which require an empty flash to be sent before sending the normal 3-way calling
      * flash, the duration in milliseconds of the empty flash to send. When {@code 0}, no empty
      * flash is sent.
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final String KEY_CDMA_3WAYCALL_FLASH_DELAY_INT = "cdma_3waycall_flash_delay_int";
 
     /**
@@ -2454,14 +2496,21 @@ public class CarrierConfigManager {
      * @see TelephonyManager#CDMA_ROAMING_MODE_HOME
      * @see TelephonyManager#CDMA_ROAMING_MODE_AFFILIATED
      * @see TelephonyManager#CDMA_ROAMING_MODE_ANY
+     *
+     * @deprecated Legacy CDMA is unsupported.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     public static final String KEY_CDMA_ROAMING_MODE_INT = "cdma_roaming_mode_int";
 
     /**
      * Determines whether 1X voice calls is supported for some CDMA carriers.
      * Default value is true.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     public static final String KEY_SUPPORT_CDMA_1X_VOICE_CALLS_BOOL =
             "support_cdma_1x_voice_calls_bool";
@@ -2483,8 +2532,10 @@ public class CarrierConfigManager {
     /**
      * Report IMEI as device id even if it's a CDMA/LTE phone.
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_FORCE_IMEI_BOOL = "force_imei_bool";
 
     /**
@@ -3217,8 +3268,10 @@ public class CarrierConfigManager {
      * on a 3GPP network. Specifically *67<number> will be converted to #31#<number> and
      * *82<number> will be converted to *31#<number> before dialing a call when this key is
      * set TRUE and device is roaming on a 3GPP network.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_CONVERT_CDMA_CALLER_ID_MMI_CODES_WHILE_ROAMING_ON_3GPP_BOOL =
             "convert_cdma_caller_id_mmi_codes_while_roaming_on_3gpp_bool";
 
@@ -3621,8 +3674,11 @@ public class CarrierConfigManager {
     /**
      * Support for the original string display of CDMA MO call.
      * By default, it is disabled.
+     *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL =
             "config_show_orig_dial_string_for_cdma";
 
@@ -5070,8 +5126,10 @@ public class CarrierConfigManager {
      * The default values come from 3GPP2 C.R1001 table 8.1-1.
      * Enhanced Roaming Indicator Number Assignments
      *
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @Deprecated
     public static final String KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY =
             "cdma_enhanced_roaming_indicator_for_home_network_int_array";
 
@@ -9756,9 +9814,8 @@ public class CarrierConfigManager {
      * }</pre>
      * <p>
      * This config is empty by default.
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String KEY_REGIONAL_SATELLITE_EARFCN_BUNDLE =
             "regional_satellite_earfcn_bundle";
 
@@ -9885,15 +9942,14 @@ public class CarrierConfigManager {
             "remove_satellite_plmn_in_manual_network_scan_bool";
 
     /**
-     * This value is used to set the max datagram size, if the value is not available then the
-     * default one will be used.
-     * If key is {@code true}, retrieve the max datagram value and use this value always,
-     * {@code false} the default value from the modem will be used.
+     * This value is used to set the max datagram size in bytes.
+     * If the value is not available then the default value will be used.
      *
-     * @hide
+     * The default value is 255 bytes.
      */
-    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE =
-            "satellite_sos_max_datagram_size";
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final String KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE_BYTES_INT =
+            "satellite_sos_max_datagram_size_bytes_int";
 
     /** @hide */
     @IntDef({
@@ -10061,6 +10117,13 @@ public class CarrierConfigManager {
             "satellite_nidd_apn_name_string";
 
     /**
+     * The display name that will be used for satellite functionality within the UI.
+     * The default string value is empty string.
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final String KEY_SATELLITE_DISPLAY_NAME_STRING = "satellite_display_name_string";
+
+    /**
      * Default value {@code true}, meaning when an emergency call request comes in, if the device is
      * in emergency satellite mode but hasn't sent the first satellite datagram, then exits
      * satellite mode to allow the emergency call to go through.
@@ -10176,10 +10239,8 @@ public class CarrierConfigManager {
      * A string array containing the list of messaging apps that support satellite.
      *
      * The default value contains only "com.google.android.apps.messaging"
-     *
-     * @hide
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String KEY_SATELLITE_SUPPORTED_MSG_APPS_STRING_ARRAY =
             "satellite_supported_msg_apps_string_array";
 
@@ -11343,6 +11404,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
+        sDefaults.putString(KEY_SATELLITE_DISPLAY_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");
@@ -11450,7 +11512,7 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_BT_TO_CELL_DELAY_MS_INT, -1);
         sDefaults.putInt(KEY_WEAR_CONNECTIVITY_EXTEND_BT_TO_CELL_DELAY_ON_WIFI_MS_INT, -1);
-        sDefaults.putInt(KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE, 255);
+        sDefaults.putInt(KEY_SATELLITE_SOS_MAX_DATAGRAM_SIZE_BYTES_INT, 255);
     }
 
     /**

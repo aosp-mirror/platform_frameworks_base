@@ -69,6 +69,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
@@ -101,6 +102,7 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.window.WindowProviderService.isWindowProviderService;
 
+import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_BOOT;
@@ -157,9 +159,9 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_W
 import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
 import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerServiceDumpProto.WINDOW_FRAMES_VALID;
+import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 import static com.android.window.flags.Flags.multiCrop;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
-import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -356,6 +358,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -3040,6 +3043,81 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public boolean reparentWindowContextToDisplayArea(
+            @NonNull IApplicationThread appThread, @NonNull IBinder clientToken, int displayId) {
+        if (!Flags.reparentWindowTokenApi()) {
+            return false;
+        }
+        Objects.requireNonNull(appThread);
+        Objects.requireNonNull(clientToken);
+        final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
+                "reparentWindowContextToDisplayArea", false /* printLog */);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mAtmService.getProcessController(appThread);
+                if (wpc == null) {
+                    ProtoLog.w(WM_ERROR, "reparentWindowContextToDisplayArea: calling from"
+                            + " non-existing process pid=%d uid=%d", callingPid, callingUid);
+                    return false;
+                }
+                final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+                if (dc == null) {
+                    ProtoLog.w(WM_ERROR, "reparentWindowContextToDisplayArea: trying to attach"
+                            + " to a non-existing display:%d", displayId);
+                    return false;
+                }
+
+                if (!mWindowContextListenerController.assertCallerCanReparentListener(clientToken,
+                        callerCanManageAppTokens, callingUid, displayId)) {
+                    return false;
+                }
+                final WindowContainer<?> container = mWindowContextListenerController.getContainer(
+                                clientToken);
+
+                final WindowToken token = container != null ? container.asWindowToken() : null;
+                if (token != null && token.isFromClient()) {
+                    ProtoLog.d(WM_DEBUG_ADD_REMOVE, "Reparenting from dc to displayId=%d",
+                            displayId);
+                    // Reparent the window created for this window context.
+                    dc.reParentWindowToken(token);
+                    hideUntilNextDraw(token);
+                    // This makes sure there is a traversal scheduled that will eventually report
+                    // the window resize to the client.
+                    dc.setLayoutNeeded();
+                    requestTraversal();
+                    return true;
+                }
+
+                final int type = mWindowContextListenerController.getWindowType(clientToken);
+                final Bundle options = mWindowContextListenerController.getOptions(clientToken);
+                // No window yet, switch listening DA.
+                final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
+                        callerCanManageAppTokens, false /* roundedCornerOverlay */);
+                mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
+                        da, type, options, true /* shouldDispatchConfigWhenRegistering */);
+                return true;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void hideUntilNextDraw(@NonNull WindowToken token) {
+        final WindowState topChild = token.getTopChild();
+        if (topChild != null) {
+            mTransactionFactory.get().hide(token.mSurfaceControl).apply();
+            topChild.applyWithNextDraw(t -> {
+                if (token.mSurfaceControl != null) {
+                    t.show(token.mSurfaceControl);
+                }
+            });
+        }
+    }
+
     /** Returns {@code true} if this binder is a registered window token. */
     @Override
     public boolean isWindowToken(IBinder binder) {
@@ -4669,7 +4747,8 @@ public class WindowManagerService extends IWindowManager.Stub
     @EnforcePermission(android.Manifest.permission.MANAGE_APP_TOKENS)
     @Override
     public void updateDisplayWindowRequestedVisibleTypes(int displayId,
-            @InsetsType int requestedVisibleTypes, @Nullable ImeTracker.Token statsToken) {
+            @InsetsType int visibleTypes, @InsetsType int mask,
+            @Nullable ImeTracker.Token statsToken) {
         updateDisplayWindowRequestedVisibleTypes_enforcePermission();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -4682,7 +4761,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_UPDATE_DISPLAY_WINDOW_REQUESTED_VISIBLE_TYPES);
-                dc.mRemoteInsetsControlTarget.setRequestedVisibleTypes(requestedVisibleTypes);
+                dc.mRemoteInsetsControlTarget.updateRequestedVisibleTypes(visibleTypes, mask);
                 // TODO(b/353463205) the statsToken shouldn't be null as it is used later in the
                 //  IME provider. Check if we have to create a new request here, if null.
                 dc.getInsetsStateController().onRequestedVisibleTypesChanged(
@@ -7947,41 +8026,44 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void waitForAllWindowsDrawn(Message message, long timeout, int displayId) {
             Objects.requireNonNull(message.getTarget());
-            final WindowContainer<?> container = displayId == INVALID_DISPLAY
-                    ? mRoot : mRoot.getDisplayContent(displayId);
-            if (container == null) {
-                // The waiting container doesn't exist, no need to wait to run the callback. Run and
-                // return;
-                message.sendToTarget();
-                return;
-            }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
-                if (displayId == INVALID_DISPLAY
-                        && mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
-                    // Use the ready-to-play of transition as the signal.
-                    return;
-                }
-                container.waitForAllWindowsDrawn();
-                mWindowPlacerLocked.requestTraversal();
-                mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);
-                if (container.mWaitingForDrawn.isEmpty()) {
-                    allWindowsDrawn = true;
-                } else {
-                    if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
-                        for (int i = 0; i < container.mWaitingForDrawn.size(); i++) {
-                            traceStartWaitingForWindowDrawn(container.mWaitingForDrawn.get(i));
-                        }
-                    }
-
-                    mWaitingForDrawnCallbacks.put(container, message);
-                    mH.sendNewMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, container, timeout);
-                    checkDrawnWindowsLocked();
-                }
+                allWindowsDrawn = waitForAllWindowsDrawnLocked(message, timeout, displayId);
             }
             if (allWindowsDrawn) {
                 message.sendToTarget();
             }
+        }
+
+        /** Return {@code true} if all windows have been drawn. */
+        private boolean waitForAllWindowsDrawnLocked(Message message, long timeout, int displayId) {
+            final WindowContainer<?> container = displayId == INVALID_DISPLAY
+                    ? mRoot : mRoot.getDisplayContent(displayId);
+            if (container == null) {
+                // The waiting container doesn't exist, no need to wait. Treat as drawn.
+                return true;
+            }
+            if (displayId == INVALID_DISPLAY
+                    && mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
+                // Use the ready-to-play of transition as the signal.
+                return false;
+            }
+            container.waitForAllWindowsDrawn();
+            mWindowPlacerLocked.requestTraversal();
+            mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);
+            if (container.mWaitingForDrawn.isEmpty()) {
+                return true;
+            }
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                for (int i = 0; i < container.mWaitingForDrawn.size(); i++) {
+                    traceStartWaitingForWindowDrawn(container.mWaitingForDrawn.get(i));
+                }
+            }
+
+            mWaitingForDrawnCallbacks.put(container, message);
+            mH.sendNewMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, container, timeout);
+            checkDrawnWindowsLocked();
+            return false;
         }
 
         @Override
@@ -9014,16 +9096,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
         clearPointerDownOutsideFocusRunnable();
 
+        final InputTarget focusedInputTarget = mFocusedInputTarget;
         if (shouldDelayTouchOutside(t)) {
-            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mPointerDownOutsideFocusRunnable =
+                    () -> handlePointerDownOutsideFocus(t, focusedInputTarget);
             mH.postDelayed(mPointerDownOutsideFocusRunnable, POINTER_DOWN_OUTSIDE_FOCUS_TIMEOUT_MS);
         } else if (!fromHandler) {
             // Still post the runnable to handler thread in case there is already a runnable
             // in execution, but still waiting to hold the wm lock.
-            mPointerDownOutsideFocusRunnable = () -> handlePointerDownOutsideFocus(t);
+            mPointerDownOutsideFocusRunnable =
+                    () -> handlePointerDownOutsideFocus(t, focusedInputTarget);
             mH.post(mPointerDownOutsideFocusRunnable);
         } else {
-            handlePointerDownOutsideFocus(t);
+            handlePointerDownOutsideFocus(t, focusedInputTarget);
         }
     }
 
@@ -9055,8 +9140,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return shouldDelayTouchForEmbeddedActivity || shouldDelayTouchForFreeform;
     }
 
-    private void handlePointerDownOutsideFocus(InputTarget t) {
+    private void handlePointerDownOutsideFocus(InputTarget t, InputTarget focusedInputTarget) {
         synchronized (mGlobalLock) {
+            if (mFocusedInputTarget != focusedInputTarget) {
+                // Skip if the mFocusedInputTarget is already changed. This is possible if the
+                // pointer-down-outside-focus event is delayed to be handled.
+                ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
+                        "Skip onPointerDownOutsideFocusLocked due to input target changed %s", t);
+                return;
+            }
             if (mPointerDownOutsideFocusRunnable != null
                     && mH.hasCallbacks(mPointerDownOutsideFocusRunnable)) {
                 // Skip if there's another pending pointer-down-outside-focus event.
@@ -9220,6 +9312,25 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_PRIVACY from '" + windowName
                     + "' because it isn't a trusted overlay");
             return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
+        }
+
+        // You need OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW permission to be able
+        // to set INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS.
+        if (overridePowerKeyBehaviorInFocusedWindow()
+                && (inputFeatures
+                & INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS)
+                != 0) {
+            final int powerPermissionResult =
+                    mContext.checkPermission(
+                            permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW,
+                            callingPid,
+                            callingUid);
+            if (powerPermissionResult != PackageManager.PERMISSION_GRANTED) {
+                throw new IllegalArgumentException(
+                        "Cannot use INPUT_FEATURE_RECEIVE_POWER_KEY_DOUBLE_PRESS from" + windowName
+                                + " because it doesn't have the"
+                                + " OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW permission");
+            }
         }
         return inputFeatures;
     }

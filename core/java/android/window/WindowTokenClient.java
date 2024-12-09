@@ -166,7 +166,7 @@ public class WindowTokenClient extends Binder {
     @VisibleForTesting
     public void onConfigurationChangedInner(@NonNull Context context,
             @NonNull Configuration newConfig, int newDisplayId, boolean shouldReportConfigChange) {
-        CompatibilityInfo.applyOverrideScaleIfNeeded(newConfig);
+        CompatibilityInfo.applyOverrideIfNeeded(newConfig);
         final boolean displayChanged;
         final boolean shouldUpdateResources;
         final int diff;

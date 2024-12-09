@@ -313,6 +313,7 @@ constructor(
                     // if it is volume panel.
                     options.setDisallowEnterPictureInPictureWhileLaunching(true)
                 }
+                intent.collectExtraIntentKeys()
                 try {
                     result[0] =
                         ActivityTaskManager.getService()

@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tileimpl
 
-import android.animation.AnimatorTestRule
 import android.content.Context
 import android.service.quicksettings.Tile
 import android.view.ContextThemeWrapper
@@ -26,6 +25,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.annotation.UiThreadTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.WifiIcons
@@ -77,7 +77,7 @@ class QSIconViewImplTest_311121830 : SysuiTestCase() {
         // Set the second state to animate (it shouldn't, because `State.state` is the same) and
         // advance time to 2 animations length
         iconView.setIcon(secondState, /* allowAnimations= */ true)
-        animatorRule.advanceTimeBy(QSIconViewImpl.QS_ANIM_LENGTH * 2)
+        animatorRule.advanceAnimationDuration(QSIconViewImpl.QS_ANIM_LENGTH * 2)
 
         assertThat(iconView.mLastIcon).isEqualTo(secondState.icon)
     }
@@ -126,7 +126,7 @@ class QSIconViewImplTest_311121830 : SysuiTestCase() {
         // Set the third state to animate and advance time by two times the animation length
         // to guarantee that all animations are done
         iconView.setIcon(thirdState, /* allowAnimations= */ true)
-        animatorRule.advanceTimeBy(QSIconViewImpl.QS_ANIM_LENGTH * 2)
+        animatorRule.advanceAnimationDuration(QSIconViewImpl.QS_ANIM_LENGTH * 2)
 
         assertThat(iconView.mLastIcon).isEqualTo(thirdState.icon)
     }

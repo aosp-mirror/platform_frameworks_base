@@ -15,7 +15,9 @@
  */
 
 #define LOG_TAG "ADynamicInstrumentationManager"
+#include <android-base/properties.h>
 #include <android/dynamic_instrumentation_manager.h>
+#include <android/os/instrumentation/BnOffsetCallback.h>
 #include <android/os/instrumentation/ExecutableMethodFileOffsets.h>
 #include <android/os/instrumentation/IDynamicInstrumentationManager.h>
 #include <android/os/instrumentation/MethodDescriptor.h>
@@ -23,13 +25,18 @@
 #include <binder/Binder.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
+#include <utils/StrongPointer.h>
 
+#include <future>
 #include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
 
 namespace android::dynamicinstrumentationmanager {
+
+using android::os::instrumentation::BnOffsetCallback;
+using android::os::instrumentation::ExecutableMethodFileOffsets;
 
 // Global instance of IDynamicInstrumentationManager, service is obtained only on first use.
 static std::mutex mLock;
@@ -131,6 +138,30 @@ void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
     delete instance;
 }
 
+class ResultCallback : public BnOffsetCallback {
+public:
+    ::android::binder::Status onResult(
+            const ::std::optional<ExecutableMethodFileOffsets>& offsets) override {
+        promise_.set_value(offsets);
+        return android::binder::Status::ok();
+    }
+
+    std::optional<ExecutableMethodFileOffsets> waitForResult() {
+        std::future<std::optional<ExecutableMethodFileOffsets>> futureResult =
+                promise_.get_future();
+        auto futureStatus = futureResult.wait_for(
+                std::chrono::seconds(1 * android::base::HwTimeoutMultiplier()));
+        if (futureStatus == std::future_status::ready) {
+            return futureResult.get();
+        } else {
+            return std::nullopt;
+        }
+    }
+
+private:
+    std::promise<std::optional<ExecutableMethodFileOffsets>> promise_;
+};
+
 int32_t ADynamicInstrumentationManager_getExecutableMethodFileOffsets(
         const ADynamicInstrumentationManager_TargetProcess* targetProcess,
         const ADynamicInstrumentationManager_MethodDescriptor* methodDescriptor,
@@ -150,15 +181,15 @@ int32_t ADynamicInstrumentationManager_getExecutableMethodFileOffsets(
         return INVALID_OPERATION;
     }
 
-    std::optional<android::os::instrumentation::ExecutableMethodFileOffsets> offsets;
+    android::sp<ResultCallback> resultCallback = android::sp<ResultCallback>::make();
     binder_status_t result =
             service->getExecutableMethodFileOffsets(targetProcessParcel, methodDescriptorParcel,
-                                                    &offsets)
+                                                    resultCallback)
                     .exceptionCode();
     if (result != OK) {
         return result;
     }
-
+    std::optional<ExecutableMethodFileOffsets> offsets = resultCallback->waitForResult();
     if (offsets != std::nullopt) {
         auto* value = new ADynamicInstrumentationManager_ExecutableMethodFileOffsets();
         value->containerPath = offsets->containerPath;

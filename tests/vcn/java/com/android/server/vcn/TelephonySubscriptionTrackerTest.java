@@ -55,7 +55,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.vcn.VcnManager;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.os.test.TestLooper;
@@ -71,6 +70,8 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.HandlerExecutor;
 
 import org.junit.Before;
 import org.junit.Test;

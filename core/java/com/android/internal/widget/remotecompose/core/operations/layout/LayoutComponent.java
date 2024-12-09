@@ -286,7 +286,9 @@ public class LayoutComponent extends Component {
     @Override
     public void paintingComponent(@NonNull PaintContext context) {
         Component prev = context.getContext().mLastComponent;
-        context.getContext().mLastComponent = this;
+        RemoteContext remoteContext = context.getContext();
+
+        remoteContext.mLastComponent = this;
         context.save();
         context.translate(mX, mY);
         if (context.isVisualDebug()) {
@@ -329,6 +331,7 @@ public class LayoutComponent extends Component {
                     child.updateVariables(context.getContext());
                     child.markNotDirty();
                 }
+                remoteContext.incrementOpCount();
                 child.paint(context);
             }
         } else {
@@ -337,6 +340,7 @@ public class LayoutComponent extends Component {
                     child.updateVariables(context.getContext());
                     child.markNotDirty();
                 }
+                remoteContext.incrementOpCount();
                 child.paint(context);
             }
         }

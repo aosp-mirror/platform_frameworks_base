@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.ShadeTestUtil
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
@@ -178,11 +179,13 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
                     ),
                 testScope = testScope,
             )
-            assertThat(values.size).isEqualTo(3)
+            assertThat(values.size).isEqualTo(if (SceneContainerFlag.isEnabled) 2 else 3)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
 
-            // Cancel will reset the translation
-            assertThat(values[2]).isEqualTo(0)
+            // When the scene framework is not enabled, cancel will reset the translation
+            if (!SceneContainerFlag.isEnabled) {
+                assertThat(values.last()).isEqualTo(0f)
+            }
         }
 
     @Test
@@ -242,8 +245,9 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
             // WHEN transition is canceled
             repository.sendTransitionStep(step(1f, TransitionState.CANCELED))
 
-            // THEN alpha is immediately set to 0f
-            assertThat(actual).isEqualTo(0f)
+            // THEN alpha updates according to whether the scene framework is enabled (CANCELED is
+            // ignored when the scene framework is enabled).
+            assertThat(actual).isEqualTo(if (SceneContainerFlag.isEnabled) 1f else 0f)
         }
 
     private fun step(

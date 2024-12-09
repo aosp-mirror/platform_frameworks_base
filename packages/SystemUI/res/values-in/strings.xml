@@ -529,7 +529,10 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Untuk membuka aplikasi menggunakan widget, Anda perlu memverifikasi diri Anda. Selain itu, harap ingat bahwa siapa saja dapat melihatnya, bahkan saat tablet Anda terkunci. Beberapa widget mungkin tidak dirancang untuk layar kunci Anda dan mungkin tidak aman untuk ditambahkan di sini."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Oke"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widget"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"Untuk menambahkan Widget di layar kunci sebagai pintasan, pastikan Widget diaktifkan di setelan."</string>
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_disabled_text (599170482297578735) -->
+    <skip />
+    <!-- no translation found for glanceable_hub_lockscreen_affordance_action_button_label (7636151133344609375) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Beralih pengguna"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu pulldown"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data dalam sesi ini akan dihapus."</string>
@@ -590,6 +593,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifikasi"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Percakapan"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Hapus semua notifikasi senyap"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifikasi dijeda oleh mode Jangan Ganggu"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Tidak ada notifikasi}=1{Notifikasi dijeda oleh {mode}}=2{Notifikasi dijeda oleh {mode} dan satu mode lainnya}other{Notifikasi dijeda oleh {mode} dan # mode lainnya}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Mulai sekarang"</string>
@@ -704,6 +709,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Pelacakan Gerak Kepala"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Ketuk untuk mengubah mode pendering"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"mode pendering"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Tanpa suara"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktifkan"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"getar"</string>
@@ -875,14 +882,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Beralih ke aplikasi di bagian kiri atau atas saat menggunakan layar terpisah"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Dalam layar terpisah: ganti salah satu aplikasi dengan yang lain"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Memindahkan jendela aktif dari satu layar ke layar lainnya"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Memindahkan jendela ke kiri"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Memindahkan jendela ke kanan"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Memaksimalkan jendela"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Meminimalkan jendela"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Beralih ke bahasa berikutnya"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Beralih ke bahasa sebelumnya"</string>
@@ -1419,7 +1422,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Kontrol sistem"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Aplikasi sistem"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Aplikasi terbaru"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Layar terpisah"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Input"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Pintasan aplikasi"</string>
@@ -1428,25 +1430,31 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Pintasan keyboard"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Menyesuaikan pintasan keyboard"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Hapus pintasan?"</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_dialog_title (8131184731313717780) -->
+    <skip />
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Tekan tombol untuk menetapkan pintasan"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Tindakan ini akan menghapus pintasan kustom Anda secara permanen."</string>
+    <!-- no translation found for shortcut_customize_mode_reset_shortcut_description (2081849715634358684) -->
+    <skip />
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Telusuri pintasan"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Tidak ada hasil penelusuran"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikon ciutkan"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikon tombol Tindakan atau Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ikon plus"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Sesuaikan"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Selesai"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikon luaskan"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"atau"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"plus"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"garis miring"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Handel geser"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Setelan Keyboard"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Setel pintasan"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Hapus"</string>
+    <!-- no translation found for shortcut_helper_customize_dialog_reset_button_label (7645535254306312685) -->
+    <skip />
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Batal"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Tekan tombol"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinasi tombol sudah digunakan. Coba tombol lain."</string>
@@ -1478,6 +1486,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tekan tombol tindakan di keyboard"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Oke!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Anda telah menyelesaikan gestur untuk melihat semua aplikasi"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Lampu latar keyboard"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Tingkat %1$d dari %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrol Rumah"</string>

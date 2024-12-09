@@ -58,11 +58,13 @@ import android.hardware.power.GpuHeadroomResult;
 import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
 import android.hardware.power.SessionTag;
+import android.hardware.power.SupportInfo;
 import android.hardware.power.WorkDuration;
 import android.os.Binder;
 import android.os.CpuHeadroomParamsInternal;
 import android.os.GpuHeadroomParamsInternal;
 import android.os.IBinder;
+import android.os.IHintManager;
 import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
@@ -153,12 +155,15 @@ public class HintManagerServiceTest {
     private ActivityManagerInternal mAmInternalMock;
     @Mock
     private PackageManager mMockPackageManager;
+    @Mock
+    private IHintManager.IHintManagerClient mClientCallback;
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private HintManagerService mService;
     private ChannelConfig mConfig;
+    private SupportInfo mSupportInfo;
 
     private static Answer<Long> fakeCreateWithConfig(Long ptr, Long sessionId) {
         return new Answer<Long>() {
@@ -167,6 +172,23 @@ public class HintManagerServiceTest {
                 return ptr;
             }
         };
+    }
+
+    private SupportInfo makeDefaultSupportInfo() {
+        mSupportInfo = new SupportInfo();
+        mSupportInfo.usesSessions = true;
+        // By default, mark everything as fully supported
+        mSupportInfo.sessionHints = -1;
+        mSupportInfo.sessionModes = -1;
+        mSupportInfo.modes = -1;
+        mSupportInfo.boosts = -1;
+        mSupportInfo.sessionTags = -1;
+        mSupportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
+        mSupportInfo.headroom.isCpuSupported = true;
+        mSupportInfo.headroom.cpuMinIntervalMillis = 2000;
+        mSupportInfo.headroom.isGpuSupported = true;
+        mSupportInfo.headroom.gpuMinIntervalMillis = 2000;
+        return mSupportInfo;
     }
 
     @Before
@@ -179,6 +201,7 @@ public class HintManagerServiceTest {
         mConfig.eventFlagDescriptor = new MQDescriptor<Byte, Byte>();
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
+        mSupportInfo = makeDefaultSupportInfo();
         when(mContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockPackageManager.getNameForUid(anyInt())).thenReturn(TEST_APP_NAME);
         when(mMockPackageManager.getApplicationInfo(eq(TEST_APP_NAME), anyInt()))
@@ -205,7 +228,9 @@ public class HintManagerServiceTest {
                     SESSION_IDS[2]));
 
         when(mIPowerMock.getInterfaceVersion()).thenReturn(6);
+        when(mIPowerMock.getSupportInfo()).thenReturn(mSupportInfo);
         when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenReturn(mConfig);
+        when(mIPowerMock.getSupportInfo()).thenReturn(mSupportInfo);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
     }
@@ -400,8 +425,11 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         IBinder token = new Binder();
 
-        final int threadCount =
-                service.getBinderServiceInstance().getMaxGraphicsPipelineThreadsCount();
+        IHintManager.HintManagerClientData data = service.getBinderServiceInstance()
+                .registerClient(mClientCallback);
+
+        final int threadCount = data.maxGraphicsPipelineThreads;
+
         long sessionPtr1 = 1111L;
         long sessionId1 = 11111L;
         CountDownLatch stopLatch1 = new CountDownLatch(1);
@@ -1247,28 +1275,22 @@ public class HintManagerServiceTest {
 
     @Test
     public void testCpuHeadroomCache() throws Exception {
-        when(mIPowerMock.getCpuHeadroomMinIntervalMillis()).thenReturn(2000L);
         CpuHeadroomParamsInternal params1 = new CpuHeadroomParamsInternal();
         CpuHeadroomParams halParams1 = new CpuHeadroomParams();
         halParams1.calculationType = CpuHeadroomParams.CalculationType.MIN;
-        halParams1.selectionType = CpuHeadroomParams.SelectionType.ALL;
         halParams1.tids = new int[]{Process.myPid()};
 
         CpuHeadroomParamsInternal params2 = new CpuHeadroomParamsInternal();
         params2.usesDeviceHeadroom = true;
         params2.calculationType = CpuHeadroomParams.CalculationType.MIN;
-        params2.selectionType = CpuHeadroomParams.SelectionType.PER_CORE;
         CpuHeadroomParams halParams2 = new CpuHeadroomParams();
         halParams2.calculationType = CpuHeadroomParams.CalculationType.MIN;
-        halParams2.selectionType = CpuHeadroomParams.SelectionType.PER_CORE;
         halParams2.tids = new int[]{};
 
         CpuHeadroomParamsInternal params3 = new CpuHeadroomParamsInternal();
         params3.calculationType = CpuHeadroomParams.CalculationType.AVERAGE;
-        params3.selectionType = CpuHeadroomParams.SelectionType.ALL;
         CpuHeadroomParams halParams3 = new CpuHeadroomParams();
         halParams3.calculationType = CpuHeadroomParams.CalculationType.AVERAGE;
-        halParams3.selectionType = CpuHeadroomParams.SelectionType.ALL;
         halParams3.tids = new int[]{Process.myPid()};
 
         // this params should not be cached as the window is not default
@@ -1276,15 +1298,14 @@ public class HintManagerServiceTest {
         params4.calculationWindowMillis = 123;
         CpuHeadroomParams halParams4 = new CpuHeadroomParams();
         halParams4.calculationType = CpuHeadroomParams.CalculationType.MIN;
-        halParams4.selectionType = CpuHeadroomParams.SelectionType.ALL;
         halParams4.calculationWindowMillis = 123;
         halParams4.tids = new int[]{Process.myPid()};
 
         float headroom1 = 0.1f;
         CpuHeadroomResult halRet1 = CpuHeadroomResult.globalHeadroom(headroom1);
         when(mIPowerMock.getCpuHeadroom(eq(halParams1))).thenReturn(halRet1);
-        float[] headroom2 = new float[] {0.2f, 0.2f};
-        CpuHeadroomResult halRet2 = CpuHeadroomResult.perCoreHeadroom(headroom2);
+        float headroom2 = 0.2f;
+        CpuHeadroomResult halRet2 = CpuHeadroomResult.globalHeadroom(headroom2);
         when(mIPowerMock.getCpuHeadroom(eq(halParams2))).thenReturn(halRet2);
         float headroom3 = 0.3f;
         CpuHeadroomResult halRet3 = CpuHeadroomResult.globalHeadroom(headroom3);
@@ -1296,8 +1317,6 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         clearInvocations(mIPowerMock);
 
-        service.getBinderServiceInstance().getCpuHeadroomMinIntervalMillis();
-        verify(mIPowerMock, times(0)).getCpuHeadroomMinIntervalMillis();
         assertEquals(halRet1, service.getBinderServiceInstance().getCpuHeadroom(params1));
         verify(mIPowerMock, times(1)).getCpuHeadroom(eq(halParams1));
         assertEquals(halRet2, service.getBinderServiceInstance().getCpuHeadroom(params2));
@@ -1348,7 +1367,6 @@ public class HintManagerServiceTest {
 
     @Test
     public void testGpuHeadroomCache() throws Exception {
-        when(mIPowerMock.getGpuHeadroomMinIntervalMillis()).thenReturn(2000L);
         GpuHeadroomParamsInternal params1 = new GpuHeadroomParamsInternal();
         GpuHeadroomParams halParams1 = new GpuHeadroomParams();
         halParams1.calculationType = GpuHeadroomParams.CalculationType.MIN;
@@ -1369,8 +1387,6 @@ public class HintManagerServiceTest {
         HintManagerService service = createService();
         clearInvocations(mIPowerMock);
 
-        service.getBinderServiceInstance().getGpuHeadroomMinIntervalMillis();
-        verify(mIPowerMock, times(0)).getGpuHeadroomMinIntervalMillis();
         assertEquals(halRet1, service.getBinderServiceInstance().getGpuHeadroom(params1));
         assertEquals(halRet2, service.getBinderServiceInstance().getGpuHeadroom(params2));
         verify(mIPowerMock, times(2)).getGpuHeadroom(any());
@@ -1402,5 +1418,68 @@ public class HintManagerServiceTest {
         verify(mIPowerMock, times(2)).getGpuHeadroom(any());
         verify(mIPowerMock, times(1)).getGpuHeadroom(eq(halParams1));
         verify(mIPowerMock, times(1)).getGpuHeadroom(eq(halParams2));
+    }
+
+    @Test
+    public void testRegisteringClient() throws Exception {
+        HintManagerService service = createService();
+        IHintManager.HintManagerClientData data = service.getBinderServiceInstance()
+                .registerClient(mClientCallback);
+        assertNotNull(data);
+        assertEquals(data.supportInfo, mSupportInfo);
+    }
+
+    @Test
+    public void testRegisteringClientOnV4() throws Exception {
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(4);
+        HintManagerService service = createService();
+        IHintManager.HintManagerClientData data = service.getBinderServiceInstance()
+                .registerClient(mClientCallback);
+        assertNotNull(data);
+        assertEquals(data.supportInfo.usesSessions, true);
+        assertEquals(data.supportInfo.boosts, 0);
+        assertEquals(data.supportInfo.modes, 0);
+        assertEquals(data.supportInfo.sessionHints, 31);
+        assertEquals(data.supportInfo.sessionModes, 0);
+        assertEquals(data.supportInfo.sessionTags, 0);
+        assertEquals(data.powerHalVersion, 4);
+        assertEquals(data.preferredRateNanos, DEFAULT_HINT_PREFERRED_RATE);
+    }
+
+    @Test
+    public void testRegisteringClientOnV5() throws Exception {
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(5);
+        HintManagerService service = createService();
+        IHintManager.HintManagerClientData data = service.getBinderServiceInstance()
+                .registerClient(mClientCallback);
+        assertNotNull(data);
+        assertEquals(data.supportInfo.usesSessions, true);
+        assertEquals(data.supportInfo.boosts, 0);
+        assertEquals(data.supportInfo.modes, 0);
+        assertEquals(data.supportInfo.sessionHints, 255);
+        assertEquals(data.supportInfo.sessionModes, 1);
+        assertEquals(data.supportInfo.sessionTags, 31);
+        assertEquals(data.powerHalVersion, 5);
+        assertEquals(data.preferredRateNanos, DEFAULT_HINT_PREFERRED_RATE);
+    }
+
+    @Test
+    public void testSettingUpOldClientWhenUnsupported() throws Exception {
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(5);
+        // Mock unsupported to modify the default support behavior
+        when(mNativeWrapperMock.halGetHintSessionPreferredRate())
+                .thenReturn(-1L);
+        HintManagerService service = createService();
+        IHintManager.HintManagerClientData data = service.getBinderServiceInstance()
+                .registerClient(mClientCallback);
+        assertNotNull(data);
+        assertEquals(data.supportInfo.usesSessions, false);
+        assertEquals(data.supportInfo.boosts, 0);
+        assertEquals(data.supportInfo.modes, 0);
+        assertEquals(data.supportInfo.sessionHints, 0);
+        assertEquals(data.supportInfo.sessionModes, 0);
+        assertEquals(data.supportInfo.sessionTags, 0);
+        assertEquals(data.powerHalVersion, 5);
+        assertEquals(data.preferredRateNanos, -1);
     }
 }

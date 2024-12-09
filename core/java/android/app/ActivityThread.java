@@ -165,6 +165,10 @@ import android.os.TelephonyServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.instrumentation.ExecutableMethodFileOffsets;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
+import android.os.instrumentation.MethodDescriptorParser;
 import android.permission.IPermissionManager;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -1372,7 +1376,8 @@ public final class ActivityThread extends ClientTransactionHandler
             data.startRequestedElapsedTime = startRequestedElapsedTime;
             data.startRequestedUptime = startRequestedUptime;
             updateCompatOverrideScale(compatInfo);
-            CompatibilityInfo.applyOverrideScaleIfNeeded(config);
+            updateCompatOverrideDisplayRotation(compatInfo);
+            CompatibilityInfo.applyOverrideIfNeeded(config);
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -1383,6 +1388,15 @@ public final class ActivityThread extends ClientTransactionHandler
             } else {
                 CompatibilityInfo.setOverrideInvertedScale(/* invertScale */ 1f,
                         /* densityInvertScale */1f);
+            }
+        }
+
+        private void updateCompatOverrideDisplayRotation(@NonNull CompatibilityInfo info) {
+            if (info.isOverrideDisplayRotationRequired()) {
+                CompatibilityInfo.setOverrideDisplayRotation(info.applicationDisplayRotation);
+            } else {
+                CompatibilityInfo.setOverrideDisplayRotation(
+                        WindowConfiguration.ROTATION_UNDEFINED);
             }
         }
 
@@ -2036,6 +2050,7 @@ public final class ActivityThread extends ClientTransactionHandler
             ucd.pkg = pkg;
             ucd.info = info;
             updateCompatOverrideScale(info);
+            updateCompatOverrideDisplayRotation(info);
             sendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
         }
 
@@ -2224,6 +2239,29 @@ public final class ActivityThread extends ClientTransactionHandler
             args.arg5 = viewIds;
             args.arg6 = uiTranslationSpec;
             sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
+        }
+
+        @Override
+        public void getExecutableMethodFileOffsets(
+                @NonNull MethodDescriptor methodDescriptor,
+                @NonNull IOffsetCallback resultCallback) {
+            Method method = MethodDescriptorParser.parseMethodDescriptor(
+                    getClass().getClassLoader(), methodDescriptor);
+            VMDebug.ExecutableMethodFileOffsets location =
+                    VMDebug.getExecutableMethodFileOffsets(method);
+            try {
+                if (location == null) {
+                    resultCallback.onResult(null);
+                    return;
+                }
+                ExecutableMethodFileOffsets ret = new ExecutableMethodFileOffsets();
+                ret.containerPath = location.getContainerPath();
+                ret.containerOffset = location.getContainerOffset();
+                ret.methodOffset = location.getMethodOffset();
+                resultCallback.onResult(ret);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -3907,12 +3945,7 @@ public final class ActivityThread extends ClientTransactionHandler
             if (mLastProcessState == processState) {
                 return;
             }
-            // Do not issue a transitional GC if we are transitioning between 2 cached states.
-            // Only update if the state flips between cached and uncached or vice versa
-            if (ActivityManager.isProcStateCached(mLastProcessState)
-                    != ActivityManager.isProcStateCached(processState)) {
-                updateVmProcessState(processState);
-            }
+            updateVmProcessState(mLastProcessState, processState);
             mLastProcessState = processState;
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
@@ -3921,18 +3954,21 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    /** Converts a process state to a VM process state. */
+    private static int toVmProcessState(int processState) {
+        final int state = ActivityManager.isProcStateJankPerceptible(processState)
+                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
+                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
+        return state;
+    }
+
     /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
-    // Currently ART VM only uses state updates for Transitional GC, and thus
-    // this function initiates a Transitional GC for transitions into Cached apps states.
-    private void updateVmProcessState(int processState) {
-        // Only a transition into Cached state should result in a Transitional GC request
-        // to the ART runtime. Update VM state to JANK_IMPERCEPTIBLE in that case.
-        // Note that there are 4 possible cached states currently, all of which are
-        // JANK_IMPERCEPTIBLE from GC point of view.
-        final int state = ActivityManager.isProcStateCached(processState)
-                ? VM_PROCESS_STATE_JANK_IMPERCEPTIBLE
-                : VM_PROCESS_STATE_JANK_PERCEPTIBLE;
-        VMRuntime.getRuntime().updateProcessState(state);
+    private void updateVmProcessState(int lastProcessState, int newProcessState) {
+        final int state = toVmProcessState(newProcessState);
+        if (lastProcessState == PROCESS_STATE_UNKNOWN
+                || state != toVmProcessState(lastProcessState)) {
+            VMRuntime.getRuntime().updateProcessState(state);
+        }
     }
 
     @Override
@@ -5159,7 +5195,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 try {
                     if (doRebind) {
                         ActivityManager.getService().unbindFinished(
-                                data.token, data.intent, doRebind);
+                                data.token, data.intent);
                     } else {
                         ActivityManager.getService().serviceDoneExecuting(
                                 data.token, SERVICE_DONE_EXECUTING_UNBIND, 0, 0, data.intent);

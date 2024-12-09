@@ -50,6 +50,10 @@ public final class GenericDocumentWrapper implements Parcelable {
     @Nullable
     private Parcel mParcel;
 
+    @GuardedBy("mLock")
+    @Nullable
+    private Integer mDataSize;
+
     private final Object mLock = new Object();
 
     public static final Creator<GenericDocumentWrapper> CREATOR =
@@ -75,11 +79,13 @@ public final class GenericDocumentWrapper implements Parcelable {
     public GenericDocumentWrapper(@NonNull GenericDocument genericDocument) {
         mGenericDocument = Objects.requireNonNull(genericDocument);
         mParcel = null;
+        mDataSize = null;
     }
 
     public GenericDocumentWrapper(@NonNull Parcel parcel) {
         mGenericDocument = null;
         mParcel = Objects.requireNonNull(parcel);
+        mDataSize = mParcel.dataSize();
     }
 
     /** Returns the wrapped {@link android.app.appsearch.GenericDocument} */
@@ -106,6 +112,21 @@ public final class GenericDocumentWrapper implements Parcelable {
             } finally {
                 unmarshallParcel.recycle();
             }
+        }
+    }
+
+    /** Returns the size of the parcelled document. */
+
+    int getDataSize() {
+        synchronized (mLock) {
+            if (mDataSize != null) {
+                return mDataSize;
+            }
+            Parcel tempParcel = Parcel.obtain();
+            writeToParcel(tempParcel, 0);
+            mDataSize = tempParcel.dataSize();
+            tempParcel.recycle();
+            return mDataSize;
         }
     }
 

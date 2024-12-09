@@ -24,6 +24,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static com.android.shell.BugreportPrefs.STATE_HIDE;
 import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
 import static com.android.shell.BugreportPrefs.getWarningState;
+import static com.android.shell.flags.Flags.handleBugreportsForWear;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -89,9 +90,9 @@ import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
-import com.google.android.collect.Lists;
-
 import libcore.io.Streams;
+
+import com.google.android.collect.Lists;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -140,6 +141,7 @@ import java.util.zip.ZipOutputStream;
 public class BugreportProgressService extends Service {
     private static final String TAG = "BugreportProgressService";
     private static final boolean DEBUG = false;
+    private static final String WRITE_AND_APPEND_MODE = "wa";
 
     private Intent startSelfIntent;
 
@@ -384,7 +386,11 @@ public class BugreportProgressService extends Service {
     }
 
     private static String getFileName(BugreportInfo info, String suffix) {
-        return String.format("%s-%s%s", info.baseName, info.getName(), suffix);
+        return getFileName(suffix, info.baseName, info.getName());
+    }
+
+    private static String getFileName(String suffix, String baseName, String name) {
+        return String.format("%s-%s%s", baseName, name, suffix);
     }
 
     private final class BugreportCallbackImpl extends BugreportCallback {
@@ -420,14 +426,14 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onFinished() {
-            mInfo.renameBugreportFile();
-            mInfo.renameScreenshots();
-            if (mInfo.bugreportFile.length() == 0) {
-                Log.e(TAG, "Bugreport file empty. File path = " + mInfo.bugreportFile);
-                onError(BUGREPORT_ERROR_RUNTIME);
-                return;
-            }
             synchronized (mLock) {
+                mInfo.renameBugreportFile();
+                mInfo.renameScreenshots();
+                if (mInfo.bugreportLocationInfo.isFileEmpty(mContext)) {
+                    Log.e(TAG, "Bugreport file empty. File path = " + mInfo.bugreportLocationInfo);
+                    onError(BUGREPORT_ERROR_RUNTIME);
+                    return;
+                }
                 sendBugreportFinishedBroadcastLocked();
                 mMainThreadHandler.post(() -> mInfoDialog.onBugreportFinished(mInfo));
             }
@@ -454,15 +460,15 @@ public class BugreportProgressService extends Service {
 
         @GuardedBy("mLock")
         private void sendBugreportFinishedBroadcastLocked() {
-            final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
-            if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
-                sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
-                        mInfo.bugreportFile, mInfo.nonce);
+            File bugreportFile = mInfo.bugreportLocationInfo.mBugreportFile;
+            if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE && bugreportFile != null) {
+                sendRemoteBugreportFinishedBroadcast(
+                        mContext, bugreportFile.getAbsolutePath(), bugreportFile, mInfo.nonce);
             } else {
                 cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE, mBugreportsDir);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
-                intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
-                intent.putExtra(EXTRA_SCREENSHOT, getScreenshotForIntent(mInfo));
+                intent.putExtra(EXTRA_BUGREPORT, mInfo.bugreportLocationInfo.getBugreportPath());
+                intent.putExtra(EXTRA_SCREENSHOT, mInfo.screenshotLocationInfo.getScreenshotPath());
                 mContext.sendBroadcast(intent, android.Manifest.permission.DUMP);
                 onBugreportFinished(mInfo);
             }
@@ -496,19 +502,6 @@ public class BugreportProgressService extends Service {
         intent.putExtra(EXTRA_BUGREPORT, bugreportFileName);
         context.sendBroadcastAsUser(intent, UserHandle.SYSTEM,
                 android.Manifest.permission.DUMP);
-    }
-
-    /**
-     * Checks if screenshot array is non-empty and returns the first screenshot's path. The first
-     * screenshot is the default screenshot for the bugreport types that take it.
-     */
-    private static String getScreenshotForIntent(BugreportInfo info) {
-        if (!info.screenshotFiles.isEmpty()) {
-            final File screenshotFile = info.screenshotFiles.get(0);
-            final String screenshotFilePath = screenshotFile.getAbsolutePath();
-            return screenshotFilePath;
-        }
-        return null;
     }
 
     private static String generateFileHash(String fileName) {
@@ -715,24 +708,28 @@ public class BugreportProgressService extends Service {
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
         List<Uri> extraAttachments =
                 intent.getParcelableArrayListExtra(EXTRA_EXTRA_ATTACHMENT_URIS, Uri.class);
-
-        BugreportInfo info = new BugreportInfo(mContext, baseName, name, shareTitle,
-                shareDescription, bugreportType, mBugreportsDir, nonce, extraAttachments);
-        synchronized (mLock) {
-            if (info.bugreportFile.exists()) {
-                Log.e(TAG, "Failed to start bugreport generation, the requested bugreport file "
-                        + info.bugreportFile + " already exists");
-                return;
-            }
-            info.createBugreportFile();
+        BugreportInfo info =
+                setupFilesAndCreateBugreportInfo(
+                        intent,
+                        bugreportType,
+                        baseName,
+                        name,
+                        shareTitle,
+                        shareDescription,
+                        nonce,
+                        extraAttachments);
+        if (info == null) {
+            Log.e(TAG, "Could not initialize bugreport inputs");
+            return;
         }
+
         ParcelFileDescriptor bugreportFd = info.getBugreportFd();
         if (bugreportFd == null) {
             Log.e(TAG, "Failed to start bugreport generation as "
                     + " bugreport parcel file descriptor is null.");
             return;
         }
-        info.createScreenshotFile(mBugreportsDir);
+
         ParcelFileDescriptor screenshotFd = null;
         if (isDefaultScreenshotRequired(bugreportType, /* hasScreenshotButton= */ !mIsTv)) {
             screenshotFd = info.getDefaultScreenshotFd();
@@ -740,7 +737,7 @@ public class BugreportProgressService extends Service {
                 Log.e(TAG, "Failed to start bugreport generation as"
                         + " screenshot parcel file descriptor is null. Deleting bugreport file");
                 FileUtils.closeQuietly(bugreportFd);
-                info.bugreportFile.delete();
+                info.bugreportLocationInfo.maybeDeleteBugreportFile();
                 return;
             }
         }
@@ -766,6 +763,56 @@ public class BugreportProgressService extends Service {
                 FileUtils.closeQuietly(screenshotFd);
             }
         }
+    }
+
+    // Sets up BugreportInfo. If needed, creates bugreport and screenshot files.
+    private BugreportInfo setupFilesAndCreateBugreportInfo(
+            Intent intent,
+            int bugreportType,
+            String baseName,
+            String name,
+            String shareTitle,
+            String shareDescription,
+            long nonce,
+            List<Uri> extraAttachments) {
+        ArrayList<Uri> brAndScreenshot;
+        Uri bugReportUri = null;
+        Uri screenshotUri = null;
+
+        if (handleBugreportsForWear() && bugreportType == BugreportParams.BUGREPORT_MODE_WEAR) {
+            brAndScreenshot = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            if (brAndScreenshot != null && !brAndScreenshot.isEmpty()) {
+                bugReportUri = brAndScreenshot.get(0);
+                if (bugReportUri == null) {
+                    Log.e(TAG, "Can't start bugreport request. Bugreport uri is null.");
+                    return null;
+                }
+                screenshotUri = (brAndScreenshot.size() > 1) ? brAndScreenshot.get(1) : null;
+            }
+        }
+
+        BugreportLocationInfo bugreportLocationInfo =
+                new BugreportLocationInfo(bugReportUri, mBugreportsDir, baseName, name);
+        ScreenshotLocationInfo screenshotLocationInfo = new ScreenshotLocationInfo(screenshotUri);
+        BugreportInfo info =
+                new BugreportInfo(
+                        mContext,
+                        baseName,
+                        name,
+                        shareTitle,
+                        shareDescription,
+                        bugreportType,
+                        nonce,
+                        extraAttachments,
+                        bugreportLocationInfo,
+                        screenshotLocationInfo);
+        synchronized (mLock) {
+            if (!bugreportLocationInfo.maybeCreateBugreportFile()) {
+                return null;
+            }
+        }
+        info.maybeCreateScreenshotFile(mBugreportsDir);
+        return info;
     }
 
     private static boolean isDefaultScreenshotRequired(
@@ -1177,8 +1224,9 @@ public class BugreportProgressService extends Service {
             stopForegroundWhenDoneLocked(info.id);
         }
 
-        if (!info.bugreportFile.exists() || !info.bugreportFile.canRead()) {
-            Log.e(TAG, "Could not read bugreport file " + info.bugreportFile);
+        File bugreportFile = info.bugreportLocationInfo.mBugreportFile;
+        if (!info.bugreportLocationInfo.isValidBugreportResult()) {
+            Log.e(TAG, "Could not read bugreport file " + bugreportFile);
             Toast.makeText(mContext, R.string.bugreport_unreadable_text, Toast.LENGTH_LONG).show();
             synchronized (mLock) {
                 stopProgressLocked(info.id);
@@ -1194,7 +1242,7 @@ public class BugreportProgressService extends Service {
      * the bugreport.
      */
     private void triggerLocalNotification(final BugreportInfo info) {
-        boolean isPlainText = info.bugreportFile.getName().toLowerCase().endsWith(".txt");
+        boolean isPlainText = info.bugreportLocationInfo.isPlainText();
         if (!isPlainText) {
             // Already zipped, send it right away.
             sendBugreportNotification(info, mTakingScreenshot);
@@ -1223,11 +1271,11 @@ public class BugreportProgressService extends Service {
         // grant temporary permissions for.
         final Uri bugreportUri;
         try {
-            bugreportUri = getUri(context, info.bugreportFile);
+            bugreportUri = getUri(context, info.bugreportLocationInfo.mBugreportFile);
         } catch (IllegalArgumentException e) {
             // Should not happen on production, but happens when a Shell is sideloaded and
             // FileProvider cannot find a configured root for it.
-            Log.wtf(TAG, "Could not get URI for " + info.bugreportFile, e);
+            Log.wtf(TAG, "Could not get URI for " + info.bugreportLocationInfo.mBugreportFile, e);
             return null;
         }
 
@@ -1258,7 +1306,7 @@ public class BugreportProgressService extends Service {
                 new ClipData.Item(null, null, null, bugreportUri));
         Log.d(TAG, "share intent: bureportUri=" + bugreportUri);
         final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri);
-        for (File screenshot : info.screenshotFiles) {
+        for (File screenshot : info.screenshotLocationInfo.mScreenshotFiles) {
             final Uri screenshotUri = getUri(context, screenshot);
             Log.d(TAG, "share intent: screenshotUri=" + screenshotUri);
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
@@ -1317,7 +1365,11 @@ public class BugreportProgressService extends Service {
      */
     private Intent buildWearWarningIntent() {
         Intent intent = new Intent();
-        intent.setClassName(mContext, getPackageName() + ".WearBugreportWarningActivity");
+        String systemUIPackage = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemUi);
+        String wearBugreportWarningActivity = getResources()
+                .getString(R.string.system_ui_wear_bugreport_warning_activity);
+        intent.setClassName(systemUIPackage, wearBugreportWarningActivity);
         if (mContext.getPackageManager().resolveActivity(intent, /* flags */ 0) == null) {
             Log.e(TAG, "Cannot find wear bugreport warning activity");
             return buildWarningIntent(mContext, /* sendIntent */ null);
@@ -1512,22 +1564,25 @@ public class BugreportProgressService extends Service {
      * original in case of failure).
      */
     private static void zipBugreport(BugreportInfo info) {
-        final String bugreportPath = info.bugreportFile.getAbsolutePath();
+        File bugreportFile = info.bugreportLocationInfo.mBugreportFile;
+        final String bugreportPath = bugreportFile.getAbsolutePath();
         final String zippedPath = bugreportPath.replace(".txt", ".zip");
         Log.v(TAG, "zipping " + bugreportPath + " as " + zippedPath);
         final File bugreportZippedFile = new File(zippedPath);
-        try (InputStream is = new FileInputStream(info.bugreportFile);
-                ZipOutputStream zos = new ZipOutputStream(
-                        new BufferedOutputStream(new FileOutputStream(bugreportZippedFile)))) {
-            addEntry(zos, info.bugreportFile.getName(), is);
+        try (InputStream is = new FileInputStream(bugreportFile);
+                ZipOutputStream zos =
+                        new ZipOutputStream(
+                                new BufferedOutputStream(
+                                        new FileOutputStream(bugreportZippedFile)))) {
+            addEntry(zos, bugreportFile.getName(), is);
             // Delete old file
-            final boolean deleted = info.bugreportFile.delete();
+            final boolean deleted = bugreportFile.delete();
             if (deleted) {
                 Log.v(TAG, "deleted original bugreport (" + bugreportPath + ")");
             } else {
                 Log.e(TAG, "could not delete original bugreport (" + bugreportPath + ")");
             }
-            info.bugreportFile = bugreportZippedFile;
+            info.bugreportLocationInfo.mBugreportFile = bugreportZippedFile;
         } catch (IOException e) {
             Log.e(TAG, "exception zipping file " + zippedPath, e);
         }
@@ -1557,7 +1612,11 @@ public class BugreportProgressService extends Service {
 
     @GuardedBy("mLock")
     private void addDetailsToZipFileLocked(BugreportInfo info) {
-        if (info.bugreportFile == null) {
+        if (handleBugreportsForWear()) {
+            Log.d(TAG, "Skipping adding details to zipped file");
+            return;
+        }
+        if (info.bugreportLocationInfo.mBugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
             return;
@@ -1588,10 +1647,11 @@ public class BugreportProgressService extends Service {
             sendBugreportBeingUpdatedNotification(mContext, info.id); // ...and that takes time
         }
 
-        final File dir = info.bugreportFile.getParentFile();
-        final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
+        File bugreportFile = info.bugreportLocationInfo.mBugreportFile;
+        final File dir = bugreportFile.getParentFile();
+        final File tmpZip = new File(dir, "tmp-" + bugreportFile.getName());
         Log.d(TAG, "Writing temporary zip file (" + tmpZip + ") with title and/or description");
-        try (ZipFile oldZip = new ZipFile(info.bugreportFile);
+        try (ZipFile oldZip = new ZipFile(bugreportFile);
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tmpZip))) {
 
             // First copy contents from original zip.
@@ -1628,8 +1688,8 @@ public class BugreportProgressService extends Service {
             stopForegroundWhenDoneLocked(info.id);
         }
 
-        if (!tmpZip.renameTo(info.bugreportFile)) {
-            Log.e(TAG, "Could not rename " + tmpZip + " to " + info.bugreportFile);
+        if (!tmpZip.renameTo(bugreportFile)) {
+            Log.e(TAG, "Could not rename " + tmpZip + " to " + bugreportFile);
         }
     }
 
@@ -2087,15 +2147,9 @@ public class BugreportProgressService extends Service {
          */
         String formattedLastUpdate;
 
-        /**
-         * Path of the main bugreport file.
-         */
-        File bugreportFile;
+        BugreportLocationInfo bugreportLocationInfo;
 
-        /**
-         * Path of the screenshot files.
-         */
-        List<File> screenshotFiles = new ArrayList<>(1);
+        ScreenshotLocationInfo screenshotLocationInfo;
 
         /**
          * Whether dumpstate sent an intent informing it has finished.
@@ -2138,10 +2192,17 @@ public class BugreportProgressService extends Service {
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
          */
-        BugreportInfo(Context context, String baseName, String name,
-                @Nullable String shareTitle, @Nullable String shareDescription,
-                @BugreportParams.BugreportMode int type, File bugreportsDir, long nonce,
-                @Nullable List<Uri> extraAttachments) {
+        BugreportInfo(
+                Context context,
+                String baseName,
+                String name,
+                @Nullable String shareTitle,
+                @Nullable String shareDescription,
+                @BugreportParams.BugreportMode int type,
+                long nonce,
+                @Nullable List<Uri> extraAttachments,
+                BugreportLocationInfo bugreportLocationInfo,
+                ScreenshotLocationInfo screenshotLocationInfo) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
@@ -2149,29 +2210,27 @@ public class BugreportProgressService extends Service {
             this.type = type;
             this.nonce = nonce;
             this.baseName = baseName;
-            this.bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
+            this.bugreportLocationInfo = bugreportLocationInfo;
+            this.screenshotLocationInfo = screenshotLocationInfo;
             this.extraAttachments = extraAttachments;
         }
 
-        void createBugreportFile() {
-            createReadWriteFile(bugreportFile);
-        }
-
-        void createScreenshotFile(File bugreportsDir) {
+        void maybeCreateScreenshotFile(File bugreportsDir) {
+            if (screenshotLocationInfo.mScreenshotUri != null) {
+                // Screenshot file was already created.
+                return;
+            }
             File screenshotFile = new File(bugreportsDir, getScreenshotName("default"));
             addScreenshot(screenshotFile);
             createReadWriteFile(screenshotFile);
         }
 
         ParcelFileDescriptor getBugreportFd() {
-            return getFd(bugreportFile);
+            return bugreportLocationInfo.getBugreportFd(context);
         }
 
         ParcelFileDescriptor getDefaultScreenshotFd() {
-            if (screenshotFiles.isEmpty()) {
-                return null;
-            }
-            return getFd(screenshotFiles.get(0));
+            return screenshotLocationInfo.getScreenshotFd(context);
         }
 
         void setTitle(String title) {
@@ -2229,14 +2288,14 @@ public class BugreportProgressService extends Service {
          * Saves the location of a taken screenshot so it can be sent out at the end.
          */
         void addScreenshot(File screenshot) {
-            screenshotFiles.add(screenshot);
+            screenshotLocationInfo.mScreenshotFiles.add(screenshot);
         }
 
         /**
          * Deletes all screenshots taken for a given bugreport.
          */
         private void deleteScreenshots() {
-            for (File file : screenshotFiles) {
+            for (File file : screenshotLocationInfo.mScreenshotFiles) {
                 Log.i(TAG, "Deleting screenshot file " + file);
                 file.delete();
             }
@@ -2246,18 +2305,14 @@ public class BugreportProgressService extends Service {
          * Deletes bugreport file for a given bugreport.
          */
         private void deleteBugreportFile() {
-            Log.i(TAG, "Deleting bugreport file " + bugreportFile);
-            bugreportFile.delete();
+            bugreportLocationInfo.maybeDeleteBugreportFile();
         }
 
         /**
          * Deletes empty files for a given bugreport.
          */
         private void deleteEmptyFiles() {
-            if (bugreportFile.length() == 0) {
-                Log.i(TAG, "Deleting empty bugreport file: " + bugreportFile);
-                bugreportFile.delete();
-            }
+            bugreportLocationInfo.maybeDeleteEmptyBugreport();
             deleteEmptyScreenshots();
         }
 
@@ -2265,14 +2320,7 @@ public class BugreportProgressService extends Service {
          * Deletes empty screenshot files.
          */
         private void deleteEmptyScreenshots() {
-            screenshotFiles.removeIf(file -> {
-                final long length = file.length();
-                if (length == 0) {
-                    Log.i(TAG, "Deleting empty screenshot file: " + file);
-                    file.delete();
-                }
-                return length == 0;
-            });
+            screenshotLocationInfo.deleteEmptyScreenshots();
         }
 
         /**
@@ -2280,43 +2328,14 @@ public class BugreportProgressService extends Service {
          * {@code initialName} if user has changed it.
          */
         void renameScreenshots() {
-            deleteEmptyScreenshots();
-            if (TextUtils.isEmpty(name) || screenshotFiles.isEmpty()) {
-                return;
-            }
-            final List<File> renamedFiles = new ArrayList<>(screenshotFiles.size());
-            for (File oldFile : screenshotFiles) {
-                final String oldName = oldFile.getName();
-                final String newName = oldName.replaceFirst(initialName, name);
-                final File newFile;
-                if (!newName.equals(oldName)) {
-                    final File renamedFile = new File(oldFile.getParentFile(), newName);
-                    Log.d(TAG, "Renaming screenshot file " + oldFile + " to " + renamedFile);
-                    newFile = oldFile.renameTo(renamedFile) ? renamedFile : oldFile;
-                } else {
-                    Log.w(TAG, "Name didn't change: " + oldName);
-                    newFile = oldFile;
-                }
-                if (newFile.length() > 0) {
-                    renamedFiles.add(newFile);
-                } else if (newFile.delete()) {
-                    Log.d(TAG, "screenshot file: " + newFile + " deleted successfully.");
-                }
-            }
-            screenshotFiles = renamedFiles;
+            screenshotLocationInfo.renameScreenshots(initialName, name);
         }
 
         /**
          * Rename bugreport file to include the name given by user via UI
          */
         void renameBugreportFile() {
-            File newBugreportFile = new File(bugreportFile.getParentFile(),
-                    getFileName(this, ".zip"));
-            if (!newBugreportFile.getPath().equals(bugreportFile.getPath())) {
-                if (bugreportFile.renameTo(newBugreportFile)) {
-                    bugreportFile = newBugreportFile;
-                }
-            }
+            bugreportLocationInfo.maybeRenameBugreportFile(this);
         }
 
         String getFormattedLastUpdate() {
@@ -2349,16 +2368,23 @@ public class BugreportProgressService extends Service {
                 builder.append("(").append(description.length()).append(" chars)");
             }
 
-            return builder
-                .append("\n\tfile: ").append(bugreportFile)
-                .append("\n\tscreenshots: ").append(screenshotFiles)
-                .append("\n\tprogress: ").append(progress)
-                .append("\n\tlast_update: ").append(getFormattedLastUpdate())
-                .append("\n\taddingDetailsToZip: ").append(addingDetailsToZip)
-                .append(" addedDetailsToZip: ").append(addedDetailsToZip)
-                .append("\n\tshareDescription: ").append(shareDescription)
-                .append("\n\tshareTitle: ").append(shareTitle)
-                .toString();
+            return builder.append("\n\tfile: ")
+                    .append(bugreportLocationInfo)
+                    .append("\n\tscreenshots: ")
+                    .append(screenshotLocationInfo)
+                    .append("\n\tprogress: ")
+                    .append(progress)
+                    .append("\n\tlast_update: ")
+                    .append(getFormattedLastUpdate())
+                    .append("\n\taddingDetailsToZip: ")
+                    .append(addingDetailsToZip)
+                    .append(" addedDetailsToZip: ")
+                    .append(addedDetailsToZip)
+                    .append("\n\tshareDescription: ")
+                    .append(shareDescription)
+                    .append("\n\tshareTitle: ")
+                    .append(shareTitle)
+                    .toString();
         }
 
         // Parcelable contract
@@ -2375,11 +2401,12 @@ public class BugreportProgressService extends Service {
             lastProgress.set(in.readInt());
             lastUpdate.set(in.readLong());
             formattedLastUpdate = in.readString();
-            bugreportFile = readFile(in);
+            bugreportLocationInfo = new BugreportLocationInfo(readFile(in));
 
             int screenshotSize = in.readInt();
             for (int i = 1; i <= screenshotSize; i++) {
-                  screenshotFiles.add(readFile(in));
+                screenshotLocationInfo = new ScreenshotLocationInfo(null);
+                screenshotLocationInfo.mScreenshotFiles.add(readFile(in));
             }
 
             finished.set(in.readInt() == 1);
@@ -2404,10 +2431,10 @@ public class BugreportProgressService extends Service {
             dest.writeInt(lastProgress.intValue());
             dest.writeLong(lastUpdate.longValue());
             dest.writeString(getFormattedLastUpdate());
-            writeFile(dest, bugreportFile);
+            writeFile(dest, bugreportLocationInfo.mBugreportFile);
 
-            dest.writeInt(screenshotFiles.size());
-            for (File screenshotFile : screenshotFiles) {
+            dest.writeInt(screenshotLocationInfo.mScreenshotFiles.size());
+            for (File screenshotFile : screenshotLocationInfo.mScreenshotFiles) {
                 writeFile(dest, screenshotFile);
             }
 
@@ -2447,6 +2474,261 @@ public class BugreportProgressService extends Service {
                 return new BugreportInfo[size];
             }
         };
+    }
+
+    /**
+     * Class for abstracting bugreport location. There are two possible cases:
+     * <li>If a bugreport request included a URI for bugreports of type {@link
+     *     BugreportParams.BUGREPORT_MODE_WEAR}, then the URI file descriptor will be used. The
+     *     requesting app manages the creation and lifecycle of the file.
+     * <li>If no URI is provided in the bugreport request, Shell will create a bugreport file and
+     *     manage its lifecycle.
+     */
+    private static final class BugreportLocationInfo {
+        /** Path of the main bugreport file. */
+        @Nullable private File mBugreportFile;
+
+        /** Uri to bugreport location. */
+        @Nullable private Uri mBugreportUri;
+
+        BugreportLocationInfo(File bugreportFile) {
+            this.mBugreportFile = bugreportFile;
+        }
+
+        BugreportLocationInfo(Uri bugreportUri, File bugreportsDir, String baseName, String name) {
+            if (bugreportUri != null) {
+                this.mBugreportUri = bugreportUri;
+            } else {
+                this.mBugreportFile = new File(bugreportsDir, getFileName(".zip", baseName, name));
+            }
+        }
+
+        private boolean maybeCreateBugreportFile() {
+            if (mBugreportFile != null && mBugreportFile.exists()) {
+                Log.e(
+                        TAG,
+                        "Failed to start bugreport generation, the requested bugreport file "
+                                + mBugreportFile
+                                + " already exists");
+                return false;
+            }
+            createBugreportFile();
+            return true;
+        }
+
+        private void createBugreportFile() {
+            if (mBugreportUri == null) {
+                createReadWriteFile(mBugreportFile);
+            }
+        }
+
+        private ParcelFileDescriptor getBugreportFd(Context context) {
+            if (mBugreportUri != null) {
+                try {
+                    return context.getContentResolver()
+                            .openFileDescriptor(mBugreportUri, WRITE_AND_APPEND_MODE);
+                } catch (Exception e) {
+                    Log.d(TAG, "Faced exception when getting BR file descriptor", e);
+                    return null;
+                }
+            }
+            if (mBugreportFile == null) {
+                Log.e(TAG, "Could not get bugreport file descriptor; bugreport file was null");
+                return null;
+            }
+            return getFd(mBugreportFile);
+        }
+
+        private void maybeDeleteBugreportFile() {
+            if (mBugreportFile == null) {
+                // This means a URI is provided and shell is not responsible for the file's
+                // lifecycle.
+                return;
+            }
+            Log.i(TAG, "Deleting bugreport file " + mBugreportFile);
+            mBugreportFile.delete();
+        }
+
+        private boolean isValidBugreportResult() {
+            if (mBugreportFile != null) {
+                return mBugreportFile.exists() && mBugreportFile.canRead();
+            }
+            // If a bugreport uri was provided, we can't assert on whether the file exists and can
+            // be read. Assume the result is valid.
+            return true;
+        }
+
+        private void maybeDeleteEmptyBugreport() {
+            if (mBugreportFile == null) {
+                // This means a URI is provided and shell is not responsible for the file's
+                // lifecycle.
+                return;
+            }
+            if (mBugreportFile.length() == 0) {
+                Log.i(TAG, "Deleting empty bugreport file: " + mBugreportFile);
+                mBugreportFile.delete();
+            }
+        }
+
+        private void maybeRenameBugreportFile(BugreportInfo bugreportInfo) {
+            if (mBugreportFile == null) {
+                // This means a URI is provided and shell is not responsible for the file's naming.
+                return;
+            }
+            File newBugreportFile =
+                    new File(mBugreportFile.getParentFile(), getFileName(bugreportInfo, ".zip"));
+            if (!newBugreportFile.getPath().equals(mBugreportFile.getPath())) {
+                if (mBugreportFile.renameTo(newBugreportFile)) {
+                    mBugreportFile = newBugreportFile;
+                }
+            }
+        }
+
+        private boolean isPlainText() {
+            if (mBugreportFile != null) {
+                return mBugreportFile.getName().toLowerCase().endsWith(".txt");
+            }
+            return false;
+        }
+
+        private boolean isFileEmpty(Context context) {
+            if (mBugreportFile != null) {
+                return mBugreportFile.length() == 0;
+            }
+            return getBugreportFd(context).getStatSize() == 0;
+        }
+
+        @Override
+        public String toString() {
+            return "BugreportLocationInfo{"
+                    + "bugreportFile="
+                    + mBugreportFile
+                    + ", bugreportUri="
+                    + mBugreportUri
+                    + '}';
+        }
+
+        private String getBugreportPath() {
+            if (mBugreportUri != null) {
+                return mBugreportUri.getLastPathSegment();
+            }
+            return mBugreportFile.getAbsolutePath();
+        }
+    }
+
+    /**
+     * Class for abstracting screenshot location. There are two possible cases:
+     * <li>If a bugreport request included a URI for bugreports of type {@link
+     *     BugreportParams.BUGREPORT_MODE_WEAR}, then the URI file descriptor will be used. The
+     *     requesting app manages the creation and lifecycle of the file.
+     * <li>If no URI is provided in the bugreport request, Shell will create the screenshot file and
+     *     manage its lifecycle.
+     */
+    private static final class ScreenshotLocationInfo {
+
+        /** Uri to screenshot location. */
+        @Nullable private Uri mScreenshotUri;
+
+        /** Path to screenshot files. */
+        private List<File> mScreenshotFiles = new ArrayList<>(1);
+
+        ScreenshotLocationInfo(Uri screenshotUri) {
+            if (screenshotUri != null) {
+                this.mScreenshotUri = screenshotUri;
+            }
+        }
+
+        private ParcelFileDescriptor getScreenshotFd(Context context) {
+            if (mScreenshotUri != null) {
+                try {
+                    return context.getContentResolver()
+                            .openFileDescriptor(mScreenshotUri, WRITE_AND_APPEND_MODE);
+                } catch (Exception e) {
+                    Log.d(TAG, "Faced exception when getting screenshot file", e);
+                    return null;
+                }
+            }
+
+            if (mScreenshotFiles.isEmpty()) {
+                return null;
+            }
+            return getFd(mScreenshotFiles.getFirst());
+        }
+
+        @Override
+        public String toString() {
+            return "ScreenshotLocationInfo{"
+                    + "screenshotUri="
+                    + mScreenshotUri
+                    + ", screenshotFiles="
+                    + mScreenshotFiles
+                    + '}';
+        }
+
+        private String getScreenshotPath() {
+            if (mScreenshotUri != null) {
+                return mScreenshotUri.getLastPathSegment();
+            }
+            return getScreenshotForIntent();
+        }
+
+        private void renameScreenshots(String initialName, String name) {
+            if (mScreenshotUri != null) {
+                // If a screenshot uri is provided, then shell is not responsible for the
+                // screenshot's naming.
+                return;
+            }
+            deleteEmptyScreenshots();
+            if (TextUtils.isEmpty(name) || mScreenshotFiles.isEmpty()) {
+                // If there is no user set name for screenshot file or there are no screenshot
+                // files, there's nothing to do.
+                return;
+            }
+            final List<File> renamedFiles = new ArrayList<>(mScreenshotFiles.size());
+            for (File oldFile : mScreenshotFiles) {
+                final String oldName = oldFile.getName();
+                final String newName = oldName.replaceFirst(initialName, name);
+                final File newFile;
+                if (!newName.equals(oldName)) {
+                    final File renamedFile = new File(oldFile.getParentFile(), newName);
+                    Log.d(TAG, "Renaming screenshot file " + oldFile + " to " + renamedFile);
+                    newFile = oldFile.renameTo(renamedFile) ? renamedFile : oldFile;
+                } else {
+                    Log.w(TAG, "Name didn't change: " + oldName);
+                    newFile = oldFile;
+                }
+                if (newFile.length() > 0) {
+                    renamedFiles.add(newFile);
+                } else if (newFile.delete()) {
+                    Log.d(TAG, "screenshot file: " + newFile + " deleted successfully.");
+                }
+            }
+            mScreenshotFiles = renamedFiles;
+        }
+
+        private void deleteEmptyScreenshots() {
+            mScreenshotFiles.removeIf(
+                    file -> {
+                        final long length = file.length();
+                        if (length == 0) {
+                            Log.i(TAG, "Deleting empty screenshot file: " + file);
+                            file.delete();
+                        }
+                        return length == 0;
+                    });
+        }
+
+        /**
+         * Checks if screenshot array is non-empty and returns the first screenshot's path. The
+         * first screenshot is the default screenshot for the bugreport types that take it.
+         */
+        private String getScreenshotForIntent() {
+            if (!mScreenshotFiles.isEmpty()) {
+                final File screenshotFile = mScreenshotFiles.getFirst();
+                return screenshotFile.getAbsolutePath();
+            }
+            return null;
+        }
     }
 
     @GuardedBy("mLock")

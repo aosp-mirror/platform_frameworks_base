@@ -449,6 +449,14 @@ flag {
 }
 
 flag {
+    name: "reparent_window_token_api"
+    namespace: "lse_desktop_experience"
+    description: "Allows to reparent a window token to a different display"
+    is_fixed_read_only: true
+    bug: "381258683"
+}
+
+flag {
     name: "enable_desktop_windowing_hsum"
     namespace: "lse_desktop_experience"
     description: "Enables HSUM on desktop mode."
@@ -460,4 +468,36 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Enable multiple desktop sessions for desktop windowing."
     bug: "379158791"
+}
+
+flag {
+    name: "enable_connected_displays_dnd"
+    namespace: "lse_desktop_experience"
+    description: "Enable drag-and-drop between connected displays."
+    bug: "381793841"
+}
+
+flag {
+    name: "enable_connected_displays_window_drag"
+    namespace: "lse_desktop_experience"
+    description: "Enable window drag between connected displays."
+    bug: "381172172"
+}
+
+flag {
+    name: "enable_bug_fixes_for_secondary_display"
+    namespace: "lse_desktop_experience"
+    description: "Bugfixes / papercuts to bring Desktop Windowing to secondary displays."
+    bug: "382023296"
+}
+
+flag {
+    name: "enable_top_visible_root_task_per_user_tracking"
+    namespace: "lse_desktop_experience"
+    description: "Enables tracking the top visible root tasks for a user."
+    bug: "381038076"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

@@ -66,6 +66,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
     private final int mUserId;
     private final Handler mHandler;
     private final boolean mIsSelfScanOnlyProvider;
+    private final boolean mSupportsSystemMediaRouting;
     private final ServiceConnection mServiceConnection = new ServiceConnectionImpl();
 
     // Connection state
@@ -95,12 +96,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             @NonNull Looper looper,
             @NonNull ComponentName componentName,
             boolean isSelfScanOnlyProvider,
+            boolean supportsSystemMediaRouting,
             int userId) {
         super(componentName, /* isSystemRouteProvider= */ false);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mRequestIdToSessionCreationRequest = new LongSparseArray<>();
         mSessionOriginalIdToTransferRequest = new HashMap<>();
         mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
+        mSupportsSystemMediaRouting = supportsSystemMediaRouting;
         mUserId = userId;
         mHandler = new Handler(looper);
     }
@@ -651,11 +654,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         }
         return TextUtils.formatSimple(
                 "ProviderServiceProxy - package: %s, bound: %b, connection (active:%b, ready:%b), "
-                        + "pending (session creations: %d, transfers: %d)",
+                        + "system media=%b, pending (session creations: %d, transfers: %d)",
                 mComponentName.getPackageName(),
                 mBound,
                 mActiveConnection != null,
                 mConnectionReady,
+                mSupportsSystemMediaRouting,
                 pendingSessionCreationCount,
                 pendingTransferCount);
     }
@@ -697,7 +701,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
 
         Connection(IMediaRoute2ProviderService serviceBinder) {
             mService = serviceBinder;
-            mCallbackStub = new ServiceCallbackStub(this);
+            mCallbackStub = new ServiceCallbackStub(this, mSupportsSystemMediaRouting);
         }
 
         public boolean register() {
@@ -811,9 +815,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
     private static final class ServiceCallbackStub extends
             IMediaRoute2ProviderServiceCallback.Stub {
         private final WeakReference<Connection> mConnectionRef;
+        private final boolean mAllowSystemMediaRoutes;
 
-        ServiceCallbackStub(Connection connection) {
+        ServiceCallbackStub(Connection connection, boolean allowSystemMediaRoutes) {
             mConnectionRef = new WeakReference<>(connection);
+            mAllowSystemMediaRoutes = allowSystemMediaRoutes;
         }
 
         public void dispose() {
@@ -844,6 +850,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
                     throw new SecurityException(
                             "Only the system is allowed to publish routes with system route types. "
                                     + "Disallowed route: "
+                                    + route);
+                }
+
+                if (route.supportsSystemMediaRouting() && !mAllowSystemMediaRoutes) {
+                    throw new SecurityException(
+                            "This provider is not allowed to publish routes that support system"
+                                    + " media routing. Disallowed route: "
                                     + route);
                 }
             }

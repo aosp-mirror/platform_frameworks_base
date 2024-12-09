@@ -1189,6 +1189,18 @@ public class ActivityManager {
         return procState == PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
+    /** @hide Should this process state be considered jank perceptible? */
+    public static final boolean isProcStateJankPerceptible(int procState) {
+        if (Flags.jankPerceptibleNarrow()) {
+            return procState == PROCESS_STATE_PERSISTENT_UI
+                || procState == PROCESS_STATE_TOP
+                || procState == PROCESS_STATE_IMPORTANT_FOREGROUND
+                || procState == PROCESS_STATE_TOP_SLEEPING;
+        } else {
+            return !isProcStateCached(procState);
+        }
+    }
+
     /** @hide requestType for assist context: only basic information. */
     public static final int ASSIST_CONTEXT_BASIC = 0;
 

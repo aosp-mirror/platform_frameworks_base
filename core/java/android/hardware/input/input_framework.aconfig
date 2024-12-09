@@ -37,13 +37,6 @@ flag {
 
 flag {
     namespace: "input_native"
-    name: "touchpad_tap_dragging"
-    description: "Offers a setting to enable touchpad tap dragging"
-    bug: "321978150"
-}
-
-flag {
-    namespace: "input_native"
     name: "keyboard_glyph_map"
     description: "Allows system to provide keyboard specific key drawables and shortcuts via config files"
     bug: "345440920"
@@ -197,3 +190,10 @@ flag {
   description: "Adds new API in WindowManager class to check if the window can override the power key double tap behavior."
   bug: "378736024"
   }
+
+flag {
+    name: "pointer_acceleration"
+    namespace: "input"
+    description: "Allows the user to disable pointer acceleration for mouse and touchpads."
+    bug: "349006858"
+}

@@ -361,6 +361,8 @@ import android.os.WorkSource;
 import android.os.incremental.IIncrementalService;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalMetrics;
+import android.os.instrumentation.IOffsetCallback;
+import android.os.instrumentation.MethodDescriptor;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
@@ -509,6 +511,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -2781,9 +2784,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mIsolatedAppBindArgs = new ArrayMap<>(1);
                 // See b/79378449 about the following exemption.
                 addServiceToMap(mIsolatedAppBindArgs, "package");
-                if (!android.server.Flags.removeJavaServiceManagerCache()) {
-                    addServiceToMap(mIsolatedAppBindArgs, "permissionmgr");
-                }
+                addServiceToMap(mIsolatedAppBindArgs, "permissionmgr");
             }
             return mIsolatedAppBindArgs;
         }
@@ -2794,38 +2795,27 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Add common services.
             // IMPORTANT: Before adding services here, make sure ephemeral apps can access them too.
             // Enable the check in ApplicationThread.bindApplication() to make sure.
-
-            // Removing User Service and App Ops Service from cache breaks boot for auto.
-            // Removing permissionmgr breaks tests for Android Auto due to SELinux restrictions.
-            // TODO: fix SELinux restrictions and remove caching for Android Auto.
-            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
-                    || !android.server.Flags.removeJavaServiceManagerCache()) {
-                addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.NETWORKMANAGEMENT_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.CONNECTIVITY_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.ACCESSIBILITY_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.INPUT_METHOD_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.INPUT_SERVICE);
-                addServiceToMap(mAppBindArgs, "graphicsstats");
-                addServiceToMap(mAppBindArgs, "content");
-                addServiceToMap(mAppBindArgs, Context.JOB_SCHEDULER_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.NOTIFICATION_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.VIBRATOR_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.ACCOUNT_SERVICE);
-                addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
-                addServiceToMap(mAppBindArgs, "mount");
-                addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
-            }
-            // See b/79378449
-            // Getting the window service and package service binder from servicemanager
-            // is blocked for Apps. However they are necessary for apps.
-            // TODO: remove exception
             addServiceToMap(mAppBindArgs, "package");
-            addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
-            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
             addServiceToMap(mAppBindArgs, "permissionmgr");
+            addServiceToMap(mAppBindArgs, Context.WINDOW_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.ALARM_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.DISPLAY_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.NETWORKMANAGEMENT_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.CONNECTIVITY_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.ACCESSIBILITY_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.INPUT_METHOD_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.INPUT_SERVICE);
+            addServiceToMap(mAppBindArgs, "graphicsstats");
             addServiceToMap(mAppBindArgs, Context.APP_OPS_SERVICE);
+            addServiceToMap(mAppBindArgs, "content");
+            addServiceToMap(mAppBindArgs, Context.JOB_SCHEDULER_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.NOTIFICATION_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.VIBRATOR_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.ACCOUNT_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.POWER_SERVICE);
+            addServiceToMap(mAppBindArgs, Context.USER_SERVICE);
+            addServiceToMap(mAppBindArgs, "mount");
+            addServiceToMap(mAppBindArgs, Context.PLATFORM_COMPAT_SERVICE);
         }
         return mAppBindArgs;
     }
@@ -13977,14 +13967,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void unbindFinished(IBinder token, Intent intent, boolean doRebind) {
+    public void unbindFinished(IBinder token, Intent intent) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
         synchronized(this) {
-            mServices.unbindFinishedLocked((ServiceRecord)token, intent, doRebind);
+            mServices.unbindFinishedLocked((ServiceRecord)token, intent);
         }
     }
 
@@ -18055,6 +18045,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void getExecutableMethodFileOffsets(@NonNull String processName,
+                int pid, int uid, @NonNull MethodDescriptor methodDescriptor,
+                @NonNull IOffsetCallback callback) {
+            final IApplicationThread thread;
+            synchronized (ActivityManagerService.this) {
+                ProcessRecord record = mProcessList.getProcessRecordLocked(processName, uid);
+                if (record == null || record.getPid() != pid) {
+                    throw new NoSuchElementException();
+                }
+                thread = record.getThread();
+            }
+            try {
+                thread.getExecutableMethodFileOffsets(methodDescriptor, callback);
+            } catch (RemoteException e) {
+                throw new RuntimeException(
+                        "IApplicationThread.getExecutableMethodFileOffsets failed", e);
+            }
+        }
+
+        @Override
         public void addCreatorToken(Intent intent, String creatorPackage) {
             ActivityManagerService.this.addCreatorToken(intent, creatorPackage);
         }
@@ -19334,7 +19344,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!preventIntentRedirect()) return;
         if (intent == null) return;
 
-        if ((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0) {
+        if (((intent.getExtendedFlags() & Intent.EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED) == 0)
+                && intent.getExtras() != null && intent.getExtras().hasIntent()) {
             Slog.wtf(TAG,
                     "[IntentRedirect] The intent does not have its nested keys collected as a "
                             + "preparation for creating intent creator tokens. Intent: "
@@ -19405,7 +19416,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return createOrGetIntentCreatorToken(intent, key);
 
         } else {
-            throw new IllegalArgumentException("intent does not contain a creator token.");
+            return null;
         }
     }
 

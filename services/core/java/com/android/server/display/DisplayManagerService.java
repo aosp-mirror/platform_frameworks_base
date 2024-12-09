@@ -47,6 +47,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
+import static android.provider.Settings.Secure.MIRROR_BUILT_IN_DISPLAY;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
@@ -71,6 +72,7 @@ import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -534,6 +536,8 @@ public final class DisplayManagerService extends SystemService {
     private final boolean mExtraDisplayEventLogging;
     private final String mExtraDisplayLoggingPackageName;
 
+    private boolean mMirrorBuiltInDisplay;
+
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -782,7 +786,11 @@ public final class DisplayManagerService extends SystemService {
                 }
                 dpc.onSwitchUser(newUserId, userSerial, newBrightness);
             });
-            handleSettingsChange();
+            handleMinimalPostProcessingAllowedSettingChange();
+
+            if (mFlags.isDisplayContentModeManagementEnabled()) {
+                updateMirrorBuiltInDisplaySettingLocked();
+            }
         }
     }
 
@@ -825,11 +833,14 @@ public final class DisplayManagerService extends SystemService {
             // relevant configuration should be in place.
             recordTopInsetLocked(mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY));
 
-            updateSettingsLocked();
+            updateMinimalPostProcessingAllowedSettingLocked();
             updateUserDisabledHdrTypesFromSettingsLocked();
             updateUserPreferredDisplayModeSettingsLocked();
             if (mIsHdrOutputControlEnabled) {
                 updateHdrConversionModeSettingsLocked();
+            }
+            if (mFlags.isDisplayContentModeManagementEnabled()) {
+                updateMirrorBuiltInDisplaySettingLocked();
             }
         }
 
@@ -1180,25 +1191,59 @@ public final class DisplayManagerService extends SystemService {
             mContext.getContentResolver().registerContentObserver(
                     Settings.Secure.getUriFor(
                         Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED), false, this);
+
+            if (mFlags.isDisplayContentModeManagementEnabled()) {
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(
+                                MIRROR_BUILT_IN_DISPLAY), false, this, UserHandle.USER_ALL);
+            }
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            handleSettingsChange();
+            if (Settings.Secure.getUriFor(
+                    Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED).equals(uri)) {
+                handleMinimalPostProcessingAllowedSettingChange();
+                return;
+            }
+
+            if (Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY).equals(uri)) {
+                if (mFlags.isDisplayContentModeManagementEnabled()) {
+                    updateMirrorBuiltInDisplaySettingLocked();
+                }
+                return;
+            }
         }
     }
 
-    private void handleSettingsChange() {
+    private void handleMinimalPostProcessingAllowedSettingChange() {
         synchronized (mSyncRoot) {
-            updateSettingsLocked();
+            updateMinimalPostProcessingAllowedSettingLocked();
             scheduleTraversalLocked(false);
         }
     }
 
-    private void updateSettingsLocked() {
+    private void updateMinimalPostProcessingAllowedSettingLocked() {
         setMinimalPostProcessingAllowed(Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
                 1, UserHandle.USER_CURRENT) != 0);
+    }
+
+    private void updateMirrorBuiltInDisplaySettingLocked() {
+        if (!mFlags.isDisplayContentModeManagementEnabled()) {
+            Slog.e(TAG, "MirrorBuiltInDisplay setting shouldn't be updated when the flag is off.");
+            return;
+        }
+
+        synchronized (mSyncRoot) {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean mirrorBuiltInDisplay = Settings.Secure.getIntForUser(resolver,
+                    MIRROR_BUILT_IN_DISPLAY, 0, UserHandle.USER_CURRENT) != 0;
+            if (mMirrorBuiltInDisplay == mirrorBuiltInDisplay) {
+                return;
+            }
+            mMirrorBuiltInDisplay = mirrorBuiltInDisplay;
+        }
     }
 
     private void restoreResolutionFromBackup() {

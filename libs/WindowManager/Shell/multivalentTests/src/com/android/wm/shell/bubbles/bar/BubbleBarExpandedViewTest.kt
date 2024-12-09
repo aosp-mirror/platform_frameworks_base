@@ -33,32 +33,30 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.Bubble
-import com.android.wm.shell.bubbles.BubbleData
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager
 import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.bubbles.BubbleTaskView
 import com.android.wm.shell.bubbles.BubbleTaskViewFactory
 import com.android.wm.shell.bubbles.DeviceConfig
+import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.RegionSamplingProvider
 import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
-import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.handles.RegionSamplingHelper
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import java.util.Collections
-import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.concurrent.Executor
 
 /** Tests for [BubbleBarExpandedViewTest] */
 @SmallTest
@@ -72,8 +70,8 @@ class BubbleBarExpandedViewTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val windowManager = context.getSystemService(WindowManager::class.java)
 
-    private lateinit var mainExecutor: TestExecutor
-    private lateinit var bgExecutor: TestExecutor
+    private lateinit var mainExecutor: TestShellExecutor
+    private lateinit var bgExecutor: TestShellExecutor
 
     private lateinit var expandedViewManager: BubbleExpandedViewManager
     private lateinit var positioner: BubblePositioner
@@ -90,8 +88,8 @@ class BubbleBarExpandedViewTest {
     fun setUp() {
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
         ProtoLog.init()
-        mainExecutor = TestExecutor()
-        bgExecutor = TestExecutor()
+        mainExecutor = TestShellExecutor()
+        bgExecutor = TestShellExecutor()
         positioner = BubblePositioner(context, windowManager)
         positioner.setShowingInBubbleBar(true)
         val deviceConfig =
@@ -105,7 +103,7 @@ class BubbleBarExpandedViewTest {
             )
         positioner.update(deviceConfig)
 
-        expandedViewManager = createExpandedViewManager()
+        expandedViewManager = FakeBubbleExpandedViewManager(bubbleBar = true, expanded = true)
         bubbleTaskView = FakeBubbleTaskViewFactory().create()
 
         val inflater = LayoutInflater.from(context)
@@ -425,64 +423,5 @@ class BubbleBarExpandedViewTest {
             setWindowVisible = false
             setWindowInvisible = false
         }
-    }
-
-    private fun createExpandedViewManager(): BubbleExpandedViewManager {
-        return object : BubbleExpandedViewManager {
-            override val overflowBubbles: List<Bubble>
-                get() = Collections.emptyList()
-
-            override fun setOverflowListener(listener: BubbleData.Listener) {
-            }
-
-            override fun collapseStack() {
-            }
-
-            override fun updateWindowFlagsForBackpress(intercept: Boolean) {
-            }
-
-            override fun promoteBubbleFromOverflow(bubble: Bubble) {
-            }
-
-            override fun removeBubble(key: String, reason: Int) {
-            }
-
-            override fun dismissBubble(bubble: Bubble, reason: Int) {
-            }
-
-            override fun setAppBubbleTaskId(key: String, taskId: Int) {
-            }
-
-            override fun isStackExpanded(): Boolean {
-                return true
-            }
-
-            override fun isShowingAsBubbleBar(): Boolean {
-                return true
-            }
-
-            override fun hideCurrentInputMethod() {
-            }
-
-            override fun updateBubbleBarLocation(location: BubbleBarLocation, source: Int) {
-            }
-        }
-    }
-
-    private class TestExecutor : ShellExecutor {
-
-        private val runnables: MutableList<Runnable> = mutableListOf()
-
-        override fun execute(runnable: Runnable) {
-            runnables.add(runnable)
-        }
-
-        override fun executeDelayed(runnable: Runnable, delayMillis: Long) {
-            execute(runnable)
-        }
-
-        override fun removeCallbacks(runnable: Runnable?) {}
-
-        override fun hasCallback(runnable: Runnable?): Boolean = false
     }
 }

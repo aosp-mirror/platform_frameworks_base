@@ -258,9 +258,9 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"EXPLORER key -> Launch Default Browser", new int[]{KeyEvent.KEYCODE_EXPLORER},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER,
                         KeyEvent.KEYCODE_EXPLORER, 0},
-                {"Meta + C -> Launch Default Contacts", new int[]{META_KEY, KeyEvent.KEYCODE_C},
+                {"Meta + P -> Launch Default Contacts", new int[]{META_KEY, KeyEvent.KEYCODE_P},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS,
-                        KeyEvent.KEYCODE_C, META_ON},
+                        KeyEvent.KEYCODE_P, META_ON},
                 {"CONTACTS key -> Launch Default Contacts", new int[]{KeyEvent.KEYCODE_CONTACTS},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS,
                         KeyEvent.KEYCODE_CONTACTS, 0},
@@ -270,15 +270,12 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"ENVELOPE key -> Launch Default Email", new int[]{KeyEvent.KEYCODE_ENVELOPE},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL,
                         KeyEvent.KEYCODE_ENVELOPE, 0},
-                {"Meta + K -> Launch Default Calendar", new int[]{META_KEY, KeyEvent.KEYCODE_K},
+                {"Meta + C -> Launch Default Calendar", new int[]{META_KEY, KeyEvent.KEYCODE_C},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR,
-                        KeyEvent.KEYCODE_K, META_ON},
+                        KeyEvent.KEYCODE_C, META_ON},
                 {"CALENDAR key -> Launch Default Calendar", new int[]{KeyEvent.KEYCODE_CALENDAR},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR,
                         KeyEvent.KEYCODE_CALENDAR, 0},
-                {"Meta + P -> Launch Default Music", new int[]{META_KEY, KeyEvent.KEYCODE_P},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC,
-                        KeyEvent.KEYCODE_P, META_ON},
                 {"MUSIC key -> Launch Default Music", new int[]{KeyEvent.KEYCODE_MUSIC},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC,
                         KeyEvent.KEYCODE_MUSIC, 0},
@@ -291,11 +288,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         KeyEvent.KEYCODE_CALCULATOR, 0},
                 {"Meta + M -> Launch Default Maps", new int[]{META_KEY, KeyEvent.KEYCODE_M},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS,
-                        KeyEvent.KEYCODE_M, META_ON},
-                {"Meta + S -> Launch Default Messaging App",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_S},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING,
-                        KeyEvent.KEYCODE_S, META_ON}};
+                        KeyEvent.KEYCODE_M, META_ON}};
     }
 
     @Keep
@@ -464,6 +457,14 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     public void testKeyGestureLaunchAssistant() {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT));
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
+    public void testKeyGestureLaunchVoiceAssistant() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT));
         mPhoneWindowManager.assertSearchManagerLaunchAssist();
     }
 

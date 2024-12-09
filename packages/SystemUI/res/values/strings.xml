@@ -1336,10 +1336,14 @@
     <string name="communal_widgets_disclaimer_text">To open an app using a widget, you\u2019ll need to verify it\u2019s you. Also, keep in mind that anyone can view them, even when your tablet\u2019s locked. Some widgets may not have been intended for your lock screen and may be unsafe to add here.</string>
     <!-- Button for user to verify they understand the information presented. [CHAR LIMIT=50] -->
     <string name="communal_widgets_disclaimer_button">Got it</string>
-    <!-- Lockscreen affordance to open glanceable hub. [CHAR LIMIT=20] -->
+    <!-- Label for a lock screen affordance to show widgets on the lock screen. [CHAR LIMIT=20] -->
     <string name="glanceable_hub_lockscreen_affordance_label">Widgets</string>
-    <!-- Text explaining that the glanceable hub affordance is disabled. [CHAR LIMIT=NONE] -->
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add Widgets on the lock screen as a shortcut, make sure it is enabled in settings.</string>
+    <!-- Text explaining why the lock screen affordance to show widgets on the lockscreen is disabled and how to enable the affordance in settings. [CHAR LIMIT=NONE] -->
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text">To add the \"Widgets\" shortcut, make sure \"Show widgets on lock screen\" is enabled in settings.</string>
+    <!-- Label for a button used to open Settings in order to enable showing widgets on the lock screen. [CHAR LIMIT=NONE] -->
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label">Settings</string>
+    <!-- Content description for a "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_glanceable_hub_to_dream_button">Show screensaver button</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1506,6 +1510,9 @@
 
     <!-- Content description for accessibility: Tapping this button will dismiss all gentle notifications [CHAR LIMIT=NONE] -->
     <string name="accessibility_notification_section_header_gentle_clear_all">Clear all silent notifications</string>
+
+    <!-- Content description for accessibility: Tapping this button will open notifications settings [CHAR LIMIT=NONE] -->
+    <string name="accessibility_notification_section_header_open_settings">Open notifications settings</string>
 
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
     <string name="dnd_suppressing_shade_text">Notifications paused by Do Not Disturb</string>
@@ -1810,6 +1817,7 @@
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
     <string name="volume_ringer_mode">ringer mode</string>
+    <string name="volume_ringer_drawer_closed_content_description"><xliff:g id="volume ringer status" example="Ring">%1$s</xliff:g>, tap to change ringer mode </string>
 
     <!-- Hint for accessibility. For example: double tap to mute [CHAR_LIMIT=NONE] -->
     <string name="volume_ringer_hint_mute">mute</string>
@@ -2274,11 +2282,11 @@
     <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app on the right [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Use split screen with current app on the right</string>
+    <string name="system_multitasking_rhs">Use split screen with app on the right</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app on the left [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Use split screen with current app on the left</string>
+    <string name="system_multitasking_lhs">Use split screen with app on the left</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
-    <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
+    <string name="system_multitasking_full_screen">Switch to full screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_splitscreen_focus_rhs">Switch to app on right or below while using split screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on left or above while using split screen [CHAR LIMIT=70] -->
@@ -3812,6 +3820,9 @@
          shortcut helper The helper is a  component that shows the  user which keyboard shortcuts
          they can use. [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_customize_button_text">Customize</string>
+    <!-- Description text of the button that allows user to resets all custom shortcuts in keyboard
+         shortcut helper when in customization mode. [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_reset_button_text">Reset</string>
     <!-- Description text of the button that allows user to exit shortcut customization mode in
          keyboard shortcut helper The helper is a  component that shows the  user which keyboard
          shortcuts they can use. [CHAR LIMIT=NONE] -->
@@ -3944,6 +3955,8 @@
     <string name="tutorial_action_key_success_title">Well done!</string>
     <!-- Text shown to the user after they complete action key tutorial [CHAR LIMIT=NONE] -->
     <string name="tutorial_action_key_success_body">You completed the view all apps gesture</string>
+    <!-- Content description for the animation playing during the tutorial. The user can click the animation to pause and unpause playback. [CHAR LIMIT=NONE] -->
+    <string name="tutorial_animation_content_description">Tutorial animation, click to pause and resume play.</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

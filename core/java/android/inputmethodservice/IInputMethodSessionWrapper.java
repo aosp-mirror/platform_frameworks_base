@@ -299,9 +299,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
             if (event.hasNoModifiers()) {
                 return false;
             }
-            return event.hasModifiers(KeyEvent.META_CTRL_ON)
-                    || event.hasModifiers(KeyEvent.META_ALT_ON)
-                    || event.hasModifiers(KeyEvent.KEYCODE_FUNCTION);
+            return event.isCtrlPressed()
+                    || event.isAltPressed()
+                    || event.isFunctionPressed()
+                    || event.isMetaPressed();
         }
 
         private boolean needsVerification(KeyEvent event) {

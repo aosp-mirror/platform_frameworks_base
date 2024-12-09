@@ -1217,178 +1217,6 @@
              a value of 'true' will not override any 'false' value in its parent chain nor will
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
-
-        <!-- Dynamic Tokens -->
-
-        <!-- @hide -->
-        <attr name="materialColorBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorControlActivated" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorControlHighlight" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorControlNormal" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorError" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorErrorContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorInverseOnSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorInversePrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorInverseSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnError" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnErrorContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSurfaceVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOutline" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOutlineVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorNeutral" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorNeutralVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorPrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorSecondary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPaletteKeyColorTertiary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorScrim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorShadow" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceBright" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerHigh" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerHighest" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerLow" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceContainerLowest" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceDim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceTint" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSurfaceVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiary" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiaryContainer" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextHintInverse" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextPrimaryInverse" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextPrimaryInverseDisableOnly" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextSecondaryAndTertiaryInverse" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTextSecondaryAndTertiaryInverseDisabled" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnPrimaryFixedVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnSecondaryFixedVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorOnTertiaryFixedVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorPrimaryFixedDim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorSecondaryFixedDim" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiaryFixed" format="color"/>
-        <!-- @hide -->
-        <attr name="materialColorTertiaryFixedDim" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandA" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandB" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandC" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandD" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockHour" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockMinute" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockSecond" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeActive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeActiveVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeInactiveVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOverviewBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeActive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeDisabled" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeAppRing" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeNotif" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorUnderSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorWeatherTemp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorWidgetBackground" format="color"/>
-
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -10570,6 +10398,32 @@
 
     <declare-styleable name="DateTimeView">
         <attr name="showRelative" format="boolean" />
+        <!-- For relative times, controls what kinds of times get disambiguation text.
+
+             The default value is "future".
+
+             Does nothing if showRelative=false.
+             -->
+        <attr name="relativeTimeDisambiguationText">
+            <!-- Times in the past will have extra clarifying text indicating that the time is in
+                 the past. For example, 1 minute ago is represented as "1m ago". If this flag is not
+                 set, times in the past are represented as just "1m". -->
+            <flag name="past" value="0x01" />
+            <!-- Times in the future will have extra clarifying text indicating that the time is in
+                 the future. For example, 1 minute in the future is represented as "in 1m". If this
+                 flag is not set, times in the future are represented as just "1m". -->
+            <flag name="future" value="0x02" />
+        </attr>
+        <!-- For relative times, sets the length of the time unit displayed (minutes, hours, etc.).
+
+             Does nothing if showRelative=false.
+             -->
+        <attr name="relativeTimeUnitDisplayLength">
+            <!-- The time unit will be shown as a short as possible (1 character if possible). -->
+            <enum name="shortest" value="0" />
+            <!-- The time unit will be shortened to a medium length (2-3 characters in general). -->
+            <enum name="medium" value="1" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="ResolverDrawerLayout_LayoutParams">

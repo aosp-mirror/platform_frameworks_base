@@ -87,8 +87,12 @@ public abstract class ViewStructure {
      * <p>This value is added to mainly help with debugging purpose.
      */
     @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+    @SuppressWarnings(
+            "ActionValue") // Lint expects this as
+                           // android.view.contentcapture.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER
+                           // but should not have contentcapture
     public static final String EXTRA_VIRTUAL_STRUCTURE_TYPE =
-            "android.view.ViewStructure.extra.VIRTUAL_STRUCTURE_TYPE";
+            "android.view.extra.VIRTUAL_STRUCTURE_TYPE";
 
     /**
      * Key used for specifying the version of the view that generated the virtual structure for
@@ -98,8 +102,12 @@ public abstract class ViewStructure {
      * "104.0.5112.69", then the value should be "104.0.5112.69"
      */
     @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+    @SuppressWarnings(
+            "ActionValue") // Lint expects this as
+                           // android.view.contentcapture.extra.VIRTUAL_STRUCTURE_TYPE
+                           // but should not have contentcapture
     public static final String EXTRA_VIRTUAL_STRUCTURE_VERSION_NUMBER =
-            "android.view.ViewStructure.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER";
+            "android.view.extra.VIRTUAL_STRUCTURE_VERSION_NUMBER";
 
     /**
      * Set the identifier for this view.

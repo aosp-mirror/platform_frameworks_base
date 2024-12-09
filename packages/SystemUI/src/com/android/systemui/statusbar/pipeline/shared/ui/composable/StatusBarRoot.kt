@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ui.DarkIconManager
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
@@ -150,12 +151,11 @@ fun StatusBarRoot(
                         )
                     iconController.addIconGroup(darkIconManager)
 
-                    // TODO(b/372657935): This won't be needed once OngoingCallController is
-                    // implemented in recommended architecture
-                    ongoingCallController.setChipView(
-                        phoneStatusBarView.requireViewById(R.id.ongoing_activity_chip_primary)
-                    )
-
+                    if (!StatusBarChipsModernization.isEnabled) {
+                        ongoingCallController.setChipView(
+                            phoneStatusBarView.requireViewById(R.id.ongoing_activity_chip_primary)
+                        )
+                    }
                     // For notifications, first inflate the [NotificationIconContainer]
                     val notificationIconArea =
                         phoneStatusBarView.requireViewById<ViewGroup>(R.id.notification_icon_area)
@@ -176,6 +176,7 @@ fun StatusBarRoot(
                     // This binder handles everything else
                     scope.launch {
                         statusBarViewBinder.bind(
+                            context.displayId,
                             phoneStatusBarView,
                             statusBarViewModel,
                             eventAnimationInteractor::animateStatusBarContentForChipEnter,

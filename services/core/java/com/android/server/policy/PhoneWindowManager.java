@@ -4081,6 +4081,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_HOME:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN:
@@ -4164,6 +4165,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT:
+            case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT:
                 if (complete) {
                     launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
                             deviceId, SystemClock.uptimeMillis(),
@@ -4426,9 +4428,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
 
         float minLinearBrightness = mPowerManager.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+                screenDisplayId, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
         float maxLinearBrightness = mPowerManager.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+                screenDisplayId, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
         float linearBrightness = mDisplayManager.getBrightness(screenDisplayId);
 
         float gammaBrightness = BrightnessUtils.convertLinearToGamma(linearBrightness);

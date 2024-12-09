@@ -185,5 +185,15 @@ flag {
     name: "hearing_device_set_connection_status_report"
     namespace: "accessibility"
     description: "Enable the connection status report for a set of hearing device."
-    bug: "357878944"
+    bug: "357882387"
+}
+
+flag {
+    name: "ignore_a2dp_disconnection_for_android_auto"
+    namespace: "cross_device_experiences"
+    description: "Do not show problem connecting message when Android Auto disconnect A2DP"
+    bug: "381981752"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

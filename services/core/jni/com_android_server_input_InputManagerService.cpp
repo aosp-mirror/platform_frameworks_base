@@ -68,6 +68,7 @@
 #include <map>
 #include <vector>
 
+#include "android_hardware_display_DisplayTopology.h"
 #include "android_hardware_display_DisplayViewport.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_hardware_input_InputWindowHandle.h"
@@ -321,6 +322,8 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
+    void setDisplayTopology(JNIEnv* env, jobject topologyGraph);
+
     base::Result<std::unique_ptr<InputChannel>> createInputChannel(const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(ui::LogicalDisplayId displayId,
                                                                    const std::string& name,
@@ -362,7 +365,7 @@ public:
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
-    FloatPoint getMouseCursorPosition(ui::LogicalDisplayId displayId);
+    vec2 getMouseCursorPosition(ui::LogicalDisplayId displayId);
     void setStylusPointerIconEnabled(bool enabled);
     void setInputMethodConnectionIsActive(bool isActive);
     void setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping);
@@ -441,7 +444,7 @@ public:
     std::shared_ptr<PointerControllerInterface> createPointerController(
             PointerControllerInterface::ControllerType type) override;
     void notifyPointerDisplayIdChanged(ui::LogicalDisplayId displayId,
-                                       const FloatPoint& position) override;
+                                       const vec2& position) override;
     void notifyMouseCursorFadedOnTyping() override;
 
     /* --- InputFilterPolicyInterface implementation --- */
@@ -638,6 +641,11 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     mInputManager->getChoreographer().setDisplayViewports(viewports);
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
+}
+
+void NativeInputManager::setDisplayTopology(JNIEnv* env, jobject topologyGraph) {
+    android_hardware_display_DisplayTopologyGraph_toNative(env, topologyGraph);
+    // TODO(b/367661489): Use the topology
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
@@ -871,7 +879,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerCon
 }
 
 void NativeInputManager::notifyPointerDisplayIdChanged(ui::LogicalDisplayId pointerDisplayId,
-                                                       const FloatPoint& position) {
+                                                       const vec2& position) {
     // Notify the Reader so that devices can be reconfigured.
     { // acquire lock
         std::scoped_lock _l(mLock);
@@ -2023,7 +2031,7 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
             InputReaderConfiguration::Change::STYLUS_BUTTON_REPORTING);
 }
 
-FloatPoint NativeInputManager::getMouseCursorPosition(ui::LogicalDisplayId displayId) {
+vec2 NativeInputManager::getMouseCursorPosition(ui::LogicalDisplayId displayId) {
     return mInputManager->getChoreographer().getMouseCursorPosition(displayId);
 }
 
@@ -2090,6 +2098,12 @@ static void nativeSetDisplayViewports(JNIEnv* env, jobject nativeImplObj,
                                       jobjectArray viewportObjArray) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->setDisplayViewports(env, viewportObjArray);
+}
+
+static void nativeSetDisplayTopology(JNIEnv* env, jobject nativeImplObj,
+                                     jobject displayTopologyObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setDisplayTopology(env, displayTopologyObj);
 }
 
 static jint nativeGetScanCodeState(JNIEnv* env, jobject nativeImplObj, jint deviceId,
@@ -3148,6 +3162,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"start", "()V", (void*)nativeStart},
         {"setDisplayViewports", "([Landroid/hardware/display/DisplayViewport;)V",
          (void*)nativeSetDisplayViewports},
+        {"setDisplayTopology", "(Landroid/hardware/display/DisplayTopologyGraph;)V",
+         (void*)nativeSetDisplayTopology},
         {"getScanCodeState", "(III)I", (void*)nativeGetScanCodeState},
         {"getKeyCodeState", "(III)I", (void*)nativeGetKeyCodeState},
         {"getSwitchState", "(III)I", (void*)nativeGetSwitchState},

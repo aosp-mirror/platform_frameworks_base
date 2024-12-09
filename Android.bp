@@ -87,6 +87,7 @@ filegroup {
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
+        ":vcn-utils-platform-sources",
         ":net-utils-framework-common-srcs",
 
         // AIDL from frameworks/base/native/
@@ -314,6 +315,7 @@ java_defaults {
             ":framework-telephony-sources",
             ":framework-wifi-annotations",
             ":framework-wifi-non-updatable-sources",
+            ":vcn-utils-platform-sources",
             ":PacProcessor-aidl-sources",
             ":ProxyHandler-aidl-sources",
             ":net-utils-framework-common-srcs",
@@ -444,6 +446,9 @@ java_library {
         default: [
             "framework-platformcrashrecovery.impl",
         ],
+    }) + select(release_flag("RELEASE_ONDEVICE_INTELLIGENCE_MODULE"), {
+        true: [],
+        default: ["framework-ondeviceintelligence-platform.impl"],
     }),
     sdk_version: "core_platform",
     installable: false,
@@ -487,6 +492,7 @@ java_library {
     apex_available: ["//apex_available:platform"],
     visibility: [
         "//frameworks/base:__subpackages__",
+        "//packages/modules/NeuralNetworks:__subpackages__",
     ],
     compile_dex: false,
     headers_only: true,
@@ -582,6 +588,9 @@ java_library {
         default: [
             "framework-platformcrashrecovery-compat-config",
         ],
+    }) + select(release_flag("RELEASE_ONDEVICE_INTELLIGENCE_MODULE"), {
+        true: [],
+        default: ["framework-ondeviceintelligence-platform-compat-config"],
     }),
 }
 
@@ -596,7 +605,7 @@ filegroup {
     srcs: [
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
-        "core/java/android/net/vcn/util/PersistableBundleUtils.java",
+        "packages/Vcn/framework-b/src/android/net/vcn/util/PersistableBundleUtils.java",
         "telephony/java/android/telephony/Annotation.java",
     ],
 }

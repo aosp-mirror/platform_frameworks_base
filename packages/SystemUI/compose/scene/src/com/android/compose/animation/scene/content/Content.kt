@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene.content
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -51,6 +52,9 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSharedValueAsState
+import com.android.compose.animation.scene.effect.GestureEffect
+import com.android.compose.animation.scene.effect.OffsetOverscrollEffect
+import com.android.compose.animation.scene.effect.VisualEffect
 import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
 import com.android.compose.animation.scene.nestedScrollToScene
@@ -108,6 +112,26 @@ internal class ContentScopeImpl(
         get() = content.key
 
     override val layoutState: SceneTransitionLayoutState = layoutImpl.state
+
+    private val _verticalOverscrollEffect =
+        OffsetOverscrollEffect(
+            orientation = Orientation.Vertical,
+            animationScope = layoutImpl.animationScope,
+        )
+
+    private val _horizontalOverscrollEffect =
+        OffsetOverscrollEffect(
+            orientation = Orientation.Horizontal,
+            animationScope = layoutImpl.animationScope,
+        )
+
+    val verticalOverscrollGestureEffect = GestureEffect(_verticalOverscrollEffect)
+
+    val horizontalOverscrollGestureEffect = GestureEffect(_horizontalOverscrollEffect)
+
+    override val verticalOverscrollEffect = VisualEffect(_verticalOverscrollEffect)
+
+    override val horizontalOverscrollEffect = VisualEffect(_horizontalOverscrollEffect)
 
     override fun Modifier.element(key: ElementKey): Modifier {
         return element(layoutImpl, content, key)

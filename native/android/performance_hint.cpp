@@ -22,6 +22,7 @@
 #include <aidl/android/hardware/power/SessionHint.h>
 #include <aidl/android/hardware/power/SessionMode.h>
 #include <aidl/android/hardware/power/SessionTag.h>
+#include <aidl/android/hardware/power/SupportInfo.h>
 #include <aidl/android/hardware/power/WorkDuration.h>
 #include <aidl/android/hardware/power/WorkDurationFixedV1.h>
 #include <aidl/android/os/IHintManager.h>
@@ -148,10 +149,36 @@ private:
     std::future<bool> mChannelCreationFinished;
 };
 
+class SupportInfoWrapper {
+public:
+    SupportInfoWrapper(hal::SupportInfo& info);
+    bool isSessionModeSupported(hal::SessionMode mode);
+    bool isSessionHintSupported(hal::SessionHint hint);
+
+private:
+    template <class T>
+    bool getEnumSupportFromBitfield(T& enumValue, int64_t& supportBitfield) {
+        // extract the bit corresponding to the enum by shifting the bitfield
+        // over that much and cutting off any extra values
+        return (supportBitfield >> static_cast<int>(enumValue)) % 2;
+    }
+    hal::SupportInfo mSupportInfo;
+};
+
+class HintManagerClient : public IHintManager::BnHintManagerClient {
+public:
+    // Currently a no-op that exists for FMQ init to call in the future
+    ndk::ScopedAStatus receiveChannelConfig(const hal::ChannelConfig&) {
+        return ndk::ScopedAStatus::ok();
+    }
+};
+
 struct APerformanceHintManager {
 public:
     static APerformanceHintManager* getInstance();
-    APerformanceHintManager(std::shared_ptr<IHintManager>& service, int64_t preferredRateNanos);
+    APerformanceHintManager(std::shared_ptr<IHintManager>& service,
+                            IHintManager::HintManagerClientData&& clientData,
+                            std::shared_ptr<HintManagerClient> callbackClient);
     APerformanceHintManager() = delete;
     ~APerformanceHintManager();
 
@@ -169,29 +196,21 @@ public:
     FMQWrapper& getFMQWrapper();
     bool canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) REQUIRES(sHintMutex);
     void initJava(JNIEnv* _Nonnull env);
-    ndk::ScopedAIBinder_Weak x;
     template <class T>
     static void layersFromNativeSurfaces(ANativeWindow** windows, int numWindows,
                                          ASurfaceControl** controls, int numSurfaceControls,
                                          std::vector<T>& out);
+    ndk::SpAIBinder& getToken();
+    SupportInfoWrapper& getSupportInfo();
 
 private:
-    // Necessary to create an empty binder object
-    static void* tokenStubOnCreate(void*) {
-        return nullptr;
-    }
-    static void tokenStubOnDestroy(void*) {}
-    static binder_status_t tokenStubOnTransact(AIBinder*, transaction_code_t, const AParcel*,
-                                               AParcel*) {
-        return STATUS_OK;
-    }
-
     static APerformanceHintManager* create(std::shared_ptr<IHintManager> iHintManager);
 
     std::shared_ptr<IHintManager> mHintManager;
+    std::shared_ptr<HintManagerClient> mCallbackClient;
+    IHintManager::HintManagerClientData mClientData;
+    SupportInfoWrapper mSupportInfoWrapper;
     ndk::SpAIBinder mToken;
-    const int64_t mPreferredRateNanos;
-    std::optional<int32_t> mMaxGraphicsPipelineThreadsCount;
     FMQWrapper mFMQWrapper;
     double mHintBudget = kMaxLoadHintsPerInterval;
     int64_t mLastBudgetReplenish = 0;
@@ -214,6 +233,7 @@ public:
     int sendHints(std::vector<hal::SessionHint>& hints, int64_t now, const char* debugName);
     int notifyWorkloadIncrease(bool cpu, bool gpu, const char* debugName);
     int notifyWorkloadReset(bool cpu, bool gpu, const char* debugName);
+    int notifyWorkloadSpike(bool cpu, bool gpu, const char* debugName);
     int setThreads(const int32_t* threadIds, size_t size);
     int getThreadIds(int32_t* const threadIds, size_t* size);
     int setPreferPowerEfficiency(bool enabled);
@@ -272,14 +292,27 @@ static FMQWrapper& getFMQ() {
     return APerformanceHintManager::getInstance()->getFMQWrapper();
 }
 
+// ===================================== SupportInfoWrapper implementation
+
+SupportInfoWrapper::SupportInfoWrapper(hal::SupportInfo& info) : mSupportInfo(info) {}
+
+bool SupportInfoWrapper::isSessionHintSupported(hal::SessionHint hint) {
+    return getEnumSupportFromBitfield(hint, mSupportInfo.sessionHints);
+}
+
+bool SupportInfoWrapper::isSessionModeSupported(hal::SessionMode mode) {
+    return getEnumSupportFromBitfield(mode, mSupportInfo.sessionModes);
+}
+
 // ===================================== APerformanceHintManager implementation
 APerformanceHintManager::APerformanceHintManager(std::shared_ptr<IHintManager>& manager,
-                                                 int64_t preferredRateNanos)
-      : mHintManager(std::move(manager)), mPreferredRateNanos(preferredRateNanos) {
-    static AIBinder_Class* tokenBinderClass =
-            AIBinder_Class_define("phm_token", tokenStubOnCreate, tokenStubOnDestroy,
-                                  tokenStubOnTransact);
-    mToken = ndk::SpAIBinder(AIBinder_new(tokenBinderClass, nullptr));
+                                                 IHintManager::HintManagerClientData&& clientData,
+                                                 std::shared_ptr<HintManagerClient> callbackClient)
+      : mHintManager(std::move(manager)),
+        mCallbackClient(callbackClient),
+        mClientData(clientData),
+        mSupportInfoWrapper(clientData.supportInfo),
+        mToken(callbackClient->asBinder()) {
     if (mFMQWrapper.isSupported()) {
         mFMQWrapper.setToken(mToken);
         mFMQWrapper.startChannel(mHintManager.get());
@@ -314,21 +347,22 @@ APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintMa
         ALOGE("%s: PerformanceHint service is not ready ", __FUNCTION__);
         return nullptr;
     }
-    int64_t preferredRateNanos = -1L;
-    ndk::ScopedAStatus ret = manager->getHintSessionPreferredRate(&preferredRateNanos);
+    std::shared_ptr<HintManagerClient> client = ndk::SharedRefBase::make<HintManagerClient>();
+    IHintManager::HintManagerClientData clientData;
+    ndk::ScopedAStatus ret = manager->registerClient(client, &clientData);
     if (!ret.isOk()) {
-        ALOGE("%s: PerformanceHint cannot get preferred rate. %s", __FUNCTION__, ret.getMessage());
+        ALOGE("%s: PerformanceHint is not supported. %s", __FUNCTION__, ret.getMessage());
         return nullptr;
     }
-    if (preferredRateNanos <= 0) {
-        preferredRateNanos = -1L;
+    if (clientData.preferredRateNanos <= 0) {
+        clientData.preferredRateNanos = -1L;
     }
-    return new APerformanceHintManager(manager, preferredRateNanos);
+    return new APerformanceHintManager(manager, std::move(clientData), client);
 }
 
 bool APerformanceHintManager::canSendLoadHints(std::vector<hal::SessionHint>& hints, int64_t now) {
     mHintBudget =
-            std::max(kMaxLoadHintsPerInterval,
+            std::min(kMaxLoadHintsPerInterval,
                      mHintBudget +
                              static_cast<double>(now - mLastBudgetReplenish) * kReplenishRate);
     mLastBudgetReplenish = now;
@@ -388,7 +422,9 @@ APerformanceHintSession* APerformanceHintManager::createSessionUsingConfig(
         ALOGE("%s: PerformanceHint cannot create session. %s", __FUNCTION__, ret.getMessage());
         return nullptr;
     }
-    auto out = new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,
+
+    auto out = new APerformanceHintSession(mHintManager, std::move(session),
+                                           mClientData.preferredRateNanos,
                                            sessionCreationConfig->targetWorkDurationNanos, isJava,
                                            sessionConfig.id == -1
                                                    ? std::nullopt
@@ -415,24 +451,11 @@ APerformanceHintSession* APerformanceHintManager::getSessionFromJava(JNIEnv* env
 }
 
 int64_t APerformanceHintManager::getPreferredRateNanos() const {
-    return mPreferredRateNanos;
+    return mClientData.preferredRateNanos;
 }
 
 int32_t APerformanceHintManager::getMaxGraphicsPipelineThreadsCount() {
-    if (!mMaxGraphicsPipelineThreadsCount.has_value()) {
-        int32_t threadsCount = -1;
-        ndk::ScopedAStatus ret = mHintManager->getMaxGraphicsPipelineThreadsCount(&threadsCount);
-        if (!ret.isOk()) {
-            ALOGE("%s: PerformanceHint cannot get max graphics pipeline threads count. %s",
-                  __FUNCTION__, ret.getMessage());
-            return -1;
-        }
-        if (threadsCount <= 0) {
-            threadsCount = -1;
-        }
-        mMaxGraphicsPipelineThreadsCount.emplace(threadsCount);
-    }
-    return mMaxGraphicsPipelineThreadsCount.value();
+    return mClientData.maxGraphicsPipelineThreads;
 }
 
 FMQWrapper& APerformanceHintManager::getFMQWrapper() {
@@ -447,6 +470,14 @@ void APerformanceHintManager::initJava(JNIEnv* _Nonnull env) {
     mJavaSessionClazz = MakeGlobalRefOrDie(env, sessionClazz);
     mJavaSessionNativePtr = GetFieldIDOrDie(env, mJavaSessionClazz, "mNativeSessionPtr", "J");
     mJavaInitialized = true;
+}
+
+ndk::SpAIBinder& APerformanceHintManager::getToken() {
+    return mToken;
+}
+
+SupportInfoWrapper& APerformanceHintManager::getSupportInfo() {
+    return mSupportInfoWrapper;
 }
 
 // ===================================== APerformanceHintSession implementation
@@ -595,6 +626,19 @@ int APerformanceHintSession::notifyWorkloadReset(bool cpu, bool gpu, const char*
     }
     if (gpu) {
         hints.push_back(hal::SessionHint::GPU_LOAD_RESET);
+    }
+    int64_t now = ::android::uptimeNanos();
+    return sendHints(hints, now, debugName);
+}
+
+int APerformanceHintSession::notifyWorkloadSpike(bool cpu, bool gpu, const char* debugName) {
+    std::vector<hal::SessionHint> hints(2);
+    hints.clear();
+    if (cpu) {
+        hints.push_back(hal::SessionHint::CPU_LOAD_SPIKE);
+    }
+    if (gpu) {
+        hints.push_back(hal::SessionHint::GPU_LOAD_SPIKE);
     }
     int64_t now = ::android::uptimeNanos();
     return sendHints(hints, now, debugName);
@@ -1147,6 +1191,16 @@ int APerformanceHint_notifyWorkloadReset(APerformanceHintSession* session, bool 
         return ENOTSUP;
     }
     return session->notifyWorkloadReset(cpu, gpu, debugName);
+}
+
+int APerformanceHint_notifyWorkloadSpike(APerformanceHintSession* session, bool cpu, bool gpu,
+                                         const char* debugName) {
+    VALIDATE_PTR(session)
+    VALIDATE_PTR(debugName)
+    if (!useNewLoadHintBehavior()) {
+        return ENOTSUP;
+    }
+    return session->notifyWorkloadSpike(cpu, gpu, debugName);
 }
 
 int APerformanceHint_setNativeSurfaces(APerformanceHintSession* session,

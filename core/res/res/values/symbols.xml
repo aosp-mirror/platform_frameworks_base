@@ -1797,6 +1797,7 @@
   <java-symbol type="bool" name="config_customUserSwitchUi" />
   <java-symbol type="bool" name="config_canRemoveFirstAccount" />
   <java-symbol type="string" name="config_accountTypeToKeepFirstAccount" />
+  <java-symbol type="bool" name="config_allowDockBeforeProvision" />
   <java-symbol type="bool" name="config_deskDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_disableMenuKeyInLockScreen" />
   <java-symbol type="bool" name="config_enableCarDockHomeLaunch" />
@@ -3160,9 +3161,8 @@
   <java-symbol type="string" name="config_cameraLaunchGestureSensorStringType" />
   <java-symbol type="integer" name="config_cameraLiftTriggerSensorType" />
   <java-symbol type="string" name="config_cameraLiftTriggerSensorStringType" />
-  <java-symbol type="bool" name="config_doubleTapPowerGestureEnabled" />
   <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
-  <java-symbol type="bool" name="config_walletDoubleTapPowerGestureEnabled" />
+  <java-symbol type="bool" name="config_doubleTapPowerGestureEnabled" />
   <java-symbol type="integer" name="config_defaultDoubleTapPowerGestureAction" />
   <java-symbol type="bool" name="config_emergencyGestureEnabled" />
   <java-symbol type="bool" name="config_defaultEmergencyGestureEnabled" />
@@ -3367,6 +3367,23 @@
   <java-symbol type="string" name="duration_hours_shortest_future" />
   <java-symbol type="string" name="duration_days_shortest_future" />
   <java-symbol type="string" name="duration_years_shortest_future" />
+  <java-symbol type="string" name="duration_minutes_shortest_past" />
+  <java-symbol type="string" name="duration_hours_shortest_past" />
+  <java-symbol type="string" name="duration_days_shortest_past" />
+  <java-symbol type="string" name="duration_years_shortest_past" />
+
+  <java-symbol type="string" name="duration_minutes_medium" />
+  <java-symbol type="string" name="duration_hours_medium" />
+  <java-symbol type="string" name="duration_days_medium" />
+  <java-symbol type="string" name="duration_years_medium" />
+  <java-symbol type="string" name="duration_minutes_medium_future" />
+  <java-symbol type="string" name="duration_hours_medium_future" />
+  <java-symbol type="string" name="duration_days_medium_future" />
+  <java-symbol type="string" name="duration_years_medium_future" />
+  <java-symbol type="string" name="duration_minutes_medium_past" />
+  <java-symbol type="string" name="duration_hours_medium_past" />
+  <java-symbol type="string" name="duration_days_medium_past" />
+  <java-symbol type="string" name="duration_years_medium_past" />
 
   <java-symbol type="string" name="duration_minutes_relative" />
   <java-symbol type="string" name="duration_hours_relative" />
@@ -5428,133 +5445,51 @@
   <java-symbol name="customColorWeatherTemp" type="color"/>
   <java-symbol name="customColorWidgetBackground" type="color"/>
 
-  <java-symbol type="attr" name="materialColorBackground"/>
-  <java-symbol type="attr" name="materialColorControlActivated"/>
-  <java-symbol type="attr" name="materialColorControlHighlight"/>
-  <java-symbol type="attr" name="materialColorControlNormal"/>
-  <java-symbol type="attr" name="materialColorError"/>
-  <java-symbol type="attr" name="materialColorErrorContainer"/>
-  <java-symbol type="attr" name="materialColorInverseOnSurface"/>
-  <java-symbol type="attr" name="materialColorInversePrimary"/>
-  <java-symbol type="attr" name="materialColorInverseSurface"/>
-  <java-symbol type="attr" name="materialColorOnBackground"/>
-  <java-symbol type="attr" name="materialColorOnError"/>
-  <java-symbol type="attr" name="materialColorOnErrorContainer"/>
-  <java-symbol type="attr" name="materialColorOnPrimary"/>
-  <java-symbol type="attr" name="materialColorOnPrimaryContainer"/>
-  <java-symbol type="attr" name="materialColorOnSecondary"/>
-  <java-symbol type="attr" name="materialColorOnSecondaryContainer"/>
-  <java-symbol type="attr" name="materialColorOnSurface"/>
-  <java-symbol type="attr" name="materialColorOnSurfaceVariant"/>
-  <java-symbol type="attr" name="materialColorOnTertiary"/>
-  <java-symbol type="attr" name="materialColorOnTertiaryContainer"/>
-  <java-symbol type="attr" name="materialColorOutline"/>
-  <java-symbol type="attr" name="materialColorOutlineVariant"/>
-  <java-symbol type="attr" name="materialColorPaletteKeyColorNeutral"/>
-  <java-symbol type="attr" name="materialColorPaletteKeyColorNeutralVariant"/>
-  <java-symbol type="attr" name="materialColorPaletteKeyColorPrimary"/>
-  <java-symbol type="attr" name="materialColorPaletteKeyColorSecondary"/>
-  <java-symbol type="attr" name="materialColorPaletteKeyColorTertiary"/>
-  <java-symbol type="attr" name="materialColorPrimary"/>
-  <java-symbol type="attr" name="materialColorPrimaryContainer"/>
-  <java-symbol type="attr" name="materialColorScrim"/>
-  <java-symbol type="attr" name="materialColorSecondary"/>
-  <java-symbol type="attr" name="materialColorSecondaryContainer"/>
-  <java-symbol type="attr" name="materialColorShadow"/>
-  <java-symbol type="attr" name="materialColorSurface"/>
-  <java-symbol type="attr" name="materialColorSurfaceBright"/>
-  <java-symbol type="attr" name="materialColorSurfaceContainer"/>
-  <java-symbol type="attr" name="materialColorSurfaceContainerHigh"/>
-  <java-symbol type="attr" name="materialColorSurfaceContainerHighest"/>
-  <java-symbol type="attr" name="materialColorSurfaceContainerLow"/>
-  <java-symbol type="attr" name="materialColorSurfaceContainerLowest"/>
-  <java-symbol type="attr" name="materialColorSurfaceDim"/>
-  <java-symbol type="attr" name="materialColorSurfaceTint"/>
-  <java-symbol type="attr" name="materialColorSurfaceVariant"/>
-  <java-symbol type="attr" name="materialColorTertiary"/>
-  <java-symbol type="attr" name="materialColorTertiaryContainer"/>
-  <java-symbol type="attr" name="materialColorTextHintInverse"/>
-  <java-symbol type="attr" name="materialColorTextPrimaryInverse"/>
-  <java-symbol type="attr" name="materialColorTextPrimaryInverseDisableOnly"/>
-  <java-symbol type="attr" name="materialColorTextSecondaryAndTertiaryInverse"/>
-  <java-symbol type="attr" name="materialColorTextSecondaryAndTertiaryInverseDisabled"/>
-  <java-symbol type="attr" name="materialColorOnPrimaryFixed"/>
-  <java-symbol type="attr" name="materialColorOnPrimaryFixedVariant"/>
-  <java-symbol type="attr" name="materialColorOnSecondaryFixed"/>
-  <java-symbol type="attr" name="materialColorOnSecondaryFixedVariant"/>
-  <java-symbol type="attr" name="materialColorOnTertiaryFixed"/>
-  <java-symbol type="attr" name="materialColorOnTertiaryFixedVariant"/>
-  <java-symbol type="attr" name="materialColorPrimaryFixed"/>
-  <java-symbol type="attr" name="materialColorPrimaryFixedDim"/>
-  <java-symbol type="attr" name="materialColorSecondaryFixed"/>
-  <java-symbol type="attr" name="materialColorSecondaryFixedDim"/>
-  <java-symbol type="attr" name="materialColorTertiaryFixed"/>
-  <java-symbol type="attr" name="materialColorTertiaryFixedDim"/>
-  <java-symbol type="attr" name="customColorBrandA"/>
-  <java-symbol type="attr" name="customColorBrandB"/>
-  <java-symbol type="attr" name="customColorBrandC"/>
-  <java-symbol type="attr" name="customColorBrandD"/>
-  <java-symbol type="attr" name="customColorClockHour"/>
-  <java-symbol type="attr" name="customColorClockMinute"/>
-  <java-symbol type="attr" name="customColorClockSecond"/>
-  <java-symbol type="attr" name="customColorOnShadeActive"/>
-  <java-symbol type="attr" name="customColorOnShadeActiveVariant"/>
-  <java-symbol type="attr" name="customColorOnShadeInactive"/>
-  <java-symbol type="attr" name="customColorOnShadeInactiveVariant"/>
-  <java-symbol type="attr" name="customColorOnThemeApp"/>
-  <java-symbol type="attr" name="customColorOverviewBackground"/>
-  <java-symbol type="attr" name="customColorShadeActive"/>
-  <java-symbol type="attr" name="customColorShadeDisabled"/>
-  <java-symbol type="attr" name="customColorShadeInactive"/>
-  <java-symbol type="attr" name="customColorThemeApp"/>
-  <java-symbol type="attr" name="customColorThemeAppRing"/>
-  <java-symbol type="attr" name="customColorThemeNotif"/>
-  <java-symbol type="attr" name="customColorUnderSurface"/>
-  <java-symbol type="attr" name="customColorWeatherTemp"/>
-  <java-symbol type="attr" name="customColorWidgetBackground"/>
-
-  <java-symbol name="system_widget_background_light" type="color"/>
-  <java-symbol name="system_clock_hour_light" type="color"/>
-  <java-symbol name="system_clock_minute_light" type="color"/>
-  <java-symbol name="system_clock_second_light" type="color"/>
-  <java-symbol name="system_theme_app_light" type="color"/>
-  <java-symbol name="system_on_theme_app_light" type="color"/>
-  <java-symbol name="system_theme_app_ring_light" type="color"/>
-  <java-symbol name="system_theme_notif_light" type="color"/>
   <java-symbol name="system_brand_a_light" type="color"/>
   <java-symbol name="system_brand_b_light" type="color"/>
   <java-symbol name="system_brand_c_light" type="color"/>
   <java-symbol name="system_brand_d_light" type="color"/>
-  <java-symbol name="system_under_surface_light" type="color"/>
-  <java-symbol name="system_shade_active_light" type="color"/>
+  <java-symbol name="system_clock_hour_light" type="color"/>
+  <java-symbol name="system_clock_minute_light" type="color"/>
+  <java-symbol name="system_clock_second_light" type="color"/>
   <java-symbol name="system_on_shade_active_light" type="color"/>
   <java-symbol name="system_on_shade_active_variant_light" type="color"/>
-  <java-symbol name="system_shade_inactive_light" type="color"/>
   <java-symbol name="system_on_shade_inactive_light" type="color"/>
   <java-symbol name="system_on_shade_inactive_variant_light" type="color"/>
-  <java-symbol name="system_shade_disabled_light" type="color"/>
+  <java-symbol name="system_on_theme_app_light" type="color"/>
   <java-symbol name="system_overview_background_light" type="color"/>
-  <java-symbol name="system_widget_background_dark" type="color"/>
-  <java-symbol name="system_clock_hour_dark" type="color"/>
-  <java-symbol name="system_clock_minute_dark" type="color"/>
-  <java-symbol name="system_clock_second_dark" type="color"/>
-  <java-symbol name="system_theme_app_dark" type="color"/>
-  <java-symbol name="system_on_theme_app_dark" type="color"/>
-  <java-symbol name="system_theme_app_ring_dark" type="color"/>
-  <java-symbol name="system_theme_notif_dark" type="color"/>
+  <java-symbol name="system_shade_active_light" type="color"/>
+  <java-symbol name="system_shade_disabled_light" type="color"/>
+  <java-symbol name="system_shade_inactive_light" type="color"/>
+  <java-symbol name="system_theme_app_light" type="color"/>
+  <java-symbol name="system_theme_app_ring_light" type="color"/>
+  <java-symbol name="system_theme_notif_light" type="color"/>
+  <java-symbol name="system_under_surface_light" type="color"/>
+  <java-symbol name="system_weather_temp_light" type="color"/>
+  <java-symbol name="system_widget_background_light" type="color"/>
+
   <java-symbol name="system_brand_a_dark" type="color"/>
   <java-symbol name="system_brand_b_dark" type="color"/>
   <java-symbol name="system_brand_c_dark" type="color"/>
   <java-symbol name="system_brand_d_dark" type="color"/>
-  <java-symbol name="system_under_surface_dark" type="color"/>
-  <java-symbol name="system_shade_active_dark" type="color"/>
+  <java-symbol name="system_clock_hour_dark" type="color"/>
+  <java-symbol name="system_clock_minute_dark" type="color"/>
+  <java-symbol name="system_clock_second_dark" type="color"/>
   <java-symbol name="system_on_shade_active_dark" type="color"/>
   <java-symbol name="system_on_shade_active_variant_dark" type="color"/>
-  <java-symbol name="system_shade_inactive_dark" type="color"/>
   <java-symbol name="system_on_shade_inactive_dark" type="color"/>
   <java-symbol name="system_on_shade_inactive_variant_dark" type="color"/>
-  <java-symbol name="system_shade_disabled_dark" type="color"/>
+  <java-symbol name="system_on_theme_app_dark" type="color"/>
   <java-symbol name="system_overview_background_dark" type="color"/>
+  <java-symbol name="system_shade_active_dark" type="color"/>
+  <java-symbol name="system_shade_disabled_dark" type="color"/>
+  <java-symbol name="system_shade_inactive_dark" type="color"/>
+  <java-symbol name="system_theme_app_dark" type="color"/>
+  <java-symbol name="system_theme_app_ring_dark" type="color"/>
+  <java-symbol name="system_theme_notif_dark" type="color"/>
+  <java-symbol name="system_under_surface_dark" type="color"/>
+  <java-symbol name="system_weather_temp_dark" type="color"/>
+  <java-symbol name="system_widget_background_dark" type="color"/>
 
   <java-symbol type="attr" name="actionModeUndoDrawable" />
   <java-symbol type="attr" name="actionModeRedoDrawable" />
@@ -5856,5 +5791,16 @@
   <java-symbol type="dimen" name="config_motionExpressiveDefaultEffectDamping"/>
   <java-symbol type="dimen" name="config_motionExpressiveSlowSpatialDamping"/>
   <java-symbol type="dimen" name="config_motionExpressiveSlowEffectDamping"/>
+
+  <!-- List of protected packages that require biometric authentication for modification -->
+  <java-symbol type="array" name="config_biometric_protected_package_names" />
+
+  <!-- Material shape spec config tokens -->
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXsmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusSmall"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusMedium"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusLarge"/>
+  <java-symbol type="dimen" name="config_shapeCornerRadiusXlarge"/>
+
 
 </resources>

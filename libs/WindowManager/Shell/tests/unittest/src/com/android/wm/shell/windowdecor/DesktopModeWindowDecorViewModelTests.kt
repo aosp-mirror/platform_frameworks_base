@@ -278,7 +278,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForTopTranslucentActivities() {
         val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
-            isTopActivityTransparent = true
+            isActivityStackTransparent = true
             isTopActivityNoDisplay = false
             numActivities = 1
         }
@@ -591,7 +591,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         verify(mockDesktopTasksController).moveTaskToDesktop(
             eq(decor.mTaskInfo.taskId),
             any(),
-            eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON)
+            eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON),
+            anyOrNull()
         )
     }
 
@@ -780,6 +781,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             times(1)
         ).setAppHandleEducationTooltipCallbacks(openHandleMenuCallbackCaptor.capture(), any())
         openHandleMenuCallbackCaptor.lastValue.invoke(task.taskId)
+        bgExecutor.flushAll()
+        testShellExecutor.flushAll()
 
         verify(decor, times(1)).createHandleMenu(anyBoolean())
     }
@@ -822,7 +825,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         )
 
         verify(mockDesktopTasksController, times(1))
-            .moveTaskToDesktop(any(), any(), any())
+            .moveTaskToDesktop(any(), any(), any(), anyOrNull())
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.content.testableContext
 import android.os.userManager
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.repository.communalMediaRepository
@@ -34,6 +35,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.phone.fakeManagedProfileController
@@ -67,6 +69,13 @@ val Kosmos.communalInteractor by Fixture {
 
 val Kosmos.editWidgetsActivityStarter by Fixture<EditWidgetsActivityStarter> { mock() }
 
+fun Kosmos.setCommunalV2ConfigEnabled(enabled: Boolean) {
+    testableContext.orCreateTestableResources.addOverride(
+        com.android.internal.R.bool.config_glanceableHubEnabled,
+        enabled,
+    )
+}
+
 suspend fun Kosmos.setCommunalEnabled(enabled: Boolean) {
     fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, enabled)
     if (enabled) {
@@ -76,7 +85,25 @@ suspend fun Kosmos.setCommunalEnabled(enabled: Boolean) {
     }
 }
 
+suspend fun Kosmos.setCommunalV2Enabled(enabled: Boolean) {
+    setCommunalV2ConfigEnabled(true)
+    if (enabled) {
+        fakeUserRepository.asMainUser()
+    } else {
+        fakeUserRepository.asDefaultUser()
+    }
+}
+
 suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
+    setCommunalEnabled(available)
+    with(fakeKeyguardRepository) {
+        setIsEncryptedOrLockdown(!available)
+        setKeyguardShowing(available)
+    }
+}
+
+suspend fun Kosmos.setCommunalV2Available(available: Boolean) {
+    setCommunalV2ConfigEnabled(true)
     setCommunalEnabled(available)
     with(fakeKeyguardRepository) {
         setIsEncryptedOrLockdown(!available)

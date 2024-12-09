@@ -18,6 +18,7 @@ package com.android.server.input;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.lights.Light;
@@ -41,6 +42,8 @@ interface NativeInputManagerService {
     void start();
 
     void setDisplayViewports(DisplayViewport[] viewports);
+
+    void setDisplayTopology(DisplayTopologyGraph topologyGraph);
 
     int getScanCodeState(int deviceId, int sourceMask, int scanCode);
 
@@ -321,6 +324,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setDisplayViewports(DisplayViewport[] viewports);
+
+        @Override
+        public native void setDisplayTopology(DisplayTopologyGraph topologyGraph);
 
         @Override
         public native int getScanCodeState(int deviceId, int sourceMask, int scanCode);

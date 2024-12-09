@@ -27,6 +27,7 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
+import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalSmartspaceRepository
@@ -34,9 +35,9 @@ import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.domain.model.CommunalContentModel.WidgetContent
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.shared.model.CommunalContentSize.FULL
-import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
-import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
+import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.FULL
+import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.HALF
+import com.android.systemui.communal.shared.model.CommunalContentSize.FixedSize.THIRD
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.communal.shared.model.EditModeState
@@ -535,7 +536,9 @@ constructor(
                 // Order by creation time descending.
                 ongoingContent.sortByDescending { it.createdTimestampMillis }
                 // Resize the items.
-                ongoingContent.resizeItems()
+                if (!communalResponsiveGrid()) {
+                    ongoingContent.resizeItems()
+                }
 
                 // Return the sorted and resized items.
                 ongoingContent

@@ -137,6 +137,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -157,6 +158,10 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class KeyguardViewMediatorTest extends SysuiTestCase {
+
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
+
     private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private KeyguardViewMediator mViewMediator;
 
@@ -278,7 +283,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mUserTracker,
                 mKosmos.getNotificationShadeWindowModel(),
                 mSecureSettings,
-                mKosmos::getCommunalInteractor);
+                mKosmos::getCommunalInteractor,
+                mKosmos.getShadeLayoutParams());
         mFeatureFlags = new FakeFeatureFlags();
         mSetFlagsRule.disableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR);
 
@@ -1163,6 +1169,29 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
      */
     private void assertATMSLockScreenShowing(boolean showing)
             throws RemoteException {
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            // ATMS is called via bgExecutor, so make sure to run all of those calls first.
+            processAllMessagesAndBgExecutorMessages();
+
+            final InOrder orderedSetLockScreenShownCalls = inOrder(mKeyguardTransitions);
+            final ArgumentCaptor<Boolean> showingCaptor = ArgumentCaptor.forClass(Boolean.class);
+            orderedSetLockScreenShownCalls
+                    .verify(mKeyguardTransitions, atLeastOnce())
+                    .startKeyguardTransition(showingCaptor.capture(), anyBoolean());
+
+            // The captor will have the most recent startKeyguardTransition call's value.
+            assertEquals(showing, showingCaptor.getValue());
+
+            // We're now just after the last startKeyguardTransition call. If we expect the
+            // lockscreen to be showing, ensure that we didn't subsequently ask for it to go away.
+            if (showing) {
+                orderedSetLockScreenShownCalls.verify(mKeyguardTransitions, never())
+                        .startKeyguardTransition(eq(false), anyBoolean());
+            }
+            return;
+        }
+
         // ATMS is called via bgExecutor, so make sure to run all of those calls first.
         processAllMessagesAndBgExecutorMessages();
 
@@ -1190,6 +1219,20 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private void assertATMSKeyguardGoingAway() throws RemoteException {
         // ATMS is called via bgExecutor, so make sure to run all of those calls first.
         processAllMessagesAndBgExecutorMessages();
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            final InOrder orderedGoingAwayCalls = inOrder(mKeyguardTransitions);
+            orderedGoingAwayCalls.verify(mKeyguardTransitions, atLeastOnce())
+                    .startKeyguardTransition(eq(false) /* keyguardShowing */,
+                            eq(false) /* aodShowing */);
+
+            // Advance the inOrder to just past the last goingAway call. Let's make sure we didn't
+            // re-show the lockscreen, which would cancel going away.
+            orderedGoingAwayCalls.verify(mKeyguardTransitions, never())
+                    .startKeyguardTransition(eq(true) /* keyguardShowing */,
+                            anyBoolean() /* aodShowing */);
+            return;
+        }
 
         final InOrder orderedGoingAwayCalls = inOrder(mActivityTaskManagerService);
         orderedGoingAwayCalls.verify(mActivityTaskManagerService, atLeastOnce())

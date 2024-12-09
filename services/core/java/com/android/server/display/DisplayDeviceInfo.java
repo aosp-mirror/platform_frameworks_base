@@ -477,6 +477,7 @@ final class DisplayDeviceInfo {
     public float brightnessMinimum;
     public float brightnessMaximum;
     public float brightnessDefault;
+    public float brightnessDim;
 
     // NaN means unsupported
     public float hdrSdrRatio = Float.NaN;
@@ -561,8 +562,8 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
-                || !BrightnessSynchronizer.floatEquals(brightnessDefault,
-                other.brightnessDefault)
+                || !BrightnessSynchronizer.floatEquals(brightnessDefault, other.brightnessDefault)
+                || !BrightnessSynchronizer.floatEquals(brightnessDim, other.brightnessDim)
                 || !Objects.equals(roundedCorners, other.roundedCorners)
                 || installOrientation != other.installOrientation
                 || !Objects.equals(displayShape, other.displayShape)
@@ -618,6 +619,7 @@ final class DisplayDeviceInfo {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        brightnessDim = other.brightnessDim;
         hdrSdrRatio = other.hdrSdrRatio;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
@@ -672,6 +674,7 @@ final class DisplayDeviceInfo {
         sb.append(", brightnessMinimum ").append(brightnessMinimum);
         sb.append(", brightnessMaximum ").append(brightnessMaximum);
         sb.append(", brightnessDefault ").append(brightnessDefault);
+        sb.append(", brightnessDim ").append(brightnessDim);
         sb.append(", hdrSdrRatio ").append(hdrSdrRatio);
         if (roundedCorners != null) {
             sb.append(", roundedCorners ").append(roundedCorners);

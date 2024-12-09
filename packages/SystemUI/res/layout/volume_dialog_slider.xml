@@ -14,15 +14,21 @@
      limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="@dimen/volume_dialog_slider_width"
-    android:layout_height="@dimen/volume_dialog_slider_height">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
     <com.google.android.material.slider.Slider
-        style="@style/SystemUI.Material3.Slider.Volume"
         android:id="@+id/volume_dialog_slider"
-        android:layout_width="@dimen/volume_dialog_slider_height"
-        android:layout_height="match_parent"
+        style="@style/SystemUI.Material3.Slider.Volume"
+        android:layout_width="@dimen/volume_dialog_slider_width"
+        android:layout_height="@dimen/volume_dialog_slider_height"
         android:layout_gravity="center"
-        android:rotation="270"
-        android:theme="@style/Theme.Material3.Light" />
+        android:theme="@style/Theme.Material3.Light"
+        android:orientation="vertical"
+        app:thumbHeight="52dp"
+        app:trackCornerSize="12dp"
+        app:trackHeight="40dp"
+        app:trackStopIndicatorSize="6dp"
+        app:trackInsideCornerSize="2dp" />
 </FrameLayout>

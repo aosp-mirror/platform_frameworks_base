@@ -14,11 +14,7 @@
      limitations under the License.
 -->
 <resources>
-    <dimen name="screen_percentage_0416">9.36dp</dimen>
     <dimen name="screen_percentage_05">11.25dp</dimen>
-    <dimen name="screen_percentage_052">11.7dp</dimen>
     <dimen name="screen_percentage_10">22.5dp</dimen>
-    <dimen name="screen_percentage_12">27dp</dimen>
     <dimen name="screen_percentage_15">33.75dp</dimen>
-    <dimen name="screen_percentage_3646">82.46dp</dimen>
 </resources>

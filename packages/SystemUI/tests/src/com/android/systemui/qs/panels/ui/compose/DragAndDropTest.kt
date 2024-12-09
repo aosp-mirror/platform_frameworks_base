@@ -22,7 +22,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -182,11 +185,14 @@ class DragAndDropTest : SysuiTestCase() {
     }
 
     private fun ComposeContentTestRule.assertTileGridContainsExactly(specs: List<String>) {
-        onNodeWithTag(CURRENT_TILES_GRID_TEST_TAG).onChildren().apply {
-            fetchSemanticsNodes().forEachIndexed { index, _ ->
-                get(index).assert(hasContentDescription(specs[index]))
+        onNodeWithTag(CURRENT_TILES_GRID_TEST_TAG)
+            .onChildren()
+            .filter(SemanticsMatcher.keyIsDefined(SemanticsProperties.ContentDescription))
+            .apply {
+                fetchSemanticsNodes().forEachIndexed { index, _ ->
+                    get(index).assert(hasContentDescription(specs[index]))
+                }
             }
-        }
     }
 
     companion object {

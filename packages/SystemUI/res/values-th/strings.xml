@@ -529,7 +529,8 @@
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"หากต้องการเปิดแอปโดยใช้วิดเจ็ต คุณจะต้องยืนยันตัวตนของคุณ นอกจากนี้ โปรดทราบว่าผู้อื่นจะดูวิดเจ็ตเหล่านี้ได้แม้ว่าแท็บเล็ตจะล็อกอยู่ก็ตาม วิดเจ็ตบางอย่างอาจไม่ได้มีไว้สำหรับหน้าจอล็อกของคุณ และอาจไม่ปลอดภัยที่จะเพิ่มที่นี่"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"รับทราบ"</string>
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"วิดเจ็ต"</string>
-    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="511359420883794513">"หากต้องการเพิ่มวิดเจ็ตในหน้าจอล็อกเป็นทางลัด โปรดตรวจสอบว่าได้เปิดใช้วิดเจ็ตแล้วในการตั้งค่า"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"หากต้องการเพิ่มทางลัด \"วิดเจ็ต\" โปรดตรวจสอบว่าได้เปิดใช้ \"แสดงวิดเจ็ตในหน้าจอล็อก\" แล้วในการตั้งค่า"</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"การตั้งค่า"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"สลับผู้ใช้"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"เมนูแบบเลื่อนลง"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
@@ -590,6 +591,8 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"การแจ้งเตือน"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"การสนทนา"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ล้างการแจ้งเตือนแบบไม่มีเสียงทั้งหมด"</string>
+    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"หยุดการแจ้งเตือนชั่วคราวโดย \"ห้ามรบกวน\""</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{ไม่มีการแจ้งเตือน}=1{หยุดการแจ้งเตือนชั่วคราวโดย {mode}}=2{หยุดการแจ้งเตือนชั่วคราวโดย {mode} และโหมดอื่นอีก 1 โหมด}other{หยุดการแจ้งเตือนชั่วคราวโดย {mode} และโหมดอื่นอีก # โหมด}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"เริ่มเลย"</string>
@@ -704,6 +707,8 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"การติดตามการเคลื่อนไหวของศีรษะ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"แตะเพื่อเปลี่ยนโหมดเสียงเรียกเข้า"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"โหมดเสียงเรียกเข้า"</string>
+    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
+    <skip />
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ปิดเสียง"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"เปิดเสียง"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"สั่น"</string>
@@ -875,14 +880,10 @@
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"เปลี่ยนไปใช้แอปทางด้านซ้ายหรือด้านบนขณะใช้โหมดแยกหน้าจอ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"ระหว่างใช้โหมดแยกหน้าจอ: เปลี่ยนแอปหนึ่งเป็นอีกแอปหนึ่ง"</string>
     <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"ย้ายหน้าต่างที่ใช้งานไปยังหน้าจอต่างๆ"</string>
-    <!-- no translation found for system_desktop_mode_snap_left_window (8636204689945162298) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_snap_right_window (2162560187639411929) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_toggle_maximize_window (4084100093691768239) -->
-    <skip />
-    <!-- no translation found for system_desktop_mode_minimize_window (1248714536732927092) -->
-    <skip />
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"ย้ายหน้าต่างไปทางซ้าย"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"ย้ายหน้าต่างไปทางขวา"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"ขยายหน้าต่างเต็มหน้าจอ"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"ย่อหน้าต่าง"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"อินพุต"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"เปลี่ยนเป็นภาษาถัดไป"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"เปลี่ยนเป็นภาษาก่อนหน้า"</string>
@@ -1419,7 +1420,6 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"การควบคุมระบบ"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"แอประบบ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"การทํางานหลายอย่างพร้อมกัน"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"แอปล่าสุด"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"แยกหน้าจอ"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"อินพุต"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"แป้นพิมพ์ลัดของแอป"</string>
@@ -1428,25 +1428,28 @@
     <string name="shortcut_helper_title" msgid="8567500639300970049">"แป้นพิมพ์ลัด"</string>
     <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"ปรับแต่งแป้นพิมพ์ลัด"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"นำแป้นพิมพ์ลัดออกใช่ไหม"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"รีเซ็ตกลับเป็นค่าเริ่มต้นไหม"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"กดแป้นเพื่อกำหนดแป้นพิมพ์ลัด"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"การดำเนินการนี้จะลบแป้นพิมพ์ลัดที่กำหนดเองอย่างถาวร"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"การดำเนินการนี้จะลบทางลัดที่กำหนดเองทั้งหมดอย่างถาวร"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ค้นหาแป้นพิมพ์ลัด"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ไม่พบผลการค้นหา"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ไอคอนยุบ"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"ไอคอนการดำเนินการหรือแป้น Meta"</string>
     <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"ไอคอนเครื่องหมายบวก"</string>
     <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"ปรับแต่ง"</string>
+    <!-- no translation found for shortcut_helper_reset_button_text (2548243844050633472) -->
+    <skip />
     <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"เสร็จสิ้น"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ไอคอนขยาย"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"หรือ"</string>
-    <!-- no translation found for shortcut_helper_key_combinations_and_conjunction (6138186504075880224) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_key_combinations_forward_slash (1238652537199346970) -->
-    <skip />
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"บวก"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"เครื่องหมายทับ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"แฮนเดิลการลาก"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"การตั้งค่าแป้นพิมพ์"</string>
     <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ตั้งค่าแป้นพิมพ์ลัด"</string>
     <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"นำออก"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ใช่ รีเซ็ต"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ยกเลิก"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"กดแป้น"</string>
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"มีการใช้แป้นที่กดร่วมกันนี้แล้ว โปรดลองใช้แป้นอื่น"</string>
@@ -1478,6 +1481,8 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"กดปุ่มดำเนินการบนแป้นพิมพ์"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ยอดเยี่ยม"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"คุณทำท่าทางสัมผัสเพื่อดูแอปทั้งหมดสำเร็จแล้ว"</string>
+    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ไฟแบ็กไลต์ของแป้นพิมพ์"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ระดับที่ %1$d จาก %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ระบบควบคุมอุปกรณ์สมาร์ทโฮม"</string>

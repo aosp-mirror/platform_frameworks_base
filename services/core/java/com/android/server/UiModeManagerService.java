@@ -885,8 +885,6 @@ final class UiModeManagerService extends SystemService {
                                 ? customModeType
                                 : MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
                         mNightMode.set(mode);
-                        //deactivates AttentionMode if user toggles DarkTheme
-                        mAttentionModeThemeOverlay = MODE_ATTENTION_THEME_OVERLAY_OFF;
                         resetNightModeOverrideLocked();
                         persistNightMode(user);
                         // on screen off will update configuration instead
@@ -1009,15 +1007,16 @@ final class UiModeManagerService extends SystemService {
 
         @Override
         public boolean setNightModeActivatedForCustomMode(int modeNightCustomType, boolean active) {
-            return setNightModeActivatedForModeInternal(modeNightCustomType, active);
+            return setNightModeActivatedForModeInternal(modeNightCustomType, active, false);
         }
 
         @Override
         public boolean setNightModeActivated(boolean active) {
-            return setNightModeActivatedForModeInternal(mNightModeCustomType, active);
+            return setNightModeActivatedForModeInternal(mNightModeCustomType, active, true);
         }
 
-        private boolean setNightModeActivatedForModeInternal(int modeCustomType, boolean active) {
+        private boolean setNightModeActivatedForModeInternal(int modeCustomType,
+            boolean active, boolean isUserInteraction) {
             if (getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -1053,12 +1052,15 @@ final class UiModeManagerService extends SystemService {
                         mOverrideNightModeOn = active;
                         mOverrideNightModeUser = mCurrentUser;
                         persistNightModeOverrides(mCurrentUser);
-                    } else if (mNightMode.get() == UiModeManager.MODE_NIGHT_NO
-                            && active) {
+                    } else if (mNightMode.get() == UiModeManager.MODE_NIGHT_NO && active) {
                         mNightMode.set(UiModeManager.MODE_NIGHT_YES);
-                    } else if (mNightMode.get() == UiModeManager.MODE_NIGHT_YES
-                            && !active) {
+                    } else if (mNightMode.get() == UiModeManager.MODE_NIGHT_YES && !active) {
                         mNightMode.set(UiModeManager.MODE_NIGHT_NO);
+                    }
+
+                    if (isUserInteraction) {
+                        // deactivates AttentionMode if user toggles DarkTheme
+                        mAttentionModeThemeOverlay = MODE_ATTENTION_THEME_OVERLAY_OFF;
                     }
                     updateConfigurationLocked();
                     applyConfigurationExternallyLocked();

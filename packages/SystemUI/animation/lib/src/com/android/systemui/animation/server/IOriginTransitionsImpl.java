@@ -438,7 +438,8 @@ public class IOriginTransitionsImpl extends IOriginTransitions.Stub {
             if (forPredictiveBackTakeover) {
                 filter.mTypeSet = new int[] {TRANSIT_PREPARE_BACK_NAVIGATION};
             } else {
-                filter.mTypeSet = new int[] {TRANSIT_CLOSE, TRANSIT_TO_BACK};
+                filter.mTypeSet =
+                        new int[] {TRANSIT_CLOSE, TRANSIT_TO_BACK, TRANSIT_OPEN, TRANSIT_TO_FRONT};
             }
 
             // The opening activity of the return transition must match the activity we just closed.

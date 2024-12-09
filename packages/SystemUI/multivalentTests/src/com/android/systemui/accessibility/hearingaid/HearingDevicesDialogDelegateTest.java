@@ -139,13 +139,11 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     private ActivityInfo mActivityInfo;
     @Mock
     private Drawable mDrawable;
-    @Mock
-    private HearingDevicesPresetsController mPresetsController;
+
     private SystemUIDialog mDialog;
     private SystemUIDialog.Factory mDialogFactory;
     private HearingDevicesDialogDelegate mDialogDelegate;
     private TestableLooper mTestableLooper;
-    private final List<CachedBluetoothDevice> mDevices = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -155,7 +153,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mProfileManager.getHapClientProfile()).thenReturn(mHapClientProfile);
         when(mLocalBluetoothAdapter.isEnabled()).thenReturn(true);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(mCachedDeviceManager);
-        when(mCachedDeviceManager.getCachedDevicesCopy()).thenReturn(mDevices);
+        when(mCachedDeviceManager.getCachedDevicesCopy()).thenReturn(List.of(mCachedDevice));
         when(mLocalBluetoothManager.getEventManager()).thenReturn(mBluetoothEventManager);
         when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
         when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
@@ -163,6 +161,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mCachedDevice.getDevice()).thenReturn(mDevice);
         when(mCachedDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mCachedDevice.getName()).thenReturn(DEVICE_NAME);
+        when(mCachedDevice.getProfiles()).thenReturn(List.of(mHapClientProfile));
         when(mCachedDevice.isActiveDevice(BluetoothProfile.HEARING_AID)).thenReturn(true);
         when(mCachedDevice.isConnectedHearingAidDevice()).thenReturn(true);
         when(mCachedDevice.isConnectedHapClientDevice()).thenReturn(true);
@@ -170,12 +169,11 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mHearingDeviceItem.getCachedBluetoothDevice()).thenReturn(mCachedDevice);
 
         mContext.setMockPackageManager(mPackageManager);
-        mDevices.add(mCachedDevice);
     }
 
     @Test
     public void clickPairNewDeviceButton_intentActionMatch() {
-        setUpPairNewDeviceDialog();
+        setUpDeviceDialogWithPairNewDeviceButton();
         mDialog.show();
 
         getPairNewDeviceButton(mDialog).performClick();
@@ -191,7 +189,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     @Test
     public void onDeviceItemGearClicked_intentActionMatch() {
-        setUpDeviceListDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
 
         mDialogDelegate.onDeviceItemGearClicked(mHearingDeviceItem, new View(mContext));
 
@@ -206,7 +204,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     @Test
     public void onDeviceItemOnClicked_connectedDevice_disconnect() {
-        setUpDeviceListDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         when(mHearingDeviceItem.getType()).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE);
 
         mDialogDelegate.onDeviceItemClicked(mHearingDeviceItem, new View(mContext));
@@ -222,7 +220,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsHearingDevicesRelatedToolName, new String[]{});
 
-        setUpPairNewDeviceDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         mDialog.show();
 
         assertToolsUi(0);
@@ -237,7 +235,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsHearingDevicesRelatedToolName, new String[]{});
 
-        setUpPairNewDeviceDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         mDialog.show();
 
         assertToolsUi(1);
@@ -247,9 +245,8 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     @EnableFlags(Flags.FLAG_HEARING_DEVICES_DIALOG_RELATED_TOOLS)
     public void showDialog_hasLiveCaption_oneRelatedToolInConfig_showTwoRelatedTools()
             throws PackageManager.NameNotFoundException {
-        when(mPackageManager.queryIntentActivities(
-                eq(LIVE_CAPTION_INTENT), anyInt())).thenReturn(
-                List.of(new ResolveInfo()));
+        when(mPackageManager.queryIntentActivities(eq(LIVE_CAPTION_INTENT), anyInt()))
+                .thenReturn(List.of(new ResolveInfo()));
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsHearingDevicesRelatedToolName,
                 new String[]{TEST_PKG + "/" + TEST_CLS});
@@ -260,18 +257,18 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
         when(mActivityInfo.getComponentName()).thenReturn(TEST_COMPONENT);
         when(mDrawable.mutate()).thenReturn(mDrawable);
 
-        setUpPairNewDeviceDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         mDialog.show();
 
         assertToolsUi(2);
     }
 
     @Test
-    public void showDialog_noPreset_presetGone() {
-        when(mPresetsController.getAllPresetInfo()).thenReturn(new ArrayList<>());
-        when(mPresetsController.getActivePresetIndex()).thenReturn(PRESET_INDEX_UNAVAILABLE);
+    public void showDialog_noPreset_presetLayoutGone() {
+        when(mHapClientProfile.getAllPresetInfo(mDevice)).thenReturn(new ArrayList<>());
+        when(mHapClientProfile.getActivePresetIndex(mDevice)).thenReturn(PRESET_INDEX_UNAVAILABLE);
 
-        setUpDeviceListDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         mDialog.show();
 
         ViewGroup presetLayout = getPresetLayout(mDialog);
@@ -281,11 +278,12 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
     @Test
     public void showDialog_presetExist_presetSelected() {
         BluetoothHapPresetInfo info = getTestPresetInfo();
-        when(mPresetsController.getAllPresetInfo()).thenReturn(List.of(info));
-        when(mPresetsController.getActivePresetIndex()).thenReturn(TEST_PRESET_INDEX);
+        when(mHapClientProfile.getAllPresetInfo(mDevice)).thenReturn(List.of(info));
+        when(mHapClientProfile.getActivePresetIndex(mDevice)).thenReturn(TEST_PRESET_INDEX);
 
-        setUpDeviceListDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         mDialog.show();
+        mTestableLooper.processAllMessages();
 
         ViewGroup presetLayout = getPresetLayout(mDialog);
         assertThat(presetLayout.getVisibility()).isEqualTo(View.VISIBLE);
@@ -295,48 +293,32 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
 
     @Test
     public void onActiveDeviceChanged_presetExist_presetSelected() {
-        setUpDeviceListDialog();
+        setUpDeviceDialogWithoutPairNewDeviceButton();
         mDialog.show();
         BluetoothHapPresetInfo info = getTestPresetInfo();
-        when(mPresetsController.getAllPresetInfo()).thenReturn(List.of(info));
-        when(mPresetsController.getActivePresetIndex()).thenReturn(TEST_PRESET_INDEX);
+        when(mHapClientProfile.getAllPresetInfo(mDevice)).thenReturn(List.of(info));
+        when(mHapClientProfile.getActivePresetIndex(mDevice)).thenReturn(TEST_PRESET_INDEX);
+
+        Spinner spinner = getPresetSpinner(mDialog);
+        assertThat(spinner.getSelectedItemPosition()).isEqualTo(-1);
 
         mDialogDelegate.onActiveDeviceChanged(mCachedDevice, BluetoothProfile.LE_AUDIO);
         mTestableLooper.processAllMessages();
 
         ViewGroup presetLayout = getPresetLayout(mDialog);
         assertThat(presetLayout.getVisibility()).isEqualTo(View.VISIBLE);
-        Spinner spinner = getPresetSpinner(mDialog);
         assertThat(spinner.getSelectedItemPosition()).isEqualTo(0);
     }
 
-
-
-    private void setUpPairNewDeviceDialog() {
-        mDialogFactory = new SystemUIDialog.Factory(
-                mContext,
-                mSystemUIDialogManager,
-                mSysUiState,
-                getFakeBroadcastDispatcher(),
-                mDialogTransitionAnimator
-        );
-        mDialogDelegate = new HearingDevicesDialogDelegate(
-                mContext,
-                true,
-                TEST_LAUNCH_SOURCE_ID,
-                mDialogFactory,
-                mActivityStarter,
-                mDialogTransitionAnimator,
-                mLocalBluetoothManager,
-                new Handler(mTestableLooper.getLooper()),
-                mAudioManager,
-                mUiEventLogger
-        );
-
-        mDialog = mDialogDelegate.createDialog();
+    private void setUpDeviceDialogWithPairNewDeviceButton() {
+        setUpDeviceDialog(/* showPairNewDevice= */ true);
     }
 
-    private void setUpDeviceListDialog() {
+    private void setUpDeviceDialogWithoutPairNewDeviceButton() {
+        setUpDeviceDialog(/* showPairNewDevice= */ false);
+    }
+
+    private void setUpDeviceDialog(boolean showPairNewDevice) {
         mDialogFactory = new SystemUIDialog.Factory(
                 mContext,
                 mSystemUIDialogManager,
@@ -345,8 +327,7 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 mDialogTransitionAnimator
         );
         mDialogDelegate = new HearingDevicesDialogDelegate(
-                mContext,
-                false,
+                showPairNewDevice,
                 TEST_LAUNCH_SOURCE_ID,
                 mDialogFactory,
                 mActivityStarter,
@@ -356,15 +337,14 @@ public class HearingDevicesDialogDelegateTest extends SysuiTestCase {
                 mAudioManager,
                 mUiEventLogger
         );
-
         mDialog = mDialogDelegate.createDialog();
-        mDialogDelegate.setHearingDevicesPresetsController(mPresetsController);
     }
 
     private BluetoothHapPresetInfo getTestPresetInfo() {
         BluetoothHapPresetInfo info = mock(BluetoothHapPresetInfo.class);
         when(info.getName()).thenReturn(TEST_PRESET_NAME);
         when(info.getIndex()).thenReturn(TEST_PRESET_INDEX);
+        when(info.isAvailable()).thenReturn(true);
         return info;
     }
 

@@ -34,7 +34,6 @@ import static org.mockito.Mockito.mock;
 import android.os.BatteryConsumer;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.platform.test.ravenwood.RavenwoodConfig;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.MonotonicClock;
@@ -48,11 +47,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class WakelockPowerStatsProcessorTest {
-    @RavenwoodConfig.Config
-    public static final RavenwoodConfig sConfig = new RavenwoodConfig.Builder()
-            .setProvideMainThread(true)
-            .build();
-
     @Rule
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePower(PowerProfile.POWER_CPU_IDLE, 720);

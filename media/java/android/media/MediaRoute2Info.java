@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Describes the properties of a route.
@@ -189,6 +190,7 @@ public final class MediaRoute2Info implements Parcelable {
      * the device.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_BUILTIN_SPEAKER
      */
     public static final int TYPE_BUILTIN_SPEAKER = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
 
@@ -196,6 +198,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a headset, which is the combination of a headphones and a microphone.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_WIRED_HEADSET
      */
     public static final int TYPE_WIRED_HEADSET = AudioDeviceInfo.TYPE_WIRED_HEADSET;
 
@@ -203,6 +206,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a pair of wired headphones.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_WIRED_HEADPHONES
      */
     public static final int TYPE_WIRED_HEADPHONES = AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
 
@@ -210,6 +214,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a bluetooth device, such as a bluetooth speaker or headphones.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_BLUETOOTH_A2DP
      */
     public static final int TYPE_BLUETOOTH_A2DP = AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
 
@@ -217,6 +222,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is an HDMI connection.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HDMI
      */
     public static final int TYPE_HDMI = AudioDeviceInfo.TYPE_HDMI;
 
@@ -224,6 +230,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is an Audio Return Channel of an HDMI connection.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HDMI_ARC
      */
     @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public static final int TYPE_HDMI_ARC = AudioDeviceInfo.TYPE_HDMI_ARC;
@@ -232,24 +239,34 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is an Enhanced Audio Return Channel of an HDMI connection.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HDMI_EARC
      */
     @FlaggedApi(FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER)
     public static final int TYPE_HDMI_EARC = AudioDeviceInfo.TYPE_HDMI_EARC;
 
     /**
      * Indicates the route is a digital line connection (for example S/PDIF).
+     *
+     * @see #getType
+     * @see AudioDeviceInfo#TYPE_LINE_DIGITAL
      */
     @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_LINE_DIGITAL = AudioDeviceInfo.TYPE_LINE_DIGITAL;
 
     /**
      * Indicates the route is an analog line-level connection.
+     *
+     * @see #getType
+     * @see AudioDeviceInfo#TYPE_LINE_ANALOG
      */
     @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_LINE_ANALOG = AudioDeviceInfo.TYPE_LINE_ANALOG;
 
     /**
      * Indicates the route is using the auxiliary line-level connectors.
+     *
+     * @see #getType
+     * @see AudioDeviceInfo#TYPE_AUX_LINE
      */
     @FlaggedApi(FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES)
     public static final int TYPE_AUX_LINE = AudioDeviceInfo.TYPE_AUX_LINE;
@@ -258,6 +275,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a USB audio device.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_USB_DEVICE
      */
     public static final int TYPE_USB_DEVICE = AudioDeviceInfo.TYPE_USB_DEVICE;
 
@@ -265,6 +283,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a USB audio device in accessory mode.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_USB_ACCESSORY
      */
     public static final int TYPE_USB_ACCESSORY = AudioDeviceInfo.TYPE_USB_ACCESSORY;
 
@@ -272,6 +291,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is the audio device associated with a dock.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_DOCK
      */
     public static final int TYPE_DOCK = AudioDeviceInfo.TYPE_DOCK;
 
@@ -279,6 +299,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a USB audio headset.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_USB_HEADSET
      */
     public static final int TYPE_USB_HEADSET = AudioDeviceInfo.TYPE_USB_HEADSET;
 
@@ -286,6 +307,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a hearing aid.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_HEARING_AID
      */
     public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
 
@@ -293,6 +315,7 @@ public final class MediaRoute2Info implements Parcelable {
      * Indicates the route is a Bluetooth Low Energy (BLE) HEADSET.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_BLE_HEADSET
      */
     public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
 
@@ -304,6 +327,7 @@ public final class MediaRoute2Info implements Parcelable {
      * to provide a better experience on multichannel contents.
      *
      * @see #getType
+     * @see AudioDeviceInfo#TYPE_MULTICHANNEL_GROUP
      */
     @FlaggedApi(FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE)
     public static final int TYPE_MULTICHANNEL_SPEAKER_GROUP =
@@ -617,7 +641,7 @@ public final class MediaRoute2Info implements Parcelable {
     private final String mProviderId;
     private final boolean mIsVisibilityRestricted;
     private final Set<String> mAllowedPackages;
-    private final Set<String> mRequiredPermissions;
+    private final List<Set<String>> mRequiredPermissions;
     @SuitabilityStatus private final int mSuitabilityStatus;
 
     MediaRoute2Info(@NonNull Builder builder) {
@@ -642,7 +666,7 @@ public final class MediaRoute2Info implements Parcelable {
         mIsVisibilityRestricted = builder.mIsVisibilityRestricted;
         mAllowedPackages = builder.mAllowedPackages;
         mSuitabilityStatus = builder.mSuitabilityStatus;
-        mRequiredPermissions = Set.copyOf(builder.mRequiredPermissions);
+        mRequiredPermissions = List.copyOf(builder.mRequiredPermissions);
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
@@ -667,7 +691,12 @@ public final class MediaRoute2Info implements Parcelable {
         mProviderId = in.readString();
         mIsVisibilityRestricted = in.readBoolean();
         mAllowedPackages = Set.of(in.createString8Array());
-        mRequiredPermissions = Set.of(in.createString8Array());
+        ArrayList<Set<String>> requiredPermissions = new ArrayList<>();
+        int numRequiredPermissionSets = in.readInt();
+        for (int i = 0; i < numRequiredPermissionSets; i++) {
+            requiredPermissions.add(Set.of(in.createString8Array()));
+        }
+        mRequiredPermissions = List.copyOf(requiredPermissions); // Use copyOf to make it immutable.
         mSuitabilityStatus = in.readInt();
     }
 
@@ -888,6 +917,17 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * Returns whether this route supports routing of the system media.
+     *
+     * @hide
+     */
+    public boolean supportsSystemMediaRouting() {
+        return (mRoutingTypeFlags
+                        & (FLAG_ROUTING_TYPE_SYSTEM_VIDEO | FLAG_ROUTING_TYPE_SYSTEM_AUDIO))
+                != 0;
+    }
+
+    /**
      * Returns true if the route info has all of the required field.
      * A route is valid if and only if it is obtained from
      * {@link com.android.server.media.MediaRouterService}.
@@ -911,11 +951,12 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * @return the set of permissions which must be held to see this route
+     * @return a list of permission sets - all the permissions in at least one of these sets must be
+     * held to see this route.
      */
     @NonNull
     @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
-    public Set<String> getRequiredPermissions() {
+    public List<Set<String>> getRequiredPermissions() {
         return mRequiredPermissions;
     }
 
@@ -1096,7 +1137,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(", allowedPackages=")
                 .append(String.join(",", mAllowedPackages))
                 .append(", mRequiredPermissions=")
-                .append(String.join(",", mRequiredPermissions))
+                .append(mRequiredPermissions.stream().map(set -> String.join(",", set)).collect(
+                                Collectors.joining("),(", "(", ")")))
                 .append(", suitabilityStatus=")
                 .append(mSuitabilityStatus)
                 .append(" }")
@@ -1130,7 +1172,10 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mProviderId);
         dest.writeBoolean(mIsVisibilityRestricted);
         dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
-        dest.writeString8Array(mRequiredPermissions.toArray(new String[0]));
+        dest.writeInt(mRequiredPermissions.size());
+        for (Set<String> permissionSet : mRequiredPermissions) {
+            dest.writeString8Array(permissionSet.toArray(new String[0]));
+        }
         dest.writeInt(mSuitabilityStatus);
     }
 
@@ -1279,7 +1324,7 @@ public final class MediaRoute2Info implements Parcelable {
         private String mProviderId;
         private boolean mIsVisibilityRestricted;
         private Set<String> mAllowedPackages;
-        private Set<String> mRequiredPermissions;
+        private List<Set<String>> mRequiredPermissions;
         @SuitabilityStatus private int mSuitabilityStatus;
 
         /**
@@ -1305,7 +1350,7 @@ public final class MediaRoute2Info implements Parcelable {
             mDeduplicationIds = Set.of();
             mAllowedPackages = Set.of();
             mSuitabilityStatus = SUITABILITY_STATUS_SUITABLE_FOR_DEFAULT_TRANSFER;
-            mRequiredPermissions = Set.of();
+            mRequiredPermissions = List.of();
         }
 
         /**
@@ -1587,7 +1632,7 @@ public final class MediaRoute2Info implements Parcelable {
         public Builder setVisibilityPublic() {
             mIsVisibilityRestricted = false;
             mAllowedPackages = Set.of();
-            mRequiredPermissions = Set.of();
+            mRequiredPermissions = List.of();
             return this;
         }
 
@@ -1614,13 +1659,31 @@ public final class MediaRoute2Info implements Parcelable {
         /**
          * Limits the visibility of this route to holders of a set of permissions.
          *
+         * <p>Calls to this method override any previous calls of
+         * {@link #setRequiredPermissions(Set)} or {@link #setRequiredPermissions(List)}.
+         *
          * @param requiredPermissions the list of all permissions which must be held in order to
          *                            see this route.
          */
         @NonNull
         @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
         public Builder setRequiredPermissions(@NonNull Set<String> requiredPermissions) {
-            mRequiredPermissions = Set.copyOf(requiredPermissions);
+            return setRequiredPermissions(List.of(requiredPermissions));
+        }
+
+        /**
+         * Limits the visibility of this route to holders of one of a set of permissions.
+         *
+         * <p>Calls to this method override any previous calls of
+         * {@link #setRequiredPermissions(Set)} or {@link #setRequiredPermissions(List)}.
+         *
+         * @param requiresOneOf a list of Sets of permissions. Holding all permissions in at least
+         *                      one of the Sets is required for the route to be visible.
+         */
+        @NonNull
+        @FlaggedApi(FLAG_ENABLE_ROUTE_VISIBILITY_CONTROL_API)
+        public Builder setRequiredPermissions(@NonNull List<Set<String>> requiresOneOf) {
+            mRequiredPermissions = List.copyOf(requiresOneOf);
             return this;
         }
 

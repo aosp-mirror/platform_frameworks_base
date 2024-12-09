@@ -38,7 +38,7 @@ import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
 import com.android.systemui.screenshot.appclips.AppClipsService;
 import com.android.systemui.screenshot.message.MessageModule;
 import com.android.systemui.screenshot.policy.ScreenshotPolicyModule;
-import com.android.systemui.screenshot.proxy.SystemUiProxyModule;
+import com.android.systemui.screenshot.proxy.ScreenshotProxyModule;
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel;
 
 import dagger.Binds;
@@ -50,7 +50,7 @@ import dagger.multibindings.IntoMap;
 /**
  * Defines injectable resources for Screenshots
  */
-@Module(includes = {ScreenshotPolicyModule.class, SystemUiProxyModule.class, MessageModule.class})
+@Module(includes = {ScreenshotPolicyModule.class, ScreenshotProxyModule.class, MessageModule.class})
 public abstract class ScreenshotModule {
 
     @Binds

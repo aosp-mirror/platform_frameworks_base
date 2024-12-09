@@ -3733,7 +3733,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 && !mTransitionController.useShellTransitionsRotation()) {
             if (deltaRotation != Surface.ROTATION_0) {
                 updateSurfaceRotation(t, deltaRotation, null /* positionLeash */);
-                getPendingTransaction().setFixedTransformHint(mSurfaceControl,
+                mDisplayContent.setFixedTransformHint(getPendingTransaction(), mSurfaceControl,
                         getWindowConfiguration().getDisplayRotation());
             } else if (deltaRotation != mLastDeltaRotation) {
                 t.setMatrix(mSurfaceControl, 1, 0, 0, 1);
