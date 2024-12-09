@@ -467,12 +467,12 @@ fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> {
 @ExperimentalFrpApi
 class CoalescingMutableTFlow<In, Out>
 internal constructor(
+    internal val name: String?,
     internal val coalesce: (old: Out, new: In) -> Out,
     internal val network: Network,
     private val getInitialValue: () -> Out,
     internal val impl: InputNode<Out> = InputNode(),
 ) : TFlow<Out>() {
-    internal val name: String? = null
     internal val storage = AtomicReference(false to getInitialValue())
 
     override fun toString(): String = "${this::class.simpleName}@$hashString"
@@ -490,7 +490,7 @@ internal constructor(
         val (scheduled, _) = storage.getAndUpdate { (_, old) -> true to coalesce(old, value) }
         if (!scheduled) {
             @Suppress("DeferredResultUnused")
-            network.transaction {
+            network.transaction("CoalescingMutableTFlow${name?.let { "($name)" }.orEmpty()}.emit") {
                 impl.visit(this, storage.getAndSet(false to getInitialValue()).second)
             }
         }
@@ -524,7 +524,9 @@ internal constructor(internal val network: Network, internal val impl: InputNode
             val newEmit =
                 async(start = CoroutineStart.LAZY) {
                     jobOrNull?.join()
-                    network.transaction { impl.visit(this, value) }.await()
+                    network
+                        .transaction("MutableTFlow($name).emit") { impl.visit(this, value) }
+                        .await()
                 }
             jobOrNull = storage.getAndSet(newEmit)
             newEmit.await()

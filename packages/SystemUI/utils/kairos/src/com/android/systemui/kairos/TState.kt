@@ -457,6 +457,7 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
 
     private val input: CoalescingMutableTFlow<Deferred<T>, Deferred<T>?> =
         CoalescingMutableTFlow(
+            name = null,
             coalesce = { _, new -> new },
             network = network,
             getInitialValue = { null },
@@ -474,7 +475,7 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
                 .cached()
         state = TStateSource(name, operatorName, initialValue, calm)
         @Suppress("DeferredResultUnused")
-        network.transaction {
+        network.transaction("MutableTState.init") {
             calm.activate(evalScope = this, downstream = Schedulable.S(state))?.let {
                 (connection, needsEval) ->
                 state.upstreamConnection = connection

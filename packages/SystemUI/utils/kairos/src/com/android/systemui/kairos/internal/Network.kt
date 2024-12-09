@@ -118,12 +118,12 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
     }
 
     /** Evaluates [block] inside of a new transaction when the network is ready. */
-    fun <R> transaction(block: suspend EvalScope.() -> R): Deferred<R> =
+    fun <R> transaction(reason: String, block: suspend EvalScope.() -> R): Deferred<R> =
         CompletableDeferred<R>(parent = coroutineScope.coroutineContext.job).also { onResult ->
             val job =
                 coroutineScope.launch {
                     inputScheduleChan.send(
-                        ScheduledAction(onStartTransaction = block, onResult = onResult)
+                        ScheduledAction(reason, onStartTransaction = block, onResult = onResult)
                     )
                 }
             onResult.invokeOnCompletion { job.cancel() }
@@ -222,6 +222,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
 }
 
 internal class ScheduledAction<T>(
+    val reason: String,
     private val onResult: CompletableDeferred<T>? = null,
     private val onStartTransaction: suspend EvalScope.() -> T,
 ) {

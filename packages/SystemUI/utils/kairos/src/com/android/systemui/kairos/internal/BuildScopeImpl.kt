@@ -85,7 +85,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         builder: suspend S.() -> Unit,
     ): TFlow<A> {
         var job: Job? = null
-        val stopEmitter = newStopEmitter()
+        val stopEmitter = newStopEmitter("buildTFlow")
         // Create a child scope that will be kept alive beyond the end of this transaction.
         val childScope = coroutineScope.childScope()
         lateinit var emitter: Pair<T, S>
@@ -131,7 +131,8 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
     ): TFlow<Out> =
         buildTFlow(
             constructFlow = { inputNode ->
-                val flow = CoalescingMutableTFlow(coalesce, network, getInitialValue, inputNode)
+                val flow =
+                    CoalescingMutableTFlow(null, coalesce, network, getInitialValue, inputNode)
                 flow to
                     object : FrpCoalescingProducerScope<In> {
                         override fun emit(value: In) {
@@ -165,7 +166,9 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
             subRef.getAndSet(None)?.let { output ->
                 if (output is Just) {
                     @Suppress("DeferredResultUnused")
-                    network.transaction { scheduleDeactivation(output.value) }
+                    network.transaction("observeEffect cancelled") {
+                        scheduleDeactivation(output.value)
+                    }
                 }
             }
         }
@@ -266,8 +269,9 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
         return changes to FrpDeferredValue(initOut)
     }
 
-    private fun newStopEmitter(): CoalescingMutableTFlow<Unit, Unit> =
+    private fun newStopEmitter(name: String): CoalescingMutableTFlow<Unit, Unit> =
         CoalescingMutableTFlow(
+            name = name,
             coalesce = { _, _: Unit -> },
             network = network,
             getInitialValue = {},
@@ -293,7 +297,7 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
     }
 
     private fun mutableChildBuildScope(): BuildScopeImpl {
-        val stopEmitter = newStopEmitter()
+        val stopEmitter = newStopEmitter("mutableChildBuildScope")
         val childScope = coroutineScope.childScope()
         childScope.coroutineContext.job.invokeOnCompletion { stopEmitter.emit(Unit) }
         // Ensure that once this transaction is done, the new child scope enters the completing
