@@ -186,7 +186,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     /** Invoked when the underlying binder of this broker has died at the client process. */
     @Override
     public void binderDied() {
-        unregister();
+        if (mIsRegistered.get()) {
+            unregister();
+        }
     }
 
     /* package */ void attachDeathRecipient() throws RemoteException {
