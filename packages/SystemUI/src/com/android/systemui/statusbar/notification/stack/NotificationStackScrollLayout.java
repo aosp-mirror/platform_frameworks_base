@@ -83,7 +83,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
@@ -4730,10 +4729,10 @@ public class NotificationStackScrollLayout
      * Update colors of section headers, shade footer, and empty shade views.
      */
     void updateDecorViews() {
-        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.materialColorOnSurface);
-        final @ColorInt int onSurfaceVariant = Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.materialColorOnSurfaceVariant);
+        final @ColorInt int onSurface = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurface);
+        final @ColorInt int onSurfaceVariant = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurfaceVariant);
 
         ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
         if (colorUpdateLogger != null) {
