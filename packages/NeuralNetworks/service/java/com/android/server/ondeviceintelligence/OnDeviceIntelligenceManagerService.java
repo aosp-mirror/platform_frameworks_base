@@ -194,20 +194,6 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         }
     }
 
-    @Override
-    public void onUserUnlocked(@NonNull TargetUser user) {
-        Slog.d(TAG, "onUserUnlocked: " + user.getUserHandle());
-        //connect to remote services(if available) during boot.
-        if (user.getUserHandle().equals(UserHandle.SYSTEM)) {
-            try {
-                ensureRemoteInferenceServiceInitialized(/* throwServiceIfInvalid */ false);
-                ensureRemoteIntelligenceServiceInitialized(/* throwServiceIfInvalid */ false);
-            } catch (Exception e) {
-                Slog.w(TAG, "Couldn't pre-start remote ondeviceintelligence services.", e);
-            }
-        }
-    }
-
     private void onDeviceConfigChange(@NonNull Set<String> keys) {
         if (keys.contains(KEY_SERVICE_ENABLED)) {
             mIsServiceEnabled = isServiceEnabled();
