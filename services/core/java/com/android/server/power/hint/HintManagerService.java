@@ -296,7 +296,11 @@ public final class HintManagerService extends SystemService {
         mPowerHalVersion = 0;
         mUsesFmq = false;
         if (mPowerHal != null) {
-            mSupportInfo = getSupportInfo();
+            try {
+                mSupportInfo = getSupportInfo();
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Could not contact PowerHAL!", e);
+            }
         }
         mDefaultCpuHeadroomCalculationWindowMillis =
                 new CpuHeadroomParamsInternal().calculationWindowMillis;
@@ -314,7 +318,7 @@ public final class HintManagerService extends SystemService {
         }
     }
 
-    SupportInfo getSupportInfo() {
+    SupportInfo getSupportInfo() throws RemoteException {
         try {
             mPowerHalVersion = mPowerHal.getInterfaceVersion();
             if (mPowerHalVersion >= 6) {
@@ -325,9 +329,40 @@ public final class HintManagerService extends SystemService {
         }
 
         SupportInfo supportInfo = new SupportInfo();
+        supportInfo.usesSessions = isHintSessionSupported();
+        // Global boosts & modes aren't currently relevant for HMS clients
+        supportInfo.boosts = 0;
+        supportInfo.modes = 0;
+        supportInfo.sessionHints = 0;
+        supportInfo.sessionModes = 0;
+        supportInfo.sessionTags = 0;
+
         supportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
         supportInfo.headroom.isCpuSupported = false;
         supportInfo.headroom.isGpuSupported = false;
+        if (isHintSessionSupported()) {
+            if (mPowerHalVersion == 4) {
+                // Assume we support the V4 hints & modes unless specified
+                // otherwise; this is to avoid breaking backwards compat
+                // since we historically just assumed they were.
+                supportInfo.sessionHints = 31; // first 5 bits are ones
+            }
+            if (mPowerHalVersion == 5) {
+                // Assume we support the V5 hints & modes unless specified
+                // otherwise; this is to avoid breaking backwards compat
+                // since we historically just assumed they were.
+
+                // Hal V5 has 8 modes, all of which it assumes are supported,
+                // so we represent that by having the first 8 bits set
+                supportInfo.sessionHints = 255; // first 8 bits are ones
+                // Hal V5 has 1 mode which it assumes is supported, so we
+                // represent that by having the first bit set
+                supportInfo.sessionModes = 1;
+                // Hal V5 has 5 tags, all of which it assumes are supported,
+                // so we represent that by having the first 5 bits set
+                supportInfo.sessionTags = 31;
+            }
+        }
         return supportInfo;
     }
 
@@ -1228,7 +1263,7 @@ public final class HintManagerService extends SystemService {
                     @SessionTag int tag, SessionCreationConfig creationConfig,
                     SessionConfig config) {
             if (!isHintSessionSupported()) {
-                throw new UnsupportedOperationException("PowerHAL is not supported!");
+                throw new UnsupportedOperationException("PowerHintSessions are not supported!");
             }
 
             java.util.Objects.requireNonNull(token);
@@ -1424,12 +1459,6 @@ public final class HintManagerService extends SystemService {
             removeChannelItem(callingTgid, callingUid);
         };
 
-        @Override
-        public long getHintSessionPreferredRate() {
-            return mHintSessionPreferredRate;
-        }
-
-        @Override
         public int getMaxGraphicsPipelineThreadsCount() {
             return MAX_GRAPHICS_PIPELINE_THREADS_COUNT;
         }
@@ -1561,6 +1590,16 @@ public final class HintManagerService extends SystemService {
             mSessionManager = ISessionManager.Stub.asInterface(sessionManager);
         }
 
+        public IHintManager.HintManagerClientData
+                registerClient(@NonNull IHintManager.IHintManagerClient clientBinder) {
+            IHintManager.HintManagerClientData out = new IHintManager.HintManagerClientData();
+            out.preferredRateNanos = mHintSessionPreferredRate;
+            out.maxGraphicsPipelineThreads = getMaxGraphicsPipelineThreadsCount();
+            out.powerHalVersion = mPowerHalVersion;
+            out.supportInfo = mSupportInfo;
+            return out;
+        }
+
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
@@ -1568,7 +1607,7 @@ public final class HintManagerService extends SystemService {
             }
             pw.println("HintSessionPreferredRate: " + mHintSessionPreferredRate);
             pw.println("MaxGraphicsPipelineThreadsCount: " + MAX_GRAPHICS_PIPELINE_THREADS_COUNT);
-            pw.println("HAL Support: " + isHintSessionSupported());
+            pw.println("Hint Session Support: " + isHintSessionSupported());
             pw.println("Active Sessions:");
             synchronized (mLock) {
                 for (int i = 0; i < mActiveSessions.size(); i++) {

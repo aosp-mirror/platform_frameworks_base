@@ -23,38 +23,31 @@ import com.android.settingslib.datastore.KeyValueStore
 class PreferenceDataStoreAdapter(val keyValueStore: KeyValueStore) : PreferenceDataStore() {
 
     override fun getBoolean(key: String, defValue: Boolean): Boolean =
-        keyValueStore.getValue(key, Boolean::class.javaObjectType) ?: defValue
+        keyValueStore.getBoolean(key) ?: defValue
 
     override fun getFloat(key: String, defValue: Float): Float =
-        keyValueStore.getValue(key, Float::class.javaObjectType) ?: defValue
+        keyValueStore.getFloat(key) ?: defValue
 
-    override fun getInt(key: String, defValue: Int): Int =
-        keyValueStore.getValue(key, Int::class.javaObjectType) ?: defValue
+    override fun getInt(key: String, defValue: Int): Int = keyValueStore.getInt(key) ?: defValue
 
-    override fun getLong(key: String, defValue: Long): Long =
-        keyValueStore.getValue(key, Long::class.javaObjectType) ?: defValue
+    override fun getLong(key: String, defValue: Long): Long = keyValueStore.getLong(key) ?: defValue
 
     override fun getString(key: String, defValue: String?): String? =
-        keyValueStore.getValue(key, String::class.javaObjectType) ?: defValue
+        keyValueStore.getString(key) ?: defValue
 
     @Suppress("UNCHECKED_CAST")
     override fun getStringSet(key: String, defValues: Set<String>?): Set<String>? =
         (keyValueStore.getValue(key, Set::class.javaObjectType) as Set<String>?) ?: defValues
 
-    override fun putBoolean(key: String, value: Boolean) =
-        keyValueStore.setValue(key, Boolean::class.javaObjectType, value)
+    override fun putBoolean(key: String, value: Boolean) = keyValueStore.setBoolean(key, value)
 
-    override fun putFloat(key: String, value: Float) =
-        keyValueStore.setValue(key, Float::class.javaObjectType, value)
+    override fun putFloat(key: String, value: Float) = keyValueStore.setFloat(key, value)
 
-    override fun putInt(key: String, value: Int) =
-        keyValueStore.setValue(key, Int::class.javaObjectType, value)
+    override fun putInt(key: String, value: Int) = keyValueStore.setInt(key, value)
 
-    override fun putLong(key: String, value: Long) =
-        keyValueStore.setValue(key, Long::class.javaObjectType, value)
+    override fun putLong(key: String, value: Long) = keyValueStore.setLong(key, value)
 
-    override fun putString(key: String, value: String?) =
-        keyValueStore.setValue(key, String::class.javaObjectType, value)
+    override fun putString(key: String, value: String?) = keyValueStore.setString(key, value)
 
     override fun putStringSet(key: String, values: Set<String>?) =
         keyValueStore.setValue(key, Set::class.javaObjectType, values)

@@ -21,6 +21,7 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.settingslib.datastore.KeyValueStore
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -156,6 +157,9 @@ abstract class PreferenceLifecycleContext(context: Context) : ContextWrapper(con
      * @throws NullPointerException if preference is not found
      */
     abstract fun <T : Any> requirePreference(key: String): T
+
+    /** Returns the [KeyValueStore] attached to the preference of given key *on the same screen*. */
+    abstract fun getKeyValueStore(key: String): KeyValueStore?
 
     /** Notifies that preference state of given key is changed and updates preference widget UI. */
     abstract fun notifyPreferenceChange(key: String)

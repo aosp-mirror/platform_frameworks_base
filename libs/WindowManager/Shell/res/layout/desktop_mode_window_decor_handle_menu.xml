@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             tools:text="Gmail"
             android:importantForAccessibility="no"
-            android:textColor="?androidprv:attr/materialColorOnSurface"
+            android:textColor="@androidprv:color/materialColorOnSurface"
             android:textSize="14sp"
             android:textFontWeight="500"
             android:lineHeight="20dp"
@@ -69,7 +69,7 @@
             android:contentDescription="@string/collapse_menu_text"
             android:src="@drawable/ic_baseline_expand_more_24"
             android:rotation="180"
-            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:tint="@androidprv:color/materialColorOnSurface"
             android:background="?android:selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
@@ -89,7 +89,7 @@
             android:layout_marginEnd="4dp"
             android:contentDescription="@string/fullscreen_text"
             android:src="@drawable/desktop_mode_ic_handle_menu_fullscreen"
-            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:tint="@androidprv:color/materialColorOnSurface"
             android:layout_weight="1"
             style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -99,7 +99,7 @@
             android:layout_marginEnd="4dp"
             android:contentDescription="@string/split_screen_text"
             android:src="@drawable/desktop_mode_ic_handle_menu_splitscreen"
-            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:tint="@androidprv:color/materialColorOnSurface"
             android:layout_weight="1"
             style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -109,7 +109,7 @@
             android:layout_marginEnd="4dp"
             android:contentDescription="@string/float_button_text"
             android:src="@drawable/desktop_mode_ic_handle_menu_floating"
-            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:tint="@androidprv:color/materialColorOnSurface"
             android:layout_weight="1"
             style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -118,7 +118,7 @@
             android:layout_marginStart="4dp"
             android:contentDescription="@string/desktop_text"
             android:src="@drawable/desktop_mode_ic_handle_menu_desktop"
-            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:tint="@androidprv:color/materialColorOnSurface"
             android:layout_weight="1"
             style="@style/DesktopModeHandleMenuWindowingButton"/>
 
@@ -139,7 +139,7 @@
             android:contentDescription="@string/screenshot_text"
             android:text="@string/screenshot_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_screenshot"
-            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            android:drawableTint="@androidprv:color/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
 
         <Button
@@ -147,7 +147,7 @@
             android:contentDescription="@string/new_window_text"
             android:text="@string/new_window_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_new_window"
-            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            android:drawableTint="@androidprv:color/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton" />
 
         <Button
@@ -155,7 +155,7 @@
             android:contentDescription="@string/manage_windows_text"
             android:text="@string/manage_windows_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_manage_windows"
-            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            android:drawableTint="@androidprv:color/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton" />
 
         <Button
@@ -163,7 +163,7 @@
             android:contentDescription="@string/change_aspect_ratio_text"
             android:text="@string/change_aspect_ratio_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_change_aspect_ratio"
-            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            android:drawableTint="@androidprv:color/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton" />
     </LinearLayout>
 
@@ -183,7 +183,7 @@
             android:contentDescription="@string/open_in_browser_text"
             android:text="@string/open_in_browser_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_open_in_browser"
-            android:drawableTint="?androidprv:attr/materialColorOnSurface"
+            android:drawableTint="@androidprv:color/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
 
         <ImageButton
@@ -195,7 +195,7 @@
             android:layout_marginStart="10dp"
             android:contentDescription="@string/open_by_default_settings_text"
             android:src="@drawable/desktop_mode_ic_handle_menu_open_by_default_settings"
-            android:tint="?androidprv:attr/materialColorOnSurface"/>
+            android:tint="@androidprv:color/materialColorOnSurface"/>
     </LinearLayout>
 </LinearLayout>
 

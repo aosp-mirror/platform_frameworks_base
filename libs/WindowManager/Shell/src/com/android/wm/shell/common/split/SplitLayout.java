@@ -1560,7 +1560,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             final int imeTargetPosition = getImeTargetPosition();
             mHasImeFocus = imeTargetPosition != SPLIT_POSITION_UNDEFINED;
             if (!mHasImeFocus) {
-                return 0;
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || showing) {
+                    return 0;
+                }
             }
 
             mStartImeTop = showing ? hiddenTop : shownTop;
@@ -1613,7 +1615,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         @Override
         public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
-            if (displayId != mDisplayId || !mHasImeFocus) return;
+            if (displayId != mDisplayId || !mHasImeFocus) {
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || mImeShown) {
+                    return;
+                }
+            }
             onProgress(getProgress(imeTop));
             mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
         }
@@ -1621,7 +1627,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         @Override
         public void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {
-            if (displayId != mDisplayId || !mHasImeFocus || cancel) return;
+            if (displayId != mDisplayId || cancel) return;
+            if (!mHasImeFocus) {
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || mImeShown) {
+                    return;
+                }
+            }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "Split IME animation ending, canceled=%b", cancel);
             onProgress(1.0f);

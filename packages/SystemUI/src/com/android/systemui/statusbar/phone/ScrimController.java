@@ -51,7 +51,6 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
@@ -82,9 +81,6 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -92,6 +88,9 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a
@@ -1532,17 +1531,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     private void updateThemeColors() {
         if (mScrimBehind == null) return;
-        int background = Utils.getColorAttr(mScrimBehind.getContext(),
-                com.android.internal.R.attr.materialColorSurfaceDim).getDefaultColor();
-        int accent = Utils.getColorAttr(mScrimBehind.getContext(),
-                com.android.internal.R.attr.materialColorPrimary).getDefaultColor();
+        int background = mScrimBehind.getContext().getColor(
+                com.android.internal.R.color.materialColorSurfaceDim);
+        int accent = mScrimBehind.getContext().getColor(
+                com.android.internal.R.color.materialColorPrimary);
         mColors.setMainColor(background);
         mColors.setSecondaryColor(accent);
         final boolean isBackgroundLight = !ContrastColorUtil.isColorDark(background);
         mColors.setSupportsDarkText(isBackgroundLight);
 
-        int surface = Utils.getColorAttr(mScrimBehind.getContext(),
-                com.android.internal.R.attr.materialColorSurface).getDefaultColor();
+        int surface = mScrimBehind.getContext().getColor(
+                com.android.internal.R.color.materialColorSurface);
         for (ScrimState state : ScrimState.values()) {
             state.setSurfaceColor(surface);
         }

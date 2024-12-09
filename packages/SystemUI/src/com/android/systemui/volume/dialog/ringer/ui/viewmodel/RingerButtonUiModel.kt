@@ -31,30 +31,20 @@ data class RingerButtonUiModel(
     companion object {
         fun getUnselectedButton(context: Context): RingerButtonUiModel {
             return RingerButtonUiModel(
-                tintColor =
-                    Utils.getColorAttrDefaultColor(context, internalR.attr.materialColorOnSurface),
-                backgroundColor =
-                    Utils.getColorAttrDefaultColor(
-                        context,
-                        internalR.attr.materialColorSurfaceContainerHighest,
-                    ),
-                cornerRadius =
-                    context.resources.getDimensionPixelSize(
-                        R.dimen.volume_dialog_background_square_corner_radius
-                    ),
+                tintColor = context.getColor(internalR.color.materialColorOnSurface),
+                backgroundColor = context.getColor(
+                    internalR.color.materialColorSurfaceContainerHighest),
+                cornerRadius = context.resources.getDimensionPixelSize(
+                    R.dimen.volume_dialog_background_square_corner_radius),
             )
         }
 
         fun getSelectedButton(context: Context): RingerButtonUiModel {
             return RingerButtonUiModel(
-                tintColor =
-                    Utils.getColorAttrDefaultColor(context, internalR.attr.materialColorOnPrimary),
-                backgroundColor =
-                    Utils.getColorAttrDefaultColor(context, internalR.attr.materialColorPrimary),
-                cornerRadius =
-                    context.resources.getDimensionPixelSize(
-                        R.dimen.volume_dialog_ringer_selected_button_background_radius
-                    ),
+                tintColor = context.getColor(internalR.color.materialColorOnPrimary),
+                backgroundColor = context.getColor(internalR.color.materialColorPrimary),
+                cornerRadius = context.resources.getDimensionPixelSize(
+                    R.dimen.volume_dialog_ringer_selected_button_background_radius),
             )
         }
     }

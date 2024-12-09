@@ -19,7 +19,7 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/materialColorSurfaceBright" />
+            <solid android:color="@androidprv:color/materialColorSurfaceBright" />
             <corners android:radius="@dimen/ksh_search_box_corner_radius" />
         </shape>
     </item>

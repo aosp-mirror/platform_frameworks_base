@@ -793,6 +793,7 @@ public class AudioDeviceInventory {
      * (see AudioService.onAudioServerDied() method)
      */
     // Always executed on AudioDeviceBroker message queue
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     /*package*/ void onRestoreDevices() {
         synchronized (mDevicesLock) {
             int res;
@@ -815,6 +816,9 @@ public class AudioDeviceInventory {
                             "Device inventory restore failed to reconnect " + di,
                             EventLogger.Event.ALOGE, TAG);
                     mConnectedDevices.remove(di.getKey(), di);
+                    if (AudioSystem.isBluetoothScoDevice(di.mDeviceType)) {
+                        mDeviceBroker.onSetBtScoActiveDevice(null);
+                    }
                 }
             }
             mAppliedStrategyRolesInt.clear();
