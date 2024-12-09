@@ -338,6 +338,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             // Make mImeSourceControl point to the new control before starting the animation.
             if (hadImeSourceControl && mImeSourceControl != imeSourceControl) {
                 mImeSourceControl.release(SurfaceControl::release);
+                if (android.view.inputmethod.Flags.refactorInsetsController()
+                        && !hasImeLeash && mAnimation != null) {
+                    // In case of losing the leash, the animation should be cancelled.
+                    mAnimation.cancel();
+                }
             }
             mImeSourceControl = imeSourceControl;
 
