@@ -46,7 +46,6 @@ import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.service.dreams.IDreamService;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -108,10 +107,8 @@ public class DreamControllerTest {
                 .thenReturn(Context.ACTIVITY_TASK_SERVICE);
 
         final PowerManager powerManager = new PowerManager(mContext, mPowerManager, null, null);
-        when(mContext.getSystemService(Context.POWER_SERVICE))
+        when(mContext.getSystemService(PowerManager.class))
                 .thenReturn(powerManager);
-        when(mContext.getSystemServiceName(PowerManager.class))
-                .thenReturn(Context.POWER_SERVICE);
         when(mContext.getResources()).thenReturn(mResources);
 
         mToken = new Binder();
@@ -234,8 +231,13 @@ public class DreamControllerTest {
     }
 
     @Test
-    @FlakyTest(bugId = 293109503)
     public void serviceDisconnect_resetsScreenTimeout() throws RemoteException {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_resetScreenTimeoutOnUnexpectedDreamExit))
+                .thenReturn(true);
+        // Recreate DreamManager because the configuration gets retrieved in the constructor
+        mDreamController = new DreamController(mContext, mHandler, mListener);
+
         // Start dream.
         mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
                 0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
@@ -254,8 +256,13 @@ public class DreamControllerTest {
     }
 
     @Test
-    @FlakyTest(bugId = 293109503)
     public void binderDied_resetsScreenTimeout() throws RemoteException {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_resetScreenTimeoutOnUnexpectedDreamExit))
+                .thenReturn(true);
+        // Recreate DreamManager because the configuration gets retrieved in the constructor
+        mDreamController = new DreamController(mContext, mHandler, mListener);
+
         // Start dream.
         mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
                 0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
