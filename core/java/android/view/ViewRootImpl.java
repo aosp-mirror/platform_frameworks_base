@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.adpf.Flags.adpfViewrootimplActionDownBoost;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS;
 import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
@@ -7977,8 +7978,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private boolean moveFocusToAdjacentWindow(@FocusDirection int direction) {
-            if (getConfiguration().windowConfiguration.getWindowingMode()
-                    != WINDOWING_MODE_MULTI_WINDOW) {
+            final int windowingMode = getConfiguration().windowConfiguration.getWindowingMode();
+            if (windowingMode != WINDOWING_MODE_MULTI_WINDOW
+                    && windowingMode != WINDOWING_MODE_FREEFORM) {
                 return false;
             }
             try {
