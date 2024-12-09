@@ -25,12 +25,12 @@ import android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.ConfigurationStateImpl
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
@@ -119,7 +119,7 @@ object ShadeDisplayAwareModule {
     fun provideShadeWindowConfigurationController(
         @ShadeDisplayAware shadeContext: Context,
         factory: ConfigurationControllerImpl.Factory,
-        @GlobalConfig globalConfigController: ConfigurationController,
+        @Main globalConfigController: ConfigurationController,
     ): ConfigurationController {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(shadeContext)
@@ -145,7 +145,7 @@ object ShadeDisplayAwareModule {
         factory: ConfigurationStateImpl.Factory,
         @ShadeDisplayAware configurationController: ConfigurationController,
         @ShadeDisplayAware context: Context,
-        @GlobalConfig configurationState: ConfigurationState,
+        @Main configurationState: ConfigurationState,
     ): ConfigurationState {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(context, configurationController)
@@ -161,7 +161,7 @@ object ShadeDisplayAwareModule {
         factory: ConfigurationRepositoryImpl.Factory,
         @ShadeDisplayAware configurationController: ConfigurationController,
         @ShadeDisplayAware context: Context,
-        @GlobalConfig globalConfigurationRepository: ConfigurationRepository,
+        @Main globalConfigurationRepository: ConfigurationRepository,
     ): ConfigurationRepository {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(context, configurationController)
@@ -175,7 +175,7 @@ object ShadeDisplayAwareModule {
     @ShadeDisplayAware
     fun provideShadeAwareConfigurationInteractor(
         @ShadeDisplayAware configurationRepository: ConfigurationRepository,
-        @GlobalConfig configurationInteractor: ConfigurationInteractor,
+        @Main configurationInteractor: ConfigurationInteractor,
     ): ConfigurationInteractor {
         return if (ShadeWindowGoesAround.isEnabled) {
             ConfigurationInteractorImpl(configurationRepository)
@@ -203,7 +203,9 @@ object ShadeDisplayAwareModule {
     @Provides
     @IntoMap
     @ClassKey(ShadePrimaryDisplayCommand::class)
-    fun provideShadePrimaryDisplayCommand(impl: Provider<ShadePrimaryDisplayCommand>): CoreStartable {
+    fun provideShadePrimaryDisplayCommand(
+        impl: Provider<ShadePrimaryDisplayCommand>
+    ): CoreStartable {
         return if (ShadeWindowGoesAround.isEnabled) {
             impl.get()
         } else {
