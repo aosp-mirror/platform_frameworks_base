@@ -83,6 +83,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
+import com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT
 import com.android.window.flags.Flags.FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.R
@@ -297,6 +298,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
             (i.arguments.first() as Rect).set(STABLE_BOUNDS)
         }
+        whenever(displayLayout.densityDpi()).thenReturn(160)
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) })
             .thenReturn(Desktop.getDefaultInstance())
         doReturn(mockToast).`when` { Toast.makeText(any(), anyInt(), anyInt()) }
@@ -1742,6 +1744,154 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 hierarchyOps.find { op -> op.container == wallpaperToken.asBinder() }
             assertThat(wallpaperChange).isNotNull()
             assertThat(wallpaperChange!!.type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
+    fun moveToNextDisplay_sizeInDpPreserved() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+            .thenReturn(secondDisplayArea)
+        // Two displays have different density
+        whenever(displayLayout.densityDpi()).thenReturn(320)
+        whenever(displayLayout.width()).thenReturn(2400)
+        whenever(displayLayout.height()).thenReturn(1600)
+        val secondaryLayout = mock(DisplayLayout::class.java)
+        whenever(displayController.getDisplayLayout(SECOND_DISPLAY)).thenReturn(secondaryLayout)
+        whenever(secondaryLayout.densityDpi()).thenReturn(160)
+        whenever(secondaryLayout.width()).thenReturn(1280)
+        whenever(secondaryLayout.height()).thenReturn(720)
+
+        // Place a task with a size of 640x480 at a position where the ratio of the left margin to
+        // the right margin is 1:3 and the ratio of top margin to the bottom margin is 1:2.
+        val task =
+            setUpFreeformTask(displayId = DEFAULT_DISPLAY, bounds = Rect(440, 374, 1080, 854))
+
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(type = TRANSIT_CHANGE)) {
+            val taskChange = changes[task.token.asBinder()]
+            assertThat(taskChange).isNotNull()
+            // To preserve DP size, pixel size is changed to 320x240. The ratio of the left margin
+            // to the right margin and the ratio of the top margin to bottom margin are also
+            // preserved.
+            assertThat(taskChange!!.configuration.windowConfiguration.bounds)
+                .isEqualTo(Rect(240, 160, 560, 400))
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
+    fun moveToNextDisplay_shiftWithinDestinationDisplayBounds() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+            .thenReturn(secondDisplayArea)
+        // Two displays have different density
+        whenever(displayLayout.densityDpi()).thenReturn(320)
+        whenever(displayLayout.width()).thenReturn(2400)
+        whenever(displayLayout.height()).thenReturn(1600)
+        val secondaryLayout = mock(DisplayLayout::class.java)
+        whenever(displayController.getDisplayLayout(SECOND_DISPLAY)).thenReturn(secondaryLayout)
+        whenever(secondaryLayout.densityDpi()).thenReturn(160)
+        whenever(secondaryLayout.width()).thenReturn(1280)
+        whenever(secondaryLayout.height()).thenReturn(720)
+
+        // Place a task with a size of 640x480 at a position where the bottom-right corner of the
+        // window is outside the source display bounds. The destination display still has enough
+        // space to place the window within its bounds.
+        val task =
+            setUpFreeformTask(displayId = DEFAULT_DISPLAY, bounds = Rect(2000, 1200, 2640, 1680))
+
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(type = TRANSIT_CHANGE)) {
+            val taskChange = changes[task.token.asBinder()]
+            assertThat(taskChange).isNotNull()
+            assertThat(taskChange!!.configuration.windowConfiguration.bounds)
+                .isEqualTo(Rect(960, 480, 1280, 720))
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
+    fun moveToNextDisplay_maximizedTask() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+            .thenReturn(secondDisplayArea)
+        // Two displays have different density
+        whenever(displayLayout.densityDpi()).thenReturn(320)
+        whenever(displayLayout.width()).thenReturn(1280)
+        whenever(displayLayout.height()).thenReturn(960)
+        val secondaryLayout = mock(DisplayLayout::class.java)
+        whenever(displayController.getDisplayLayout(SECOND_DISPLAY)).thenReturn(secondaryLayout)
+        whenever(secondaryLayout.densityDpi()).thenReturn(160)
+        whenever(secondaryLayout.width()).thenReturn(1280)
+        whenever(secondaryLayout.height()).thenReturn(720)
+
+        // Place a task with a size equals to display size.
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY, bounds = Rect(0, 0, 1280, 960))
+
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(type = TRANSIT_CHANGE)) {
+            val taskChange = changes[task.token.asBinder()]
+            assertThat(taskChange).isNotNull()
+            // DP size is preserved. The window is centered in the destination display.
+            assertThat(taskChange!!.configuration.windowConfiguration.bounds)
+                .isEqualTo(Rect(320, 120, 960, 600))
+        }
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT)
+    fun moveToNextDisplay_defaultBoundsWhenDestinationTooSmall() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+            .thenReturn(secondDisplayArea)
+        // Two displays have different density
+        whenever(displayLayout.densityDpi()).thenReturn(320)
+        whenever(displayLayout.width()).thenReturn(2400)
+        whenever(displayLayout.height()).thenReturn(1600)
+        val secondaryLayout = mock(DisplayLayout::class.java)
+        whenever(displayController.getDisplayLayout(SECOND_DISPLAY)).thenReturn(secondaryLayout)
+        whenever(secondaryLayout.densityDpi()).thenReturn(160)
+        whenever(secondaryLayout.width()).thenReturn(640)
+        whenever(secondaryLayout.height()).thenReturn(480)
+        whenever(secondaryLayout.getStableBoundsForDesktopMode(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(0, 0, 640, 480)
+        }
+
+        // A task with a size of 1800x1200 is being placed. To preserve DP size,
+        // 900x600 pixels are needed, which does not fit in the destination display.
+        val task =
+            setUpFreeformTask(displayId = DEFAULT_DISPLAY, bounds = Rect(300, 200, 2100, 1400))
+
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(type = TRANSIT_CHANGE)) {
+            val taskChange = changes[task.token.asBinder()]
+            assertThat(taskChange).isNotNull()
+            assertThat(taskChange!!.configuration.windowConfiguration.bounds.left).isAtLeast(0)
+            assertThat(taskChange.configuration.windowConfiguration.bounds.top).isAtLeast(0)
+            assertThat(taskChange.configuration.windowConfiguration.bounds.right).isAtMost(640)
+            assertThat(taskChange.configuration.windowConfiguration.bounds.bottom).isAtMost(480)
         }
     }
 
