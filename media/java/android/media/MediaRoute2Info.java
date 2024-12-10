@@ -899,6 +899,15 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * Returns whether this route supports {@link #FLAG_ROUTING_TYPE_REMOTE remote routing}.
+     *
+     * @hide
+     */
+    public boolean supportsRemoteRouting() {
+        return (mRoutingTypeFlags & MediaRoute2Info.FLAG_ROUTING_TYPE_REMOTE) != 0;
+    }
+
+    /**
      * Returns true if the route info has all of the required field.
      * A route is valid if and only if it is obtained from
      * {@link com.android.server.media.MediaRouterService}.
