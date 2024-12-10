@@ -151,6 +151,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -947,12 +948,28 @@ private fun BoxScope.CommunalHubLazyGrid(
                     }
                 }
             } else {
+                val itemAlpha =
+                    if (communalResponsiveGrid()) {
+                        val percentVisible by
+                            remember(gridState, index) {
+                                derivedStateOf { calculatePercentVisible(gridState, index) }
+                            }
+                        animateFloatAsState(percentVisible)
+                    } else {
+                        null
+                    }
+
                 CommunalContent(
                     model = item,
                     viewModel = viewModel,
                     size = size,
                     selected = false,
-                    modifier = Modifier.requiredSize(dpSize).animateItem(),
+                    modifier =
+                        Modifier.requiredSize(dpSize).animateItem().thenIf(
+                            communalResponsiveGrid()
+                        ) {
+                            Modifier.graphicsLayer { alpha = itemAlpha?.value ?: 1f }
+                        },
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
@@ -1855,6 +1872,44 @@ private fun CommunalContentModel.getSpanOrMax(maxSpan: Int?) =
     } else {
         size.span
     }
+
+private fun IntRect.percentOverlap(other: IntRect): Float {
+    val intersection = intersect(other)
+    if (intersection.width < 0 || intersection.height < 0) {
+        return 0f
+    }
+    val overlapArea = intersection.width * intersection.height
+    val area = width * height
+    return overlapArea.toFloat() / area.toFloat()
+}
+
+private fun calculatePercentVisible(state: LazyGridState, index: Int): Float {
+    val viewportSize = state.layoutInfo.viewportSize
+    val visibleRect =
+        IntRect(
+            offset =
+                IntOffset(
+                    state.layoutInfo.viewportStartOffset + state.layoutInfo.beforeContentPadding,
+                    0,
+                ),
+            size =
+                IntSize(
+                    width =
+                        viewportSize.width -
+                            state.layoutInfo.beforeContentPadding -
+                            state.layoutInfo.afterContentPadding,
+                    height = viewportSize.height,
+                ),
+        )
+
+    val itemInfo = state.layoutInfo.visibleItemsInfo.find { it.index == index }
+    return if (itemInfo != null) {
+        val boundingBox = IntRect(itemInfo.offset, itemInfo.size)
+        boundingBox.percentOverlap(visibleRect)
+    } else {
+        0f
+    }
+}
 
 private object Colors {
     val DisabledColorFilter by lazy { disabledColorMatrix() }
