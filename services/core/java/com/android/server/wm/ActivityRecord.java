@@ -4585,19 +4585,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    /**
-     * Returns {@code true} if the requested orientation of this activity is the same as the
-     * resolved orientation of the from activity.
-     */
-    private boolean isStartingOrientationCompatible(@NonNull ActivityRecord fromActivity) {
-        final int fromOrientation = fromActivity.getConfiguration().orientation;
-        final int requestedOrientation = getRequestedConfigurationOrientation();
-        if (requestedOrientation == ORIENTATION_UNDEFINED) {
-            return fromOrientation == getConfiguration().orientation;
-        }
-        return fromOrientation == requestedOrientation;
-    }
-
     private boolean transferStartingWindow(@NonNull ActivityRecord fromActivity) {
         final WindowState tStartingWindow = fromActivity.mStartingWindow;
         if (tStartingWindow != null && fromActivity.mStartingSurface != null) {
@@ -4617,7 +4604,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             // Do not transfer if the orientation doesn't match, redraw starting window while it is
             // on top will cause flicker.
-            if (!isStartingOrientationCompatible(fromActivity)) {
+            final int fromOrientation = fromActivity.getConfiguration().orientation;
+            final int requestedOrientation = getRequestedConfigurationOrientation();
+            if (requestedOrientation == ORIENTATION_UNDEFINED) {
+                if (fromOrientation != getConfiguration().orientation) {
+                    return false;
+                }
+            } else if (fromOrientation != requestedOrientation) {
                 return false;
             }
 
@@ -4715,11 +4708,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             return true;
         } else if (fromActivity.mStartingData != null) {
-            if (fromActivity.mStartingData instanceof SnapshotStartingData
-                    && !isStartingOrientationCompatible(fromActivity)) {
-                // Do not transfer because the snapshot will be distorted in different orientation.
-                return false;
-            }
             // The previous app was getting ready to show a
             // starting window, but hasn't yet done so.  Steal it!
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW,

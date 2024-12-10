@@ -1969,32 +1969,32 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             }
 
-            // If all stages are filled, create new SplitBounds and update Recents.
-            if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
-                int currentSnapPosition = mSplitLayout.calculateCurrentSnapPosition();
-                if (Flags.enableFlexibleTwoAppSplit()) {
-                    // Split screen can be laid out in such a way that some of the apps are
-                    // offscreen. For the purposes of passing SplitBounds up to launcher (for use in
-                    // thumbnails etc.), we crop the bounds down to the screen size.
-                    topLeftBounds.left =
-                            Math.max(topLeftBounds.left, 0);
-                    topLeftBounds.top =
-                            Math.max(topLeftBounds.top, 0);
-                    bottomRightBounds.right =
-                            Math.min(bottomRightBounds.right, mSplitLayout.getDisplayWidth());
-                    bottomRightBounds.top =
-                            Math.min(bottomRightBounds.top, mSplitLayout.getDisplayHeight());
+            int currentSnapPosition = mSplitLayout.calculateCurrentSnapPosition();
 
-                    // TODO (b/349828130): Can change to getState() fully after brief soak time.
-                    if (mSplitState.get() != currentSnapPosition) {
-                        Log.wtf(TAG, "SplitState is " + mSplitState.get()
-                                + ", expected " + currentSnapPosition);
-                        currentSnapPosition = mSplitState.get();
-                    }
+            if (Flags.enableFlexibleTwoAppSplit()) {
+                // Split screen can be laid out in such a way that some of the apps are offscreen.
+                // For the purposes of passing SplitBounds up to launcher (for use in thumbnails
+                // etc.), we crop the bounds down to the screen size.
+                topLeftBounds.left =
+                        Math.max(topLeftBounds.left, 0);
+                topLeftBounds.top =
+                        Math.max(topLeftBounds.top, 0);
+                bottomRightBounds.right =
+                        Math.min(bottomRightBounds.right, mSplitLayout.getDisplayWidth());
+                bottomRightBounds.top =
+                        Math.min(bottomRightBounds.top, mSplitLayout.getDisplayHeight());
+
+                // TODO (b/349828130): Can change to getState() fully after brief soak time.
+                if (mSplitState.get() != currentSnapPosition) {
+                    Log.wtf(TAG, "SplitState is " + mSplitState.get()
+                            + ", expected " + currentSnapPosition);
+                    currentSnapPosition = mSplitState.get();
                 }
-                SplitBounds splitBounds = new SplitBounds(topLeftBounds, bottomRightBounds,
-                        leftTopTaskId, rightBottomTaskId, currentSnapPosition);
+            }
 
+            SplitBounds splitBounds = new SplitBounds(topLeftBounds, bottomRightBounds,
+                    leftTopTaskId, rightBottomTaskId, currentSnapPosition);
+            if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
                 // Update the pair for the top tasks
                 boolean added = recentTasks.addSplitPair(mainStageTopTaskId, sideStageTopTaskId,
                         splitBounds);

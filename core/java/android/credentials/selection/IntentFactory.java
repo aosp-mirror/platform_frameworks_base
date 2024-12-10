@@ -16,7 +16,7 @@
 
 package android.credentials.selection;
 
-import static android.credentials.flags.Flags.FLAG_PROPAGATE_USER_CONTEXT_FOR_INTENT_CREATION;
+import static android.credentials.flags.Flags.FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED;
 import static android.credentials.flags.Flags.configurableSelectorUiEnabled;
 
 import android.annotation.FlaggedApi;
@@ -24,8 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
-import android.annotation.UserIdInt;
-import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +32,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.IBinder;
 import android.os.Parcel;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -49,7 +46,7 @@ import java.util.ArrayList;
  * @hide
  */
 @TestApi
-@FlaggedApi(FLAG_PROPAGATE_USER_CONTEXT_FOR_INTENT_CREATION)
+@FlaggedApi(FLAG_CONFIGURABLE_SELECTOR_UI_ENABLED)
 public class IntentFactory {
 
     /**
@@ -68,10 +65,9 @@ public class IntentFactory {
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
             @NonNull
             ArrayList<DisabledProviderData> disabledProviderDataList,
-            @NonNull ResultReceiver resultReceiver,
-            @UserIdInt int userId) {
+            @NonNull ResultReceiver resultReceiver) {
         return createCredentialSelectorIntentInternal(context, requestInfo,
-                disabledProviderDataList, resultReceiver, userId);
+                disabledProviderDataList, resultReceiver);
     }
 
     /**
@@ -100,10 +96,9 @@ public class IntentFactory {
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
             @NonNull
             ArrayList<DisabledProviderData> disabledProviderDataList,
-            @NonNull ResultReceiver resultReceiver,
-            @UserIdInt int userId) {
+            @NonNull ResultReceiver resultReceiver) {
         IntentCreationResult result = createCredentialSelectorIntentInternal(context, requestInfo,
-                disabledProviderDataList, resultReceiver, userId);
+                disabledProviderDataList, resultReceiver);
         result.getIntent().putParcelableArrayListExtra(
                 ProviderData.EXTRA_ENABLED_PROVIDER_DATA_LIST, enabledProviderDataList);
         return result;
@@ -135,10 +130,9 @@ public class IntentFactory {
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
             @NonNull
             ArrayList<DisabledProviderData> disabledProviderDataList,
-            @NonNull ResultReceiver resultReceiver, @UserIdInt int userId) {
+            @NonNull ResultReceiver resultReceiver) {
         return createCredentialSelectorIntentForCredMan(context, requestInfo,
-            enabledProviderDataList, disabledProviderDataList, resultReceiver,
-            userId).getIntent();
+                enabledProviderDataList, disabledProviderDataList, resultReceiver).getIntent();
     }
 
     /**
@@ -148,10 +142,10 @@ public class IntentFactory {
     @NonNull
     public static Intent createCancelUiIntent(@NonNull Context context,
             @NonNull IBinder requestToken, boolean shouldShowCancellationUi,
-            @NonNull String appPackageName, @UserIdInt int userId) {
+            @NonNull String appPackageName) {
         Intent intent = new Intent();
         IntentCreationResult.Builder intentResultBuilder = new IntentCreationResult.Builder(intent);
-        setCredentialSelectorUiComponentName(context, intent, intentResultBuilder, userId);
+        setCredentialSelectorUiComponentName(context, intent, intentResultBuilder);
         intent.putExtra(CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
                 new CancelSelectionRequest(new RequestToken(requestToken), shouldShowCancellationUi,
                         appPackageName));
@@ -168,10 +162,10 @@ public class IntentFactory {
             @SuppressLint("ConcreteCollection") // Concrete collection needed for marshalling.
             @NonNull
             ArrayList<DisabledProviderData> disabledProviderDataList,
-            @NonNull ResultReceiver resultReceiver, @UserIdInt int userId) {
+            @NonNull ResultReceiver resultReceiver) {
         Intent intent = new Intent();
         IntentCreationResult.Builder intentResultBuilder = new IntentCreationResult.Builder(intent);
-        setCredentialSelectorUiComponentName(context, intent, intentResultBuilder, userId);
+        setCredentialSelectorUiComponentName(context, intent, intentResultBuilder);
         intent.putParcelableArrayListExtra(
                 ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST, disabledProviderDataList);
         intent.putExtra(RequestInfo.EXTRA_REQUEST_INFO, requestInfo);
@@ -181,11 +175,9 @@ public class IntentFactory {
     }
 
     private static void setCredentialSelectorUiComponentName(@NonNull Context context,
-            @NonNull Intent intent, @NonNull IntentCreationResult.Builder intentResultBuilder,
-            @UserIdInt int userId) {
+            @NonNull Intent intent, @NonNull IntentCreationResult.Builder intentResultBuilder) {
         if (configurableSelectorUiEnabled()) {
-            ComponentName componentName = getOemOverrideComponentName(context,
-                    intentResultBuilder, userId);
+            ComponentName componentName = getOemOverrideComponentName(context, intentResultBuilder);
 
             ComponentName fallbackUiComponentName = null;
             try {
@@ -218,7 +210,7 @@ public class IntentFactory {
      */
     @Nullable
     private static ComponentName getOemOverrideComponentName(@NonNull Context context,
-            @NonNull IntentCreationResult.Builder intentResultBuilder, @UserIdInt int userId) {
+            @NonNull IntentCreationResult.Builder intentResultBuilder) {
         ComponentName result = null;
         String oemComponentString =
                 Resources.getSystem()
@@ -236,43 +228,35 @@ public class IntentFactory {
             if (oemComponentName != null) {
                 try {
                     intentResultBuilder.setOemUiPackageName(oemComponentName.getPackageName());
-                    ActivityInfo info;
-                    if (android.credentials.flags.Flags.propagateUserContextForIntentCreation()) {
-                      info = context.getPackageManager().getActivityInfo(oemComponentName,
-                          PackageManager.ComponentInfoFlags.of(
-                              PackageManager.MATCH_SYSTEM_ONLY));
-                    } else {
-                      info = AppGlobals.getPackageManager().getActivityInfo(
-                          oemComponentName, 0, userId);
-                    }
-                    boolean oemComponentEnabled = false;
-                    if (info != null) {
-                      oemComponentEnabled = info.enabled;
-                      int runtimeComponentEnabledState = context.getPackageManager()
+                    ActivityInfo info = context.getPackageManager().getActivityInfo(
+                            oemComponentName,
+                            PackageManager.ComponentInfoFlags.of(
+                                    PackageManager.MATCH_SYSTEM_ONLY));
+                    boolean oemComponentEnabled = info.enabled;
+                    int runtimeComponentEnabledState = context.getPackageManager()
                           .getComponentEnabledSetting(oemComponentName);
-                      if (runtimeComponentEnabledState == PackageManager
+                    if (runtimeComponentEnabledState == PackageManager
                           .COMPONENT_ENABLED_STATE_ENABLED) {
-                        oemComponentEnabled = true;
-                      } else if (runtimeComponentEnabledState == PackageManager
+                          oemComponentEnabled = true;
+                    } else if (runtimeComponentEnabledState == PackageManager
                           .COMPONENT_ENABLED_STATE_DISABLED) {
                         oemComponentEnabled = false;
-                      }
-                      if (oemComponentEnabled && info.exported) {
-                        intentResultBuilder.setOemUiUsageStatus(IntentCreationResult
-                            .OemUiUsageStatus.SUCCESS);
-                        Slog.i(TAG,
-                            "Found enabled oem CredMan UI component."
-                                + oemComponentString);
-                        result = oemComponentName;
-                      } else {
-                          intentResultBuilder.setOemUiUsageStatus(IntentCreationResult
-                                  .OemUiUsageStatus.OEM_UI_CONFIG_SPECIFIED_FOUND_BUT_NOT_ENABLED);
-                          Slog.i(TAG,
-                                  "Found enabled oem CredMan UI component but it was not "
-                                      + "enabled.");
-                      }
                     }
-                } catch (RemoteException | PackageManager.NameNotFoundException e) {
+                    if (oemComponentEnabled && info.exported) {
+                        intentResultBuilder.setOemUiUsageStatus(IntentCreationResult
+                                .OemUiUsageStatus.SUCCESS);
+                        Slog.i(TAG,
+                                "Found enabled oem CredMan UI component."
+                                        + oemComponentString);
+                        result = oemComponentName;
+                    } else {
+                        intentResultBuilder.setOemUiUsageStatus(IntentCreationResult
+                                .OemUiUsageStatus.OEM_UI_CONFIG_SPECIFIED_FOUND_BUT_NOT_ENABLED);
+                        Slog.i(TAG,
+                                "Found enabled oem CredMan UI component but it was not "
+                                        + "enabled.");
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
                     intentResultBuilder.setOemUiUsageStatus(IntentCreationResult.OemUiUsageStatus
                             .OEM_UI_CONFIG_SPECIFIED_BUT_NOT_FOUND);
                     Slog.i(TAG, "Unable to find oem CredMan UI component: "

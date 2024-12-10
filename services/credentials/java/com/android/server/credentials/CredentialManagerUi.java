@@ -114,7 +114,7 @@ public class CredentialManagerUi {
     /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
     public Intent createCancelIntent(IBinder requestId, String packageName) {
         return IntentFactory.createCancelUiIntent(mContext, requestId,
-                /*shouldShowCancellationUi=*/ true, packageName, mUserId);
+                /*shouldShowCancellationUi=*/ true, packageName);
     }
 
     /**
@@ -177,7 +177,7 @@ public class CredentialManagerUi {
 
         IntentCreationResult intentCreationResult = IntentFactory
                 .createCredentialSelectorIntentForCredMan(mContext, requestInfo, providerDataList,
-                        new ArrayList<>(disabledProviderDataList), mResultReceiver, mUserId);
+                        new ArrayList<>(disabledProviderDataList), mResultReceiver);
         requestSessionMetric.collectUiConfigurationResults(
                 mContext, intentCreationResult, mUserId);
         Intent intent = intentCreationResult.getIntent();
@@ -211,7 +211,7 @@ public class CredentialManagerUi {
             RequestSessionMetric requestSessionMetric) {
         IntentCreationResult intentCreationResult = IntentFactory
                 .createCredentialSelectorIntentForAutofill(mContext, requestInfo, new ArrayList<>(),
-                        mResultReceiver, mUserId);
+                        mResultReceiver);
         requestSessionMetric.collectUiConfigurationResults(
                 mContext, intentCreationResult, mUserId);
         return intentCreationResult.getIntent();
