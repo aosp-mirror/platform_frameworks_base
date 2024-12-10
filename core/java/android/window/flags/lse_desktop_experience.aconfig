@@ -16,6 +16,17 @@ flag {
 }
 
 flag {
+    name: "include_top_transparent_fullscreen_task_in_desktop_heuristic"
+    namespace: "lse_desktop_experience"
+    description: "Whether to include any top transparent fullscreen task launched in desktop /n"
+                 "mode in the heuristic for if desktop windowing is showing or not."
+    bug: "379543275"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_windowing_dynamic_initial_bounds"
     namespace: "lse_desktop_experience"
     description: "Enables new initial bounds for desktop windowing which adjust depending on app constraints"

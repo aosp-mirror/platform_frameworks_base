@@ -86,7 +86,9 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_APP_LAUNCH_ALTTAB_TRANSITIONS_BUGFIX(
             Flags::enableDesktopAppLaunchAlttabTransitionsBugfix, false),
     ENABLE_DESKTOP_APP_LAUNCH_TRANSITIONS_BUGFIX(
-            Flags::enableDesktopAppLaunchTransitionsBugfix, false);
+            Flags::enableDesktopAppLaunchTransitionsBugfix, false),
+    INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC(
+            Flags::includeTopTransparentFullscreenTaskInDesktopHeuristic, true);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.
