@@ -557,10 +557,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Nullable
     private Intent getBrowserLink() {
         final Uri browserLink;
-        if (isCapturedLinkAvailable()) {
-            browserLink = mCapturedLink.mUri;
-        } else if (mWebUri != null) {
+        if (mWebUri != null) {
             browserLink = mWebUri;
+        } else if (isCapturedLinkAvailable()) {
+            browserLink = mCapturedLink.mUri;
         } else {
             browserLink = mGenericLink;
         }
@@ -1317,7 +1317,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     @VisibleForTesting
     void onAssistContentReceived(@Nullable AssistContent assistContent) {
-        mWebUri = assistContent == null ? null : assistContent.getWebUri();
+        mWebUri = assistContent == null ? null : AppToWebUtils.getSessionWebUri(assistContent);
         loadAppInfoIfNeeded();
         updateGenericLink();
         final boolean supportsMultiInstance = mMultiInstanceHelper
