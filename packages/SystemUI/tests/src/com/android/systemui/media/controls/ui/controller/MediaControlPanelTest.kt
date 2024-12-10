@@ -247,7 +247,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             mContext,
             0,
             intent.setPackage(mContext.packageName),
-            PendingIntent.FLAG_MUTABLE
+            PendingIntent.FLAG_MUTABLE,
         )
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -294,7 +294,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 override fun loadAnimator(
                     animId: Int,
                     otionInterpolator: Interpolator,
-                    vararg targets: View
+                    vararg targets: View,
                 ): AnimatorSet {
                     return mockAnimator
                 }
@@ -323,7 +323,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 packageName = PACKAGE,
                 instanceId = instanceId,
                 recommendations = listOf(smartspaceAction, smartspaceAction, smartspaceAction),
-                cardAction = smartspaceAction
+                cardAction = smartspaceAction,
             )
     }
 
@@ -370,7 +370,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 packageName = PACKAGE,
                 token = session.sessionToken,
                 device = device,
-                instanceId = instanceId
+                instanceId = instanceId,
             )
     }
 
@@ -416,7 +416,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         action1.id,
                         action2.id,
                         action3.id,
-                        action4.id
+                        action4.id,
                     )
             }
 
@@ -536,7 +536,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 playOrPause = MediaAction(icon, Runnable {}, "play", bg),
                 nextOrCustom = MediaAction(icon, Runnable {}, "next", bg),
                 custom0 = MediaAction(icon, null, "custom 0", bg),
-                custom1 = MediaAction(icon, null, "custom 1", bg)
+                custom1 = MediaAction(icon, null, "custom 1", bg),
             )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -590,7 +590,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 custom0 = MediaAction(icon, null, "custom 0", bg),
                 custom1 = MediaAction(icon, null, "custom 1", bg),
                 false,
-                true
+                true,
             )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -622,7 +622,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 custom0 = MediaAction(icon, null, "custom 0", bg),
                 custom1 = MediaAction(icon, null, "custom 1", bg),
                 true,
-                false
+                false,
             )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -760,7 +760,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val semanticActions =
             MediaButton(
                 playOrPause = MediaAction(icon, Runnable {}, "play", null),
-                nextOrCustom = MediaAction(icon, Runnable {}, "next", null)
+                nextOrCustom = MediaAction(icon, Runnable {}, "next", null),
             )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -850,7 +850,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val semanticActions =
             MediaButton(
                 prevOrCustom = MediaAction(icon, {}, "prev", null),
-                nextOrCustom = MediaAction(icon, {}, "next", null)
+                nextOrCustom = MediaAction(icon, {}, "next", null),
             )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -921,7 +921,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val semanticActions =
             MediaButton(
                 prevOrCustom = MediaAction(icon, {}, "prev", null),
-                nextOrCustom = MediaAction(icon, {}, "next", null)
+                nextOrCustom = MediaAction(icon, {}, "next", null),
             )
         val state = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -944,7 +944,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val semanticActions =
             MediaButton(
                 prevOrCustom = MediaAction(icon, {}, "prev", null),
-                nextOrCustom = MediaAction(icon, {}, "next", null)
+                nextOrCustom = MediaAction(icon, {}, "next", null),
             )
         val state = mediaData.copy(semanticActions = semanticActions)
 
@@ -963,6 +963,29 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, ConstraintSet.GONE)
         verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.VISIBLE)
         verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.VISIBLE)
+    }
+
+    @Test
+    fun setIsScrubbing_reservedButtonSpaces_scrubbingTimesShown() {
+        val semanticActions =
+            MediaButton(
+                prevOrCustom = null,
+                nextOrCustom = null,
+                reserveNext = true,
+                reservePrev = true,
+            )
+        val state = mediaData.copy(semanticActions = semanticActions)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+        reset(expandedSet)
+
+        getScrubbingChangeListener().onScrubbingChanged(true)
+        mainExecutor.runAllReady()
+
+        verify(expandedSet).setVisibility(R.id.actionPrev, View.GONE)
+        verify(expandedSet).setVisibility(R.id.actionNext, View.GONE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_elapsed_time, View.VISIBLE)
+        verify(expandedSet).setVisibility(R.id.media_scrubbing_total_time, View.VISIBLE)
     }
 
     @Test
@@ -1009,13 +1032,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 MediaNotificationAction(true, actionIntent = pendingIntent, icon, "play"),
                 MediaNotificationAction(true, actionIntent = null, icon, "next"),
                 MediaNotificationAction(true, actionIntent = null, icon, "custom 0"),
-                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "custom 1")
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "custom 1"),
             )
         val state =
             mediaData.copy(
                 actions = actions,
                 actionsToShowInCompact = listOf(1, 2),
-                semanticActions = null
+                semanticActions = null,
             )
 
         player.attachPlayer(viewHolder)
@@ -1701,7 +1724,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
-                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4"),
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1720,7 +1743,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
-                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4"),
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1739,7 +1762,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
                 MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
-                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4"),
             )
         val data = mediaData.copy(actions = actions)
 
@@ -2021,7 +2044,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle(subtitle3)
                             .setIcon(icon)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
         player.bindRecommendation(data)
@@ -2047,7 +2070,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setIcon(
                                 Icon.createWithResource(
                                     context,
-                                    com.android.settingslib.R.drawable.ic_1x_mobiledata
+                                    com.android.settingslib.R.drawable.ic_1x_mobiledata,
                                 )
                             )
                             .setExtras(Bundle.EMPTY)
@@ -2084,7 +2107,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle("fake subtitle")
                             .setIcon(icon)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
         player.bindRecommendation(data)
@@ -2119,7 +2142,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle("")
                             .setIcon(icon)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
         player.bindRecommendation(data)
@@ -2142,7 +2165,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setIcon(
                                 Icon.createWithResource(
                                     context,
-                                    com.android.settingslib.R.drawable.ic_1x_mobiledata
+                                    com.android.settingslib.R.drawable.ic_1x_mobiledata,
                                 )
                             )
                             .setExtras(Bundle.EMPTY)
@@ -2157,11 +2180,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setIcon(
                                 Icon.createWithResource(
                                     context,
-                                    com.android.settingslib.R.drawable.ic_3g_mobiledata
+                                    com.android.settingslib.R.drawable.ic_3g_mobiledata,
                                 )
                             )
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
 
@@ -2185,7 +2208,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setIcon(
                                 Icon.createWithResource(
                                     context,
-                                    com.android.settingslib.R.drawable.ic_1x_mobiledata
+                                    com.android.settingslib.R.drawable.ic_1x_mobiledata,
                                 )
                             )
                             .setExtras(Bundle.EMPTY)
@@ -2200,11 +2223,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setIcon(
                                 Icon.createWithResource(
                                     context,
-                                    com.android.settingslib.R.drawable.ic_3g_mobiledata
+                                    com.android.settingslib.R.drawable.ic_3g_mobiledata,
                                 )
                             )
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
 
@@ -2245,7 +2268,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle("subtitle1")
                             .setIcon(albumArt)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
 
@@ -2268,7 +2291,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             Bundle().apply {
                 putInt(
                     MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
-                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED,
                 )
                 putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, 0.5)
             }
@@ -2290,7 +2313,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle("subtitle1")
                             .setIcon(albumArt)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
 
@@ -2328,7 +2351,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle("subtitle1")
                             .setIcon(albumArt)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
 
@@ -2381,7 +2404,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .setSubtitle("subtitle1")
                             .setIcon(albumArt)
                             .setExtras(Bundle.EMPTY)
-                            .build()
+                            .build(),
                     )
             )
 
@@ -2444,7 +2467,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         icon = null,
                         action = {},
                         contentDescription = "play",
-                        background = null
+                        background = null,
                     )
             )
         val data = mediaData.copy(semanticActions = semanticActions)
@@ -2465,7 +2488,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         icon = null,
                         action = {},
                         contentDescription = "play",
-                        background = null
+                        background = null,
                     )
             )
         val data = mediaData.copy(semanticActions = semanticActions)
@@ -2498,7 +2521,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         icon = null,
                         action = {},
                         contentDescription = "play",
-                        background = null
+                        background = null,
                     )
             )
         val data = mediaData.copy(semanticActions = semanticActions)
@@ -2530,8 +2553,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         icon = null,
                         action = {},
                         contentDescription = "custom0",
-                        background = null
-                    ),
+                        background = null,
+                    )
             )
         val data = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)
@@ -2553,8 +2576,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                         icon = null,
                         action = {},
                         contentDescription = "custom0",
-                        background = null
-                    ),
+                        background = null,
+                    )
             )
         val data = mediaData.copy(semanticActions = semanticActions)
         player.attachPlayer(viewHolder)

@@ -16,21 +16,23 @@
 
 package com.android.systemui.media.controls.ui.viewmodel
 
-import android.R
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
+import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
 import com.android.systemui.media.controls.util.mediaInstanceId
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -130,6 +132,31 @@ class MediaControlViewModelTest : SysuiTestCase() {
             assertThat(playerModel?.titleName).isEqualTo(TITLE_2)
             assertThat(playerModel?.artistName).isEqualTo(ARTIST_2)
             assertThat(underTest.setPlayer(playerModel!!)).isTrue()
+        }
+
+    @Test
+    fun reservedButtons_showScrubbingTimes() =
+        testScope.runTest {
+            val playerModel by collectLastValue(underTest.player)
+            val mediaData =
+                initMediaData(ARTIST, TITLE)
+                    .copy(semanticActions = MediaButton(reserveNext = true, reservePrev = true))
+
+            mediaDataFilter.onMediaDataLoaded(KEY, KEY, mediaData)
+
+            assertThat(playerModel?.actionButtons).isNotNull()
+            assertThat(playerModel!!.useSemanticActions).isTrue()
+            assertThat(playerModel!!.canShowTime).isTrue()
+
+            val buttons = playerModel!!.actionButtons
+
+            val prevButton = buttons.find { it.buttonId == R.id.actionPrev }!!
+            assertThat(prevButton.notVisibleValue).isEqualTo(ConstraintSet.GONE)
+            assertThat(prevButton.isVisibleWhenScrubbing).isEqualTo(false)
+
+            val nextButton = buttons.find { it.buttonId == R.id.actionNext }!!
+            assertThat(nextButton.notVisibleValue).isEqualTo(ConstraintSet.GONE)
+            assertThat(nextButton.isVisibleWhenScrubbing).isEqualTo(false)
         }
 
     private fun initMediaData(artist: String, title: String): MediaData {
