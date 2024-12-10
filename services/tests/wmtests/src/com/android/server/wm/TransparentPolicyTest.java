@@ -314,6 +314,7 @@ public class TransparentPolicyTest extends WindowTestsBase {
         runTestScenario((robot) -> {
             robot.transparentActivity((ta) -> {
                 ta.applyOnActivity((a) -> {
+                    a.setIgnoreOrientationRequest(false);
                     a.applyToTopActivity((topActivity) -> {
                         topActivity.mWmService.mAppCompatConfiguration
                                 .setLetterboxHorizontalPositionMultiplier(1.0f);

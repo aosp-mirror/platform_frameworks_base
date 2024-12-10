@@ -777,6 +777,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task rootTask = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
@@ -815,6 +816,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_displayContent() {
         removeGlobalMinSizeRestriction();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task rootTask = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);

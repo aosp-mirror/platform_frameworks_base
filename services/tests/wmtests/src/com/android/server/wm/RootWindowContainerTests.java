@@ -693,6 +693,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testAwakeFromSleepingWithAppConfiguration() {
         final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
+        display.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.moveFocusableActivityToTop("test");
         assertTrue(activity.getRootTask().isFocusedRootTaskOnDisplay());
