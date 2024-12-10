@@ -59,8 +59,11 @@ constructor(
                 StatusBarConnectedDisplays.assertInNewMode()
                 OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(this.key)
             }
-        // TODO(b/364653005): Use the notification color if applicable.
-        val colors = ColorsModel.Themed
+        val colors =
+            ColorsModel.Custom(
+                backgroundColorInt = this.promotedContent.colors.backgroundColor,
+                primaryTextColorInt = this.promotedContent.colors.primaryTextColor,
+            )
         val onClickListener =
             View.OnClickListener {
                 // The notification pipeline needs everything to run on the main thread, so keep
