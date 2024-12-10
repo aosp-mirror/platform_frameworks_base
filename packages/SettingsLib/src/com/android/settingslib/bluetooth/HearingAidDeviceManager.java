@@ -308,6 +308,10 @@ public class HearingAidDeviceManager {
         }
     }
 
+    void clearLocalDataIfNeeded(CachedBluetoothDevice device) {
+        HearingDeviceLocalDataManager.clear(mContext, device.getDevice());
+    }
+
     private void setAudioRoutingConfig(CachedBluetoothDevice device) {
         AudioDeviceAttributes hearingDeviceAttributes =
                 mRoutingHelper.getMatchedHearingDeviceAttributes(device);
