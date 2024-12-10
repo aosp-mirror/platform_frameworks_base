@@ -28,6 +28,9 @@ class FakeCarrierConfigRepository : CarrierConfigRepository {
         configsById.getOrPut(subId) { SystemUiCarrierConfig(subId, createDefaultTestConfig()) }
 }
 
+val CarrierConfigRepository.fake
+    get() = this as FakeCarrierConfigRepository
+
 fun createDefaultTestConfig() =
     PersistableBundle().also {
         it.putBoolean(
