@@ -278,9 +278,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("applicationLabel");
         final ActivityInfo activityInfo = createActivityInfo();
         when(mMockPackageManager.getActivityInfo(any(), anyInt())).thenReturn(activityInfo);
-        final ResolveInfo resolveInfo = new ResolveInfo();
-        resolveInfo.activityInfo = activityInfo;
-        when(mMockPackageManager.resolveActivity(any(), anyInt())).thenReturn(resolveInfo);
+        final ResolveInfo resolveInfo = createResolveInfo(false /* handleAllWebDataUri */);
+        when(mMockPackageManager.resolveActivityAsUser(any(), anyInt(), anyInt()))
+                .thenReturn(resolveInfo);
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
@@ -1664,11 +1664,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB)
     public void browserApp_transferSessionUriUsedForBrowserAppWhenAvailable() {
         // Make {@link AppToWebUtils#isBrowserApp} return true
-        ResolveInfo resolveInfo = new ResolveInfo();
-        resolveInfo.handleAllWebDataURI = true;
-        resolveInfo.activityInfo = createActivityInfo();
+        ResolveInfo browserResolveInfo = createResolveInfo(true /* handleAllWebUriData */);
         when(mMockPackageManager.queryIntentActivitiesAsUser(any(), anyInt(), anyInt()))
-                .thenReturn(List.of(resolveInfo));
+                .thenReturn(List.of(browserResolveInfo));
 
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(true /* visible */);
         final DesktopModeWindowDecoration decor = createWindowDecoration(
@@ -1793,6 +1791,13 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         return windowDecor;
     }
 
+    private ResolveInfo createResolveInfo(boolean handleAllWebDataURI) {
+        final ResolveInfo info = new ResolveInfo();
+        info.handleAllWebDataURI = handleAllWebDataURI;
+        info.activityInfo = createActivityInfo();
+        return info;
+    }
+
     private ActivityManager.RunningTaskInfo createTaskInfo(boolean visible) {
         final ActivityManager.TaskDescription.Builder taskDescriptionBuilder =
                 new ActivityManager.TaskDescription.Builder();
@@ -1821,6 +1826,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         applicationInfo.packageName = "DesktopModeWindowDecorationTestPackage";
         final ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.applicationInfo = applicationInfo;
+        activityInfo.packageName = "DesktopModeWindowDecorationTestPackage";
         activityInfo.name = "DesktopModeWindowDecorationTest";
         return activityInfo;
     }

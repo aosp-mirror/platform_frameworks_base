@@ -617,14 +617,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (browserLink == null) return null;
-        return AppToWebUtils.getBrowserIntent(browserLink, mContext.getPackageManager());
+        return AppToWebUtils.getBrowserIntent(browserLink, mContext.getPackageManager(),
+                mUserContext.getUserId());
 
     }
 
     @Nullable
     private Intent getAppLink() {
         return mWebUri == null ? null
-                : AppToWebUtils.getAppIntent(mWebUri, mContext.getPackageManager());
+                : AppToWebUtils.getAppIntent(mWebUri, mContext.getPackageManager(),
+                        mUserContext.getUserId());
     }
 
     private boolean isBrowserApp() {
