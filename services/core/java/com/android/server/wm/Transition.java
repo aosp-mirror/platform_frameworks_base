@@ -1439,7 +1439,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     }
                 }
             }
-            if (wt == null) continue;
+            if (wt == null || !wt.isVisible()) continue;
             final WindowState target = wt.mDisplayContent.mWallpaperController.getWallpaperTarget();
             final boolean isTargetInvisible = target == null || !target.mToken.isVisible();
             final boolean isWallpaperVisibleAtEnd =
@@ -2271,19 +2271,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
-    /**
-
-     * Wallpaper will set itself as target if it wants to keep itself visible without a target.
-     */
-    private static boolean wallpaperIsOwnTarget(WallpaperWindowToken wallpaper) {
-        final WindowState target =
-                wallpaper.getDisplayContent().mWallpaperController.getWallpaperTarget();
-        return target != null && target.isDescendantOf(wallpaper);
-    }
-
-    /**
-     * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
-     */
     private void commitVisibleWallpapers(SurfaceControl.Transaction t) {
         boolean showWallpaper = shouldWallpaperBeVisible();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
@@ -2291,11 +2278,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wallpaper != null) {
                 if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
                     wallpaper.commitVisibility(showWallpaper);
-                } else if (wallpaper.mWmService.mFlags.mEnsureWallpaperInTransitions
-                        && wallpaper.isVisible()
-                        && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
-                        && !wallpaperIsOwnTarget(wallpaper)) {
-                    wallpaper.setVisibleRequested(false);
                 }
                 if (showWallpaper && wallpaper.isVisibleRequested()) {
                     for (int j = wallpaper.mChildren.size() - 1; j >= 0; --j) {
