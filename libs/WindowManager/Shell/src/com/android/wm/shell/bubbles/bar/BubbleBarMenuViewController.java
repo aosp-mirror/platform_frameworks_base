@@ -22,8 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -169,12 +167,7 @@ class BubbleBarMenuViewController {
         int handleHeight = mHandleView.getHandleHeight();
         float targetWidth = mHandleView.getHandleWidth() + widthDiff * WIDTH_SWAP_FRACTION;
         float targetHeight = targetWidth * mMenuView.getTitleItemHeight() / mMenuView.getWidth();
-        int menuColor;
-        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                com.android.internal.R.attr.materialColorSurfaceBright,
-        })) {
-            menuColor = ta.getColor(0, Color.WHITE);
-        }
+        int menuColor = mContext.getColor(com.android.internal.R.color.materialColorSurfaceBright);
         // Calculating deltas
         float swapScale = targetWidth / mMenuView.getWidth();
         float handleWidthDelta = targetWidth - mHandleView.getHandleWidth();
@@ -227,11 +220,8 @@ class BubbleBarMenuViewController {
     private ArrayList<BubbleBarMenuView.MenuAction> createMenuActions(Bubble bubble) {
         ArrayList<BubbleBarMenuView.MenuAction> menuActions = new ArrayList<>();
         Resources resources = mContext.getResources();
-        int tintColor;
-        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                com.android.internal.R.attr.materialColorOnSurface})) {
-            tintColor = ta.getColor(0, Color.TRANSPARENT);
-        }
+        int tintColor = mContext.getColor(com.android.internal.R.color.materialColorOnSurface);
+
         if (bubble.isConversation()) {
             // Don't bubble conversation action
             menuActions.add(new BubbleBarMenuView.MenuAction(

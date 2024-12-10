@@ -86,7 +86,7 @@ internal class DepthTracker {
     @Volatile private var dirty_depthIsDirect = true
     @Volatile private var dirty_isIndirectRoot = false
 
-    suspend fun schedule(scheduler: Scheduler, node: MuxNode<*, *, *>) {
+    fun schedule(scheduler: Scheduler, node: MuxNode<*, *, *>) {
         if (dirty_depthIsDirect) {
             scheduler.schedule(dirty_directDepth, node)
         } else {

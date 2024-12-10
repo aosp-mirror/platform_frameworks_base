@@ -26,7 +26,7 @@
         android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
         android:contentDescription="@string/volume_ringer_mode"
         android:gravity="center"
-        android:tint="?androidprv:attr/materialColorOnSurface"
+        android:tint="@androidprv:color/materialColorOnSurface"
         android:src="@drawable/volume_ringer_item_bg"
         android:background="@drawable/volume_ringer_item_bg"/>
 

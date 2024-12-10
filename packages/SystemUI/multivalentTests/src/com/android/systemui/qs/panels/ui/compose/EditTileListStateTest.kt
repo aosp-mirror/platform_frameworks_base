@@ -39,7 +39,7 @@ class EditTileListStateTest : SysuiTestCase() {
 
     @Test
     fun startDrag_listHasSpacers() {
-        underTest.onStarted(TestEditTiles[0])
+        underTest.onStarted(TestEditTiles[0], DragType.Add)
 
         // [ a ] [ b ] [ c ] [ X ]
         // [ Large D ] [ e ] [ X ]
@@ -51,8 +51,8 @@ class EditTileListStateTest : SysuiTestCase() {
 
     @Test
     fun moveDrag_listChanges() {
-        underTest.onStarted(TestEditTiles[4])
-        underTest.onMoved(3, false)
+        underTest.onStarted(TestEditTiles[4], DragType.Add)
+        underTest.onTargeting(3, false)
 
         // Tile E goes to index 3
         // [ a ] [ b ] [ c ] [ e ]
@@ -65,8 +65,8 @@ class EditTileListStateTest : SysuiTestCase() {
     fun moveDragOnSidesOfLargeTile_listChanges() {
         val draggedCell = TestEditTiles[4]
 
-        underTest.onStarted(draggedCell)
-        underTest.onMoved(4, true)
+        underTest.onStarted(draggedCell, DragType.Add)
+        underTest.onTargeting(4, true)
 
         // Tile E goes to the right side of tile D, list is unchanged
         // [ a ] [ b ] [ c ] [ X ]
@@ -74,7 +74,7 @@ class EditTileListStateTest : SysuiTestCase() {
         assertThat(underTest.tiles.toStrings())
             .isEqualTo(listOf("a", "b", "c", "spacer", "d", "e", "spacer"))
 
-        underTest.onMoved(4, false)
+        underTest.onTargeting(4, false)
 
         // Tile E goes to the left side of tile D, they swap positions
         // [ a ] [ b ] [ c ] [ e ]
@@ -87,8 +87,8 @@ class EditTileListStateTest : SysuiTestCase() {
     fun moveNewTile_tileIsAdded() {
         val newTile = createEditTile("newTile", 2)
 
-        underTest.onStarted(newTile)
-        underTest.onMoved(5, false)
+        underTest.onStarted(newTile, DragType.Add)
+        underTest.onTargeting(5, false)
 
         // New tile goes to index 5
         // [ a ] [ b ] [ c ] [ X ]
@@ -102,7 +102,7 @@ class EditTileListStateTest : SysuiTestCase() {
 
     @Test
     fun movedTileOutOfBounds_tileDisappears() {
-        underTest.onStarted(TestEditTiles[0])
+        underTest.onStarted(TestEditTiles[0], DragType.Add)
         underTest.movedOutOfBounds()
 
         assertThat(underTest.tiles.toStrings()).doesNotContain(TestEditTiles[0].tile.tileSpec.spec)

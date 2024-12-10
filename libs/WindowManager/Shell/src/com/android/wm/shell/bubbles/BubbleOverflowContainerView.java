@@ -226,13 +226,11 @@ public class BubbleOverflowContainerView extends LinearLayout {
                         ? res.getColor(R.color.bubbles_dark)
                         : res.getColor(R.color.bubbles_light));
 
-        final TypedArray typedArray = getContext().obtainStyledAttributes(new int[] {
-                com.android.internal.R.attr.materialColorSurfaceBright,
-                com.android.internal.R.attr.materialColorOnSurface});
-        int bgColor = typedArray.getColor(0, isNightMode ? Color.BLACK : Color.WHITE);
-        int textColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
-        textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, isNightMode);
-        typedArray.recycle();
+
+        int bgColor = getContext().getColor(
+                com.android.internal.R.color.materialColorSurfaceBright);
+        int textColor = getContext().getColor(com.android.internal.R.color.materialColorOnSurface);
+
         setBackgroundColor(bgColor);
         mEmptyStateTitle.setTextColor(textColor);
         mEmptyStateSubtitle.setTextColor(textColor);

@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:textColor="?androidprv:attr/materialColorOnSurface"
+            android:textColor="@androidprv:color/materialColorOnSurface"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault" />
 
         <ImageView
@@ -60,7 +60,7 @@
             android:layout_marginStart="8dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_expand_less"
-            app:tint="?androidprv:attr/materialColorOnSurface" />
+            app:tint="@androidprv:color/materialColorOnSurface" />
 
     </LinearLayout>
 

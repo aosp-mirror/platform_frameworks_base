@@ -147,8 +147,7 @@ constructor(
             // The footer needs to be re-inflated every time the theme or the font size changes.
             configuration
                 .inflateLayout<FooterView>(
-                    if (NotifRedesignFooter.isEnabled)
-                        R.layout.status_bar_notification_footer_redesign
+                    if (NotifRedesignFooter.isEnabled) R.layout.notification_2025_footer
                     else R.layout.status_bar_notification_footer,
                     parentView,
                     attachToRoot = false,

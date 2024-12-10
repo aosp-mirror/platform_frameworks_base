@@ -1217,14 +1217,40 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun moveRunningTaskToDesktop_deviceSupported_taskIsMovedToDesktop() {
-    val task = setUpFullscreenTask()
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun moveBackgroundTaskToDesktop_remoteTransition_usesOneShotHandler() {
+    val transitionHandlerArgCaptor = ArgumentCaptor.forClass(TransitionHandler::class.java)
+    whenever(
+      transitions.startTransition(anyInt(), any(), transitionHandlerArgCaptor.capture())
+    ).thenReturn(Binder())
 
-    controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
+    val task = createTaskInfo(1)
+    whenever(shellTaskOrganizer.getRunningTaskInfo(anyInt())).thenReturn(null)
+    whenever(recentTasksController.findTaskInBackground(anyInt())).thenReturn(task)
+    controller.moveTaskToDesktop(
+      taskId = task.taskId,
+      transitionSource = UNKNOWN,
+      remoteTransition = RemoteTransition(spy(TestRemoteTransition())))
 
-    val wct = getLatestEnterDesktopWct()
-    assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
     verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
+    assertIs<OneShotRemoteHandler>(transitionHandlerArgCaptor.value)
+  }
+
+
+  @Test
+  fun moveRunningTaskToDesktop_remoteTransition_usesOneShotHandler() {
+    val transitionHandlerArgCaptor = ArgumentCaptor.forClass(TransitionHandler::class.java)
+    whenever(
+      transitions.startTransition(anyInt(), any(), transitionHandlerArgCaptor.capture())
+    ).thenReturn(Binder())
+
+    controller.moveRunningTaskToDesktop(
+      task = setUpFullscreenTask(),
+      transitionSource = UNKNOWN,
+      remoteTransition = RemoteTransition(spy(TestRemoteTransition())))
+
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
+    assertIs<OneShotRemoteHandler>(transitionHandlerArgCaptor.value)
   }
 
   @Test

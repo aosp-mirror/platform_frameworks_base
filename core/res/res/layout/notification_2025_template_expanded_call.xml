@@ -49,13 +49,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="@dimen/conversation_content_start"
+                android:layout_marginStart="@dimen/notification_2025_content_margin_start"
                 android:orientation="vertical"
                 android:minHeight="68dp"
                 >
 
                 <include
-                    layout="@layout/notification_template_conversation_header"
+                    layout="@layout/notification_2025_conversation_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     />
@@ -97,7 +97,7 @@
             layout="@layout/notification_template_smart_reply_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginStart="@dimen/notification_2025_content_margin_start"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:layout_marginTop="@dimen/notification_content_margin"
             />

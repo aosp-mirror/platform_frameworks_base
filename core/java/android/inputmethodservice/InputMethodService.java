@@ -3202,7 +3202,8 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @FlaggedApi(Flags.FLAG_ADAPTIVE_HANDWRITING_BOUNDS)
     public final void setStylusHandwritingRegion(@NonNull Region handwritingRegion) {
-        if (handwritingRegion.equals(mLastHandwritingRegion)) {
+        final Region immutableHandwritingRegion = new Region(handwritingRegion);
+        if (immutableHandwritingRegion.equals(mLastHandwritingRegion)) {
             Log.v(TAG, "Failed to set setStylusHandwritingRegion():"
                     + " same region set twice.");
             return;
@@ -3210,10 +3211,10 @@ public class InputMethodService extends AbstractInputMethodService {
 
         if (DEBUG) {
             Log.d(TAG, "Setting new handwriting region for stylus handwriting "
-                    + handwritingRegion + " from last " + mLastHandwritingRegion);
+                    + immutableHandwritingRegion + " from last " + mLastHandwritingRegion);
         }
-        mPrivOps.setHandwritingTouchableRegion(handwritingRegion);
-        mLastHandwritingRegion = handwritingRegion;
+        mPrivOps.setHandwritingTouchableRegion(immutableHandwritingRegion);
+        mLastHandwritingRegion = immutableHandwritingRegion;
     }
 
     /**
