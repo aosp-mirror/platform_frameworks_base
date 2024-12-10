@@ -53,7 +53,7 @@ class MultiDisplayStatusBarModeRepositoryStoreTest : SysuiTestCase() {
     @Test
     fun forDisplay_startsInstance() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             verify(instance).start()
         }
@@ -61,7 +61,7 @@ class MultiDisplayStatusBarModeRepositoryStoreTest : SysuiTestCase() {
     @Test
     fun displayRemoved_stopsInstance() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             fakeDisplayRepository.removeDisplay(DEFAULT_DISPLAY)
 

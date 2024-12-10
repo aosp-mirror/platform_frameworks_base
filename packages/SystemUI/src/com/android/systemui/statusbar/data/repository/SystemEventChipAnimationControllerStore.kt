@@ -62,11 +62,17 @@ constructor(
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    override fun createInstanceForDisplay(displayId: Int): SystemEventChipAnimationController {
+    override fun createInstanceForDisplay(displayId: Int): SystemEventChipAnimationController? {
+        val displayWindowProperties =
+            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR) ?: return null
+        val statusBarWindowController =
+            statusBarWindowControllerStore.forDisplay(displayId) ?: return null
+        val contentInsetsProvider =
+            statusBarContentInsetsProviderStore.forDisplay(displayId) ?: return null
         return factory.create(
-            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR).context,
-            statusBarWindowControllerStore.forDisplay(displayId),
-            statusBarContentInsetsProviderStore.forDisplay(displayId),
+            displayWindowProperties.context,
+            statusBarWindowController,
+            contentInsetsProvider,
         )
     }
 

@@ -39,7 +39,7 @@ class LightsOutInteractorTest : SysuiTestCase() {
     fun isLowProfile_lightsOutStatusBarMode_false() = runTest {
         statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.LIGHTS_OUT
 
-        val actual by collectLastValue(interactor.isLowProfile(DISPLAY_ID))
+        val actual by collectLastValue(interactor.isLowProfile(DISPLAY_ID)!!)
 
         assertThat(actual).isTrue()
     }
@@ -49,7 +49,7 @@ class LightsOutInteractorTest : SysuiTestCase() {
         statusBarModeRepository.defaultDisplay.statusBarMode.value =
             StatusBarMode.LIGHTS_OUT_TRANSPARENT
 
-        val actual by collectLastValue(interactor.isLowProfile(DISPLAY_ID))
+        val actual by collectLastValue(interactor.isLowProfile(DISPLAY_ID)!!)
 
         assertThat(actual).isTrue()
     }
@@ -58,7 +58,7 @@ class LightsOutInteractorTest : SysuiTestCase() {
     fun isLowProfile_transparentStatusBarMode_false() = runTest {
         statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
 
-        val actual by collectLastValue(interactor.isLowProfile(DISPLAY_ID))
+        val actual by collectLastValue(interactor.isLowProfile(DISPLAY_ID)!!)
 
         assertThat(actual).isFalse()
     }

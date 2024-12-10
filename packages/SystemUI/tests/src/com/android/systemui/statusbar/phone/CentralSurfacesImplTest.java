@@ -36,6 +36,8 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.MSG_DISMISS_K
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -53,8 +55,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptySet;
-
-import static kotlinx.coroutines.flow.FlowKt.flowOf;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
@@ -132,6 +132,7 @@ import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -175,6 +176,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl;
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -216,6 +218,10 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
+import dagger.Lazy;
+
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -231,9 +237,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Provider;
-
-import dagger.Lazy;
-import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -536,6 +539,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new StatusBarInitializerImpl(
                         mStatusBarWindowController,
                         mStatusBarModePerDisplayRepository,
+                        mock(StatusBarConfigurationController.class),
+                        mock(DarkIconDispatcher.class),
                         mCollapsedStatusBarFragmentProvider,
                         mock(StatusBarRootFactory.class),
                         mock(HomeStatusBarComponent.Factory.class),

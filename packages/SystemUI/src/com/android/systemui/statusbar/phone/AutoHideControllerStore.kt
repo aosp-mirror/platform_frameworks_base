@@ -47,9 +47,9 @@ constructor(
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    override fun createInstanceForDisplay(displayId: Int): AutoHideController {
+    override fun createInstanceForDisplay(displayId: Int): AutoHideController? {
         val displayWindowProperties =
-            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR)
+            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR) ?: return null
         return autoHideControllerFactory.create(displayWindowProperties.context)
     }
 

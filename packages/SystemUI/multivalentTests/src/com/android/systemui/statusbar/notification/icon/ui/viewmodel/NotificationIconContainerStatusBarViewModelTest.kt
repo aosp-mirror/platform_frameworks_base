@@ -225,7 +225,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
             val displayId = 123
             darkIconRepository.darkState(displayId).value =
                 SysuiDarkIconDispatcher.DarkChange(emptyList(), 0f, 0xAABBCC)
-            val iconColors by collectLastValue(underTest.iconColors(displayId))
+            val iconColors by collectLastValue(underTest.iconColors(displayId)!!)
             assertThat(iconColors).isNotNull()
 
             assertThat(iconColors!!.tint).isEqualTo(0xAABBCC)
@@ -241,7 +241,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
             val displayId = 321
             darkIconRepository.darkState(displayId).value =
                 SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
-            val iconColors by collectLastValue(underTest.iconColors(displayId))
+            val iconColors by collectLastValue(underTest.iconColors(displayId)!!)
             val staticDrawableColor = iconColors?.staticDrawableColor(Rect(6, 6, 7, 7))
             assertThat(staticDrawableColor).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
         }
@@ -252,7 +252,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
             val displayId = 987
             darkIconRepository.darkState(displayId).value =
                 SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
-            val iconColors by collectLastValue(underTest.iconColors(displayId))
+            val iconColors by collectLastValue(underTest.iconColors(displayId)!!)
             assertThat(iconColors!!.staticDrawableColor(Rect(6, 6, 7, 7)))
                 .isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
         }

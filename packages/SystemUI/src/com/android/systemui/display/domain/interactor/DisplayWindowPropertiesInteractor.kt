@@ -33,7 +33,7 @@ interface DisplayWindowPropertiesInteractor {
      *
      * @throws IllegalArgumentException if no display with the given display id exists.
      */
-    fun getForStatusBar(displayId: Int): DisplayWindowProperties
+    fun getForStatusBar(displayId: Int): DisplayWindowProperties?
 }
 
 @SysUISingleton
@@ -42,7 +42,7 @@ class DisplayWindowPropertiesInteractorImpl
 constructor(private val repo: DisplayWindowPropertiesRepository) :
     DisplayWindowPropertiesInteractor {
 
-    override fun getForStatusBar(displayId: Int): DisplayWindowProperties {
+    override fun getForStatusBar(displayId: Int): DisplayWindowProperties? {
         return repo.get(displayId, TYPE_STATUS_BAR)
     }
 }

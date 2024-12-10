@@ -62,9 +62,9 @@ constructor(
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    override fun createInstanceForDisplay(displayId: Int): StatusBarConfigurationController {
+    override fun createInstanceForDisplay(displayId: Int): StatusBarConfigurationController? {
         val displayWindowProperties =
-            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR)
+            displayWindowPropertiesRepository.get(displayId, TYPE_STATUS_BAR) ?: return null
         return configurationControllerFactory.create(displayWindowProperties.context)
     }
 

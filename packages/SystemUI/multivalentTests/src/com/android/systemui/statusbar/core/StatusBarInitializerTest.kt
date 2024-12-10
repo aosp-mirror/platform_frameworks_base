@@ -26,10 +26,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.plugins.fakeDarkIconDispatcher
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory
+import com.android.systemui.statusbar.policy.statusBarConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.testKosmos
@@ -77,6 +79,8 @@ class StatusBarInitializerTest : SysuiTestCase() {
             componentFactory = mock(HomeStatusBarComponent.Factory::class.java),
             creationListeners = setOf(),
             statusBarModePerDisplayRepository = statusBarModePerDisplayRepository,
+            darkIconDispatcher = kosmos.fakeDarkIconDispatcher,
+            statusBarConfigurationController = kosmos.statusBarConfigurationController,
         )
 
     @Test

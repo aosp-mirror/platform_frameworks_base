@@ -54,19 +54,23 @@ constructor(
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    override fun createInstanceForDisplay(displayId: Int): StatusBarWindowController {
+    override fun createInstanceForDisplay(displayId: Int): StatusBarWindowController? {
         val statusBarDisplayContext =
             displayWindowPropertiesRepository.get(
                 displayId = displayId,
                 windowType = WindowManager.LayoutParams.TYPE_STATUS_BAR,
-            )
+            ) ?: return null
+        val statusBarConfigurationController =
+            statusBarConfigurationControllerStore.forDisplay(displayId) ?: return null
+        val contentInsetsProvider =
+            statusBarContentInsetsProviderStore.forDisplay(displayId) ?: return null
         val viewCaptureAwareWindowManager =
             viewCaptureAwareWindowManagerFactory.create(statusBarDisplayContext.windowManager)
         return controllerFactory.create(
             statusBarDisplayContext.context,
             viewCaptureAwareWindowManager,
-            statusBarConfigurationControllerStore.forDisplay(displayId),
-            statusBarContentInsetsProviderStore.forDisplay(displayId),
+            statusBarConfigurationController,
+            contentInsetsProvider,
         )
     }
 

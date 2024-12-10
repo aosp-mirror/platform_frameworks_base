@@ -62,8 +62,10 @@ constructor(
 
     override fun iconView(key: String): StatusBarIconView? {
         val entry = notifCollection.getEntry(key) ?: return null
+        val displayWindowProperties =
+            displayWindowPropertiesInteractor.getForStatusBar(displayId) ?: return null
         return cachedIcons.computeIfAbsent(key) {
-            val context = displayWindowPropertiesInteractor.getForStatusBar(displayId).context
+            val context = displayWindowProperties.context
             iconManager.createSbIconView(context, entry)
         }
     }

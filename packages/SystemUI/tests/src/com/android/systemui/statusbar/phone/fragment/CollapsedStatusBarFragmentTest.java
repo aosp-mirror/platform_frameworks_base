@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,6 +62,9 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips;
 import com.android.systemui.statusbar.core.StatusBarRootModernization;
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
@@ -75,6 +79,8 @@ import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatu
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewModel;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.StatusBarOperatorNameViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
@@ -134,6 +140,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock private StatusBarWindowControllerStore mStatusBarWindowControllerStore;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private StatusBarConfigurationControllerStore mStatusBarConfigurationControllerStore;
+    @Mock private StatusBarConfigurationController mStatusBarConfigurationController;
+    @Mock private DarkIconDispatcherStore mDarkIconDispatcherStore;
+    @Mock private DarkIconDispatcher mDarkIconDispatcher;
     @Rule
     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
@@ -145,6 +157,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Before
     public void setup() {
+        when(mStatusBarWindowControllerStore.forDisplay(anyInt()))
+                .thenReturn(mStatusBarWindowController);
+        when(mStatusBarConfigurationControllerStore.forDisplay(anyInt()))
+                .thenReturn(mStatusBarConfigurationController);
+        when(mDarkIconDispatcherStore.forDisplay(anyInt())).thenReturn(mDarkIconDispatcher);
+
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mDependency.injectMockDependency(DarkIconDispatcher.class);
 
@@ -1276,11 +1294,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mDumpManager,
                 mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
-                mock(DemoModeController.class));
+                mock(DemoModeController.class),
+                mStatusBarWindowControllerStore,
+                mStatusBarConfigurationControllerStore,
+                mDarkIconDispatcherStore);
     }
 
     private void setUpDaggerComponent() {
-        when(mStatusBarFragmentComponentFactory.create(any()))
+        when(mStatusBarFragmentComponentFactory.create(any(), any(), any(), any()))
                 .thenReturn(mHomeStatusBarComponent);
         when(mHomeStatusBarComponent.getHeadsUpAppearanceController())
                 .thenReturn(mHeadsUpAppearanceController);
