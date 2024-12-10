@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.role.RoleManager.ROLE_SYSTEM_DEPENDENCY_INSTALLER;
 import static android.content.pm.PackageInstaller.ACTION_INSTALL_DEPENDENCY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.os.Process.SYSTEM_UID;
@@ -56,8 +57,6 @@ import java.util.concurrent.TimeUnit;
 public class InstallDependencyHelper {
     private static final String TAG = InstallDependencyHelper.class.getSimpleName();
     private static final boolean DEBUG = true;
-    private static final String ROLE_SYSTEM_DEPENDENCY_INSTALLER =
-            "android.app.role.SYSTEM_DEPENDENCY_INSTALLER";
     // The maximum amount of time to wait before the system unbinds from the verifier.
     private static final long UNBIND_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(6);
     private static final long REQUEST_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(1);
