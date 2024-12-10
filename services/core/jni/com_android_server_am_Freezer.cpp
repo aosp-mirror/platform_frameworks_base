@@ -68,7 +68,7 @@ jint getBinderFreezeInfo(JNIEnv *env, jobject, jint pid) {
 
 bool isFreezerSupported(JNIEnv *env, jclass) {
     std::string path;
-    if (!getAttributePathForTask("FreezerState", getpid(), &path)) {
+    if (!CgroupGetAttributePathForTask("FreezerState", getpid(), &path)) {
         ALOGI("No attribute for FreezerState");
         return false;
     }
