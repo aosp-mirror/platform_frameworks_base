@@ -55,6 +55,8 @@ class FakeMobileIconsInteractor(
 
     override val filteredSubscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
 
+    override val defaultDataSubId = MutableStateFlow(DEFAULT_DATA_SUB_ID)
+
     private val _activeDataConnectionHasDataEnabled = MutableStateFlow(false)
     override val activeDataConnectionHasDataEnabled = _activeDataConnectionHasDataEnabled
 
