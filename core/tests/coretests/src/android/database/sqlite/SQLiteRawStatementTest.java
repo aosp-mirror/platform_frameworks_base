@@ -1048,5 +1048,28 @@ public class SQLiteRawStatementTest {
         } finally {
             mDatabase.endTransaction();
         }
+
+        // Ensure that column names and column types can be fetched even if the statement is not
+        // stepped.  A new SQL statement is created to avoid interaction from the statement cache.
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1 WHERE j = 3")) {
+            // Do not step the statement.
+            assertEquals("i", s.getColumnName(0));
+            assertEquals("j", s.getColumnName(1));
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            // Do not step the statement.
+            s.getColumnName(3); // out-of-range column
+            fail("JNI exception not thrown");
+        } catch (SQLiteBindOrColumnIndexOutOfRangeException e) {
+            // Passing case.
+        } finally {
+            mDatabase.endTransaction();
+        }
+
     }
 }
