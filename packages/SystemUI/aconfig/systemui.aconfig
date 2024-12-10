@@ -1871,6 +1871,13 @@ flag {
 }
 
 flag {
+    name: "desktop_effects_qs_tile"
+    namespace: "systemui"
+    description: "Enables the QS tile for desktop effects"
+    bug: "376797327"
+}
+
+flag {
    name: "hub_edit_mode_touch_adjustments"
    namespace: "systemui"
    description: "Makes selected widget toggleable in edit mode and modifier buttons mutually exclusive."
