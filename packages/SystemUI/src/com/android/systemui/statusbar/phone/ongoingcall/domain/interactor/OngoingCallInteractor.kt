@@ -21,17 +21,22 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -47,7 +52,9 @@ import kotlinx.coroutines.flow.stateIn
 @SysUISingleton
 class OngoingCallInteractor @Inject constructor(
     @Application private val scope: CoroutineScope,
-    activityManagerRepository: ActivityManagerRepository,
+    private val activityManagerRepository: ActivityManagerRepository,
+    private val statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
     @OngoingCallLog private val logBuffer: LogBuffer,
 ) {
@@ -58,46 +65,78 @@ class OngoingCallInteractor @Inject constructor(
      */
     val ongoingCallState: StateFlow<OngoingCallModel> =
         activeNotificationsInteractor.ongoingCallNotification
-            .flatMapLatest { notificationModel ->
-                when (notificationModel) {
-                    null -> {
-                        logger.d("No active call notification - hiding chip")
-                        flowOf(OngoingCallModel.NoCall)
-                    }
-
-                    else -> combine(
-                        flowOf(notificationModel),
-                        activityManagerRepository.createIsAppVisibleFlow(
-                            creationUid = notificationModel.uid,
-                            logger = logger,
-                            identifyingLogTag = TAG,
-                        ),
-                    ) { model, isVisible ->
-                        when {
-                            isVisible -> {
-                                logger.d({ "Call app is visible: uid=$int1" }) {
-                                    int1 = model.uid
-                                }
-                                OngoingCallModel.InCallWithVisibleApp
-                            }
-
-                            else -> {
-                                logger.d({ "Active call detected: startTime=$long1 hasIcon=$bool1" }) {
-                                    long1 = model.whenTime
-                                    bool1 = model.statusBarChipIconView != null
-                                }
-                                OngoingCallModel.InCall(
-                                    startTimeMs = model.whenTime,
-                                    notificationIconView = model.statusBarChipIconView,
-                                    intent = model.contentIntent,
-                                    notificationKey = model.key,
-                                )
-                            }
-                        }
-                    }
-                }
+            .flatMapLatest { notification ->
+                createOngoingCallStateFlow(
+                    notification = notification
+                )
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), OngoingCallModel.NoCall)
+            .onEach { state ->
+                setStatusBarRequiredForOngoingCall(state)
+            }
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = OngoingCallModel.NoCall
+            )
+
+    private fun createOngoingCallStateFlow(
+        notification: ActiveNotificationModel?
+    ): Flow<OngoingCallModel> {
+        if (notification == null) {
+            logger.d("No active call notification - hiding chip")
+            return flowOf(OngoingCallModel.NoCall)
+        }
+
+        return combine(
+            flowOf(notification),
+            activityManagerRepository.createIsAppVisibleFlow(
+                creationUid = notification.uid,
+                logger = logger,
+                identifyingLogTag = TAG,
+            )
+        ) { model, isVisible ->
+            deriveOngoingCallState(model, isVisible)
+        }
+    }
+
+    private fun deriveOngoingCallState(
+        model: ActiveNotificationModel,
+        isVisible: Boolean
+    ): OngoingCallModel {
+        return when {
+            isVisible -> {
+                logger.d({ "Call app is visible: uid=$int1" }) {
+                    int1 = model.uid
+                }
+                OngoingCallModel.InCallWithVisibleApp
+            }
+
+            else -> {
+                logger.d({ "Active call detected: startTime=$long1 hasIcon=$bool1" }) {
+                    long1 = model.whenTime
+                    bool1 = model.statusBarChipIconView != null
+                }
+                OngoingCallModel.InCall(
+                    startTimeMs = model.whenTime,
+                    notificationIconView = model.statusBarChipIconView,
+                    intent = model.contentIntent,
+                    notificationKey = model.key
+                )
+            }
+        }
+    }
+
+    private fun setStatusBarRequiredForOngoingCall(state: OngoingCallModel) {
+        val statusBarRequired = state is OngoingCallModel.InCall
+        // TODO(b/382808183): Create a single repository that can be utilized in
+        //  `statusBarModeRepositoryStore` and `statusBarWindowControllerStore` so we do not need
+        //  two separate calls to force the status bar to stay visible.
+        statusBarModeRepositoryStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
+            statusBarRequired
+        )
+        statusBarWindowControllerStore.defaultDisplay
+            .setOngoingProcessRequiresStatusBarVisible(statusBarRequired)
+    }
 
     companion object {
         private val TAG = "OngoingCall"

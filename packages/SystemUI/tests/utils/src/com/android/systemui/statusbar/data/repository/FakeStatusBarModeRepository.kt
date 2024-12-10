@@ -47,6 +47,7 @@ class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository 
     override val isInFullscreenMode = MutableStateFlow(false)
     override val statusBarAppearance = MutableStateFlow<StatusBarAppearance?>(null)
     override val statusBarMode = MutableStateFlow(StatusBarMode.TRANSPARENT)
+    override val ongoingProcessRequiresStatusBarVisible = MutableStateFlow(false)
 
     override fun showTransient() {
         isTransientShown.value = true
@@ -59,6 +60,9 @@ class FakeStatusBarModePerDisplayRepository : StatusBarModePerDisplayRepository 
     override fun start() {}
 
     override fun stop() {}
+    override fun setOngoingProcessRequiresStatusBarVisible(requiredVisible: Boolean) {
+        ongoingProcessRequiresStatusBarVisible.value = requiredVisible
+    }
 
     override fun onStatusBarViewInitialized(component: HomeStatusBarComponent) {}
 
