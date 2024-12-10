@@ -511,3 +511,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "enable_per_display_desktop_wallpaper_activity"
+    namespace: "lse_desktop_experience"
+    description: "Enables having a DesktopWallpaperActivity at a per-display level."
+    bug: "381935663"
+}
