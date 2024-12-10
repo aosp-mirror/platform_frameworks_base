@@ -39,6 +39,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
@@ -456,8 +457,8 @@ public class FooterView extends StackScrollerDecorView {
      */
     public void updateColors() {
         Resources.Theme theme = mContext.getTheme();
-        final @ColorInt int onSurface = mContext.getColor(
-                com.android.internal.R.color.materialColorOnSurface);
+        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(mContext,
+                com.android.internal.R.attr.materialColorOnSurface);
         // Same resource, separate drawables to prevent touch effects from showing on the wrong
         // button.
         final Drawable clearAllBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
@@ -466,8 +467,8 @@ public class FooterView extends StackScrollerDecorView {
                 ? theme.getDrawable(R.drawable.notif_footer_btn_background) : null;
         final @ColorInt int scHigh;
         if (!notificationFooterBackgroundTintOptimization()) {
-            scHigh = mContext.getColor(
-                    com.android.internal.R.color.materialColorSurfaceContainerHigh);
+            scHigh = Utils.getColorAttrDefaultColor(mContext,
+                    com.android.internal.R.attr.materialColorSurfaceContainerHigh);
             if (scHigh != 0) {
                 final ColorFilter bgColorFilter = new PorterDuffColorFilter(scHigh, SRC_ATOP);
                 clearAllBg.setColorFilter(bgColorFilter);

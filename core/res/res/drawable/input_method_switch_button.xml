@@ -30,7 +30,7 @@
             <shape android:shape="rectangle">
                 <corners android:radius="28dp"/>
                 <solid android:color="@color/transparent"/>
-                <stroke android:color="@color/materialColorPrimary"
+                <stroke android:color="?attr/materialColorPrimary"
                     android:width="1dp"/>
                 <padding android:left="16dp"
                     android:top="8dp"

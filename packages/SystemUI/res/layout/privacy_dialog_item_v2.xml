@@ -25,7 +25,7 @@
     android:foreground="?android:attr/selectableItemBackground"
     app:cardCornerRadius="28dp"
     app:cardElevation="0dp"
-    app:cardBackgroundColor="@androidprv:color/materialColorSurfaceBright">
+    app:cardBackgroundColor="?androidprv:attr/materialColorSurfaceBright">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"

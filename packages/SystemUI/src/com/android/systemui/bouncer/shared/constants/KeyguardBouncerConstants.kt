@@ -33,15 +33,13 @@ object KeyguardBouncerConstants {
     const val DEFAULT_PIN_LENGTH = 6
 
     object ColorId {
-        const val TITLE = com.android.internal.R.color.materialColorOnSurface
-        const val PIN_SHAPES = com.android.internal.R.color.materialColorOnSurfaceVariant
-        const val NUM_PAD_BACKGROUND =
-            com.android.internal.R.color.materialColorSurfaceContainerHigh
-        const val NUM_PAD_BACKGROUND_PRESSED =
-            com.android.internal.R.color.materialColorPrimaryFixed
-        const val NUM_PAD_PRESSED = com.android.internal.R.color.materialColorOnPrimaryFixed
-        const val NUM_PAD_KEY = com.android.internal.R.color.materialColorOnSurface
-        const val NUM_PAD_BUTTON = com.android.internal.R.color.materialColorOnSecondaryFixed
-        const val EMERGENCY_BUTTON = com.android.internal.R.color.materialColorTertiaryFixed
+        const val TITLE = com.android.internal.R.attr.materialColorOnSurface
+        const val PIN_SHAPES = com.android.internal.R.attr.materialColorOnSurfaceVariant
+        const val NUM_PAD_BACKGROUND = com.android.internal.R.attr.materialColorSurfaceContainerHigh
+        const val NUM_PAD_BACKGROUND_PRESSED = com.android.internal.R.attr.materialColorPrimaryFixed
+        const val NUM_PAD_PRESSED = com.android.internal.R.attr.materialColorOnPrimaryFixed
+        const val NUM_PAD_KEY = com.android.internal.R.attr.materialColorOnSurface
+        const val NUM_PAD_BUTTON = com.android.internal.R.attr.materialColorOnSecondaryFixed
+        const val EMERGENCY_BUTTON = com.android.internal.R.attr.materialColorTertiaryFixed
     }
 }

@@ -18,6 +18,7 @@ package com.android.systemui.communal.util
 
 import android.content.Context
 import android.graphics.Color
+import com.android.settingslib.Utils
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -53,6 +54,9 @@ constructor(
 
     private fun loadBackgroundColor(): Color =
         Color.valueOf(
-            context.getColor(com.android.internal.R.color.materialColorPrimary)
+            Utils.getColorAttrDefaultColor(
+                context,
+                com.android.internal.R.attr.materialColorPrimary
+            )
         )
 }

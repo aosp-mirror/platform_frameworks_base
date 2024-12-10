@@ -25,7 +25,7 @@
         android:paddingBottom="@dimen/ksh_key_view_padding_vertical"
         android:layout_marginStart="@dimen/ksh_item_margin_start"
         android:background="@drawable/ksh_key_item_background"
-        android:textColor="@androidprv:color/materialColorOnSurfaceVariant"
+        android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
         android:singleLine="true"
         android:gravity="center"
         android:textSize="@dimen/ksh_item_text_size" />

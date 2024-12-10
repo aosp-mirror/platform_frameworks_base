@@ -56,10 +56,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             style="@style/Chipbar.Text"
-            android:textColor="@androidprv:color/materialColorOnSecondaryFixed"
+            android:textColor="?androidprv:attr/materialColorOnSecondaryFixed"
             android:alpha="0.0"
             />
-        <!-- LINT.ThenChange(/packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarInfo.kt) -->
+        <!-- LINT.ThenChange(systemui.temporarydisplay.chipbar.ChipbarInfo.kt) -->
 
         <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
         <ImageView
@@ -68,7 +68,7 @@
             android:layout_height="@dimen/chipbar_end_icon_size"
             android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
             android:src="@drawable/ic_progress_activity"
-            android:tint="@androidprv:color/materialColorOnSecondaryFixedVariant"
+            android:tint="?androidprv:attr/materialColorOnSecondaryFixedVariant"
             android:alpha="0.0"
             />
 
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/chipbar_end_item_start_margin"
             style="@style/Chipbar.Text"
-            android:textColor="@androidprv:color/materialColorOnPrimaryFixed"
+            android:textColor="?androidprv:attr/materialColorOnPrimaryFixed"
             android:paddingStart="@dimen/chipbar_outer_padding"
             android:paddingEnd="@dimen/chipbar_outer_padding"
             android:paddingTop="@dimen/chipbar_end_button_vertical_padding"

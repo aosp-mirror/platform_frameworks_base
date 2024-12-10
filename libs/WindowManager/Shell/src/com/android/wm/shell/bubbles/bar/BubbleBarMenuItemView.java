@@ -17,6 +17,7 @@ package com.android.wm.shell.bubbles.bar;
 
 import android.annotation.ColorInt;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
@@ -62,8 +63,9 @@ public class BubbleBarMenuItemView extends LinearLayout {
      */
     void update(Icon icon, String title, @ColorInt int tint) {
         if (tint == Color.TRANSPARENT) {
-            mTextView.setTextColor(
-                    getContext().getColor(com.android.internal.R.color.materialColorOnSurface));
+            final TypedArray typedArray = getContext().obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.materialColorOnSurface});
+            mTextView.setTextColor(typedArray.getColor(0, Color.BLACK));
         } else {
             icon.setTint(tint);
             mTextView.setTextColor(tint);

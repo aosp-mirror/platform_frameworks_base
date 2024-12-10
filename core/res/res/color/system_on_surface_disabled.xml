@@ -15,6 +15,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/materialColorOnSurface"
+    <item android:color="?attr/materialColorOnSurface"
           android:alpha="?attr/disabledAlpha" />
 </selector>

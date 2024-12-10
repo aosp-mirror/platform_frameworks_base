@@ -17,6 +17,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
           android:alpha="?attr/primaryContentAlpha"
-          android:color="@color/materialColorOnSurface" />
-    <item android:color="@color/materialColorOnSurface" />
+          android:color="?attr/materialColorOnSurface" />
+    <item android:color="?attr/materialColorOnSurface" />
 </selector>

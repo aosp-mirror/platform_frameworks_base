@@ -27,7 +27,7 @@
                 android:innerRadiusRatio="@dimen/progressbar_inner_radius_ratio"
                 android:thickness="@dimen/progressbar_thickness"
                 android:useLevel="false">
-                <solid android:color="@color/materialColorSurfaceContainer"/>
+                <solid android:color="?attr/materialColorSurfaceContainer"/>
             </shape>
         </item>
         <item>
@@ -36,7 +36,7 @@
                 android:innerRadiusRatio="@dimen/progressbar_inner_radius_ratio"
                 android:thickness="@dimen/progressbar_thickness"
                 android:useLevel="true">
-                <solid android:color="@color/materialColorPrimary"/>
+                <solid android:color="?attr/materialColorPrimary"/>
             </shape>
         </item>
     </layer-list>
