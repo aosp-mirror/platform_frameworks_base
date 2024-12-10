@@ -33959,5 +33959,6 @@
             file="frameworks/base/packages/SystemUI/src/com/android/systemui/biometrics/domain/interactor/SideFpsSensorInteractor.kt"
             line="53"
             column="5"/>
+    </issue>
 
 </issues>

@@ -45,6 +45,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -145,7 +146,7 @@ public class BiometricNotificationService implements CoreStartable {
     };
 
     @Inject
-    public BiometricNotificationService(@NonNull Context context,
+    public BiometricNotificationService(@NonNull @Main Context context,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull KeyguardStateController keyguardStateController,
             @NonNull Handler handler, @NonNull NotificationManager notificationManager,
