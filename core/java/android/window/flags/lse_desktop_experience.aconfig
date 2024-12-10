@@ -414,6 +414,16 @@ flag {
 }
 
 flag {
+    name: "enable_desktop_recents_transitions_corners_bugfix"
+    namespace: "lse_desktop_experience"
+    description: "Enables rounded corners bugfix for Recents transitions."
+    bug: "383079261"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_move_to_next_display_shortcut"
     namespace: "lse_desktop_experience"
     description: "Add new keyboard shortcut of moving a task into next display"
