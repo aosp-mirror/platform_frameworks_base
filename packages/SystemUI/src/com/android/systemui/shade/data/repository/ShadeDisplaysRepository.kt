@@ -16,17 +16,22 @@
 
 package com.android.systemui.shade.data.repository
 
+import android.provider.Settings.Global.DEVELOPMENT_SHADE_DISPLAY_AWARENESS
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.shade.display.ShadeDisplayPolicy
+import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 /** Source of truth for the display currently holding the shade. */
@@ -38,7 +43,7 @@ interface ShadeDisplaysRepository {
 /** Allows to change the policy that determines in which display the Shade window is visible. */
 interface MutableShadeDisplaysRepository : ShadeDisplaysRepository {
     /** Updates the policy to select where the shade is visible. */
-    val policy: MutableStateFlow<ShadeDisplayPolicy>
+    val policy: StateFlow<ShadeDisplayPolicy>
 }
 
 /** Keeps the policy and propagates the display id for the shade from it. */
@@ -46,9 +51,27 @@ interface MutableShadeDisplaysRepository : ShadeDisplaysRepository {
 @OptIn(ExperimentalCoroutinesApi::class)
 class ShadeDisplaysRepositoryImpl
 @Inject
-constructor(defaultPolicy: ShadeDisplayPolicy, @Background bgScope: CoroutineScope) :
-    MutableShadeDisplaysRepository {
-    override val policy = MutableStateFlow<ShadeDisplayPolicy>(defaultPolicy)
+constructor(
+    globalSettings: GlobalSettings,
+    defaultPolicy: ShadeDisplayPolicy,
+    @Background bgScope: CoroutineScope,
+    policies: Set<@JvmSuppressWildcards ShadeDisplayPolicy>,
+) : MutableShadeDisplaysRepository {
+
+    override val policy: StateFlow<ShadeDisplayPolicy> =
+        globalSettings
+            .observerFlow(DEVELOPMENT_SHADE_DISPLAY_AWARENESS)
+            .onStart { emit(Unit) }
+            .map {
+                val current = globalSettings.getString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS)
+                for (policy in policies) {
+                    if (policy.name == current) return@map policy
+                }
+                globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, defaultPolicy.name)
+                return@map defaultPolicy
+            }
+            .distinctUntilChanged()
+            .stateIn(bgScope, SharingStarted.WhileSubscribed(), defaultPolicy)
 
     override val displayId: StateFlow<Int> =
         policy
