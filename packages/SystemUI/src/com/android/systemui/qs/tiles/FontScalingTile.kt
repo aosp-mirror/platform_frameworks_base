@@ -34,6 +34,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.shared.QSSettingsPackageRepository
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -56,6 +57,7 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>,
+    private val settingsPackageRepository: QSSettingsPackageRepository,
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -118,6 +120,7 @@ constructor(
 
     override fun getLongClickIntent(): Intent? {
         return Intent(Settings.ACTION_TEXT_READING_SETTINGS)
+            .setPackage(settingsPackageRepository.getSettingsPackageName())
     }
 
     override fun getTileLabel(): CharSequence {

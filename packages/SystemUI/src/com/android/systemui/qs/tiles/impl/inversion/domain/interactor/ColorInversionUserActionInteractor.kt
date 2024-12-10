@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.impl.inversion.domain.interactor
 import android.content.Intent
 import android.provider.Settings
 import com.android.systemui.accessibility.data.repository.ColorInversionRepository
+import com.android.systemui.qs.shared.QSSettingsPackageRepository
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
@@ -32,21 +33,20 @@ class ColorInversionUserActionInteractor
 constructor(
     private val colorInversionRepository: ColorInversionRepository,
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
+    private val settingsPackageRepository: QSSettingsPackageRepository,
 ) : QSTileUserActionInteractor<ColorInversionTileModel> {
 
     override suspend fun handleInput(input: QSTileInput<ColorInversionTileModel>): Unit =
         with(input) {
             when (action) {
                 is QSTileUserAction.Click -> {
-                    colorInversionRepository.setIsEnabled(
-                        !data.isEnabled,
-                        user,
-                    )
+                    colorInversionRepository.setIsEnabled(!data.isEnabled, user)
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
                         action.expandable,
                         Intent(Settings.ACTION_COLOR_INVERSION_SETTINGS)
+                            .setPackage(settingsPackageRepository.getSettingsPackageName()),
                     )
                 }
                 is QSTileUserAction.ToggleClick -> {}

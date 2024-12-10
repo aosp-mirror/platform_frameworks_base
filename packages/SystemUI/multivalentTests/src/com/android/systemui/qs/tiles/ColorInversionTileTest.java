@@ -45,6 +45,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.shared.QSSettingsPackageRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
@@ -59,15 +60,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
 
 @RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ColorInversionTileTest extends SysuiTestCase {
+    private static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
     private static final Integer COLOR_INVERSION_DISABLED = 0;
     private static final Integer COLOR_INVERSION_ENABLED = 1;
 
@@ -90,6 +92,8 @@ public class ColorInversionTileTest extends SysuiTestCase {
     private QsEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private QSSettingsPackageRepository mQSSettingsPackageRepository;
 
     private TestableLooper mTestableLooper;
     private SecureSettings mSecureSettings;
@@ -108,6 +112,8 @@ public class ColorInversionTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
+        when(mQSSettingsPackageRepository.getSettingsPackageName())
+                .thenReturn(SETTINGS_PACKAGE_NAME);
 
         mTile = new ColorInversionTile(
                 mHost,
@@ -120,7 +126,8 @@ public class ColorInversionTileTest extends SysuiTestCase {
                 mActivityStarter,
                 mQSLogger,
                 mUserTracker,
-                mSecureSettings
+                mSecureSettings,
+                mQSSettingsPackageRepository
         );
 
         mTile.initialize();
@@ -144,6 +151,7 @@ public class ColorInversionTileTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(IntentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_COLOR_INVERSION_SETTINGS);
+        assertThat(IntentCaptor.getValue().getPackage()).isEqualTo(SETTINGS_PACKAGE_NAME);
     }
 
     @Test

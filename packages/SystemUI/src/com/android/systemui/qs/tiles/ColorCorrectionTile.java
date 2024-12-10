@@ -38,6 +38,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.shared.QSSettingsPackageRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
@@ -53,6 +54,7 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
     @Nullable
     private Icon mIcon = null;
     private final UserSettingObserver mSetting;
+    private final QSSettingsPackageRepository mQSSettingsPackageRepository;
 
     @Inject
     public ColorCorrectionTile(
@@ -66,11 +68,13 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             UserTracker userTracker,
-            SecureSettings secureSettings
+            SecureSettings secureSettings,
+            QSSettingsPackageRepository qsSettingsPackageRepository
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
+        mQSSettingsPackageRepository = qsSettingsPackageRepository;
         mSetting = new UserSettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, userTracker.getUserId()) {
             @Override
@@ -106,7 +110,8 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_COLOR_CORRECTION_SETTINGS);
+        return new Intent(Settings.ACTION_COLOR_CORRECTION_SETTINGS)
+                .setPackage(mQSSettingsPackageRepository.getSettingsPackageName());
     }
 
     @Override
