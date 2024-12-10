@@ -58,6 +58,11 @@ public class SplitScreenConstants {
      */
     public static final int SPLIT_POSITION_BOTTOM_OR_RIGHT = 1;
 
+    /**
+     * Deprecated and will be replaced fully by @SplitIndex. With support for 3+ apps in split,
+     * existing references to top/left and bottom/right will be replaced by INDEX_0 and INDEX_1
+     * respectively. For now they can be used interchangeably, the underlying ints are the same.
+     */
     @IntDef(prefix = {"SPLIT_POSITION_"}, value = {
             SPLIT_POSITION_UNDEFINED,
             SPLIT_POSITION_TOP_OR_LEFT,
@@ -83,6 +88,21 @@ public class SplitScreenConstants {
             SPLIT_INDEX_3
     })
     public @interface SplitIndex {
+    }
+
+    /**
+     * Return the @SplitIndex constant for a given integer index. @SplitIndex is the replacement
+     * for @SplitPosition, and will be used interchangeably with @SplitPosition to support 3+ apps
+     * in split.
+     */
+    public static int getIndex(int i) {
+        return switch (i) {
+            case 0 -> SPLIT_INDEX_0;
+            case 1 -> SPLIT_INDEX_1;
+            case 2 -> SPLIT_INDEX_2;
+            case 3 -> SPLIT_INDEX_3;
+            default -> SPLIT_INDEX_UNDEFINED;
+        };
     }
 
     /** Signifies that user is currently not in split screen. */
