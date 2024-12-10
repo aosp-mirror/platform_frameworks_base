@@ -2650,7 +2650,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Skip copy splash screen to client if it was resized, or the starting data already
                 // requested to be removed after transaction commit.
                 || (mStartingData != null && (mStartingData.mResizedFromTransfer
-                        || mStartingData.mRemoveAfterTransaction != AFTER_TRANSACTION_IDLE))
+                        || mStartingData.mRemoveAfterTransaction
+                        == AFTER_TRANSACTION_REMOVE_DIRECTLY))
                 || isRelaunching()) {
             return false;
         }
