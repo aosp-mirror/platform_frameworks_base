@@ -303,6 +303,10 @@ abstract class HdmiCecFeatureAction {
         return mSource.getDeviceInfo().getPhysicalAddress();
     }
 
+    protected final int getServicePath() {
+        return mService.getPhysicalAddress();
+    }
+
     protected final void sendUserControlPressedAndReleased(int targetAddress, int uiCommand) {
         mSource.sendUserControlPressedAndReleased(targetAddress, uiCommand);
     }
