@@ -814,6 +814,10 @@ public final class MessageQueue {
 
     /**
      * @return true if we are blocked on a sync barrier
+     *
+     * Calls to this method must not be allowed to race with `next`.
+     * Specifically, the Looper thread must be paused before calling this method,
+     * and may not be resumed until after returning from this method.
      */
     boolean isBlockedOnSyncBarrier() {
         throwIfNotTest();
