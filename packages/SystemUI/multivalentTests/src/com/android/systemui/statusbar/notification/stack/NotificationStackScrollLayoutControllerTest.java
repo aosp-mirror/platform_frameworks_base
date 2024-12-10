@@ -952,11 +952,10 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Test
     @EnableSceneContainer
     public void onTouchEvent_stopExpandingNotification_sceneContainerEnabled() {
-        boolean touchHandled = stopExpandingNotification();
+        stopExpandingNotification();
 
-        verify(mNotificationStackScrollLayout).startOverscrollAfterExpanding();
+        verify(mExpandHelper).finishExpanding();
         verify(mNotificationStackScrollLayout, never()).dispatchDownEventToScroller(any());
-        assertTrue(touchHandled);
     }
 
     @Test
@@ -964,11 +963,11 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     public void onTouchEvent_stopExpandingNotification_sceneContainerDisabled() {
         stopExpandingNotification();
 
-        verify(mNotificationStackScrollLayout, never()).startOverscrollAfterExpanding();
+        verify(mExpandHelper, never()).finishExpanding();
         verify(mNotificationStackScrollLayout).dispatchDownEventToScroller(any());
     }
 
-    private boolean stopExpandingNotification() {
+    private void stopExpandingNotification() {
         when(mNotificationStackScrollLayout.getExpandHelper()).thenReturn(mExpandHelper);
         when(mNotificationStackScrollLayout.getIsExpanded()).thenReturn(true);
         when(mNotificationStackScrollLayout.getExpandedInThisMotion()).thenReturn(true);
@@ -983,13 +982,13 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         NotificationStackScrollLayoutController.TouchHandler touchHandler =
                 mController.getTouchHandler();
 
-        return touchHandler.onTouchEvent(MotionEvent.obtain(
-                /* downTime= */ 0,
-                /* eventTime= */ 0,
-                MotionEvent.ACTION_DOWN,
-                0,
-                0,
-                /* metaState= */ 0
+        touchHandler.onTouchEvent(MotionEvent.obtain(
+            /* downTime= */ 0,
+            /* eventTime= */ 0,
+            MotionEvent.ACTION_DOWN,
+            0,
+            0,
+            /* metaState= */ 0
         ));
     }
 

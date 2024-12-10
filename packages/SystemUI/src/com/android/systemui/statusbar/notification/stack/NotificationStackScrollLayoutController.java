@@ -2203,11 +2203,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 expandingNotification = mView.isExpandingNotification();
                 if (mView.getExpandedInThisMotion() && !expandingNotification && wasExpandingBefore
                         && !mView.getDisallowScrollingInThisMotion()) {
-                    // We need to dispatch the overscroll differently when Scene Container is on,
-                    // since NSSL no longer controls its own scroll.
+                    // Finish expansion here, as this gesture will be marked to be sent to
+                    // scene container
                     if (SceneContainerFlag.isEnabled() && !isCancelOrUp) {
-                        mView.startOverscrollAfterExpanding();
-                        return true;
+                        expandHelper.finishExpanding();
                     } else {
                         mView.dispatchDownEventToScroller(ev);
                     }
