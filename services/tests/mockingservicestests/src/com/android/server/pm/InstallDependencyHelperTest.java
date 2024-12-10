@@ -21,11 +21,7 @@ import static android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.SharedLibraryInfo;
@@ -90,32 +86,15 @@ public class InstallDependencyHelperTest {
     }
 
     @Test
-    public void testResolveLibraryDependenciesIfNeeded_errorInSharedLibrariesImpl()
-            throws Exception {
-        doThrow(new PackageManagerException(new Exception("xyz")))
-                .when(mSharedLibraries).collectMissingSharedLibraryInfos(any());
-
-        PackageLite pkg = getPackageLite(TEST_APP_USING_SDK1_AND_SDK2);
-        CallbackHelper callback = new CallbackHelper(/*expectSuccess=*/ false);
-        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, mComputer,
-                0, mHandler, callback);
-        callback.assertFailure();
-
-        assertThat(callback.error).hasMessageThat().contains("xyz");
-    }
-
-    @Test
     public void testResolveLibraryDependenciesIfNeeded_failsToBind() throws Exception {
         // Return a non-empty list as missing dependency
         PackageLite pkg = getPackageLite(TEST_APP_USING_SDK1_AND_SDK2);
         List<SharedLibraryInfo> missingDependency = Collections.singletonList(
                 mock(SharedLibraryInfo.class));
-        when(mSharedLibraries.collectMissingSharedLibraryInfos(eq(pkg)))
-                .thenReturn(missingDependency);
 
         CallbackHelper callback = new CallbackHelper(/*expectSuccess=*/ false);
-        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, mComputer,
-                0, mHandler, callback);
+        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(missingDependency, pkg,
+                mComputer, 0, mHandler, callback);
         callback.assertFailure();
 
         assertThat(callback.error).hasMessageThat().contains(
@@ -128,12 +107,10 @@ public class InstallDependencyHelperTest {
         // Return an empty list as missing dependency
         PackageLite pkg = getPackageLite(TEST_APP_USING_SDK1_AND_SDK2);
         List<SharedLibraryInfo> missingDependency = Collections.emptyList();
-        when(mSharedLibraries.collectMissingSharedLibraryInfos(eq(pkg)))
-                .thenReturn(missingDependency);
 
         CallbackHelper callback = new CallbackHelper(/*expectSuccess=*/ true);
-        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(pkg, mComputer,
-                0, mHandler, callback);
+        mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(missingDependency, pkg,
+                mComputer, 0, mHandler, callback);
         callback.assertSuccess();
     }
 

@@ -1314,7 +1314,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 }
             }
 
-            if (handlePrepareTransition(info, st, ft, finishCallback)) {
+            if (handlePrepareTransition(transition, info, st, ft, finishCallback)) {
                 if (checkTakeoverFlags()) {
                     mTakeoverHandler = mTransitions.getHandlerForTakeover(transition, info);
                 }
@@ -1630,7 +1630,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
          * happen when core make an activity become visible.
          */
         @VisibleForTesting
-        boolean handlePrepareTransition(
+        boolean handlePrepareTransition(@NonNull IBinder transition,
                 @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction st,
                 @NonNull SurfaceControl.Transaction ft,
@@ -1678,6 +1678,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 }
             }
             st.apply();
+            // In case other transition handler took the handleRequest before this class.
+            mPrepareOpenTransition = transition;
             mFinishOpenTransaction = ft;
             mFinishOpenTransitionCallback = finishCallback;
             mOpenTransitionInfo = info;

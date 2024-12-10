@@ -1591,6 +1591,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private int getHearingDeviceSummaryRes(int leftBattery, int rightBattery,
             boolean shortSummary) {
+        if (getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_MONO
+                || getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT) {
+            return !shortSummary && (getBatteryLevel() > BluetoothDevice.BATTERY_LEVEL_UNKNOWN)
+                    ? R.string.bluetooth_active_battery_level
+                    : R.string.bluetooth_active_no_battery_level;
+        }
         boolean isLeftDeviceConnected = getConnectedHearingAidSide(
                 HearingAidInfo.DeviceSide.SIDE_LEFT).isPresent();
         boolean isRightDeviceConnected = getConnectedHearingAidSide(
@@ -1646,8 +1652,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             @HearingAidInfo.DeviceSide int side) {
         return Stream.concat(Stream.of(this, mSubDevice), mMemberDevices.stream())
                 .filter(Objects::nonNull)
-                .filter(device -> device.getDeviceSide() == side
-                        || device.getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT)
+                .filter(device -> device.getDeviceSide() == side)
                 .filter(device -> device.getDevice().isConnected())
                 // For hearing aids, we should expect only one device assign to one side, but if
                 // it happens, we don't care which one.

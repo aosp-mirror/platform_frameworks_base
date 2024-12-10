@@ -16,13 +16,20 @@
 
 package com.android.wm.shell.compatui.letterbox
 
+import android.content.Context
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.compatui.letterbox.LetterboxMatchers.asAnyMode
 import java.util.function.Consumer
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 
 /**
  * Tests for [MultiSurfaceLetterboxController].
@@ -147,9 +154,33 @@ class MultiSurfaceLetterboxControllerTest : ShellTestCase() {
     /**
      * Runs a test scenario providing a Robot.
      */
-    fun runTestScenario(consumer: Consumer<LetterboxControllerRobotTest>) {
-        val robot =
-            LetterboxControllerRobotTest(mContext, { sb -> MultiSurfaceLetterboxController(sb) })
-        consumer.accept(robot)
+    fun runTestScenario(consumer: Consumer<MultiLetterboxControllerRobotTest>) {
+        consumer.accept(MultiLetterboxControllerRobotTest(mContext).apply { initController() })
+    }
+
+    class MultiLetterboxControllerRobotTest(context: Context) :
+        LetterboxControllerRobotTest() {
+
+        private val letterboxConfiguration: LetterboxConfiguration
+        private val surfaceBuilder: LetterboxSurfaceBuilder
+
+        init {
+            letterboxConfiguration = LetterboxConfiguration(context)
+            surfaceBuilder = LetterboxSurfaceBuilder(letterboxConfiguration)
+            spyOn(surfaceBuilder)
+        }
+
+        override fun buildController(): LetterboxController =
+            MultiSurfaceLetterboxController(surfaceBuilder)
+
+        fun checkSurfaceBuilderInvoked(times: Int = 1, name: String = "", callSite: String = "") {
+            verify(surfaceBuilder, times(times)).createSurface(
+                eq(transaction),
+                eq(parentLeash),
+                name.asAnyMode(),
+                callSite.asAnyMode(),
+                any()
+            )
+        }
     }
 }

@@ -213,35 +213,6 @@ public class ViewGroupTest {
         assertTrue(autofillableViews.containsAll(Arrays.asList(viewA, viewC)));
     }
 
-    @Test
-    public void testMeasureCache() {
-        final int spec1 = View.MeasureSpec.makeMeasureSpec(100, View.MeasureSpec.AT_MOST);
-        final int spec2 = View.MeasureSpec.makeMeasureSpec(50, View.MeasureSpec.AT_MOST);
-        final Context context = getInstrumentation().getContext();
-        final View child = new View(context);
-        final TestView parent = new TestView(context, 0);
-        parent.addView(child);
-
-        child.setPadding(1, 2, 3, 4);
-        parent.measure(spec1, spec1);
-        assertEquals(4, parent.getMeasuredWidth());
-        assertEquals(6, parent.getMeasuredHeight());
-
-        child.setPadding(5, 6, 7, 8);
-        parent.measure(spec2, spec2);
-        assertEquals(12, parent.getMeasuredWidth());
-        assertEquals(14, parent.getMeasuredHeight());
-
-        // This ends the state of forceLayout.
-        parent.layout(0, 0, 50, 50);
-
-        // The cached values should be cleared after the new setPadding is called. And the measured
-        // width and height should be up-to-date.
-        parent.measure(spec1, spec1);
-        assertEquals(12, parent.getMeasuredWidth());
-        assertEquals(14, parent.getMeasuredHeight());
-    }
-
     private static void getUnobscuredTouchableRegion(Region outRegion, View view) {
         outRegion.set(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
         final ViewParent parent = view.getParent();
@@ -268,19 +239,6 @@ public class ViewGroupTest {
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             // We don't layout this view.
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            int measuredWidth = 0;
-            int measuredHeight = 0;
-            final int count = getChildCount();
-            for (int i = 0; i < count; i++) {
-                final View child = getChildAt(i);
-                measuredWidth += child.getPaddingLeft() + child.getPaddingRight();
-                measuredHeight += child.getPaddingTop() + child.getPaddingBottom();
-            }
-            setMeasuredDimension(measuredWidth, measuredHeight);
         }
     }
 

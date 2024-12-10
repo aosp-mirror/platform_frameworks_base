@@ -75,7 +75,7 @@ internal class MuxPromptMovingNode<K : Any, V>(
             if (depthTracker.dirty_depthIncreased()) {
                 depthTracker.schedule(evalScope.compactor, node = this)
             }
-            evalScope.schedule(this)
+            schedule(evalScope)
         } else {
             val compactDownstream = depthTracker.isDirty()
             if (evalResult != null || compactDownstream) {
@@ -291,7 +291,7 @@ internal class MuxPromptPatchNode<K : Any, V>(private val muxNode: MuxPromptMovi
         val upstreamResult = upstream.getPushEvent(evalScope)
         if (upstreamResult is Just) {
             muxNode.patchData = upstreamResult.value
-            evalScope.schedule(muxNode)
+            muxNode.schedule(evalScope)
         }
     }
 
@@ -451,7 +451,7 @@ internal fun <K : Any, A> switchPromptImpl(
                     // Schedule for evaluation if any switched-in nodes or the patches node have
                     // already emitted within this transaction.
                     if (movingNode.patchData != null || movingNode.upstreamData.isNotEmpty()) {
-                        evalScope.schedule(movingNode)
+                        movingNode.schedule(evalScope)
                     }
 
                     return movingNode.takeUnless { it.patches == null && it.switchedIn.isEmpty() }

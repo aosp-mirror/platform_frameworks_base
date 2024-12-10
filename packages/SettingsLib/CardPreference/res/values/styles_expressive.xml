@@ -17,14 +17,12 @@
 
 <resources>
     <style name="TextAppearance.CardTitle.SettingsLib"
-        parent="@style/TextAppearance.PreferenceTitle.SettingsLib">
+        parent="@style/TextAppearance.SettingsLib.TitleMedium.Emphasized">
         <item name="android:textColor">@color/settingslib_materialColorOnPrimary</item>
-        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="TextAppearance.CardSummary.SettingsLib"
-        parent="@style/TextAppearance.PreferenceSummary.SettingsLib">
+        parent="@style/TextAppearance.SettingsLib.LabelMedium">
         <item name="android:textColor">@color/settingslib_materialColorOnSecondary</item>
-        <item name="android:textSize">14sp</item>
     </style>
 </resources>

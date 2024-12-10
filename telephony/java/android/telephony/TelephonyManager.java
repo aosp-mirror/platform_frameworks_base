@@ -6387,6 +6387,7 @@ public class TelephonyManager {
      * @deprecated use {@link #getImsPrivateUserIdentity()}
      */
     @UnsupportedAppUsage
+    @Deprecated
     public String getIsimImpi() {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
@@ -6476,6 +6477,7 @@ public class TelephonyManager {
      * @deprecated use {@link #getImsPublicUserIdentities()}
      */
     @UnsupportedAppUsage
+    @Deprecated
     @Nullable
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String[] getIsimImpu() {
@@ -8510,7 +8512,9 @@ public class TelephonyManager {
             if (telephony == null) {
                 throw new IllegalStateException("telephony service is null.");
             }
-            telephony.rebootModem(getSlotIndex());
+            if (!telephony.rebootModem(getSlotIndex())) {
+                throw new RuntimeException("Couldn't reboot modem (it may be not supported)");
+            }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "rebootRadio RemoteException", ex);
             throw ex.rethrowAsRuntimeException();
@@ -14051,6 +14055,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CARRIERLOCK)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
