@@ -2150,13 +2150,14 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startServiceFromJar(
                         WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
-                // Start USD service
-                if (android.net.wifi.flags.Flags.usd()) {
-                    t.traceBegin("StartUsd");
-                    mSystemServiceManager.startServiceFromJar(
-                            WIFI_USD_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
-                    t.traceEnd();
-                }
+            }
+
+            if (android.net.wifi.flags.Flags.usd() && context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_deviceSupportsWifiUsd)) {
+                t.traceBegin("StartWifiUsd");
+                mSystemServiceManager.startServiceFromJar(WIFI_USD_SERVICE_CLASS,
+                        WIFI_APEX_SERVICE_JAR_PATH);
+                t.traceEnd();
             }
 
             if (context.getPackageManager().hasSystemFeature(
