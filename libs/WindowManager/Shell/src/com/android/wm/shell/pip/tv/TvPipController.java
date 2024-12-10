@@ -269,6 +269,8 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
         mShellController.addConfigurationChangeListener(this);
         mShellController.addUserChangeListener(this);
+
+        mAppOpsListener.setCallback(mPipTaskOrganizer::removePip);
     }
 
     @Override
