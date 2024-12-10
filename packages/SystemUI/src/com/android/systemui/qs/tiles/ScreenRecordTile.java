@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -144,8 +145,10 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         // Show expand icon when clicking will open a dialog
         state.forceExpandIcon = state.state == Tile.STATE_INACTIVE;
 
+        state.expandedAccessibilityClassName = Button.class.getName();
         if (isRecording) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_stop);
+            state.expandedAccessibilityClassName = Switch.class.getName();
         } else if (isStarting) {
             int countdown =
                     (int) ScreenRecordModel.Starting.Companion.toCountdownSeconds(
@@ -157,7 +160,6 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
                 ? state.label
                 : TextUtils.concat(state.label, ", ", state.secondaryLabel);
-        state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
     @Override
