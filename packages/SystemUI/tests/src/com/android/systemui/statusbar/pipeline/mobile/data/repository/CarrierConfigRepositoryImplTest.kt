@@ -48,11 +48,11 @@ import org.mockito.quality.Strictness
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class CarrierConfigRepositoryTest : SysuiTestCase() {
+class CarrierConfigRepositoryImplTest : SysuiTestCase() {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var underTest: CarrierConfigRepository
+    private lateinit var underTest: CarrierConfigRepositoryImpl
     private lateinit var mockitoSession: MockitoSession
     private lateinit var carrierConfigCoreStartable: CarrierConfigCoreStartable
 
@@ -81,7 +81,7 @@ class CarrierConfigRepositoryTest : SysuiTestCase() {
         }
 
         underTest =
-            CarrierConfigRepository(
+            CarrierConfigRepositoryImpl(
                 fakeBroadcastDispatcher,
                 carrierConfigManager,
                 dumpManager,

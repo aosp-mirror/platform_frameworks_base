@@ -32,6 +32,8 @@ import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneMod
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepositoryImpl
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -118,6 +120,9 @@ abstract class StatusBarPipelineModule {
     @Binds abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
 
     @Binds abstract fun mobileMappingsProxy(impl: MobileMappingsProxyImpl): MobileMappingsProxy
+
+    @Binds
+    abstract fun carrierConfigRepository(impl: CarrierConfigRepositoryImpl): CarrierConfigRepository
 
     @Binds
     abstract fun subscriptionManagerProxy(
