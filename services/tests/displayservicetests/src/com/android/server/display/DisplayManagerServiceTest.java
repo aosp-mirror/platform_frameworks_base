@@ -3708,7 +3708,7 @@ public class DisplayManagerServiceTest {
                 eq(config));
 
         bs.releaseVirtualDisplay(mMockAppToken);
-        verify(mMockVirtualDisplayAdapter).releaseVirtualDisplayLocked(binder, callingUid);
+        verify(mMockVirtualDisplayAdapter).releaseVirtualDisplayLocked(binder);
     }
 
     @Test
