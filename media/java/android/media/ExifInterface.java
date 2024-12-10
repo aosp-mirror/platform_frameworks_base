@@ -2037,9 +2037,10 @@ public class ExifInterface {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
             mIsSupportedFile = false;
-            Log.w(TAG, "Invalid image: ExifInterface got an unsupported image format file"
-                    + "(ExifInterface supports JPEG and some RAW image formats only) "
-                    + "or a corrupted JPEG file to ExifInterface.", e);
+            Log.d(
+                    TAG,
+                    "Invalid image: ExifInterface got an unsupported or corrupted image file",
+                    e);
         } finally {
             addDefaultValuesForCompatibility();
 
