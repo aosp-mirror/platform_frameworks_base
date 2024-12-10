@@ -276,6 +276,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       DesktopUserRepositories(
         context,
         shellInit,
+        shellController,
         persistentRepository,
         repositoryInitializer,
         testScope,
@@ -3907,7 +3908,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun shellController_registersUserChangeListener() {
-      verify(shellController, times(1)).addUserChangeListener(any())
+      verify(shellController, times(2)).addUserChangeListener(any())
   }
 
   @Test

@@ -24,14 +24,15 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_HSUM
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
+import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -66,6 +67,7 @@ class DesktopUserRepositoriesTest : ShellTestCase() {
     private val persistentRepository = mock<DesktopPersistentRepository>()
     private val repositoryInitializer = mock<DesktopRepositoryInitializer>()
     private val userManager = mock<UserManager>()
+    private val shellController = mock<ShellController>()
 
     @Before
     fun setUp() {
@@ -86,8 +88,14 @@ class DesktopUserRepositoriesTest : ShellTestCase() {
         whenever(userManager.getProfiles(USER_ID_1)).thenReturn(profiles)
 
         userRepositories = DesktopUserRepositories(
-            context, shellInit, persistentRepository, repositoryInitializer, datastoreScope,
-                userManager)
+            context,
+            shellInit,
+            shellController,
+            persistentRepository,
+            repositoryInitializer,
+            datastoreScope,
+            userManager
+        )
     }
 
     @After

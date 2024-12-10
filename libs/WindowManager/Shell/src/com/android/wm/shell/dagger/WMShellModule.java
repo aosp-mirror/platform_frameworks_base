@@ -1025,12 +1025,14 @@ public abstract class WMShellModule {
     static DesktopUserRepositories provideDesktopUserRepositories(
             Context context,
             ShellInit shellInit,
+            ShellController shellController,
             DesktopPersistentRepository desktopPersistentRepository,
             DesktopRepositoryInitializer desktopRepositoryInitializer,
             @ShellMainThread CoroutineScope mainScope,
             UserManager userManager
     ) {
-        return new DesktopUserRepositories(context, shellInit, desktopPersistentRepository,
+        return new DesktopUserRepositories(context, shellInit, shellController,
+                desktopPersistentRepository,
                 desktopRepositoryInitializer,
                 mainScope, userManager);
     }
