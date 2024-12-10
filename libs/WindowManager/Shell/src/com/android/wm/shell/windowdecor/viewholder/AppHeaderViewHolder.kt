@@ -79,7 +79,7 @@ class AppHeaderViewHolder(
 
     data class HeaderData(
         val taskInfo: RunningTaskInfo,
-        val isRequestingImmersive: Boolean,
+        val isTaskMaximized: Boolean,
         val inFullImmersiveState: Boolean,
         val hasGlobalFocus: Boolean,
         val enableMaximizeLongClick: Boolean,
@@ -163,7 +163,7 @@ class AppHeaderViewHolder(
     override fun bindData(data: HeaderData) {
         bindData(
             data.taskInfo,
-            data.isRequestingImmersive,
+            data.isTaskMaximized,
             data.inFullImmersiveState,
             data.hasGlobalFocus,
             data.enableMaximizeLongClick
@@ -172,7 +172,7 @@ class AppHeaderViewHolder(
 
     private fun bindData(
         taskInfo: RunningTaskInfo,
-        isRequestingImmersive: Boolean,
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean,
         hasGlobalFocus: Boolean,
         enableMaximizeLongClick: Boolean,
@@ -180,7 +180,7 @@ class AppHeaderViewHolder(
         if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
             bindDataWithThemedHeaders(
                 taskInfo,
-                isRequestingImmersive,
+                isTaskMaximized,
                 inFullImmersiveState,
                 hasGlobalFocus,
                 enableMaximizeLongClick,
@@ -225,7 +225,7 @@ class AppHeaderViewHolder(
 
     private fun bindDataWithThemedHeaders(
         taskInfo: RunningTaskInfo,
-        requestingImmersive: Boolean,
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean,
         hasGlobalFocus: Boolean,
         enableMaximizeLongClick: Boolean,
@@ -283,7 +283,7 @@ class AppHeaderViewHolder(
                     drawableInsets = maximizeDrawableInsets
                 )
             )
-            setIcon(getMaximizeButtonIcon(requestingImmersive, inFullImmersiveState))
+            setIcon(getMaximizeButtonIcon(isTaskMaximized, inFullImmersiveState))
         }
         // Close button.
         closeWindowButton.apply {
@@ -358,34 +358,19 @@ class AppHeaderViewHolder(
 
     @DrawableRes
     private fun getMaximizeButtonIcon(
-        requestingImmersive: Boolean,
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean
     ): Int = when {
-        shouldShowEnterFullImmersiveIcon(requestingImmersive, inFullImmersiveState) -> {
-            R.drawable.decor_desktop_mode_immersive_button_dark
-        }
-        shouldShowExitFullImmersiveIcon(requestingImmersive, inFullImmersiveState) -> {
-            R.drawable.decor_desktop_mode_immersive_exit_button_dark
+        shouldShowExitFullImmersiveOrMaximizeIcon(isTaskMaximized, inFullImmersiveState) -> {
+            R.drawable.decor_desktop_mode_immersive_or_maximize_exit_button_dark
         }
         else -> R.drawable.decor_desktop_mode_maximize_button_dark
     }
 
-    private fun shouldShowEnterFullImmersiveIcon(
-        requestingImmersive: Boolean,
+    private fun shouldShowExitFullImmersiveOrMaximizeIcon(
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean
-    ): Boolean = Flags.enableFullyImmersiveInDesktop()
-            && requestingImmersive && !inFullImmersiveState
-
-    private fun shouldShowExitFullImmersiveIcon(
-        requestingImmersive: Boolean,
-        inFullImmersiveState: Boolean
-    ): Boolean = isInFullImmersiveStateAndRequesting(requestingImmersive, inFullImmersiveState)
-
-    private fun isInFullImmersiveStateAndRequesting(
-        requestingImmersive: Boolean,
-        inFullImmersiveState: Boolean
-    ): Boolean = Flags.enableFullyImmersiveInDesktop()
-            && requestingImmersive && inFullImmersiveState
+    ): Boolean = (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveState) || isTaskMaximized
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
         return HeaderStyle(

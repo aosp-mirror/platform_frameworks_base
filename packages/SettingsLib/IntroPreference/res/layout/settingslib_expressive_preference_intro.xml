@@ -26,7 +26,6 @@
 
         <ImageView
             android:id="@android:id/icon"
-            android:src="@drawable/settingslib_arrow_drop_down"
             style="@style/SettingsLibEntityHeaderIcon"/>
 
         <TextView

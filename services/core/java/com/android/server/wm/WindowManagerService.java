@@ -2673,7 +2673,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (outRelayoutResult != null) {
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
-                        && win.mSyncSeqId > lastSyncSeqId) {
+                        && win.mSyncSeqId > lastSyncSeqId && !displayContent.mWaitingForConfig) {
                     outRelayoutResult.syncSeqId = win.shouldSyncWithBuffers()
                             ? win.mSyncSeqId
                             : -1;

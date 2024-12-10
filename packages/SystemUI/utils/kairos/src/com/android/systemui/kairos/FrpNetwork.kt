@@ -137,7 +137,7 @@ internal class LocalFrpNetwork(
     override suspend fun <R> transact(block: suspend FrpTransactionScope.() -> R): R {
         val result = CompletableDeferred<R>(coroutineContext[Job])
         @Suppress("DeferredResultUnused")
-        network.transaction {
+        network.transaction("FrpNetwork.transact") {
             val buildScope =
                 BuildScopeImpl(
                     stateScope = StateScopeImpl(evalScope = this, endSignal = endSignal),
@@ -151,7 +151,7 @@ internal class LocalFrpNetwork(
     override suspend fun activateSpec(spec: FrpSpec<*>) {
         val job =
             network
-                .transaction {
+                .transaction("FrpNetwork.activateSpec") {
                     val buildScope =
                         BuildScopeImpl(
                             stateScope = StateScopeImpl(evalScope = this, endSignal = endSignal),
@@ -166,7 +166,8 @@ internal class LocalFrpNetwork(
     override fun <In, Out> coalescingMutableTFlow(
         coalesce: (old: Out, new: In) -> Out,
         getInitialValue: () -> Out,
-    ): CoalescingMutableTFlow<In, Out> = CoalescingMutableTFlow(coalesce, network, getInitialValue)
+    ): CoalescingMutableTFlow<In, Out> =
+        CoalescingMutableTFlow(null, coalesce, network, getInitialValue)
 
     override fun <T> mutableTFlow(): MutableTFlow<T> = MutableTFlow(network)
 

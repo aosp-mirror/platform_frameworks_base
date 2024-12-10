@@ -183,30 +183,9 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.OldTitle">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:paddingTop">12dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">24sp</item>
-    </style>
-
-    <style name="TextAppearance.AuthCredential.OldSubtitle">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="TextAppearance.AuthCredential.OldDescription">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
     <style name="TextAppearance.AuthCredential.LogoDescription" parent="TextAppearance.Material3.LabelLarge" >
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-        <item name="android:gravity">@integer/biometric_dialog_text_gravity</item>
+        <item name="android:gravity">center_horizontal</item>
         <item name="android:maxLines">1</item>
         <item name="android:textColor">@androidprv:color/materialColorOnSurfaceVariant</item>
         <item name="android:ellipsize">end</item>

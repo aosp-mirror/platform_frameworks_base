@@ -615,7 +615,7 @@ private fun Shortcut(
             }
             .focusable(interactionSource = interactionSource)
             .padding(8.dp)
-            .semantics { contentDescription = shortcut.contentDescription }
+            .semantics(mergeDescendants = true) { contentDescription = shortcut.contentDescription }
     ) {
         Row(
             modifier =

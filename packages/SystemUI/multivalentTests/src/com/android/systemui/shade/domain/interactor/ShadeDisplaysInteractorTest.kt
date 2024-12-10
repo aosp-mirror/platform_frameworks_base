@@ -16,32 +16,26 @@
 
 package com.android.systemui.shade.domain.interactor
 
-import android.content.mockedContext
 import android.content.res.Configuration
 import android.content.res.mockResources
 import android.view.Display
-import android.view.mockWindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.scene.ui.view.mockShadeRootView
 import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.inOrder
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class ShadeDisplaysInteractorTest : SysuiTestCase() {
@@ -49,9 +43,7 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
     private val shadeRootview = kosmos.mockShadeRootView
     private val positionRepository = kosmos.fakeShadeDisplaysRepository
-    private val shadeContext = kosmos.mockedContext
-    private val testScope = kosmos.testScope
-    private val shadeWm = kosmos.mockWindowManager
+    private val shadeContext = kosmos.mockedWindowContext
     private val resources = kosmos.mockResources
     private val configuration = mock<Configuration>()
     private val display = mock<Display>()
@@ -66,8 +58,8 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
         whenever(resources.configuration).thenReturn(configuration)
 
         whenever(shadeContext.displayId).thenReturn(0)
-        whenever(shadeContext.getSystemService(any())).thenReturn(shadeWm)
         whenever(shadeContext.resources).thenReturn(resources)
+        whenever(shadeContext.display).thenReturn(display)
     }
 
     @Test
@@ -77,7 +69,7 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
         underTest.start()
 
-        verifyNoMoreInteractions(shadeWm)
+        verify(shadeContext, never()).reparentToDisplay(any())
     }
 
     @Test
@@ -87,24 +79,6 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
 
         underTest.start()
 
-        inOrder(shadeWm).apply {
-            verify(shadeWm).removeView(eq(shadeRootview))
-            verify(shadeWm).addView(eq(shadeRootview), any())
-        }
-    }
-
-    @Test
-    fun start_shadePositionChanges_removedThenAdded() {
-        whenever(display.displayId).thenReturn(0)
-        positionRepository.setDisplayId(0)
-        underTest.start()
-
-        positionRepository.setDisplayId(1)
-        testScope.advanceUntilIdle()
-
-        inOrder(shadeWm).apply {
-            verify(shadeWm).removeView(eq(shadeRootview))
-            verify(shadeWm).addView(eq(shadeRootview), any())
-        }
+        verify(shadeContext).reparentToDisplay(eq(1))
     }
 }

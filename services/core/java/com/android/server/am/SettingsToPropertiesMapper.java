@@ -143,6 +143,7 @@ public class SettingsToPropertiesMapper {
         "tv_os",
         "aaos_carframework_triage",
         "aaos_performance_triage",
+        "aaos_input_triage",
         "aaos_user_triage",
         "aaos_window_triage",
         "aaos_audio_triage",

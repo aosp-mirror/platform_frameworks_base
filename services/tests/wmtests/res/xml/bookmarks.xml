@@ -48,7 +48,7 @@
 
     <bookmark
         category="android.intent.category.APP_CONTACTS"
-        androidprv:keycode="KEYCODE_C"
+        androidprv:keycode="KEYCODE_P"
         androidprv:modifierState="META|SHIFT" />
 
     <bookmark
