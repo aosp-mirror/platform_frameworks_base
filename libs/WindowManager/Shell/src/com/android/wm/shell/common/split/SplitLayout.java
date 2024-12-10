@@ -112,11 +112,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private static final int FLING_EXIT_DURATION = 450;
     private static final int FLING_OFFSCREEN_DURATION = 500;
 
-    /** A split ratio used on larger screens, where we can fit both apps onscreen. */
-    public static final float ONSCREEN_ONLY_ASYMMETRIC_RATIO = 0.33f;
-    /** A split ratio used on smaller screens, where we place one app mostly offscreen. */
-    public static final float OFFSCREEN_ASYMMETRIC_RATIO = 0.1f;
-
     // Here are some (arbitrarily decided) layer definitions used during animations to make sure the
     // layers stay in order. (During transitions, everything is reparented onto a transition root
     // and can be freely relayered.)
@@ -236,7 +231,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         updateDividerConfig(mContext);
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        updateLayouts();
         mInteractionJankMonitor = InteractionJankMonitor.getInstance();
         resetDividerPosition();
         updateInvisibleRect();
@@ -490,7 +485,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mIsLargeScreen = configuration.smallestScreenWidthDp >= 600;
         mIsLeftRightSplit = SplitScreenUtils.isLeftRightSplit(mAllowLeftRightSplitInPortrait,
                 configuration);
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        updateLayouts();
         updateDividerConfig(mContext);
         initDividerPosition(mTempRect, wasLeftRightSplit);
         updateInvisibleRect();
@@ -518,7 +513,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRootBounds.set(tmpRect);
         mIsLeftRightSplit = SplitScreenUtils.isLeftRightSplit(mAllowLeftRightSplitInPortrait,
                 mIsLargeScreen, mRootBounds.width() >= mRootBounds.height());
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        updateLayouts();
         initDividerPosition(mTempRect, wasLeftRightSplit);
     }
 
@@ -652,7 +647,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         if (!mPinnedTaskbarInsets.equals(pinnedTaskbarInsets)) {
             mPinnedTaskbarInsets = pinnedTaskbarInsets;
             // Refresh the DividerSnapAlgorithm.
-            mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+            updateLayouts();
             // If the divider is no longer placed on a snap point, animate it to the nearest one.
             DividerSnapAlgorithm.SnapTarget snapTarget =
                     findSnapTarget(mDividerPosition, 0, false /* hardDismiss */);
@@ -824,8 +819,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
-    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds) {
-        final Rect insets = getDisplayStableInsets(context);
+    /**
+     * (Re)calculates the split screen logic for this particular display/orientation. Refreshes the
+     * DividerSnapAlgorithm, which controls divider snap points, and populates a map in SplitState
+     * with bounds for all valid split layouts.
+     */
+    private void updateLayouts() {
+        // Update SplitState map
+
+        if (Flags.enableFlexibleTwoAppSplit()) {
+            mSplitState.populateLayouts(
+                    mRootBounds, mDividerSize, mIsLeftRightSplit, mPinnedTaskbarInsets.toRect());
+        }
+
+        // Get new DividerSnapAlgorithm
+
+        final Rect insets = getDisplayStableInsets(mContext);
 
         // Make split axis insets value same as the larger one to avoid bounds1 and bounds2
         // have difference for avoiding size-compat mode when switching unresizable apps in
@@ -835,10 +844,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             insets.set(insets.left, largerInsets, insets.right, largerInsets);
         }
 
-        return new DividerSnapAlgorithm(
-                context.getResources(),
-                rootBounds.width(),
-                rootBounds.height(),
+        mDividerSnapAlgorithm = new DividerSnapAlgorithm(
+                mContext.getResources(),
+                mRootBounds.width(),
+                mRootBounds.height(),
                 mDividerSize,
                 mIsLeftRightSplit,
                 insets,

@@ -708,6 +708,14 @@ public class FrameworkServicesModule {
         return context.getSystemService(WindowManager.class);
     }
 
+    /** A window manager working for the default display only. */
+    @Provides
+    @Singleton
+    @Main
+    static WindowManager provideMainWindowManager(WindowManager windowManager) {
+        return windowManager;
+    }
+
     @Provides
     @Singleton
     static ViewCaptureAwareWindowManager provideViewCaptureAwareWindowManager(

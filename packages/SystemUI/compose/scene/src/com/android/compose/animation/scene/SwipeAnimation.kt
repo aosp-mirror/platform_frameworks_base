@@ -337,13 +337,6 @@ internal class SwipeAnimation<T : ContentKey>(
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
         val initialProgress = progress
-        // Skip the animation if we have already reached the target content and the overscroll does
-        // not animate anything.
-        val hasReachedTargetContent =
-            (targetContent == toContent && initialProgress >= 1f) ||
-                (targetContent == fromContent && initialProgress <= 0f)
-        val skipAnimation =
-            hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
 
         val targetContent =
             if (targetContent != currentContent && !canChangeContent(targetContent)) {
@@ -351,6 +344,14 @@ internal class SwipeAnimation<T : ContentKey>(
             } else {
                 targetContent
             }
+
+        // Skip the animation if we have already reached the target content and the overscroll does
+        // not animate anything.
+        val hasReachedTargetContent =
+            (targetContent == toContent && initialProgress >= 1f) ||
+                (targetContent == fromContent && initialProgress <= 0f)
+        val skipAnimation =
+            hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
 
         val targetOffset =
             if (targetContent == fromContent) {

@@ -33,7 +33,6 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -246,51 +245,57 @@ constructor(
     private fun Content() {
         PlatformTheme(isDarkTheme = true) {
             ProvideShortcutHelperIndication(interactionsConfig = interactionsConfig()) {
-                AnimatedVisibility(
-                    visible = viewModel.isQsVisibleAndAnyShadeExpanded,
-                    modifier =
-                        Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
-                            // Clipping before translation to match QSContainerImpl.onDraw
-                            .offset {
-                                IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
-                            }
-                            .thenIf(notificationScrimClippingParams.isEnabled) {
-                                Modifier.notificationScrimClip {
-                                    notificationScrimClippingParams.params
+                if (viewModel.isQsVisibleAndAnyShadeExpanded) {
+                    Box(
+                        modifier =
+                            Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
+                                // Clipping before translation to match QSContainerImpl.onDraw
+                                .offset {
+                                    IntOffset(
+                                        x = 0,
+                                        y = viewModel.viewTranslationY.fastRoundToInt(),
+                                    )
                                 }
+                                .thenIf(notificationScrimClippingParams.isEnabled) {
+                                    Modifier.notificationScrimClip {
+                                        notificationScrimClippingParams.params
+                                    }
+                                }
+                                // Disable touches in the whole composable while the mirror is
+                                // showing. While the mirror is showing, an ancestor of the
+                                // ComposeView is made alpha 0, but touches are still being captured
+                                // by the composables.
+                                .gesturesDisabled(viewModel.showingMirror)
+                    ) {
+                        val isEditing by
+                            viewModel.containerViewModel.editModeViewModel.isEditing
+                                .collectAsStateWithLifecycle()
+                        val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                        AnimatedContent(
+                            targetState = isEditing,
+                            transitionSpec = {
+                                fadeIn(animationSpecEditMode) togetherWith
+                                    fadeOut(animationSpecEditMode)
+                            },
+                            label = "EditModeAnimatedContent",
+                        ) { editing ->
+                            if (editing) {
+                                val qqsPadding = viewModel.qqsHeaderHeight
+                                EditMode(
+                                    viewModel = viewModel.containerViewModel.editModeViewModel,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(top = { qqsPadding })
+                                            .padding(
+                                                horizontal = {
+                                                    QuickSettingsShade.Dimensions.Padding
+                                                        .roundToPx()
+                                                }
+                                            ),
+                                )
+                            } else {
+                                CollapsableQuickSettingsSTL()
                             }
-                            // Disable touches in the whole composable while the mirror is showing.
-                            // While the mirror is showing, an ancestor of the ComposeView is made
-                            // alpha 0, but touches are still being captured by the composables.
-                            .gesturesDisabled(viewModel.showingMirror),
-                ) {
-                    val isEditing by
-                        viewModel.containerViewModel.editModeViewModel.isEditing
-                            .collectAsStateWithLifecycle()
-                    val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                    AnimatedContent(
-                        targetState = isEditing,
-                        transitionSpec = {
-                            fadeIn(animationSpecEditMode) togetherWith
-                                fadeOut(animationSpecEditMode)
-                        },
-                        label = "EditModeAnimatedContent",
-                    ) { editing ->
-                        if (editing) {
-                            val qqsPadding = viewModel.qqsHeaderHeight
-                            EditMode(
-                                viewModel = viewModel.containerViewModel.editModeViewModel,
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .padding(top = { qqsPadding })
-                                        .padding(
-                                            horizontal = {
-                                                QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                            }
-                                        ),
-                            )
-                        } else {
-                            CollapsableQuickSettingsSTL()
                         }
                     }
                 }

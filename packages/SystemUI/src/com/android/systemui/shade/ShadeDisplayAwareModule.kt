@@ -26,12 +26,12 @@ import android.window.WindowContext
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.ConfigurationStateImpl
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
@@ -49,6 +49,7 @@ import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import javax.inject.Provider
+import javax.inject.Qualifier
 
 /**
  * Module responsible for managing display-specific components and resources for the notification
@@ -133,7 +134,7 @@ object ShadeDisplayAwareModule {
     fun provideShadeWindowConfigurationController(
         @ShadeDisplayAware shadeContext: Context,
         factory: ConfigurationControllerImpl.Factory,
-        @GlobalConfig globalConfigController: ConfigurationController,
+        @Main globalConfigController: ConfigurationController,
     ): ConfigurationController {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(shadeContext)
@@ -159,7 +160,7 @@ object ShadeDisplayAwareModule {
         factory: ConfigurationStateImpl.Factory,
         @ShadeDisplayAware configurationController: ConfigurationController,
         @ShadeDisplayAware context: Context,
-        @GlobalConfig configurationState: ConfigurationState,
+        @Main configurationState: ConfigurationState,
     ): ConfigurationState {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(context, configurationController)
@@ -175,7 +176,7 @@ object ShadeDisplayAwareModule {
         factory: ConfigurationRepositoryImpl.Factory,
         @ShadeDisplayAware configurationController: ConfigurationController,
         @ShadeDisplayAware context: Context,
-        @GlobalConfig globalConfigurationRepository: ConfigurationRepository,
+        @Main globalConfigurationRepository: ConfigurationRepository,
     ): ConfigurationRepository {
         return if (ShadeWindowGoesAround.isEnabled) {
             factory.create(context, configurationController)
@@ -189,7 +190,7 @@ object ShadeDisplayAwareModule {
     @ShadeDisplayAware
     fun provideShadeAwareConfigurationInteractor(
         @ShadeDisplayAware configurationRepository: ConfigurationRepository,
-        @GlobalConfig configurationInteractor: ConfigurationInteractor,
+        @Main configurationInteractor: ConfigurationInteractor,
     ): ConfigurationInteractor {
         return if (ShadeWindowGoesAround.isEnabled) {
             ConfigurationInteractorImpl(configurationRepository)
@@ -237,9 +238,23 @@ object ShadeDisplayAwareModule {
             CoreStartable.NOP
         }
     }
+
+    @Provides
+    @ShadeOnDefaultDisplayWhenLocked
+    fun provideShadeOnDefaultDisplayWhenLocked(): Boolean = true
 }
 
 @Module
 internal interface OptionalShadeDisplayAwareBindings {
     @BindsOptionalOf fun bindOptionalOfWindowRootView(): WindowRootView
 }
+
+/**
+ * Annotates the boolean value that defines whether the shade window should go back to the default
+ * display when the keyguard is visible.
+ *
+ * As of today (Dec 2024), This is a configuration parameter provided in the dagger graph as the
+ * final policy around keyguard display is still under discussion, and will be evaluated based on
+ * how well this solution behaves from the performance point of view.
+ */
+@Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class ShadeOnDefaultDisplayWhenLocked

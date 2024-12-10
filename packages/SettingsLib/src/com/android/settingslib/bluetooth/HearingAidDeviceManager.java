@@ -18,7 +18,6 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothHapClient;
 import android.bluetooth.BluetoothHearingAid;
-import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.le.ScanFilter;
@@ -432,8 +431,7 @@ public class HearingAidDeviceManager {
                 p -> p instanceof HapClientProfile)) {
             int audioLocation = leAudioProfile.getAudioLocation(cachedDevice.getDevice());
             int hearingAidType = hapClientProfile.getHearingAidType(cachedDevice.getDevice());
-            if (audioLocation != BluetoothLeAudio.AUDIO_LOCATION_INVALID
-                    && hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
+            if (hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
                 final HearingAidInfo info = new HearingAidInfo.Builder()
                         .setLeAudioLocation(audioLocation)
                         .setHapDeviceType(hearingAidType)
