@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -457,6 +458,30 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         assertThat(draggable.onDragStartedPointersDown).isEqualTo(6)
     }
 
+    @Test
+    fun shouldStartDrag() {
+        val draggable = TestDraggable()
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation))
+            }
+
+        // Drag in one direction.
+        draggable.shouldStartDrag = false
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(touchSlop.toOffset())
+        }
+        assertThat(draggable.onDragStartedCalled).isFalse()
+
+        // Drag in the other direction.
+        draggable.shouldStartDrag = true
+        rule.onRoot().performTouchInput { moveBy(-touchSlop.toOffset()) }
+        assertThat(draggable.onDragStartedCalled).isTrue()
+        assertThat(draggable.onDragStartedSign).isEqualTo(-1f)
+        assertThat(draggable.onDragDelta).isEqualTo(0f)
+    }
+
     private fun ComposeContentTestRule.setContentWithTouchSlop(
         content: @Composable () -> Unit
     ): Float {
@@ -481,6 +506,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         private val onDragStopped: suspend (Float) -> Float = { it },
         private val shouldConsumeNestedScroll: (Float) -> Boolean = { true },
     ) : NestedDraggable {
+        var shouldStartDrag = true
         var onDragStartedCalled = false
         var onDragCalled = false
         var onDragStoppedCalled = false
@@ -489,6 +515,8 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         var onDragStartedSign = 0f
         var onDragStartedPointersDown = 0
         var onDragDelta = 0f
+
+        override fun shouldStartDrag(change: PointerInputChange): Boolean = shouldStartDrag
 
         override fun onDragStarted(
             position: Offset,

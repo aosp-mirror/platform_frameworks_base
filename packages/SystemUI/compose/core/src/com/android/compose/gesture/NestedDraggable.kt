@@ -41,6 +41,7 @@ import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
@@ -66,6 +67,16 @@ import kotlinx.coroutines.launch
  * scrollable.
  */
 interface NestedDraggable {
+    /**
+     * Return whether we should start a drag given the pointer [change].
+     *
+     * This is called when the touch slop is reached. If this returns `true`, then the [change] will
+     * be consumed and [onDragStarted] will be called. If this returns `false`, then the current
+     * touch slop detection will be reset and restarted at the current
+     * [change position][PointerInputChange.position].
+     */
+    fun shouldStartDrag(change: PointerInputChange): Boolean = true
+
     /**
      * Called when a drag is started in the given [position] (*before* dragging the touch slop) and
      * in the direction given by [sign], with the given number of [pointersDown] when the touch slop
@@ -248,8 +259,14 @@ private class NestedDraggableNode(
 
             var overSlop = 0f
             val onTouchSlopReached = { change: PointerInputChange, over: Float ->
-                change.consume()
-                overSlop = over
+                if (draggable.shouldStartDrag(change)) {
+                    change.consume()
+                    overSlop = over
+                }
+
+                // If shouldStartDrag() returned false, then we didn't consume the event and
+                // awaitTouchSlopOrCancellation() will reset the touch slop detector so that the
+                // user has to drag by at least the touch slop again.
             }
 
             suspend fun AwaitPointerEventScope.awaitTouchSlopOrCancellation(
@@ -288,7 +305,17 @@ private class NestedDraggableNode(
 
             if (drag != null) {
                 velocityTracker.resetTracking()
-                val sign = (drag.position - down.position).toFloat().sign
+                val sign = drag.positionChangeIgnoreConsumed().toFloat().sign
+                check(sign != 0f) {
+                    buildString {
+                        append("sign is equal to 0 ")
+                        append("touchSlop ${currentValueOf(LocalViewConfiguration).touchSlop} ")
+                        append("down.position ${down.position} ")
+                        append("drag.position ${drag.position} ")
+                        append("drag.previousPosition ${drag.previousPosition}")
+                    }
+                }
+
                 check(pointersDownCount > 0) { "pointersDownCount is equal to $pointersDownCount" }
                 val wrappedController =
                     WrappedController(
