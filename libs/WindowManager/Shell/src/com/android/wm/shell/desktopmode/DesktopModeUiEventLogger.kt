@@ -145,7 +145,11 @@ class DesktopModeUiEventLogger(
         @UiEvent(doc = "Moving the desktop window by dragging the header")
         DESKTOP_WINDOW_MOVE_BY_HEADER_DRAG(2021),
         @UiEvent(doc = "Double tap on the window header to refocus a desktop window")
-        DESKTOP_WINDOW_HEADER_TAP_TO_REFOCUS(2022);
+        DESKTOP_WINDOW_HEADER_TAP_TO_REFOCUS(2022),
+        @UiEvent(doc = "Enter multi-instance by using the New Window button")
+        DESKTOP_WINDOW_MULTI_INSTANCE_NEW_WINDOW_CLICK(2069),
+        @UiEvent(doc = "Enter multi-instance by clicking an icon in the Manage Windows menu")
+        DESKTOP_WINDOW_MULTI_INSTANCE_MANAGE_WINDOWS_ICON_CLICK(2070);
 
         override fun getId(): Int = mId
     }
