@@ -157,6 +157,19 @@
     <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_SYSTEM_VENDOR_INTELLIGENCE_ROLE_ENABLED)
          @hide @SystemApi -->
     <public name="config_systemVendorIntelligence" />
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceIntelligenceService"></public>
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceSandboxedInferenceService"></public>
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace"></public>
+
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
