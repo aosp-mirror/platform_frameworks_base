@@ -14,19 +14,49 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.IntDef;
 import android.content.pm.UserInfo;
 import android.util.SparseArray;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public interface NotificationLockscreenUserManager {
     String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     String NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION
             = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            prefix = {"REDACTION_TYPE_"},
+            value = {
+                    REDACTION_TYPE_NONE,
+                    REDACTION_TYPE_PUBLIC,
+                    REDACTION_TYPE_SENSITIVE_CONTENT})
+    @interface RedactionType {}
+
+    /**
+     * Indicates that a notification requires no redaction
+     */
+    int REDACTION_TYPE_NONE = 0;
+
+    /**
+     * Indicates that a notification should have all content redacted, showing the public view.
+     * Overrides all other redaction types.
+     */
+    int REDACTION_TYPE_PUBLIC = 1;
+
+    /**
+     * Indicates that a notification should have its main content redacted, due to detected
+     * sensitive content, such as a One-Time Password
+     */
+    int REDACTION_TYPE_SENSITIVE_CONTENT = 1 << 1;
+
     /**
      * @param userId user Id
-     * @return true if we re on a secure lock screen
+     * @return true if we're on a secure lock screen
      */
     boolean isLockscreenPublicMode(int userId);
 
@@ -68,7 +98,13 @@ public interface NotificationLockscreenUserManager {
 
     void updatePublicMode();
 
-    boolean needsRedaction(NotificationEntry entry);
+    /**
+     * Determine what type of redaction is needed, if any. Returns REDACTION_TYPE_NONE if no
+     * redaction type is needed, REDACTION_TYPE_PUBLIC if private notifications are blocked, and
+     * REDACTION_TYPE_SENSITIVE_CONTENT if sensitive content is detected, and REDACTION_TYPE_PUBLIC
+     * doesn't apply.
+     */
+    @RedactionType int getRedactionType(NotificationEntry entry);
 
     /**
      * Has the given user chosen to allow their private (full) notifications to be shown even
