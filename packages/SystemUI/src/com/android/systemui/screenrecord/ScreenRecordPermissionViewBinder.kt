@@ -70,6 +70,7 @@ class ScreenRecordPermissionViewBinder(
     }
 
     companion object {
+
         private val RECORDABLE_DISPLAY_TYPES =
             intArrayOf(
                 Display.TYPE_OVERLAY,
@@ -83,8 +84,10 @@ class ScreenRecordPermissionViewBinder(
                 .mediaProjectionConnectedDisplayNoVirtualDevice()
 
         fun createOptionList(displayManager: DisplayManager): List<ScreenShareOption> {
-            if (!com.android.media.projection.flags.Flags.mediaProjectionConnectedDisplay()) {
-                return listOf(
+            val connectedDisplays = getConnectedDisplays(displayManager)
+
+            val options =
+                mutableListOf(
                     ScreenShareOption(
                         SINGLE_APP,
                         R.string.screenrecord_permission_dialog_option_text_single_app,
@@ -103,33 +106,10 @@ class ScreenRecordPermissionViewBinder(
                         displayName = Build.MODEL,
                     ),
                 )
-            }
 
-            return listOf(
-                ScreenShareOption(
-                    SINGLE_APP,
-                    R.string.screenrecord_permission_dialog_option_text_single_app,
-                    R.string.screenrecord_permission_dialog_warning_single_app,
-                    startButtonText =
-                        R.string
-                            .media_projection_entry_generic_permission_dialog_continue_single_app,
-                ),
-                ScreenShareOption(
-                    ENTIRE_SCREEN,
-                    R.string.screenrecord_permission_dialog_option_text_entire_screen_for_display,
-                    R.string.screenrecord_permission_dialog_warning_entire_screen,
-                    startButtonText =
-                        R.string.screenrecord_permission_dialog_continue_entire_screen,
-                    displayId = Display.DEFAULT_DISPLAY,
-                    displayName = Build.MODEL,
-                ),
-            ) +
-                displayManager.displays
-                    .filter {
-                        it.displayId != Display.DEFAULT_DISPLAY &&
-                            (!filterDeviceTypeFlag || it.type in RECORDABLE_DISPLAY_TYPES)
-                    }
-                    .map {
+            if (connectedDisplays.isNotEmpty()) {
+                options +=
+                    connectedDisplays.map {
                         ScreenShareOption(
                             ENTIRE_SCREEN,
                             R.string
@@ -144,6 +124,18 @@ class ScreenRecordPermissionViewBinder(
                             displayName = it.name,
                         )
                     }
+            }
+            return options.toList()
+        }
+
+        private fun getConnectedDisplays(displayManager: DisplayManager): List<Display> {
+            if (!com.android.media.projection.flags.Flags.mediaProjectionConnectedDisplay()) {
+                return emptyList()
+            }
+            return displayManager.displays.filter {
+                it.displayId != Display.DEFAULT_DISPLAY &&
+                    (!filterDeviceTypeFlag || it.type in RECORDABLE_DISPLAY_TYPES)
+            }
         }
     }
 }
