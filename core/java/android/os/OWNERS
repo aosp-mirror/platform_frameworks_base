@@ -115,6 +115,9 @@ per-file ProfilingServiceManager.java = file:/PERFORMANCE_OWNERS
 # Performance
 per-file IpcDataCache.java = file:/PERFORMANCE_OWNERS
 
+# Processes, threads, and scheduling
+per-file Process.java = file:/PERFORMANCE_OWNERS
+
 # Memory
 per-file OomKillRecord.java = file:/MEMORY_OWNERS
 
