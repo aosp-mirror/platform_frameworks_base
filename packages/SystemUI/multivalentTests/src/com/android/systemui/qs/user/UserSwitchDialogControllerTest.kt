@@ -56,26 +56,16 @@ import org.mockito.kotlin.any
 @RunWith(AndroidJUnit4::class)
 class UserSwitchDialogControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var dialogFactory: SystemUIDialog.Factory
-    @Mock
-    private lateinit var dialog: SystemUIDialog
-    @Mock
-    private lateinit var falsingManager: FalsingManager
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var userDetailViewAdapter: UserDetailView.Adapter
-    @Mock
-    private lateinit var launchExpandable: Expandable
-    @Mock
-    private lateinit var neutralButton: Button
-    @Mock
-    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
-    @Mock
-    private lateinit var uiEventLogger: UiEventLogger
-    @Captor
-    private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
+    @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
+    @Mock private lateinit var dialog: SystemUIDialog
+    @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var userDetailViewAdapter: UserDetailView.Adapter
+    @Mock private lateinit var launchExpandable: Expandable
+    @Mock private lateinit var neutralButton: Button
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Captor private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
 
     private lateinit var controller: UserSwitchDialogController
 
@@ -86,14 +76,15 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         whenever(dialog.context).thenReturn(mContext)
         whenever(dialogFactory.create(eq(mContext))).thenReturn(dialog)
 
-        controller = UserSwitchDialogController(
-            { userDetailViewAdapter },
-            activityStarter,
-            falsingManager,
-            mDialogTransitionAnimator,
-            uiEventLogger,
-            dialogFactory
-        )
+        controller =
+            UserSwitchDialogController(
+                { userDetailViewAdapter },
+                activityStarter,
+                falsingManager,
+                mDialogTransitionAnimator,
+                uiEventLogger,
+                dialogFactory,
+            )
     }
 
     @Test
@@ -150,7 +141,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
             .postStartActivityDismissingKeyguard(
                 argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
                 eq(0),
-                eq(null)
+                eq(null),
             )
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
     }
