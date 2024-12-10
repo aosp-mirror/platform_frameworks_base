@@ -64,7 +64,7 @@ class UserSwitchDialogController @Inject constructor(
      * [userDetailViewAdapterProvider] and show it as launched from [expandable].
      */
     fun showDialog(context: Context, expandable: Expandable) {
-        with(dialogFactory.create()) {
+        with(dialogFactory.create(context)) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
 

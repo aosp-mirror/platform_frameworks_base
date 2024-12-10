@@ -32,7 +32,6 @@ import com.android.systemui.qs.PseudoGridView
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -51,6 +50,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -84,7 +84,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(dialog.context).thenReturn(mContext)
-        whenever(dialogFactory.create()).thenReturn(dialog)
+        whenever(dialogFactory.create(eq(mContext))).thenReturn(dialog)
 
         controller = UserSwitchDialogController(
             { userDetailViewAdapter },

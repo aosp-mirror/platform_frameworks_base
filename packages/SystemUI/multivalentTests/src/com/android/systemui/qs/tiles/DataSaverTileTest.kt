@@ -46,6 +46,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.eq
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
 
@@ -79,7 +80,7 @@ class DataSaverTileTest(flags: FlagsParameterization) : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         whenever(mHost.context).thenReturn(mContext)
-        whenever(systemUIDialogFactory.create()).thenReturn(systemUIDialog)
+        whenever(systemUIDialogFactory.create(eq(mContext))).thenReturn(systemUIDialog)
 
         tile =
             DataSaverTile(
