@@ -43,7 +43,9 @@ class RadioPreferencesTest {
             RadioPreferences(remember {
                 object : ListPreferenceModel {
                     override val title = TITLE
-                    override val options = emptyList<ListPreferenceOption>()
+                    override val options = listOf(
+                        ListPreferenceOption(id = 1, text = "A")
+                    )
                     override val selectedId = mutableIntStateOf(0)
                     override val onIdSelected: (Int) -> Unit = {}
                 }

@@ -16,8 +16,6 @@
 
 package com.android.server.ondeviceintelligence;
 
-import static android.app.ondeviceintelligence.flags.Flags.enableOnDeviceIntelligenceModule;
-
 import static android.app.ondeviceintelligence.OnDeviceIntelligenceManager.ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.DEVICE_CONFIG_UPDATE_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BROADCAST_INTENT;
@@ -180,10 +178,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         publishBinderService(
                 Context.ON_DEVICE_INTELLIGENCE_SERVICE, getOnDeviceIntelligenceManagerService(),
                 /* allowIsolated = */ true);
-        if (enableOnDeviceIntelligenceModule()) {
-            LocalManagerRegistry.addManager(OnDeviceIntelligenceManagerLocal.class,
+        LocalManagerRegistry.addManager(OnDeviceIntelligenceManagerLocal.class,
                     this::getRemoteInferenceServiceUid);
-        }
     }
 
     @Override
@@ -195,20 +191,6 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                     (properties) -> onDeviceConfigChange(properties.getKeyset()));
 
             mIsServiceEnabled = isServiceEnabled();
-        }
-    }
-
-    @Override
-    public void onUserUnlocked(@NonNull TargetUser user) {
-        Slog.d(TAG, "onUserUnlocked: " + user.getUserHandle());
-        //connect to remote services(if available) during boot.
-        if (user.getUserHandle().equals(UserHandle.SYSTEM)) {
-            try {
-                ensureRemoteInferenceServiceInitialized(/* throwServiceIfInvalid */ false);
-                ensureRemoteIntelligenceServiceInitialized(/* throwServiceIfInvalid */ false);
-            } catch (Exception e) {
-                Slog.w(TAG, "Couldn't pre-start remote ondeviceintelligence services.", e);
-            }
         }
     }
 

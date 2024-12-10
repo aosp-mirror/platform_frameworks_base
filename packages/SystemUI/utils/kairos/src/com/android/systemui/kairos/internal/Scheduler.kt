@@ -21,44 +21,34 @@ package com.android.systemui.kairos.internal
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.PriorityBlockingQueue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 internal interface Scheduler {
-    suspend fun schedule(depth: Int, node: MuxNode<*, *, *>)
+    fun schedule(depth: Int, node: MuxNode<*, *, *>)
 
-    suspend fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>)
+    fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>)
 }
 
 internal class SchedulerImpl : Scheduler {
     val enqueued = ConcurrentHashMap<MuxNode<*, *, *>, Any>()
     val scheduledQ = PriorityBlockingQueue<Pair<Int, MuxNode<*, *, *>>>(16, compareBy { it.first })
-    val chan = Channel<Pair<Int, MuxNode<*, *, *>>>(Channel.UNLIMITED)
 
-    override suspend fun schedule(depth: Int, node: MuxNode<*, *, *>) {
+    override fun schedule(depth: Int, node: MuxNode<*, *, *>) {
         if (enqueued.putIfAbsent(node, node) == null) {
-            chan.send(Pair(depth, node))
+            scheduledQ.add(Pair(depth, node))
         }
     }
 
-    override suspend fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>) {
+    override fun scheduleIndirect(indirectDepth: Int, node: MuxNode<*, *, *>) {
         schedule(Int.MIN_VALUE + indirectDepth, node)
-    }
-
-    suspend fun activate() {
-        for (nodeSchedule in chan) {
-            scheduledQ.add(nodeSchedule)
-            drainChan()
-        }
     }
 
     internal suspend fun drainEval(network: Network) {
         drain { runStep ->
             runStep { muxNode -> network.evalScope { muxNode.visit(this) } }
             // If any visited MuxPromptNodes had their depths increased, eagerly propagate those
-            // depth
-            // changes now before performing further network evaluation.
+            // depth changes now before performing further network evaluation.
             network.compactor.drainCompact()
         }
     }
@@ -71,16 +61,9 @@ internal class SchedulerImpl : Scheduler {
         crossinline onStep:
             suspend (runStep: suspend (visit: suspend (MuxNode<*, *, *>) -> Unit) -> Unit) -> Unit
     ): Unit = coroutineScope {
-        while (!chan.isEmpty || scheduledQ.isNotEmpty()) {
-            drainChan()
+        while (scheduledQ.isNotEmpty()) {
             val maxDepth = scheduledQ.peek()?.first ?: error("Unexpected empty scheduler")
             onStep { visit -> runStep(maxDepth, visit) }
-        }
-    }
-
-    private suspend fun drainChan() {
-        while (!chan.isEmpty) {
-            scheduledQ.add(chan.receive())
         }
     }
 

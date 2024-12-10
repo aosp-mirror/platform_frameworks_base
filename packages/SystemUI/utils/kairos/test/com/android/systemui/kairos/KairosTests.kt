@@ -1170,12 +1170,12 @@ class KairosTests {
                                     mergeIncrementally
                                         .onEach { println("patch: $it") }
                                         .foldMapIncrementally()
-                                        .flatMap { it.combineValues() }
+                                        .flatMap { it.combine() }
                                 }
                             }
                         }
                         .foldMapIncrementally()
-                        .flatMap { it.combineValues() }
+                        .flatMap { it.combine() }
 
                 accState.toStateFlow()
             }

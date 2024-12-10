@@ -28,6 +28,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.ShadeInterpolation
@@ -51,6 +52,7 @@ import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.QSEvent
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeLog
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -113,6 +115,7 @@ constructor(
     @Named(QUICK_QS_PANEL) val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) val qsMediaHost: MediaHost,
     @Named(QSFragmentComposeModule.QS_USING_MEDIA_PLAYER) private val usingMedia: Boolean,
+    private val uiEventLogger: UiEventLogger,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
 ) : Dumpable, ExclusiveActivatable() {
 
@@ -453,6 +456,14 @@ constructor(
 
     fun emitMotionEventForFalsingSwipeNested() {
         falsingInteractor.isFalseTouch(Classifier.QS_SWIPE_NESTED)
+    }
+
+    fun onQQSOpen() {
+        uiEventLogger.log(QSEvent.QQS_PANEL_EXPANDED)
+    }
+
+    fun onQSOpen() {
+        uiEventLogger.log(QSEvent.QS_PANEL_EXPANDED)
     }
 
     override suspend fun onActivated(): Nothing {

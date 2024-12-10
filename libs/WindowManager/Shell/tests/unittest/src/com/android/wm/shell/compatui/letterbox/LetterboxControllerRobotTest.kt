@@ -16,10 +16,8 @@
 
 package com.android.wm.shell.compatui.letterbox
 
-import android.content.Context
 import android.graphics.Rect
 import android.view.SurfaceControl
-import com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn
 import com.android.wm.shell.compatui.letterbox.LetterboxMatchers.asAnyMode
 import org.mockito.kotlin.any
 import org.mockito.kotlin.clearInvocations
@@ -31,10 +29,7 @@ import org.mockito.kotlin.verify
 /**
  * Robot to test [LetterboxController] implementations.
  */
-open class LetterboxControllerRobotTest(
-    ctx: Context,
-    controllerBuilder: (LetterboxSurfaceBuilder) -> LetterboxController
-) {
+abstract class LetterboxControllerRobotTest {
 
     companion object {
         @JvmStatic
@@ -44,20 +39,20 @@ open class LetterboxControllerRobotTest(
         private val TASK_ID = 20
     }
 
-    private val letterboxConfiguration: LetterboxConfiguration
-    private val surfaceBuilder: LetterboxSurfaceBuilder
-    private val letterboxController: LetterboxController
-    private val transaction: SurfaceControl.Transaction
-    private val parentLeash: SurfaceControl
+    lateinit var letterboxController: LetterboxController
+    val transaction: SurfaceControl.Transaction
+    val parentLeash: SurfaceControl
 
     init {
-        letterboxConfiguration = LetterboxConfiguration(ctx)
-        surfaceBuilder = LetterboxSurfaceBuilder(letterboxConfiguration)
-        letterboxController = controllerBuilder(surfaceBuilder)
         transaction = getTransactionMock()
         parentLeash = mock<SurfaceControl>()
-        spyOn(surfaceBuilder)
     }
+
+    fun initController() {
+        letterboxController = buildController()
+    }
+
+    abstract fun buildController(): LetterboxController
 
     fun sendCreateSurfaceRequest(
         displayId: Int = DISPLAY_ID,
@@ -100,16 +95,6 @@ open class LetterboxControllerRobotTest(
 
     fun invokeDump() {
         letterboxController.dump()
-    }
-
-    fun checkSurfaceBuilderInvoked(times: Int = 1, name: String = "", callSite: String = "") {
-        verify(surfaceBuilder, times(times)).createSurface(
-            eq(transaction),
-            eq(parentLeash),
-            name.asAnyMode(),
-            callSite.asAnyMode(),
-            any()
-        )
     }
 
     fun checkTransactionRemovedInvoked(times: Int = 1) {

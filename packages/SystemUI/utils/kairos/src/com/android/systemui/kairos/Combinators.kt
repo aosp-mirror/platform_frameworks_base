@@ -17,6 +17,7 @@
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.util.These
+import com.android.systemui.kairos.util.WithPrev
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 import kotlinx.coroutines.flow.Flow
@@ -68,16 +69,6 @@ fun <A, B, C> TFlow<A>.samplePromptly(
                 is These.This -> just(transform(these.thiz.first, these.thiz.second))
             }
         }
-
-/**
- * Returns a [TState] containing a map with a snapshot of the current state of each [TState] in the
- * original map.
- */
-fun <K, A> Map<K, TState<A>>.combineValues(): TState<Map<K, A>> =
-    asIterable()
-        .map { (k, state) -> state.map { v -> k to v } }
-        .combine()
-        .map { entries -> entries.toMap() }
 
 /**
  * Returns a cold [Flow] that, when collected, emits from this [TFlow]. [network] is needed to
@@ -248,3 +239,14 @@ val <A> FrpStatefulMode<A>.compiledStateful: FrpStateful<TState<A>>
  */
 fun <A> FrpBuildScope.rebuildOn(rebuildSignal: TFlow<*>, spec: FrpSpec<A>): TState<A> =
     rebuildSignal.map { spec }.holdLatestSpec(spec)
+
+/**
+ * Like [stateChanges] but also includes the old value of this [TState].
+ *
+ * Shorthand for:
+ * ``` kotlin
+ *     stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
+ * ```
+ */
+val <A> TState<A>.transitions: TFlow<WithPrev<A, A>>
+    get() = stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
