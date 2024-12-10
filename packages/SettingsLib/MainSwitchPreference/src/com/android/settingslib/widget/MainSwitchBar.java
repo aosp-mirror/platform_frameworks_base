@@ -284,7 +284,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         }
     }
 
-    static class SavedState extends BaseSavedState {
+    public static class SavedState extends BaseSavedState {
         boolean mChecked;
         boolean mVisible;
 
