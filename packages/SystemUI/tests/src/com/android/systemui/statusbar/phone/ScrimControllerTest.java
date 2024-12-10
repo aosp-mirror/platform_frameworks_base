@@ -45,6 +45,8 @@ import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
@@ -152,6 +154,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private final FakeKeyguardTransitionRepository mKeyguardTransitionRepository =
             mKosmos.getKeyguardTransitionRepository();
     @Mock private KeyguardInteractor mKeyguardInteractor;
+    @Mock private TypedArray mMockTypedArray;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
@@ -233,8 +236,12 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext = spy(getContext());
-        when(mContext.getColor(com.android.internal.R.color.materialColorSurface))
-                .thenAnswer(invocation -> mSurfaceColor);
+        when(mContext.obtainStyledAttributes(
+                new int[]{com.android.internal.R.attr.materialColorSurface}))
+                .thenReturn(mMockTypedArray);
+
+        when(mMockTypedArray.getColorStateList(anyInt()))
+                .thenAnswer((invocation) -> ColorStateList.valueOf(mSurfaceColor));
 
         mScrimBehind = spy(new ScrimView(mContext));
         mScrimInFront = new ScrimView(mContext);

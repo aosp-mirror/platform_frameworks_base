@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
 import androidx.core.graphics.drawable.DrawableCompat
+import com.android.settingslib.Utils
 import com.android.systemui.res.R
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.EMERGENCY_BUTTON
 
@@ -44,7 +45,7 @@ abstract class KeyguardSimInputView(context: Context, attrs: AttributeSet) :
 
     override fun reloadColors() {
         super.reloadColors()
-        val imageColor = context.getColor(EMERGENCY_BUTTON)
+        val imageColor = Utils.getColorAttrDefaultColor(context, EMERGENCY_BUTTON)
         simImageView?.let {
             val wrappedDrawable = DrawableCompat.wrap(it.drawable)
             DrawableCompat.setTint(wrappedDrawable, imageColor)

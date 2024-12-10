@@ -17,6 +17,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <item android:state_hovered="false" android:state_focused="false" android:color="@android:color/transparent" />
-    <item android:state_focused="true" android:color="@androidprv:color/materialColorOnSurface" android:alpha=".1" />
-    <item android:state_hovered="true" android:color="@androidprv:color/materialColorOnSurface" android:alpha=".08" />
+    <item android:state_focused="true" android:color="?androidprv:attr/materialColorOnSurface" android:alpha=".1" />
+    <item android:state_hovered="true" android:color="?androidprv:attr/materialColorOnSurface" android:alpha=".08" />
 </selector>

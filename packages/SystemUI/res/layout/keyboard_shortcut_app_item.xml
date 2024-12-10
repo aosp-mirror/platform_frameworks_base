@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:paddingEnd="12dp"
             android:paddingBottom="4dp"
-            android:textColor="@androidprv:color/materialColorOnSurface"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="16sp"
             android:maxLines="5"

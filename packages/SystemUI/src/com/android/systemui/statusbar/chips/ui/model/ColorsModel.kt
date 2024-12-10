@@ -51,8 +51,9 @@ sealed interface ColorsModel {
         // the right text color. Right now, it has the right text color when the chip is first
         // created but the color doesn't update if dark theme changes.
         override fun text(context: Context) =
-            context.getColor(
-                com.android.internal.R.color.materialColorOnSurface
+            Utils.getColorAttrDefaultColor(
+                context,
+                com.android.internal.R.attr.materialColorOnSurface,
             )
     }
 

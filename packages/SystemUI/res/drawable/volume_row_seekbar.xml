@@ -26,7 +26,7 @@
         <shape>
             <size android:height="@dimen/volume_dialog_track_width" />
             <corners android:radius="@dimen/volume_dialog_panel_width_half" />
-            <solid android:color="@androidprv:color/materialColorOutlineVariant" />
+            <solid android:color="?androidprv:attr/materialColorOutlineVariant" />
         </shape>
     </item>
     <item android:id="@android:id/progress"

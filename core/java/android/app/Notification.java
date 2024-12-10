@@ -14839,7 +14839,10 @@ public class Notification implements Parcelable
 
             if (isColorized) {
                 if (rawColor == COLOR_DEFAULT) {
-                    mBackgroundColor = ctx.getColor(R.color.materialColorSecondary);
+                    int[] attrs = {R.attr.materialColorSecondary};
+                    try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
+                        mBackgroundColor = getColor(ta, 0, Color.WHITE);
+                    }
                 } else {
                     mBackgroundColor = rawColor;
                 }
@@ -14871,25 +14874,30 @@ public class Notification implements Parcelable
                 mRippleAlpha = 0x33;
             } else {
                 int[] attrs = {
+                        R.attr.materialColorSurfaceContainerHigh,
+                        R.attr.materialColorOnSurface,
+                        R.attr.materialColorOnSurfaceVariant,
+                        R.attr.materialColorPrimary,
+                        R.attr.materialColorSecondary,
+                        R.attr.materialColorTertiary,
+                        R.attr.materialColorOnTertiary,
+                        R.attr.materialColorTertiaryFixedDim,
+                        R.attr.materialColorOnTertiaryFixed,
                         R.attr.colorError,
                         R.attr.colorControlHighlight
                 };
-
-                mBackgroundColor = ctx.getColor(R.color.materialColorSurfaceContainerHigh);
-                mPrimaryTextColor = ctx.getColor(R.color.materialColorOnSurface);
-                mSecondaryTextColor = ctx.getColor(R.color.materialColorOnSurfaceVariant);
-                mPrimaryAccentColor = ctx.getColor(R.color.materialColorPrimary);
-                mSecondaryAccentColor = ctx.getColor(R.color.materialColorSecondary);
-                mTertiaryAccentColor = ctx.getColor(R.color.materialColorTertiary);
-                mOnTertiaryAccentTextColor = ctx.getColor(R.color.materialColorOnTertiary);
-                mTertiaryFixedDimAccentColor = ctx.getColor(
-                        R.color.materialColorTertiaryFixedDim);
-                mOnTertiaryFixedAccentTextColor = ctx.getColor(
-                        R.color.materialColorOnTertiaryFixed);
-
                 try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
-                    mErrorColor = getColor(ta, 0, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 1, 0x33ffffff));
+                    mBackgroundColor = getColor(ta, 0, nightMode ? Color.BLACK : Color.WHITE);
+                    mPrimaryTextColor = getColor(ta, 1, COLOR_INVALID);
+                    mSecondaryTextColor = getColor(ta, 2, COLOR_INVALID);
+                    mPrimaryAccentColor = getColor(ta, 3, COLOR_INVALID);
+                    mSecondaryAccentColor = getColor(ta, 4, COLOR_INVALID);
+                    mTertiaryAccentColor = getColor(ta, 5, COLOR_INVALID);
+                    mOnTertiaryAccentTextColor = getColor(ta, 6, COLOR_INVALID);
+                    mTertiaryFixedDimAccentColor = getColor(ta, 7, COLOR_INVALID);
+                    mOnTertiaryFixedAccentTextColor = getColor(ta, 8, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 9, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 10, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);

@@ -40,8 +40,8 @@ import androidx.annotation.WorkerThread
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.android.settingslib.Utils
-import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.res.R
+import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.maybeForceFullscreen
 import java.lang.ref.WeakReference
@@ -347,16 +347,16 @@ class PrivacyDialogV2(
     private fun getForegroundColor(active: Boolean) =
         Utils.getColorAttrDefaultColor(
             context,
-            if (active) com.android.internal.R.color.materialColorOnPrimaryFixed
-            else com.android.internal.R.color.materialColorOnSurface,
+            if (active) com.android.internal.R.attr.materialColorOnPrimaryFixed
+            else com.android.internal.R.attr.materialColorOnSurface
         )
 
     @ColorInt
     private fun getBackgroundColor(active: Boolean) =
         Utils.getColorAttrDefaultColor(
             context,
-            if (active) com.android.internal.R.color.materialColorPrimaryFixed
-            else com.android.internal.R.color.materialColorSurfaceContainerHigh,
+            if (active) com.android.internal.R.attr.materialColorPrimaryFixed
+            else com.android.internal.R.attr.materialColorSurfaceContainerHigh
         )
 
     private fun getMutableDrawable(@DrawableRes resId: Int) = context.getDrawable(resId)!!.mutate()

@@ -33,6 +33,6 @@
         android:fontFamily="google-sans-text"
         android:textAppearance="?attr/textAppearance"
         android:accessibilityHeading="true"
-        android:textColor="@color/materialColorPrimary"/>
+        android:textColor="?attr/materialColorPrimary"/>
 
 </LinearLayout>

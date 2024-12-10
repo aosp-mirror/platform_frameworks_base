@@ -16,8 +16,8 @@
 
 package com.android.compose.theme
 
-import android.annotation.ColorRes
 import android.content.Context
+import androidx.annotation.AttrRes
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -70,118 +70,118 @@ class PlatformThemeTest {
         val colorValues = mutableListOf<ColorValue>()
 
         fun onLaunch(colorScheme: ColorScheme, context: Context) {
-            fun addValue(name: String, materialValue: Color, @ColorRes color: Int) {
-                colorValues.add(ColorValue(name, materialValue, Color(context.getColor(color))))
+            fun addValue(name: String, materialValue: Color, @AttrRes attr: Int) {
+                colorValues.add(ColorValue(name, materialValue, colorAttr(context, attr)))
             }
 
-            addValue("primary", colorScheme.primary, R.color.materialColorPrimary)
-            addValue("onPrimary", colorScheme.onPrimary, R.color.materialColorOnPrimary)
+            addValue("primary", colorScheme.primary, R.attr.materialColorPrimary)
+            addValue("onPrimary", colorScheme.onPrimary, R.attr.materialColorOnPrimary)
             addValue(
                 "primaryContainer",
                 colorScheme.primaryContainer,
-                R.color.materialColorPrimaryContainer,
+                R.attr.materialColorPrimaryContainer,
             )
             addValue(
                 "onPrimaryContainer",
                 colorScheme.onPrimaryContainer,
-                R.color.materialColorOnPrimaryContainer,
+                R.attr.materialColorOnPrimaryContainer,
             )
             addValue(
                 "inversePrimary",
                 colorScheme.inversePrimary,
-                R.color.materialColorInversePrimary,
+                R.attr.materialColorInversePrimary,
             )
-            addValue("secondary", colorScheme.secondary, R.color.materialColorSecondary)
-            addValue("onSecondary", colorScheme.onSecondary, R.color.materialColorOnSecondary)
+            addValue("secondary", colorScheme.secondary, R.attr.materialColorSecondary)
+            addValue("onSecondary", colorScheme.onSecondary, R.attr.materialColorOnSecondary)
             addValue(
                 "secondaryContainer",
                 colorScheme.secondaryContainer,
-                R.color.materialColorSecondaryContainer,
+                R.attr.materialColorSecondaryContainer,
             )
             addValue(
                 "onSecondaryContainer",
                 colorScheme.onSecondaryContainer,
-                R.color.materialColorOnSecondaryContainer,
+                R.attr.materialColorOnSecondaryContainer,
             )
-            addValue("tertiary", colorScheme.tertiary, R.color.materialColorTertiary)
-            addValue("onTertiary", colorScheme.onTertiary, R.color.materialColorOnTertiary)
+            addValue("tertiary", colorScheme.tertiary, R.attr.materialColorTertiary)
+            addValue("onTertiary", colorScheme.onTertiary, R.attr.materialColorOnTertiary)
             addValue(
                 "tertiaryContainer",
                 colorScheme.tertiaryContainer,
-                R.color.materialColorTertiaryContainer,
+                R.attr.materialColorTertiaryContainer,
             )
             addValue(
                 "onTertiaryContainer",
                 colorScheme.onTertiaryContainer,
-                R.color.materialColorOnTertiaryContainer,
+                R.attr.materialColorOnTertiaryContainer,
             )
-            addValue("onBackground", colorScheme.onBackground, R.color.materialColorOnBackground)
-            addValue("surface", colorScheme.surface, R.color.materialColorSurface)
-            addValue("onSurface", colorScheme.onSurface, R.color.materialColorOnSurface)
+            addValue("onBackground", colorScheme.onBackground, R.attr.materialColorOnBackground)
+            addValue("surface", colorScheme.surface, R.attr.materialColorSurface)
+            addValue("onSurface", colorScheme.onSurface, R.attr.materialColorOnSurface)
             addValue(
                 "surfaceVariant",
                 colorScheme.surfaceVariant,
-                R.color.materialColorSurfaceVariant,
+                R.attr.materialColorSurfaceVariant,
             )
             addValue(
                 "onSurfaceVariant",
                 colorScheme.onSurfaceVariant,
-                R.color.materialColorOnSurfaceVariant,
+                R.attr.materialColorOnSurfaceVariant,
             )
             addValue(
                 "inverseSurface",
                 colorScheme.inverseSurface,
-                R.color.materialColorInverseSurface,
+                R.attr.materialColorInverseSurface,
             )
             addValue(
                 "inverseOnSurface",
                 colorScheme.inverseOnSurface,
-                R.color.materialColorInverseOnSurface,
+                R.attr.materialColorInverseOnSurface,
             )
-            addValue("error", colorScheme.error, R.color.materialColorError)
-            addValue("onError", colorScheme.onError, R.color.materialColorOnError)
+            addValue("error", colorScheme.error, R.attr.materialColorError)
+            addValue("onError", colorScheme.onError, R.attr.materialColorOnError)
             addValue(
                 "errorContainer",
                 colorScheme.errorContainer,
-                R.color.materialColorErrorContainer,
+                R.attr.materialColorErrorContainer,
             )
             addValue(
                 "onErrorContainer",
                 colorScheme.onErrorContainer,
-                R.color.materialColorOnErrorContainer,
+                R.attr.materialColorOnErrorContainer,
             )
-            addValue("outline", colorScheme.outline, R.color.materialColorOutline)
+            addValue("outline", colorScheme.outline, R.attr.materialColorOutline)
             addValue(
                 "outlineVariant",
                 colorScheme.outlineVariant,
-                R.color.materialColorOutlineVariant,
+                R.attr.materialColorOutlineVariant,
             )
-            addValue("surfaceBright", colorScheme.surfaceBright, R.color.materialColorSurfaceBright)
-            addValue("surfaceDim", colorScheme.surfaceDim, R.color.materialColorSurfaceDim)
+            addValue("surfaceBright", colorScheme.surfaceBright, R.attr.materialColorSurfaceBright)
+            addValue("surfaceDim", colorScheme.surfaceDim, R.attr.materialColorSurfaceDim)
             addValue(
                 "surfaceContainer",
                 colorScheme.surfaceContainer,
-                R.color.materialColorSurfaceContainer,
+                R.attr.materialColorSurfaceContainer,
             )
             addValue(
                 "surfaceContainerHigh",
                 colorScheme.surfaceContainerHigh,
-                R.color.materialColorSurfaceContainerHigh,
+                R.attr.materialColorSurfaceContainerHigh,
             )
             addValue(
                 "surfaceContainerHighest",
                 colorScheme.surfaceContainerHighest,
-                R.color.materialColorSurfaceContainerHighest,
+                R.attr.materialColorSurfaceContainerHighest,
             )
             addValue(
                 "surfaceContainerLow",
                 colorScheme.surfaceContainerLow,
-                R.color.materialColorSurfaceContainerLow,
+                R.attr.materialColorSurfaceContainerLow,
             )
             addValue(
                 "surfaceContainerLowest",
                 colorScheme.surfaceContainerLowest,
-                R.color.materialColorSurfaceContainerLowest,
+                R.attr.materialColorSurfaceContainerLowest,
             )
         }
 
@@ -200,9 +200,9 @@ class PlatformThemeTest {
                     "MaterialTheme.colorScheme.${colorValue.name} matches attribute color"
                 )
                 .that(colorValue.materialValue)
-                .isEqualTo(colorValue.colorValue)
+                .isEqualTo(colorValue.attrValue)
         }
     }
 
-    private data class ColorValue(val name: String, val materialValue: Color, val colorValue: Color)
+    private data class ColorValue(val name: String, val materialValue: Color, val attrValue: Color)
 }
