@@ -26,7 +26,6 @@ import android.view.KeyEvent.KEYCODE_EQUALS
 import android.view.KeyEvent.KEYCODE_LEFT_BRACKET
 import android.view.KeyEvent.KEYCODE_MINUS
 import android.view.KeyEvent.KEYCODE_RIGHT_BRACKET
-import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
 import android.view.KeyboardShortcutGroup
@@ -72,20 +71,6 @@ constructor(@Main private val resources: Resources, @Application private val con
         add(
             shortcutInfo(resources.getString(R.string.system_multitasking_full_screen)) {
                 command(META_META_ON or META_CTRL_ON, KEYCODE_DPAD_UP)
-            }
-        )
-        //  Change split screen focus to RHS:
-        //   - Meta + Alt + Right arrow
-        add(
-            shortcutInfo(resources.getString(R.string.system_multitasking_splitscreen_focus_rhs)) {
-                command(META_META_ON or META_ALT_ON, KEYCODE_DPAD_RIGHT)
-            }
-        )
-        //  Change split screen focus to LHS:
-        //   - Meta + Alt + Left arrow
-        add(
-            shortcutInfo(resources.getString(R.string.system_multitasking_splitscreen_focus_lhs)) {
-                command(META_META_ON or META_ALT_ON, KEYCODE_DPAD_LEFT)
             }
         )
         if (enableMoveToNextDisplayShortcut()) {

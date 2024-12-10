@@ -917,6 +917,17 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * Returns whether this route supports routing of the system media.
+     *
+     * @hide
+     */
+    public boolean supportsSystemMediaRouting() {
+        return (mRoutingTypeFlags
+                        & (FLAG_ROUTING_TYPE_SYSTEM_VIDEO | FLAG_ROUTING_TYPE_SYSTEM_AUDIO))
+                != 0;
+    }
+
+    /**
      * Returns true if the route info has all of the required field.
      * A route is valid if and only if it is obtained from
      * {@link com.android.server.media.MediaRouterService}.

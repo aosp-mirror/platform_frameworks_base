@@ -222,8 +222,8 @@
             android:layout_height="match_parent"
             android:layout_margin="@dimen/overlay_dismiss_button_margin"
             android:background="@drawable/circular_background"
-            android:backgroundTint="?androidprv:attr/materialColorPrimaryFixedDim"
-            android:tint="?androidprv:attr/materialColorOnPrimaryFixed"
+            android:backgroundTint="@androidprv:color/materialColorPrimaryFixedDim"
+            android:tint="@androidprv:color/materialColorOnPrimaryFixed"
             android:padding="4dp"
             android:src="@drawable/ic_close"/>
     </FrameLayout>

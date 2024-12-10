@@ -1,4 +1,4 @@
-# See system/core/logcat/event.logtags for a description of the format of this file.
+# See system/logging/logcat/event.logtags for a description of the format of this file.
 
 option java_package org.chromium.arc
 

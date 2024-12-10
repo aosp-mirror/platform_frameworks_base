@@ -98,6 +98,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
+import com.android.wm.shell.desktopmode.DesktopModeUtils;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
@@ -522,7 +523,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         } else {
             mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
                     mTaskInfo,
-                    TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                    DesktopModeUtils.isTaskMaximized(mTaskInfo, mDisplayController),
                     inFullImmersive,
                     hasGlobalFocus,
                     /* maximizeHoverEnabled= */ canOpenMaximizeMenu(
@@ -1705,7 +1706,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         .isTaskInFullImmersiveState(mTaskInfo.taskId);
         asAppHeader(mWindowDecorViewHolder).bindData(new AppHeaderViewHolder.HeaderData(
                 mTaskInfo,
-                TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                DesktopModeUtils.isTaskMaximized(mTaskInfo, mDisplayController),
                 inFullImmersive,
                 isFocused(),
                 /* maximizeHoverEnabled= */ canOpenMaximizeMenu(animatingTaskResizeOrReposition)));

@@ -490,3 +490,14 @@ flag {
     description: "Bugfixes / papercuts to bring Desktop Windowing to secondary displays."
     bug: "382023296"
 }
+
+flag {
+    name: "enable_top_visible_root_task_per_user_tracking"
+    namespace: "lse_desktop_experience"
+    description: "Enables tracking the top visible root tasks for a user."
+    bug: "381038076"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

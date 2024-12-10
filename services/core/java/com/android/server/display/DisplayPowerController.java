@@ -906,6 +906,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mLogicalDisplay.getPowerThrottlingDataIdLocked();
 
         mHandler.postAtTime(() -> {
+            if (mStopped) {
+                // DPC has already stopped, don't execute any more.
+                return;
+            }
+
             boolean changed = false;
 
             if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {

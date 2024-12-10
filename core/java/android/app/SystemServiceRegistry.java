@@ -289,6 +289,7 @@ import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 import com.android.internal.util.Preconditions;
 
+import java.time.InstantSource;
 import java.util.Map;
 import java.util.Objects;
 
@@ -625,7 +626,7 @@ public final class SystemServiceRegistry {
                                     com.android.internal.R.style.Theme_Holo_Dialog,
                                     com.android.internal.R.style.Theme_DeviceDefault_Dialog,
                                     com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
-                    ctx.mMainThread.getHandler());
+                    InstantSource.system());
             }});
 
         registerService(Context.PEOPLE_SERVICE, PeopleManager.class,

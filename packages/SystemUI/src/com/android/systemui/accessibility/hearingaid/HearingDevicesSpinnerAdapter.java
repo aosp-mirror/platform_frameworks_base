@@ -64,9 +64,9 @@ public class HearingDevicesSpinnerAdapter extends ArrayAdapter<String> {
 
         TextView text = view.findViewById(R.id.hearing_devices_spinner_text);
         if (text != null) {
-            int tintColor = Utils.getColorAttr(mContext,
-                    isSelected ? com.android.internal.R.attr.materialColorOnPrimaryContainer
-                            : com.android.internal.R.attr.materialColorOnSurface).getDefaultColor();
+            int tintColor = mContext.getColor(
+                    isSelected ? com.android.internal.R.color.materialColorOnPrimaryContainer
+                            : com.android.internal.R.color.materialColorOnSurface);
             text.setTextColor(tintColor);
         }
         return view;

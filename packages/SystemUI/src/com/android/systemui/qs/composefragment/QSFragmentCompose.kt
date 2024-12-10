@@ -325,9 +325,15 @@ constructor(
         }
 
         SceneTransitionLayout(state = sceneState, modifier = Modifier.fillMaxSize()) {
-            scene(QuickSettings) { QuickSettingsElement() }
+            scene(QuickSettings) {
+                LaunchedEffect(Unit) { viewModel.onQSOpen() }
+                QuickSettingsElement()
+            }
 
-            scene(QuickQuickSettings) { QuickQuickSettingsElement() }
+            scene(QuickQuickSettings) {
+                LaunchedEffect(Unit) { viewModel.onQQSOpen() }
+                QuickQuickSettingsElement()
+            }
         }
     }
 

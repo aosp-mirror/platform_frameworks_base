@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.compatui.letterbox
 
-import android.content.Context
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
@@ -44,24 +43,14 @@ import org.mockito.kotlin.verify
 @SmallTest
 class LetterboxUtilsTest : ShellTestCase() {
 
-    val firstLetterboxController = mock<LetterboxController>()
-    val secondLetterboxController = mock<LetterboxController>()
-    val thirdLetterboxController = mock<LetterboxController>()
-
-    private val letterboxControllerBuilder: (LetterboxSurfaceBuilder) -> LetterboxController =
-        { _ ->
-            firstLetterboxController.append(secondLetterboxController)
-                .append(thirdLetterboxController)
-        }
-
     @Test
     fun `Appended LetterboxController invoked creation on all the controllers`() {
         runTestScenario { r ->
             r.sendCreateSurfaceRequest()
 
-            r.verifyCreateSurfaceInvokedWithRequest(target = firstLetterboxController)
-            r.verifyCreateSurfaceInvokedWithRequest(target = secondLetterboxController)
-            r.verifyCreateSurfaceInvokedWithRequest(target = thirdLetterboxController)
+            r.verifyCreateSurfaceInvokedWithRequest(target = r.firstLetterboxController)
+            r.verifyCreateSurfaceInvokedWithRequest(target = r.secondLetterboxController)
+            r.verifyCreateSurfaceInvokedWithRequest(target = r.thirdLetterboxController)
         }
     }
 
@@ -69,9 +58,9 @@ class LetterboxUtilsTest : ShellTestCase() {
     fun `Appended LetterboxController invoked destroy on all the controllers`() {
         runTestScenario { r ->
             r.sendDestroySurfaceRequest()
-            r.verifyDestroySurfaceInvokedWithRequest(target = firstLetterboxController)
-            r.verifyDestroySurfaceInvokedWithRequest(target = secondLetterboxController)
-            r.verifyDestroySurfaceInvokedWithRequest(target = thirdLetterboxController)
+            r.verifyDestroySurfaceInvokedWithRequest(target = r.firstLetterboxController)
+            r.verifyDestroySurfaceInvokedWithRequest(target = r.secondLetterboxController)
+            r.verifyDestroySurfaceInvokedWithRequest(target = r.thirdLetterboxController)
         }
     }
 
@@ -79,9 +68,9 @@ class LetterboxUtilsTest : ShellTestCase() {
     fun `Appended LetterboxController invoked update visibility on all the controllers`() {
         runTestScenario { r ->
             r.sendUpdateSurfaceVisibilityRequest(visible = true)
-            r.verifyUpdateVisibilitySurfaceInvokedWithRequest(target = firstLetterboxController)
-            r.verifyUpdateVisibilitySurfaceInvokedWithRequest(target = secondLetterboxController)
-            r.verifyUpdateVisibilitySurfaceInvokedWithRequest(target = thirdLetterboxController)
+            r.verifyUpdateVisibilitySurfaceInvokedWithRequest(target = r.firstLetterboxController)
+            r.verifyUpdateVisibilitySurfaceInvokedWithRequest(target = r.secondLetterboxController)
+            r.verifyUpdateVisibilitySurfaceInvokedWithRequest(target = r.thirdLetterboxController)
         }
     }
 
@@ -89,9 +78,9 @@ class LetterboxUtilsTest : ShellTestCase() {
     fun `Appended LetterboxController invoked update bounds on all the controllers`() {
         runTestScenario { r ->
             r.sendUpdateSurfaceBoundsRequest(taskBounds = Rect(), activityBounds = Rect())
-            r.verifyUpdateSurfaceBoundsInvokedWithRequest(target = firstLetterboxController)
-            r.verifyUpdateSurfaceBoundsInvokedWithRequest(target = secondLetterboxController)
-            r.verifyUpdateSurfaceBoundsInvokedWithRequest(target = thirdLetterboxController)
+            r.verifyUpdateSurfaceBoundsInvokedWithRequest(target = r.firstLetterboxController)
+            r.verifyUpdateSurfaceBoundsInvokedWithRequest(target = r.secondLetterboxController)
+            r.verifyUpdateSurfaceBoundsInvokedWithRequest(target = r.thirdLetterboxController)
         }
     }
 
@@ -99,9 +88,9 @@ class LetterboxUtilsTest : ShellTestCase() {
     fun `Appended LetterboxController invoked update dump on all the controllers`() {
         runTestScenario { r ->
             r.invokeDump()
-            r.verifyDumpInvoked(target = firstLetterboxController)
-            r.verifyDumpInvoked(target = secondLetterboxController)
-            r.verifyDumpInvoked(target = thirdLetterboxController)
+            r.verifyDumpInvoked(target = r.firstLetterboxController)
+            r.verifyDumpInvoked(target = r.secondLetterboxController)
+            r.verifyDumpInvoked(target = r.thirdLetterboxController)
         }
     }
 
@@ -138,21 +127,20 @@ class LetterboxUtilsTest : ShellTestCase() {
      * Runs a test scenario providing a Robot.
      */
     fun runTestScenario(consumer: Consumer<AppendLetterboxControllerRobotTest>) {
-        val robot = AppendLetterboxControllerRobotTest(mContext, letterboxControllerBuilder)
-        consumer.accept(robot)
+        consumer.accept(AppendLetterboxControllerRobotTest().apply { initController() })
     }
 
-    class AppendLetterboxControllerRobotTest(
-        ctx: Context,
-        builder: (LetterboxSurfaceBuilder) -> LetterboxController
-    ) : LetterboxControllerRobotTest(ctx, builder) {
+    class AppendLetterboxControllerRobotTest : LetterboxControllerRobotTest() {
+
+        val firstLetterboxController = mock<LetterboxController>()
+        val secondLetterboxController = mock<LetterboxController>()
+        val thirdLetterboxController = mock<LetterboxController>()
 
         private var testableMap = mutableMapOf<Int, Int>()
         private var onItemState: Int? = null
         private var onMissingStateKey: Int? = null
         private var onMissingStateMap: MutableMap<Int, Int>? = null
 
-        private val transaction = getTransactionMock()
         private val surface = SurfaceControl()
 
         fun verifyCreateSurfaceInvokedWithRequest(
@@ -230,5 +218,9 @@ class LetterboxUtilsTest : ShellTestCase() {
         fun verifySetWindowCrop(expectedWidth: Int, expectedHeight: Int) {
             verify(transaction).setWindowCrop(surface, expectedWidth, expectedHeight)
         }
+
+        override fun buildController(): LetterboxController =
+            firstLetterboxController.append(secondLetterboxController)
+                .append(thirdLetterboxController)
     }
 }

@@ -541,8 +541,7 @@ class InputManagerServiceTests {
                 0
             },
             "title",
-            /* uid = */0,
-            /* inputFeatureFlags = */ 0
+            /* uid = */0
         )
         whenever(windowManagerInternal.getKeyInterceptionInfoFromToken(any())).thenReturn(info)
     }

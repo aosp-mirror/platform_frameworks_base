@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams
 import android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE
+import android.window.WindowContext
 import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.ConfigurationStateImpl
@@ -76,6 +77,19 @@ object ShadeDisplayAwareModule {
         } else {
             context
         }
+    }
+
+    @Provides
+    @ShadeDisplayAware
+    @SysUISingleton
+    fun provideShadeDisplayAwareWindowContext(@ShadeDisplayAware context: Context): WindowContext {
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
+        // We rely on the fact context is a WindowContext as the API to reparent windows is only
+        // available there.
+        return (context as? WindowContext)
+            ?: error(
+                "ShadeDisplayAware context must be a window context to allow window reparenting."
+            )
     }
 
     @Provides
@@ -203,7 +217,9 @@ object ShadeDisplayAwareModule {
     @Provides
     @IntoMap
     @ClassKey(ShadePrimaryDisplayCommand::class)
-    fun provideShadePrimaryDisplayCommand(impl: Provider<ShadePrimaryDisplayCommand>): CoreStartable {
+    fun provideShadePrimaryDisplayCommand(
+        impl: Provider<ShadePrimaryDisplayCommand>
+    ): CoreStartable {
         return if (ShadeWindowGoesAround.isEnabled) {
             impl.get()
         } else {
