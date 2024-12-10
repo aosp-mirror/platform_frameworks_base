@@ -93,6 +93,10 @@ public class DisplayManagerFlags {
             com.android.graphics.surfaceflinger.flags.Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
             com.android.graphics.surfaceflinger.flags.Flags::enableSmallAreaDetection);
 
+    private final FlagState mDisplayConfigErrorHalFlagState = new FlagState(
+            com.android.graphics.surfaceflinger.flags.Flags.FLAG_DISPLAY_CONFIG_ERROR_HAL,
+            com.android.graphics.surfaceflinger.flags.Flags::displayConfigErrorHal);
+
     private final FlagState mBrightnessIntRangeUserPerceptionFlagState = new FlagState(
             Flags.FLAG_BRIGHTNESS_INT_RANGE_USER_PERCEPTION,
             Flags::brightnessIntRangeUserPerception);
@@ -361,6 +365,10 @@ public class DisplayManagerFlags {
         return mSmallAreaDetectionFlagState.isEnabled();
     }
 
+    public boolean isDisplayConfigErrorHalEnabled() {
+        return mDisplayConfigErrorHalFlagState.isEnabled();
+    }
+
     public boolean isBrightnessIntRangeUserPerceptionEnabled() {
         return mBrightnessIntRangeUserPerceptionFlagState.isEnabled();
     }
@@ -591,6 +599,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mEvenDimmerFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
+        pw.println(" " + mDisplayConfigErrorHalFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mRestrictDisplayModes);
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);

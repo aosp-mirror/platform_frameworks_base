@@ -136,6 +136,7 @@ public class DisplayModeDirector {
     private final ProximitySensorObserver mSensorObserver;
     private final HbmObserver mHbmObserver;
     private final SkinThermalStatusObserver mSkinThermalStatusObserver;
+    private final ModeChangeObserver mModeChangeObserver;
 
     @Nullable
     private final SystemRequestObserver mSystemRequestObserver;
@@ -247,6 +248,7 @@ public class DisplayModeDirector {
         mDisplayObserver = new DisplayObserver(context, handler, mVotesStorage, injector);
         mSensorObserver = new ProximitySensorObserver(mVotesStorage, injector);
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, mVotesStorage);
+        mModeChangeObserver = new ModeChangeObserver(mVotesStorage, injector, handler.getLooper());
         mHbmObserver = new HbmObserver(injector, mVotesStorage, BackgroundThread.getHandler(),
                 mDeviceConfigDisplaySettings);
         if (displayManagerFlags.isRestrictDisplayModesEnabled()) {
@@ -275,6 +277,9 @@ public class DisplayModeDirector {
         mSensorObserver.observe();
         mHbmObserver.observe();
         mSkinThermalStatusObserver.observe();
+        if (mDisplayManagerFlags.isDisplayConfigErrorHalEnabled()) {
+            mModeChangeObserver.observe();
+        }
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
