@@ -66,8 +66,6 @@ internal interface NetworkScope : InitScope {
 
     fun schedule(state: TStateSource<*>)
 
-    suspend fun schedule(node: MuxNode<*, *, *>)
-
     fun scheduleDeactivation(node: PushNode<*>)
 
     fun scheduleDeactivation(output: Output<*>)

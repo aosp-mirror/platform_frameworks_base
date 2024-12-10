@@ -29,7 +29,7 @@
             <item android:state_activated="true">
                 <shape android:shape="rectangle">
                     <corners android:radius="28dp"/>
-                    <solid android:color="?attr/materialColorSecondaryContainer"/>
+                    <solid android:color="@color/materialColorSecondaryContainer"/>
                 </shape>
             </item>
         </selector>

@@ -64,7 +64,7 @@
                     android:lineSpacingExtra="4sp"
                     android:text="@string/letterbox_education_dialog_title"
                     android:textAlignment="center"
-                    android:textColor="?androidprv:attr/materialColorOnSurface"
+                    android:textColor="@androidprv:color/materialColorOnSurface"
                     android:fontFamily="@*android:string/config_headlineFontFamily"
                     android:textSize="24sp"/>
 
@@ -104,7 +104,7 @@
                     android:background=
                         "@drawable/letterbox_education_dismiss_button_background_ripple"
                     android:text="@string/letterbox_education_got_it"
-                    android:textColor="?androidprv:attr/materialColorOnPrimary"
+                    android:textColor="@androidprv:color/materialColorOnPrimary"
                     android:textAlignment="center"
                     android:contentDescription="@string/letterbox_education_got_it"/>
 

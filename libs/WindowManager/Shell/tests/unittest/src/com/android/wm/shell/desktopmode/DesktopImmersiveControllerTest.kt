@@ -42,6 +42,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.desktopmode.DesktopImmersiveController.Direction
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitReason.USER_INTERACTION
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.sysui.ShellInit
@@ -95,6 +96,8 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         whenever(mockDisplayLayout.getStableBounds(any())).thenAnswer { invocation ->
             (invocation.getArgument(0) as Rect).set(STABLE_BOUNDS)
         }
+        whenever(mockDisplayLayout.width()).thenReturn(DISPLAY_BOUNDS.width())
+        whenever(mockDisplayLayout.height()).thenReturn(DISPLAY_BOUNDS.height())
         controller = DesktopImmersiveController(
             shellInit = mock(),
             transitions = mockTransitions,
@@ -277,10 +280,12 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
 
         controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isTrue()
+        assertTransitionPending(
+            transition = transition,
+            taskId = task.taskId,
+            direction = Direction.EXIT,
+            animate = false
+        )
     }
 
     @Test
@@ -298,10 +303,12 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
 
         controller.exitImmersiveIfApplicable(transition, wct, DEFAULT_DISPLAY, USER_INTERACTION)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isFalse()
+        assertTransitionNotPending(
+            transition = transition,
+            taskId = task.taskId,
+            direction = Direction.EXIT,
+            animate = false
+        )
     }
 
     @Test
@@ -360,10 +367,12 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             reason = USER_INTERACTION,
         ).asExit()?.runOnTransitionStart?.invoke(transition)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isFalse()
+        assertTransitionNotPending(
+            transition = transition,
+            taskId = task.taskId,
+            animate = false,
+            direction = Direction.EXIT
+        )
     }
 
     @Test
@@ -416,10 +425,12 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         controller.exitImmersiveIfApplicable(wct, task, USER_INTERACTION)
             .asExit()?.runOnTransitionStart?.invoke(transition)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isTrue()
+        assertTransitionPending(
+            transition = transition,
+            taskId = task.taskId,
+            direction = Direction.EXIT,
+            animate = false
+        )
     }
 
     @Test
@@ -481,10 +492,12 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         )
         controller.onTransitionFinished(transition, aborted = false)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isFalse()
+        assertTransitionNotPending(
+            transition = transition,
+            taskId = task.taskId,
+            direction = Direction.EXIT,
+            animate = false
+        )
     }
 
     @Test
@@ -513,14 +526,18 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         controller.onTransitionMerged(transition, mergedToTransition)
         controller.onTransitionFinished(mergedToTransition, aborted = false)
 
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == transition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isFalse()
-        assertThat(controller.pendingExternalExitTransitions.any { exit ->
-            exit.transition == mergedToTransition && exit.displayId == DEFAULT_DISPLAY
-                    && exit.taskId == task.taskId
-        }).isFalse()
+        assertTransitionNotPending(
+            transition = transition,
+            taskId = task.taskId,
+            animate = false,
+            direction = Direction.EXIT
+        )
+        assertTransitionNotPending(
+            transition = mergedToTransition,
+            taskId = task.taskId,
+            animate = false,
+            direction = Direction.EXIT
+        )
     }
 
     @Test
@@ -686,7 +703,7 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun externalAnimateResizeChange_doesNotCleanUpPendingTransitionState() {
+    fun externalAnimateResizeChange_doesNotRemovePendingTransition() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
         whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
@@ -709,12 +726,16 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
         )
         animatorTestRule.advanceTimeBy(DesktopImmersiveController.FULL_IMMERSIVE_ANIM_DURATION_MS)
 
-        assertThat(controller.state).isNotNull()
+        assertTransitionPending(
+            transition = mockBinder,
+            taskId = task.taskId,
+            direction = Direction.EXIT
+        )
     }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun startAnimation_missingChange_clearsState() {
+    fun startAnimation_missingChange_removesPendingTransition() {
         val task = createFreeformTask()
         val mockBinder = mock(IBinder::class.java)
         whenever(mockTransitions.startTransition(eq(TRANSIT_CHANGE), any(), eq(controller)))
@@ -735,7 +756,42 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
             finishCallback = {}
         )
 
-        assertThat(controller.state).isNull()
+        assertTransitionNotPending(
+            transition = mockBinder,
+            taskId = task.taskId,
+            direction = Direction.ENTER
+        )
+    }
+
+    private fun assertTransitionPending(
+        transition: IBinder,
+        taskId: Int,
+        direction: Direction,
+        animate: Boolean = true,
+        displayId: Int = DEFAULT_DISPLAY
+    ) {
+        assertThat(controller.pendingImmersiveTransitions.any { pendingTransition ->
+            pendingTransition.transition == transition
+                    && pendingTransition.displayId == displayId
+                    && pendingTransition.taskId == taskId
+                    && pendingTransition.animate == animate
+                    && pendingTransition.direction == direction
+        }).isTrue()
+    }
+
+    private fun assertTransitionNotPending(
+        transition: IBinder,
+        taskId: Int,
+        direction: Direction,
+        animate: Boolean = true,
+        displayId: Int = DEFAULT_DISPLAY
+    ) {
+        assertThat(controller.pendingImmersiveTransitions.any { pendingTransition ->
+            pendingTransition.transition == transition
+                    && pendingTransition.displayId == displayId
+                    && pendingTransition.taskId == taskId
+                    && pendingTransition.direction == direction
+        }).isFalse()
     }
 
     private fun createTransitionInfo(
@@ -768,5 +824,6 @@ class DesktopImmersiveControllerTest : ShellTestCase() {
 
     companion object {
         private val STABLE_BOUNDS = Rect(0, 100, 2000, 1900)
+        private val DISPLAY_BOUNDS = Rect(0, 0, 2000, 2000)
     }
 }

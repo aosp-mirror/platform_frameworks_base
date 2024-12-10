@@ -16,14 +16,9 @@
 
 package com.android.server;
 
-import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
-
-import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
-import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,7 +33,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -47,12 +41,10 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.view.KeyEvent;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
@@ -78,8 +70,7 @@ public class GestureLauncherService extends SystemService {
      * Time in milliseconds in which the power button must be pressed twice so it will be considered
      * as a camera launch.
      */
-    @VisibleForTesting
-    static final long POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
+    @VisibleForTesting static final long CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS = 300;
 
 
     /**
@@ -109,23 +100,10 @@ public class GestureLauncherService extends SystemService {
     @VisibleForTesting
     static final int EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_MAX = 5000;
 
-    /** Indicates camera should be launched on power double tap. */
-    @VisibleForTesting static final int LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER = 0;
-
-    /** Indicates wallet should be launched on power double tap. */
-    @VisibleForTesting static final int LAUNCH_WALLET_ON_DOUBLE_TAP_POWER = 1;
-
-    /** Number of taps required to launch the double tap shortcut (either camera or wallet). */
-    public static final int DOUBLE_POWER_TAP_COUNT_THRESHOLD = 2;
-
-    /** Bundle to send with PendingIntent to grant background activity start privileges. */
-    private static final Bundle GRANT_BACKGROUND_START_PRIVILEGES =
-            ActivityOptions.makeBasic()
-                    .setPendingIntentBackgroundActivityStartMode(
-                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS)
-                    .toBundle();
-
-    private final QuickAccessWalletClient mQuickAccessWalletClient;
+    /**
+     * Number of taps required to launch camera shortcut.
+     */
+    private static final int CAMERA_POWER_TAP_COUNT_THRESHOLD = 2;
 
     /** The listener that receives the gesture event. */
     private final GestureEventListener mGestureListener = new GestureEventListener();
@@ -180,9 +158,6 @@ public class GestureLauncherService extends SystemService {
      */
     private boolean mCameraDoubleTapPowerEnabled;
 
-    /** Whether wallet double tap power button gesture is currently enabled. */
-    private boolean mWalletDoubleTapPowerEnabled;
-
     /**
      * Whether emergency gesture is currently enabled
      */
@@ -229,22 +204,14 @@ public class GestureLauncherService extends SystemService {
         }
     }
     public GestureLauncherService(Context context) {
-        this(
-                context,
-                new MetricsLogger(),
-                QuickAccessWalletClient.create(context),
-                new UiEventLoggerImpl());
+        this(context, new MetricsLogger(), new UiEventLoggerImpl());
     }
 
     @VisibleForTesting
-    public GestureLauncherService(
-            Context context,
-            MetricsLogger metricsLogger,
-            QuickAccessWalletClient quickAccessWalletClient,
+    GestureLauncherService(Context context, MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger) {
         super(context);
         mContext = context;
-        mQuickAccessWalletClient = quickAccessWalletClient;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
     }
@@ -270,9 +237,6 @@ public class GestureLauncherService extends SystemService {
                     "GestureLauncherService");
             updateCameraRegistered();
             updateCameraDoubleTapPowerEnabled();
-            if (launchWalletOptionOnPowerDoubleTap()) {
-                updateWalletDoubleTapPowerEnabled();
-            }
             updateEmergencyGestureEnabled();
             updateEmergencyGesturePowerButtonCooldownPeriodMs();
 
@@ -324,14 +288,6 @@ public class GestureLauncherService extends SystemService {
         boolean enabled = isCameraDoubleTapPowerSettingEnabled(mContext, mUserId);
         synchronized (this) {
             mCameraDoubleTapPowerEnabled = enabled;
-        }
-    }
-
-    @VisibleForTesting
-    void updateWalletDoubleTapPowerEnabled() {
-        boolean enabled = isWalletDoubleTapPowerSettingEnabled(mContext, mUserId);
-        synchronized (this) {
-            mWalletDoubleTapPowerEnabled = enabled;
         }
     }
 
@@ -462,33 +418,10 @@ public class GestureLauncherService extends SystemService {
                         Settings.Secure.CAMERA_GESTURE_DISABLED, 0, userId) == 0);
     }
 
-    /** Checks if camera should be launched on double press of the power button. */
     public static boolean isCameraDoubleTapPowerSettingEnabled(Context context, int userId) {
-        boolean res;
-
-        if (launchWalletOptionOnPowerDoubleTap()) {
-            res = isDoubleTapPowerGestureSettingEnabled(context, userId)
-                    && getDoubleTapPowerGestureAction(context, userId)
-                    == LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER;
-        } else {
-            // These are legacy settings that will be deprecated once the option to launch both
-            // wallet and camera has been created.
-            res = isCameraDoubleTapPowerEnabled(context.getResources())
-                    && (Settings.Secure.getIntForUser(context.getContentResolver(),
-                    Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, 0, userId) == 0);
-        }
-        return res;
-    }
-
-    /** Checks if wallet should be launched on double tap of the power button. */
-    public static boolean isWalletDoubleTapPowerSettingEnabled(Context context, int userId) {
-        if (!launchWalletOptionOnPowerDoubleTap()) {
-            return false;
-        }
-
-        return isDoubleTapPowerGestureSettingEnabled(context, userId)
-                && getDoubleTapPowerGestureAction(context, userId)
-                        == LAUNCH_WALLET_ON_DOUBLE_TAP_POWER;
+        return isCameraDoubleTapPowerEnabled(context.getResources())
+                && (Settings.Secure.getIntForUser(context.getContentResolver(),
+                        Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, 0, userId) == 0);
     }
 
     public static boolean isCameraLiftTriggerSettingEnabled(Context context, int userId) {
@@ -506,28 +439,6 @@ public class GestureLauncherService extends SystemService {
                 && Settings.Secure.getIntForUser(context.getContentResolver(),
                 Settings.Secure.EMERGENCY_GESTURE_ENABLED,
                 isDefaultEmergencyGestureEnabled(context.getResources()) ? 1 : 0, userId) != 0;
-    }
-
-    private static int getDoubleTapPowerGestureAction(Context context, int userId) {
-        return Settings.Secure.getIntForUser(
-                context.getContentResolver(),
-                Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
-                LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER,
-                userId);
-    }
-
-    /** Whether the shortcut to launch app on power double press is enabled. */
-    private static boolean isDoubleTapPowerGestureSettingEnabled(Context context, int userId) {
-        return Settings.Secure.getIntForUser(
-                                context.getContentResolver(),
-                                Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED,
-                                isDoubleTapConfigEnabled(context.getResources()) ? 1 : 0,
-                                userId)
-                        == 1;
-    }
-
-    private static boolean isDoubleTapConfigEnabled(Resources resources) {
-        return resources.getBoolean(R.bool.config_doubleTapPowerGestureEnabled);
     }
 
     /**
@@ -583,56 +494,10 @@ public class GestureLauncherService extends SystemService {
      * Whether GestureLauncherService should be enabled according to system properties.
      */
     public static boolean isGestureLauncherEnabled(Resources resources) {
-        boolean res =
-                isCameraLaunchEnabled(resources)
-                        || isCameraLiftTriggerEnabled(resources)
-                        || isEmergencyGestureEnabled(resources);
-        if (launchWalletOptionOnPowerDoubleTap()) {
-            res |= isDoubleTapConfigEnabled(resources);
-        } else {
-            res |= isCameraDoubleTapPowerEnabled(resources);
-        }
-        return res;
-    }
-
-    /**
-     * Processes a power key event in GestureLauncherService without performing an action. This
-     * method is called on every KEYCODE_POWER ACTION_DOWN event and ensures that, even if
-     * KEYCODE_POWER events are passed to and handled by the app, the GestureLauncherService still
-     * keeps track of all running KEYCODE_POWER events for its gesture detection and relevant
-     * actions.
-     */
-    public void processPowerKeyDown(KeyEvent event) {
-        if (mEmergencyGestureEnabled && mEmergencyGesturePowerButtonCooldownPeriodMs >= 0
-                && event.getEventTime() - mLastEmergencyGestureTriggered
-                < mEmergencyGesturePowerButtonCooldownPeriodMs) {
-            return;
-        }
-        if (event.isLongPress()) {
-            return;
-        }
-
-        final long powerTapInterval;
-
-        synchronized (this) {
-            powerTapInterval = event.getEventTime() - mLastPowerDown;
-            mLastPowerDown = event.getEventTime();
-            if (powerTapInterval >= POWER_SHORT_TAP_SEQUENCE_MAX_INTERVAL_MS) {
-                // Tap too slow, reset consecutive tap counts.
-                mFirstPowerDown = event.getEventTime();
-                mPowerButtonConsecutiveTaps = 1;
-                mPowerButtonSlowConsecutiveTaps = 1;
-            } else if (powerTapInterval >= POWER_DOUBLE_TAP_MAX_TIME_MS) {
-                // Tap too slow for shortcuts
-                mFirstPowerDown = event.getEventTime();
-                mPowerButtonConsecutiveTaps = 1;
-                mPowerButtonSlowConsecutiveTaps++;
-            } else if (powerTapInterval > 0) {
-                // Fast consecutive tap
-                mPowerButtonConsecutiveTaps++;
-                mPowerButtonSlowConsecutiveTaps++;
-            }
-        }
+        return isCameraLaunchEnabled(resources)
+                || isCameraDoubleTapPowerEnabled(resources)
+                || isCameraLiftTriggerEnabled(resources)
+                || isEmergencyGestureEnabled(resources);
     }
 
     /**
@@ -642,8 +507,8 @@ public class GestureLauncherService extends SystemService {
      * @param outLaunched true if some action is taken as part of the key intercept (eg, app launch)
      * @return true if the key down event is intercepted
      */
-    public boolean interceptPowerKeyDown(
-            KeyEvent event, boolean interactive, MutableBoolean outLaunched) {
+    public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
+            MutableBoolean outLaunched) {
         if (mEmergencyGestureEnabled && mEmergencyGesturePowerButtonCooldownPeriodMs >= 0
                 && event.getEventTime() - mLastEmergencyGestureTriggered
                 < mEmergencyGesturePowerButtonCooldownPeriodMs) {
@@ -665,7 +530,6 @@ public class GestureLauncherService extends SystemService {
             return false;
         }
         boolean launchCamera = false;
-        boolean launchWallet = false;
         boolean launchEmergencyGesture = false;
         boolean intercept = false;
         long powerTapInterval;
@@ -677,12 +541,12 @@ public class GestureLauncherService extends SystemService {
                 mFirstPowerDown  = event.getEventTime();
                 mPowerButtonConsecutiveTaps = 1;
                 mPowerButtonSlowConsecutiveTaps = 1;
-            } else if (powerTapInterval >= POWER_DOUBLE_TAP_MAX_TIME_MS) {
+            } else if (powerTapInterval >= CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS) {
                 // Tap too slow for shortcuts
                 mFirstPowerDown  = event.getEventTime();
                 mPowerButtonConsecutiveTaps = 1;
                 mPowerButtonSlowConsecutiveTaps++;
-            } else if (!overridePowerKeyBehaviorInFocusedWindow() || powerTapInterval > 0) {
+            } else {
                 // Fast consecutive tap
                 mPowerButtonConsecutiveTaps++;
                 mPowerButtonSlowConsecutiveTaps++;
@@ -722,15 +586,9 @@ public class GestureLauncherService extends SystemService {
                 }
             }
             if (mCameraDoubleTapPowerEnabled
-                    && powerTapInterval < POWER_DOUBLE_TAP_MAX_TIME_MS
-                    && mPowerButtonConsecutiveTaps == DOUBLE_POWER_TAP_COUNT_THRESHOLD) {
+                    && powerTapInterval < CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS
+                    && mPowerButtonConsecutiveTaps == CAMERA_POWER_TAP_COUNT_THRESHOLD) {
                 launchCamera = true;
-                intercept = interactive;
-            } else if (launchWalletOptionOnPowerDoubleTap()
-                    && mWalletDoubleTapPowerEnabled
-                    && powerTapInterval < POWER_DOUBLE_TAP_MAX_TIME_MS
-                    && mPowerButtonConsecutiveTaps == DOUBLE_POWER_TAP_COUNT_THRESHOLD) {
-                launchWallet = true;
                 intercept = interactive;
             }
         }
@@ -750,10 +608,6 @@ public class GestureLauncherService extends SystemService {
                         (int) powerTapInterval);
                 mUiEventLogger.log(GestureLauncherEvent.GESTURE_CAMERA_DOUBLE_TAP_POWER);
             }
-        } else if (launchWallet) {
-            Slog.i(TAG, "Power button double tap gesture detected, launching wallet. Interval="
-                    + powerTapInterval + "ms");
-            launchWallet = sendGestureTargetActivityPendingIntent();
         } else if (launchEmergencyGesture) {
             Slog.i(TAG, "Emergency gesture detected, launching.");
             launchEmergencyGesture = handleEmergencyGesture();
@@ -769,74 +623,11 @@ public class GestureLauncherService extends SystemService {
                 mPowerButtonSlowConsecutiveTaps);
         mMetricsLogger.histogram("power_double_tap_interval", (int) powerTapInterval);
 
-        outLaunched.value = launchCamera || launchEmergencyGesture || launchWallet;
+        outLaunched.value = launchCamera || launchEmergencyGesture;
         // Intercept power key event if the press is part of a gesture (camera, eGesture) and the
         // user has completed setup.
         return intercept && isUserSetupComplete();
     }
-
-    /**
-     * Fetches and sends gestureTargetActivityPendingIntent from QuickAccessWallet, which is a
-     * specific activity that QuickAccessWalletService has defined to be launch on detection of the
-     * power button gesture.
-     */
-    private boolean sendGestureTargetActivityPendingIntent() {
-        boolean userSetupComplete = isUserSetupComplete();
-        if (mQuickAccessWalletClient == null
-                || !mQuickAccessWalletClient.isWalletServiceAvailable()) {
-            Slog.w(TAG, "QuickAccessWalletService is not available, ignoring wallet gesture.");
-            return false;
-        }
-
-        if (!userSetupComplete) {
-            if (DBG) {
-                Slog.d(TAG, "userSetupComplete = false, ignoring wallet gesture.");
-            }
-            return false;
-        }
-        if (DBG) {
-            Slog.d(TAG, "userSetupComplete = true, performing wallet gesture.");
-        }
-
-        mQuickAccessWalletClient.getGestureTargetActivityPendingIntent(
-                getContext().getMainExecutor(),
-                gesturePendingIntent -> {
-                    if (gesturePendingIntent == null) {
-                        Slog.d(TAG, "getGestureTargetActivityPendingIntent is null.");
-                        sendFallbackPendingIntent();
-                        return;
-                    }
-                    sendPendingIntentWithBackgroundStartPrivileges(gesturePendingIntent);
-                });
-        return true;
-    }
-
-    /**
-     * If gestureTargetActivityPendingIntent is null, this method is invoked to start the activity
-     * that QuickAccessWalletService has defined to host the Wallet view, which is typically the
-     * home screen of the Wallet application.
-     */
-    private void sendFallbackPendingIntent() {
-        mQuickAccessWalletClient.getWalletPendingIntent(
-                getContext().getMainExecutor(),
-                walletPendingIntent -> {
-                    if (walletPendingIntent == null) {
-                        Slog.w(TAG, "getWalletPendingIntent returns null. Not launching "
-                                + "anything for wallet.");
-                        return;
-                    }
-                    sendPendingIntentWithBackgroundStartPrivileges(walletPendingIntent);
-                });
-    }
-
-    private void sendPendingIntentWithBackgroundStartPrivileges(PendingIntent pendingIntent) {
-        try {
-            pendingIntent.send(GRANT_BACKGROUND_START_PRIVILEGES);
-        } catch (PendingIntent.CanceledException e) {
-            Slog.e(TAG, "PendingIntent was canceled", e);
-        }
-    }
-
     /**
      * @return true if camera was launched, false otherwise.
      */
@@ -909,39 +700,31 @@ public class GestureLauncherService extends SystemService {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
-    private final BroadcastReceiver mUserReceiver =
-            new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                        mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-                        mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
-                        registerContentObservers();
-                        updateCameraRegistered();
-                        updateCameraDoubleTapPowerEnabled();
-                        if (launchWalletOptionOnPowerDoubleTap()) {
-                            updateWalletDoubleTapPowerEnabled();
-                        }
-                        updateEmergencyGestureEnabled();
-                        updateEmergencyGesturePowerButtonCooldownPeriodMs();
-                    }
-                }
-            };
+    private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
+                registerContentObservers();
+                updateCameraRegistered();
+                updateCameraDoubleTapPowerEnabled();
+                updateEmergencyGestureEnabled();
+                updateEmergencyGesturePowerButtonCooldownPeriodMs();
+            }
+        }
+    };
 
-    private final ContentObserver mSettingObserver =
-            new ContentObserver(new Handler()) {
-                public void onChange(boolean selfChange, android.net.Uri uri, int userId) {
-                    if (userId == mUserId) {
-                        updateCameraRegistered();
-                        updateCameraDoubleTapPowerEnabled();
-                        if (launchWalletOptionOnPowerDoubleTap()) {
-                            updateWalletDoubleTapPowerEnabled();
-                        }
-                        updateEmergencyGestureEnabled();
-                        updateEmergencyGesturePowerButtonCooldownPeriodMs();
-                    }
-                }
-            };
+    private final ContentObserver mSettingObserver = new ContentObserver(new Handler()) {
+        public void onChange(boolean selfChange, android.net.Uri uri, int userId) {
+            if (userId == mUserId) {
+                updateCameraRegistered();
+                updateCameraDoubleTapPowerEnabled();
+                updateEmergencyGestureEnabled();
+                updateEmergencyGesturePowerButtonCooldownPeriodMs();
+            }
+        }
+    };
 
     private final class GestureEventListener implements SensorEventListener {
         @Override

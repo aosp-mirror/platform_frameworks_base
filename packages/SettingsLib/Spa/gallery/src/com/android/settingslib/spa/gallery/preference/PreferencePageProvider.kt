@@ -20,11 +20,13 @@ import android.os.Bundle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DisabledByDefault
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.IntState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,8 +35,11 @@ import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
+import com.android.settingslib.spa.widget.preference.ListPreferenceModel
+import com.android.settingslib.spa.widget.preference.ListPreferenceOption
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.preference.RadioPreferences
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Category
 import com.android.settingslib.spa.widget.ui.SettingsIcon
@@ -103,6 +108,22 @@ object PreferencePageProvider : SettingsPageProvider {
                     override val summary = { ticks.toString() }
                 })
             }
+            val selectedId = rememberSaveable { mutableIntStateOf(0) }
+            RadioPreferences(
+                object : ListPreferenceModel {
+                    override val title: String = "RadioPreferences"
+                    override val options: List<ListPreferenceOption> =
+                        listOf(
+                            ListPreferenceOption(id = 0, text = "option1"),
+                            ListPreferenceOption(id = 1, text = "option2"),
+                            ListPreferenceOption(id = 2, text = "option3"),
+                        )
+                    override val selectedId: IntState = selectedId
+                    override val onIdSelected: (Int) -> Unit = {
+                        selectedId.intValue = it
+                    }
+                }
+            )
         }
     }
 

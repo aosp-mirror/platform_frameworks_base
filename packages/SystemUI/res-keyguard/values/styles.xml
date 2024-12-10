@@ -23,13 +23,13 @@
     <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textColor">@androidprv:color/materialColorOnSurface</item>
     </style>
     <style name="Keyguard.Bouncer.PrimaryMessage" parent="Theme.SystemUI">
         <item name="android:textSize">18sp</item>
         <item name="android:lineHeight">24dp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textColor">@androidprv:color/materialColorOnSurface</item>
         <item name="android:singleLine">true</item>
         <item name="android:textAlignment">center</item>
         <item name="android:ellipsize">marquee</item>
@@ -41,10 +41,10 @@
         <item name="android:textAlignment">center</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:ellipsize">end</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="android:textColor">@androidprv:color/materialColorOnSurfaceVariant</item>
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="Theme.SystemUI">
-        <item name="android:textColor">?androidprv:attr/materialColorOnTertiaryFixed</item>
+        <item name="android:textColor">@androidprv:color/materialColorOnTertiaryFixed</item>
         <item name="android:textSize">16sp</item>
         <item name="android:background">@drawable/kg_emergency_button_background</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>

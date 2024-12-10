@@ -16,6 +16,8 @@
 
 package com.android.server.wm.flicker.notification
 
+import android.platform.systemui_tapl.controller.NotificationIdentity
+import android.platform.systemui_tapl.ui.Root
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.DisableNotificationCooldownSettingRule
@@ -28,8 +30,6 @@ import android.tools.helpers.wakeUpAndGoToHomeScreen
 import android.tools.traces.component.ComponentNameMatcher
 import android.view.WindowInsets
 import android.view.WindowManager
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.NotificationAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtEnd
@@ -87,8 +87,9 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
             .withWindowSurfaceDisappeared(ComponentNameMatcher.NOTIFICATION_SHADE)
             .waitForAndVerify()
     }
+
     protected fun FlickerTestData.openAppFromNotification() {
-        doOpenAppAndWait(startY = 10, endY = 3 * device.displayHeight / 4, steps = 25)
+        doOpenAppAndWait()
     }
 
     protected fun FlickerTestData.openAppFromLockNotification() {
@@ -101,25 +102,27 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
                 WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
             )
 
-        doOpenAppAndWait(startY = insets.top + 100, endY = device.displayHeight / 2, steps = 4)
+        doOpenAppAndWait()
     }
 
-    protected fun FlickerTestData.doOpenAppAndWait(startY: Int, endY: Int, steps: Int) {
-        // Swipe down to show the notification shade
-        val x = device.displayWidth / 2
-        device.swipe(x, startY, x, endY, steps)
-        device.waitForIdle(2000)
-        instrumentation.uiAutomation.syncInputTransactions()
+    protected fun FlickerTestData.doOpenAppAndWait() {
+        val shade = Root.get().openNotificationShade()
 
         // Launch the activity by clicking the notification
+        // Post notification and ensure that it's collapsed
         val notification =
-            device.wait(Until.findObject(By.text("Flicker Test Notification")), 2000L)
-        notification?.click() ?: error("Notification not found")
-        instrumentation.uiAutomation.syncInputTransactions()
+            shade.notificationStack.findNotification(
+                NotificationIdentity(
+                    type = NotificationIdentity.Type.BY_TEXT,
+                    text = "Flicker Test Notification",
+                )
+            )
 
+        notification.clickToApp()
         // Wait for the app to launch
         wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
     }
+
     @Presubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_warmStart()
 
     @Presubmit @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_warmStart()

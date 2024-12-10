@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.compatui.letterbox
 
-import android.content.Context
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
@@ -64,65 +63,48 @@ class MixedLetterboxControllerTest : ShellTestCase() {
      * Runs a test scenario providing a Robot.
      */
     fun runTestScenario(consumer: Consumer<MixedLetterboxControllerRobotTest>) {
-        val robot = MixedLetterboxControllerRobotTest(mContext, ObjectToTestHolder())
-        consumer.accept(robot)
+        consumer.accept(MixedLetterboxControllerRobotTest().apply { initController() })
     }
 
-    class MixedLetterboxControllerRobotTest(
-        ctx: Context,
-        private val objectToTestHolder: ObjectToTestHolder
-    ) : LetterboxControllerRobotTest(ctx, objectToTestHolder.controllerBuilder) {
+    class MixedLetterboxControllerRobotTest : LetterboxControllerRobotTest() {
+        val singleLetterboxController: SingleSurfaceLetterboxController =
+            mock<SingleSurfaceLetterboxController>()
+        val multipleLetterboxController: MultiSurfaceLetterboxController =
+            mock<MultiSurfaceLetterboxController>()
+        val controllerStrategy: LetterboxControllerStrategy = mock<LetterboxControllerStrategy>()
 
         fun configureStrategyFor(letterboxMode: LetterboxMode) {
-            doReturn(letterboxMode).`when`(objectToTestHolder.controllerStrategy)
-                .getLetterboxImplementationMode()
+            doReturn(letterboxMode).`when`(controllerStrategy).getLetterboxImplementationMode()
         }
 
         fun checkCreateInvokedOnSingleController(times: Int = 1) {
-            verify(
-                objectToTestHolder.singleLetterboxController,
-                times(times)
-            ).createLetterboxSurface(any(), any(), any())
+            verify(singleLetterboxController, times(times)).createLetterboxSurface(
+                any(),
+                any(),
+                any()
+            )
         }
 
         fun checkCreateInvokedOnMultiController(times: Int = 1) {
-            verify(
-                objectToTestHolder.multipleLetterboxController,
-                times(times)
-            ).createLetterboxSurface(any(), any(), any())
+            verify(multipleLetterboxController, times(times)).createLetterboxSurface(
+                any(),
+                any(),
+                any()
+            )
         }
 
         fun checkDestroyInvokedOnSingleController(times: Int = 1) {
-            verify(
-                objectToTestHolder.singleLetterboxController,
-                times(times)
-            ).destroyLetterboxSurface(any(), any())
+            verify(singleLetterboxController, times(times)).destroyLetterboxSurface(any(), any())
         }
 
         fun checkDestroyInvokedOnMultiController(times: Int = 1) {
-            verify(
-                objectToTestHolder.multipleLetterboxController,
-                times(times)
-            ).destroyLetterboxSurface(any(), any())
+            verify(multipleLetterboxController, times(times)).destroyLetterboxSurface(any(), any())
         }
-    }
 
-    data class ObjectToTestHolder(
-        val singleLetterboxController: SingleSurfaceLetterboxController =
-        mock<SingleSurfaceLetterboxController>(),
-        val multipleLetterboxController: MultiSurfaceLetterboxController =
-        mock<MultiSurfaceLetterboxController>(),
-        val controllerStrategy: LetterboxControllerStrategy = mock<LetterboxControllerStrategy>()
-    ) {
-
-        private val mixedController =
-            MixedLetterboxController(
-                singleLetterboxController,
-                multipleLetterboxController,
-                controllerStrategy
-            )
-
-        val controllerBuilder: (LetterboxSurfaceBuilder) -> LetterboxController =
-            { _ -> mixedController }
+        override fun buildController(): LetterboxController = MixedLetterboxController(
+            singleLetterboxController,
+            multipleLetterboxController,
+            controllerStrategy
+        )
     }
 }

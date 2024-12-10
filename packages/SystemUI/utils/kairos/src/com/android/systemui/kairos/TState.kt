@@ -121,7 +121,7 @@ fun <A, B, C> TState<A>.combineWith(
 
 /**
  * Splits a [TState] of pairs into a pair of [TFlows][TState], where each returned [TState] holds
- * hald of the original.
+ * half of the original.
  *
  * Shorthand for:
  * ```kotlin
@@ -312,6 +312,57 @@ fun <A, B, C, D, Z> combine(
     )
 }
 
+/**
+ * Returns a [TState] whose value is generated with [transform] by combining the current values of
+ * each given [TState].
+ *
+ * @see TState.combineWith
+ */
+@ExperimentalFrpApi
+fun <A, B, C, D, E, Z> combine(
+    stateA: TState<A>,
+    stateB: TState<B>,
+    stateC: TState<C>,
+    stateD: TState<D>,
+    stateE: TState<E>,
+    transform: suspend FrpScope.(A, B, C, D, E) -> Z,
+): TState<Z> {
+    val operatorName = "combine"
+    val name = operatorName
+    return TStateInit(
+        init(name) {
+            coroutineScope {
+                val dl1: Deferred<TStateImpl<A>> = async {
+                    stateA.init.connect(evalScope = this@init)
+                }
+                val dl2: Deferred<TStateImpl<B>> = async {
+                    stateB.init.connect(evalScope = this@init)
+                }
+                val dl3: Deferred<TStateImpl<C>> = async {
+                    stateC.init.connect(evalScope = this@init)
+                }
+                val dl4: Deferred<TStateImpl<D>> = async {
+                    stateD.init.connect(evalScope = this@init)
+                }
+                val dl5: Deferred<TStateImpl<E>> = async {
+                    stateE.init.connect(evalScope = this@init)
+                }
+                zipStates(
+                    name,
+                    operatorName,
+                    dl1.await(),
+                    dl2.await(),
+                    dl3.await(),
+                    dl4.await(),
+                    dl5.await(),
+                ) { a, b, c, d, e ->
+                    NoScope.runInFrpScope { transform(a, b, c, d, e) }
+                }
+            }
+        }
+    )
+}
+
 /** Returns a [TState] by applying [transform] to the value held by the original [TState]. */
 @ExperimentalFrpApi
 fun <A, B> TState<A>.flatMap(transform: suspend FrpScope.(A) -> TState<B>): TState<B> {
@@ -367,7 +418,7 @@ fun <A> TState<A>.selector(numDistinctValues: Int? = null): TStateSelector<A> =
  * @see selector
  */
 @ExperimentalFrpApi
-class TStateSelector<A>
+class TStateSelector<in A>
 internal constructor(
     private val upstream: TState<A>,
     private val groupedChanges: GroupedTFlow<A, Boolean>,
@@ -406,6 +457,7 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
 
     private val input: CoalescingMutableTFlow<Deferred<T>, Deferred<T>?> =
         CoalescingMutableTFlow(
+            name = null,
             coalesce = { _, new -> new },
             network = network,
             getInitialValue = { null },
@@ -423,7 +475,7 @@ internal constructor(internal val network: Network, initialValue: Deferred<T>) :
                 .cached()
         state = TStateSource(name, operatorName, initialValue, calm)
         @Suppress("DeferredResultUnused")
-        network.transaction {
+        network.transaction("MutableTState.init") {
             calm.activate(evalScope = this, downstream = Schedulable.S(state))?.let {
                 (connection, needsEval) ->
                 state.upstreamConnection = connection

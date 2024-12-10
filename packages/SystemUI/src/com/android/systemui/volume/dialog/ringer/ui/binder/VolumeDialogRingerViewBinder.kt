@@ -30,7 +30,6 @@ import androidx.dynamicanimation.animation.FloatValueHolder
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.internal.R as internalR
-import com.android.settingslib.Utils
 import com.android.systemui.res.R
 import com.android.systemui.util.children
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
@@ -294,15 +293,11 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
                 }
             if (isSelected && !isAnimated) {
                 setBackgroundResource(R.drawable.volume_drawer_selection_bg)
-                setColorFilter(
-                    Utils.getColorAttrDefaultColor(context, internalR.attr.materialColorOnPrimary)
-                )
+                setColorFilter(context.getColor(internalR.color.materialColorOnPrimary))
                 background = background.mutate()
             } else if (!isAnimated) {
                 setBackgroundResource(R.drawable.volume_ringer_item_bg)
-                setColorFilter(
-                    Utils.getColorAttrDefaultColor(context, internalR.attr.materialColorOnSurface)
-                )
+                setColorFilter(context.getColor(internalR.color.materialColorOnSurface))
                 background = background.mutate()
             }
             setOnClickListener {
