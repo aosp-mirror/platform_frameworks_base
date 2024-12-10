@@ -31,6 +31,8 @@ import android.provider.Settings;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.settingslib.utils.ThreadUtils;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,7 +51,10 @@ import java.util.Map;
 
 /** Tests for {@link HearingDeviceLocalDataManager}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {HearingDeviceLocalDataManagerTest.ShadowGlobal.class})
+@Config(shadows = {
+        HearingDeviceLocalDataManagerTest.ShadowGlobal.class,
+        HearingDeviceLocalDataManagerTest.ShadowThreadUtils.class,
+})
 public class HearingDeviceLocalDataManagerTest {
 
     private static final String TEST_ADDRESS = "XX:XX:XX:XX:11:22";
@@ -247,6 +252,14 @@ public class HearingDeviceLocalDataManagerTest {
 
         private static Map<String, String> get(ContentResolver cr) {
             return sDataMap.computeIfAbsent(cr, k -> new HashMap<>());
+        }
+    }
+
+    @Implements(value = ThreadUtils.class)
+    public static class ShadowThreadUtils {
+        @Implementation
+        protected static void postOnBackgroundThread(Runnable runnable) {
+            runnable.run();
         }
     }
 }

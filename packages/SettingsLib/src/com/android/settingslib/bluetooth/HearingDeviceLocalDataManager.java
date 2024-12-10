@@ -148,6 +148,14 @@ public class HearingDeviceLocalDataManager {
         }
     }
 
+    /** Flushes the data into Settings . */
+    public synchronized void flush() {
+        if (!mIsStarted) {
+            return;
+        }
+        putAmbientVolumeSettings();
+    }
+
     /**
      * Puts the local data of the corresponding hearing device.
      *
@@ -274,9 +282,6 @@ public class HearingDeviceLocalDataManager {
             notifyIfDataChanged(mAddrToDataMap, updatedAddrToDataMap);
             mAddrToDataMap.clear();
             mAddrToDataMap.putAll(updatedAddrToDataMap);
-            if (DEBUG) {
-                Log.v(TAG, "getLocalDataFromSettings, " + mAddrToDataMap + ", manager: " + this);
-            }
         }
     }
 
@@ -287,12 +292,10 @@ public class HearingDeviceLocalDataManager {
                 builder.append(KEY_ADDR).append("=").append(entry.getKey());
                 builder.append(entry.getValue().toSettingsFormat()).append(";");
             }
-            if (DEBUG) {
-                Log.v(TAG, "putAmbientVolumeSettings, " + builder + ", manager: " + this);
-            }
-            Settings.Global.putStringForUser(mContext.getContentResolver(),
-                    LOCAL_AMBIENT_VOLUME_SETTINGS, builder.toString(),
-                    UserHandle.USER_SYSTEM);
+            ThreadUtils.postOnBackgroundThread(() -> {
+                Settings.Global.putStringForUser(mContext.getContentResolver(),
+                        LOCAL_AMBIENT_VOLUME_SETTINGS, builder.toString(), UserHandle.USER_SYSTEM);
+            });
         }
     }
 
