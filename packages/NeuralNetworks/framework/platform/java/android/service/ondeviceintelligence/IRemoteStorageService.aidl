@@ -20,7 +20,7 @@ import android.app.ondeviceintelligence.Feature;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
 
-import com.android.modules.utils.AndroidFuture;
+import com.android.internal.infra.AndroidFuture;
 
 /**
  * Interface for a concrete implementation to provide access to storage read access

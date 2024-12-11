@@ -19,4 +19,4 @@ package android.app.ondeviceintelligence;
 /**
   * @hide
   */
-@JavaOnlyStableParcelable parcelable Feature;
+parcelable Feature;

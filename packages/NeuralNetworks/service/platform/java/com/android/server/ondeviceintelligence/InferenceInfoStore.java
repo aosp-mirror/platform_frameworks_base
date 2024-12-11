@@ -28,9 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
-/**
- * @hide
- */
 public class InferenceInfoStore {
     private static final String TAG = "InferenceInfoStore";
     private final TreeSet<InferenceInfo> inferenceInfos;

@@ -19,4 +19,4 @@ package android.app.ondeviceintelligence;
 /**
   * @hide
   */
-@JavaOnlyStableParcelable parcelable TokenInfo;
+parcelable TokenInfo;

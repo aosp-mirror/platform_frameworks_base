@@ -21,11 +21,11 @@ import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.Feature;
-import android.app.ondeviceintelligence.IRemoteCallback;
-import android.app.ondeviceintelligence.ICancellationSignal;
+import android.os.IRemoteCallback;
+import android.os.ICancellationSignal;
 import android.os.PersistableBundle;
 import android.os.Bundle;
-import com.android.modules.utils.AndroidFuture;
+import com.android.internal.infra.AndroidFuture;
 import android.service.ondeviceintelligence.IRemoteStorageService;
 import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 

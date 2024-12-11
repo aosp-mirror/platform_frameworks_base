@@ -30,7 +30,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.text.MessageFormat;
-import java.util.Objects;
 
 /**
  * Represents a status of a requested {@link Feature}.
@@ -79,12 +78,18 @@ public final class FeatureDetails implements Parcelable {
             @Status int featureStatus,
             @NonNull PersistableBundle featureDetailParams) {
         this.mFeatureStatus = featureStatus;
-        this.mFeatureDetailParams = Objects.requireNonNull(featureDetailParams);
+        com.android.internal.util.AnnotationValidations.validate(
+                Status.class, null, mFeatureStatus);
+        this.mFeatureDetailParams = featureDetailParams;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mFeatureDetailParams);
     }
 
     public FeatureDetails(
             @Status int featureStatus) {
         this.mFeatureStatus = featureStatus;
+        com.android.internal.util.AnnotationValidations.validate(
+                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = new PersistableBundle();
     }
 
@@ -149,7 +154,11 @@ public final class FeatureDetails implements Parcelable {
                 PersistableBundle.CREATOR);
 
         this.mFeatureStatus = status;
+        com.android.internal.util.AnnotationValidations.validate(
+                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = persistableBundle;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mFeatureDetailParams);
     }
 
 

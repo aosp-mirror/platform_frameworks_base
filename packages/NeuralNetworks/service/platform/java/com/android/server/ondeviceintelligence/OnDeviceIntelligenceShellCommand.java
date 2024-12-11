@@ -18,16 +18,12 @@ package com.android.server.ondeviceintelligence;
 
 import android.annotation.NonNull;
 import android.os.Binder;
-
-import com.android.modules.utils.BasicShellCommandHandler;
+import android.os.ShellCommand;
 
 import java.io.PrintWriter;
 import java.util.Objects;
 
-/**
- * @hide
- */
-final class OnDeviceIntelligenceShellCommand extends BasicShellCommandHandler {
+final class OnDeviceIntelligenceShellCommand extends ShellCommand {
     private static final String TAG = OnDeviceIntelligenceShellCommand.class.getSimpleName();
 
     @NonNull
