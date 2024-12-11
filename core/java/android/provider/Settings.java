@@ -6352,6 +6352,16 @@ public final class Settings {
                 "mouse_swap_primary_button";
 
         /**
+         * Whether to enable mouse scrolling acceleration.
+         *
+         * When enabled, mouse scrolling is accelerated based on the user's scrolling speed.
+         * When disabled, mouse scrolling speed becomes directly proportional to the speed at which
+         * the wheel is turned.
+         * @hide
+         */
+        public static final String MOUSE_SCROLLING_ACCELERATION = "mouse_scrolling_acceleration";
+
+        /**
          * Pointer fill style, specified by
          * {@link android.view.PointerIcon.PointerIconVectorStyleFill} constants.
          *
@@ -6601,6 +6611,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
             PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
             PRIVATE_SETTINGS.add(PREFERRED_REGION);
+            PRIVATE_SETTINGS.add(MOUSE_SCROLLING_ACCELERATION);
         }
 
         /**

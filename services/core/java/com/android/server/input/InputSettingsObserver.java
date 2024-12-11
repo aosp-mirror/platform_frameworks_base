@@ -69,6 +69,8 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(
                                 Settings.System.MOUSE_SWAP_PRIMARY_BUTTON),
                         (reason) -> updateMouseSwapPrimaryButton()),
+                Map.entry(Settings.System.getUriFor(Settings.System.MOUSE_SCROLLING_ACCELERATION),
+                        (reason) -> updateMouseScrollingAcceleration()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
                         (reason) -> updateTouchpadPointerSpeed()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
@@ -182,6 +184,11 @@ class InputSettingsObserver extends ContentObserver {
     private void updateMouseSwapPrimaryButton() {
         mNative.setMouseSwapPrimaryButtonEnabled(
                 InputSettings.isMouseSwapPrimaryButtonEnabled(mContext));
+    }
+
+    private void updateMouseScrollingAcceleration() {
+        mNative.setMouseScrollingAccelerationEnabled(
+                InputSettings.isMouseScrollingAccelerationEnabled(mContext));
     }
 
     private void updateTouchpadPointerSpeed() {
