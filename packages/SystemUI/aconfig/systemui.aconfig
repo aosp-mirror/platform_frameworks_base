@@ -679,7 +679,7 @@ flag {
 flag {
     name: "volume_redesign"
     namespace: "systemui"
-    description: "Enables Volume BC25 visuals update"
+    description: "Enables Volume visuals update"
     bug: "368308908"
 }
 
