@@ -63,7 +63,7 @@ import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.desktopmode.calculateMaximizeBounds
+import com.android.wm.shell.desktopmode.isTaskMaximized
 import com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
@@ -231,11 +231,7 @@ class MaximizeMenu(
     }
 
     private fun getSizeToggleDirection(): MaximizeMenuView.SizeToggleDirection {
-        val maximizeBounds = calculateMaximizeBounds(
-            displayController.getDisplayLayout(taskInfo.displayId)!!,
-            taskInfo
-        )
-        val maximized = taskInfo.configuration.windowConfiguration.bounds.equals(maximizeBounds)
+        val maximized = isTaskMaximized(taskInfo, displayController)
         return if (maximized)
             MaximizeMenuView.SizeToggleDirection.RESTORE
         else
