@@ -1,0 +1,385 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.systemui.statusbar.phone
+
+import android.app.Notification
+import android.app.Notification.Builder
+import android.app.StatusBarManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.testing.TestableLooper
+import android.testing.TestableLooper.RunWithLooper
+import android.view.Display.DEFAULT_DISPLAY
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
+import com.android.systemui.InitController
+import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.activityStarter
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.settings.FakeDisplayTracker
+import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.panelExpansionInteractor
+import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.NotificationRemoteInputManager
+import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.lockscreenShadeTransitionController
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor
+import com.android.systemui.statusbar.notification.dynamicPrivacyController
+import com.android.systemui.statusbar.notification.headsup.headsUpManager
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionCondition
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionFilter
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notificationLockscreenUserManager
+import com.android.systemui.statusbar.notificationRemoteInputManager
+import com.android.systemui.statusbar.notificationShadeWindowController
+import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.statusbar.sysuiStatusBarStateController
+import com.android.systemui.testKosmos
+import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+
+@SmallTest
+@RunWith(AndroidJUnit4::class)
+@RunWithLooper
+class StatusBarNotificationPresenterTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
+    private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
+
+    private var interruptSuppressor: NotificationInterruptSuppressor? = null
+    private var alertsDisabledCondition: VisualInterruptionCondition? = null
+    private var vrModeCondition: VisualInterruptionCondition? = null
+    private var needsRedactionFilter: VisualInterruptionFilter? = null
+    private var panelsDisabledCondition: VisualInterruptionCondition? = null
+
+    private val commandQueue: CommandQueue = CommandQueue(mContext, FakeDisplayTracker(mContext))
+    private val shadeController: ShadeController = mock()
+    private val notificationAlertsInteractor: NotificationAlertsInteractor = mock()
+    private val keyguardStateController: KeyguardStateController = mock()
+
+    private lateinit var underTest: StatusBarNotificationPresenter
+
+    @Before
+    fun setup() {
+        mDependency.injectTestDependency(StatusBarStateController::class.java, mock())
+        mDependency.injectTestDependency(ShadeController::class.java, shadeController)
+        mDependency.injectMockDependency(NotificationRemoteInputManager.Callback::class.java)
+        mDependency.injectMockDependency(NotificationShadeWindowController::class.java)
+
+        whenever(notificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(true)
+
+        underTest = createPresenter()
+        if (VisualInterruptionRefactor.isEnabled) {
+            verifyAndCaptureSuppressors()
+        } else {
+            verifyAndCaptureLegacySuppressor()
+        }
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testInit_refactorDisabled() {
+        assertThat(VisualInterruptionRefactor.isEnabled).isFalse()
+        assertThat(alertsDisabledCondition).isNull()
+        assertThat(vrModeCondition).isNull()
+        assertThat(needsRedactionFilter).isNull()
+        assertThat(panelsDisabledCondition).isNull()
+        assertThat(interruptSuppressor).isNotNull()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testInit_refactorEnabled() {
+        assertThat(VisualInterruptionRefactor.isEnabled).isTrue()
+        assertThat(alertsDisabledCondition).isNotNull()
+        assertThat(vrModeCondition).isNotNull()
+        assertThat(needsRedactionFilter).isNotNull()
+        assertThat(panelsDisabledCondition).isNotNull()
+        assertThat(interruptSuppressor).isNull()
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testNoSuppressHeadsUp_default_refactorDisabled() {
+        assertThat(interruptSuppressor!!.suppressAwakeHeadsUp(createNotificationEntry())).isFalse()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testNoSuppressHeadsUp_default_refactorEnabled() {
+        assertThat(alertsDisabledCondition!!.shouldSuppress()).isFalse()
+        assertThat(vrModeCondition!!.shouldSuppress()).isFalse()
+        assertThat(needsRedactionFilter!!.shouldSuppress(createNotificationEntry())).isFalse()
+        assertThat(alertsDisabledCondition!!.shouldSuppress()).isFalse()
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressHeadsUp_disabledStatusBar_refactorDisabled() {
+        commandQueue.disable(
+            DEFAULT_DISPLAY,
+            StatusBarManager.DISABLE_EXPAND,
+            0,
+            false, /* animate */
+        )
+        TestableLooper.get(this).processAllMessages()
+
+        assertWithMessage("The panel should suppress heads up while disabled")
+            .that(interruptSuppressor!!.suppressAwakeHeadsUp(createNotificationEntry()))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressHeadsUp_disabledStatusBar_refactorEnabled() {
+        commandQueue.disable(
+            DEFAULT_DISPLAY,
+            StatusBarManager.DISABLE_EXPAND,
+            0,
+            false, /* animate */
+        )
+        TestableLooper.get(this).processAllMessages()
+
+        assertWithMessage("The panel should suppress heads up while disabled")
+            .that(panelsDisabledCondition!!.shouldSuppress())
+            .isTrue()
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressHeadsUp_disabledNotificationShade_refactorDisabled() {
+        commandQueue.disable(
+            DEFAULT_DISPLAY,
+            0,
+            StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
+            false, /* animate */
+        )
+        TestableLooper.get(this).processAllMessages()
+
+        assertWithMessage(
+                "The panel should suppress interruptions while notification shade disabled"
+            )
+            .that(interruptSuppressor!!.suppressAwakeHeadsUp(createNotificationEntry()))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressHeadsUp_disabledNotificationShade_refactorEnabled() {
+        commandQueue.disable(
+            DEFAULT_DISPLAY,
+            0,
+            StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
+            false, /* animate */
+        )
+        TestableLooper.get(this).processAllMessages()
+
+        assertWithMessage(
+                "The panel should suppress interruptions while notification shade disabled"
+            )
+            .that(panelsDisabledCondition!!.shouldSuppress())
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testPanelsDisabledConditionSuppressesPeek() {
+        val types: Set<VisualInterruptionType> = panelsDisabledCondition!!.types
+        assertThat(types).contains(VisualInterruptionType.PEEK)
+        assertThat(types)
+            .containsNoneOf(VisualInterruptionType.BUBBLE, VisualInterruptionType.PULSE)
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testNoSuppressHeadsUp_FSI_nonOccludedKeyguard_refactorDisabled() {
+        whenever(keyguardStateController.isShowing()).thenReturn(true)
+        whenever(keyguardStateController.isOccluded()).thenReturn(false)
+
+        assertThat(interruptSuppressor!!.suppressAwakeHeadsUp(createFsiNotificationEntry()))
+            .isFalse()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testNoSuppressHeadsUp_FSI_nonOccludedKeyguard_refactorEnabled() {
+        whenever(keyguardStateController.isShowing()).thenReturn(true)
+        whenever(keyguardStateController.isOccluded()).thenReturn(false)
+
+        assertThat(needsRedactionFilter!!.shouldSuppress(createFsiNotificationEntry())).isFalse()
+
+        val types: Set<VisualInterruptionType> = needsRedactionFilter!!.types
+        assertThat(types).contains(VisualInterruptionType.PEEK)
+        assertThat(types)
+            .containsNoneOf(VisualInterruptionType.BUBBLE, VisualInterruptionType.PULSE)
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressInterruptions_vrMode_refactorDisabled() {
+        underTest.mVrMode = true
+
+        assertWithMessage("Vr mode should suppress interruptions")
+            .that(interruptSuppressor!!.suppressAwakeInterruptions(createNotificationEntry()))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressInterruptions_vrMode_refactorEnabled() {
+        underTest.mVrMode = true
+
+        assertWithMessage("Vr mode should suppress interruptions")
+            .that(vrModeCondition!!.shouldSuppress())
+            .isTrue()
+
+        val types: Set<VisualInterruptionType> = vrModeCondition!!.types
+        assertThat(types).contains(VisualInterruptionType.PEEK)
+        assertThat(types).doesNotContain(VisualInterruptionType.PULSE)
+        assertThat(types).contains(VisualInterruptionType.BUBBLE)
+    }
+
+    @Test
+    @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressInterruptions_statusBarAlertsDisabled_refactorDisabled() {
+        whenever(notificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(false)
+
+        assertWithMessage("When alerts aren't enabled, interruptions are suppressed")
+            .that(interruptSuppressor!!.suppressInterruptions(createNotificationEntry()))
+            .isTrue()
+    }
+
+    @Test
+    @EnableFlags(VisualInterruptionRefactor.FLAG_NAME)
+    fun testSuppressInterruptions_statusBarAlertsDisabled_refactorEnabled() {
+        whenever(notificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(false)
+
+        assertWithMessage("When alerts aren't enabled, interruptions are suppressed")
+            .that(alertsDisabledCondition!!.shouldSuppress())
+            .isTrue()
+
+        val types: Set<VisualInterruptionType> = alertsDisabledCondition!!.types
+        assertThat(types).contains(VisualInterruptionType.PEEK)
+        assertThat(types).contains(VisualInterruptionType.PULSE)
+        assertThat(types).contains(VisualInterruptionType.BUBBLE)
+    }
+
+    private fun createPresenter(): StatusBarNotificationPresenter {
+        val shadeViewController: ShadeViewController = mock()
+
+        val notificationShadeWindowView: NotificationShadeWindowView = mock()
+        whenever(notificationShadeWindowView.resources).thenReturn(mContext.resources)
+
+        val stackScrollLayoutController: NotificationStackScrollLayoutController = mock()
+        whenever(stackScrollLayoutController.view).thenReturn(mock())
+
+        val initController: InitController = InitController()
+
+        return StatusBarNotificationPresenter(
+                mContext,
+                shadeViewController,
+                kosmos.panelExpansionInteractor,
+                /* quickSettingsController = */ mock(),
+                kosmos.headsUpManager,
+                notificationShadeWindowView,
+                kosmos.activityStarter,
+                stackScrollLayoutController,
+                kosmos.dozeScrimController,
+                kosmos.notificationShadeWindowController,
+                kosmos.dynamicPrivacyController,
+                keyguardStateController,
+                notificationAlertsInteractor,
+                kosmos.lockscreenShadeTransitionController,
+                kosmos.powerInteractor,
+                commandQueue,
+                kosmos.notificationLockscreenUserManager,
+                kosmos.sysuiStatusBarStateController,
+                /* notifShadeEventSource = */ mock(),
+                /* notificationMediaManager = */ mock(),
+                /* notificationGutsManager = */ mock(),
+                initController,
+                visualInterruptionDecisionProvider,
+                kosmos.notificationRemoteInputManager,
+                /* remoteInputManagerCallback = */ mock(),
+                /* notificationListContainer = */ mock(),
+            )
+            .also { initController.executePostInitTasks() }
+    }
+
+    private fun verifyAndCaptureSuppressors() {
+        interruptSuppressor = null
+
+        val conditionCaptor = argumentCaptor<VisualInterruptionCondition>()
+        verify(visualInterruptionDecisionProvider, times(3)).addCondition(conditionCaptor.capture())
+        val conditions: List<VisualInterruptionCondition> = conditionCaptor.allValues
+        alertsDisabledCondition = conditions[0]
+        vrModeCondition = conditions[1]
+        panelsDisabledCondition = conditions[2]
+
+        val needsRedactionFilterCaptor = argumentCaptor<VisualInterruptionFilter>()
+        verify(visualInterruptionDecisionProvider).addFilter(needsRedactionFilterCaptor.capture())
+        needsRedactionFilter = needsRedactionFilterCaptor.lastValue
+    }
+
+    private fun verifyAndCaptureLegacySuppressor() {
+        alertsDisabledCondition = null
+        vrModeCondition = null
+        needsRedactionFilter = null
+        panelsDisabledCondition = null
+
+        val suppressorCaptor = argumentCaptor<NotificationInterruptSuppressor>()
+        verify(visualInterruptionDecisionProvider).addLegacySuppressor(suppressorCaptor.capture())
+        interruptSuppressor = suppressorCaptor.lastValue
+    }
+
+    private fun createNotificationEntry(): NotificationEntry {
+        return NotificationEntryBuilder()
+            .setPkg("a")
+            .setOpPkg("a")
+            .setTag("a")
+            .setNotification(Builder(mContext, "a").build())
+            .build()
+    }
+
+    private fun createFsiNotificationEntry(): NotificationEntry {
+        val notification: Notification =
+            Builder(mContext, "a").setFullScreenIntent(mock(), true).build()
+
+        return NotificationEntryBuilder()
+            .setPkg("a")
+            .setOpPkg("a")
+            .setTag("a")
+            .setNotification(notification)
+            .build()
+    }
+}

@@ -2251,8 +2251,7 @@ class BackNavigationController {
         if (w.asTask() != null) {
             final Task task = w.asTask();
             snapshot = task.mRootWindowContainer.mWindowManager.mTaskSnapshotController.getSnapshot(
-                    task.mTaskId, task.mUserId, false /* restoreFromDisk */,
-                    false /* isLowResolution */);
+                    task.mTaskId, false /* isLowResolution */);
         } else {
             ActivityRecord ar = w.asActivityRecord();
             if (ar == null && w.asTaskFragment() != null) {

@@ -7212,10 +7212,6 @@
          screen. -->
     <bool name="config_dragToMaximizeInDesktopMode">false</bool>
 
-    <!-- Whether showing the app handle is supported on this device.
-         If config_isDesktopModeSupported, then this has no effect -->
-    <bool name="config_enableAppHandle">false</bool>
-
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>

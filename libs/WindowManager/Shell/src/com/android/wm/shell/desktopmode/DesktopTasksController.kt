@@ -571,7 +571,7 @@ class DesktopTasksController(
     ): ((IBinder) -> Unit)? {
         val taskId = taskInfo.taskId
         desktopTilingDecorViewModel.removeTaskIfTiled(displayId, taskId)
-        performDesktopExitCleanupIfNeeded(taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskId, displayId, wct)
         taskRepository.addClosingTask(displayId, taskId)
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(displayId, taskId)
@@ -610,7 +610,7 @@ class DesktopTasksController(
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
-        performDesktopExitCleanupIfNeeded(taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskId, displayId, wct)
         // Notify immersive handler as it might need to exit immersive state.
         val exitResult =
             desktopImmersiveController.exitImmersiveIfApplicable(
@@ -863,6 +863,10 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         if (!task.isFreeform) addMoveToDesktopChanges(wct, task, displayId)
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
+
+        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
+        }
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
     }
@@ -1348,9 +1352,22 @@ class DesktopTasksController(
      * Remove wallpaper activity if task provided is last task and wallpaper activity token is not
      * null
      */
-    private fun performDesktopExitCleanupIfNeeded(taskId: Int, wct: WindowContainerTransaction) {
-        if (!taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
-            return
+    private fun performDesktopExitCleanupIfNeeded(
+        taskId: Int,
+        displayId: Int,
+        wct: WindowContainerTransaction,
+    ) {
+        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            if (!taskRepository.isOnlyVisibleNonClosingTask(taskId, displayId)) {
+                return
+            }
+            if (displayId != DEFAULT_DISPLAY) {
+                return
+            }
+        } else {
+            if (!taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
+                return
+            }
         }
         desktopModeEnterExitTransitionListener?.onExitDesktopModeTransitionStarted(
             FULLSCREEN_ANIMATION_DURATION
@@ -1844,7 +1861,7 @@ class DesktopTasksController(
         if (!isDesktopModeShowing(task.displayId)) return null
 
         val wct = WindowContainerTransaction()
-        performDesktopExitCleanupIfNeeded(task.taskId, wct)
+        performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
 
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
@@ -1927,7 +1944,7 @@ class DesktopTasksController(
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
 
-        performDesktopExitCleanupIfNeeded(taskInfo.taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskInfo.taskId, taskInfo.displayId, wct)
     }
 
     private fun cascadeWindow(bounds: Rect, displayLayout: DisplayLayout, displayId: Int) {
@@ -1961,7 +1978,7 @@ class DesktopTasksController(
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
 
-        performDesktopExitCleanupIfNeeded(taskInfo.taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskInfo.taskId, taskInfo.displayId, wct)
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */

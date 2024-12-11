@@ -77,6 +77,13 @@ constructor(
         contentBuilder.text = notification.text()
         contentBuilder.skeletonLargeIcon = null // TODO
 
+        val colorsFromNotif = recoveredBuilder.getColors(/* header= */ false)
+        contentBuilder.colors =
+            PromotedNotificationContentModel.Colors(
+                backgroundColor = colorsFromNotif.backgroundColor,
+                primaryTextColor = colorsFromNotif.primaryTextColor,
+            )
+
         recoveredBuilder.style?.extractContent(contentBuilder)
             ?: run { contentBuilder.style = Style.Ineligible }
 

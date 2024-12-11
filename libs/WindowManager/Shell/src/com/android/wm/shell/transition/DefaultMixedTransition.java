@@ -204,6 +204,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "tryAnimateOpenIntentWithRemoteAndPipOrDesktop");
         TransitionInfo.Change pipChange = null;
+        TransitionInfo.Change pipActivityChange = null;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             TransitionInfo.Change change = info.getChanges().get(i);
             if (mPipHandler.isEnteringPip(change, info.getType())) {
@@ -213,6 +214,12 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
                 }
                 pipChange = change;
                 info.getChanges().remove(i);
+            } else if (change.getTaskInfo() == null && change.getParent() != null
+                    && pipChange != null && change.getParent().equals(pipChange.getContainer())) {
+                // Cache the PiP activity if it's a target and cached pip task change is its parent;
+                // note that we are bottom-to-top, so if such activity has a task
+                // that is also a target, then it must have been cached already as pipChange.
+                pipActivityChange = change;
             }
         }
         TransitionInfo.Change desktopChange = null;
@@ -257,8 +264,16 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             // make a new startTransaction because pip's startEnterAnimation "consumes" it so
             // we need a separate one to send over to launcher.
             SurfaceControl.Transaction otherStartT = new SurfaceControl.Transaction();
-
-            mPipHandler.startEnterAnimation(pipChange, otherStartT, finishTransaction, finishCB);
+            if (pipActivityChange == null) {
+                mPipHandler.startEnterAnimation(pipChange, otherStartT, finishTransaction,
+                        finishCB);
+            } else {
+                info.getChanges().remove(pipActivityChange);
+                TransitionInfo pipInfo = subCopy(info, TRANSIT_PIP, false /* withChanges */);
+                pipInfo.getChanges().addAll(List.of(pipChange, pipActivityChange));
+                mPipHandler.startAnimation(mTransition, pipInfo, startTransaction,
+                        finishTransaction, finishCB);
+            }
 
             // Dispatch the rest of the transition normally.
             if (mLeftoversHandler != null

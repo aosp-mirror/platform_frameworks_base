@@ -33,6 +33,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,6 +53,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -78,11 +80,15 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
+
     @Before
     public void setUp() throws Exception {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         final SecureSettings secureSettings = TestUtils.mockSecureSettings();
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, secureSettings);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                secureSettings);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 windowManager);
         mStubMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,

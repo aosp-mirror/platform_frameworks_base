@@ -47,14 +47,6 @@ public final class T4tNdefNfceeCcFileInfo implements Parcelable {
      */
     private int mVersion;
     /**
-     * Indicates the max data size by a single ReadBinary<p>
-     */
-    private int mMaxReadLength;
-    /**
-     * Indicates the max data size by a single UpdateBinary<p>
-     */
-    private int mMaxWriteLength;
-    /**
      * Indicates the NDEF File Identifier<p>
      */
     private int mFileId;
@@ -65,40 +57,35 @@ public final class T4tNdefNfceeCcFileInfo implements Parcelable {
     /**
      * Indicates the read access condition<p>
      */
-    private int mReadAccess;
+    private boolean mIsReadAllowed;
     /**
      * Indicates the write access condition<p>
      */
-    private int mWriteAccess;
+    private boolean mIsWriteAllowed;
 
     /**
      * Constructor to be used by NFC service and internal classes.
      * @hide
      */
-    public T4tNdefNfceeCcFileInfo(int cclen, int version, int maxLe, int maxLc,
+    public T4tNdefNfceeCcFileInfo(int cclen, int version,
                       int ndefFileId, int ndefMaxSize,
-                      int ndefReadAccess, int ndefWriteAccess) {
+                      boolean isReadAllowed, boolean isWriteAllowed) {
         mCcLength = cclen;
         mVersion = version;
-        mMaxWriteLength = maxLc;
-        mMaxReadLength = maxLe;
         mFileId = ndefFileId;
         mMaxSize = ndefMaxSize;
-        mReadAccess = ndefReadAccess;
-        mWriteAccess = ndefWriteAccess;
+        mIsReadAllowed = isReadAllowed;
+        mIsWriteAllowed = isWriteAllowed;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-
         dest.writeInt(mCcLength);
         dest.writeInt(mVersion);
-        dest.writeInt(mMaxWriteLength);
-        dest.writeInt(mMaxReadLength);
         dest.writeInt(mFileId);
         dest.writeInt(mMaxSize);
-        dest.writeInt(mReadAccess);
-        dest.writeInt(mWriteAccess);
+        dest.writeBoolean(mIsReadAllowed);
+        dest.writeBoolean(mIsWriteAllowed);
     }
 
     /**
@@ -146,30 +133,6 @@ public final class T4tNdefNfceeCcFileInfo implements Parcelable {
     }
 
     /**
-     * Indicates the max data size that can be read by a single invocation of
-     * {@link T4tNdefNfcee#readData(int)}.
-     *
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.4" MLe.
-     * @return max size of read (in bytes).
-     */
-    @IntRange(from = 0xf, to = 0xffff)
-    public int getMaxReadLength() {
-        return mMaxReadLength;
-    }
-
-    /**
-     * Indicates the max data size that can be written by a single invocation of
-     * {@link T4tNdefNfcee#writeData(int, byte[])}
-     *
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.4" MLc.
-     * @return max size of write (in bytes).
-     */
-    @IntRange(from = 0xd, to = 0xffff)
-    public int getMaxWriteLength() {
-        return mMaxWriteLength;
-    }
-
-    /**
      * Indicates the NDEF File Identifier. This is the identifier used in the last invocation of
      * {@link T4tNdefNfcee#writeData(int, byte[])}
      *
@@ -191,73 +154,21 @@ public final class T4tNdefNfceeCcFileInfo implements Parcelable {
     }
 
     /**
-     * T4T tag read access granted without any security.
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     */
-    public static final int READ_ACCESS_GRANTED_UNRESTRICTED = 0x0;
-    /**
-     * T4T tag read access granted with limited proprietary access only.
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     */
-    public static final int READ_ACCESS_GRANTED_RESTRICTED = 0x80;
-
-    /**
-     * Possible return values for {@link #getVersion()}.
-     * @hide
-     */
-    @IntDef(prefix = { "READ_ACCESS_GRANTED_" }, value = {
-            READ_ACCESS_GRANTED_RESTRICTED,
-            READ_ACCESS_GRANTED_UNRESTRICTED,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ReadAccess {}
-
-    /**
      * Indicates the read access condition.
      * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     * @return read access restriction
+     * @return boolean true if read access is allowed, otherwise false.
      */
-    @ReadAccess
-    public int getReadAccess() {
-        return mReadAccess;
+    public boolean isReadAllowed() {
+        return mIsReadAllowed;
     }
-
-    /**
-     * T4T tag write access granted without any security.
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     */
-    public static final int WRITE_ACCESS_GRANTED_UNRESTRICTED = 0x0;
-    /**
-     * T4T tag write access granted with limited proprietary access only.
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     */
-    public static final int WRITE_ACCESS_GRANTED_RESTRICTED = 0x80;
-    /**
-     * T4T tag write access not granted.
-     * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     */
-    public static final int WRITE_ACCESS_NOT_GRANTED = 0xFF;
-
-    /**
-     * Possible return values for {@link #getVersion()}.
-     * @hide
-     */
-    @IntDef(prefix = { "READ_ACCESS_GRANTED_" }, value = {
-            WRITE_ACCESS_GRANTED_RESTRICTED,
-            WRITE_ACCESS_GRANTED_UNRESTRICTED,
-            WRITE_ACCESS_NOT_GRANTED,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface WriteAccess {}
 
     /**
      * Indicates the write access condition.
      * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.2" for more details.
-     * @return write access restriction
+     * @return boolean if write access is allowed, otherwise false.
      */
-    @WriteAccess
-    public int getWriteAccess() {
-        return mWriteAccess;
+    public boolean isWriteAllowed() {
+        return mIsWriteAllowed;
     }
 
     @Override
@@ -273,16 +184,14 @@ public final class T4tNdefNfceeCcFileInfo implements Parcelable {
                     // NdefNfceeCcFileInfo fields
                     int cclen = in.readInt();
                     int version = in.readInt();
-                    int maxLe = in.readInt();
-                    int maxLc = in.readInt();
                     int ndefFileId = in.readInt();
                     int ndefMaxSize = in.readInt();
-                    int ndefReadAccess = in.readInt();
-                    int ndefWriteAccess = in.readInt();
+                    boolean isReadAllowed = in.readBoolean();
+                    boolean isWriteAllowed = in.readBoolean();
 
-                    return new T4tNdefNfceeCcFileInfo(cclen, version, maxLe, maxLc,
+                    return new T4tNdefNfceeCcFileInfo(cclen, version,
                             ndefFileId, ndefMaxSize,
-                            ndefReadAccess, ndefWriteAccess);
+                            isReadAllowed, isWriteAllowed);
                 }
 
                 @Override

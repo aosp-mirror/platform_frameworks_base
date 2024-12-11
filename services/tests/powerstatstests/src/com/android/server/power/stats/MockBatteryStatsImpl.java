@@ -77,9 +77,15 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
                 new PowerStatsUidResolver());
     }
 
-    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
-            Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
-        super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock,
+            File historyDirectory, Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+        this(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+                powerStatsUidResolver);
+    }
+
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, MonotonicClock monotonicClock,
+            File historyDirectory, Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+        super(config, clock, monotonicClock, historyDirectory, handler,
                 mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
                 mock(UserInfoProvider.class), mockPowerProfile(),
                 new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),

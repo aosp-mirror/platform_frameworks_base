@@ -517,7 +517,8 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             SplitState splitState,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler) {
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor) {
         return new SplitScreenController(
                 context,
                 shellInit,
@@ -541,7 +542,8 @@ public abstract class WMShellModule {
                 multiInstanceHelper,
                 splitState,
                 mainExecutor,
-                mainHandler);
+                mainHandler,
+                bgExecutor);
     }
 
     //
@@ -1025,12 +1027,14 @@ public abstract class WMShellModule {
     static DesktopUserRepositories provideDesktopUserRepositories(
             Context context,
             ShellInit shellInit,
+            ShellController shellController,
             DesktopPersistentRepository desktopPersistentRepository,
             DesktopRepositoryInitializer desktopRepositoryInitializer,
             @ShellMainThread CoroutineScope mainScope,
             UserManager userManager
     ) {
-        return new DesktopUserRepositories(context, shellInit, desktopPersistentRepository,
+        return new DesktopUserRepositories(context, shellInit, shellController,
+                desktopPersistentRepository,
                 desktopRepositoryInitializer,
                 mainScope, userManager);
     }

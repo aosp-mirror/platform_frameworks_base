@@ -486,7 +486,7 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
-     * Sets to containers adjacent to each other. Containers below two visible adjacent roots will
+     * Sets two containers adjacent to each other. Containers below two visible adjacent roots will
      * be made invisible. This currently only applies to TaskFragment containers created by
      * organizer.
      * @param root1 the first root.
@@ -495,9 +495,64 @@ public final class WindowContainerTransaction implements Parcelable {
     @NonNull
     public WindowContainerTransaction setAdjacentRoots(
             @NonNull WindowContainerToken root1, @NonNull WindowContainerToken root2) {
-        mHierarchyOps.add(HierarchyOp.createForAdjacentRoots(
-                root1.asBinder(),
-                root2.asBinder()));
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            mHierarchyOps.add(HierarchyOp.createForAdjacentRoots(
+                    root1.asBinder(),
+                    root2.asBinder()));
+            return this;
+        }
+        return setAdjacentRootSet(root1, root2);
+    }
+
+    /**
+     * Sets multiple containers adjacent to each other. Containers below the visible adjacent roots
+     * will be made invisible. This currently only applies to Task containers created by organizer.
+     *
+     * To remove one container from the adjacent roots, one can call {@link #clearAdjacentRoots}
+     * with the target container.
+     * To remove all containers from the adjacent roots, one much call {@link #clearAdjacentRoots}
+     * on each container if there were more than two containers in the set.
+     *
+     * For non-Task TaskFragment, use {@link #setAdjacentTaskFragments} instead.
+     *
+     * @param roots the Tasks that should be adjacent to each other.
+     * @throws IllegalArgumentException if roots have size < 2.
+     * @hide // TODO(b/373709676) Rename to setAdjacentRoots and update CTS.
+     */
+    @NonNull
+    public WindowContainerTransaction setAdjacentRootSet(
+            @NonNull WindowContainerToken... roots) {
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalArgumentException("allowMultipleAdjacentTaskFragments is not enabled."
+                    + " Use #setAdjacentRoots instead.");
+        }
+        if (roots.length < 2) {
+            throw new IllegalArgumentException("setAdjacentRootSet must have size >= 2");
+        }
+        final IBinder[] rootTokens = new IBinder[roots.length];
+        for (int i = 0; i < roots.length; i++) {
+            rootTokens[i] = roots[i].asBinder();
+        }
+        mHierarchyOps.add(
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS)
+                        .setContainers(rootTokens)
+                        .build());
+        return this;
+    }
+
+    /**
+     * Clears container adjacent.
+     * If {@link #setAdjacentRootSet} is called with more than 2 roots, calling this will only
+     * remove the given root from the adjacent set. The rest of roots will stay adjacent to each
+     * other.
+     *
+     * @param root the root container to clear the adjacent roots for.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction clearAdjacentRoots(
+            @NonNull WindowContainerToken root) {
+        mHierarchyOps.add(HierarchyOp.createForClearAdjacentRoots(root.asBinder()));
         return this;
     }
 
@@ -963,18 +1018,6 @@ public final class WindowContainerTransaction implements Parcelable {
     public WindowContainerTransaction setTaskFragmentOrganizer(
             @NonNull ITaskFragmentOrganizer organizer) {
         mTaskFragmentOrganizer = organizer;
-        return this;
-    }
-
-    /**
-     * Clears container adjacent.
-     * @param root the root container to clear the adjacent roots for.
-     * @hide
-     */
-    @NonNull
-    public WindowContainerTransaction clearAdjacentRoots(
-            @NonNull WindowContainerToken root) {
-        mHierarchyOps.add(HierarchyOp.createForClearAdjacentRoots(root.asBinder()));
         return this;
     }
 
@@ -1520,6 +1563,9 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         private IBinder mContainer;
 
+        @Nullable
+        private IBinder[] mContainers;
+
         // If this is same as mContainer, then only change position, don't reparent.
         @Nullable
         private IBinder mReparent;
@@ -1704,6 +1750,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public HierarchyOp(@NonNull HierarchyOp copy) {
             mType = copy.mType;
             mContainer = copy.mContainer;
+            mContainers = copy.mContainers;
             mBounds = copy.mBounds;
             mIncludingParents = copy.mIncludingParents;
             mReparent = copy.mReparent;
@@ -1729,6 +1776,7 @@ public final class WindowContainerTransaction implements Parcelable {
         protected HierarchyOp(Parcel in) {
             mType = in.readInt();
             mContainer = in.readStrongBinder();
+            mContainers = in.createBinderArray();
             mBounds = in.readTypedObject(Rect.CREATOR);
             mIncludingParents = in.readBoolean();
             mReparent = in.readStrongBinder();
@@ -1779,6 +1827,13 @@ public final class WindowContainerTransaction implements Parcelable {
             return mContainer;
         }
 
+        @NonNull
+        public IBinder[] getContainers() {
+            return mContainers;
+        }
+
+        /** @deprecated b/373709676 replace with {@link #getContainers()}. */
+        @Deprecated
         @NonNull
         public IBinder getAdjacentRoot() {
             return mReparent;
@@ -1869,7 +1924,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_REORDER: return "reorder";
                 case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "childrenTasksReparent";
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "setLaunchRoot";
-                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "setAdjacentRoot";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "setAdjacentRoots";
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "launchTask";
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "setAdjacentFlagRoot";
                 case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT:
@@ -1883,7 +1938,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: return "setAlwaysOnTop";
                 case HIERARCHY_OP_TYPE_REMOVE_TASK: return "removeTask";
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: return "finishActivity";
-                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "clearAdjacentRoot";
+                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "clearAdjacentRoots";
                 case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
                     return "setReparentLeafTaskIfRelaunch";
                 case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
@@ -1923,8 +1978,18 @@ public final class WindowContainerTransaction implements Parcelable {
                     sb.append(mContainer).append(" to ").append(mToTop ? "top" : "bottom");
                     break;
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
-                    sb.append("container=").append(mContainer)
-                            .append(" adjacentRoot=").append(mReparent);
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        for (IBinder container : mContainers) {
+                            if (container == mContainers[0]) {
+                                sb.append("adjacentRoots=").append(container);
+                            } else {
+                                sb.append(", ").append(container);
+                            }
+                        }
+                    } else {
+                        sb.append("container=").append(mContainer)
+                                .append(" adjacentRoot=").append(mReparent);
+                    }
                     break;
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK:
                     sb.append(mLaunchOptions);
@@ -1997,6 +2062,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mType);
             dest.writeStrongBinder(mContainer);
+            dest.writeBinderArray(mContainers);
             dest.writeTypedObject(mBounds, flags);
             dest.writeBoolean(mIncludingParents);
             dest.writeStrongBinder(mReparent);
@@ -2042,6 +2108,9 @@ public final class WindowContainerTransaction implements Parcelable {
 
             @Nullable
             private IBinder mContainer;
+
+            @Nullable
+            private IBinder[] mContainers;
 
             @Nullable
             private IBinder mReparent;
@@ -2101,6 +2170,11 @@ public final class WindowContainerTransaction implements Parcelable {
 
             Builder setContainer(@Nullable IBinder container) {
                 mContainer = container;
+                return this;
+            }
+
+            Builder setContainers(@Nullable IBinder[] containers) {
+                mContainers = containers;
                 return this;
             }
 
@@ -2209,6 +2283,7 @@ public final class WindowContainerTransaction implements Parcelable {
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
+                hierarchyOp.mContainers = mContainers;
                 hierarchyOp.mReparent = mReparent;
                 hierarchyOp.mWindowingModes = mWindowingModes != null
                         ? Arrays.copyOf(mWindowingModes, mWindowingModes.length)

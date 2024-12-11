@@ -111,6 +111,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private WindowDecorViewModel mWindowDecorViewModel;
     @Mock private SplitState mSplitState;
     @Mock private ShellExecutor mMainExecutor;
+    @Mock private ShellExecutor mBgExecutor;
     @Mock private Handler mMainHandler;
     @Mock private LaunchAdjacentController mLaunchAdjacentController;
     @Mock private DefaultMixedHandler mMixedHandler;
@@ -136,16 +137,18 @@ public class SplitTransitionTests extends ShellTestCase {
         mSplitLayout = SplitTestUtils.createMockSplitLayout();
         mMainStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue,
-                mIconProvider, Optional.of(mWindowDecorViewModel), STAGE_TYPE_MAIN));
+                mIconProvider, mMainExecutor, mBgExecutor, Optional.of(mWindowDecorViewModel),
+                STAGE_TYPE_MAIN));
         mMainStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mSideStage = spy(new StageTaskListener(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mock(
                 StageTaskListener.StageListenerCallbacks.class), mSyncQueue,
-                mIconProvider, Optional.of(mWindowDecorViewModel), STAGE_TYPE_SIDE));
+                mIconProvider, mMainExecutor, mBgExecutor, Optional.of(mWindowDecorViewModel),
+                STAGE_TYPE_SIDE));
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
-                mTransactionPool, mMainExecutor, mMainHandler, Optional.empty(),
+                mTransactionPool, mMainExecutor, mMainHandler, mBgExecutor, Optional.empty(),
                 mLaunchAdjacentController, Optional.empty(), mSplitState);
         mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();

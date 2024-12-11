@@ -20,7 +20,9 @@ import com.android.systemui.activity.data.repository.activityManagerRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
 
 val Kosmos.ongoingCallInteractor: OngoingCallInteractor by
     Kosmos.Fixture {
@@ -28,6 +30,8 @@ val Kosmos.ongoingCallInteractor: OngoingCallInteractor by
           scope = applicationCoroutineScope,
           activeNotificationsInteractor = activeNotificationsInteractor,
           activityManagerRepository = activityManagerRepository,
+          statusBarModeRepositoryStore = fakeStatusBarModeRepository,
+          statusBarWindowControllerStore = fakeStatusBarWindowControllerStore,
           logBuffer = logcatLogBuffer("OngoingCallInteractorKosmos"),
       )
     }
