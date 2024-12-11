@@ -84,10 +84,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.NestedScrollBehavior
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
@@ -134,7 +134,7 @@ private val quickSettingsShadeContentKey: ContentKey
  * entire size of the scene.
  */
 @Composable
-fun SceneScope.HeadsUpNotificationSpace(
+fun ContentScope.HeadsUpNotificationSpace(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     useHunBounds: () -> Boolean = { true },
@@ -176,7 +176,7 @@ fun SceneScope.HeadsUpNotificationSpace(
  * the user. When swiped up, the heads up notification is snoozed.
  */
 @Composable
-fun SceneScope.SnoozeableHeadsUpNotificationSpace(
+fun ContentScope.SnoozeableHeadsUpNotificationSpace(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
 ) {
@@ -246,7 +246,7 @@ fun SceneScope.SnoozeableHeadsUpNotificationSpace(
 
 /** Adds the space where notification stack should appear in the scene. */
 @Composable
-fun SceneScope.ConstrainedNotificationStack(
+fun ContentScope.ConstrainedNotificationStack(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
@@ -281,7 +281,7 @@ fun SceneScope.ConstrainedNotificationStack(
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SceneScope.NotificationScrollingStack(
+fun ContentScope.NotificationScrollingStack(
     shadeSession: SaveableSession,
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
@@ -622,7 +622,7 @@ fun SceneScope.NotificationScrollingStack(
  * the notification contents (stack, footer, shelf) should be drawn.
  */
 @Composable
-fun SceneScope.NotificationStackCutoffGuideline(
+fun ContentScope.NotificationStackCutoffGuideline(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
@@ -642,7 +642,7 @@ fun SceneScope.NotificationStackCutoffGuideline(
 }
 
 @Composable
-private fun SceneScope.NotificationPlaceholder(
+private fun ContentScope.NotificationPlaceholder(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     useStackBounds: () -> Boolean,
