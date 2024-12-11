@@ -18,19 +18,26 @@ package android.graphics;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.test.InstrumentationTestCase;
 import android.text.TextUtils;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.text.flags.Flags;
 
 import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,13 +45,14 @@ import java.util.HashSet;
 /**
  * PaintTest tests {@link Paint}.
  */
-public class PaintTest extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class PaintTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final String FONT_PATH = "fonts/HintedAdvanceWidthTest-Regular.ttf";
 
-    static void assertEquals(String message, float[] expected, float[] actual) {
+    static void assertFloatArrayEquals(String message, float[] expected, float[] actual) {
         if (expected.length != actual.length) {
             fail(message + " expected array length:<" + expected.length + "> but was:<"
                     + actual.length + ">");
@@ -88,9 +96,10 @@ public class PaintTest extends InstrumentationTestCase {
     };
 
     @SmallTest
+    @Test
     public void testHintingWidth() {
         final Typeface fontTypeface = Typeface.createFromAsset(
-                getInstrumentation().getContext().getAssets(), FONT_PATH);
+                InstrumentationRegistry.getInstrumentation().getContext().getAssets(), FONT_PATH);
         Paint paint = new Paint();
         paint.setTypeface(fontTypeface);
 
@@ -103,12 +112,14 @@ public class PaintTest extends InstrumentationTestCase {
 
             paint.setHinting(Paint.HINTING_OFF);
             paint.getTextWidths(String.valueOf(testCase.mText), widths);
-            assertEquals("Text width of '" + testCase.mText + "' without hinting is not expected.",
+            assertFloatArrayEquals(
+                    "Text width of '" + testCase.mText + "' without hinting is not expected.",
                     testCase.mWidthWithoutHinting, widths);
 
             paint.setHinting(Paint.HINTING_ON);
             paint.getTextWidths(String.valueOf(testCase.mText), widths);
-            assertEquals("Text width of '" + testCase.mText + "' with hinting is not expected.",
+            assertFloatArrayEquals(
+                    "Text width of '" + testCase.mText + "' with hinting is not expected.",
                     testCase.mWidthWithHinting, widths);
         }
     }
@@ -131,9 +142,11 @@ public class PaintTest extends InstrumentationTestCase {
         return sb.toString();
     }
 
+    @Test
     public void testHasGlyph_variationSelectors() {
         final Typeface fontTypeface = Typeface.createFromAsset(
-                getInstrumentation().getContext().getAssets(), "fonts/hasGlyphTestFont.ttf");
+                InstrumentationRegistry.getInstrumentation().getContext().getAssets(),
+                "fonts/hasGlyphTestFont.ttf");
         Paint p = new Paint();
         p.setTypeface(fontTypeface);
 
@@ -175,6 +188,7 @@ public class PaintTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testGetTextRunAdvances() {
         {
             // LTR
@@ -231,6 +245,7 @@ public class PaintTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testGetTextRunAdvances_invalid() {
         Paint p = new Paint();
         char[] text = "test".toCharArray();
@@ -284,6 +299,7 @@ public class PaintTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testMeasureTextBidi() {
         Paint p = new Paint();
         {
@@ -340,18 +356,21 @@ public class PaintTest extends InstrumentationTestCase {
         }
     }
 
+    @Test
     public void testSetGetWordSpacing() {
         Paint p = new Paint();
-        assertEquals(0.0f, p.getWordSpacing());  // The default value should be 0.
+        assertEquals(0.0f, p.getWordSpacing(), 0.0f);  // The default value should be 0.
         p.setWordSpacing(1.0f);
-        assertEquals(1.0f, p.getWordSpacing());
+        assertEquals(1.0f, p.getWordSpacing(), 0.0f);
         p.setWordSpacing(-2.0f);
-        assertEquals(-2.0f, p.getWordSpacing());
+        assertEquals(-2.0f, p.getWordSpacing(), 0.0f);
     }
 
+    @Test
     public void testGetUnderlinePositionAndThickness() {
         final Typeface fontTypeface = Typeface.createFromAsset(
-                getInstrumentation().getContext().getAssets(), "fonts/underlineTestFont.ttf");
+                InstrumentationRegistry.getInstrumentation().getContext().getAssets(),
+                "fonts/underlineTestFont.ttf");
         final Paint p = new Paint();
         final int textSize = 100;
         p.setTextSize(textSize);
@@ -391,6 +410,7 @@ public class PaintTest extends InstrumentationTestCase {
         return ccByChars;
     }
 
+    @Test
     public void testCluster() {
         final Paint p = new Paint();
         p.setTextSize(100);
@@ -417,6 +437,7 @@ public class PaintTest extends InstrumentationTestCase {
     }
 
     @RequiresFlagsEnabled(Flags.FLAG_TYPEFACE_CACHE_FOR_VAR_SETTINGS)
+    @Test
     public void testDerivedFromSameTypeface() {
         final Paint p = new Paint();
 
@@ -432,6 +453,7 @@ public class PaintTest extends InstrumentationTestCase {
     }
 
     @RequiresFlagsEnabled(Flags.FLAG_TYPEFACE_CACHE_FOR_VAR_SETTINGS)
+    @Test
     public void testDerivedFromChained() {
         final Paint p = new Paint();
 
