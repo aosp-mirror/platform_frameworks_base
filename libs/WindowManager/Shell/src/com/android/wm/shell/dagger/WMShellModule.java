@@ -517,7 +517,8 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             SplitState splitState,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler) {
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor) {
         return new SplitScreenController(
                 context,
                 shellInit,
@@ -541,7 +542,8 @@ public abstract class WMShellModule {
                 multiInstanceHelper,
                 splitState,
                 mainExecutor,
-                mainHandler);
+                mainHandler,
+                bgExecutor);
     }
 
     //

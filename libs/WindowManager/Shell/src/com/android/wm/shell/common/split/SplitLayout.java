@@ -794,6 +794,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     void onStartDragging() {
+        // This triggers initialization of things like the resize veil in preparation for
+        // showing it when the user moves the divider past the slop
+        updateDividerBounds(getDividerPosition(), false /* shouldUseParallaxEffect */);
+
         mInteractionJankMonitor.begin(getDividerLeash(), mContext, mHandler,
                 CUJ_SPLIT_SCREEN_RESIZE);
     }
