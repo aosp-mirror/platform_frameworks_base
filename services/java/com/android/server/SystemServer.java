@@ -293,6 +293,7 @@ import com.android.server.usage.StorageStatsService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.usb.UsbService;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.vcn.VcnLocation;
 import com.android.server.vibrator.VibratorManagerService;
 import com.android.server.voiceinteraction.VoiceInteractionManagerService;
 import com.android.server.vr.VrManagerService;
@@ -2238,10 +2239,13 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartVcnManagementService");
             try {
-                // TODO: b/375213246 When VCN is in mainline module, load it from the apex path.
-                // Whether VCN will be in apex or in the platform will be gated by a build system
-                // flag.
-                mSystemServiceManager.startService(CONNECTIVITY_SERVICE_INITIALIZER_B_CLASS);
+                if (VcnLocation.IS_VCN_IN_MAINLINE) {
+                    mSystemServiceManager.startServiceFromJar(
+                            CONNECTIVITY_SERVICE_INITIALIZER_B_CLASS,
+                            CONNECTIVITY_SERVICE_APEX_PATH);
+                } else {
+                    mSystemServiceManager.startService(CONNECTIVITY_SERVICE_INITIALIZER_B_CLASS);
+                }
             } catch (Throwable e) {
                 reportWtf("starting VCN Management Service", e);
             }
