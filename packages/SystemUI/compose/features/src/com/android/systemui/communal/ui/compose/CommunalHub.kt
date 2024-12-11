@@ -910,7 +910,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                         Arrangement.spacedBy(
                             sizeInfo?.verticalArrangement ?: Dimensions.ItemSpacing
                         ),
-                    enabled = selected,
+                    enabled = selected && !isItemDragging,
                     alpha = { outlineAlpha },
                     modifier =
                         Modifier.requiredSize(dpSize)
