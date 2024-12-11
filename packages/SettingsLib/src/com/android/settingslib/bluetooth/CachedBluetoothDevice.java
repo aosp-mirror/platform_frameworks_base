@@ -1916,6 +1916,25 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 BluetoothProfile.STATE_CONNECTED;
     }
 
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} supports broadcast assistant profile
+     */
+    public boolean isConnectedLeAudioBroadcastAssistantDevice() {
+        LocalBluetoothLeBroadcastAssistant leBroadcastAssistant =
+                mProfileManager.getLeAudioBroadcastAssistantProfile();
+        return leBroadcastAssistant != null && leBroadcastAssistant.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} supports volume control profile
+     */
+    public boolean isConnectedVolumeControlDevice() {
+        VolumeControlProfile volumeControl = mProfileManager.getVolumeControlProfile();
+        return volumeControl != null && volumeControl.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
+    }
+
     private boolean isConnectedSapDevice() {
         SapProfile sapProfile = mProfileManager.getSapProfile();
         return sapProfile != null && sapProfile.getConnectionStatus(mDevice)
