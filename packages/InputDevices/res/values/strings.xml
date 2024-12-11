@@ -164,4 +164,7 @@
 
     <!-- Montenegrin (Cyrillic) keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_montenegrin_cyrillic">Montenegrin (Cyrillic)</string>
+
+    <!-- Romanian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_romanian">Romanian</string>
 </resources>
