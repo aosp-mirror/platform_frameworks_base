@@ -3621,8 +3621,6 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
-    @SystemApi
-    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     public void requestSatelliteDisplayName(
             @NonNull @CallbackExecutor Executor executor,
