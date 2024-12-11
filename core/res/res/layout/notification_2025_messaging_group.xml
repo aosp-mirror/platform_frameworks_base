@@ -24,13 +24,13 @@
     android:orientation="horizontal" >
     <FrameLayout
         android:id="@+id/message_icon_container"
-        android:layout_width="@dimen/conversation_content_start"
+        android:layout_width="@dimen/notification_2025_content_margin_start"
         android:layout_height="wrap_content">
         <ImageView
             android:layout_gravity="top|center_horizontal"
             android:id="@+id/message_icon"
-            android:layout_width="@dimen/messaging_avatar_size"
-            android:layout_height="@dimen/messaging_avatar_size"
+            android:layout_width="@dimen/notification_2025_icon_circle_size"
+            android:layout_height="@dimen/notification_2025_icon_circle_size"
             android:background="@drawable/notification_icon_circle"
             android:clipToOutline="true"
             android:scaleType="centerCrop"
@@ -58,14 +58,14 @@
     </com.android.internal.widget.RemeasuringLinearLayout>
     <FrameLayout
         android:id="@+id/messaging_group_icon_container"
-        android:layout_width="@dimen/messaging_avatar_size"
-        android:layout_height="@dimen/messaging_avatar_size"
+        android:layout_width="@dimen/notification_2025_icon_circle_size"
+        android:layout_height="@dimen/notification_2025_icon_circle_size"
         android:layout_marginStart="12dp"
         android:visibility="gone"/>
     <FrameLayout
         android:id="@+id/messaging_group_sending_progress_container"
         android:layout_width="@dimen/messaging_group_sending_progress_size"
-        android:layout_height="@dimen/messaging_avatar_size"
+        android:layout_height="@dimen/notification_2025_icon_circle_size"
         android:layout_marginStart="12dp"
         android:layout_gravity="top"
         android:visibility="gone">
