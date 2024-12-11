@@ -9,16 +9,6 @@ flag {
 }
 
 flag {
-  name: "reset_draw_state_on_client_invisible"
-  namespace: "windowing_frontend"
-  description: "Reset draw state if the client is notified to be invisible"
-  bug: "373023636"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "wait_for_transition_on_display_switch"
     namespace: "windowing_frontend"
     description: "Waits for Shell transition to start before unblocking the screen after display switch"

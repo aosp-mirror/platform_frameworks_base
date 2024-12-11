@@ -248,7 +248,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.sEnableShellTransitions;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
-import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -5590,18 +5589,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped, then we need to set up to wait for its windows to be ready.
             if (!isVisible() || mAppStopped) {
                 clearAllDrawn();
-                // Reset the draw state in order to prevent the starting window to be immediately
-                // dismissed when the app still has the surface.
-                if (!Flags.resetDrawStateOnClientInvisible()
-                        && !isVisible() && !isClientVisible()) {
-                    forAllWindows(w -> {
-                        if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
-                            w.mWinAnimator.resetDrawState();
-                            // Force add to mResizingWindows, so the window will report drawn.
-                            w.forceReportingResized();
-                        }
-                    }, true /* traverseTopToBottom */);
-                }
             }
 
             // In the case where we are making an app visible but holding off for a transition,
