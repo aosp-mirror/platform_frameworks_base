@@ -61,6 +61,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1088,8 +1089,19 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Use launch-adjacent-flag-root if launching with launch-adjacent flag.
         if ((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
                 && mLaunchAdjacentFlagRootTask != null) {
-            final Task launchAdjacentRootAdjacentTask =
-                    mLaunchAdjacentFlagRootTask.getAdjacentTask();
+            final Task launchAdjacentRootAdjacentTask;
+            if (Flags.allowMultipleAdjacentTaskFragments()) {
+                final Task[] tmpTask = new Task[1];
+                mLaunchAdjacentFlagRootTask.forOtherAdjacentTasks(task -> {
+                    // TODO(b/382208145): enable FLAG_ACTIVITY_LAUNCH_ADJACENT for 3+.
+                    // Find the first adjacent for now.
+                    tmpTask[0] = task;
+                    return true;
+                });
+                launchAdjacentRootAdjacentTask = tmpTask[0];
+            } else {
+                launchAdjacentRootAdjacentTask = mLaunchAdjacentFlagRootTask.getAdjacentTask();
+            }
             if (sourceTask != null && (sourceTask == candidateTask
                     || sourceTask.topRunningActivity() == null)) {
                 // Do nothing when task that is getting opened is same as the source or when
@@ -1114,15 +1126,26 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         for (int i = mLaunchRootTasks.size() - 1; i >= 0; --i) {
             if (mLaunchRootTasks.get(i).contains(windowingMode, activityType)) {
                 final Task launchRootTask = mLaunchRootTasks.get(i).task;
-                final Task adjacentRootTask = launchRootTask != null
-                        ? launchRootTask.getAdjacentTask() : null;
-                if (sourceTask != null && adjacentRootTask != null
-                        && (sourceTask == adjacentRootTask
-                        || sourceTask.isDescendantOf(adjacentRootTask))) {
-                    return adjacentRootTask;
-                } else {
+                if (launchRootTask == null || sourceTask == null) {
                     return launchRootTask;
                 }
+                if (!Flags.allowMultipleAdjacentTaskFragments()) {
+                    final Task adjacentRootTask = launchRootTask.getAdjacentTask();
+                    if (adjacentRootTask != null && (sourceTask == adjacentRootTask
+                            || sourceTask.isDescendantOf(adjacentRootTask))) {
+                        return adjacentRootTask;
+                    }
+                    return launchRootTask;
+                }
+                final Task[] adjacentRootTask = new Task[1];
+                launchRootTask.forOtherAdjacentTasks(task -> {
+                    if (sourceTask == task || sourceTask.isDescendantOf(task)) {
+                        adjacentRootTask[0] = task;
+                        return true;
+                    }
+                    return false;
+                });
+                return adjacentRootTask[0] != null ? adjacentRootTask[0] : launchRootTask;
             }
         }
 
@@ -1133,12 +1156,31 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 // A pinned task relaunching should be handled by its task organizer. Skip fallback
                 // launch target of a pinned task from source task.
                 || candidateTask.getWindowingMode() != WINDOWING_MODE_PINNED)) {
-            final Task adjacentTarget = sourceTask.getAdjacentTask();
-            if (adjacentTarget != null) {
-                if (candidateTask != null
-                        && (candidateTask == adjacentTarget
-                        || candidateTask.isDescendantOf(adjacentTarget))) {
-                    return adjacentTarget;
+            final Task taskWithAdjacent = sourceTask.getTaskWithAdjacent();
+            if (taskWithAdjacent != null) {
+                // Has adjacent.
+                if (candidateTask == null) {
+                    return sourceTask.getCreatedByOrganizerTask();
+                }
+                // Check if the candidate is already positioned in the adjacent Task.
+                if (Flags.allowMultipleAdjacentTaskFragments()) {
+                    final Task[] adjacentRootTask = new Task[1];
+                    sourceTask.forOtherAdjacentTasks(task -> {
+                        if (candidateTask == task || candidateTask.isDescendantOf(task)) {
+                            adjacentRootTask[0] = task;
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (adjacentRootTask[0] != null) {
+                        return adjacentRootTask[0];
+                    }
+                } else {
+                    final Task adjacentTarget = taskWithAdjacent.getAdjacentTask();
+                    if (candidateTask == adjacentTarget
+                            || candidateTask.isDescendantOf(adjacentTarget)) {
+                        return adjacentTarget;
+                    }
                 }
                 return sourceTask.getCreatedByOrganizerTask();
             }

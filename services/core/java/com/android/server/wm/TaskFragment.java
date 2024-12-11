@@ -531,6 +531,28 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return mAdjacentTaskFragments;
     }
 
+    /**
+     * Runs callback on all TaskFragments that are adjacent to this. The invoke order is not
+     * guaranteed.
+     */
+    void forOtherAdjacentTaskFragments(@NonNull Consumer<TaskFragment> callback) {
+        if (mAdjacentTaskFragments == null) {
+            return;
+        }
+        mAdjacentTaskFragments.forAllTaskFragments(callback, this /* exclude */);
+    }
+
+    /**
+     * Runs callback on all TaskFragments that are adjacent to this. Returns early if callback
+     * returns true on any of them. The invoke order is not guaranteed.
+     */
+    boolean forOtherAdjacentTaskFragments(@NonNull Predicate<TaskFragment> callback) {
+        if (mAdjacentTaskFragments == null) {
+            return false;
+        }
+        return mAdjacentTaskFragments.forAllTaskFragments(callback, this /* exclude */);
+    }
+
     boolean hasAdjacentTaskFragment() {
         if (!Flags.allowMultipleAdjacentTaskFragments()) {
             return mAdjacentTaskFragment != null;
@@ -3198,24 +3220,47 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return false;
         }
 
-        final TaskFragment adjacentTf = getAdjacentTaskFragment();
-        if (adjacentTf == null) {
+        if (!hasAdjacentTaskFragment()) {
             // early return if no adjacent TF.
             return false;
         }
 
-        if (getParent().mChildren.indexOf(adjacentTf) < getParent().mChildren.indexOf(this)) {
-            // early return if this TF already has higher z-ordering.
-            return false;
+        final ArrayList<WindowContainer> siblings = getParent().mChildren;
+        final int zOrder = siblings.indexOf(this);
+
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            if (siblings.indexOf(getAdjacentTaskFragment()) < zOrder) {
+                // early return if this TF already has higher z-ordering.
+                return false;
+            }
+        } else {
+            final boolean hasAdjacentOnTop = forOtherAdjacentTaskFragments(
+                    tf -> siblings.indexOf(tf) > zOrder);
+            if (!hasAdjacentOnTop) {
+                // early return if this TF already has higher z-ordering.
+                return false;
+            }
         }
 
-        ToBooleanFunction<WindowState> getDimBehindWindow =
+        final ToBooleanFunction<WindowState> getDimBehindWindow =
                 (w) -> (w.mAttrs.flags & FLAG_DIM_BEHIND) != 0 && w.mActivityRecord != null
                         && w.mActivityRecord.isEmbedded() && (w.mActivityRecord.isVisibleRequested()
                         || w.mActivityRecord.isVisible());
-        if (adjacentTf.forAllWindows(getDimBehindWindow, true)) {
-            // early return if the adjacent Tf has a dimming window.
-            return false;
+
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            final TaskFragment adjacentTf = getAdjacentTaskFragment();
+            if (adjacentTf.forAllWindows(getDimBehindWindow, true)) {
+                // early return if the adjacent Tf has a dimming window.
+                return false;
+            }
+        } else {
+            final boolean adjacentHasDimmingWindow = forOtherAdjacentTaskFragments(tf -> {
+                return tf.forAllWindows(getDimBehindWindow, true);
+            });
+            if (adjacentHasDimmingWindow) {
+                // early return if the adjacent Tf has a dimming window.
+                return false;
+            }
         }
 
         // boost if there's an Activity window that has FLAG_DIM_BEHIND flag.
@@ -3526,6 +3571,37 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         /** Whether the {@link TaskFragment} is in this adjacent set. */
         boolean contains(@NonNull TaskFragment taskFragment) {
             return mAdjacentSet.contains(taskFragment);
+        }
+
+        /**
+         * Runs the callback on all adjacent TaskFragments. Skips the exclude one if not null.
+         */
+        void forAllTaskFragments(@NonNull Consumer<TaskFragment> callback,
+                @Nullable TaskFragment exclude) {
+            for (int i = mAdjacentSet.size() - 1; i >= 0; i--) {
+                final TaskFragment taskFragment = mAdjacentSet.valueAt(i);
+                if (taskFragment != exclude) {
+                    callback.accept(taskFragment);
+                }
+            }
+        }
+
+        /**
+         * Runs the callback on all adjacent TaskFragments until one returns {@code true}. Skips the
+         * exclude one if not null.
+         */
+        boolean forAllTaskFragments(@NonNull Predicate<TaskFragment> callback,
+                @Nullable TaskFragment exclude) {
+            for (int i = mAdjacentSet.size() - 1; i >= 0; i--) {
+                final TaskFragment taskFragment = mAdjacentSet.valueAt(i);
+                if (taskFragment == exclude) {
+                    continue;
+                }
+                if (callback.test(taskFragment)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
