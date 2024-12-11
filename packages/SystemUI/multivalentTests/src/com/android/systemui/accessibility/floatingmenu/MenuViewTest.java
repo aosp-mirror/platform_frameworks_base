@@ -32,6 +32,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -48,6 +49,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -65,6 +67,9 @@ public class MenuViewTest extends SysuiTestCase {
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
+
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
 
     private SysuiTestableContext mSpyContext;
 
@@ -84,7 +89,8 @@ public class MenuViewTest extends SysuiTestCase {
         doNothing().when(mSpyContext).startActivity(any());
 
         final SecureSettings secureSettings = TestUtils.mockSecureSettings();
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, secureSettings);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                secureSettings);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         mStubMenuViewAppearance = new MenuViewAppearance(mSpyContext, stubWindowManager);
         mMenuView = spy(new MenuView(mSpyContext, stubMenuViewModel, mStubMenuViewAppearance,

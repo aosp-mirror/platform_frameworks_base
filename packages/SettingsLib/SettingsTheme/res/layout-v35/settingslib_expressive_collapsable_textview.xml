@@ -40,7 +40,7 @@
         android:longClickable="false"
         android:maxLines="10"
         android:ellipsize="end"
-        android:textAppearance="@style/TextAppearance.TopIntroText"/>
+        android:textAppearance="@style/TextAppearance.SettingsLib.BodyLarge"/>
 
     <com.android.settingslib.widget.LinkableTextView
         android:id="@+id/settingslib_expressive_learn_more"

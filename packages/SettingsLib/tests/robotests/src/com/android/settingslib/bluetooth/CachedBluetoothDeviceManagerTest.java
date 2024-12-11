@@ -139,6 +139,11 @@ public class CachedBluetoothDeviceManagerTest {
         mCachedDevice1 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1));
         mCachedDevice2 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2));
         mCachedDevice3 = spy(new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice3));
+
+        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
+                mCachedDeviceManager.mCachedDevices));
+        mCachedDeviceManager.mHearingAidDeviceManager = mHearingAidDeviceManager;
+        doNothing().when(mHearingAidDeviceManager).clearLocalDataIfNeeded(any());
     }
 
     /**
@@ -338,6 +343,8 @@ public class CachedBluetoothDeviceManagerTest {
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice2);
+
+        verify(mHearingAidDeviceManager).clearLocalDataIfNeeded(cachedDevice2);
         verify(mDevice1).removeBond();
     }
 
@@ -353,6 +360,8 @@ public class CachedBluetoothDeviceManagerTest {
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice1);
+
+        verify(mHearingAidDeviceManager).clearLocalDataIfNeeded(cachedDevice1);
         verify(mDevice2).removeBond();
     }
 
@@ -406,9 +415,6 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void updateHearingAidDevices_directToHearingAidDeviceManager() {
-        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
-                mCachedDeviceManager.mCachedDevices));
-        mCachedDeviceManager.mHearingAidDeviceManager = mHearingAidDeviceManager;
         mCachedDeviceManager.updateHearingAidsDevices();
 
         verify(mHearingAidDeviceManager).updateHearingAidsDevices();
@@ -535,6 +541,7 @@ public class CachedBluetoothDeviceManagerTest {
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice1);
 
+        verify(mHearingAidDeviceManager).clearLocalDataIfNeeded(cachedDevice1);
         verify(mDevice2).removeBond();
         assertThat(cachedDevice1.getGroupId()).isEqualTo(
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
@@ -559,6 +566,7 @@ public class CachedBluetoothDeviceManagerTest {
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice2);
 
+        verify(mHearingAidDeviceManager).clearLocalDataIfNeeded(cachedDevice2);
         verify(mDevice1).removeBond();
         assertThat(cachedDevice2.getGroupId()).isEqualTo(
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
@@ -611,10 +619,7 @@ public class CachedBluetoothDeviceManagerTest {
 
     @Test
     public void onActiveDeviceChanged_validHiSyncId_callExpectedFunction() {
-        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
-                mCachedDeviceManager.mCachedDevices));
         doNothing().when(mHearingAidDeviceManager).onActiveDeviceChanged(any());
-        mCachedDeviceManager.mHearingAidDeviceManager = mHearingAidDeviceManager;
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         cachedDevice1.setHearingAidInfo(

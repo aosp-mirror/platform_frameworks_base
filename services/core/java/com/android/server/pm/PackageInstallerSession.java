@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STOR
 import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SESSION_INVALID;
@@ -109,6 +110,7 @@ import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLite;
@@ -539,6 +541,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private DomainSet mPreVerifiedDomains;
+
+    private AtomicBoolean mDependencyInstallerEnabled = new AtomicBoolean();
+    private AtomicInteger mMissingSharedLibraryCount = new AtomicInteger();
 
     static class FileEntry {
         private final int mIndex;
@@ -3232,6 +3237,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (Flags.sdkDependencyInstaller()
                 && params.isAutoInstallDependenciesEnabled
                 && !isMultiPackage()) {
+            mDependencyInstallerEnabled.set(true);
             resolveLibraryDependenciesIfNeeded();
         } else {
             install();
@@ -3241,8 +3247,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void resolveLibraryDependenciesIfNeeded() {
         synchronized (mLock) {
-            mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(mPackageLite,
-                    mPm.snapshotComputer(), userId, mHandler,
+            List<SharedLibraryInfo> missingLibraries = new ArrayList<>();
+            try {
+                missingLibraries = mInstallDependencyHelper.getMissingSharedLibraries(mPackageLite);
+            } catch (PackageManagerException e) {
+                handleDependencyResolutionFailure(e);
+            } catch (Exception e) {
+                handleDependencyResolutionFailure(
+                        new PackageManagerException(
+                                INSTALL_FAILED_MISSING_SHARED_LIBRARY, e.getMessage()));
+            }
+
+            mMissingSharedLibraryCount.set(missingLibraries.size());
+            mInstallDependencyHelper.resolveLibraryDependenciesIfNeeded(missingLibraries,
+                    mPackageLite, mPm.snapshotComputer(), userId, mHandler,
                     new OutcomeReceiver<>() {
 
                         @Override
@@ -3252,12 +3270,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
                         @Override
                         public void onError(@NonNull PackageManagerException e) {
-                            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-                            setSessionFailed(e.error, completeMsg);
-                            onSessionDependencyResolveFailure(e.error, completeMsg);
+                            handleDependencyResolutionFailure(e);
                         }
                     });
         }
+    }
+
+    private void handleDependencyResolutionFailure(@NonNull PackageManagerException e) {
+        final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+        setSessionFailed(e.error, completeMsg);
+        onSessionDependencyResolveFailure(e.error, completeMsg);
+        PackageMetrics.onDependencyInstallationFailure(
+                sessionId, getPackageName(), e.error, mInstallerUid, params,
+                mMissingSharedLibraryCount.get());
     }
 
     /**
@@ -3327,7 +3352,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             return new InstallingSession(sessionId, stageDir, localObserver, params, mInstallSource,
                     user, mSigningDetails, mInstallerUid, mPackageLite, mPreVerifiedDomains, mPm,
-                    mHasAppMetadataFile);
+                    mHasAppMetadataFile, mDependencyInstallerEnabled.get(),
+                    mMissingSharedLibraryCount.get());
         }
     }
 

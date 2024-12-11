@@ -183,7 +183,7 @@ public class HeadsUpManagerImpl
 
     @Inject
     public HeadsUpManagerImpl(
-            @NonNull final Context context,
+            @NonNull @ShadeDisplayAware final Context context,
             HeadsUpManagerLogger logger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,

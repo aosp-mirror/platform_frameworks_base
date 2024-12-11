@@ -97,14 +97,14 @@ class PreferenceScreenBindingHelper(
         val preferencesBuilder = ImmutableMap.builder<String, PreferenceHierarchyNode>()
         val dependenciesBuilder = ImmutableMultimap.builder<String, String>()
         val lifecycleAwarePreferences = mutableListOf<PreferenceLifecycleProvider>()
-        fun PreferenceMetadata.addDependency(dependency: PreferenceMetadata) {
-            dependenciesBuilder.put(key, dependency.key)
-        }
 
         fun PreferenceHierarchyNode.addNode() {
             metadata.let {
-                preferencesBuilder.put(it.key, this)
-                it.dependencyOfEnabledState(context)?.addDependency(it)
+                val key = it.key
+                preferencesBuilder.put(key, this)
+                for (dependency in it.dependencies(context)) {
+                    dependenciesBuilder.put(dependency, key)
+                }
                 if (it is PreferenceLifecycleProvider) lifecycleAwarePreferences.add(it)
             }
         }

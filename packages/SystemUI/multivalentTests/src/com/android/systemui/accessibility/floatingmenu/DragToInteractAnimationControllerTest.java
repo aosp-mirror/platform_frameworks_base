@@ -24,6 +24,7 @@ import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -39,6 +40,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -54,11 +56,15 @@ public class DragToInteractAnimationControllerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
+
     @Before
     public void setUp() throws Exception {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final SecureSettings mockSecureSettings = TestUtils.mockSecureSettings();
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mockSecureSettings);
+        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
+                mockSecureSettings);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
         final MenuView stubMenuView = spy(new MenuView(mContext, stubMenuViewModel,

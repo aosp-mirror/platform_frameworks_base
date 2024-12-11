@@ -118,14 +118,13 @@ public class VirtualDisplayAdapterTest {
     public void testCreateAndReleaseVirtualDisplay() {
         VirtualDisplayConfig config = new VirtualDisplayConfig.Builder("test", /* width= */ 1,
                 /* height= */ 1, /* densityDpi= */ 1).build();
-        int ownerUid = 10;
 
         DisplayDevice result = mAdapter.createVirtualDisplayLocked(mMockCallback,
-                /* projection= */ null, ownerUid, /* packageName= */ "testpackage",
+                /* projection= */ null, /* ownerUid= */ 10, /* packageName= */ "testpackage",
                 /* uniqueId= */ "uniqueId", /* surface= */ null, /* flags= */ 0, config);
         assertNotNull(result);
 
-        result = mAdapter.releaseVirtualDisplayLocked(mMockBinder, ownerUid);
+        result = mAdapter.releaseVirtualDisplayLocked(mMockBinder);
         assertNotNull(result);
     }
 
@@ -230,7 +229,6 @@ public class VirtualDisplayAdapterTest {
 
         // Displays for the same package
         for (int i = 0; i < MAX_DEVICES_PER_PACKAGE * 2; i++) {
-            // Same owner UID
             IVirtualDisplayCallback callback = createCallback();
             DisplayDevice device = mAdapter.createVirtualDisplayLocked(callback,
                     mMediaProjectionMock, 1234, "test.package", "123",
@@ -240,7 +238,6 @@ public class VirtualDisplayAdapterTest {
 
         // Displays for different packages
         for (int i = 0; i < MAX_DEVICES * 2; i++) {
-            // Same owner UID
             IVirtualDisplayCallback callback = createCallback();
             DisplayDevice device = mAdapter.createVirtualDisplayLocked(callback,
                     mMediaProjectionMock, 1234 + i, "test.package", "123",
@@ -270,8 +267,7 @@ public class VirtualDisplayAdapterTest {
         }
 
         // Release one display
-        DisplayDevice device = mAdapter.releaseVirtualDisplayLocked(callbacks.get(0).asBinder(),
-                ownerUid);
+        DisplayDevice device = mAdapter.releaseVirtualDisplayLocked(callbacks.get(0).asBinder());
         assertNotNull(device);
         callbacks.remove(0);
 
@@ -292,7 +288,7 @@ public class VirtualDisplayAdapterTest {
 
         // Release all the displays
         for (IVirtualDisplayCallback cb : callbacks) {
-            device = mAdapter.releaseVirtualDisplayLocked(cb.asBinder(), ownerUid);
+            device = mAdapter.releaseVirtualDisplayLocked(cb.asBinder());
             assertNotNull(device);
         }
         callbacks.clear();
@@ -342,8 +338,7 @@ public class VirtualDisplayAdapterTest {
         }
 
         // Release one display
-        DisplayDevice device = mAdapter.releaseVirtualDisplayLocked(callbacks.get(0).asBinder(),
-                firstOwnerUid);
+        DisplayDevice device = mAdapter.releaseVirtualDisplayLocked(callbacks.get(0).asBinder());
         assertNotNull(device);
         callbacks.remove(0);
 
@@ -363,9 +358,8 @@ public class VirtualDisplayAdapterTest {
         assertNull(device);
 
         // Release all the displays
-        for (int i = 0; i < callbacks.size(); i++) {
-            device = mAdapter.releaseVirtualDisplayLocked(callbacks.get(i).asBinder(),
-                    firstOwnerUid + i);
+        for (IVirtualDisplayCallback iVirtualDisplayCallback : callbacks) {
+            device = mAdapter.releaseVirtualDisplayLocked(iVirtualDisplayCallback.asBinder());
             assertNotNull(device);
         }
         callbacks.clear();

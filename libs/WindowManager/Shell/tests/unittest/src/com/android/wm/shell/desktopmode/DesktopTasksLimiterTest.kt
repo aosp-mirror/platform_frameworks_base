@@ -42,6 +42,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
@@ -96,6 +97,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Mock lateinit var persistentRepository: DesktopPersistentRepository
     @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
     @Mock lateinit var userManager: UserManager
+    @Mock lateinit var shellController: ShellController
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
@@ -117,6 +119,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             DesktopUserRepositories(
                 context,
                 shellInit,
+                shellController,
                 persistentRepository,
                 repositoryInitializer,
                 testScope,

@@ -124,7 +124,6 @@ public class PipTransition extends PipTransitionController implements
     // Internal state and relevant cached info
     //
 
-    @Nullable
     private Transitions.TransitionFinishCallback mFinishCallback;
 
     private ValueAnimator mTransitionAnimator;
@@ -236,7 +235,6 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        mFinishCallback = finishCallback;
         if (transition == mEnterTransition || info.getType() == TRANSIT_PIP) {
             mEnterTransition = null;
             // If we are in swipe PiP to Home transition we are ENTERING_PIP as a jumpcut transition
@@ -282,7 +280,6 @@ public class PipTransition extends PipTransitionController implements
         if (isRemovePipTransition(info)) {
             return removePipImmediately(info, startTransaction, finishTransaction, finishCallback);
         }
-        mFinishCallback = null;
         return false;
     }
 
@@ -331,6 +328,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
         // We expect the PiP activity as a separate change in a config-at-end transition;
         // only flings are not using config-at-end for resize bounds changes
         TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
@@ -378,6 +376,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipActivityChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
 
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect destinationBounds = pipChange.getEndAbsBounds();
@@ -446,6 +445,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipActivityChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
 
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect startBounds = pipChange.getStartAbsBounds();
@@ -572,6 +572,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
 
         Rect destinationBounds = pipChange.getEndAbsBounds();
         SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
@@ -614,6 +615,7 @@ public class PipTransition extends PipTransitionController implements
                 return false;
             }
         }
+        mFinishCallback = finishCallback;
 
         // The parent change if we were in a multi-activity PiP; null if single activity PiP.
         final TransitionInfo.Change parentBeforePip = pipChange.getTaskInfo() == null

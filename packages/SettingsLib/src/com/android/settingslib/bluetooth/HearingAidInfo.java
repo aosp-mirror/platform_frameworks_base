@@ -34,6 +34,7 @@ public class HearingAidInfo {
             DeviceSide.SIDE_LEFT,
             DeviceSide.SIDE_RIGHT,
             DeviceSide.SIDE_LEFT_AND_RIGHT,
+            DeviceSide.SIDE_MONO
     })
 
     /** Side definition for hearing aids. */
@@ -42,6 +43,7 @@ public class HearingAidInfo {
         int SIDE_LEFT = 0;
         int SIDE_RIGHT = 1;
         int SIDE_LEFT_AND_RIGHT = 2;
+        int SIDE_MONO = 3;
     }
 
     @Retention(java.lang.annotation.RetentionPolicy.SOURCE)
@@ -124,6 +126,9 @@ public class HearingAidInfo {
 
     @DeviceSide
     private static int convertLeAudioLocationToInternalSide(int leAudioLocation) {
+        if (leAudioLocation == BluetoothLeAudio.AUDIO_LOCATION_MONO) {
+            return DeviceSide.SIDE_MONO;
+        }
         boolean isLeft = (leAudioLocation & LE_AUDIO_LOCATION_LEFT) != 0;
         boolean isRight = (leAudioLocation & LE_AUDIO_LOCATION_RIGHT) != 0;
         if (isLeft && isRight) {

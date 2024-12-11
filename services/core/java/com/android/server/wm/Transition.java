@@ -1870,7 +1870,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayArea<?> da = wc.asDisplayArea();
             if (da == null) continue;
             if (da.isVisibleRequested()) {
-                mController.mValidateDisplayVis.remove(da);
+                final int inValidateList = mController.mValidateDisplayVis.indexOf(da);
+                if (inValidateList >= 0
+                        // The display-area is visible, but if we only detect a non-visibility
+                        // change, then we shouldn't remove the validator.
+                        && !mChanges.get(da).mVisible) {
+                    mController.mValidateDisplayVis.remove(inValidateList);
+                }
             } else {
                 // In case something accidentally hides a displayarea and nothing shows it again.
                 mController.mValidateDisplayVis.add(da);

@@ -28,6 +28,7 @@ import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
@@ -129,6 +130,36 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
             assertThat(chip.icon)
                 .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(notifKey))
+        }
+
+    @Test
+    fun chips_onePromotedNotif_colorMatches() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.colors =
+                        PromotedNotificationContentModel.Colors(
+                            backgroundColor = 56,
+                            primaryTextColor = 89,
+                        )
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = promotedContentBuilder.build(),
+                    )
+                )
+            )
+
+            assertThat(latest).hasSize(1)
+            val colors = latest!![0].colors
+            assertThat(colors).isInstanceOf(ColorsModel.Custom::class.java)
+            assertThat((colors as ColorsModel.Custom).backgroundColorInt).isEqualTo(56)
+            assertThat((colors as ColorsModel.Custom).primaryTextColorInt).isEqualTo(89)
         }
 
     @Test
