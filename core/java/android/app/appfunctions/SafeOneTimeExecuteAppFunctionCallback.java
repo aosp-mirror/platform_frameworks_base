@@ -19,10 +19,12 @@ package android.app.appfunctions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A wrapper of IExecuteAppFunctionCallback which swallows the {@link RemoteException}. This
@@ -38,7 +40,10 @@ public class SafeOneTimeExecuteAppFunctionCallback {
 
     @NonNull private final IExecuteAppFunctionCallback mCallback;
 
-    @Nullable CompletionCallback mCompletionCallback;
+    @Nullable
+    private final CompletionCallback mCompletionCallback;
+
+    private final AtomicLong mExecutionStartTimeAfterBindMillis = new AtomicLong();
 
     public SafeOneTimeExecuteAppFunctionCallback(@NonNull IExecuteAppFunctionCallback callback) {
         this(callback, /* completionCallback= */ null);
@@ -59,7 +64,8 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         try {
             mCallback.onSuccess(result);
             if (mCompletionCallback != null) {
-                mCompletionCallback.finalizeOnSuccess(result);
+                mCompletionCallback.finalizeOnSuccess(result,
+                        mExecutionStartTimeAfterBindMillis.get());
             }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
@@ -76,7 +82,8 @@ public class SafeOneTimeExecuteAppFunctionCallback {
         try {
             mCallback.onError(error);
             if (mCompletionCallback != null) {
-                mCompletionCallback.finalizeOnError(error);
+                mCompletionCallback.finalizeOnError(error,
+                        mExecutionStartTimeAfterBindMillis.get());
             }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
@@ -93,14 +100,25 @@ public class SafeOneTimeExecuteAppFunctionCallback {
     }
 
     /**
+     * Sets the execution start time of the request. Used to calculate the overhead latency of
+     * requests.
+     */
+    public void setExecutionStartTimeMillis() {
+        if (!mExecutionStartTimeAfterBindMillis.compareAndSet(0, SystemClock.elapsedRealtime())) {
+            Log.w(TAG, "Ignore subsequent calls to setExecutionStartTimeMillis()");
+        }
+    }
+
+    /**
      * Provides a hook to execute additional actions after the {@link IExecuteAppFunctionCallback}
      * has been invoked.
      */
     public interface CompletionCallback {
         /** Called after {@link IExecuteAppFunctionCallback#onSuccess}. */
-        void finalizeOnSuccess(@NonNull ExecuteAppFunctionResponse result);
+        void finalizeOnSuccess(@NonNull ExecuteAppFunctionResponse result,
+                long executionStartTimeMillis);
 
         /** Called after {@link IExecuteAppFunctionCallback#onError}. */
-        void finalizeOnError(@NonNull AppFunctionException error);
+        void finalizeOnError(@NonNull AppFunctionException error, long executionStartTimeMillis);
     }
 }
