@@ -1130,6 +1130,19 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Adds a hierarchy op for app compat reachability.
+     *
+     * @param container The token for the container Task
+     * @param taskId    The id of the current task
+     * @hide
+     */
+    public WindowContainerTransaction setReachabilityOffset(
+            @NonNull WindowContainerToken container, int taskId, int x, int y) {
+        mHierarchyOps.add(HierarchyOp.createForReachability(container.asBinder(), taskId, x, y));
+        return this;
+    }
+
+    /**
      * Merges another WCT into this one.
      * @param transfer When true, this will transfer everything from other potentially leaving
      *                 other in an unusable state. When false, other is left alone, but
@@ -1590,6 +1603,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE = 22;
         public static final int HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT = 23;
         public static final int HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK = 24;
+        public static final int HIERARCHY_OP_TYPE_APP_COMPAT_REACHABILITY = 25;
 
         @IntDef(prefix = {"HIERARCHY_OP_TYPE_"}, value = {
                 HIERARCHY_OP_TYPE_REPARENT,
@@ -1617,6 +1631,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE,
                 HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT,
                 HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK,
+                HIERARCHY_OP_TYPE_APP_COMPAT_REACHABILITY,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface HierarchyOpType {
@@ -1629,6 +1644,10 @@ public final class WindowContainerTransaction implements Parcelable {
         // When starting from a shortcut, this contains the calling package.
         public static final String LAUNCH_KEY_SHORTCUT_CALLING_PACKAGE =
                 "android:transaction.hop.shortcut_calling_package";
+
+        // The following keys are used to define the reachability direction after a double tap.
+        public static final String REACHABILITY_EVENT_X = "android:transaction.reachability_x";
+        public static final String REACHABILITY_EVENT_Y = "android:transaction.reachability_y";
 
         @HierarchyOpType
         private final int mType;
@@ -1663,6 +1682,9 @@ public final class WindowContainerTransaction implements Parcelable {
 
         @Nullable
         private Bundle mLaunchOptions;
+
+        @Nullable
+        private Bundle mAppCompatOptions;
 
         @Nullable
         private Intent mActivityIntent;
@@ -1833,7 +1855,21 @@ public final class WindowContainerTransaction implements Parcelable {
                     .build();
         }
 
-        /** Creates a hierarchy op for setting a task non-trimmable by recents. */
+        /** Create a hierarchy op for app compat reachability. */
+        @NonNull
+        public static HierarchyOp createForReachability(IBinder container, int taskId, int x,
+                int y) {
+            final Bundle appCompatOptions = new Bundle();
+            appCompatOptions.putInt(LAUNCH_KEY_TASK_ID, taskId);
+            appCompatOptions.putInt(REACHABILITY_EVENT_X, x);
+            appCompatOptions.putInt(REACHABILITY_EVENT_Y, y);
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_APP_COMPAT_REACHABILITY)
+                    .setAppCompatOptions(appCompatOptions)
+                    .setContainer(container)
+                    .build();
+        }
+
+        /** Create a hierarchy op for setting a task non-trimmable by recents. */
         @NonNull
         @FlaggedApi(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
         public static HierarchyOp createForSetTaskTrimmableFromRecents(@NonNull IBinder container,
@@ -1863,6 +1899,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mWindowingModes = copy.mWindowingModes;
             mActivityTypes = copy.mActivityTypes;
             mLaunchOptions = copy.mLaunchOptions;
+            mAppCompatOptions = copy.mAppCompatOptions;
             mActivityIntent = copy.mActivityIntent;
             mTaskFragmentOperation = copy.mTaskFragmentOperation;
             mKeyguardState = copy.mKeyguardState;
@@ -1889,6 +1926,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mWindowingModes = in.createIntArray();
             mActivityTypes = in.createIntArray();
             mLaunchOptions = in.readBundle();
+            mAppCompatOptions = in.readBundle(getClass().getClassLoader());
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mTaskFragmentOperation = in.readTypedObject(TaskFragmentOperation.CREATOR);
             mKeyguardState = in.readTypedObject(KeyguardState.CREATOR);
@@ -1963,6 +2001,11 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         public Bundle getLaunchOptions() {
             return mLaunchOptions;
+        }
+
+        @Nullable
+        public Bundle getAppCompatOptions() {
+            return mAppCompatOptions;
         }
 
         @Nullable
@@ -2100,6 +2143,9 @@ public final class WindowContainerTransaction implements Parcelable {
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK:
                     sb.append(mLaunchOptions);
                     break;
+                case HIERARCHY_OP_TYPE_APP_COMPAT_REACHABILITY:
+                    sb.append(mAppCompatOptions);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
                     sb.append("container=").append(mContainer).append(" clearRoot=").append(mToTop);
                     break;
@@ -2182,6 +2228,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeIntArray(mWindowingModes);
             dest.writeIntArray(mActivityTypes);
             dest.writeBundle(mLaunchOptions);
+            dest.writeBundle(mAppCompatOptions);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeTypedObject(mTaskFragmentOperation, flags);
             dest.writeTypedObject(mKeyguardState, flags);
@@ -2243,6 +2290,9 @@ public final class WindowContainerTransaction implements Parcelable {
 
             @Nullable
             private Bundle mLaunchOptions;
+
+            @Nullable
+            private Bundle mAppCompatOptions;
 
             @Nullable
             private Intent mActivityIntent;
@@ -2328,6 +2378,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setAppCompatOptions(@Nullable Bundle appCompatOptions) {
+                mAppCompatOptions = appCompatOptions;
+                return this;
+            }
+
             Builder setActivityIntent(@Nullable Intent activityIntent) {
                 mActivityIntent = activityIntent;
                 return this;
@@ -2407,6 +2462,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mToTop = mToTop;
                 hierarchyOp.mReparentTopOnly = mReparentTopOnly;
                 hierarchyOp.mLaunchOptions = mLaunchOptions;
+                hierarchyOp.mAppCompatOptions = mAppCompatOptions;
                 hierarchyOp.mActivityIntent = mActivityIntent;
                 hierarchyOp.mPendingIntent = mPendingIntent;
                 hierarchyOp.mAlwaysOnTop = mAlwaysOnTop;
