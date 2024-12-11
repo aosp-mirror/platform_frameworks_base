@@ -918,6 +918,30 @@ public class VpnTest extends VpnTestBase {
     }
 
     @Test
+    public void testOnUserAddedAndRemoved_nullUserInfo() throws Exception {
+        final Vpn vpn = createVpn(PRIMARY_USER.id);
+        final Set<Range<Integer>> initialRange = rangeSet(PRIMARY_USER_RANGE);
+        // Note since mVpnProfile is a Ikev2VpnProfile, this starts an IkeV2VpnRunner.
+        startLegacyVpn(vpn, mVpnProfile);
+        // Set an initial Uid range and mock the network agent
+        vpn.mNetworkCapabilities.setUids(initialRange);
+        vpn.mNetworkAgent = mMockNetworkAgent;
+
+        // Add the restricted user and then remove it immediately. So the getUserInfo() will return
+        // null for the given restricted user id.
+        setMockedUsers(PRIMARY_USER, RESTRICTED_PROFILE_A);
+        doReturn(null).when(mUserManager).getUserInfo(RESTRICTED_PROFILE_A.id);
+        vpn.onUserAdded(RESTRICTED_PROFILE_A.id);
+        // Expect no range change to the NetworkCapabilities.
+        assertEquals(initialRange, vpn.mNetworkCapabilities.getUids());
+
+        // Remove the restricted user
+        vpn.onUserRemoved(RESTRICTED_PROFILE_A.id);
+        // Expect no range change to the NetworkCapabilities.
+        assertEquals(initialRange, vpn.mNetworkCapabilities.getUids());
+    }
+
+    @Test
     public void testPrepare_throwSecurityExceptionWhenGivenPackageDoesNotBelongToTheCaller()
             throws Exception {
         mTestDeps.mIgnoreCallingUidChecks = false;
