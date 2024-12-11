@@ -133,6 +133,7 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
      */
     @Test
     public void testViewModelObservation() {
+        mController.onViewAttached();
         final Observer<Collection<ComplicationViewModel>> observer =
                 captureComplicationViewModelsObserver();
 
@@ -152,6 +153,7 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testMalformedComplicationAddition() {
+        mController.onViewAttached();
         final Observer<Collection<ComplicationViewModel>> observer =
                 captureComplicationViewModelsObserver();
 
@@ -167,6 +169,7 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testNewComplicationsBeforeEntryAnimationsFinishSetToInvisible() {
+        mController.onViewAttached();
         final Observer<Collection<ComplicationViewModel>> observer =
                 captureComplicationViewModelsObserver();
 
@@ -181,6 +184,7 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testNewComplicationsAfterEntryAnimationsFinishNotSetToInvisible() {
+        mController.onViewAttached();
         final Observer<Collection<ComplicationViewModel>> observer =
                 captureComplicationViewModelsObserver();
 
@@ -198,6 +202,7 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testAnimationsDisabled_ComplicationsNeverSetToInvisible() {
+        mController.onViewAttached();
         //Disable animations
         mController.mIsAnimationEnabled = false;
 
@@ -211,6 +216,16 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
         // The complication view should not be set to invisible.
         verify(mComplicationView, never()).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testLifecycleObserve_activeOnlyDuringAttachedState() {
+        verify(mComplicationViewModelLiveData, never()).observe(any(), any());
+        mController.onViewAttached();
+        final Observer<Collection<ComplicationViewModel>> observer =
+                captureComplicationViewModelsObserver();
+        mController.onViewDetached();
+        verify(mComplicationViewModelLiveData).removeObserver(eq(observer));
     }
 
     private Observer<Collection<ComplicationViewModel>> captureComplicationViewModelsObserver() {
