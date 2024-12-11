@@ -19,6 +19,7 @@ package com.android.wm.shell.shared.desktopmode;
 import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
@@ -29,7 +30,6 @@ import android.window.DesktopModeFlags;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
-import com.android.wm.shell.shared.Utils.Lazy;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -42,7 +42,8 @@ public class DesktopModeStatus {
 
     private static final String TAG = "DesktopModeStatus";
 
-    private static Lazy<Boolean> sIsLargeScreenDevice = new Lazy<>();
+    @Nullable
+    private static Boolean sIsLargeScreenDevice = null;
 
     /**
      * Flag to indicate whether task resizing is veiled.
@@ -287,12 +288,15 @@ public class DesktopModeStatus {
      * @return {@code true} if this device has an internal large screen
      */
     private static boolean deviceHasLargeScreen(@NonNull Context context) {
-        return sIsLargeScreenDevice.get(() -> Arrays.stream(
+        if (sIsLargeScreenDevice == null) {
+            sIsLargeScreenDevice = Arrays.stream(
                 context.getSystemService(DisplayManager.class)
                         .getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED))
                 .filter(display -> display.getType() == Display.TYPE_INTERNAL)
                 .anyMatch(display -> display.getMinSizeDimensionDp()
-                        >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP));
+                        >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
+        }
+        return sIsLargeScreenDevice;
     }
 
     /**
