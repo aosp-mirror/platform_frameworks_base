@@ -18,14 +18,14 @@ package android.service.ondeviceintelligence;
 
 import android.os.PersistableBundle;
 import android.os.ParcelFileDescriptor;
-import android.app.ondeviceintelligence.ICancellationSignal;
+import android.os.ICancellationSignal;
 import android.os.RemoteCallback;
 import android.app.ondeviceintelligence.IDownloadCallback;
 import android.app.ondeviceintelligence.Feature;
 import android.app.ondeviceintelligence.IFeatureCallback;
 import android.app.ondeviceintelligence.IListFeaturesCallback;
 import android.app.ondeviceintelligence.IFeatureDetailsCallback;
-import com.android.modules.utils.AndroidFuture;
+import com.android.internal.infra.AndroidFuture;
 import android.service.ondeviceintelligence.IRemoteProcessingService;
 
 

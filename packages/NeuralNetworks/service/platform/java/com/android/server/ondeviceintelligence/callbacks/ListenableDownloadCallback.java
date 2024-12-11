@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 
-import com.android.modules.utils.AndroidFuture;
+import com.android.internal.infra.AndroidFuture;
 
 import java.util.concurrent.TimeoutException;
 
@@ -32,8 +32,6 @@ import java.util.concurrent.TimeoutException;
  * some cases. Instead, in such cases we rely on the remote service sending progress updates and if
  * there are *no* progress callbacks in the duration of {@link #idleTimeoutMs}, we can assume the
  * download will not complete and enabling faster cleanup.
- *
- * @hide
  */
 public class ListenableDownloadCallback extends IDownloadCallback.Stub implements Runnable {
     private final IDownloadCallback callback;

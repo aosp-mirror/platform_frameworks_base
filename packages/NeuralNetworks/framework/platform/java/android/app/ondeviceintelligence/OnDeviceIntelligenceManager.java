@@ -29,12 +29,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.app.ondeviceintelligence.utils.BinderUtils;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -42,7 +43,7 @@ import android.os.RemoteException;
 import android.system.OsConstants;
 import android.util.Log;
 
-import com.android.modules.utils.AndroidFuture;
+import com.android.internal.infra.AndroidFuture;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -78,38 +79,9 @@ public final class OnDeviceIntelligenceManager {
     public static final String AUGMENT_REQUEST_CONTENT_BUNDLE_KEY =
             "AugmentRequestContentBundleKey";
 
-    /**
-     * Timeout to be used for unbinding to the configured remote {@link
-     * android.service.ondeviceintelligence.OnDeviceIntelligenceService} if there are no requests in
-     * the queue. A value of -1 represents to never unbind.
-     *
-     * @hide
-     */
-    public static final String ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS =
-        "on_device_intelligence_unbind_timeout_ms";
-
-    /**
-     * Timeout that represents maximum idle time before which a callback should be populated.
-     *
-     * @hide
-     */
-    public static final String ON_DEVICE_INTELLIGENCE_IDLE_TIMEOUT_MS =
-        "on_device_intelligence_idle_timeout_ms";
-
-    /**
-     * Timeout to be used for unbinding to the configured remote {@link
-     * android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService} if there are no
-     * requests in the queue. A value of -1 represents to never unbind.
-     *
-     * @hide
-     */
-    public static final String ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS =
-        "on_device_inference_unbind_timeout_ms";
-
     private static final String TAG = "OnDeviceIntelligence";
     private final Context mContext;
     private final IOnDeviceIntelligenceManager mService;
-
 
     /**
      * @hide
@@ -132,11 +104,11 @@ public final class OnDeviceIntelligenceManager {
         try {
             RemoteCallback callback = new RemoteCallback(result -> {
                 if (result == null) {
-                    BinderUtils.withCleanCallingIdentity(
+                    Binder.withCleanCallingIdentity(
                             () -> callbackExecutor.execute(() -> versionConsumer.accept(0)));
                 }
                 long version = result.getLong(API_VERSION_BUNDLE_KEY);
-                BinderUtils.withCleanCallingIdentity(
+                Binder.withCleanCallingIdentity(
                         () -> callbackExecutor.execute(() -> versionConsumer.accept(version)));
             });
             mService.getVersion(callback);
@@ -178,14 +150,14 @@ public final class OnDeviceIntelligenceManager {
                     new IFeatureCallback.Stub() {
                         @Override
                         public void onSuccess(Feature result) {
-                            BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                            Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> featureReceiver.onResult(result)));
                         }
 
                         @Override
                         public void onFailure(int errorCode, String errorMessage,
                                 PersistableBundle errorParams) {
-                            BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                            Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> featureReceiver.onError(
                                             new OnDeviceIntelligenceException(
                                                     errorCode, errorMessage, errorParams))));
@@ -212,14 +184,14 @@ public final class OnDeviceIntelligenceManager {
                     new IListFeaturesCallback.Stub() {
                         @Override
                         public void onSuccess(List<Feature> result) {
-                            BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                            Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> featureListReceiver.onResult(result)));
                         }
 
                         @Override
                         public void onFailure(int errorCode, String errorMessage,
                                 PersistableBundle errorParams) {
-                            BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                            Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> featureListReceiver.onError(
                                             new OnDeviceIntelligenceException(
                                                     errorCode, errorMessage, errorParams))));
@@ -250,14 +222,14 @@ public final class OnDeviceIntelligenceManager {
 
                 @Override
                 public void onSuccess(FeatureDetails result) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> featureDetailsReceiver.onResult(result)));
                 }
 
                 @Override
                 public void onFailure(int errorCode, String errorMessage,
                         PersistableBundle errorParams) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> featureDetailsReceiver.onError(
                                     new OnDeviceIntelligenceException(errorCode,
                                             errorMessage, errorParams))));
@@ -295,27 +267,27 @@ public final class OnDeviceIntelligenceManager {
 
                 @Override
                 public void onDownloadStarted(long bytesToDownload) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> callback.onDownloadStarted(bytesToDownload)));
                 }
 
                 @Override
                 public void onDownloadProgress(long bytesDownloaded) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> callback.onDownloadProgress(bytesDownloaded)));
                 }
 
                 @Override
                 public void onDownloadFailed(int failureStatus, String errorMessage,
                         PersistableBundle errorParams) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> callback.onDownloadFailed(failureStatus, errorMessage,
                                     errorParams)));
                 }
 
                 @Override
                 public void onDownloadCompleted(PersistableBundle downloadParams) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> callback.onDownloadCompleted(downloadParams)));
                 }
             };
@@ -352,14 +324,14 @@ public final class OnDeviceIntelligenceManager {
             ITokenInfoCallback callback = new ITokenInfoCallback.Stub() {
                 @Override
                 public void onSuccess(TokenInfo tokenInfo) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> outcomeReceiver.onResult(tokenInfo)));
                 }
 
                 @Override
                 public void onFailure(int errorCode, String errorMessage,
                         PersistableBundle errorParams) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> outcomeReceiver.onError(
                                     new OnDeviceIntelligenceException(
                                             errorCode, errorMessage, errorParams))));
@@ -404,7 +376,7 @@ public final class OnDeviceIntelligenceManager {
             IResponseCallback callback = new IResponseCallback.Stub() {
                 @Override
                 public void onSuccess(@InferenceParams Bundle result) {
-                    BinderUtils.withCleanCallingIdentity(() -> {
+                    Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(() -> processingCallback.onResult(result));
                     });
                 }
@@ -412,7 +384,7 @@ public final class OnDeviceIntelligenceManager {
                 @Override
                 public void onFailure(int errorCode, String errorMessage,
                         PersistableBundle errorParams) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> processingCallback.onError(
                                     new OnDeviceIntelligenceException(
                                             errorCode, errorMessage, errorParams))));
@@ -421,7 +393,7 @@ public final class OnDeviceIntelligenceManager {
                 @Override
                 public void onDataAugmentRequest(@NonNull @InferenceParams Bundle request,
                         @NonNull RemoteCallback contentCallback) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> processingCallback.onDataAugmentRequest(request, result -> {
                                 Bundle bundle = new Bundle();
                                 bundle.putParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY, result);
@@ -474,7 +446,7 @@ public final class OnDeviceIntelligenceManager {
             IStreamingResponseCallback callback = new IStreamingResponseCallback.Stub() {
                 @Override
                 public void onNewContent(@InferenceParams Bundle result) {
-                    BinderUtils.withCleanCallingIdentity(() -> {
+                    Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
                                 () -> streamingProcessingCallback.onPartialResult(result));
                     });
@@ -482,7 +454,7 @@ public final class OnDeviceIntelligenceManager {
 
                 @Override
                 public void onSuccess(@InferenceParams Bundle result) {
-                    BinderUtils.withCleanCallingIdentity(() -> {
+                    Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
                                 () -> streamingProcessingCallback.onResult(result));
                     });
@@ -491,7 +463,7 @@ public final class OnDeviceIntelligenceManager {
                 @Override
                 public void onFailure(int errorCode, String errorMessage,
                         PersistableBundle errorParams) {
-                    BinderUtils.withCleanCallingIdentity(() -> {
+                    Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
                                 () -> streamingProcessingCallback.onError(
                                         new OnDeviceIntelligenceException(
@@ -503,7 +475,7 @@ public final class OnDeviceIntelligenceManager {
                 @Override
                 public void onDataAugmentRequest(@NonNull @InferenceParams Bundle content,
                         @NonNull RemoteCallback contentCallback) {
-                    BinderUtils.withCleanCallingIdentity(() -> callbackExecutor.execute(
+                    Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> streamingProcessingCallback.onDataAugmentRequest(content,
                                     contentResponse -> {
                                         Bundle bundle = new Bundle();
@@ -641,17 +613,8 @@ public final class OnDeviceIntelligenceManager {
                     if (error != null || cancellationTransport == null) {
                         Log.e(TAG, "Unable to receive the remote cancellation signal.", error);
                     } else {
-                        ICancellationSignal remoteCancellationSignal =
-                                ICancellationSignal.Stub.asInterface(cancellationTransport);
-                        cancellationSignal.setOnCancelListener(
-                                () -> {
-                                    try {
-                                        remoteCancellationSignal.cancel();
-                                    } catch (RemoteException e) {
-                                        Log.w(TAG, "Unable to propagate cancellation signal.",
-                                                e);
-                                    }
-                                });
+                        cancellationSignal.setRemote(
+                                ICancellationSignal.Stub.asInterface(cancellationTransport));
                     }
                 }, callbackExecutor);
         return cancellationFuture;
@@ -674,4 +637,6 @@ public final class OnDeviceIntelligenceManager {
                 }, executor);
         return processingSignalFuture;
     }
+
+
 }

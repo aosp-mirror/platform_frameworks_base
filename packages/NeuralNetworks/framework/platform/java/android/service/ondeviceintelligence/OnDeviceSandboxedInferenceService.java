@@ -19,6 +19,8 @@ package android.service.ondeviceintelligence;
 import static android.app.ondeviceintelligence.OnDeviceIntelligenceManager.AUGMENT_REQUEST_CONTENT_BUNDLE_KEY;
 import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -29,9 +31,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.ondeviceintelligence.Feature;
-import android.app.ondeviceintelligence.ICancellationSignal;
 import android.app.ondeviceintelligence.IProcessingSignal;
-import android.app.ondeviceintelligence.IRemoteCallback;
 import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
@@ -48,9 +48,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
+import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.Message;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -59,8 +61,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.modules.utils.AndroidFuture;
-import com.android.modules.utils.HandlerExecutor;
+import com.android.internal.infra.AndroidFuture;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -73,7 +74,7 @@ import java.util.function.Consumer;
 
 /**
  * Abstract base class for performing inference in a isolated process. This service exposes its
- * methods via {@link android.app.ondeviceintelligence.OnDeviceIntelligenceManager}.
+ * methods via {@link OnDeviceIntelligenceManager}.
  *
  * <p> A service that provides methods to perform on-device inference both in streaming and
  * non-streaming fashion. Also, provides a way to register a storage service that will be used to
@@ -98,12 +99,6 @@ import java.util.function.Consumer;
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public abstract class OnDeviceSandboxedInferenceService extends Service {
     private static final String TAG = OnDeviceSandboxedInferenceService.class.getSimpleName();
-
-    private static final int MSG_TOKEN_INFO_REQUEST = 1;
-    private static final int MSG_PROCESS_REQUEST_STREAMING = 2;
-    private static final int MSG_PROCESS_REQUEST = 3;
-    private static final int MSG_UPDATE_PROCESSING_STATE = 4;
-
 
     /**
      * @hide
@@ -138,12 +133,12 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      * @hide
      */
     public static final String MODEL_LOADED_BROADCAST_INTENT =
-            "android.service.ondeviceintelligence.MODEL_LOADED";
+        "android.service.ondeviceintelligence.MODEL_LOADED";
     /**
      * @hide
      */
     public static final String MODEL_UNLOADED_BROADCAST_INTENT =
-            "android.service.ondeviceintelligence.MODEL_UNLOADED";
+        "android.service.ondeviceintelligence.MODEL_UNLOADED";
 
     /**
      * @hide
@@ -157,115 +152,12 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_TOKEN_INFO_REQUEST:
-                        TokenInfoParams params = (TokenInfoParams) msg.obj;
-                        OnDeviceSandboxedInferenceService.this.onTokenInfoRequest(
-                                msg.arg1,
-                                params.feature,
-                                params.request,
-                                params.cancellationSignal,
-                                params.callback);
-                        break;
-                    case MSG_PROCESS_REQUEST_STREAMING:
-                        StreamingRequestParams streamParams = (StreamingRequestParams) msg.obj;
-                        OnDeviceSandboxedInferenceService.this.onProcessRequestStreaming(
-                                msg.arg1,
-                                streamParams.feature,
-                                streamParams.request,
-                                msg.arg2,
-                                streamParams.cancellationSignal,
-                                streamParams.processingSignal,
-                                streamParams.callback);
-                        break;
-                    case MSG_PROCESS_REQUEST:
-                        RequestParams requestParams = (RequestParams) msg.obj;
-                        OnDeviceSandboxedInferenceService.this.onProcessRequest(
-                                msg.arg1,
-                                requestParams.feature,
-                                requestParams.request,
-                                msg.arg2,
-                                requestParams.cancellationSignal,
-                                requestParams.processingSignal,
-                                requestParams.callback);
-                        break;
-                    case MSG_UPDATE_PROCESSING_STATE:
-                        UpdateStateParams stateParams = (UpdateStateParams) msg.obj;
-                        OnDeviceSandboxedInferenceService.this.onUpdateProcessingState(
-                                stateParams.processingState,
-                                stateParams.callback);
-                        break;
-                }
-            }
-        };
+        mHandler = new Handler(Looper.getMainLooper(), null /* callback */, true /* async */);
     }
 
-    // Parameter holder classes
-    private static class TokenInfoParams {
-        final Feature feature;
-        final Bundle request;
-        final CancellationSignal cancellationSignal;
-        final OutcomeReceiver<TokenInfo, OnDeviceIntelligenceException> callback;
-
-        TokenInfoParams(Feature feature, Bundle request, CancellationSignal cancellationSignal,
-                OutcomeReceiver<TokenInfo, OnDeviceIntelligenceException> callback) {
-            this.feature = feature;
-            this.request = request;
-            this.cancellationSignal = cancellationSignal;
-            this.callback = callback;
-        }
-    }
-
-    private static class StreamingRequestParams {
-        final Feature feature;
-        final Bundle request;
-        final CancellationSignal cancellationSignal;
-        final ProcessingSignal processingSignal;
-        final StreamingProcessingCallback callback;
-
-        StreamingRequestParams(Feature feature, Bundle request,
-                CancellationSignal cancellationSignal, ProcessingSignal processingSignal,
-                StreamingProcessingCallback callback) {
-            this.feature = feature;
-            this.request = request;
-            this.cancellationSignal = cancellationSignal;
-            this.processingSignal = processingSignal;
-            this.callback = callback;
-        }
-    }
-
-    private static class RequestParams {
-        final Feature feature;
-        final Bundle request;
-        final CancellationSignal cancellationSignal;
-        final ProcessingSignal processingSignal;
-        final ProcessingCallback callback;
-
-        RequestParams(Feature feature, Bundle request,
-                CancellationSignal cancellationSignal, ProcessingSignal processingSignal,
-                ProcessingCallback callback) {
-            this.feature = feature;
-            this.request = request;
-            this.cancellationSignal = cancellationSignal;
-            this.processingSignal = processingSignal;
-            this.callback = callback;
-        }
-    }
-
-    private static class UpdateStateParams {
-        final Bundle processingState;
-        final OutcomeReceiver<PersistableBundle, OnDeviceIntelligenceException> callback;
-
-        UpdateStateParams(Bundle processingState,
-                OutcomeReceiver<PersistableBundle, OnDeviceIntelligenceException> callback) {
-            this.processingState = processingState;
-            this.callback = callback;
-        }
-    }
-
+    /**
+     * @hide
+     */
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
@@ -276,7 +168,8 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                         IRemoteCallback remoteCallback) throws RemoteException {
                     Objects.requireNonNull(storageService);
                     mRemoteStorageService = storageService;
-                    remoteCallback.sendResult(Bundle.EMPTY);
+                    remoteCallback.sendResult(
+                            Bundle.EMPTY); //to notify caller uid to system-server.
                 }
 
                 @Override
@@ -285,42 +178,34 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                         ITokenInfoCallback tokenInfoCallback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(tokenInfoCallback);
-                    CancellationSignal cancellationSignal = new CancellationSignal();
+                    ICancellationSignal transport = null;
                     if (cancellationSignalFuture != null) {
-                        ICancellationSignal transport = new ICancellationSignal.Stub() {
-                            @Override
-                            public void cancel() {
-                                cancellationSignal.cancel();
-                            }
-                        };
+                        transport = CancellationSignal.createTransport();
                         cancellationSignalFuture.complete(transport);
                     }
 
-                    Message msg = Message.obtain(mHandler, MSG_TOKEN_INFO_REQUEST,
-                            callerUid, 0,
-                            new TokenInfoParams(feature, request,
-                                    cancellationSignalFuture != null ? cancellationSignal : null,
+                    mHandler.executeOrSendMessage(
+                            obtainMessage(
+                                    OnDeviceSandboxedInferenceService::onTokenInfoRequest,
+                                    OnDeviceSandboxedInferenceService.this,
+                                    callerUid, feature,
+                                    request,
+                                    CancellationSignal.fromTransport(transport),
                                     wrapTokenInfoCallback(tokenInfoCallback)));
-                    mHandler.sendMessage(msg);
                 }
 
                 @Override
-                public void processRequestStreaming(int callerUid, Feature feature,
-                        Bundle request, int requestType,
+                public void processRequestStreaming(int callerUid, Feature feature, Bundle request,
+                        int requestType,
                         AndroidFuture cancellationSignalFuture,
                         AndroidFuture processingSignalFuture,
                         IStreamingResponseCallback callback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(callback);
 
-                    CancellationSignal cancellationSignal = new CancellationSignal();
+                    ICancellationSignal transport = null;
                     if (cancellationSignalFuture != null) {
-                        ICancellationSignal transport = new ICancellationSignal.Stub() {
-                            @Override
-                            public void cancel() {
-                                cancellationSignal.cancel();
-                            }
-                        };
+                        transport = CancellationSignal.createTransport();
                         cancellationSignalFuture.complete(transport);
                     }
                     IProcessingSignal processingSignalTransport = null;
@@ -329,32 +214,30 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                         processingSignalFuture.complete(processingSignalTransport);
                     }
 
-                    Message msg = Message.obtain(mHandler, MSG_PROCESS_REQUEST_STREAMING,
-                            callerUid, requestType,
-                            new StreamingRequestParams(feature, request,
-                                    cancellationSignalFuture != null ? cancellationSignal : null,
+
+                    mHandler.executeOrSendMessage(
+                            obtainMessage(
+                                    OnDeviceSandboxedInferenceService::onProcessRequestStreaming,
+                                    OnDeviceSandboxedInferenceService.this, callerUid,
+                                    feature,
+                                    request,
+                                    requestType,
+                                    CancellationSignal.fromTransport(transport),
                                     ProcessingSignal.fromTransport(processingSignalTransport),
                                     wrapStreamingResponseCallback(callback)));
-                    mHandler.sendMessage(msg);
                 }
 
                 @Override
-                public void processRequest(int callerUid, Feature feature,
-                        Bundle request, int requestType,
+                public void processRequest(int callerUid, Feature feature, Bundle request,
+                        int requestType,
                         AndroidFuture cancellationSignalFuture,
                         AndroidFuture processingSignalFuture,
                         IResponseCallback callback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(callback);
-
-                    CancellationSignal cancellationSignal = new CancellationSignal();
+                    ICancellationSignal transport = null;
                     if (cancellationSignalFuture != null) {
-                        ICancellationSignal transport = new ICancellationSignal.Stub() {
-                            @Override
-                            public void cancel() {
-                                cancellationSignal.cancel();
-                            }
-                        };
+                        transport = CancellationSignal.createTransport();
                         cancellationSignalFuture.complete(transport);
                     }
                     IProcessingSignal processingSignalTransport = null;
@@ -362,14 +245,14 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                         processingSignalTransport = ProcessingSignal.createTransport();
                         processingSignalFuture.complete(processingSignalTransport);
                     }
-
-                    Message msg = Message.obtain(mHandler, MSG_PROCESS_REQUEST,
-                            callerUid, requestType,
-                            new RequestParams(feature, request,
-                                    cancellationSignalFuture != null ? cancellationSignal : null,
+                    mHandler.executeOrSendMessage(
+                            obtainMessage(
+                                    OnDeviceSandboxedInferenceService::onProcessRequest,
+                                    OnDeviceSandboxedInferenceService.this, callerUid, feature,
+                                    request, requestType,
+                                    CancellationSignal.fromTransport(transport),
                                     ProcessingSignal.fromTransport(processingSignalTransport),
                                     wrapResponseCallback(callback)));
-                    mHandler.sendMessage(msg);
                 }
 
                 @Override
@@ -377,11 +260,11 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                         IProcessingUpdateStatusCallback callback) {
                     Objects.requireNonNull(processingState);
                     Objects.requireNonNull(callback);
-
-                    Message msg = Message.obtain(mHandler, MSG_UPDATE_PROCESSING_STATE,
-                            new UpdateStateParams(processingState,
+                    mHandler.executeOrSendMessage(
+                            obtainMessage(
+                                    OnDeviceSandboxedInferenceService::onUpdateProcessingState,
+                                    OnDeviceSandboxedInferenceService.this, processingState,
                                     wrapOutcomeReceiver(callback)));
-                    mHandler.sendMessage(msg);
                 }
             };
         }
