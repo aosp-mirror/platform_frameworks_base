@@ -74,6 +74,7 @@ import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.StubTransaction
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder
@@ -91,6 +92,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.Optional
 import java.util.function.Supplier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainCoroutineDispatcher
 
 /**
  * Utility class for tests of [DesktopModeWindowDecorViewModel]
@@ -181,6 +184,8 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             testShellExecutor,
             mockMainHandler,
             mockMainChoreographer,
+            mock<MainCoroutineDispatcher>(),
+            mock<CoroutineScope>(),
             bgExecutor,
             shellInit,
             mockShellCommandHandler,
@@ -213,7 +218,8 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             mockTaskPositionerFactory,
             mockFocusTransitionObserver,
             desktopModeEventLogger,
-            mock<DesktopModeUiEventLogger>()
+            mock<DesktopModeUiEventLogger>(),
+            mock<WindowDecorTaskResourceLoader>()
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -293,8 +299,9 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
         val decoration = Mockito.mock(DesktopModeWindowDecoration::class.java)
         whenever(
             mockDesktopModeWindowDecorFactory.create(
-                any(), any(), any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(), any())
+                any(), any(), any(), any(), any(), any(), any(), eq(task), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.user).thenReturn(mockUserHandle)
