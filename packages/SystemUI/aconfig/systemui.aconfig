@@ -1325,7 +1325,7 @@ flag {
   name: "media_controls_ui_update"
   namespace: "systemui"
   description: "Enables media visuals update"
-  bug: "380053768"
+  bug: "379044958"
 }
 
 flag {
