@@ -560,10 +560,9 @@ public class Process {
      * Foreground thread group - All threads in
      * this group are scheduled with a normal share of the CPU.
      * Value is same as constant SP_FOREGROUND of enum SchedPolicy.
-     * Not used at this level.
      * @hide
      **/
-    private static final int THREAD_GROUP_FOREGROUND = 1;
+    public static final int THREAD_GROUP_FOREGROUND = 1;
 
     /**
      * System thread group.
