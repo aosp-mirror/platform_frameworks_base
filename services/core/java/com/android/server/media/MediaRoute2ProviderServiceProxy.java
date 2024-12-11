@@ -279,13 +279,20 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         if (!mRunning) {
             return false;
         }
+        // We bind if any manager is scanning (regardless of whether an app is scanning) to give
+        // the opportunity for providers to publish routing sessions that were established
+        // directly between the app and the provider (typically via AndroidX MediaRouter). See
+        // b/176774510#comment20 for more information.
         boolean bindDueToManagerScan =
                 mIsManagerScanning && !Flags.enablePreventionOfManagerScansWhenNoAppsScan();
-        if (!getSessionInfos().isEmpty() || bindDueToManagerScan) {
-            // We bind if any manager is scanning (regardless of whether an app is scanning) to give
-            // the opportunity for providers to publish routing sessions that were established
-            // directly between the app and the provider (typically via AndroidX MediaRouter). See
-            // b/176774510#comment20 for more information.
+        // We also bind if this provider supports system media routing, because even if an app
+        // doesn't have any registered discovery preference, we should still be able to route their
+        // system media.
+        boolean bindDueToSystemMediaRoutingSupport =
+                mIsManagerScanning && mSupportsSystemMediaRouting;
+        if (!getSessionInfos().isEmpty()
+                || bindDueToManagerScan
+                || bindDueToSystemMediaRoutingSupport) {
             return true;
         }
         boolean anAppIsScanning =
