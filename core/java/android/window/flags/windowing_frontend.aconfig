@@ -207,16 +207,6 @@ flag {
 }
 
 flag {
-  name: "filter_irrelevant_input_device_change"
-  namespace: "windowing_frontend"
-  description: "Recompute display configuration only for necessary input device changes"
-  bug: "368461853"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "respect_non_top_visible_fixed_orientation"
   namespace: "windowing_frontend"
   description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
