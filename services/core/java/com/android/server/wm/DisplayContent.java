@@ -4237,7 +4237,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return target;
         }
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
-            final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
+            final DisplayContent defaultDc = getUserMainDisplayContent();
             return defaultDc.mRemoteInsetsControlTarget;
         } else {
             return getImeFallback();
@@ -4247,9 +4247,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     InsetsControlTarget getImeFallback() {
         // host is in non-default display that doesn't support system decor, default to
         // default display's StatusBar to control IME (when available), else let system control it.
-        final DisplayContent defaultDc = mWmService.getDefaultDisplayContentLocked();
-        WindowState statusBar = defaultDc.getDisplayPolicy().getStatusBar();
+        final DisplayContent defaultDc = getUserMainDisplayContent();
+        final WindowState statusBar = defaultDc.getDisplayPolicy().getStatusBar();
         return statusBar != null ? statusBar : defaultDc.mRemoteInsetsControlTarget;
+    }
+
+    private DisplayContent getUserMainDisplayContent() {
+        final DisplayContent defaultDc;
+        final int userId = mWmService.mUmInternal.getUserAssignedToDisplay(mDisplayId);
+        defaultDc = mWmService.getUserMainDisplayContentLocked(userId);
+        if (defaultDc == null) {
+            throw new IllegalStateException(
+                    "No default display was assigned to user " + userId);
+        }
+        return defaultDc;
     }
 
     /**
@@ -4790,7 +4801,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // The control target could be the RemoteInsetsControlTarget (if the focussed
                 // view is on a virtual display that can not show the IME (and therefore it will
                 // be shown on the default display)
-                if (isDefaultDisplay && mRemoteInsetsControlTarget != null) {
+                if (isUserMainDisplay() && mRemoteInsetsControlTarget != null) {
                     return mRemoteInsetsControlTarget;
                 }
             }
@@ -4804,6 +4815,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } else {
             return imeInputTarget;
         }
+    }
+
+    /**
+     * Returns {@code true} if {@link #mDisplayId} corresponds to the user's main display.
+     *
+     * <p>Visible background users may have other than DEFAULT_DISPLAY marked as their main display.
+     */
+    private boolean isUserMainDisplay() {
+        final int userId = mWmService.mUmInternal.getUserAssignedToDisplay(mDisplayId);
+        return mDisplayId == mWmService.mUmInternal.getMainDisplayAssignedToUser(userId);
     }
 
     /**
