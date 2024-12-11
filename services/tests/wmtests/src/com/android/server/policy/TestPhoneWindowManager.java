@@ -447,6 +447,14 @@ class TestPhoneWindowManager {
         mTestLooper.dispatchAll();
     }
 
+    void overrideZenMode(int mode) {
+        doReturn(mode).when(mNotificationManager).getZenMode();
+    }
+
+    void assertZenMode(int mode) {
+        verify(mNotificationManager).setZenMode(eq(mode), any(), anyString(), eq(true));
+    }
+
     /**
      * Below functions will override the setting or the policy behavior.
      */
