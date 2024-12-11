@@ -7473,6 +7473,23 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRoot.getDisplayContent(DEFAULT_DISPLAY);
     }
 
+    /**
+     * Returns the main display content for the user passed as parameter.
+     *
+     * <p>Visible background users may have their own designated main display, distinct from the
+     * system default display (DEFAULT_DISPLAY). Visible background users operate independently
+     * with their own main displays. These secondary user main displays host the secondary home
+     * activities.
+     */
+    @Nullable
+    DisplayContent getUserMainDisplayContentLocked(@UserIdInt int userId) {
+        final int userMainDisplayId = mUmInternal.getMainDisplayAssignedToUser(userId);
+        if (userMainDisplayId == -1) {
+            return null;
+        }
+        return mRoot.getDisplayContent(userMainDisplayId);
+    }
+
     public void onOverlayChanged() {
         // Post to display thread so it can get the latest display info.
         mH.post(() -> {
