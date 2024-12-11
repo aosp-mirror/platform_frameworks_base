@@ -18,7 +18,6 @@ package com.android.systemui.bouncer.data.repository
 
 import android.content.res.Resources
 import com.android.internal.R
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -37,7 +36,7 @@ class EmergencyServicesRepository
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Main private val resources: Resources,
-    @GlobalConfig configurationRepository: ConfigurationRepository,
+    @Main configurationRepository: ConfigurationRepository,
 ) {
     /**
      * Whether to enable emergency services calls while the SIM card is locked. This is disabled in
@@ -49,7 +48,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = getEnableEmergencyCallWhileSimLocked()
+                initialValue = getEnableEmergencyCallWhileSimLocked(),
             )
 
     private fun getEnableEmergencyCallWhileSimLocked(): Boolean {

@@ -16,150 +16,6 @@
   -->
 
 <resources>
-    <style name="SettingsLibTextAppearance" parent="@android:style/TextAppearance.DeviceDefault">
-        <!--item name="android:fontFamily"></item-->
-        <item name="android:hyphenationFrequency">normalFast</item>
-        <item name="android:lineBreakWordStyle">phrase</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Primary">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-
-    <style name="SettingsLibTextAppearance.Primary.Display">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Display.Large">
-        <item name="android:textSize">57sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Display.Medium">
-        <item name="android:textSize">45sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Display.Small">
-        <item name="android:textSize">36sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Primary.Headline">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Headline.Large">
-        <item name="android:textSize">32sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Headline.Medium">
-        <item name="android:textSize">28sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Headline.Small">
-        <item name="android:textSize">24sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Primary.Title">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Title.Large">
-        <item name="android:textSize">22sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Title.Medium">
-        <item name="android:textSize">16sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Title.Small">
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Primary.Label">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Label.Large">
-        <item name="android:textSize">14sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Label.Medium">
-        <item name="android:textSize">12sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Label.Small">
-        <item name="android:textSize">11sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Primary.Body">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Body.Large">
-        <item name="android:textSize">16sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Body.Medium">
-        <item name="android:textSize">14sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Primary.Body.Small">
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Emphasized">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-
-    <style name="SettingsLibTextAppearance.Emphasized.Display">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Display.Large">
-        <item name="android:textSize">57sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Display.Medium">
-        <item name="android:textSize">45sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Display.Small">
-        <item name="android:textSize">36sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Emphasized.Headline">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Headline.Large">
-        <item name="android:textSize">32sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Headline.Medium">
-        <item name="android:textSize">28sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Headline.Small">
-        <item name="android:textSize">24sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Emphasized.Title">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Title.Large">
-        <item name="android:textSize">22sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Title.Medium">
-        <item name="android:textSize">16sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Title.Small">
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Emphasized.Label">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Label.Large">
-        <item name="android:textSize">14sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Label.Medium">
-        <item name="android:textSize">12sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Label.Small">
-        <item name="android:textSize">11sp</item>
-    </style>
-
-    <style name="SettingsLibTextAppearance.Emphasized.Body">
-        <!--item name="android:fontFamily"></item-->
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Body.Large">
-        <item name="android:textSize">16sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Body.Medium">
-        <item name="android:textSize">14sp</item>
-    </style>
-    <style name="SettingsLibTextAppearance.Emphasized.Body.Small">
-        <item name="android:textSize">12sp</item>
-    </style>
-
     <style name="SettingslibSwitchStyle.Expressive" parent="">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -173,122 +29,6 @@
     <style name="SettingslibMainSwitchStyle.Expressive" parent="SettingslibSwitchStyle.Expressive">
         <item name="android:layout_gravity">center</item>
         <item name="trackTint">@color/settingslib_expressive_color_main_switch_track</item>
-    </style>
-
-    <style name="SettingsLibCardStyle" parent="">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginHorizontal">?android:attr/listPreferredItemPaddingStart</item>
-        <item name="android:layout_marginVertical">@dimen/settingslib_expressive_space_extrasmall4</item>
-        <item name="cardBackgroundColor">@color/settingslib_materialColorPrimary</item>
-        <item name="cardCornerRadius">@dimen/settingslib_expressive_radius_extralarge3</item>
-        <item name="cardElevation">0dp</item>
-        <item name="rippleColor">?android:attr/colorControlHighlight</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Filled"
-        parent="@style/Widget.Material3.Button">
-        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
-        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:backgroundTint">@color/settingslib_materialColorPrimary</item>
-        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
-        <item name="android:textColor">@color/settingslib_materialColorOnPrimary</item>
-        <item name="android:textSize">14sp</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconTint">@color/settingslib_materialColorOnPrimary</item>
-        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Filled.Large">
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small4</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Filled.Extra"
-        parent="@style/SettingsLibButtonStyle.Expressive.Filled.Large">
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Tonal"
-        parent="@style/Widget.Material3.Button.TonalButton">
-        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
-        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:backgroundTint">@color/settingslib_materialColorSecondaryContainer</item>
-        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
-        <item name="android:textColor">@color/settingslib_materialColorOnSecondaryContainer</item>
-        <item name="android:textSize">14sp</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconTint">@color/settingslib_materialColorOnSecondaryContainer</item>
-        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Tonal.Large">
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small4</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Tonal.Extra"
-        parent="@style/SettingsLibButtonStyle.Expressive.Tonal.Large">
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Outline"
-        parent="@style/Widget.Material3.Button.OutlinedButton.Icon">
-        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
-        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
-        <item name="android:textColor">@color/settingslib_materialColorPrimary</item>
-        <item name="android:textSize">14sp</item>
-        <item name="iconTint">@color/settingslib_materialColorPrimary</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
-        <item name="iconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
-        <item name="strokeColor">@color/settingslib_materialColorOutlineVariant</item>
-
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Outline.Large">
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small4</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="SettingsLibButtonStyle.Expressive.Outline.Extra"
-        parent="@style/SettingsLibButtonStyle.Expressive.Outline.Large">
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="SettingslibTextButtonStyle.Expressive"
-        parent="@style/Widget.Material3.Button.TextButton.Icon">
-        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/settingslib_materialColorOnSurface</item>
-        <item name="iconTint">@null</item>
-        <item name="iconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
-        <item name="rippleColor">?android:attr/colorControlHighlight</item>
     </style>
 
     <style name="EntityHeader">
@@ -327,12 +67,11 @@
         <item name="android:gravity">center</item>
         <item name="android:ellipsize">marquee</item>
         <item name="android:textDirection">locale</item>
-        <item name="android:textAppearance">@style/TextAppearance.EntityHeaderTitle</item>
+        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.TitleLarge.Emphasized</item>
     </style>
 
     <style name="SettingslibTextAppearance.LinkableTextStyle.Expressive"
-           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
-        <item name="android:textSize">14sp</item>
+           parent="@style/TextAppearance.SettingsLib.LabelLarge">
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
@@ -345,5 +84,15 @@
         <item name="cardCornerRadius">@dimen/settingslib_expressive_radius_extralarge2</item>
         <item name="cardElevation">0dp</item>
         <item name="rippleColor">?android:attr/colorControlHighlight</item>
+    </style>
+
+    <style name="TextAppearance.SettingsLib.PreferenceTitle"
+        parent="@style/TextAppearance.SettingsLib.TitleMedium">
+        <item name="android:textColor">@color/settingslib_text_color_primary</item>
+    </style>
+
+    <style name="TextAppearance.SettingsLib.PreferenceSummary"
+        parent="@style/TextAppearance.SettingsLib.BodyMedium">
+        <item name="android:textColor">@color/settingslib_text_color_secondary</item>
     </style>
 </resources>

@@ -17,7 +17,6 @@ package com.android.settingslib.bluetooth;
 
 import static android.bluetooth.BluetoothHearingAid.HI_SYNC_ID_INVALID;
 import static android.bluetooth.BluetoothLeAudio.AUDIO_LOCATION_FRONT_LEFT;
-import static android.bluetooth.BluetoothLeAudio.AUDIO_LOCATION_INVALID;
 
 import static com.android.settingslib.bluetooth.HapClientProfile.HearingAidType.TYPE_BINAURAL;
 import static com.android.settingslib.bluetooth.HapClientProfile.HearingAidType.TYPE_INVALID;
@@ -272,14 +271,14 @@ public class HearingAidDeviceManagerTest {
      *
      * Conditions:
      *      1) LeAudio hearing aid
-     *      2) Invalid audio location and device type
+     *      2) Invalid device type
      * Result:
      *      Do not set hearing aid info to the device.
      */
     @Test
     public void initHearingAidDeviceIfNeeded_leAudio_invalidInfo_notToSetHearingAidInfo() {
         when(mCachedDevice1.getProfiles()).thenReturn(List.of(mLeAudioProfile, mHapClientProfile));
-        when(mLeAudioProfile.getAudioLocation(mDevice1)).thenReturn(AUDIO_LOCATION_INVALID);
+        when(mLeAudioProfile.getAudioLocation(mDevice1)).thenReturn(AUDIO_LOCATION_FRONT_LEFT);
         when(mHapClientProfile.getHearingAidType(mDevice1)).thenReturn(TYPE_INVALID);
 
         mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(mCachedDevice1, null);
@@ -506,14 +505,14 @@ public class HearingAidDeviceManagerTest {
      *
      * Conditions:
      *      1) LeAudio hearing aid
-     *      2) Invalid audio location and device type
+     *      2) Invalid device type
      * Result:
      *      Do not set hearing aid info to the device.
      */
     @Test
     public void updateHearingAidsDevices_leAudio_invalidInfo_notToSetHearingAidInfo() {
         when(mCachedDevice1.getProfiles()).thenReturn(List.of(mLeAudioProfile, mHapClientProfile));
-        when(mLeAudioProfile.getAudioLocation(mDevice1)).thenReturn(AUDIO_LOCATION_INVALID);
+        when(mLeAudioProfile.getAudioLocation(mDevice1)).thenReturn(AUDIO_LOCATION_FRONT_LEFT);
         when(mHapClientProfile.getHearingAidType(mDevice1)).thenReturn(TYPE_INVALID);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
 

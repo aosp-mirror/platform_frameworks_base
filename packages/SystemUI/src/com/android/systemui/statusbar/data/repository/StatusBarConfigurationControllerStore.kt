@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.data.repository
 
 import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR
 import com.android.systemui.CoreStartable
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.DisplayWindowPropertiesRepository
 import com.android.systemui.display.data.repository.PerDisplayStore
@@ -74,7 +74,7 @@ constructor(
 @SysUISingleton
 class SingleDisplayStatusBarConfigurationControllerStore
 @Inject
-constructor(@GlobalConfig globalConfigurationController: ConfigurationController) :
+constructor(@Main globalConfigurationController: ConfigurationController) :
     StatusBarConfigurationControllerStore,
     PerDisplayStore<StatusBarConfigurationController> by SingleDisplayStore(
         globalConfigurationController as StatusBarConfigurationController

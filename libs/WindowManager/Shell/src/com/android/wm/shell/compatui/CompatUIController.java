@@ -55,6 +55,7 @@ import com.android.wm.shell.compatui.api.CompatUIHandler;
 import com.android.wm.shell.compatui.api.CompatUIInfo;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonClicked;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -70,7 +71,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -667,9 +667,10 @@ public class CompatUIController implements OnDisplaysChangedListener,
 
     private void createOrUpdateUserAspectRatioSettingsLayout(@NonNull TaskInfo taskInfo,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
+        boolean overridesShowAppHandle = DesktopModeStatus.overridesShowAppHandle(mContext);
         if (mUserAspectRatioSettingsLayout != null) {
             if (mUserAspectRatioSettingsLayout.needsToBeRecreated(taskInfo, taskListener)
-                    || mIsInDesktopMode) {
+                    || mIsInDesktopMode || overridesShowAppHandle) {
                 mUserAspectRatioSettingsLayout.release();
                 mUserAspectRatioSettingsLayout = null;
             } else {
@@ -682,8 +683,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 return;
             }
         }
-        if (mIsInDesktopMode) {
-            // Return if in desktop mode.
+        if (mIsInDesktopMode || overridesShowAppHandle) {
+            // Return if in desktop mode or app handle menu is already showing change aspect ratio
+            // option.
             return;
         }
         // Create a new UI layout.

@@ -40,7 +40,6 @@
 
             <ImageView
                 android:id="@android:id/icon"
-                android:src="@drawable/settingslib_arrow_drop_down"
                 android:layout_width="@dimen/settingslib_expressive_space_medium3"
                 android:layout_height="@dimen/settingslib_expressive_space_medium3"
                 android:scaleType="centerInside"/>
@@ -60,16 +59,12 @@
                 android:id="@android:id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hyphenationFrequency="normalFast"
-                android:lineBreakWordStyle="phrase"
                 android:textAppearance="@style/TextAppearance.CardTitle.SettingsLib"/>
 
             <TextView
                 android:id="@android:id/summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hyphenationFrequency="normalFast"
-                android:lineBreakWordStyle="phrase"
                 android:textAppearance="@style/TextAppearance.CardSummary.SettingsLib"/>
 
         </LinearLayout>

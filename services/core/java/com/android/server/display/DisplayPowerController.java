@@ -3311,7 +3311,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 int displayId, SensorManager sensorManager) {
             return new DisplayPowerProximityStateController(wakelockController, displayDeviceConfig,
                     looper, nudgeUpdatePowerState,
-                    displayId, sensorManager, /* injector= */ null);
+                    displayId, sensorManager);
         }
 
         AutomaticBrightnessController getAutomaticBrightnessController(

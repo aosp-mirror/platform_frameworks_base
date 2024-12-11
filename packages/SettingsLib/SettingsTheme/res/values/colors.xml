@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<resources>
+    <color name="settingslib_error_0">#FFFFFF</color>
+    <color name="settingslib_error_10">#FFFBFF</color>
+    <color name="settingslib_error_50">#FFEDEA</color>
+    <color name="settingslib_error_100">#FFDAD6</color>
+    <color name="settingslib_error_200">#FFB4AB</color>
+    <color name="settingslib_error_300">#FF897D</color>
+    <color name="settingslib_error_400">#FF5449</color>
+    <color name="settingslib_error_500">#DE3730</color>
+    <color name="settingslib_error_600">#BA1A1A</color>
+    <color name="settingslib_error_700">#93000A</color>
+    <color name="settingslib_error_800">#690005</color>
+    <color name="settingslib_error_900">#410002</color>
+    <color name="settingslib_error_1000">#000000</color>
+
+    <color name="settingslib_materialColorPrimary">#006B5F</color>
+    <color name="settingslib_materialColorOnPrimary">#FFFFFF</color>
+    <color name="settingslib_materialColorPrimaryContainer">#C5EAE2</color>
+    <color name="settingslib_materialColorOnPrimaryContainer">#00201C</color>
+    <color name="settingslib_materialColorPrimaryInverse">#83D6C7</color>
+    <color name="settingslib_materialColorPrimaryFixed">#C5EAE2</color>
+    <color name="settingslib_materialColorPrimaryFixedDim">#82D5C6</color>
+    <color name="settingslib_materialColorOnPrimaryFixed">#00201C</color>
+    <color name="settingslib_materialColorOnPrimaryFixedVariant">#005047</color>
+    <color name="settingslib_materialColorSecondary">#4A635E</color>
+    <color name="settingslib_materialColorOnSecondary">#FFFFFF</color>
+    <color name="settingslib_materialColorSecondaryContainer">#CCE8E2</color>
+    <color name="settingslib_materialColorOnSecondaryContainer">#051F1B</color>
+    <color name="settingslib_materialColorSecondaryFixed">#CCE8E2</color>
+    <color name="settingslib_materialColorSecondaryFixedDim">#B1CCC6</color>
+    <color name="settingslib_materialColorOnSecondaryFixed">#051F1B</color>
+    <color name="settingslib_materialColorOnSecondaryFixedVariant">#334C47</color>
+    <color name="settingslib_materialColorTertiary">#456179</color>
+    <color name="settingslib_materialColorOnTertiary">#FFFFFF</color>
+    <color name="settingslib_materialColorTertiaryContainer">#CBE6FF</color>
+    <color name="settingslib_materialColorOnTertiaryContainer">#001E31</color>
+    <color name="settingslib_materialColorTertiaryFixed">#CBE5FF</color>
+    <color name="settingslib_materialColorTertiaryFixedDim">#ADCAE5</color>
+    <color name="settingslib_materialColorOnTertiaryFixed">#001E31</color>
+    <color name="settingslib_materialColorOnTertiaryFixedVariant">#2D4A60</color>
+    <color name="settingslib_materialColorError">#B3261E</color>
+    <color name="settingslib_materialColorOnError">#FFFFFF</color>
+    <color name="settingslib_materialColorErrorContainer">#F9DEDC</color>
+    <color name="settingslib_materialColorOnErrorContainer">#3A0A08</color>
+    <color name="settingslib_materialColorOutline">#777777</color>
+    <color name="settingslib_materialColorOutlineVariant">#C7C6C5</color>
+    <color name="settingslib_materialColorBackground">#F9FAF8</color>
+    <color name="settingslib_materialColorOnBackground">#1B1B1B</color>
+    <color name="settingslib_materialColorSurface">#F9FAF8</color>
+    <color name="settingslib_materialColorOnSurface">#1B1B1B</color>
+    <color name="settingslib_materialColorSurfaceVariant">#E3E3E3</color>
+    <color name="settingslib_materialColorOnSurfaceVariant">#474747</color>
+    <color name="settingslib_materialColorSurfaceInverse">#303030</color>
+    <color name="settingslib_materialColorOnSurfaceInverse">#F1F1F1</color>
+    <color name="settingslib_materialColorSurfaceBright">#F9FAF8</color>
+    <color name="settingslib_materialColorSurfaceDim">#DADADA</color>
+    <color name="settingslib_materialColorSurfaceContainer">#EEEEEE</color>
+    <color name="settingslib_materialColorSurfaceContainerLow">#F4F4F4</color>
+    <color name="settingslib_materialColorSurfaceContainerLowest">#FFFFFF</color>
+    <color name="settingslib_materialColorSurfaceContainerHigh">#E8E8E8</color>
+    <color name="settingslib_materialColorSurfaceContainerHighest">#E3E3E3</color>
+</resources>

@@ -103,6 +103,8 @@ class InstallingSession {
     final DomainSet mPreVerifiedDomains;
     final boolean mHasAppMetadataFile;
     @Nullable final String mDexoptCompilerFilter;
+    final boolean mDependencyInstallerEnabled;
+    final int mMissingSharedLibraryCount;
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
@@ -138,13 +140,16 @@ class InstallingSession {
         mPreVerifiedDomains = null;
         mHasAppMetadataFile = false;
         mDexoptCompilerFilter = null;
+        mDependencyInstallerEnabled = false;
+        mMissingSharedLibraryCount = 0;
     }
 
     InstallingSession(int sessionId, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             UserHandle user, SigningDetails signingDetails, int installerUid,
             PackageLite packageLite, DomainSet preVerifiedDomains, PackageManagerService pm,
-            boolean hasAppMetadatafile) {
+            boolean hasAppMetadatafile, boolean dependencyInstallerEnabled,
+            int missingSharedLibraryCount) {
         mPm = pm;
         mUser = user;
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
@@ -175,6 +180,8 @@ class InstallingSession {
         mPreVerifiedDomains = preVerifiedDomains;
         mHasAppMetadataFile = hasAppMetadatafile;
         mDexoptCompilerFilter = sessionParams.dexoptCompilerFilter;
+        mDependencyInstallerEnabled = dependencyInstallerEnabled;
+        mMissingSharedLibraryCount = missingSharedLibraryCount;
     }
 
     @Override

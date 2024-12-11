@@ -714,12 +714,12 @@ public class AuthController implements
         onDialogDismissed(reason);
     }
     @Inject
-    public AuthController(Context context,
+    public AuthController(@Main Context context,
             @Application CoroutineScope applicationCoroutineScope,
             Execution execution,
             CommandQueue commandQueue,
             ActivityTaskManager activityTaskManager,
-            @NonNull WindowManager windowManager,
+            @NonNull @Main WindowManager windowManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Optional<AuthContextPlugins> contextPlugins,

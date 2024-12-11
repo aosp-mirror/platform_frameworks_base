@@ -15,6 +15,8 @@
  */
 package com.android.server.autofill;
 
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SUGGESTION_FILTER_OUT;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -128,5 +130,58 @@ public class PresentationEventLoggerTest {
                 pEventLogger.getInternalEvent().get();
         assertThat(event).isNotNull();
         assertThat(event.mDisplayPresentationType).isEqualTo(3);
+    }
+
+    @Test
+    public void testNoSuggestionsTextFiltered() {
+        PresentationStatsEventLogger pEventLogger =
+                PresentationStatsEventLogger.createPresentationLog(1, 1, 1);
+        AutofillId id = new AutofillId(13);
+        AutofillValue initialValue = AutofillValue.forText("hello");
+        pEventLogger.startNewEvent();
+        pEventLogger.maybeSetFocusedId(id);
+        pEventLogger.maybeSetNoPresentationEventReasonSuggestionsFiltered(initialValue);
+
+        PresentationStatsEventLogger.PresentationStatsEventInternal event =
+                pEventLogger.getInternalEvent().get();
+        assertThat(event).isNotNull();
+        int NO_SUGGESTIONS =
+                AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SUGGESTION_FILTER_OUT;
+        assertThat(event.mNoPresentationReason).isEqualTo(NO_SUGGESTIONS);
+    }
+
+    @Test
+    public void testSuggestionsTextNotFiltered() {
+        PresentationStatsEventLogger pEventLogger =
+                PresentationStatsEventLogger.createPresentationLog(1, 1, 1);
+        AutofillId id = new AutofillId(13);
+        AutofillValue initialValue = null;
+        pEventLogger.startNewEvent();
+        pEventLogger.maybeSetFocusedId(id);
+        pEventLogger.maybeSetNoPresentationEventReasonSuggestionsFiltered(initialValue);
+
+        PresentationStatsEventLogger.PresentationStatsEventInternal event =
+                pEventLogger.getInternalEvent().get();
+        assertThat(event).isNotNull();
+        assertThat(event.mNoPresentationReason).isNotEqualTo(
+                AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SUGGESTION_FILTER_OUT);
+    }
+
+    @Test
+    public void testNotShownReasonNotOverridden() {
+
+        PresentationStatsEventLogger pEventLogger =
+                PresentationStatsEventLogger.createPresentationLog(1, 1, 1);
+
+        pEventLogger.startNewEvent();
+        pEventLogger.maybeSetNoPresentationEventReason(AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED);
+        // Not allowed - no op
+        pEventLogger.maybeSetNoPresentationEventReasonIfNoReasonExists(
+                AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SUGGESTION_FILTER_OUT);
+
+        PresentationStatsEventLogger.PresentationStatsEventInternal event =
+                pEventLogger.getInternalEvent().get();
+        assertThat(event).isNotNull();
+        assertThat(event.mNoPresentationReason).isEqualTo(AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED);
     }
 }

@@ -718,7 +718,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         tInfo = createTransitionInfo(TRANSIT_PREPARE_BACK_NAVIGATION, open);
         callback = mock(Transitions.TransitionFinishCallback.class);
         mBackTransitionHandler.startAnimation(mockBinder, tInfo, st, ft, callback);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(tInfo), eq(st), eq(ft), eq(callback));
         mBackTransitionHandler.mCloseTransitionRequested = true;
         TransitionInfo tInfo2 = createTransitionInfo(TRANSIT_CLOSE, close);
@@ -750,7 +750,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 null /* remoteTransition */);
         mBackTransitionHandler.handleRequest(mockBinder, requestInfo);
         mBackTransitionHandler.startAnimation(mockBinder, tInfo, st, ft, callback);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(tInfo), eq(st), eq(ft), eq(callback));
 
         mBackTransitionHandler.onAnimationFinished();
@@ -801,7 +801,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         canHandle = mBackTransitionHandler.startAnimation(mockBinder,
                 prepareInfo, st, ft, callback2);
         assertTrue("Handle prepare transition" , canHandle);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(prepareInfo), eq(st), eq(ft), eq(callback2));
         final TransitionInfo closeInfo = createTransitionInfo(TRANSIT_CLOSE, close);
         Transitions.TransitionFinishCallback mergeCallback =
@@ -819,7 +819,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         canHandle = mBackTransitionHandler.startAnimation(
                 mockBinder, prepareInfo, st, ft, callback3);
         assertTrue("Handle prepare transition" , canHandle);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(prepareInfo), eq(st), eq(ft), eq(callback3));
         final TransitionInfo.Change open2 = createAppChange(
                 openTaskId2, TRANSIT_OPEN, FLAG_MOVED_TO_TOP);
