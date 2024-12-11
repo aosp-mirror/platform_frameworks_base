@@ -22,7 +22,6 @@ import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
 import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
 import static android.view.InsetsFrameProvider.SOURCE_DISPLAY;
 import static android.view.InsetsFrameProvider.SOURCE_FRAME;
-import static android.view.ViewRootImpl.CLIENT_IMMERSIVE_CONFIRMATION;
 import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -193,7 +192,6 @@ public class DisplayPolicy {
     private final boolean mCarDockEnablesAccelerometer;
     private final boolean mDeskDockEnablesAccelerometer;
     private final AccessibilityManager mAccessibilityManager;
-    private final ImmersiveModeConfirmation mImmersiveModeConfirmation;
     private final ScreenshotHelper mScreenshotHelper;
 
     private final Object mServiceAcquireLock = new Object();
@@ -634,12 +632,6 @@ public class DisplayPolicy {
         };
         displayContent.mAppTransition.registerListenerLocked(mAppTransitionListener);
         displayContent.mTransitionController.registerLegacyListener(mAppTransitionListener);
-        if (CLIENT_TRANSIENT || CLIENT_IMMERSIVE_CONFIRMATION) {
-            mImmersiveModeConfirmation = null;
-        } else {
-            mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext, looper,
-                    mService.mVrModeEnabled, mCanSystemBarsBeShownByUser);
-        }
 
         // TODO: Make it can take screenshot on external display
         mScreenshotHelper = displayContent.isDefaultDisplay
@@ -2294,11 +2286,7 @@ public class DisplayPolicy {
                 }
             }
         }
-        if (CLIENT_IMMERSIVE_CONFIRMATION || CLIENT_TRANSIENT) {
-            mStatusBarManagerInternal.confirmImmersivePrompt();
-        } else {
-            mImmersiveModeConfirmation.confirmCurrentPrompt();
-        }
+        mStatusBarManagerInternal.confirmImmersivePrompt();
     }
 
     boolean isKeyguardShowing() {
@@ -2523,16 +2511,9 @@ public class DisplayPolicy {
             // The immersive confirmation window should be attached to the immersive window root.
             final RootDisplayArea root = win.getRootDisplayArea();
             final int rootDisplayAreaId = root == null ? FEATURE_UNDEFINED : root.mFeatureId;
-            if (!CLIENT_TRANSIENT && !CLIENT_IMMERSIVE_CONFIRMATION) {
-                mImmersiveModeConfirmation.immersiveModeChangedLw(rootDisplayAreaId,
-                        isImmersiveMode,
-                        mService.mPolicy.isUserSetupComplete(),
-                        isNavBarEmpty(disableFlags));
-            } else {
-                // TODO(b/277290737): Move this to the client side, instead of using a proxy.
-                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(getDisplayId(),
+            // TODO(b/277290737): Move this to the client side, instead of using a proxy.
+            callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(getDisplayId(),
                         rootDisplayAreaId, isImmersiveMode));
-            }
         }
 
         // Show transient bars for panic if needed.
@@ -2745,15 +2726,8 @@ public class DisplayPolicy {
     void onPowerKeyDown(boolean isScreenOn) {
         // Detect user pressing the power button in panic when an application has
         // taken over the whole screen.
-        boolean panic = false;
-        if (!CLIENT_TRANSIENT && !CLIENT_IMMERSIVE_CONFIRMATION) {
-            panic = mImmersiveModeConfirmation.onPowerKeyDown(isScreenOn,
-                    SystemClock.elapsedRealtime(), isImmersiveMode(mSystemUiControllingWindow),
-                    isNavBarEmpty(mLastDisableFlags));
-        } else {
-            panic = isPowerKeyDownPanic(isScreenOn, SystemClock.elapsedRealtime(),
+        boolean panic = isPowerKeyDownPanic(isScreenOn, SystemClock.elapsedRealtime(),
                     isImmersiveMode(mSystemUiControllingWindow), isNavBarEmpty(mLastDisableFlags));
-        }
         if (panic) {
             mHandler.post(mHiddenNavPanic);
         }
@@ -2774,27 +2748,6 @@ public class DisplayPolicy {
         return false;
     }
 
-    void onVrStateChangedLw(boolean enabled) {
-        if (!CLIENT_TRANSIENT && !CLIENT_IMMERSIVE_CONFIRMATION) {
-            mImmersiveModeConfirmation.onVrStateChangedLw(enabled);
-        }
-    }
-
-    /**
-     * Called when the state of lock task mode changes. This should be used to disable immersive
-     * mode confirmation.
-     *
-     * @param lockTaskState the new lock task mode state. One of
-     *                      {@link ActivityManager#LOCK_TASK_MODE_NONE},
-     *                      {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
-     *                      {@link ActivityManager#LOCK_TASK_MODE_PINNED}.
-     */
-    public void onLockTaskStateChangedLw(int lockTaskState) {
-        if (!CLIENT_TRANSIENT && !CLIENT_IMMERSIVE_CONFIRMATION) {
-            mImmersiveModeConfirmation.onLockTaskModeChangedLw(lockTaskState);
-        }
-    }
-
     /** Called when a {@link android.os.PowerManager#USER_ACTIVITY_EVENT_TOUCH} is sent. */
     public void onUserActivityEventTouch() {
         // If there is keyguard, it may use INPUT_FEATURE_DISABLE_USER_ACTIVITY (InputDispatcher
@@ -2806,14 +2759,6 @@ public class DisplayPolicy {
         // state temporarily to make the process more responsive.
         final WindowState w = mNotificationShade;
         mService.mAtmService.setProcessAnimatingWhileDozing(w != null ? w.getProcess() : null);
-    }
-
-    boolean onSystemUiSettingsChanged() {
-        if (CLIENT_TRANSIENT || CLIENT_IMMERSIVE_CONFIRMATION) {
-            return false;
-        } else {
-            return mImmersiveModeConfirmation.onSettingChanged(mService.mCurrentUserId);
-        }
     }
 
     /**
@@ -3025,9 +2970,6 @@ public class DisplayPolicy {
         mDisplayContent.mTransitionController.unregisterLegacyListener(mAppTransitionListener);
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
         mHandler.post(mForceShowNavBarSettingsObserver::unregister);
-        if (!CLIENT_TRANSIENT && !CLIENT_IMMERSIVE_CONFIRMATION) {
-            mImmersiveModeConfirmation.release();
-        }
         if (mService.mPointerLocationEnabled) {
             setPointerLocationEnabled(false);
         }
