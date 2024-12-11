@@ -324,7 +324,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             if (target != imeControlTarget) {
                 // TODO(b/353463205): check if fromUser=false is correct here
                 boolean imeVisible = target.isRequestedVisible(WindowInsets.Type.ime());
-                ImeTracker.Token statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
+                ImeTracker.Token statsToken = ImeTracker.forLogging().onStart(
+                        imeVisible ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE,
                         ImeTracker.ORIGIN_SERVER,
                         imeVisible ? SoftInputShowHideReason.SHOW_INPUT_TARGET_CHANGED
                                 : SoftInputShowHideReason.HIDE_INPUT_TARGET_CHANGED,

@@ -62,7 +62,7 @@ public class ToggleSeekBar extends SeekBar {
         } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
             setHovered(false);
         }
-        return true;
+        return super.onHoverEvent(event);
     }
 
     @Override

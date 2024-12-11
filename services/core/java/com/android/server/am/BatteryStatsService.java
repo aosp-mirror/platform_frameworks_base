@@ -1101,6 +1101,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
     private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+        private static final long BATTERY_USAGE_STATS_PER_UID_MAX_STATS_AGE =
+                TimeUnit.HOURS.toMillis(2);
+
         @Override
         public int onPullAtom(int atomTag, List<StatsEvent> data) {
             final BatteryUsageStats bus;
@@ -1168,7 +1171,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                             .setMinConsumedPowerThreshold(minConsumedPowerThreshold);
 
                     if (isBatteryUsageStatsAccumulationSupported()) {
-                        query.accumulated();
+                        query.accumulated()
+                                .setMaxStatsAgeMs(BATTERY_USAGE_STATS_PER_UID_MAX_STATS_AGE);
                     }
 
                     bus = getBatteryUsageStats(List.of(query.build())).get(0);

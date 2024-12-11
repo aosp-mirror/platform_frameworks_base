@@ -24,7 +24,7 @@ import com.android.systemui.biometrics.shared.model.SensorLocation
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.dagger.qualifiers.Main
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -43,7 +43,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
     repository: FingerprintPropertyRepository,
-    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
+    @Main configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {

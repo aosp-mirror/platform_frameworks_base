@@ -135,6 +135,9 @@ class EditTileListState(
             cell is TileGridCell && cell.tile.tileSpec == draggedTile.tile.tileSpec
         }
         draggedPosition = Offset.Unspecified
+
+        // Regenerate spacers without the dragged tile
+        regenerateGrid()
     }
 
     override fun onDrop() {

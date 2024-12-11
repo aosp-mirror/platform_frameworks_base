@@ -506,9 +506,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             return;
         }
 
-        Slog.i(TAG, "Requesting Transition to state: " + state.getIdentifier() + ", from state="
-                + mDeviceState.getIdentifier() + ", interactive=" + mInteractive
-                + ", mBootCompleted=" + mBootCompleted);
         // As part of a state transition, we may need to turn off some displays temporarily so that
         // the transition is smooth. Plus, on some devices, only one internal displays can be
         // on at a time. We use LogicalDisplay.setIsInTransition to mark a display that needs to be
@@ -521,6 +518,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 mInteractive, mBootCompleted);
         final boolean sleepDevice = shouldDeviceBePutToSleep(mPendingDeviceState, mDeviceState,
                 mInteractive, mBootCompleted);
+
+        Slog.i(TAG, "Requesting Transition to state: " + state.getIdentifier() + ", from state="
+                + mDeviceState.getIdentifier() + ", interactive=" + mInteractive
+                + ", mBootCompleted=" + mBootCompleted + ", wakeDevice=" + wakeDevice
+                + ", sleepDevice=" + sleepDevice);
 
         // If all displays are off already, we can just transition here, unless we are trying to
         // wake or sleep the device as part of this transition. In that case defer the final

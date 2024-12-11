@@ -27,6 +27,7 @@ import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
+import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -64,6 +65,7 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
     private val persistentRepository = mock<DesktopPersistentRepository>()
     private val userManager = mock<UserManager>()
     private val testExecutor = mock<ShellExecutor>()
+    private val shellController = mock<ShellController>()
 
     @Before
     fun setUp() {
@@ -74,7 +76,12 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
             DesktopRepositoryInitializerImpl(context, persistentRepository, datastoreScope)
         desktopUserRepositories =
             DesktopUserRepositories(
-                context, shellInit, persistentRepository, repositoryInitializer, datastoreScope,
+                context,
+                shellInit,
+                shellController,
+                persistentRepository,
+                repositoryInitializer,
+                datastoreScope,
                 userManager
             )
     }

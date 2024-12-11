@@ -1950,6 +1950,21 @@
     <!-- Text displayed indicating that the user might be able to use satellite SOS. -->
     <string name="satellite_emergency_only_carrier_text">Emergency calls or SOS</string>
 
+    <!-- Content description skeleton. Input strings should be carrier name and signal bar description [CHAR LIMIT=NONE]-->
+    <string name="accessibility_phone_string_format"><xliff:g id="carrier_name" example="Carrier Name">%1$s</xliff:g>, <xliff:g id="signal_strength_description" example="two bars">%2$s</xliff:g>.</string>
+    <!-- Content description describing 0 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_signal">no signal</string>
+    <!-- Content description describing 1 signal bar. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_one_bar">one bar</string>
+    <!-- Content description describing 2 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_two_bars">two bars</string>
+    <!-- Content description describing 3 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_three_bars">three bars</string>
+    <!-- Content description describing 4 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_four_bars">four bars</string>
+    <!-- Content description describing full signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_signal_full">signal full</string>
+
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
 

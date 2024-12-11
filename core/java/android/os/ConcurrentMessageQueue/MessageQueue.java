@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.Instrumentation;
@@ -784,7 +785,7 @@ public final class MessageQueue {
             mMessageDirectlyQueued = false;
             nativePollOnce(ptr, mNextPollTimeoutMillis);
 
-            Message msg = nextMessage();
+            Message msg = nextMessage(false);
             if (msg != null) {
                 msg.markInUse();
                 return msg;
@@ -1087,7 +1088,6 @@ public final class MessageQueue {
      *
      * Caller must ensure that this doesn't race 'next' from the Looper thread.
      */
-    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
     Long peekWhenForTest() {
         throwIfNotTest();
         Message ret = nextMessage(true);
@@ -1100,7 +1100,6 @@ public final class MessageQueue {
      *
      * Caller must ensure that this doesn't race 'next' from the Looper thread.
      */
-    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
     @Nullable
     Message pollForTest() {
         throwIfNotTest();
@@ -1109,13 +1108,21 @@ public final class MessageQueue {
 
     /**
      * @return true if we are blocked on a sync barrier
+     *
+     * Calls to this method must not be allowed to race with `next`.
+     * Specifically, the Looper thread must be paused before calling this method,
+     * and may not be resumed until after returning from this method.
      */
     boolean isBlockedOnSyncBarrier() {
         throwIfNotTest();
+
+        // Call nextMessage to get the stack drained into our priority queues
+        nextMessage(true);
+
         Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
         MessageNode queueNode = iterateNext(queueIter);
 
-        if (queueNode.isBarrier()) {
+        if (queueNode != null && queueNode.isBarrier()) {
             long now = SystemClock.uptimeMillis();
 
             /* Look for a deliverable async node. If one exists we are not blocked. */
@@ -1128,15 +1135,14 @@ public final class MessageQueue {
              * Look for a deliverable sync node. In this case, if one exists we are blocked
              * since the barrier prevents delivery of the Message.
              */
-            while (queueNode.isBarrier()) {
+            while (queueNode != null && queueNode.isBarrier()) {
                 queueNode = iterateNext(queueIter);
             }
             if (queueNode != null && now >= queueNode.getWhen()) {
                 return true;
             }
-
-            return false;
         }
+        return false;
     }
 
     private StateNode getStateNode(StackNode node) {
@@ -1193,7 +1199,7 @@ public final class MessageQueue {
         MessageNode p = (MessageNode) top;
 
         while (true) {
-            if (compare.compareMessage(p.mMessage, h, what, object, r, when)) {
+            if (compare.compareMessage(p, h, what, object, r, when)) {
                 found = true;
                 if (DEBUG) {
                     Log.w(TAG, "stackHasMessages node matches");
@@ -1238,7 +1244,7 @@ public final class MessageQueue {
         while (iterator.hasNext()) {
             MessageNode msg = iterator.next();
 
-            if (compare.compareMessage(msg.mMessage, h, what, object, r, when)) {
+            if (compare.compareMessage(msg, h, what, object, r, when)) {
                 if (removeMatches) {
                     found = true;
                     if (queue.remove(msg)) {

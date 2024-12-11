@@ -57,6 +57,14 @@ constructor(
     // top-level tag. It should instead be provided as the first string in each log message.
     private val extraLogTag = "SingleChipInteractor[key=$key]"
 
+    init {
+        if (startingModel.promotedContent == null) {
+            logger.e({ "$str1: Starting model has promotedContent=null, which shouldn't happen" }) {
+                str1 = extraLogTag
+            }
+        }
+    }
+
     private val _notificationModel = MutableStateFlow(startingModel)
 
     /**
@@ -68,6 +76,14 @@ constructor(
             logger.w({ "$str1: received model for different key $str2" }) {
                 str1 = extraLogTag
                 str2 = model.key
+            }
+            return
+        }
+        if (model.promotedContent == null) {
+            logger.e({
+                "$str1: received model with promotedContent=null, which shouldn't happen"
+            }) {
+                str1 = extraLogTag
             }
             return
         }
@@ -99,6 +115,15 @@ constructor(
         }
 
     private fun ActiveNotificationModel.toNotificationChipModel(): NotificationChipModel? {
+        val promotedContent = this.promotedContent
+        if (promotedContent == null) {
+            logger.w({
+                "$str1: Can't show chip because promotedContent=null, which shouldn't happen"
+            }) {
+                str1 = extraLogTag
+            }
+            return null
+        }
         val statusBarChipIconView = this.statusBarChipIconView
         if (statusBarChipIconView == null) {
             if (!StatusBarConnectedDisplays.isEnabled) {
@@ -111,7 +136,8 @@ constructor(
                 return null
             }
         }
-        return NotificationChipModel(key, statusBarChipIconView, whenTime)
+
+        return NotificationChipModel(key, statusBarChipIconView, whenTime, promotedContent)
     }
 
     @AssistedFactory

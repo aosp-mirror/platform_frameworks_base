@@ -5088,6 +5088,7 @@ package android.hardware.contexthub {
     field public static final int REASON_ENDPOINT_STOPPED = 6; // 0x6
     field public static final int REASON_FAILURE = 0; // 0x0
     field public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3; // 0x3
+    field public static final int REASON_PERMISSION_DENIED = 9; // 0x9
   }
 
   public static final class HubEndpoint.Builder {

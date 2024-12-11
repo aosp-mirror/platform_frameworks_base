@@ -91,7 +91,7 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.CONTROL_WINDOW_INSETS_ANIMATION,
         SoftInputShowHideReason.SHOW_INPUT_TARGET_CHANGED,
         SoftInputShowHideReason.HIDE_INPUT_TARGET_CHANGED,
-        SoftInputShowHideReason.REASON_HIDE_WINDOW_LOST_FOCUS,
+        SoftInputShowHideReason.HIDE_WINDOW_LOST_FOCUS,
 })
 public @interface SoftInputShowHideReason {
     /** Default, undefined reason. */
@@ -340,18 +340,6 @@ public @interface SoftInputShowHideReason {
     int HIDE_WINDOW_LEGACY_DIRECT = ImeProtoEnums.REASON_HIDE_WINDOW_LEGACY_DIRECT;
 
     /**
-     * Show soft input because the input target changed
-     * {@link com.android.server.wm.ImeInsetsSourceProvider#onInputTargetChanged}.
-     */
-    int SHOW_INPUT_TARGET_CHANGED = ImeProtoEnums.REASON_SHOW_INPUT_TARGET_CHANGED;
-
-    /**
-     * Hide soft input because the input target changed by
-     * {@link com.android.server.wm.ImeInsetsSourceProvider#onInputTargetChanged}.
-     */
-    int HIDE_INPUT_TARGET_CHANGED = ImeProtoEnums.REASON_HIDE_INPUT_TARGET_CHANGED;
-
-    /**
      * Show / Hide soft input by
      * {@link android.inputmethodservice.InputMethodService#resetStateForNewConfiguration}.
      */
@@ -420,6 +408,18 @@ public @interface SoftInputShowHideReason {
      */
     int CONTROL_WINDOW_INSETS_ANIMATION = ImeProtoEnums.REASON_CONTROL_WINDOW_INSETS_ANIMATION;
 
+    /**
+     * Show soft input because the input target changed
+     * {@link com.android.server.wm.ImeInsetsSourceProvider#onInputTargetChanged}.
+     */
+    int SHOW_INPUT_TARGET_CHANGED = ImeProtoEnums.REASON_SHOW_INPUT_TARGET_CHANGED;
+
+    /**
+     * Hide soft input because the input target changed by
+     * {@link com.android.server.wm.ImeInsetsSourceProvider#onInputTargetChanged}.
+     */
+    int HIDE_INPUT_TARGET_CHANGED = ImeProtoEnums.REASON_HIDE_INPUT_TARGET_CHANGED;
+
     /** Hide soft input when the window lost focus. */
-    int REASON_HIDE_WINDOW_LOST_FOCUS = ImeProtoEnums.REASON_HIDE_WINDOW_LOST_FOCUS;
+    int HIDE_WINDOW_LOST_FOCUS = ImeProtoEnums.REASON_HIDE_WINDOW_LOST_FOCUS;
 }

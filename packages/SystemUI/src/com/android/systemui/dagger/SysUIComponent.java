@@ -21,7 +21,7 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
-import com.android.systemui.common.ui.GlobalConfig;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.PerUser;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
@@ -128,14 +128,14 @@ public interface SysUIComponent {
      * Creates a ConfigurationController.
      */
     @SysUISingleton
-    @GlobalConfig
+    @Main
     ConfigurationController getConfigurationController();
 
     /**
      * Creates a ConfigurationForwarder.
      */
     @SysUISingleton
-    @GlobalConfig
+    @Main
     ConfigurationForwarder getConfigurationForwarder();
 
     /**
