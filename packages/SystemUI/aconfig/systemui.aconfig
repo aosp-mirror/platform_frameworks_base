@@ -1869,3 +1869,10 @@ flag {
     description: "Larger privacy indicators on large screen"
     bug: "381864715"
 }
+
+flag {
+   name: "glanceable_hub_direct_edit_mode"
+   namespace: "systemui"
+   description: "Invokes edit mode directly from long press in glanceable hub"
+   bug: "382531177"
+}

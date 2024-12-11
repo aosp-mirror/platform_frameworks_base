@@ -19,6 +19,7 @@ package com.android.systemui.communal.view.viewmodel
 import android.content.ComponentName
 import android.content.pm.UserInfo
 import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
@@ -26,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
@@ -101,6 +103,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -442,6 +445,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
     fun customizeWidgetButton_showsThenHidesAfterTimeout() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -455,6 +459,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
     fun customizeWidgetButton_onDismiss_hidesImmediately() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -465,6 +470,14 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             underTest.onHidePopup()
             assertThat(currentPopup).isNull()
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
+    fun longClickDirectlyStartsEditMode() =
+        testScope.runTest {
+            underTest.onLongClick()
+            verify(communalInteractor).showWidgetEditor(any())
         }
 
     @Test
