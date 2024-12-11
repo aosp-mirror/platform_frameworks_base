@@ -215,7 +215,8 @@ public class JankDataProcessorTest {
         assertEquals(jankStats.getJankyFrameCount() * 2, pendingStat.getJankyFrames());
         assertEquals(jankStats.getTotalFrameCount() * 2, pendingStat.getTotalFrames());
 
-        int[] originalHistogramBuckets = jankStats.getFrameOverrunHistogram().getBucketCounters();
+        int[] originalHistogramBuckets =
+                jankStats.getRelativeFrameTimeHistogram().getBucketCounters();
         int[] frameOverrunBuckets = pendingStat.getFrameOverrunBuckets();
 
         for (int i = 0; i < frameOverrunBuckets.length; i++) {
