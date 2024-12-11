@@ -19,6 +19,7 @@ package com.android.systemui.power.data.repository
 
 import android.os.PowerManager
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.power.shared.model.DozeScreenStateModel
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
@@ -40,6 +41,8 @@ class FakePowerRepository @Inject constructor() : PowerRepository {
 
     private val _screenPowerState = MutableStateFlow(ScreenPowerState.SCREEN_OFF)
     override val screenPowerState = _screenPowerState.asStateFlow()
+
+    override val dozeScreenState = MutableStateFlow(DozeScreenStateModel.UNKNOWN)
 
     var lastWakeWhy: String? = null
     var lastWakeReason: Int? = null
@@ -63,7 +66,7 @@ class FakePowerRepository @Inject constructor() : PowerRepository {
         rawState: WakefulnessState,
         lastWakeReason: WakeSleepReason,
         lastSleepReason: WakeSleepReason,
-        powerButtonLaunchGestureTriggered: Boolean
+        powerButtonLaunchGestureTriggered: Boolean,
     ) {
         _wakefulness.value =
             WakefulnessModel(
