@@ -43,6 +43,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -750,10 +752,13 @@ private fun HorizontalGridWrapper(
     content: LazyGridScope.(sizeInfo: SizeInfo?) -> Unit,
 ) {
     if (communalResponsiveGrid()) {
+        val flingBehavior =
+            rememberSnapFlingBehavior(lazyGridState = gridState, snapPosition = SnapPosition.Start)
         ResponsiveLazyHorizontalGrid(
             cellAspectRatio = 1.5f,
             modifier = modifier,
             state = gridState,
+            flingBehavior = flingBehavior,
             minContentPadding = minContentPadding,
             minHorizontalArrangement = Dimensions.ItemSpacing,
             minVerticalArrangement = Dimensions.ItemSpacing,
