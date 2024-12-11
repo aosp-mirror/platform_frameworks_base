@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.graphics.Color
+import android.graphics.Rect
 import android.view.View
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
@@ -66,4 +69,20 @@ class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
         )
 
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
+
+    val darkRegions = mutableListOf<Rect>()
+
+    var darkIconTint = Color.BLACK
+    var lightIconTint = Color.WHITE
+
+    override fun areaTint(displayId: Int): Flow<StatusBarTintColor> =
+        MutableStateFlow(
+            StatusBarTintColor { viewBounds ->
+                if (DarkIconDispatcher.isInAreas(darkRegions, viewBounds)) {
+                    lightIconTint
+                } else {
+                    darkIconTint
+                }
+            }
+        )
 }

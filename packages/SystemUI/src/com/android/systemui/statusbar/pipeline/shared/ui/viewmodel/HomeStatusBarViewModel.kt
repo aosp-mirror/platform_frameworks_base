@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.annotation.ColorInt
+import android.graphics.Rect
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -27,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -43,6 +46,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotif
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
@@ -52,6 +56,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
@@ -119,6 +124,12 @@ interface HomeStatusBarViewModel {
      */
     fun areNotificationsLightsOut(displayId: Int): Flow<Boolean>
 
+    /**
+     * Given a displayId, returns a flow of [StatusBarTintColor], a functional interface that will
+     * allow a view to calculate its correct tint depending on location
+     */
+    fun areaTint(displayId: Int): Flow<StatusBarTintColor>
+
     /** Models the current visibility for a specific child view of status bar. */
     data class VisibilityModel(
         @View.Visibility val visibility: Int,
@@ -140,6 +151,7 @@ constructor(
     collapsedStatusBarInteractor: CollapsedStatusBarInteractor,
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
+    private val darkIconInteractor: DarkIconInteractor,
     headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
@@ -191,6 +203,21 @@ constructor(
                 }
                 .distinctUntilChanged()
         }
+
+    override fun areaTint(displayId: Int): Flow<StatusBarTintColor> =
+        darkIconInteractor
+            .darkState(displayId)
+            .map { (areas: Collection<Rect>, tint: Int) ->
+                StatusBarTintColor { viewBounds: Rect ->
+                    if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {
+                        tint
+                    } else {
+                        DarkIconDispatcher.DEFAULT_ICON_TINT
+                    }
+                }
+            }
+            .conflate()
+            .distinctUntilChanged()
 
     /**
      * True if the current SysUI state can show the home status bar (aka this status bar), and false
@@ -301,4 +328,9 @@ constructor(
     // Similar to the above, but uses INVISIBLE in place of GONE
     @View.Visibility
     private fun Boolean.toVisibleOrInvisible(): Int = if (this) View.VISIBLE else View.INVISIBLE
+}
+
+/** Lookup the color for a given view in the status bar */
+fun interface StatusBarTintColor {
+    @ColorInt fun tint(viewBounds: Rect): Int
 }
