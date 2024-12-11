@@ -12023,11 +12023,8 @@ public abstract class PackageManager {
      * file.
      *
      * @throws SigningInfoException if the verification fails
-     *
-     * @hide
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_CLOUD_COMPILATION_PM)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static @NonNull SigningInfo getVerifiedSigningInfo(@NonNull String path,
             @AppSigningSchemeVersion int minAppSigningSchemeVersion) throws SigningInfoException {
         ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
