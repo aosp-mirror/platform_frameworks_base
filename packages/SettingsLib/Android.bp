@@ -65,6 +65,7 @@ android_library {
     libs:[
         // This flag library has been added in frameworks jar
         "aconfig_settingslib_flags_java_lib",
+        "wifi_framework_aconfig_flags_lib",
     ],
     plugins: ["androidx.room_room-compiler-plugin"],
     use_resource_processor: true,
