@@ -9988,6 +9988,19 @@ public class CarrierConfigManager {
             "satellite_data_support_mode_int";
 
     /**
+     * Determines whether data roaming off setting should be ignored and satellite data should be
+     * allowed even when data roaming is off.
+     *
+     * If the carrier would like to allow the device to use satellite connection when data roaming
+     * is off, this key should be set to {@code true}.
+     *
+     * The default value is {@code false} i.e. disallow satellite data when data roaming is off.
+     */
+    @FlaggedApi(Flags.FLAG_SATELLITE_25Q4_APIS)
+    public static final String KEY_SATELLITE_IGNORE_DATA_ROAMING_SETTING_BOOL =
+        "satellite_ignore_data_roaming_setting_bool";
+
+    /**
      * Determine whether to override roaming Wi-Fi Calling preference when device is connected to
      * non-terrestrial network.
      * {@code true}  - roaming preference cannot be changed by user independently.
@@ -11388,6 +11401,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_REMOVE_SATELLITE_PLMN_IN_MANUAL_NETWORK_SCAN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_DATA_SUPPORT_MODE_INT,
                 CarrierConfigManager.SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED);
+        sDefaults.putBoolean(KEY_SATELLITE_IGNORE_DATA_ROAMING_SETTING_BOOL, false);
         sDefaults.putBoolean(KEY_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN_BOOL, true);
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 7);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
