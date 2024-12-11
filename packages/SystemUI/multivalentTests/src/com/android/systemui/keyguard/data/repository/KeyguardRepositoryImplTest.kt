@@ -123,27 +123,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun bottomAreaAlpha() =
-        testScope.runTest {
-            assertThat(underTest.bottomAreaAlpha.value).isEqualTo(1f)
-
-            underTest.setBottomAreaAlpha(0.1f)
-            assertThat(underTest.bottomAreaAlpha.value).isEqualTo(0.1f)
-
-            underTest.setBottomAreaAlpha(0.2f)
-            assertThat(underTest.bottomAreaAlpha.value).isEqualTo(0.2f)
-
-            underTest.setBottomAreaAlpha(0.3f)
-            assertThat(underTest.bottomAreaAlpha.value).isEqualTo(0.3f)
-
-            underTest.setBottomAreaAlpha(0.5f)
-            assertThat(underTest.bottomAreaAlpha.value).isEqualTo(0.5f)
-
-            underTest.setBottomAreaAlpha(1.0f)
-            assertThat(underTest.bottomAreaAlpha.value).isEqualTo(1f)
-        }
-
-    @Test
     fun panelAlpha() =
         testScope.runTest {
             assertThat(underTest.panelAlpha.value).isEqualTo(1f)

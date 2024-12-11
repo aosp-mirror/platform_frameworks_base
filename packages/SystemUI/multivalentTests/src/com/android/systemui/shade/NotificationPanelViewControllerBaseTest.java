@@ -68,7 +68,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.EmptyLockIconViewController;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardSliceViewController;
@@ -99,7 +98,6 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewConfigurator;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardClockRepository;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
-import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
@@ -108,7 +106,6 @@ import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingOb
 import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardTouchHandlingViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
@@ -167,8 +164,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
@@ -228,10 +223,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
     @Mock protected CentralSurfaces mCentralSurfaces;
     @Mock protected NotificationStackScrollLayout mNotificationStackScrollLayout;
-    @Mock protected KeyguardBottomAreaView mKeyguardBottomArea;
-    @Mock protected KeyguardBottomAreaViewController mKeyguardBottomAreaViewController;
     @Mock protected ViewPropertyAnimator mViewPropertyAnimator;
-    @Mock protected KeyguardBottomAreaView mQsFrame;
     @Mock protected HeadsUpManager mHeadsUpManager;
     @Mock protected NotificationGutsManager mGutsManager;
     @Mock protected KeyguardStatusBarView mKeyguardStatusBar;
@@ -270,7 +262,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     @Mock protected KeyguardStatusViewComponent mKeyguardStatusViewComponent;
     @Mock protected KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
-    @Mock protected EmptyLockIconViewController mLockIconViewController;
     @Mock protected KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
     @Mock protected KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock protected KeyguardStatusBarViewController mKeyguardStatusBarViewController;
@@ -317,7 +308,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ViewGroup mQsHeader;
     @Mock protected ViewParent mViewParent;
     @Mock protected ViewTreeObserver mViewTreeObserver;
-    @Mock protected KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     @Mock protected DreamingToLockscreenTransitionViewModel
             mDreamingToLockscreenTransitionViewModel;
     @Mock protected OccludedToLockscreenTransitionViewModel
@@ -352,7 +342,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
-    protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected KeyguardClockInteractor mKeyguardClockInteractor;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected FakeKeyguardClockRepository mFakeKeyguardClockRepository;
@@ -397,13 +386,10 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
 
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
-
         mMainDispatcher = getMainDispatcher();
         KeyguardInteractorFactory.WithDependencies keyguardInteractorDeps =
                 KeyguardInteractorFactory.create();
         mFakeKeyguardRepository = keyguardInteractorDeps.getRepository();
-        mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
         mFakeKeyguardClockRepository = new FakeKeyguardClockRepository();
         mKeyguardClockInteractor = mKosmos.getKeyguardClockInteractor();
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
@@ -500,9 +486,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(1000);
         when(mNotificationStackScrollLayoutController.getHeadsUpCallback())
                 .thenReturn(mHeadsUpCallback);
-        when(mKeyguardBottomAreaViewController.getView()).thenReturn(mKeyguardBottomArea);
-        when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
-        when(mKeyguardBottomArea.animate()).thenReturn(mViewPropertyAnimator);
         when(mView.animate()).thenReturn(mViewPropertyAnimator);
         when(mKeyguardStatusView.animate()).thenReturn(mViewPropertyAnimator);
         when(mViewPropertyAnimator.translationX(anyFloat())).thenReturn(mViewPropertyAnimator);
@@ -513,7 +496,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mViewPropertyAnimator.setListener(any())).thenReturn(mViewPropertyAnimator);
         when(mViewPropertyAnimator.setUpdateListener(any())).thenReturn(mViewPropertyAnimator);
         when(mViewPropertyAnimator.withEndAction(any())).thenReturn(mViewPropertyAnimator);
-        when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
         ViewGroup rootView = mock(ViewGroup.class);
@@ -647,8 +629,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(keyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_user_switcher), any(), anyBoolean()))
                 .thenReturn(mUserSwitcherView);
-        when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
-                .thenReturn(mKeyguardBottomArea);
         when(mNotificationRemoteInputManager.isRemoteInputActive())
                 .thenReturn(false);
         doAnswer(invocation -> {
@@ -720,7 +700,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mMediaDataManager,
                 mNotificationShadeDepthController,
                 mAmbientState,
-                mLockIconViewController,
                 mKeyguardMediaController,
                 mTapAgainViewController,
                 mNavigationModeController,
@@ -736,15 +715,12 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mShadeRepository,
                 mSysUIUnfoldComponent,
                 mSysUiState,
-                () -> mKeyguardBottomAreaViewController,
                 mKeyguardUnlockAnimationController,
                 mKeyguardIndicationController,
                 mNotificationListContainer,
                 mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
                 systemClock,
-                mKeyguardBottomAreaViewModel,
-                mKeyguardBottomAreaInteractor,
                 mKeyguardClockInteractor,
                 mAlternateBouncerInteractor,
                 mDreamingToLockscreenTransitionViewModel,

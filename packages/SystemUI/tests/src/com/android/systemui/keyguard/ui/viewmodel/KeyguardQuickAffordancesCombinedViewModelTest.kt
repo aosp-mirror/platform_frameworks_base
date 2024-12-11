@@ -25,7 +25,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -190,8 +189,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         dockManager = DockManagerFake()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
-
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         val featureFlags =
             FakeFeatureFlags().apply { set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false) }

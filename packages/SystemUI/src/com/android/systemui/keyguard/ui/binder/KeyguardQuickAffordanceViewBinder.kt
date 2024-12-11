@@ -71,9 +71,6 @@ constructor(
 
     /**
      * Defines interface for an object that acts as the binding between the view and its view-model.
-     *
-     * Users of the [KeyguardBottomAreaViewBinder] class should use this to control the binder after
-     * it is bound.
      */
     interface Binding {
         /** Notifies that device configuration has changed. */

@@ -17,21 +17,17 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 
 /** View model for communal tutorial indicator on keyguard */
 class CommunalTutorialIndicatorViewModel
 @Inject
-constructor(
-    private val communalTutorialInteractor: CommunalTutorialInteractor,
-    bottomAreaInteractor: KeyguardBottomAreaInteractor,
-) {
+constructor(private val communalTutorialInteractor: CommunalTutorialInteractor) {
     /**
      * An observable for whether the tutorial indicator view should be visible.
      *
@@ -46,5 +42,6 @@ constructor(
     }
 
     /** An observable for the alpha level for the tutorial indicator. */
-    val alpha: Flow<Float> = bottomAreaInteractor.alpha.distinctUntilChanged()
+    // TODO("b/383587536") find replacement for keyguardBottomAreaInteractor alpha
+    val alpha: Flow<Float> = flowOf(0f)
 }
