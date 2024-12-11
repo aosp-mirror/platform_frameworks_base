@@ -149,6 +149,9 @@ java_library_static {
 
         // Java/AIDL sources to be moved out to CrashRecovery module
         ":services-crashrecovery-sources",
+
+        // Indicate whether VCN is in platform or mainline
+        ":vcn-location-sources",
     ],
 
     libs: [
