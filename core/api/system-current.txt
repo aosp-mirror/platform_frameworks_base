@@ -520,6 +520,9 @@ package android {
     field public static final int config_defaultCallScreening = 17039398; // 0x1040026
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_defaultNotes = 17039429; // 0x1040045
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int config_defaultOnDeviceIntelligenceDeviceConfigNamespace;
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int config_defaultOnDeviceIntelligenceService;
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int config_defaultOnDeviceSandboxedInferenceService;
     field @FlaggedApi("android.permission.flags.cross_user_role_platform_api_enabled") public static final int config_defaultReservedForTestingProfileGroupExclusivity;
     field @FlaggedApi("android.permission.flags.retail_demo_role_enabled") public static final int config_defaultRetailDemo = 17039432; // 0x1040048
     field public static final int config_defaultSms = 17039396; // 0x1040024
