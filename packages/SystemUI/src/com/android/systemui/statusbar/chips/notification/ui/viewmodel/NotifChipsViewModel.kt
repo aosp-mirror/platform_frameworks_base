@@ -90,6 +90,15 @@ constructor(
             return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
         }
 
+        if (this.promotedContent.shortCriticalText != null) {
+            return OngoingActivityChipModel.Shown.Text(
+                icon,
+                colors,
+                this.promotedContent.shortCriticalText,
+                onClickListener,
+            )
+        }
+
         if (this.promotedContent.time == null) {
             return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
         }
@@ -120,6 +129,5 @@ constructor(
                 )
             }
         }
-        // TODO(b/364653005): If Notification.shortCriticalText is set, use that instead of `when`.
     }
 }

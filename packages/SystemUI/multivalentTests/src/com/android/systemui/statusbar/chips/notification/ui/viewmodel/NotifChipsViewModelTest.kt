@@ -116,7 +116,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             val chip = latest!![0]
-            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat(chip.icon).isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarView(icon))
         }
 
@@ -139,7 +139,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             assertThat(latest).hasSize(1)
             val chip = latest!![0]
-            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
             assertThat(chip.icon)
                 .isEqualTo(OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(notifKey))
         }
@@ -241,6 +241,35 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             assertIsNotifKey(latest!![1], secondKey)
         }
 
+    @Test
+    fun chips_hasShortCriticalText_usesTextInsteadOfTime() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.shortCriticalText = "Arrived"
+                    this.time =
+                        PromotedNotificationContentModel.When(
+                            time = 6543L,
+                            mode = PromotedNotificationContentModel.When.Mode.BasicTime,
+                        )
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = promotedContentBuilder.build(),
+                    )
+                )
+            )
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0]).isInstanceOf(OngoingActivityChipModel.Shown.Text::class.java)
+            assertThat((latest!![0] as OngoingActivityChipModel.Shown.Text).text)
+                .isEqualTo("Arrived")
+        }
 
     @Test
     fun chips_noTime_isIconOnly() =
