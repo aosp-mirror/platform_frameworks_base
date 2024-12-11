@@ -14,7 +14,15 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <dimen name="config_wearMaterial3_buttonCornerRadius">26dp</dimen>
-    <dimen name="config_wearMaterial3_bottomDialogCornerRadius">18dp</dimen>
-</resources>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+        android:color="?attr/colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/btn_material_filled_background_color_watch"/>
+            <corners android:radius="@dimen/config_wearMaterial3_buttonCornerRadius"/>
+            <size
+                android:width="@dimen/btn_material_width"
+                android:height="@dimen/btn_material_height" />
+        </shape>
+    </item>
+</ripple>

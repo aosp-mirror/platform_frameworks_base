@@ -114,7 +114,7 @@
                         <ImageView
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/dialog_alert_button_positive"/>
+                            android:src="@drawable/dialog_alert_button_positive_watch"/>
                     </FrameLayout>
                 </LinearLayout>
             </FrameLayout>
