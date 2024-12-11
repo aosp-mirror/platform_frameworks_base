@@ -115,13 +115,20 @@ per-file ProfilingServiceManager.java = file:/PERFORMANCE_OWNERS
 # Performance
 per-file IpcDataCache.java = file:/PERFORMANCE_OWNERS
 
+# Processes, threads, and scheduling
+per-file Process.java = file:/PERFORMANCE_OWNERS
+
 # Memory
 per-file OomKillRecord.java = file:/MEMORY_OWNERS
 
 # MessageQueue and related classes
 per-file MessageQueue.java = mfasheh@google.com, shayba@google.com
 per-file Message.java = mfasheh@google.com, shayba@google.com
+per-file Looper.java = mfasheh@google.com, shayba@google.com
 per-file TestLooperManager.java = mfasheh@google.com, shayba@google.com
+per-file Handler.java = mfasheh@google.com, shayba@google.com
+per-file HandlerThread.java = mfasheh@google.com, shayba@google.com
+per-file HandlerExecutor.java = mfasheh@google.com, shayba@google.com
 
 # Stats
 per-file IStatsBootstrapAtomService.aidl = file:/services/core/java/com/android/server/stats/OWNERS

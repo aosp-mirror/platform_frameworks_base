@@ -48,6 +48,7 @@ def main(args):
     with open(outfile, "w") as out:
         out.write(HEADER)
 
+        count = 0
         with gzip.open(log) as f:
             for line in f:
                 s = line.decode("utf-8")
@@ -63,7 +64,8 @@ def main(args):
                 if m:
                     command = m.groups()[0]
 
-                    out.write('#========\n')
+                    count += 1
+                    out.write(f'### Command {count} ========\n')
 
                     # Show the full command line before executing it.
                     out.write('#echo ' + shlex.quote(command) + '\n')

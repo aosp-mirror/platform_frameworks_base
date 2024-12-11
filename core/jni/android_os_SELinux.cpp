@@ -34,23 +34,27 @@
 
 namespace android {
 namespace {
-std::atomic<selabel_handle*> sehandle{nullptr};
+std::atomic<selabel_handle *> file_sehandle{nullptr};
 
-selabel_handle* GetSELabelHandle() {
-    selabel_handle* h = sehandle.load();
+selabel_handle *GetSELabelHandle_impl(selabel_handle *(*handle_func)(),
+                                      std::atomic<selabel_handle *> *handle_cache) {
+    selabel_handle *h = handle_cache->load();
     if (h != nullptr) {
         return h;
     }
 
-    h = selinux_android_file_context_handle();
+    h = handle_func();
     selabel_handle* expected = nullptr;
-    if (!sehandle.compare_exchange_strong(expected, h)) {
+    if (!handle_cache->compare_exchange_strong(expected, h)) {
         selabel_close(h);
-        return sehandle.load();
+        return handle_cache->load();
     }
     return h;
 }
 
+selabel_handle *GetSELabelFileBackendHandle() {
+    return GetSELabelHandle_impl(selinux_android_file_context_handle, &file_sehandle);
+}
 }
 
 struct SecurityContext_Delete {
@@ -106,7 +110,7 @@ static jstring fileSelabelLookup(JNIEnv* env, jobject, jstring pathStr) {
         return NULL;
     }
 
-    auto* selabel_handle = GetSELabelHandle();
+    auto *selabel_handle = GetSELabelFileBackendHandle();
     if (selabel_handle == NULL) {
         ALOGE("fileSelabelLookup => Failed to get SEHandle");
         return NULL;

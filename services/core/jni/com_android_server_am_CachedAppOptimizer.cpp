@@ -564,8 +564,8 @@ static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIE
                                                                             jobject clazz) {
     std::string path;
 
-    if (!getAttributePathForTask("FreezerState", getpid(), &path)) {
-        path = "";
+    if (!CgroupGetAttributePathForTask("FreezerState", getpid(), &path)) {
+        path.clear();
     }
 
     return env->NewStringUTF(path.c_str());
