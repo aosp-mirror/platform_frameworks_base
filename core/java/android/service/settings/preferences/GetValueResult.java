@@ -170,6 +170,7 @@ public final class GetValueResult implements Parcelable {
     /**
      * Builder to construct {@link GetValueResult}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         @ResultCode
         private final int mResultCode;

@@ -156,6 +156,7 @@ public final class SetValueResult implements Parcelable {
     /**
      * Builder to construct {@link SetValueResult}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         @ResultCode
         private final int mResultCode;
