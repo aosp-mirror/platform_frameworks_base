@@ -156,12 +156,12 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         )
     }
 
-    fun logAutoRemoveCanceled(entry: NotificationEntry, reason: String?) {
+    fun logAutoRemoveCanceled(entry: NotificationEntry?, reason: String?) {
         buffer.log(
             TAG,
             INFO,
             {
-                str1 = entry.logKey
+                str1 = entry?.logKey
                 str2 = reason ?: "unknown"
             },
             { "cancel auto remove of $str1 reason: $str2" },
