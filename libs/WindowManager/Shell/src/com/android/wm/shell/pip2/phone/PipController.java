@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -54,6 +55,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.pip.IPip;
 import com.android.wm.shell.common.pip.IPipAnimationListener;
+import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
@@ -94,6 +96,7 @@ public class PipController implements ConfigurationChangeListener,
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final PipTransitionState mPipTransitionState;
     private final PipTouchHandler mPipTouchHandler;
+    private final PipAppOpsListener mPipAppOpsListener;
     private final ShellExecutor mMainExecutor;
     private final PipImpl mImpl;
     private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
@@ -137,6 +140,7 @@ public class PipController implements ConfigurationChangeListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
+            PipAppOpsListener pipAppOpsListener,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -152,6 +156,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this);
         mPipTouchHandler = pipTouchHandler;
+        mPipAppOpsListener = pipAppOpsListener;
         mMainExecutor = mainExecutor;
         mImpl = new PipImpl();
 
@@ -177,6 +182,7 @@ public class PipController implements ConfigurationChangeListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
+            PipAppOpsListener pipAppOpsListener,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -186,7 +192,7 @@ public class PipController implements ConfigurationChangeListener,
         return new PipController(context, shellInit, shellCommandHandler, shellController,
                 displayController, displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                 pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
-                pipTransitionState, pipTouchHandler, mainExecutor);
+                pipTransitionState, pipTouchHandler, pipAppOpsListener, mainExecutor);
     }
 
     public PipImpl getPipImpl() {
@@ -225,6 +231,20 @@ public class PipController implements ConfigurationChangeListener,
                 mPipScheduler.scheduleExitPipViaExpand();
             }
         });
+
+        mPipAppOpsListener.setCallback(mPipTouchHandler.getMotionHelper());
+        mPipTransitionState.addPipTransitionStateChangedListener(
+                (oldState, newState, extra) -> {
+                    if (newState == PipTransitionState.ENTERED_PIP) {
+                        final TaskInfo taskInfo = mPipTransitionState.getPipTaskInfo();
+                        if (taskInfo != null && taskInfo.topActivity != null) {
+                            mPipAppOpsListener.onActivityPinned(
+                                    taskInfo.topActivity.getPackageName());
+                        }
+                    } else if (newState == PipTransitionState.EXITED_PIP) {
+                        mPipAppOpsListener.onActivityUnpinned();
+                    }
+                });
     }
 
     private ExternalInterfaceBinder createExternalInterface() {

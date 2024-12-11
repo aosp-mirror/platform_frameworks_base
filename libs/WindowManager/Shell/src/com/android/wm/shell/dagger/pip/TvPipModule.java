@@ -233,12 +233,4 @@ public abstract class TvPipModule {
     static PipParamsChangedForwarder providePipParamsChangedForwarder() {
         return new PipParamsChangedForwarder();
     }
-
-    @WMSingleton
-    @Provides
-    static PipAppOpsListener providePipAppOpsListener(Context context,
-            PipTaskOrganizer pipTaskOrganizer,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipAppOpsListener(context, pipTaskOrganizer::removePip, mainExecutor);
-    }
 }
