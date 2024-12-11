@@ -738,6 +738,11 @@ public class VirtualDeviceManagerService extends SystemService {
         public int getDevicePolicy(int deviceId, int policyType) {
             return mImpl.getDevicePolicy(deviceId, policyType);
         }
+
+        @Override // Binder call
+        public int getDeviceIdForDisplayId(int displayId) {
+            return mImpl.getDeviceIdForDisplayId(displayId);
+        }
     }
 
     private final class LocalService extends VirtualDeviceManagerInternal {
