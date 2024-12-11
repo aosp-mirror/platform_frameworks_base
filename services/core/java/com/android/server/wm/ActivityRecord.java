@@ -137,6 +137,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATIO
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SWITCH;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
@@ -2138,6 +2139,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
             mLaunchRootTask = options.getLaunchRootTask();
+            if (mLaunchCookie != null) {
+                ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Activity created with launch cookie=%s act=%s(%d)",
+                        mLaunchCookie, packageName, System.identityHashCode(this));
+            }
         } else {
             mHasSceneTransition = false;
         }
@@ -4141,6 +4147,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     r -> r.mLaunchCookie == null && !r.finishing && r.isUid(getUid()),
                     this, false /* includeBoundary */, false /* traverseTopToBottom */);
             if (nextCookieTarget != null) {
+                ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Transferring launch cookie=%s on finish from=%s(%d) to=%s(%d)",
+                        mLaunchCookie, packageName, System.identityHashCode(this),
+                        nextCookieTarget.packageName, System.identityHashCode(nextCookieTarget));
                 nextCookieTarget.mLaunchCookie = mLaunchCookie;
                 mLaunchCookie = null;
             }
