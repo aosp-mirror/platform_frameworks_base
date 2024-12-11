@@ -2228,7 +2228,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     setReportedScreenState(REPORTED_TO_POLICY_SCREEN_TURNING_OFF);
                     blockScreenOff();
                     mWindowManagerPolicy.screenTurningOff(mDisplayId, mPendingScreenOffUnblocker);
-                    unblockScreenOff();
                 } else if (mPendingScreenOffUnblocker != null) {
                     // Abort doing the state change until screen off is unblocked.
                     return false;
