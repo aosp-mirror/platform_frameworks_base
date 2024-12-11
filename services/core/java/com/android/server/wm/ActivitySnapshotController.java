@@ -149,7 +149,8 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         for (int i = activities.length - 1; i >= 0; --i) {
             fileId ^= getSystemHashCode(activities[i]);
         }
-        return tmpUsf.mFileId == fileId ? mCache.getSnapshot(tmpUsf.mActivityIds.get(0)) : null;
+        return tmpUsf.mFileId == fileId
+                ? mCache.getSnapshotInner(tmpUsf.mActivityIds.get(0)) : null;
     }
 
     private void cleanUpUserFiles(int userId) {
