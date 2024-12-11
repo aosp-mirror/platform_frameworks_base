@@ -19,6 +19,7 @@ package com.android.server;
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SUCCESS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -1933,12 +1934,12 @@ public class PackageWatchdogTest {
             return mImpact;
         }
 
-        public boolean onExecuteHealthCheckMitigation(VersionedPackage versionedPackage,
+        public int onExecuteHealthCheckMitigation(VersionedPackage versionedPackage,
                 int failureReason, int mitigationCount) {
             mMitigatedPackages.add(versionedPackage.getPackageName());
             mMitigationCounts.add(mitigationCount);
             mLastFailureReason = failureReason;
-            return true;
+            return MITIGATION_RESULT_SUCCESS;
         }
 
         public String getUniqueIdentifier() {
@@ -1957,11 +1958,10 @@ public class PackageWatchdogTest {
             return mImpact;
         }
 
-        public boolean onExecuteBootLoopMitigation(int level) {
-            Slog.w("hrm1243", "I'm here " + level);
+        public int onExecuteBootLoopMitigation(int level) {
             mMitigatedBootLoop = true;
             mBootMitigationCounts.add(level);
-            return true;
+            return MITIGATION_RESULT_SUCCESS;
         }
 
         public boolean mitigatedBootLoop() {
