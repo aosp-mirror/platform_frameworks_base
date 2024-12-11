@@ -32,11 +32,9 @@ filegroup {
     visibility: ["//frameworks/base/services/core"],
 }
 
-// Do not static include this lib in VCN because these files exist in
-// both service-connectivity.jar and framework.jar
-// TODO: b/374174952 After VCN moves to Connectivity/ and the modularization is done
-// this lib can be removed and "service-connectivity-b-pre-jarjar" can include
-// "service-connectivity-pre-jarjar"
+// TODO: b/374174952 This library is only used in "service-connectivity-b-platform"
+// After VCN moves to Connectivity/ and the modularization is done, this lib and
+// "service-connectivity-b-platform" can both be removed
 java_library {
     name: "connectivity-utils-service-vcn-internal",
     sdk_version: "module_current",
@@ -48,30 +46,30 @@ java_library {
         "framework-annotations-lib",
         "unsupportedappusage",
     ],
-    visibility: [
-        "//visibility:private",
-    ],
-    apex_available: [
-        // TODO: b/374174952 Remove it when VCN modularization is released
-        "//apex_available:platform",
+    visibility: ["//visibility:private"],
+}
 
-        "com.android.tethering",
+filegroup {
+    name: "service-vcn-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
+    visibility: [
+        "//packages/modules/Connectivity/service-b",
     ],
 }
 
-java_library {
-    name: "service-connectivity-b-pre-jarjar",
-    sdk_version: "system_server_current",
-    min_sdk_version: "35", // TODO: Make it Android 25Q2 when this is included in mainline
+// This java_defaults will be used for "service-connectivity-b-platform" and
+// "service-connectivity-b-pre-jarjar"
+java_defaults {
+    name: "service-connectivity-b-pre-jarjar-defaults",
     defaults: ["framework-system-server-module-defaults"], // This is a system server jar
 
     srcs: [
-        "src/**/*.java",
+        ":service-vcn-sources",
     ],
 
     libs: [
         "android.net.ipsec.ike.stubs.module_lib",
-        "connectivity-utils-service-vcn-internal",
         "framework-annotations-lib",
         "framework-connectivity-pre-jarjar",
         "framework-connectivity-t-pre-jarjar",
@@ -89,13 +87,30 @@ java_library {
         "modules-utils-handlerexecutor",
     ],
 
+    defaults_visibility: [
+        "//packages/modules/Connectivity/service-b",
+    ],
+}
+
+// This library is only used to be included into services.jar when the build system
+// flag RELEASE_MOVE_VCN_TO_MAINLINE is disabled. When the flag is enabled, a module
+// version of this library will be included in Tethering module
+java_library {
+    name: "service-connectivity-b-platform",
+    defaults: ["service-connectivity-b-pre-jarjar-defaults"],
+    static_libs: ["connectivity-utils-service-vcn-internal"],
+
+    sdk_version: "system_server_current",
+    min_sdk_version: "35",
+
+    // TODO (b/374174952 ): This file is for jarjaring files in
+    // "connectivity-utils-service-vcn-internal".
+    jarjar_rules: "service-vcn-platform-jarjar-rules.txt",
+
     visibility: [
         "//frameworks/base/services",
     ],
     apex_available: [
-        // TODO: b/374174952 Remove it when VCN modularization is released
         "//apex_available:platform",
-
-        "com.android.tethering",
     ],
 }

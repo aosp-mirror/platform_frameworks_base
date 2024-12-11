@@ -22,9 +22,11 @@ import static com.android.server.VcnManagementService.LOCAL_LOG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.net.IpSecTransform;
 import android.net.IpSecTransformState;
 import android.net.Network;
+import android.os.Build;
 import android.os.OutcomeReceiver;
 import android.util.CloseGuard;
 import android.util.Slog;
@@ -42,6 +44,8 @@ import java.util.concurrent.Executor;
  *
  * <p>This class is flag gated by "network_metric_monitor"
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public abstract class NetworkMetricMonitor implements AutoCloseable {
     private static final String TAG = NetworkMetricMonitor.class.getSimpleName();
 

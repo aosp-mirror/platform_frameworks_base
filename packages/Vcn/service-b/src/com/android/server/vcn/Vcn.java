@@ -29,6 +29,7 @@ import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.NetworkCapabilities;
@@ -39,6 +40,7 @@ import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnManager.VcnErrorCode;
 import android.net.vcn.util.LogUtils;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelUuid;
@@ -75,6 +77,8 @@ import java.util.Set;
  *
  * @hide
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class Vcn extends Handler {
     private static final String TAG = Vcn.class.getSimpleName();
 
