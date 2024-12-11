@@ -50,6 +50,8 @@ import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSat
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModel
 import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModelImpl
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstantsImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
@@ -107,6 +109,9 @@ abstract class StatusBarPipelineModule {
     abstract fun deviceBasedSatelliteViewModel(
         impl: DeviceBasedSatelliteViewModelImpl
     ): DeviceBasedSatelliteViewModel
+
+    @Binds
+    abstract fun connectivityConstants(impl: ConnectivityConstantsImpl): ConnectivityConstants
 
     @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 

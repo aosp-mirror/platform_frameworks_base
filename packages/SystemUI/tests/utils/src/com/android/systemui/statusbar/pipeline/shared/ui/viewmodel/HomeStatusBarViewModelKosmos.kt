@@ -31,7 +31,7 @@ import com.android.systemui.statusbar.phone.domain.interactor.darkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.collapsedStatusBarInteractor
 
-val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
+var Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
     Kosmos.Fixture {
         HomeStatusBarViewModelImpl(
             collapsedStatusBarInteractor,
@@ -41,6 +41,7 @@ val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
             headsUpNotificationInteractor,
             keyguardTransitionInteractor,
             keyguardInteractor,
+            statusBarOperatorNameViewModel,
             sceneInteractor,
             sceneContainerOcclusionInteractor,
             shadeInteractor,

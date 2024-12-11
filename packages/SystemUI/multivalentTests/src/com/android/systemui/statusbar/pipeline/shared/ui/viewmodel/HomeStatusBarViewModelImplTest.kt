@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataS
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
 import com.android.systemui.statusbar.phone.data.repository.fakeDarkIconRepository
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setCollapsedStatusBarInteractorShowOperatorName
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -497,6 +498,72 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             kosmos.sceneContainerRepository.snapToScene(Scenes.Gone)
 
             assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_allowedByInteractor_allowedByDisableFlags_visible() =
+        kosmos.runTest {
+            kosmos.setCollapsedStatusBarInteractorShowOperatorName(true)
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_disAllowedByInteractor_allowedByDisableFlags_notVisible() =
+        kosmos.runTest {
+            kosmos.setCollapsedStatusBarInteractorShowOperatorName(false)
+
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_allowedByInteractor_disallowedByDisableFlags_notVisible() =
+        kosmos.runTest {
+            kosmos.setCollapsedStatusBarInteractorShowOperatorName(true)
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_SYSTEM_INFO, DISABLE2_NONE)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun shouldShowOperatorNameView_allowedByInteractor_hunPinned_false() =
+        kosmos.runTest {
+            kosmos.setCollapsedStatusBarInteractorShowOperatorName(false)
+
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            // there is an active HUN
+            headsUpNotificationRepository.setNotifications(
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "key",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
+                )
+            )
+
+            val latest by collectLastValue(underTest.shouldShowOperatorNameView)
+
+            assertThat(latest).isFalse()
         }
 
     @Test

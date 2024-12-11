@@ -16,8 +16,32 @@
 
 package com.android.systemui.statusbar.pipeline.shared.domain.interactor
 
+import android.telephony.CarrierConfigManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.disableflags.domain.interactor.disableFlagsInteractor
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.airplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.carrierConfigRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.configWithOverride
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fake
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.carrierConfigInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.fakeMobileIconsInteractor
 
 val Kosmos.collapsedStatusBarInteractor: CollapsedStatusBarInteractor by
-    Kosmos.Fixture { CollapsedStatusBarInteractor(disableFlagsInteractor) }
+    Kosmos.Fixture {
+        CollapsedStatusBarInteractor(
+            airplaneModeInteractor,
+            carrierConfigInteractor,
+            disableFlagsInteractor,
+        )
+    }
+
+/** Set the default data subId to 1, and sets the carrier config setting to [show] */
+fun Kosmos.setCollapsedStatusBarInteractorShowOperatorName(show: Boolean) {
+    fakeMobileIconsInteractor.defaultDataSubId.value = 1
+    carrierConfigRepository.fake.configsById[1] =
+        SystemUiCarrierConfig(
+            1,
+            configWithOverride(CarrierConfigManager.KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL, show),
+        )
+}

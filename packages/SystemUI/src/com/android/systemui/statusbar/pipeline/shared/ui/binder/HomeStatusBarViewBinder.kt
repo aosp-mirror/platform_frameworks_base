@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.binder
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -204,6 +205,18 @@ constructor(
                 }
 
                 if (StatusBarRootModernization.isEnabled) {
+                    val operatorNameView = view.requireViewById<View>(R.id.operator_name_frame)
+                    StatusBarOperatorNameViewBinder.bind(
+                        operatorNameView,
+                        viewModel.operatorNameViewModel,
+                        viewModel::areaTint,
+                    )
+                    launch {
+                        viewModel.shouldShowOperatorNameView.collect {
+                            operatorNameView.isVisible = it
+                        }
+                    }
+
                     val clockView = view.requireViewById<View>(R.id.clock)
                     launch { viewModel.isClockVisible.collect { clockView.adjustVisibility(it) } }
 

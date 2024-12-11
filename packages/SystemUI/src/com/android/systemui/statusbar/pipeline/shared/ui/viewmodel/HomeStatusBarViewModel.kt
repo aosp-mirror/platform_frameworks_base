@@ -95,6 +95,9 @@ interface HomeStatusBarViewModel {
      */
     val ongoingActivityChips: StateFlow<MultipleOngoingActivityChipsModel>
 
+    /** View model for the carrier name that may show in the status bar based on carrier config */
+    val operatorNameViewModel: StatusBarOperatorNameViewModel
+
     /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
      * the current scene should never show the home status bar.
@@ -104,6 +107,8 @@ interface HomeStatusBarViewModel {
      */
     val isHomeStatusBarAllowedByScene: StateFlow<Boolean>
 
+    /** True if the operator name view is not hidden due to HUN or other visibility state */
+    val shouldShowOperatorNameView: Flow<Boolean>
     val isClockVisible: Flow<VisibilityModel>
     val isNotificationIconContainerVisible: Flow<VisibilityModel>
     /**
@@ -155,6 +160,7 @@ constructor(
     headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
+    override val operatorNameViewModel: StatusBarOperatorNameViewModel,
     sceneInteractor: SceneInteractor,
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     shadeInteractor: ShadeInteractor,
@@ -258,6 +264,20 @@ constructor(
             ongoingActivityChips.map { it.primary is OngoingActivityChipModel.Shown }
         } else {
             primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Shown }
+        }
+
+    override val shouldShowOperatorNameView: Flow<Boolean> =
+        combine(
+            shouldHomeStatusBarBeVisible,
+            headsUpNotificationInteractor.statusBarHeadsUpState,
+            collapsedStatusBarInteractor.visibilityViaDisableFlags,
+            collapsedStatusBarInteractor.shouldShowOperatorName,
+        ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags, shouldShowOperator ->
+            val hideForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
+            shouldStatusBarBeVisible &&
+                !hideForHeadsUp &&
+                visibilityViaDisableFlags.isSystemInfoAllowed &&
+                shouldShowOperator
         }
 
     override val isClockVisible: Flow<VisibilityModel> =

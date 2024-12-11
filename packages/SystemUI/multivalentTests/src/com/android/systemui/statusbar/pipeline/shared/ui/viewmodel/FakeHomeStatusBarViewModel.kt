@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
+class FakeHomeStatusBarViewModel(
+    override val operatorNameViewModel: StatusBarOperatorNameViewModel
+) : HomeStatusBarViewModel {
     private val areNotificationLightsOut = MutableStateFlow(false)
 
     override val isTransitioningFromLockscreenToOccluded = MutableStateFlow(false)
@@ -40,6 +42,8 @@ class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
     override val ongoingActivityChips = MutableStateFlow(MultipleOngoingActivityChipsModel())
 
     override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
+
+    override val shouldShowOperatorNameView = MutableStateFlow(false)
 
     override val isClockVisible =
         MutableStateFlow(
