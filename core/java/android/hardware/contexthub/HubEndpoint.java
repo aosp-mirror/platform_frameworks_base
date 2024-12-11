@@ -355,7 +355,10 @@ public class HubEndpoint {
         }
         try {
             IContextHubEndpoint serviceToken =
-                    service.registerEndpoint(mPendingHubEndpointInfo, mServiceCallback);
+                    service.registerEndpoint(
+                            mPendingHubEndpointInfo,
+                            mServiceCallback,
+                            mPendingHubEndpointInfo.getTag());
             mAssignedHubEndpointInfo = serviceToken.getAssignedHubEndpointInfo();
             mServiceToken = serviceToken;
         } catch (RemoteException e) {
