@@ -42,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -138,7 +139,7 @@ public class MediaQualityService extends SystemService {
             try (
                     Cursor cursor = getCursorAfterQuerying(
                             mMediaQualityDbHelper.PICTURE_QUALITY_TABLE_NAME,
-                            getAllMediaProfileColumns(), selection, selectionArguments)
+                            getMediaProfileColumns(includeParams), selection, selectionArguments)
             ) {
                 int count = cursor.getCount();
                 if (count == 0) {
@@ -160,8 +161,8 @@ public class MediaQualityService extends SystemService {
                 String packageName, boolean includeParams, UserHandle user) {
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
-            return getPictureProfilesBasedOnConditions(getAllMediaProfileColumns(), selection,
-                    selectionArguments);
+            return getPictureProfilesBasedOnConditions(getMediaProfileColumns(includeParams),
+                    selection, selectionArguments);
         }
 
         @Override
@@ -259,7 +260,7 @@ public class MediaQualityService extends SystemService {
             try (
                     Cursor cursor = getCursorAfterQuerying(
                             mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME,
-                            getAllMediaProfileColumns(), selection, selectionArguments)
+                            getMediaProfileColumns(includeParams), selection, selectionArguments)
             ) {
                 int count = cursor.getCount();
                 if (count == 0) {
@@ -281,8 +282,8 @@ public class MediaQualityService extends SystemService {
                 String packageName, boolean includeParams, UserHandle user) {
             String selection = BaseParameters.PARAMETER_PACKAGE + " = ?";
             String[] selectionArguments = {packageName};
-            return getSoundProfilesBasedOnConditions(getAllMediaProfileColumns(), selection,
-                    selectionArguments);
+            return getSoundProfilesBasedOnConditions(getMediaProfileColumns(includeParams),
+                    selection, selectionArguments);
         }
 
         @Override
@@ -406,15 +407,18 @@ public class MediaQualityService extends SystemService {
             return values;
         }
 
-        private String[] getAllMediaProfileColumns() {
-            return new String[]{
+        private String[] getMediaProfileColumns(boolean includeParams) {
+            ArrayList<String> columns = new ArrayList<>(Arrays.asList(
                     BaseParameters.PARAMETER_ID,
                     BaseParameters.PARAMETER_TYPE,
                     BaseParameters.PARAMETER_NAME,
                     BaseParameters.PARAMETER_INPUT_ID,
-                    BaseParameters.PARAMETER_PACKAGE,
-                    mMediaQualityDbHelper.SETTINGS
-            };
+                    BaseParameters.PARAMETER_PACKAGE)
+            );
+            if (includeParams) {
+                columns.add(mMediaQualityDbHelper.SETTINGS);
+            }
+            return columns.toArray(new String[0]);
         }
 
         private PictureProfile getPictureProfileWithTempIdFromCursor(Cursor cursor) {
