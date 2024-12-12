@@ -62,11 +62,14 @@ public class MediaProjectionPermissionActivity extends Activity
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mPackageName = getCallingPackage();
+        // The source of truth where the original request is coming from.
+        mPackageName = getLaunchedFromPackage();
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         mService = IMediaProjectionManager.Stub.asInterface(b);
 
-        if (mPackageName == null) {
+        if (getCallingPackage() == null) {
+            // If get calling package is null, the activity was not started for result.
+            // We should not proceed.
             finish();
             return;
         }
