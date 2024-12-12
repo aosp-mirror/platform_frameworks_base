@@ -65,6 +65,7 @@ public class RestrictionsSet {
             throw new IllegalArgumentException("empty restriction bundle cannot be added.");
         }
         mUserRestrictions.put(userId, restrictions);
+        UserManager.invalidateUserRestriction();
     }
 
     /**
@@ -84,6 +85,7 @@ public class RestrictionsSet {
         } else {
             mUserRestrictions.delete(userId);
         }
+        UserManager.invalidateUserRestriction();
         return true;
     }
 
@@ -101,6 +103,9 @@ public class RestrictionsSet {
                 restrictions.remove(restriction);
                 removed = true;
             }
+        }
+        if (removed) {
+            UserManager.invalidateUserRestriction();
         }
         return removed;
     }
@@ -129,6 +134,7 @@ public class RestrictionsSet {
                     i--;
                 }
             }
+            UserManager.invalidateUserRestriction();
         }
     }
 
@@ -192,6 +198,7 @@ public class RestrictionsSet {
     public boolean remove(@UserIdInt int userId) {
         boolean hasUserRestriction = mUserRestrictions.contains(userId);
         mUserRestrictions.remove(userId);
+        UserManager.invalidateUserRestriction();
         return hasUserRestriction;
     }
 
@@ -200,6 +207,7 @@ public class RestrictionsSet {
      */
     public void removeAllRestrictions() {
         mUserRestrictions.clear();
+        UserManager.invalidateUserRestriction();
     }
 
     /**
