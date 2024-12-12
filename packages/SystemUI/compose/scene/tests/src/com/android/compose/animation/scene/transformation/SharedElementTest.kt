@@ -18,11 +18,13 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -47,11 +49,21 @@ class SharedElementTest {
         rule.testTransition(
             fromSceneContent = {
                 // Foo is at (10, 50) with a size of (20, 80).
-                Box(Modifier.offset(10.dp, 50.dp).element(TestElements.Foo).size(20.dp, 80.dp))
+                Box(
+                    Modifier.offset(10.dp, 50.dp)
+                        .element(TestElements.Foo)
+                        .size(20.dp, 80.dp)
+                        .background(Color.Red)
+                )
             },
             toSceneContent = {
                 // Foo is at (50, 70) with a size of (10, 40).
-                Box(Modifier.offset(50.dp, 70.dp).element(TestElements.Foo).size(10.dp, 40.dp))
+                Box(
+                    Modifier.offset(50.dp, 70.dp)
+                        .element(TestElements.Foo)
+                        .size(10.dp, 40.dp)
+                        .background(Color.Blue)
+                )
             },
             transition = {
                 spec = tween(16 * 4, easing = LinearEasing)
@@ -88,13 +100,23 @@ class SharedElementTest {
             fromSceneContent = {
                 Box(Modifier.fillMaxSize()) {
                     // Foo is at (10, 50).
-                    Box(Modifier.offset(10.dp, 50.dp).element(TestElements.Foo))
+                    Box(
+                        Modifier.offset(10.dp, 50.dp)
+                            .element(TestElements.Foo)
+                            .size(20.dp)
+                            .background(Color.Red)
+                    )
                 }
             },
             toSceneContent = {
                 Box(Modifier.fillMaxSize()) {
                     // Foo is at (50, 60).
-                    Box(Modifier.offset(50.dp, 60.dp).element(TestElements.Foo))
+                    Box(
+                        Modifier.offset(50.dp, 60.dp)
+                            .element(TestElements.Foo)
+                            .size(20.dp)
+                            .background(Color.Blue)
+                    )
                 }
             },
             transition = {
@@ -104,7 +126,11 @@ class SharedElementTest {
                 sharedElement(TestElements.Foo, enabled = false)
 
                 // In SceneA, Foo leaves to the left edge.
-                translate(TestElements.Foo.inScene(TestScenes.SceneA), Edge.Left)
+                translate(
+                    TestElements.Foo.inScene(TestScenes.SceneA),
+                    Edge.Left,
+                    startsOutsideLayoutBounds = false,
+                )
 
                 // In SceneB, Foo comes from the bottom edge.
                 translate(TestElements.Foo.inScene(TestScenes.SceneB), Edge.Bottom)

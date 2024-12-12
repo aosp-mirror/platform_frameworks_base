@@ -1342,19 +1342,15 @@ private inline fun <T> computeValue(
 
     // The content for which we compute the transformation. Note that this is not necessarily
     // [currentContent] because [currentContent] could be a different content than the transition
-    // fromContent or toContent during interruptions.
+    // fromContent or toContent during interruptions or when a ancestor transition is running.
     val content: ContentKey
     // Get the transformed value, i.e. the target value at the beginning (for entering elements) or
     // end (for leaving elements) of the transition.
     val contentState: Element.State
     when {
-        isSharedElement && currentContent == fromContent -> {
-            content = fromContent
-            contentState = fromState!!
-        }
-        isSharedElement && currentContent == toContent -> {
-            content = toContent
-            contentState = toState!!
+        isSharedElement -> {
+            content = currentContent
+            contentState = currentContentState
         }
         isAncestorTransition(layoutImpl, transition) -> {
             if (
@@ -1545,6 +1541,8 @@ private inline fun <T> computeValue(
         when {
             content == toContent -> true
             content == fromContent -> false
+            isAncestorTransition(layoutImpl, transition) ->
+                isEnteringAncestorTransition(layoutImpl, transition)
             content == transition.currentScene -> toState == null
             else -> content == toContent
         }
@@ -1562,6 +1560,13 @@ private fun isAncestorTransition(
     return layoutImpl.ancestors.fastAny {
         it.inContent == transition.fromContent || it.inContent == transition.toContent
     }
+}
+
+private fun isEnteringAncestorTransition(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition
+): Boolean {
+    return layoutImpl.ancestors.fastAny { it.inContent == transition.toContent }
 }
 
 private inline fun <T> PropertyTransformation<T>.requireInterpolatedTransformation(
