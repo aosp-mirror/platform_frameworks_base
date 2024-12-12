@@ -16,7 +16,6 @@
 
 package com.android.server.location.contexthub;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.location.ContextHubManager.AUTHORIZATION_DENIED;
 import static android.hardware.location.ContextHubManager.AUTHORIZATION_DENIED_GRACE_PERIOD;
 import static android.hardware.location.ContextHubManager.AUTHORIZATION_GRANTED;
@@ -25,7 +24,6 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
-import android.chre.flags.Flags;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -655,7 +653,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         // If in the grace period, don't check permissions state since it'll cause cleanup
         // messages to be dropped.
         if (authState == AUTHORIZATION_DENIED
-                || !notePermissions(messagePermissions, RECEIVE_MSG_NOTE + nanoAppId)) {
+                || !ContextHubServiceUtil.notePermissions(
+                        mAppOpsManager,
+                        mUid,
+                        mPackage,
+                        mAttributionTag,
+                        messagePermissions,
+                        RECEIVE_MSG_NOTE + nanoAppId)) {
             Log.e(TAG, "Dropping message from " + Long.toHexString(nanoAppId) + ". " + mPackage
                     + " doesn't have permission");
             return ErrorCode.PERMISSION_DENIED;
@@ -754,56 +758,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * Checks that this client has all of the provided permissions.
-     *
-     * @param permissions list of permissions to check
-     * @return true if the client has all of the permissions granted
-     */
-    boolean hasPermissions(List<String> permissions) {
-        for (String permission : permissions) {
-            if (mContext.checkPermission(permission, mPid, mUid) != PERMISSION_GRANTED) {
-                Log.e(TAG, "no permission for " + permission);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Attributes the provided permissions to the package of this client.
-     *
-     * @param permissions list of permissions covering data the client is about to receive
-     * @param noteMessage message that should be noted alongside permissions attribution to
-     *     facilitate debugging
-     * @return true if client has ability to use all of the provided permissions
-     */
-    boolean notePermissions(List<String> permissions, String noteMessage) {
-        for (String permission : permissions) {
-            int opCode = AppOpsManager.permissionToOpCode(permission);
-            if (opCode != AppOpsManager.OP_NONE) {
-                try {
-                    if (mAppOpsManager.noteOp(opCode, mUid, mPackage, mAttributionTag, noteMessage)
-                            != AppOpsManager.MODE_ALLOWED) {
-                        return false;
-                    }
-                } catch (SecurityException e) {
-                    Log.e(
-                            TAG,
-                            "SecurityException: noteOp for pkg "
-                                    + mPackage
-                                    + " opcode "
-                                    + opCode
-                                    + ": "
-                                    + e.getMessage());
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * @return true if the client is a PendingIntent client that has been cancelled.
      */
     boolean isPendingIntentCancelled() {
@@ -868,7 +822,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         synchronized (mMessageChannelNanoappIdMap) {
             // Check permission granted state synchronously since this method can be invoked from
             // multiple threads.
-            boolean hasPermissions = hasPermissions(nanoappPermissions);
+            boolean hasPermissions =
+                    ContextHubServiceUtil.hasPermissions(mContext, mPid, mUid, nanoappPermissions);
 
             curAuthState = mMessageChannelNanoappIdMap.getOrDefault(
                     nanoAppId, AUTHORIZATION_UNKNOWN);
