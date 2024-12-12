@@ -56,7 +56,7 @@ java_sdk_library {
     ],
     defaults: ["framework-module-defaults"],
     sdk_version: "module_current",
-    min_sdk_version: "current",
+    min_sdk_version: "35", // Make it 36 once available.
     installable: true,
     optimize: {
         enabled: false,
