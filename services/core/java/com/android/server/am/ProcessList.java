@@ -2553,13 +2553,12 @@ public final class ProcessList {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
                 // We can't isolate app data and storage data as parent zygote already did that.
-                startResult = appZygote.getProcess().start(entryPoint,
-                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                startResult = appZygote.startProcess(entryPoint,
+                        app.processName, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
-                        app.info.dataDir, null, app.info.packageName,
-                        /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, isTopApp,
-                        app.getDisabledCompatChanges(), pkgDataInfoMap, allowlistedAppDataInfoMap,
-                        false, false, false,
+                        app.info.dataDir, app.info.packageName, isTopApp,
+                        app.getDisabledCompatChanges(), pkgDataInfoMap,
+                        allowlistedAppDataInfoMap,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
             } else {
                 regularZygote = true;
