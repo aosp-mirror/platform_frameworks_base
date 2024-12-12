@@ -1,0 +1,84 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- Extends Framelayout -->
+<com.android.systemui.statusbar.notification.footer.ui.view.FooterView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone">
+
+    <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp">
+
+        <TextView
+            android:id="@+id/unlock_prompt_footer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:text="@string/unlock_to_see_notif_text"
+            android:textAppearance="?android:attr/textAppearanceButton"
+            android:visibility="gone" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.android.systemui.statusbar.notification.row.FooterViewButton
+                android:id="@+id/history_button"
+                style="@style/TextAppearance.NotificationFooterButtonRedesign"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@drawable/notif_footer_btn_background"
+                android:contentDescription="@string/notification_history_button_description"
+                android:drawableStart="@drawable/notif_footer_btn_history"
+                android:focusable="true"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <com.android.systemui.statusbar.notification.row.FooterViewButton
+                android:id="@+id/dismiss_text"
+                style="@style/TextAppearance.NotificationFooterButtonRedesign"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/notif_footer_btn_background"
+                android:contentDescription="@string/accessibility_clear_all"
+                android:focusable="true"
+                android:text="@string/clear_all_notifications_text"
+                android:ellipsize="end"
+                android:maxLines="1"
+                app:layout_constraintEnd_toStartOf="@id/settings_button"
+                app:layout_constraintStart_toEndOf="@id/history_button" />
+
+            <com.android.systemui.statusbar.notification.row.FooterViewButton
+                android:id="@+id/settings_button"
+                style="@style/TextAppearance.NotificationFooterButtonRedesign"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@drawable/notif_footer_btn_background"
+                android:contentDescription="@string/notification_settings_button_description"
+                android:drawableStart="@drawable/notif_footer_btn_settings"
+                android:focusable="true"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
+</com.android.systemui.statusbar.notification.footer.ui.view.FooterView>

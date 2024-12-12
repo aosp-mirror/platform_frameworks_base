@@ -2466,9 +2466,6 @@
     <string name="config_systemCallStreaming" translatable="false"></string>
     <!-- The name of the package that will hold the default retail demo role. -->
     <string name="config_defaultRetailDemo" translatable="false"></string>
-    <!-- The name of the package that will hold the default reserved for testing profile group
-         exclusivity role. -->
-    <string name="config_defaultReservedForTestingProfileGroupExclusivity" translatable="false">android.app.rolemultiuser.cts.app</string>
 
     <!-- The component name of the wear service class that will be started by the system server. -->
     <string name="config_wearServiceComponent" translatable="false"></string>
@@ -7211,10 +7208,6 @@
     <!-- Whether a desktop window should be maximized when it's dragged to the top edge of the
          screen. -->
     <bool name="config_dragToMaximizeInDesktopMode">false</bool>
-
-    <!-- Whether showing the app handle is supported on this device.
-         If config_isDesktopModeSupported, then this has no effect -->
-    <bool name="config_enableAppHandle">false</bool>
 
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->

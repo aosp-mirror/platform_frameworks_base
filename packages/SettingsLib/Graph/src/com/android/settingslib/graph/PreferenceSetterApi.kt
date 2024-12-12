@@ -146,7 +146,7 @@ class PreferenceSetterApiHandler(
                 val booleanValue = value.booleanValue
                 val resultCode = metadata.checkWritePermit(booleanValue)
                 if (resultCode != PreferenceSetterResult.OK) return resultCode
-                storage.setValue(key, Boolean::class.javaObjectType, booleanValue)
+                storage.setBoolean(key, booleanValue)
                 return PreferenceSetterResult.OK
             } else if (value.hasIntValue()) {
                 val intValue = value.intValue
@@ -155,7 +155,7 @@ class PreferenceSetterApiHandler(
                 if (metadata is RangeValue && !metadata.isValidValue(application, intValue)) {
                     return PreferenceSetterResult.INVALID_REQUEST
                 }
-                storage.setValue(key, Int::class.javaObjectType, intValue)
+                storage.setInt(key, intValue)
                 return PreferenceSetterResult.OK
             }
         } catch (e: Exception) {

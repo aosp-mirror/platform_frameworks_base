@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.promoted.shared.model
 
 import android.annotation.DrawableRes
 import android.graphics.drawable.Icon
+import androidx.annotation.ColorInt
 import com.android.internal.widget.NotificationProgressModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
@@ -39,6 +40,7 @@ data class PromotedNotificationContentModel(
     val title: CharSequence?,
     val text: CharSequence?,
     val skeletonLargeIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val colors: Colors,
     val style: Style,
 
     // for CallStyle:
@@ -61,6 +63,7 @@ data class PromotedNotificationContentModel(
         var text: CharSequence? = null
         var skeletonLargeIcon: Icon? = null
         var style: Style = Style.Ineligible
+        var colors: Colors = Colors(backgroundColor = 0, primaryTextColor = 0)
 
         // for CallStyle:
         var personIcon: Icon? = null
@@ -83,6 +86,7 @@ data class PromotedNotificationContentModel(
                 title = title,
                 text = text,
                 skeletonLargeIcon = skeletonLargeIcon,
+                colors = colors,
                 style = style,
                 personIcon = personIcon,
                 personName = personName,
@@ -101,6 +105,9 @@ data class PromotedNotificationContentModel(
             CountUp,
         }
     }
+
+    /** The colors used to display the notification. */
+    data class Colors(@ColorInt val backgroundColor: Int, @ColorInt val primaryTextColor: Int)
 
     /** The promotion-eligible style of a notification, or [Style.Ineligible] if not. */
     enum class Style {

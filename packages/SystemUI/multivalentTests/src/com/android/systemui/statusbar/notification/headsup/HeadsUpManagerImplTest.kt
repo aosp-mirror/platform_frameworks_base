@@ -40,11 +40,11 @@ import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl.HeadsUpEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -179,6 +179,44 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    fun pinnedHeadsUpStatuses_noHeadsUp() {
+        assertThat(underTest.hasPinnedHeadsUp()).isFalse()
+        assertThat(underTest.pinnedHeadsUpStatus()).isEqualTo(PinnedStatus.NotPinned)
+    }
+
+    @Test
+    fun pinnedHeadsUpStatuses_pinnedBySystem() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        entry.row = testHelper.createRow()
+        underTest.showNotification(entry, isPinnedByUser = false)
+
+        assertThat(underTest.hasPinnedHeadsUp()).isTrue()
+        assertThat(underTest.pinnedHeadsUpStatus()).isEqualTo(PinnedStatus.PinnedBySystem)
+    }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun pinnedHeadsUpStatuses_pinnedByUser_butFlagOff_returnsNotPinned() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        entry.row = testHelper.createRow()
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        assertThat(underTest.hasPinnedHeadsUp()).isFalse()
+        assertThat(underTest.pinnedHeadsUpStatus()).isEqualTo(PinnedStatus.NotPinned)
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun pinnedHeadsUpStatuses_pinnedByUser_flagOn() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        entry.row = testHelper.createRow()
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        assertThat(underTest.hasPinnedHeadsUp()).isTrue()
+        assertThat(underTest.pinnedHeadsUpStatus()).isEqualTo(PinnedStatus.PinnedByUser)
+    }
+
+    @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
     fun testGetHeadsUpEntryList_includesAvalancheEntryList() {
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
@@ -199,10 +237,10 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testShowNotification_addsEntry() {
+    fun testShowNotification_notPinnedByUser_addsEntry() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = false)
 
         assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
         assertThat(underTest.hasNotifications()).isTrue()
@@ -210,20 +248,43 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testShowNotification_autoDismisses() {
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testShowNotification_isPinnedByUser_addsEntry() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+        assertThat(underTest.hasNotifications()).isTrue()
+        assertThat(underTest.getEntry(entry.key)).isEqualTo(entry)
+    }
+
+    @Test
+    fun testShowNotification_notPinnedByUser_autoDismisses() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry, isPinnedByUser = false)
         systemClock.advanceTime((TEST_AUTO_DISMISS_TIME * 3 / 2).toLong())
 
         assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
     }
 
     @Test
-    fun testRemoveNotification_removeDeferred() {
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testShowNotification_isPinnedByUser_autoDismisses() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = true)
+        systemClock.advanceTime((TEST_AUTO_DISMISS_TIME * 3 / 2).toLong())
+
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    fun testRemoveNotification_notPinnedByUser_removeDeferred() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry, isPinnedByUser = false)
 
         val removedImmediately =
             underTest.removeNotification(
@@ -236,10 +297,27 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testRemoveNotification_forceRemove() {
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testRemoveNotification_isPinnedByUser_removeDeferred() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        val removedImmediately =
+            underTest.removeNotification(
+                entry.key,
+                /* releaseImmediately= */ false,
+                "removeDeferred",
+            )
+        assertThat(removedImmediately).isFalse()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    fun testRemoveNotification_notPinnedByUser_forceRemove() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry, isPinnedByUser = false)
 
         val removedImmediately =
             underTest.removeNotification(entry.key, /* releaseImmediately= */ true, "forceRemove")
@@ -248,11 +326,26 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testRemoveNotification_isPinnedByUser_forceRemove() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        val removedImmediately =
+            underTest.removeNotification(entry.key, /* releaseImmediately= */ true, "forceRemove")
+        assertThat(removedImmediately).isTrue()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
     fun testReleaseAllImmediately() {
         for (i in 0 until 4) {
             val entry = HeadsUpManagerTestUtil.createEntry(i, mContext)
-            entry.row = mock<ExpandableNotificationRow>()
-            underTest.showNotification(entry)
+            entry.row = testHelper.createRow()
+            val isPinnedByUser = i % 2 == 0
+            underTest.showNotification(entry, isPinnedByUser)
         }
 
         underTest.releaseAllImmediately()
@@ -261,10 +354,21 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testCanRemoveImmediately_notShownLongEnough() {
+    fun testCanRemoveImmediately_notShownLongEnough_notPinnedByUser() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
 
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = false)
+
+        // The entry has just been added so we should not remove immediately.
+        assertThat(underTest.canRemoveImmediately(entry.key)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testCanRemoveImmediately_notShownLongEnough_isPinnedByUser() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+
+        underTest.showNotification(entry, isPinnedByUser = true)
 
         // The entry has just been added so we should not remove immediately.
         assertThat(underTest.canRemoveImmediately(entry.key)).isFalse()
@@ -365,17 +469,48 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testSnooze() {
+    fun testSnooze_notPinnedByUser() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = false)
+
         underTest.snooze()
+
         assertThat(underTest.isSnoozed(entry.sbn.packageName)).isTrue()
     }
 
     @Test
-    fun testSwipedOutNotification() {
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testSnooze_isPinnedByUser() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        underTest.snooze()
+
+        assertThat(underTest.isSnoozed(entry.sbn.packageName)).isTrue()
+    }
+
+    @Test
+    fun testSwipedOutNotification_notPinnedByUser() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        underTest.showNotification(entry, isPinnedByUser = false)
+        underTest.addSwipedOutNotification(entry.key)
+
+        // Remove should succeed because the notification is swiped out
+        val removedImmediately =
+            underTest.removeNotification(
+                entry.key,
+                /* releaseImmediately= */ false,
+                /* reason= */ "swipe out",
+            )
+        assertThat(removedImmediately).isTrue()
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testSwipedOutNotification_isPinnedByUser() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        underTest.showNotification(entry, isPinnedByUser = true)
         underTest.addSwipedOutNotification(entry.key)
 
         // Remove should succeed because the notification is swiped out
@@ -413,10 +548,24 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testExtendHeadsUp() {
+    fun testExtendHeadsUp_notPinnedByUser() {
         val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        underTest.showNotification(entry)
+        underTest.showNotification(entry, isPinnedByUser = false)
+
         underTest.extendHeadsUp()
+
+        systemClock.advanceTime(((TEST_AUTO_DISMISS_TIME + TEST_EXTENSION_TIME) / 2).toLong())
+        assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testExtendHeadsUp_isPinnedByUser() {
+        val entry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        underTest.showNotification(entry, isPinnedByUser = true)
+
+        underTest.extendHeadsUp()
+
         systemClock.advanceTime(((TEST_AUTO_DISMISS_TIME + TEST_EXTENSION_TIME) / 2).toLong())
         assertThat(underTest.isHeadsUpEntry(entry.key)).isTrue()
     }
@@ -465,7 +614,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         kosmos.visualStabilityProvider.isReorderingAllowed = true
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        underTest.showNotification(notifEntry)
+        underTest.showNotification(notifEntry, isPinnedByUser = false)
         assertThat(notifEntry.isSeenInShade).isFalse()
     }
 
@@ -604,7 +753,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id= */ 0, mContext)
 
             // Add notifEntry to ANM mAlertEntries map and make it NOT unpinned
-            underTest.showNotification(notifEntry)
+            underTest.showNotification(notifEntry, isPinnedByUser = false)
 
             val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
             headsUpEntry!!.mWasUnpinned = false
@@ -621,7 +770,7 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
                 HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id= */ 0, mContext)
 
             // Add notifEntry to ANM mAlertEntries map and make it unpinned
-            underTest.showNotification(notifEntry)
+            underTest.showNotification(notifEntry, isPinnedByUser = false)
 
             val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
             headsUpEntry!!.mWasUnpinned = true
@@ -793,11 +942,11 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
         // Note: the standard way to show a notification would be calling showNotification rather
-        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // than onEntryAdded. However, in practice showNotification in effect adds
         // the notification and then updates it; in order to not log twice, the entry needs
         // to have a functional ExpandableNotificationRow that can keep track of whether it's
         // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
-        underTest.onEntryAdded(entryToPin)
+        underTest.onEntryAdded(entryToPin, /* requestedPinnedStatus= */ PinnedStatus.PinnedBySystem)
 
         assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
         assertThat(AvalancheController.ThrottleEvent.AVALANCHE_THROTTLING_HUN_SHOWN.getId())
@@ -816,11 +965,11 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
         // Note: the standard way to show a notification would be calling showNotification rather
-        // than onAlertEntryAdded. However, in practice showNotification in effect adds
+        // than onEntryAdded. However, in practice showNotification in effect adds
         // the notification and then updates it; in order to not log twice, the entry needs
         // to have a functional ExpandableNotificationRow that can keep track of whether it's
         // pinned or not (via isRowPinned()). That feels like a lot to pull in to test this one bit.
-        underTest.onEntryAdded(entryToPin)
+        underTest.onEntryAdded(entryToPin, /* requestedPinnedStatus= */ PinnedStatus.PinnedBySystem)
 
         assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
         assertThat(HeadsUpManagerImpl.NotificationPeekEvent.NOTIFICATION_PEEK.id)
@@ -889,7 +1038,10 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         val flags: List<FlagsParameterization>
             get() = buildList {
                 addAll(
-                    FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME)
+                    FlagsParameterization.allCombinationsOf(
+                            NotificationThrottleHun.FLAG_NAME,
+                            StatusBarNotifChips.FLAG_NAME,
+                        )
                         .andSceneContainer()
                 )
             }

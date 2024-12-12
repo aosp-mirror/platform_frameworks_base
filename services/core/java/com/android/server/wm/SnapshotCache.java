@@ -51,7 +51,7 @@ abstract class SnapshotCache<TYPE extends WindowContainer> {
     }
 
     @Nullable
-    final TaskSnapshot getSnapshot(Integer id) {
+    final TaskSnapshot getSnapshotInner(Integer id) {
         synchronized (mLock) {
             // Try the running cache.
             final CacheEntry entry = mRunningCache.get(id);

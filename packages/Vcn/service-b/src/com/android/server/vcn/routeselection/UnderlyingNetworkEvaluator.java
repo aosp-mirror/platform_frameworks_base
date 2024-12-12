@@ -22,12 +22,14 @@ import static com.android.server.VcnManagementService.LOCAL_LOG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.net.IpSecTransform;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
+import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.IndentingPrintWriter;
@@ -50,6 +52,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @hide
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class UnderlyingNetworkEvaluator {
     private static final String TAG = UnderlyingNetworkEvaluator.class.getSimpleName();
 

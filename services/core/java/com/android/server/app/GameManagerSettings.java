@@ -116,7 +116,7 @@ public class GameManagerSettings {
      * Removes all game settings of a given package.
      * This operation must be synced with an external lock.
      */
-    void removeGame(String packageName) {
+    void removeGameLocked(String packageName) {
         mGameModes.remove(packageName);
         mConfigOverrides.remove(packageName);
     }
@@ -125,7 +125,7 @@ public class GameManagerSettings {
      * Returns the game config override of a given package or null if absent.
      * This operation must be synced with an external lock.
      */
-    GamePackageConfiguration getConfigOverride(String packageName) {
+    GamePackageConfiguration getConfigOverrideLocked(String packageName) {
         return mConfigOverrides.get(packageName);
     }
 
@@ -133,7 +133,7 @@ public class GameManagerSettings {
      * Sets the game config override of a given package.
      * This operation must be synced with an external lock.
      */
-    void setConfigOverride(String packageName, GamePackageConfiguration configOverride) {
+    void setConfigOverrideLocked(String packageName, GamePackageConfiguration configOverride) {
         mConfigOverrides.put(packageName, configOverride);
     }
 
@@ -141,7 +141,7 @@ public class GameManagerSettings {
      * Removes the game mode config override of a given package.
      * This operation must be synced with an external lock.
      */
-    void removeConfigOverride(String packageName) {
+    void removeConfigOverrideLocked(String packageName) {
         mConfigOverrides.remove(packageName);
     }
 

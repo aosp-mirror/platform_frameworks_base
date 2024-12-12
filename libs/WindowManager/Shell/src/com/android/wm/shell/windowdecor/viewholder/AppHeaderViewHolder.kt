@@ -40,12 +40,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.android.internal.R.attr.materialColorOnSecondaryContainer
-import com.android.internal.R.attr.materialColorOnSurface
-import com.android.internal.R.attr.materialColorSecondaryContainer
-import com.android.internal.R.attr.materialColorSurfaceContainerHigh
-import com.android.internal.R.attr.materialColorSurfaceContainerLow
-import com.android.internal.R.attr.materialColorSurfaceDim
+import com.android.internal.R.color.materialColorOnSecondaryContainer
+import com.android.internal.R.color.materialColorOnSurface
+import com.android.internal.R.color.materialColorSecondaryContainer
+import com.android.internal.R.color.materialColorSurfaceContainerHigh
+import com.android.internal.R.color.materialColorSurfaceContainerLow
+import com.android.internal.R.color.materialColorSurfaceDim
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
@@ -72,14 +72,12 @@ class AppHeaderViewHolder(
         onCaptionButtonClickListener: View.OnClickListener,
         private val onLongClickListener: OnLongClickListener,
         onCaptionGenericMotionListener: View.OnGenericMotionListener,
-        appName: CharSequence,
-        appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
 ) : WindowDecorationViewHolder<AppHeaderViewHolder.HeaderData>(rootView) {
 
     data class HeaderData(
         val taskInfo: RunningTaskInfo,
-        val isRequestingImmersive: Boolean,
+        val isTaskMaximized: Boolean,
         val inFullImmersiveState: Boolean,
         val hasGlobalFocus: Boolean,
         val enableMaximizeLongClick: Boolean,
@@ -154,8 +152,6 @@ class AppHeaderViewHolder(
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         minimizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         minimizeWindowButton.setOnTouchListener(onCaptionTouchListener)
-        appNameTextView.text = appName
-        appIconImageView.setImageBitmap(appIconBitmap)
         maximizeButtonView.onHoverAnimationFinishedListener =
                 onMaximizeHoverAnimationFinishedListener
     }
@@ -163,16 +159,26 @@ class AppHeaderViewHolder(
     override fun bindData(data: HeaderData) {
         bindData(
             data.taskInfo,
-            data.isRequestingImmersive,
+            data.isTaskMaximized,
             data.inFullImmersiveState,
             data.hasGlobalFocus,
             data.enableMaximizeLongClick
         )
     }
 
+    /** Sets the app's name in the header. */
+    fun setAppName(name: CharSequence) {
+        appNameTextView.text = name
+    }
+
+    /** Sets the app's icon in the header. */
+    fun setAppIcon(icon: Bitmap) {
+        appIconImageView.setImageBitmap(icon)
+    }
+
     private fun bindData(
         taskInfo: RunningTaskInfo,
-        isRequestingImmersive: Boolean,
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean,
         hasGlobalFocus: Boolean,
         enableMaximizeLongClick: Boolean,
@@ -180,7 +186,7 @@ class AppHeaderViewHolder(
         if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
             bindDataWithThemedHeaders(
                 taskInfo,
-                isRequestingImmersive,
+                isTaskMaximized,
                 inFullImmersiveState,
                 hasGlobalFocus,
                 enableMaximizeLongClick,
@@ -225,7 +231,7 @@ class AppHeaderViewHolder(
 
     private fun bindDataWithThemedHeaders(
         taskInfo: RunningTaskInfo,
-        requestingImmersive: Boolean,
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean,
         hasGlobalFocus: Boolean,
         enableMaximizeLongClick: Boolean,
@@ -283,7 +289,7 @@ class AppHeaderViewHolder(
                     drawableInsets = maximizeDrawableInsets
                 )
             )
-            setIcon(getMaximizeButtonIcon(requestingImmersive, inFullImmersiveState))
+            setIcon(getMaximizeButtonIcon(isTaskMaximized, inFullImmersiveState))
         }
         // Close button.
         closeWindowButton.apply {
@@ -358,34 +364,19 @@ class AppHeaderViewHolder(
 
     @DrawableRes
     private fun getMaximizeButtonIcon(
-        requestingImmersive: Boolean,
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean
     ): Int = when {
-        shouldShowEnterFullImmersiveIcon(requestingImmersive, inFullImmersiveState) -> {
-            R.drawable.decor_desktop_mode_immersive_button_dark
-        }
-        shouldShowExitFullImmersiveIcon(requestingImmersive, inFullImmersiveState) -> {
-            R.drawable.decor_desktop_mode_immersive_exit_button_dark
+        shouldShowExitFullImmersiveOrMaximizeIcon(isTaskMaximized, inFullImmersiveState) -> {
+            R.drawable.decor_desktop_mode_immersive_or_maximize_exit_button_dark
         }
         else -> R.drawable.decor_desktop_mode_maximize_button_dark
     }
 
-    private fun shouldShowEnterFullImmersiveIcon(
-        requestingImmersive: Boolean,
+    private fun shouldShowExitFullImmersiveOrMaximizeIcon(
+        isTaskMaximized: Boolean,
         inFullImmersiveState: Boolean
-    ): Boolean = Flags.enableFullyImmersiveInDesktop()
-            && requestingImmersive && !inFullImmersiveState
-
-    private fun shouldShowExitFullImmersiveIcon(
-        requestingImmersive: Boolean,
-        inFullImmersiveState: Boolean
-    ): Boolean = isInFullImmersiveStateAndRequesting(requestingImmersive, inFullImmersiveState)
-
-    private fun isInFullImmersiveStateAndRequesting(
-        requestingImmersive: Boolean,
-        inFullImmersiveState: Boolean
-    ): Boolean = Flags.enableFullyImmersiveInDesktop()
-            && requestingImmersive && inFullImmersiveState
+    ): Boolean = (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveState) || isTaskMaximized
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
         return HeaderStyle(
@@ -595,33 +586,31 @@ class AppHeaderViewHolder(
 
     @ColorInt
     private fun getAppNameAndButtonColor(taskInfo: RunningTaskInfo, hasGlobalFocus: Boolean): Int {
-        val materialColorAttr = when {
+        val materialColor = context.getColor(when {
             taskInfo.isTransparentCaptionBarAppearance &&
                     taskInfo.isLightCaptionBarAppearance -> materialColorOnSecondaryContainer
             taskInfo.isTransparentCaptionBarAppearance &&
                     !taskInfo.isLightCaptionBarAppearance -> materialColorOnSurface
             isDarkMode() -> materialColorOnSurface
             else -> materialColorOnSecondaryContainer
-        }
+        })
         val appDetailsOpacity = when {
             isDarkMode() && !hasGlobalFocus -> DARK_THEME_UNFOCUSED_OPACITY
             !isDarkMode() && !hasGlobalFocus -> LIGHT_THEME_UNFOCUSED_OPACITY
             else -> FOCUSED_OPACITY
         }
-        context.withStyledAttributes(null, intArrayOf(materialColorAttr), 0, 0) {
-            val color = getColor(0, 0)
-            return if (appDetailsOpacity == FOCUSED_OPACITY) {
-                color
-            } else {
-                Color.argb(
-                    appDetailsOpacity,
-                    Color.red(color),
-                    Color.green(color),
-                    Color.blue(color)
-                )
-            }
+
+
+        return if (appDetailsOpacity == FOCUSED_OPACITY) {
+            materialColor
+        } else {
+            Color.argb(
+                appDetailsOpacity,
+                Color.red(materialColor),
+                Color.green(materialColor),
+                Color.blue(materialColor)
+            )
         }
-        return 0
     }
 
     private fun isDarkMode(): Boolean {
@@ -645,8 +634,6 @@ class AppHeaderViewHolder(
             onCaptionButtonClickListener: View.OnClickListener,
             onLongClickListener: OnLongClickListener,
             onCaptionGenericMotionListener: View.OnGenericMotionListener,
-            appName: CharSequence,
-            appIconBitmap: Bitmap,
             onMaximizeHoverAnimationFinishedListener: () -> Unit,
         ): AppHeaderViewHolder = AppHeaderViewHolder(
             rootView,
@@ -654,8 +641,6 @@ class AppHeaderViewHolder(
             onCaptionButtonClickListener,
             onLongClickListener,
             onCaptionGenericMotionListener,
-            appName,
-            appIconBitmap,
             onMaximizeHoverAnimationFinishedListener,
         )
     }

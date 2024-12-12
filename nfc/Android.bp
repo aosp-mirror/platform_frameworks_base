@@ -37,6 +37,7 @@ filegroup {
 java_sdk_library {
     name: "framework-nfc",
     libs: [
+        "androidx.annotation_annotation",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
         "framework-permission-s.stubs.module_lib",
         "framework-permission.stubs.module_lib",
@@ -55,7 +56,7 @@ java_sdk_library {
     ],
     defaults: ["framework-module-defaults"],
     sdk_version: "module_current",
-    min_sdk_version: "current",
+    min_sdk_version: "35", // Make it 36 once available.
     installable: true,
     optimize: {
         enabled: false,
@@ -70,6 +71,7 @@ java_sdk_library {
         "//cts/hostsidetests/multidevices/nfc:__subpackages__",
         "//cts/tests/tests/nfc",
         "//packages/apps/Nfc:__subpackages__",
+        "//packages/modules/Nfc:__subpackages__",
     ],
     jarjar_rules: ":nfc-jarjar-rules",
     lint: {

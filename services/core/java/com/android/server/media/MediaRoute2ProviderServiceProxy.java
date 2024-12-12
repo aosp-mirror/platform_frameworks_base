@@ -66,6 +66,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
     private final int mUserId;
     private final Handler mHandler;
     private final boolean mIsSelfScanOnlyProvider;
+    private final boolean mSupportsSystemMediaRouting;
     private final ServiceConnection mServiceConnection = new ServiceConnectionImpl();
 
     // Connection state
@@ -95,12 +96,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             @NonNull Looper looper,
             @NonNull ComponentName componentName,
             boolean isSelfScanOnlyProvider,
+            boolean supportsSystemMediaRouting,
             int userId) {
         super(componentName, /* isSystemRouteProvider= */ false);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mRequestIdToSessionCreationRequest = new LongSparseArray<>();
         mSessionOriginalIdToTransferRequest = new HashMap<>();
         mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
+        mSupportsSystemMediaRouting = supportsSystemMediaRouting;
         mUserId = userId;
         mHandler = new Handler(looper);
     }
@@ -276,13 +279,22 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         if (!mRunning) {
             return false;
         }
+        // We bind if any manager is scanning (regardless of whether an app is scanning) to give
+        // the opportunity for providers to publish routing sessions that were established
+        // directly between the app and the provider (typically via AndroidX MediaRouter). See
+        // b/176774510#comment20 for more information.
         boolean bindDueToManagerScan =
                 mIsManagerScanning && !Flags.enablePreventionOfManagerScansWhenNoAppsScan();
-        if (!getSessionInfos().isEmpty() || bindDueToManagerScan) {
-            // We bind if any manager is scanning (regardless of whether an app is scanning) to give
-            // the opportunity for providers to publish routing sessions that were established
-            // directly between the app and the provider (typically via AndroidX MediaRouter). See
-            // b/176774510#comment20 for more information.
+        // We also bind if this provider supports system media routing, because even if an app
+        // doesn't have any registered discovery preference, we should still be able to route their
+        // system media.
+        boolean bindDueToSystemMediaRoutingSupport =
+                mLastDiscoveryPreference != null
+                        && mLastDiscoveryPreference.shouldPerformActiveScan()
+                        && mSupportsSystemMediaRouting;
+        if (!getSessionInfos().isEmpty()
+                || bindDueToManagerScan
+                || bindDueToSystemMediaRoutingSupport) {
             return true;
         }
         boolean anAppIsScanning =
@@ -651,11 +663,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         }
         return TextUtils.formatSimple(
                 "ProviderServiceProxy - package: %s, bound: %b, connection (active:%b, ready:%b), "
-                        + "pending (session creations: %d, transfers: %d)",
+                        + "system media=%b, pending (session creations: %d, transfers: %d)",
                 mComponentName.getPackageName(),
                 mBound,
                 mActiveConnection != null,
                 mConnectionReady,
+                mSupportsSystemMediaRouting,
                 pendingSessionCreationCount,
                 pendingTransferCount);
     }
@@ -697,7 +710,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
 
         Connection(IMediaRoute2ProviderService serviceBinder) {
             mService = serviceBinder;
-            mCallbackStub = new ServiceCallbackStub(this);
+            mCallbackStub = new ServiceCallbackStub(this, mSupportsSystemMediaRouting);
         }
 
         public boolean register() {
@@ -811,9 +824,11 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
     private static final class ServiceCallbackStub extends
             IMediaRoute2ProviderServiceCallback.Stub {
         private final WeakReference<Connection> mConnectionRef;
+        private final boolean mAllowSystemMediaRoutes;
 
-        ServiceCallbackStub(Connection connection) {
+        ServiceCallbackStub(Connection connection, boolean allowSystemMediaRoutes) {
             mConnectionRef = new WeakReference<>(connection);
+            mAllowSystemMediaRoutes = allowSystemMediaRoutes;
         }
 
         public void dispose() {
@@ -844,6 +859,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
                     throw new SecurityException(
                             "Only the system is allowed to publish routes with system route types. "
                                     + "Disallowed route: "
+                                    + route);
+                }
+
+                if (route.supportsSystemMediaRouting() && !mAllowSystemMediaRoutes) {
+                    throw new SecurityException(
+                            "This provider is not allowed to publish routes that support system"
+                                    + " media routing. Disallowed route: "
                                     + route);
                 }
             }

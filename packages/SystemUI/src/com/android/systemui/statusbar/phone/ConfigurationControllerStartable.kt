@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.phone
 
 import com.android.systemui.CoreStartable
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import javax.inject.Inject
@@ -27,8 +27,8 @@ import javax.inject.Inject
 class ConfigurationControllerStartable
 @Inject
 constructor(
-    @GlobalConfig private val configurationController: ConfigurationController,
-    private val listeners: Set<@JvmSuppressWildcards ConfigurationListener>
+    @Main private val configurationController: ConfigurationController,
+    private val listeners: Set<@JvmSuppressWildcards ConfigurationListener>,
 ) : CoreStartable {
     override fun start() {
         listeners.forEach { configurationController.addCallback(it) }

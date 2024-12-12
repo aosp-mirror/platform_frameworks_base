@@ -76,7 +76,7 @@ fun CategoryTitle(title: String) {
  * visually separates groups of items.
  */
 @Composable
-fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit) {
+fun Category(title: String? = null, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     var displayTitle by remember { mutableStateOf(false) }
     Column(
         modifier =
@@ -90,7 +90,7 @@ fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit)
         if (title != null && displayTitle) CategoryTitle(title = title)
         Column(
             modifier =
-                Modifier.onGloballyPositioned { coordinates ->
+                modifier.onGloballyPositioned { coordinates ->
                         displayTitle = coordinates.size.height > 0
                     }
                     .then(
@@ -162,7 +162,7 @@ internal val LocalIsInCategory = compositionLocalOf { false }
 @Composable
 private fun CategoryPreview() {
     SettingsTheme {
-        Category("Appearance") {
+        Category(title = "Appearance") {
             Preference(
                 object : PreferenceModel {
                     override val title = "Title"

@@ -86,6 +86,17 @@ public class HearingDeviceLocalDataManager {
         mSettingsObserver = new SettingsObserver(ThreadUtils.getUiThreadHandler());
     }
 
+    /**
+     * Clears the local data of the device. This method should be called when the device is
+     * unpaired.
+     */
+    public static void clear(@NonNull Context context, @NonNull BluetoothDevice device) {
+        HearingDeviceLocalDataManager manager = new HearingDeviceLocalDataManager(context);
+        manager.getLocalDataFromSettings();
+        manager.remove(device);
+        manager.putAmbientVolumeSettings();
+    }
+
     /** Starts the manager. Loads the data from Settings and start observing any changes. */
     public synchronized void start() {
         if (mIsStarted) {
@@ -141,6 +152,7 @@ public class HearingDeviceLocalDataManager {
      * Puts the local data of the corresponding hearing device.
      *
      * @param device the device to update the local data
+     * @param data the local data to be stored
      */
     private void put(BluetoothDevice device, Data data) {
         if (device == null) {
@@ -148,9 +160,31 @@ public class HearingDeviceLocalDataManager {
         }
         synchronized (sLock) {
             final String addr = device.getAnonymizedAddress();
-            mAddrToDataMap.put(addr, data);
+            if (data == null) {
+                mAddrToDataMap.remove(addr);
+            } else {
+                mAddrToDataMap.put(addr, data);
+            }
             if (mListener != null && mListenerExecutor != null) {
                 mListenerExecutor.execute(() -> mListener.onDeviceLocalDataChange(addr, data));
+            }
+        }
+    }
+
+    /**
+     * Removes the local data of the corresponding hearing device.
+     *
+     * @param device the device to remove the local data
+     */
+    private void remove(BluetoothDevice device) {
+        if (device == null) {
+            return;
+        }
+        synchronized (sLock) {
+            final String addr = device.getAnonymizedAddress();
+            mAddrToDataMap.remove(addr);
+            if (mListener != null && mListenerExecutor != null) {
+                mListenerExecutor.execute(() -> mListener.onDeviceLocalDataChange(addr, null));
             }
         }
     }

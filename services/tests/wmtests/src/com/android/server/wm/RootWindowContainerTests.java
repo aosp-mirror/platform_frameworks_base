@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS_AND_RESTORE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -63,6 +64,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -77,12 +79,14 @@ import android.graphics.Rect;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.app.ResolverActivity;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -693,6 +697,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testAwakeFromSleepingWithAppConfiguration() {
         final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
+        display.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.moveFocusableActivityToTop("test");
         assertTrue(activity.getRootTask().isFocusedRootTaskOnDisplay());
@@ -1329,6 +1334,38 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         assertNotNull(taskDisplayArea.getRootHomeTask());
         assertEquals(taskDisplayArea.getTopRootTask(), taskDisplayArea.getRootHomeTask());
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_TOP_VISIBLE_ROOT_TASK_PER_USER_TRACKING)
+    @Test
+    public void testSwitchUser_withVisibleRootTasks_storesAllVisibleRootTasksForCurrentUser() {
+        // Set up root tasks
+        final Task rootTask1 = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task rootTask2 = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task rootTask3 = mRootWindowContainer.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        doReturn(rootTask3).when(mRootWindowContainer).getTopDisplayFocusedRootTask();
+
+        // Set up user ids and visibility
+        rootTask1.mUserId = mRootWindowContainer.mCurrentUser;
+        rootTask2.mUserId = mRootWindowContainer.mCurrentUser;
+        rootTask3.mUserId = mRootWindowContainer.mCurrentUser;
+        rootTask1.mVisibleRequested = false;
+        rootTask2.mVisibleRequested = true;
+        rootTask3.mVisibleRequested = true;
+
+        // Switch to a different user
+        int currentUser = mRootWindowContainer.mCurrentUser;
+        int otherUser = currentUser + 1;
+        mRootWindowContainer.switchUser(otherUser, null);
+
+        // Verify that the previous user persists it's previous visible root tasks
+        assertArrayEquals(
+                new int[]{rootTask2.mTaskId, rootTask3.mTaskId},
+                mRootWindowContainer.mUserVisibleRootTasks.get(currentUser).toArray()
+        );
     }
 
     @Test

@@ -81,6 +81,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
+import com.android.window.flags.Flags.FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
 import com.android.wm.shell.MockToken
@@ -276,6 +277,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
       DesktopUserRepositories(
         context,
         shellInit,
+        shellController,
         persistentRepository,
         repositoryInitializer,
         testScope,
@@ -1217,14 +1219,40 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
-  fun moveRunningTaskToDesktop_deviceSupported_taskIsMovedToDesktop() {
-    val task = setUpFullscreenTask()
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+  fun moveBackgroundTaskToDesktop_remoteTransition_usesOneShotHandler() {
+    val transitionHandlerArgCaptor = ArgumentCaptor.forClass(TransitionHandler::class.java)
+    whenever(
+      transitions.startTransition(anyInt(), any(), transitionHandlerArgCaptor.capture())
+    ).thenReturn(Binder())
 
-    controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
+    val task = createTaskInfo(1)
+    whenever(shellTaskOrganizer.getRunningTaskInfo(anyInt())).thenReturn(null)
+    whenever(recentTasksController.findTaskInBackground(anyInt())).thenReturn(task)
+    controller.moveTaskToDesktop(
+      taskId = task.taskId,
+      transitionSource = UNKNOWN,
+      remoteTransition = RemoteTransition(spy(TestRemoteTransition())))
 
-    val wct = getLatestEnterDesktopWct()
-    assertThat(wct.changes[task.token.asBinder()]?.windowingMode).isEqualTo(WINDOWING_MODE_FREEFORM)
     verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
+    assertIs<OneShotRemoteHandler>(transitionHandlerArgCaptor.value)
+  }
+
+
+  @Test
+  fun moveRunningTaskToDesktop_remoteTransition_usesOneShotHandler() {
+    val transitionHandlerArgCaptor = ArgumentCaptor.forClass(TransitionHandler::class.java)
+    whenever(
+      transitions.startTransition(anyInt(), any(), transitionHandlerArgCaptor.capture())
+    ).thenReturn(Binder())
+
+    controller.moveRunningTaskToDesktop(
+      task = setUpFullscreenTask(),
+      transitionSource = UNKNOWN,
+      remoteTransition = RemoteTransition(spy(TestRemoteTransition())))
+
+    verify(desktopModeEnterExitTransitionListener).onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
+    assertIs<OneShotRemoteHandler>(transitionHandlerArgCaptor.value)
   }
 
   @Test
@@ -1594,6 +1622,30 @@ class DesktopTasksControllerTest : ShellTestCase() {
       assertThat(hierarchyOps[0].isReparent).isTrue()
       assertThat(hierarchyOps[0].newParent).isEqualTo(defaultDisplayArea.token.asBinder())
       assertThat(hierarchyOps[0].toTop).isTrue()
+    }
+  }
+
+  @Test
+  @EnableFlags(FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY)
+  fun moveToNextDisplay_removeWallpaper() {
+    // Set up two display ids
+    whenever(rootTaskDisplayAreaOrganizer.displayIds)
+      .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+    // Create a mock for the target display area: second display
+    val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+    whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+      .thenReturn(secondDisplayArea)
+    // Add a task and a wallpaper
+    val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+    val wallpaperToken = MockToken().token()
+    taskRepository.wallpaperActivityToken = wallpaperToken
+
+    controller.moveToNextDisplay(task.taskId)
+
+    with(getLatestWct(type = TRANSIT_CHANGE)) {
+      val wallpaperChange = hierarchyOps.find { op -> op.container == wallpaperToken.asBinder() }
+      assertThat(wallpaperChange).isNotNull()
+      assertThat(wallpaperChange!!.type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
     }
   }
 
@@ -3881,7 +3933,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
   @Test
   fun shellController_registersUserChangeListener() {
-      verify(shellController, times(1)).addUserChangeListener(any())
+      verify(shellController, times(2)).addUserChangeListener(any())
   }
 
   @Test

@@ -43,6 +43,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -151,6 +153,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -218,6 +221,7 @@ fun CommunalHub(
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+    var contentOffset: Offset by remember { mutableStateOf(Offset.Zero) }
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
@@ -240,9 +244,7 @@ fun CommunalHub(
             initialValue = !viewModel.isEditMode
         )
 
-    val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
-    val contentOffset = beforeContentPadding(contentPadding).toOffset()
-
+    val minContentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     ObserveScrollEffect(gridState, viewModel)
 
     val context = LocalContext.current
@@ -294,9 +296,19 @@ fun CommunalHub(
                                     offset.y,
                                 ) - contentOffset
                             val index = firstIndexAtOffset(gridState, adjustedOffset)
-                            val key =
+                            val tappedKey =
                                 index?.let { keyAtIndexIfEditable(contentListState.list, index) }
-                            viewModel.setSelectedKey(key)
+
+                            viewModel.setSelectedKey(
+                                if (
+                                    Flags.hubEditModeTouchAdjustments() &&
+                                        selectedKey.value == tappedKey
+                                ) {
+                                    null
+                                } else {
+                                    tappedKey
+                                }
+                            )
                         }
                     }
                 }
@@ -368,7 +380,7 @@ fun CommunalHub(
     ) {
         AccessibilityContainer(viewModel) {
             if (!viewModel.isEditMode && isEmptyState) {
-                EmptyStateCta(contentPadding = contentPadding, viewModel = viewModel)
+                EmptyStateCta(contentPadding = minContentPadding, viewModel = viewModel)
             } else {
                 val slideOffsetInPx =
                     with(LocalDensity.current) { Dimensions.SlideOffsetY.toPx().toInt() }
@@ -397,10 +409,11 @@ fun CommunalHub(
                         CommunalHubLazyGrid(
                             communalContent = communalContent,
                             viewModel = viewModel,
-                            contentPadding = contentPadding,
+                            minContentPadding = minContentPadding,
                             contentOffset = contentOffset,
                             screenWidth = screenWidth,
                             setGridCoordinates = { gridCoordinates = it },
+                            setContentOffset = { contentOffset = it },
                             updateDragPositionForRemove = { boundingBox ->
                                 val gridOffset = gridCoordinates?.positionInWindow()
                                 val removeButtonCenter =
@@ -742,27 +755,40 @@ fun calculateWidgetSize(
 
 @Composable
 private fun HorizontalGridWrapper(
-    contentPadding: PaddingValues,
+    minContentPadding: PaddingValues,
     gridState: LazyGridState,
+    setContentOffset: (offset: Offset) -> Unit,
     modifier: Modifier = Modifier,
     content: LazyGridScope.(sizeInfo: SizeInfo?) -> Unit,
 ) {
     if (communalResponsiveGrid()) {
+        val flingBehavior =
+            rememberSnapFlingBehavior(lazyGridState = gridState, snapPosition = SnapPosition.Start)
         ResponsiveLazyHorizontalGrid(
             cellAspectRatio = 1.5f,
             modifier = modifier,
             state = gridState,
-            minContentPadding = contentPadding,
+            flingBehavior = flingBehavior,
+            minContentPadding = minContentPadding,
             minHorizontalArrangement = Dimensions.ItemSpacing,
             minVerticalArrangement = Dimensions.ItemSpacing,
+            setContentOffset = setContentOffset,
             content = content,
         )
     } else {
+        val layoutDirection = LocalLayoutDirection.current
+        val density = LocalDensity.current
+
+        val minStartPadding = minContentPadding.calculateStartPadding(layoutDirection)
+        val minTopPadding = minContentPadding.calculateTopPadding()
+
+        with(density) { setContentOffset(Offset(minStartPadding.toPx(), minTopPadding.toPx())) }
+
         LazyHorizontalGrid(
             modifier = modifier,
             state = gridState,
             rows = GridCells.Fixed(CommunalContentSize.FixedSize.FULL.span),
-            contentPadding = contentPadding,
+            contentPadding = minContentPadding,
             horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
             verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
         ) {
@@ -776,13 +802,14 @@ private fun HorizontalGridWrapper(
 private fun BoxScope.CommunalHubLazyGrid(
     communalContent: List<CommunalContentModel>,
     viewModel: BaseCommunalViewModel,
-    contentPadding: PaddingValues,
+    minContentPadding: PaddingValues,
     selectedKey: State<String?>,
     screenWidth: Int,
     contentOffset: Offset,
     gridState: LazyGridState,
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
+    setContentOffset: (offset: Offset) -> Unit,
     updateDragPositionForRemove: (boundingBox: IntRect) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
@@ -833,7 +860,8 @@ private fun BoxScope.CommunalHubLazyGrid(
     HorizontalGridWrapper(
         modifier = gridModifier,
         gridState = gridState,
-        contentPadding = contentPadding,
+        minContentPadding = minContentPadding,
+        setContentOffset = setContentOffset,
     ) { sizeInfo ->
         /** Override spans based on the responsive grid size */
         val finalizedList =
@@ -892,12 +920,12 @@ private fun BoxScope.CommunalHubLazyGrid(
                     key = item.key,
                     currentSpan = GridItemSpan(currentItemSpan),
                     gridState = gridState,
-                    gridContentPadding = contentPadding,
+                    gridContentPadding = sizeInfo?.contentPadding ?: minContentPadding,
                     verticalArrangement =
                         Arrangement.spacedBy(
                             sizeInfo?.verticalArrangement ?: Dimensions.ItemSpacing
                         ),
-                    enabled = selected,
+                    enabled = selected && !isItemDragging,
                     alpha = { outlineAlpha },
                     modifier =
                         Modifier.requiredSize(dpSize)
@@ -935,12 +963,28 @@ private fun BoxScope.CommunalHubLazyGrid(
                     }
                 }
             } else {
+                val itemAlpha =
+                    if (communalResponsiveGrid()) {
+                        val percentVisible by
+                            remember(gridState, index) {
+                                derivedStateOf { calculatePercentVisible(gridState, index) }
+                            }
+                        animateFloatAsState(percentVisible)
+                    } else {
+                        null
+                    }
+
                 CommunalContent(
                     model = item,
                     viewModel = viewModel,
                     size = size,
                     selected = false,
-                    modifier = Modifier.requiredSize(dpSize).animateItem(),
+                    modifier =
+                        Modifier.requiredSize(dpSize).animateItem().thenIf(
+                            communalResponsiveGrid()
+                        ) {
+                            Modifier.graphicsLayer { alpha = itemAlpha?.value ?: 1f }
+                        },
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
@@ -1046,17 +1090,27 @@ private fun Toolbar(
                 .onSizeChanged { setToolbarSize(it) }
     ) {
         val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
-        ToolbarButton(
-            isPrimary = !removeEnabled,
-            modifier = Modifier.align(Alignment.CenterStart),
-            onClick = onOpenWidgetPicker,
-        ) {
-            Icon(Icons.Default.Add, null)
-            Text(text = addWidgetText)
+
+        if (!(Flags.hubEditModeTouchAdjustments() && removeEnabled)) {
+            ToolbarButton(
+                isPrimary = !removeEnabled,
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = onOpenWidgetPicker,
+            ) {
+                Icon(Icons.Default.Add, null)
+                Text(text = addWidgetText)
+            }
         }
 
         AnimatedVisibility(
-            modifier = Modifier.align(Alignment.Center),
+            modifier =
+                Modifier.align(
+                    if (Flags.hubEditModeTouchAdjustments()) {
+                        Alignment.CenterStart
+                    } else {
+                        Alignment.Center
+                    }
+                ),
             visible = removeEnabled,
             enter = fadeIn(),
             exit = fadeOut(),
@@ -1079,7 +1133,11 @@ private fun Toolbar(
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             ButtonDefaults.IconSpacing,
-                            Alignment.CenterHorizontally,
+                            if (Flags.hubEditModeTouchAdjustments()) {
+                                Alignment.Start
+                            } else {
+                                Alignment.CenterHorizontally
+                            },
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -1733,24 +1791,22 @@ private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): Padd
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenHeight = with(density) { windowMetrics.bounds.height().toDp() }
     val toolbarHeight = with(density) { Dimensions.ToolbarPaddingTop + toolbarSize.height.toDp() }
-    val verticalPadding =
-        ((screenHeight - toolbarHeight - hubDimensions.GridHeight + hubDimensions.GridTopSpacing) /
-                2)
-            .coerceAtLeast(Dimensions.Spacing)
-    return PaddingValues(
-        start = Dimensions.ToolbarPaddingHorizontal,
-        end = Dimensions.ToolbarPaddingHorizontal,
-        top = verticalPadding + toolbarHeight,
-        bottom = verticalPadding,
-    )
-}
-
-@Composable
-private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingInPx {
-    return with(LocalDensity.current) {
-        ContentPaddingInPx(
-            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current).toPx(),
-            top = paddingValues.calculateTopPadding().toPx(),
+    return if (communalResponsiveGrid()) {
+        PaddingValues(
+            start = Dimensions.ToolbarPaddingHorizontal,
+            end = Dimensions.ToolbarPaddingHorizontal,
+            top = hubDimensions.GridTopSpacing,
+        )
+    } else {
+        val verticalPadding =
+            ((screenHeight - toolbarHeight - hubDimensions.GridHeight +
+                    hubDimensions.GridTopSpacing) / 2)
+                .coerceAtLeast(Dimensions.Spacing)
+        PaddingValues(
+            start = Dimensions.ToolbarPaddingHorizontal,
+            end = Dimensions.ToolbarPaddingHorizontal,
+            top = verticalPadding + toolbarHeight,
+            bottom = verticalPadding,
         )
     }
 }
@@ -1769,10 +1825,6 @@ private fun firstIndexAtOffset(gridState: LazyGridState, offset: Offset): Int? =
 /** Returns the key of item if it's editable at the given index. Only widget is editable. */
 private fun keyAtIndexIfEditable(list: List<CommunalContentModel>, index: Int): String? =
     if (index in list.indices && list[index].isWidgetContent()) list[index].key else null
-
-data class ContentPaddingInPx(val start: Float, val top: Float) {
-    fun toOffset(): Offset = Offset(start, top)
-}
 
 class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
@@ -1849,6 +1901,44 @@ private fun CommunalContentModel.getSpanOrMax(maxSpan: Int?) =
     } else {
         size.span
     }
+
+private fun IntRect.percentOverlap(other: IntRect): Float {
+    val intersection = intersect(other)
+    if (intersection.width < 0 || intersection.height < 0) {
+        return 0f
+    }
+    val overlapArea = intersection.width * intersection.height
+    val area = width * height
+    return overlapArea.toFloat() / area.toFloat()
+}
+
+private fun calculatePercentVisible(state: LazyGridState, index: Int): Float {
+    val viewportSize = state.layoutInfo.viewportSize
+    val visibleRect =
+        IntRect(
+            offset =
+                IntOffset(
+                    state.layoutInfo.viewportStartOffset + state.layoutInfo.beforeContentPadding,
+                    0,
+                ),
+            size =
+                IntSize(
+                    width =
+                        viewportSize.width -
+                            state.layoutInfo.beforeContentPadding -
+                            state.layoutInfo.afterContentPadding,
+                    height = viewportSize.height,
+                ),
+        )
+
+    val itemInfo = state.layoutInfo.visibleItemsInfo.find { it.index == index }
+    return if (itemInfo != null) {
+        val boundingBox = IntRect(itemInfo.offset, itemInfo.size)
+        boundingBox.percentOverlap(visibleRect)
+    } else {
+        0f
+    }
+}
 
 private object Colors {
     val DisabledColorFilter by lazy { disabledColorMatrix() }

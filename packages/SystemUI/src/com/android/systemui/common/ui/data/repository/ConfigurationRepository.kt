@@ -23,9 +23,9 @@ import android.view.DisplayInfo
 import androidx.annotation.DimenRes
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.wrapper.DisplayUtilsWrapper
 import dagger.Binds
@@ -162,19 +162,19 @@ abstract class ConfigurationRepositoryModule {
      * injected.
      */
     @Binds
-    @Deprecated("Use the ConfigurationRepository annotated with @GlobalConfig instead.")
+    @Deprecated("Use the ConfigurationRepository annotated with @Main instead.")
     @SysUISingleton
     abstract fun provideDefaultConfigRepository(
-        @GlobalConfig configurationRepository: ConfigurationRepository
+        @Main configurationRepository: ConfigurationRepository
     ): ConfigurationRepository
 
     companion object {
         @Provides
-        @GlobalConfig
+        @Main
         @SysUISingleton
         fun provideGlobalConfigRepository(
             context: Context,
-            @GlobalConfig configurationController: ConfigurationController,
+            @Main configurationController: ConfigurationController,
             factory: ConfigurationRepositoryImpl.Factory,
         ): ConfigurationRepository {
             return factory.create(context, configurationController)

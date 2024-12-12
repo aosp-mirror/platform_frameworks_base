@@ -75,8 +75,8 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
             return new CancellationSignal();
         });
 
-        mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq(mEntry));
+        mViewBinder.bindHeadsUpView(mEntry, /* isPinnedByUser= */ false, null);
+        verify(mLogger).startBindingHun(mEntry, /* isPinnedByUser= */ false);
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
@@ -85,8 +85,8 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
-        mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq(mEntry));
+        mViewBinder.bindHeadsUpView(mEntry, /* isPinnedByUser= */ true, null);
+        verify(mLogger).startBindingHun(mEntry, /* isPinnedByUser= */ true);
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
@@ -116,8 +116,8 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
             return new CancellationSignal();
         });
 
-        mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq(mEntry));
+        mViewBinder.bindHeadsUpView(mEntry, /* isPinnedByUser= */ false, null);
+        verify(mLogger).startBindingHun(mEntry, /* isPinnedByUser= */ false);
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
@@ -140,8 +140,8 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
             return new CancellationSignal();
         });
 
-        mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq(mEntry));
+        mViewBinder.bindHeadsUpView(mEntry, /* isPinnedByUser= */ true, null);
+        verify(mLogger).startBindingHun(mEntry, /* isPinnedByUser= */ true);
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
@@ -167,8 +167,8 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
             return new CancellationSignal();
         });
 
-        mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq(mEntry));
+        mViewBinder.bindHeadsUpView(mEntry, /* isPinnedByUser= */ false, null);
+        verify(mLogger).startBindingHun(mEntry, /* isPinnedByUser= */ false);
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 

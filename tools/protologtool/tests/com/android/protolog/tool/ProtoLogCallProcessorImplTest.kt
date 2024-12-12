@@ -42,7 +42,8 @@ class ProtoLogCallProcessorImplTest {
             call: MethodCallExpr,
             messageString: String,
             level: LogLevel,
-            group: LogGroup
+            group: LogGroup,
+            lineNumber: Int,
         ) {
             calls.add(LogCall(call, messageString, level, group))
         }

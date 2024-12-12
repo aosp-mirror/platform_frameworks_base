@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
 import androidx.compose.foundation.layout.waterfall
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -65,7 +66,10 @@ fun SceneScope.OverlayShade(
 
         Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = Alignment.TopEnd) {
             Panel(
-                modifier = Modifier.element(OverlayShade.Elements.Panel).panelSize(),
+                modifier =
+                    Modifier.element(OverlayShade.Elements.Panel)
+                        .overscroll(verticalOverscrollEffect)
+                        .panelSize(),
                 content = content,
             )
         }

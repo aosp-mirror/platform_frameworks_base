@@ -78,24 +78,22 @@ public class InstallDependencyHelper {
         mPackageInstallerService = packageInstallerService;
     }
 
-    void resolveLibraryDependenciesIfNeeded(PackageLite pkg, Computer snapshot, int userId,
-            Handler handler, OutcomeReceiver<Void, PackageManagerException> origCallback) {
+    void resolveLibraryDependenciesIfNeeded(List<SharedLibraryInfo> missingLibraries,
+            PackageLite pkg, Computer snapshot, int userId, Handler handler,
+            OutcomeReceiver<Void, PackageManagerException> origCallback) {
         CallOnceProxy callback = new CallOnceProxy(handler, origCallback);
         try {
-            resolveLibraryDependenciesIfNeededInternal(pkg, snapshot, userId, handler, callback);
-        } catch (PackageManagerException e) {
-            callback.onError(e);
+            resolveLibraryDependenciesIfNeededInternal(
+                    missingLibraries, pkg, snapshot, userId, handler, callback);
         } catch (Exception e) {
             onError(callback, e.getMessage());
         }
     }
 
 
-    private void resolveLibraryDependenciesIfNeededInternal(PackageLite pkg, Computer snapshot,
-            int userId, Handler handler, CallOnceProxy callback) throws PackageManagerException {
-        final List<SharedLibraryInfo> missing =
-                mSharedLibraries.collectMissingSharedLibraryInfos(pkg);
-
+    private void resolveLibraryDependenciesIfNeededInternal(List<SharedLibraryInfo> missing,
+            PackageLite pkg, Computer snapshot, int userId, Handler handler,
+            CallOnceProxy callback) {
         if (missing.isEmpty()) {
             if (DEBUG) {
                 Slog.d(TAG, "No missing dependency for " + pkg.getPackageName());
@@ -127,6 +125,11 @@ public class InstallDependencyHelper {
         if (!scheduleSuccess) {
             onError(callback, "Failed to schedule job on Dependency Installer Service");
         }
+    }
+
+    List<SharedLibraryInfo> getMissingSharedLibraries(PackageLite pkg)
+            throws PackageManagerException {
+        return mSharedLibraries.collectMissingSharedLibraryInfos(pkg);
     }
 
     void notifySessionComplete(int sessionId) {

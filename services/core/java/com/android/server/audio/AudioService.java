@@ -4177,6 +4177,12 @@ public class AudioService extends IAudioService.Stub
         // Stream mute changed, fire the intent.
         Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, isMuted);
+        if (replaceStreamBtSco() && isStreamBluetoothSco(streamType)) {
+            intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                    AudioSystem.STREAM_BLUETOOTH_SCO);
+            // in this case broadcast for both sco and voice_call streams the mute status
+            sendBroadcastToAll(intent, null /* options */);
+        }
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
         sendBroadcastToAll(intent, null /* options */);
     }
@@ -4684,6 +4690,12 @@ public class AudioService extends IAudioService.Stub
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
+                // TODO(b/382704431): remove to allow STREAM_VOICE_CALL to drive abs volume
+                //  over A2DP
+                if (getDeviceForStream(AudioSystem.STREAM_VOICE_CALL)
+                        == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    return AudioSystem.STREAM_MUSIC;
+                }
                 return AudioSystem.STREAM_VOICE_CALL;
             case AudioSystem.MODE_CALL_SCREENING:
             case AudioSystem.MODE_COMMUNICATION_REDIRECT:
@@ -4695,15 +4707,20 @@ public class AudioService extends IAudioService.Stub
                 // other conditions will influence the stream type choice, read on...
                 break;
         }
-        if (voiceActivityCanOverride
-                && mVoicePlaybackActive.get()) {
+
+        if (voiceActivityCanOverride && mVoicePlaybackActive.get()) {
+            // TODO(b/382704431): remove to allow STREAM_VOICE_CALL to drive abs volume over A2DP
+            if (getDeviceForStream(AudioSystem.STREAM_VOICE_CALL)
+                    == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                return AudioSystem.STREAM_MUSIC;
+            }
             return AudioSystem.STREAM_VOICE_CALL;
         }
         return AudioSystem.STREAM_MUSIC;
     }
 
-    private AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
-    private AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
+    private final AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
+    private final AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
 
     private final IPlaybackConfigDispatcher mPlaybackActivityMonitor =
             new IPlaybackConfigDispatcher.Stub() {
@@ -4923,7 +4940,7 @@ public class AudioService extends IAudioService.Stub
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
 
-        Log.i(TAG,
+        Slog.i(TAG,
                 "onUpdateContextualVolumes: absolute volume driving streams " + streamType
                 + " avrcp supported: " + mAvrcpAbsVolSupported);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
@@ -4932,7 +4949,7 @@ public class AudioService extends IAudioService.Stub
                 if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                     if (!enabled) {
-                        Log.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
+                        Slog.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
                     }
                 }
                 if (stream != streamType) {
@@ -4960,7 +4977,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
         if (absVolumeDevices.size() > 1) {
-            Log.w(TAG, "onUpdateContextualVolumes too many active devices: "
+            Slog.w(TAG, "onUpdateContextualVolumes too many active devices: "
                     + absVolumeDevices.stream().map(AudioSystem::getOutputDeviceName)
                         .collect(Collectors.joining(","))
                     + ", for stream: " + streamType);
@@ -4971,7 +4988,7 @@ public class AudioService extends IAudioService.Stub
         final int index = getStreamVolume(streamType, device);
 
         if (DEBUG_VOL) {
-            Log.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
+            Slog.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
                     + ", device: " + AudioSystem.getOutputDeviceName(device)
                     + ", index: " + index);
         }
@@ -9659,9 +9676,16 @@ public class AudioService extends IAudioService.Stub
                         mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
                         mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE,
                                 oldIndex);
-
-                        mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
-                                mStreamType);
+                        int extraStreamType = mStreamType;
+                        // TODO: remove this when deprecating STREAM_BLUETOOTH_SCO
+                        if (isStreamBluetoothSco(mStreamType)) {
+                            mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                                    AudioSystem.STREAM_BLUETOOTH_SCO);
+                            extraStreamType = AudioSystem.STREAM_BLUETOOTH_SCO;
+                        } else {
+                            mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                                    mStreamType);
+                        }
                         mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
                                 streamAlias);
 
@@ -9672,9 +9696,21 @@ public class AudioService extends IAudioService.Stub
                                         " aliased streams: " + aliasStreamIndexes;
                             }
                             AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
-                                    mStreamType, aliasStreamIndexesString, index, oldIndex));
+                                    extraStreamType, aliasStreamIndexesString, index, oldIndex));
+                            if (extraStreamType != mStreamType) {
+                                AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
+                                        mStreamType, aliasStreamIndexesString, index, oldIndex));
+                            }
                         }
                         sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
+                        if (extraStreamType != mStreamType) {
+                            // send multiple intents in case we merged voice call and bt sco streams
+                            mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE,
+                                    mStreamType);
+                            // do not use the options in thid case which could discard
+                            // the previous intent
+                            sendBroadcastToAll(mVolumeChanged, null);
+                        }
                     }
                 }
             }

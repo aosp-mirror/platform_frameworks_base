@@ -9,7 +9,9 @@ package android.service.watchdog {
     method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
     method @NonNull public abstract java.util.List<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> onGetSupportedPackages();
     method public abstract void onRequestHealthCheck(@NonNull String);
+    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public final void setHealthCheckResultCallback(@Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<android.os.Bundle>);
     field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
+    field @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") public static final String EXTRA_HEALTH_CHECK_PASSED_PACKAGE = "android.service.watchdog.extra.HEALTH_CHECK_PASSED_PACKAGE";
     field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
   }
 

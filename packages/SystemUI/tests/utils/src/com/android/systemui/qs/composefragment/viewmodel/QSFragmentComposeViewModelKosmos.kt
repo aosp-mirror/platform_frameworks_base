@@ -18,6 +18,7 @@ package com.android.systemui.qs.composefragment.viewmodel
 
 import android.content.res.mainResources
 import androidx.lifecycle.LifecycleCoroutineScope
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -68,6 +69,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     qqsMediaHost,
                     qsMediaHost,
                     usingMediaInComposeFragment,
+                    uiEventLoggerFake,
                     lifecycleScope,
                 )
             }

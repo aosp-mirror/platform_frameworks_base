@@ -21,12 +21,13 @@ import android.content.ContextWrapper
 import android.content.SharedPreferences
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.provider.Settings
 import android.provider.Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
 import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.testing.TestableLooper
 import android.view.ContextThemeWrapper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -38,6 +39,7 @@ import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
@@ -60,16 +62,28 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @DisableFlags(android.app.Flags.FLAG_MODES_UI)
-class DndTileTest : SysuiTestCase() {
+class DndTileTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     companion object {
         private const val DEFAULT_USER = 0
         private const val KEY = Settings.Secure.ZEN_DURATION
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Mock private lateinit var qsHost: QSHost

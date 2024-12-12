@@ -62,12 +62,12 @@ constructor(
         overrideClockSize.value = clockSize
     }
 
-    fun getSmartspaceStartPadding(context: Context): Int {
-        return KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
+    fun getDateWeatherStartPadding(context: Context): Int {
+        return KeyguardSmartspaceViewModel.getDateWeatherStartMargin(context)
     }
 
-    fun getSmartspaceEndPadding(context: Context): Int {
-        return KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
+    fun getDateWeatherEndPadding(context: Context): Int {
+        return KeyguardSmartspaceViewModel.getDateWeatherEndMargin(context)
     }
 
     /*

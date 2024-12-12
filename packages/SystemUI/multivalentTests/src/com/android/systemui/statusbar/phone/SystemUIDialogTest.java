@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -120,6 +121,22 @@ public class SystemUIDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRegisterReceiverWithoutAcsd() {
+        SystemUIDialog dialog = createDialogWithDelegate(mContext, mDelegate,
+                false /* shouldAcsdDismissDialog */);
+        final ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        final ArgumentCaptor<IntentFilter> intentFilterCaptor =
+                ArgumentCaptor.forClass(IntentFilter.class);
+
+        dialog.show();
+        verify(mBroadcastDispatcher).registerReceiver(broadcastReceiverCaptor.capture(),
+                intentFilterCaptor.capture(), ArgumentMatchers.eq(null), ArgumentMatchers.any());
+        assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_SCREEN_OFF));
+        assertFalse(intentFilterCaptor.getValue().hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+    }
+
+    @Test
     @RequiresFlagsEnabled(Flags.FLAG_PREDICTIVE_BACK_ANIMATE_DIALOGS)
     public void usePredictiveBackAnimFlag() {
         final SystemUIDialog dialog = new SystemUIDialog(mContext);
@@ -163,7 +180,8 @@ public class SystemUIDialogTest extends SysuiTestCase {
     public void delegateIsCalled_inCorrectOrder() {
         Configuration configuration = new Configuration();
         InOrder inOrder = Mockito.inOrder(mDelegate);
-        SystemUIDialog dialog = createDialogWithDelegate();
+        SystemUIDialog dialog = createDialogWithDelegate(mContext, mDelegate,
+                true /* shouldAcsdDismissDialog */);
 
         dialog.show();
         dialog.onWindowFocusChanged(/* hasFocus= */ true);
@@ -178,7 +196,8 @@ public class SystemUIDialogTest extends SysuiTestCase {
         inOrder.verify(mDelegate).onStop(dialog);
     }
 
-    private SystemUIDialog createDialogWithDelegate() {
+    private SystemUIDialog createDialogWithDelegate(Context context,
+            SystemUIDialog.Delegate delegate, boolean shouldAcsdDismissDialog) {
         SystemUIDialog.Factory factory = new SystemUIDialog.Factory(
                 getContext(),
                 Dependency.get(SystemUIDialogManager.class),
@@ -186,6 +205,6 @@ public class SystemUIDialogTest extends SysuiTestCase {
                 Dependency.get(BroadcastDispatcher.class),
                 Dependency.get(DialogTransitionAnimator.class)
         );
-        return factory.create(mDelegate);
+        return factory.create(delegate, context, shouldAcsdDismissDialog);
     }
 }

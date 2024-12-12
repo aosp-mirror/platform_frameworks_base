@@ -982,8 +982,9 @@ private fun Context.getUserBadgedLogoInfo(
     activityTaskManager: ActivityTaskManager,
 ): Pair<Drawable?, String> {
     // If the app sets customized icon/description, use the passed-in value directly
-    var icon: Drawable? =
-        if (prompt.logoBitmap != null) BitmapDrawable(resources, prompt.logoBitmap) else null
+    val customizedIcon: Drawable? =
+        prompt.logoBitmap?.let { BitmapDrawable(resources, prompt.logoBitmap) }
+    var icon = customizedIcon
     var label = prompt.logoDescription ?: ""
     if (icon != null && label.isNotEmpty()) {
         return Pair(icon, label)
@@ -1009,12 +1010,11 @@ private fun Context.getUserBadgedLogoInfo(
         }
     }
 
-    // Add user badge
+    // Add user badge for non-customized logo icon
     val userHandle = UserHandle.of(prompt.userInfo.userId)
-    if (label.isNotEmpty()) {
-        label = packageManager.getUserBadgedLabel(label, userHandle).toString()
+    if (icon != null && icon != customizedIcon) {
+        icon = packageManager.getUserBadgedIcon(icon, userHandle)
     }
-    icon = icon?.let { packageManager.getUserBadgedIcon(it, userHandle) }
 
     return Pair(icon, label)
 }

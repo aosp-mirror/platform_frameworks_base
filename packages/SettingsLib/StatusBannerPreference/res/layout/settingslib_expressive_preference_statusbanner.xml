@@ -72,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:hyphenationFrequency="normalFast"
                     android:lineBreakWordStyle="phrase"
-                    android:textAppearance="@style/SettingsLibTextAppearance.Emphasized.Title.Large"/>
+                    android:textAppearance="@style/TextAppearance.SettingsLib.TitleLarge.Emphasized"/>
 
                 <TextView
                     android:id="@android:id/summary"
@@ -81,7 +81,7 @@
                     android:hyphenationFrequency="normalFast"
                     android:lineBreakWordStyle="phrase"
                     android:maxLines="3"
-                    android:textAppearance="@style/SettingsLibTextAppearance.Primary.Body.Medium"/>
+                    android:textAppearance="@style/TextAppearance.SettingsLib.BodyMedium"/>
             </LinearLayout>
         </LinearLayout>
 

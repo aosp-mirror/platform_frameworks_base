@@ -25,6 +25,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.display.data.repository.display
 import com.android.systemui.display.data.repository.displayRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.testKosmos
@@ -38,17 +39,31 @@ import org.junit.runner.RunWith
 class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val displayRepository = kosmos.displayRepository
-    val underTest = StatusBarTouchShadeDisplayPolicy(displayRepository, testScope.backgroundScope)
+
+    private fun createUnderTest(
+        shadeOnDefaultDisplayWhenLocked: Boolean = false
+    ): StatusBarTouchShadeDisplayPolicy {
+        return StatusBarTouchShadeDisplayPolicy(
+            displayRepository,
+            keyguardRepository,
+            testScope.backgroundScope,
+            shadeOnDefaultDisplayWhenLocked = shadeOnDefaultDisplayWhenLocked,
+        )
+    }
 
     @Test
     fun displayId_defaultToDefaultDisplay() {
+        val underTest = createUnderTest()
+
         assertThat(underTest.displayId.value).isEqualTo(Display.DEFAULT_DISPLAY)
     }
 
     @Test
     fun onStatusBarTouched_called_updatesDisplayId() =
         testScope.runTest {
+            val underTest = createUnderTest()
             val displayId by collectLastValue(underTest.displayId)
 
             displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
@@ -60,6 +75,7 @@ class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
     @Test
     fun onStatusBarTouched_notExistentDisplay_displayIdNotUpdated() =
         testScope.runTest {
+            val underTest = createUnderTest()
             val displayIds by collectValues(underTest.displayId)
             assertThat(displayIds).isEqualTo(listOf(Display.DEFAULT_DISPLAY))
 
@@ -72,6 +88,7 @@ class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
     @Test
     fun onStatusBarTouched_afterDisplayRemoved_goesBackToDefaultDisplay() =
         testScope.runTest {
+            val underTest = createUnderTest()
             val displayId by collectLastValue(underTest.displayId)
 
             displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
@@ -82,5 +99,41 @@ class StatusBarTouchShadeDisplayPolicyTest : SysuiTestCase() {
             displayRepository.removeDisplay(2)
 
             assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+        }
+
+    @Test
+    fun onStatusBarTouched_afterKeyguardVisible_goesBackToDefaultDisplay() =
+        testScope.runTest {
+            val underTest = createUnderTest(shadeOnDefaultDisplayWhenLocked = true)
+            val displayId by collectLastValue(underTest.displayId)
+
+            displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
+            underTest.onStatusBarTouched(2)
+
+            assertThat(displayId).isEqualTo(2)
+
+            keyguardRepository.setKeyguardShowing(true)
+
+            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+        }
+
+    @Test
+    fun onStatusBarTouched_afterKeyguardHides_goesBackToPreviousDisplay() =
+        testScope.runTest {
+            val underTest = createUnderTest(shadeOnDefaultDisplayWhenLocked = true)
+            val displayId by collectLastValue(underTest.displayId)
+
+            displayRepository.addDisplays(display(id = 2, type = TYPE_EXTERNAL))
+            underTest.onStatusBarTouched(2)
+
+            assertThat(displayId).isEqualTo(2)
+
+            keyguardRepository.setKeyguardShowing(true)
+
+            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+
+            keyguardRepository.setKeyguardShowing(false)
+
+            assertThat(displayId).isEqualTo(2)
         }
 }

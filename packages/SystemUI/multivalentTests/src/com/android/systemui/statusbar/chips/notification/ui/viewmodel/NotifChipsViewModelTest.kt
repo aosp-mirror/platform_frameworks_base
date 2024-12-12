@@ -22,22 +22,30 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.data.repository.UnconfinedFakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -47,7 +55,12 @@ import org.mockito.kotlin.mock
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(StatusBarNotifChips.FLAG_NAME)
 class NotifChipsViewModelTest : SysuiTestCase() {
-    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val kosmos =
+        testKosmos().useUnconfinedTestDispatcher().apply {
+            // Don't be in lockscreen so that HUNs are allowed
+            fakeKeyguardTransitionRepository =
+                FakeKeyguardTransitionRepository(initInLockscreen = false, testScope = testScope)
+        }
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
 
     private val underTest by lazy { kosmos.notifChipsViewModel }
@@ -132,6 +145,36 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun chips_onePromotedNotif_colorMatches() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.colors =
+                        PromotedNotificationContentModel.Colors(
+                            backgroundColor = 56,
+                            primaryTextColor = 89,
+                        )
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = promotedContentBuilder.build(),
+                    )
+                )
+            )
+
+            assertThat(latest).hasSize(1)
+            val colors = latest!![0].colors
+            assertThat(colors).isInstanceOf(ColorsModel.Custom::class.java)
+            assertThat((colors as ColorsModel.Custom).backgroundColorInt).isEqualTo(56)
+            assertThat((colors as ColorsModel.Custom).primaryTextColorInt).isEqualTo(89)
+        }
+
+    @Test
     fun chips_onlyForPromotedNotifs() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
@@ -196,6 +239,54 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             assertThat(latest).hasSize(2)
             assertIsNotifKey(latest!![0], firstKey)
             assertIsNotifKey(latest!![1], secondKey)
+        }
+
+    @Test
+    fun chips_noHeadsUp_showsTime() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
+                    )
+                )
+            )
+
+            // WHEN there's no HUN
+            kosmos.headsUpNotificationRepository.setNotifications(emptyList())
+
+            // THEN the chip shows the time
+            assertThat(latest!![0])
+                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+        }
+
+    @Test
+    fun chips_hasHeadsUpByUser_onlyShowsIcon() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
+                    )
+                )
+            )
+
+            // WHEN there's a HUN pinned by a user
+            kosmos.headsUpNotificationRepository.setNotifications(
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "notif",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
+                )
+            )
+
+            assertThat(latest!![0])
+                .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
         }
 
     @Test

@@ -1589,7 +1589,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
             assertThat(logoInfo).isNotNull()
             assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconWithBadge)
-            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionWithBadge)
+            // Logo label does not use badge info.
+            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
         }
 
     @Test

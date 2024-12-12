@@ -170,7 +170,7 @@ public class BluetoothPowerStatsProcessorTest {
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
                 () -> new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
-        BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
+        BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
         mBluetoothActivityEnergyInfo = mockBluetoothActivityEnergyInfo(1000, 600, 100, 200,
                 mockUidTraffic(APP_UID1, 100, 200),
@@ -271,7 +271,7 @@ public class BluetoothPowerStatsProcessorTest {
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
                 () -> new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
-        BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
+        BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
         mBluetoothActivityEnergyInfo = mockBluetoothActivityEnergyInfo(1000, 600, 100, 200,
                 mockUidTraffic(APP_UID1, 100, 200),
@@ -371,7 +371,7 @@ public class BluetoothPowerStatsProcessorTest {
         PowerComponentAggregatedPowerStats aggregatedStats = createAggregatedPowerStats(
                 () -> new BluetoothPowerStatsProcessor(mStatsRule.getPowerProfile()));
 
-        BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector);
+        BluetoothPowerStatsCollector collector = new BluetoothPowerStatsCollector(mInjector, null);
         collector.setEnabled(true);
         mBluetoothActivityEnergyInfo = mockBluetoothActivityEnergyInfo(1000, 600, 100, 200,
                 mockUidTraffic(APP_UID1, 100, 200),

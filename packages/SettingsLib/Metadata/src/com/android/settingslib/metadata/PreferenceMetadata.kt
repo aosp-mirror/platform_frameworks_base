@@ -107,20 +107,11 @@ interface PreferenceMetadata {
      *
      * UI framework normally does not allow user to interact with the preference widget when it is
      * disabled.
-     *
-     * [dependencyOfEnabledState] is provided to support dependency, the [shouldDisableDependents]
-     * value of dependent preference is used to decide enabled state.
      */
-    fun isEnabled(context: Context): Boolean {
-        val dependency = dependencyOfEnabledState(context) ?: return true
-        return !dependency.shouldDisableDependents(context)
-    }
+    fun isEnabled(context: Context): Boolean = true
 
-    /** Returns the key of depended preference to decide the enabled state. */
-    fun dependencyOfEnabledState(context: Context): PreferenceMetadata? = null
-
-    /** Returns whether this preference's dependents should be disabled. */
-    fun shouldDisableDependents(context: Context): Boolean = !isEnabled(context)
+    /** Returns the keys of depended preferences. */
+    fun dependencies(context: Context): Array<String> = arrayOf()
 
     /** Returns if the preference is persistent in datastore. */
     fun isPersistent(context: Context): Boolean = this is PersistentPreference<*>
@@ -174,13 +165,11 @@ interface PreferenceMetadata {
 }
 
 /** Metadata of preference group. */
-@AnyThread
-interface PreferenceGroup : PreferenceMetadata
+@AnyThread interface PreferenceGroup : PreferenceMetadata
 
 /** Metadata of preference category. */
 @AnyThread
-open class PreferenceCategory(override val key: String, override val title: Int) :
-    PreferenceGroup
+open class PreferenceCategory(override val key: String, override val title: Int) : PreferenceGroup
 
 /** Metadata of preference screen. */
 @AnyThread

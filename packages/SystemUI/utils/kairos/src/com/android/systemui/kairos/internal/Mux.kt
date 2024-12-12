@@ -188,6 +188,14 @@ internal sealed class MuxNode<K : Any, V, Output>(val lifecycle: MuxLifecycle<Ou
     }
 
     abstract fun hasCurrentValueLocked(transactionStore: TransactionStore): Boolean
+
+    fun schedule(evalScope: EvalScope) {
+        // TODO: Potential optimization
+        //  Detect if this node is guaranteed to have a single upstream within this transaction,
+        //  then bypass scheduling it. Instead immediately schedule its downstream and treat this
+        //  MuxNode as a Pull (effectively making it a mapCheap).
+        depthTracker.schedule(evalScope.scheduler, this)
+    }
 }
 
 /** An input branch of a mux node, associated with a key. */
@@ -202,7 +210,7 @@ internal class MuxBranchNode<K : Any, V>(private val muxNode: MuxNode<K, V, *>, 
         val upstreamResult = upstream.getPushEvent(evalScope)
         if (upstreamResult is Just) {
             muxNode.upstreamData[key] = upstreamResult.value
-            evalScope.schedule(muxNode)
+            muxNode.schedule(evalScope)
         }
     }
 

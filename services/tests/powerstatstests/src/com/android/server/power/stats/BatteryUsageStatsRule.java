@@ -41,6 +41,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 
@@ -65,6 +66,7 @@ public class BatteryUsageStatsRule implements TestRule {
 
     private final PowerProfile mPowerProfile;
     private final MockClock mMockClock = new MockClock();
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(666777, mMockClock);
     private String mTestName;
     private boolean mCreateTempDirectory;
     private File mHistoryDir;
@@ -118,7 +120,7 @@ public class BatteryUsageStatsRule implements TestRule {
             clearDirectory();
         }
         mBatteryStats = new MockBatteryStatsImpl(mBatteryStatsConfigBuilder.build(),
-                mMockClock, mHistoryDir, mHandler, new PowerStatsUidResolver());
+                mMockClock, mMonotonicClock, mHistoryDir, mHandler, new PowerStatsUidResolver());
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
         synchronized (mBatteryStats) {
@@ -142,6 +144,10 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public MockClock getMockClock() {
         return mMockClock;
+    }
+
+    public MonotonicClock getMonotonicClock() {
+        return mMonotonicClock;
     }
 
     public Handler getHandler() {

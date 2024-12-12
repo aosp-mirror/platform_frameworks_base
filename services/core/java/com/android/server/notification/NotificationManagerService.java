@@ -361,6 +361,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.GroupHelper.NotificationAttributes;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
+import com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent;
 import com.android.server.notification.toast.CustomToastRecord;
 import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
@@ -1934,10 +1935,20 @@ public class NotificationManagerService extends SystemService {
                 hasSensitiveContent, lifespanMs);
     }
 
-    protected void logClassificationChannelAdjustmentReceived(boolean hasPosted, boolean isAlerting,
-                                                              int classification, int lifespanMs) {
+    protected void logClassificationChannelAdjustmentReceived(NotificationRecord r,
+                                                              boolean hasPosted,
+                                                              int classification) {
+        // Note that this value of isAlerting does not fully indicate whether a notif
+        // would make a sound or HUN on device; it is an approximation for metrics.
+        boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
+        int instanceId = r.getSbn().getInstanceId() == null
+                ? 0 : r.getSbn().getInstanceId().getId();
+
         FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_CHANNEL_CLASSIFICATION,
-                hasPosted, isAlerting, classification, lifespanMs);
+                hasPosted, isAlerting, classification,
+                r.getLifespanMs(System.currentTimeMillis()),
+                NotificationReportedEvent.NOTIFICATION_ADJUSTED.getId(),
+                instanceId, r.getUid());
     }
 
     protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
@@ -7052,11 +7063,8 @@ public class NotificationManagerService extends SystemService {
                     int classification = adjustments.getInt(KEY_TYPE);
                     // swap app provided type with the real thing
                     adjustments.putParcelable(KEY_TYPE, newChannel);
-                    // Note that this value of isAlerting does not fully indicate whether a notif
-                    // would make a sound or HUN on device; it is an approximation for metrics.
-                    boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
-                    logClassificationChannelAdjustmentReceived(isPosted, isAlerting, classification,
-                            r.getLifespanMs(System.currentTimeMillis()));
+
+                    logClassificationChannelAdjustmentReceived(r, isPosted, classification);
                 }
             }
             r.addAdjustment(adjustment);

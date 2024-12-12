@@ -32,7 +32,6 @@ import com.android.systemui.qs.PseudoGridView
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -51,31 +50,22 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UserSwitchDialogControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var dialogFactory: SystemUIDialog.Factory
-    @Mock
-    private lateinit var dialog: SystemUIDialog
-    @Mock
-    private lateinit var falsingManager: FalsingManager
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var userDetailViewAdapter: UserDetailView.Adapter
-    @Mock
-    private lateinit var launchExpandable: Expandable
-    @Mock
-    private lateinit var neutralButton: Button
-    @Mock
-    private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
-    @Mock
-    private lateinit var uiEventLogger: UiEventLogger
-    @Captor
-    private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
+    @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
+    @Mock private lateinit var dialog: SystemUIDialog
+    @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var userDetailViewAdapter: UserDetailView.Adapter
+    @Mock private lateinit var launchExpandable: Expandable
+    @Mock private lateinit var neutralButton: Button
+    @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
+    @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Captor private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
 
     private lateinit var controller: UserSwitchDialogController
 
@@ -84,16 +74,17 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(dialog.context).thenReturn(mContext)
-        whenever(dialogFactory.create()).thenReturn(dialog)
+        whenever(dialogFactory.create(eq(mContext))).thenReturn(dialog)
 
-        controller = UserSwitchDialogController(
-            { userDetailViewAdapter },
-            activityStarter,
-            falsingManager,
-            mDialogTransitionAnimator,
-            uiEventLogger,
-            dialogFactory
-        )
+        controller =
+            UserSwitchDialogController(
+                { userDetailViewAdapter },
+                activityStarter,
+                falsingManager,
+                mDialogTransitionAnimator,
+                uiEventLogger,
+                dialogFactory,
+            )
     }
 
     @Test
@@ -150,7 +141,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
             .postStartActivityDismissingKeyguard(
                 argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
                 eq(0),
-                eq(null)
+                eq(null),
             )
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
     }

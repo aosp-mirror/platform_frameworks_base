@@ -63,14 +63,12 @@ public class ZipFilePerfTest {
 
     @Test
     @Parameters(method = "getData")
-    public void timeZipFileOpen(int numEntries) throws Exception {
+    public void timeZipFileOpenClose(int numEntries) throws Exception {
         setUp(numEntries);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             ZipFile zf = new ZipFile(mFile);
-            state.pauseTiming();
             zf.close();
-            state.resumeTiming();
         }
     }
 

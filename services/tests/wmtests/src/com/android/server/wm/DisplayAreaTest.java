@@ -491,6 +491,7 @@ public class DisplayAreaTest extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_callSuperOnDescendantOrientationChangedNoSensor() {
         final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task stack =
                 new TaskBuilder(mSupervisor).setOnTop(!ON_TOP).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getTopNonFinishingActivity();

@@ -1718,8 +1718,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             int userId, @Nullable String namespace, String tag) {
         // Rate limit excessive schedule() calls.
         final String servicePkg = job.getService().getPackageName();
-        if (job.isPersisted() && (packageName == null || packageName.equals(servicePkg))) {
-            // Only limit schedule calls for persisted jobs scheduled by the app itself.
+        if (job.isPersisted() && (Flags.enforceScheduleLimitToProxyJobs()
+                || (packageName == null || packageName.equals(servicePkg)))) {
+            // limit excessive schedule calls for persisted jobs.
             final String pkg = packageName == null ? servicePkg : packageName;
             if (!mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG)) {
                 if (mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_LOGGED)) {
@@ -5925,9 +5926,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.print(Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT,
                     Flags.doNotForceRushExecutionAtBoot());
-            pw.println();
-            pw.print(android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION,
-                    android.app.job.Flags.backupJobsExemption());
             pw.println();
             pw.print(android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND,
                     android.app.job.Flags.ignoreImportantWhileForeground());

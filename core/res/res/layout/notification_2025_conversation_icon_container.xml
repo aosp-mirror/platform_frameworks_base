@@ -18,32 +18,27 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/conversation_icon_container"
-    android:layout_width="@dimen/conversation_content_start"
+    android:layout_width="@dimen/notification_2025_content_margin_start"
     android:layout_height="wrap_content"
     android:gravity="start|top"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingTop="20dp"
-    android:paddingBottom="16dp"
     android:importantForAccessibility="no"
     >
 
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/notification_2025_margin"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:layout_gravity="top|center_horizontal"
         >
 
-        <!-- Big icon: 48x48, 12dp padding top, 16dp padding sides -->
         <com.android.internal.widget.CachingIconView
             android:id="@+id/conversation_icon"
-            android:layout_width="@dimen/conversation_avatar_size"
-            android:layout_height="@dimen/conversation_avatar_size"
-            android:layout_marginLeft="@dimen/conversation_badge_protrusion"
-            android:layout_marginRight="@dimen/conversation_badge_protrusion"
-            android:layout_marginBottom="@dimen/conversation_badge_protrusion"
+            android:layout_width="@dimen/notification_2025_icon_circle_size"
+            android:layout_height="@dimen/notification_2025_icon_circle_size"
             android:background="@drawable/notification_icon_circle"
             android:clipToOutline="true"
             android:scaleType="centerCrop"
@@ -52,19 +47,25 @@
 
         <ViewStub
             android:layout="@layout/notification_2025_conversation_face_pile_layout"
-            android:layout_width="@dimen/conversation_avatar_size"
-            android:layout_height="@dimen/conversation_avatar_size"
-            android:layout_marginLeft="@dimen/conversation_badge_protrusion"
-            android:layout_marginRight="@dimen/conversation_badge_protrusion"
-            android:layout_marginBottom="@dimen/conversation_badge_protrusion"
+            android:layout_width="@dimen/notification_2025_icon_circle_size"
+            android:layout_height="@dimen/notification_2025_icon_circle_size"
             android:id="@+id/conversation_face_pile"
             />
 
+        <!-- The badge icon is visually aligned to the square containing the conversation icon,
+        but it has a border in the color of the background that is meant to delimit it from the
+        conversation icon. This border, although not visible due to the color, is technically
+        outside these bounds.
+        In order to align the badge properly to the bottom end of the square, we use a top/start
+        margin that is equal to (size of the conversation icon - size of the badge - size of the
+        border on one side).
+        -->
         <FrameLayout
             android:id="@+id/conversation_icon_badge"
-            android:layout_width="@dimen/conversation_icon_size_badged"
-            android:layout_height="@dimen/conversation_icon_size_badged"
-            android:layout_gravity="end|bottom"
+            android:layout_width="@dimen/notification_2025_conversation_icon_badge_size"
+            android:layout_height="@dimen/notification_2025_conversation_icon_badge_size"
+            android:layout_marginTop="@dimen/notification_2025_conversation_icon_badge_position"
+            android:layout_marginStart="@dimen/notification_2025_conversation_icon_badge_position"
             android:clipChildren="false"
             android:clipToPadding="false"
             >
@@ -83,7 +84,7 @@
                 android:id="@+id/icon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="4dp"
+                android:layout_margin="@dimen/notification_2025_conversation_icon_badge_padding"
                 android:layout_gravity="center"
                 android:forceHasOverlappingRendering="false"
                 />

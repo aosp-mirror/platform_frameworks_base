@@ -1010,6 +1010,7 @@ public class SQLiteRawStatementTest {
         mDatabase.beginTransaction();
         try {
             mDatabase.execSQL("CREATE TABLE t1 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t1 (i, j) VALUES (2, 20)");
             mDatabase.setTransactionSuccessful();
         } finally {
             mDatabase.endTransaction();
@@ -1017,13 +1018,58 @@ public class SQLiteRawStatementTest {
 
         mDatabase.beginTransactionReadOnly();
         try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
-            s.step();
-            s.getColumnText(5); // out-of-range column
+            assertTrue(s.step());
+            s.getColumnText(5); // out-of-range column: the range is [0,2).
             fail("JNI exception not thrown");
         } catch (SQLiteBindOrColumnIndexOutOfRangeException e) {
             // Passing case.
         } finally {
             mDatabase.endTransaction();
         }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            // Do not step the statement.  The column count will be zero.
+            s.getColumnText(5); // out-of-range column: never stepped.
+            fail("JNI exception not thrown");
+        } catch (SQLiteMisuseException e) {
+            // Passing case.
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            // Do not step the statement.  The column count will be zero.
+            s.getColumnText(0); // out-of-range column: never stepped.
+            fail("JNI exception not thrown");
+        } catch (SQLiteMisuseException e) {
+            // Passing case.
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Ensure that column names and column types can be fetched even if the statement is not
+        // stepped.  A new SQL statement is created to avoid interaction from the statement cache.
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1 WHERE j = 3")) {
+            // Do not step the statement.
+            assertEquals("i", s.getColumnName(0));
+            assertEquals("j", s.getColumnName(1));
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.beginTransactionReadOnly();
+        try (SQLiteRawStatement s = mDatabase.createRawStatement("SELECT * from t1")) {
+            // Do not step the statement.
+            s.getColumnName(3); // out-of-range column
+            fail("JNI exception not thrown");
+        } catch (SQLiteBindOrColumnIndexOutOfRangeException e) {
+            // Passing case.
+        } finally {
+            mDatabase.endTransaction();
+        }
+
     }
 }

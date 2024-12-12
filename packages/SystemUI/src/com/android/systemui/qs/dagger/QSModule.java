@@ -16,55 +16,10 @@
 
 package com.android.systemui.qs.dagger;
 
-import com.android.systemui.media.dagger.MediaModule;
-import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.ReduceBrightColorsControllerImpl;
-import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule;
-import com.android.systemui.qs.external.QSExternalModule;
-import com.android.systemui.qs.panels.dagger.PanelsModule;
-import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
-import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.tiles.di.QSTilesModule;
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter;
-import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl;
-
-import java.util.Map;
-
-import dagger.Binds;
 import dagger.Module;
-import dagger.multibindings.Multibinds;
 
 /**
- * Module for QS dependencies
+ * Module for QS dependencies for AOSP inclusion
  */
-@Module(subcomponents = {QSFragmentComponent.class, QSSceneComponent.class},
-        includes = {
-                MediaModule.class,
-                PanelsModule.class,
-                QSFragmentComposeModule.class,
-                QSExternalModule.class,
-                QSFlagsModule.class,
-                QSHostModule.class,
-                QSPipelineModule.class,
-                QSTilesModule.class,
-        }
-)
-public interface QSModule {
-
-    /**
-     * A map of internal QS tiles. Ensures that this can be injected even if
-     * it is empty
-     */
-    @Multibinds
-    Map<String, QSTileImpl<?>> tileMap();
-
-    @Binds
-    QSSceneAdapter bindsQsSceneInteractor(QSSceneAdapterImpl impl);
-
-    /**
-     * Dims the screen
-     */
-    @Binds
-    ReduceBrightColorsController bindReduceBrightColorsController(
-            ReduceBrightColorsControllerImpl impl);
-}
+@Module(includes = { QSModuleBase.class})
+public interface QSModule { }

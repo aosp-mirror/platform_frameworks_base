@@ -70,6 +70,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
@@ -160,6 +161,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
     private static final String MIDI_ALSA_PATH =
             "/sys/class/android_usb/android0/f_midi/alsa";
+
+    /**
+     * The minimum SELinux genfs labels version that supports udc sysfs genfs context.
+     */
+    private static final int MIN_SELINUX_GENFS_LABELS_VERSION = 202404;
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
@@ -445,7 +451,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         mEnableUdcSysfsUsbStateUpdate =
                 android.hardware.usb.flags.Flags.enableUdcSysfsUsbStateUpdate()
-                && context.getResources().getBoolean(R.bool.config_enableUdcSysfsUsbStateUpdate);
+                && context.getResources().getBoolean(R.bool.config_enableUdcSysfsUsbStateUpdate)
+                && SELinux.getGenfsLabelsVersion() > MIN_SELINUX_GENFS_LABELS_VERSION;
 
         if (mEnableUdcSysfsUsbStateUpdate) {
             mUEventObserver.startObserving(UDC_SUBSYS_MATCH);

@@ -134,7 +134,7 @@
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
     <public name="pageSizeCompat" />
     <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
-    <public name="shareRolePriority"/>
+    <public name="wantsRoleHolderPriority"/>
     <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
     <public name="minSdkVersionFull"/>
   </staging-public-group>
@@ -151,12 +151,24 @@
     <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
          @hide @SystemApi -->
     <public name="config_systemDependencyInstaller" />
-    <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_CROSS_USER_ROLE_PLATFORM_API_ENABLED)
-         @hide @SystemApi -->
-    <public name="config_defaultReservedForTestingProfileGroupExclusivity" />
+    <!-- @hide @SystemApi -->
+    <public name="removed_config_defaultReservedForTestingProfileGroupExclusivity" />
     <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_SYSTEM_VENDOR_INTELLIGENCE_ROLE_ENABLED)
          @hide @SystemApi -->
     <public name="config_systemVendorIntelligence" />
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceIntelligenceService"></public>
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceSandboxedInferenceService"></public>
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace"></public>
+
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">

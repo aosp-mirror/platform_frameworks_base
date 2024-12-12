@@ -1950,6 +1950,21 @@
     <!-- Text displayed indicating that the user might be able to use satellite SOS. -->
     <string name="satellite_emergency_only_carrier_text">Emergency calls or SOS</string>
 
+    <!-- Content description skeleton. Input strings should be carrier name and signal bar description [CHAR LIMIT=NONE]-->
+    <string name="accessibility_phone_string_format"><xliff:g id="carrier_name" example="Carrier Name">%1$s</xliff:g>, <xliff:g id="signal_strength_description" example="two bars">%2$s</xliff:g>.</string>
+    <!-- Content description describing 0 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_no_signal">no signal</string>
+    <!-- Content description describing 1 signal bar. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_one_bar">one bar</string>
+    <!-- Content description describing 2 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_two_bars">two bars</string>
+    <!-- Content description describing 3 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_three_bars">three bars</string>
+    <!-- Content description describing 4 signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_four_bars">four bars</string>
+    <!-- Content description describing full signal bars. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_signal_full">signal full</string>
+
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
 
@@ -2046,8 +2061,9 @@
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
 
+    <!-- TODO: b/381099727 - Mark translatable once feedback layout is finalized. -->
     <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
-    <string name="notification_guts_bundle_feedback">Provide Bundle Feedback</string>
+    <string name="notification_guts_bundle_feedback" translatable="false">Provide Bundle Feedback</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -2282,11 +2298,11 @@
     <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app on the right [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Use split screen with current app on the right</string>
+    <string name="system_multitasking_rhs">Use split screen with app on the right</string>
     <!-- User visible title for the keyboard shortcut that enters split screen with current app on the left [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Use split screen with current app on the left</string>
+    <string name="system_multitasking_lhs">Use split screen with app on the left</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
-    <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
+    <string name="system_multitasking_full_screen">Switch to full screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_splitscreen_focus_rhs">Switch to app on right or below while using split screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on left or above while using split screen [CHAR LIMIT=70] -->
@@ -2575,8 +2591,6 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
 
-    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
-    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
     <string name="shutdown_progress">Shutting down\u2026</string>
 

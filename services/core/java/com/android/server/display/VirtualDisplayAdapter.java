@@ -91,6 +91,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
     private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices = new ArrayMap<>();
 
+    // When a virtual display is created, the mapping (appToken -> ownerUid) is stored here. That
+    // way, when the display is released later, we can retrieve the ownerUid and decrement
+    // the number of virtual displays that exist for that ownerUid. We can't use
+    // Binder.getCallingUid() because the display might be released by the system process and not
+    // the process that created the display.
+    private final ArrayMap<IBinder, Integer> mOwnerUids = new ArrayMap<>();
+
     private final int mMaxDevices;
     private final int mMaxDevicesPerPackage;
     private final SparseIntArray mNoOfDevicesPerPackage = new SparseIntArray();
@@ -194,6 +201,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         mVirtualDisplayDevices.put(appToken, device);
         if (getFeatureFlags().isVirtualDisplayLimitEnabled()) {
             mNoOfDevicesPerPackage.put(ownerUid, noOfDevices + 1);
+            mOwnerUids.put(appToken, ownerUid);
         }
 
         try {
@@ -205,7 +213,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             appToken.linkToDeath(device, 0);
         } catch (RemoteException ex) {
             Slog.e(TAG, "Virtual Display: error while setting up VirtualDisplayDevice", ex);
-            removeVirtualDisplayDeviceLocked(appToken, ownerUid);
+            removeVirtualDisplayDeviceLocked(appToken);
             device.destroyLocked(false);
             return null;
         }
@@ -252,12 +260,10 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     /**
      * Release a virtual display that was previously created
      * @param appToken The token to identify the display
-     * @param ownerUid The UID of the package, used to keep track of and limit the number of
-     *                 displays created per package
      * @return The display device that has been removed
      */
-    public DisplayDevice releaseVirtualDisplayLocked(IBinder appToken, int ownerUid) {
-        VirtualDisplayDevice device = removeVirtualDisplayDeviceLocked(appToken, ownerUid);
+    public DisplayDevice releaseVirtualDisplayLocked(IBinder appToken) {
+        VirtualDisplayDevice device = removeVirtualDisplayDeviceLocked(appToken);
         if (device != null) {
             Slog.v(TAG, "Release VirtualDisplay " + device.mName);
             device.destroyLocked(true);
@@ -299,11 +305,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
     }
 
-    private VirtualDisplayDevice removeVirtualDisplayDeviceLocked(IBinder appToken, int ownerUid) {
-        int noOfDevices = mNoOfDevicesPerPackage.get(ownerUid, /* valueIfKeyNotFound= */ 0);
+    private VirtualDisplayDevice removeVirtualDisplayDeviceLocked(IBinder appToken) {
         if (getFeatureFlags().isVirtualDisplayLimitEnabled()) {
+            int ownerUid = mOwnerUids.get(appToken);
+            int noOfDevices = mNoOfDevicesPerPackage.get(ownerUid, /* valueIfKeyNotFound= */ 0);
             if (noOfDevices <= 1) {
                 mNoOfDevicesPerPackage.delete(ownerUid);
+                mOwnerUids.remove(appToken);
             } else {
                 mNoOfDevicesPerPackage.put(ownerUid, noOfDevices - 1);
             }
@@ -378,7 +386,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         @Override
         public void binderDied() {
             synchronized (getSyncRoot()) {
-                removeVirtualDisplayDeviceLocked(mAppToken, mOwnerUid);
+                removeVirtualDisplayDeviceLocked(mAppToken);
                 Slog.i(TAG, "Virtual display device released because application token died: "
                     + mOwnerPackageName);
                 destroyLocked(false);

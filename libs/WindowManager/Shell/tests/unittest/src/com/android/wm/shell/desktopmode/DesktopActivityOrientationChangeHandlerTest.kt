@@ -36,6 +36,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_RESPECT_ORIENTATION_CHANGE_FOR_UNRESIZEABLE
+import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
@@ -98,6 +99,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Mock lateinit var persistentRepository: DesktopPersistentRepository
     @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
     @Mock lateinit var userManager: UserManager
+    @Mock lateinit var shellController: ShellController
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var handler: DesktopActivityOrientationChangeHandler
@@ -123,6 +125,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
             DesktopUserRepositories(
                 context,
                 shellInit,
+                shellController,
                 persistentRepository,
                 repositoryInitializer,
                 testScope,

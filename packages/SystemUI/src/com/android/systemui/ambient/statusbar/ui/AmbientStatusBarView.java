@@ -75,8 +75,8 @@ public class AmbientStatusBarView extends ConstraintLayout {
     private ShadowInfo mAmbientShadowInfo;
     private int mDrawableSize;
     private int mDrawableInsetSize;
-    private static final float KEY_SHADOW_ALPHA = 0.35f;
-    private static final float AMBIENT_SHADOW_ALPHA = 0.4f;
+    private static final float KEY_SHADOW_ALPHA = 0.8f;
+    private static final float AMBIENT_SHADOW_ALPHA = 0.6f;
 
     public AmbientStatusBarView(Context context) {
         this(context, null);

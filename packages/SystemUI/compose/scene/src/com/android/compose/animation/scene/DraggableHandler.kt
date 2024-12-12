@@ -108,7 +108,7 @@ internal class DraggableHandlerImpl(
 
         swipes.updateSwipesResults(fromContent)
         val result =
-            swipes.findUserActionResult(overSlop)
+            (if (overSlop < 0f) swipes.upOrLeftResult else swipes.downOrRightResult)
                 // As we were unable to locate a valid target scene, the initial SwipeAnimation
                 // cannot be defined. Consequently, a simple NoOp Controller will be returned.
                 ?: return NoOpDragController
@@ -448,27 +448,6 @@ internal class Swipes(val upOrLeft: Swipe.Resolved, val downOrRight: Swipe.Resol
         this.upOrLeftResult = upOrLeftResult
         this.downOrRightResult = downOrRightResult
     }
-
-    /**
-     * Returns the [UserActionResult] in the direction of [directionOffset].
-     *
-     * @param directionOffset signed float that indicates the direction. Positive is down or right
-     *   negative is up or left.
-     * @return null when there are no targets in either direction. If one direction is null and you
-     *   drag into the null direction this function will return the opposite direction, assuming
-     *   that the users intention is to start the drag into the other direction eventually. If
-     *   [directionOffset] is 0f and both direction are available, it will default to
-     *   [upOrLeftResult].
-     */
-    fun findUserActionResult(directionOffset: Float): UserActionResult? {
-        return when {
-            upOrLeftResult == null && downOrRightResult == null -> null
-            (directionOffset < 0f && upOrLeftResult != null) || downOrRightResult == null ->
-                upOrLeftResult
-
-            else -> downOrRightResult
-        }
-    }
 }
 
 internal class NestedScrollHandlerImpl(
@@ -535,31 +514,6 @@ internal class NestedScrollHandlerImpl(
                         shouldEnableSwipes()
                     }
                 }
-            },
-            canStartPostFling = { velocityAvailable ->
-                val behavior: NestedScrollBehavior =
-                    when {
-                        velocityAvailable > 0f -> topOrLeftBehavior
-                        velocityAvailable < 0f -> bottomOrRightBehavior
-                        else -> return@PriorityNestedScrollConnection false
-                    }
-
-                // We could start an overscroll animation
-                canChangeScene = false
-
-                val pointersDown: PointersInfo.PointersDown? =
-                    when (val info = pointersInfoOwner.pointersInfo()) {
-                        PointersInfo.MouseWheel -> {
-                            // Do not support mouse wheel interactions
-                            return@PriorityNestedScrollConnection false
-                        }
-
-                        is PointersInfo.PointersDown -> info
-                        null -> null
-                    }
-                lastPointersDown = pointersDown
-
-                behavior.canStartOnPostFling && shouldEnableSwipes()
             },
             onStart = { firstScroll ->
                 scrollController(
