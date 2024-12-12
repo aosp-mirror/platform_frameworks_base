@@ -47,7 +47,11 @@ internal constructor(
     }
 
     override fun createDialog(): SystemUIDialog {
-        return systemUIDialogFactory.create(this, rearDisplayContext)
+        return systemUIDialogFactory.create(
+            this,
+            rearDisplayContext,
+            false, /* shouldAcsdDismissDialog */
+        )
     }
 
     override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {

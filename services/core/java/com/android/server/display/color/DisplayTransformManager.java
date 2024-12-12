@@ -265,7 +265,7 @@ public class DisplayTransformManager {
     /**
      * Sets color mode and updates night display transform values.
      */
-    public boolean setColorMode(int colorMode, float[] nightDisplayMatrix,
+    public boolean setColorMode(int colorMode, float[] nightDisplayMatrix, float[] rbcMatrix,
             int compositionColorMode) {
         if (colorMode == ColorDisplayManager.COLOR_MODE_NATURAL) {
             applySaturation(COLOR_SATURATION_NATURAL);
@@ -285,7 +285,11 @@ public class DisplayTransformManager {
             setDisplayColor(colorMode, compositionColorMode);
         }
 
+        // These are close to the setDisplayColor() call to reduce delay between
+        // setting these matrixes and updating the color mode. Without this proximity
+        // of calls, updates to color mode can result in flicker.
         setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, nightDisplayMatrix);
+        setColorMatrix(LEVEL_COLOR_MATRIX_REDUCE_BRIGHT_COLORS, rbcMatrix);
 
         updateConfiguration();
 

@@ -448,6 +448,17 @@ public class MessagingGroup extends NotificationOptimizedLinearLayout implements
         mSenderView.setVisibility(hidden ? GONE : VISIBLE);
     }
 
+    private void updateIconVisibility() {
+        if (Flags.notificationsRedesignTemplates() && !mIsInConversation) {
+            // We don't show any icon (other than the app icon) in the collapsed form. For
+            // conversations, keeping this container helps with aligning the message to the icon
+            // when collapsed, but the old messaging style already has this alignment built into
+            // the template like all other layouts. Conversations are special because we use the
+            // same base layout for both the collapsed and expanded views.
+            mMessagingIconContainer.setVisibility(mSingleLine ? GONE : VISIBLE);
+        }
+    }
+
     @Override
     public boolean hasDifferentHeightWhenFirst() {
         return mCanHideSenderIfFirst && !mSingleLine && !TextUtils.isEmpty(mSenderName);
@@ -703,6 +714,7 @@ public class MessagingGroup extends NotificationOptimizedLinearLayout implements
             updateMaxDisplayedLines();
             updateClipRect();
             updateSenderVisibility();
+            updateIconVisibility();
         }
     }
 
@@ -716,13 +728,16 @@ public class MessagingGroup extends NotificationOptimizedLinearLayout implements
      * @param isInConversation is this in a conversation
      */
     public void setIsInConversation(boolean isInConversation) {
-        if (Flags.notificationsRedesignTemplates()) {
-            // No alignment adjustments are necessary in the redesign, as the size of the icons
-            // in both conversations and old messaging notifications are the same.
-            return;
-        }
         if (mIsInConversation != isInConversation) {
             mIsInConversation = isInConversation;
+
+            if (Flags.notificationsRedesignTemplates()) {
+                updateIconVisibility();
+                // No other alignment adjustments are necessary in the redesign, as the size of the
+                // icons in both conversations and old messaging notifications are the same.
+                return;
+            }
+
             MarginLayoutParams layoutParams =
                     (MarginLayoutParams) mMessagingIconContainer.getLayoutParams();
             layoutParams.width = mIsInConversation

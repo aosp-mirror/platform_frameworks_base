@@ -112,9 +112,10 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public int openSession(HubEndpointInfo destination, String serviceDescriptor)
             throws RemoteException {
-        ContextHubServiceUtil.checkPermissions(mContext);
+        super.openSession_enforcePermission();
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         int sessionId = mEndpointManager.reserveSessionId();
         EndpointInfo halEndpointInfo = ContextHubServiceUtil.convertHalEndpointInfo(destination);
@@ -139,8 +140,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void closeSession(int sessionId, int reason) throws RemoteException {
-        ContextHubServiceUtil.checkPermissions(mContext);
+        super.closeSession_enforcePermission();
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         try {
             mContextHubProxy.closeEndpointSession(sessionId, (byte) reason);
@@ -151,8 +153,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void unregister() {
-        ContextHubServiceUtil.checkPermissions(mContext);
+        super.unregister_enforcePermission();
         mIsRegistered.set(false);
         try {
             mContextHubProxy.unregisterEndpoint(mHalEndpointInfo);
@@ -174,8 +177,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void openSessionRequestComplete(int sessionId) {
-        ContextHubServiceUtil.checkPermissions(mContext);
+        super.openSessionRequestComplete_enforcePermission();
         synchronized (mOpenSessionLock) {
             try {
                 mContextHubProxy.endpointSessionOpenComplete(sessionId);
@@ -187,9 +191,10 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void sendMessage(
             int sessionId, HubMessage message, IContextHubTransactionCallback callback) {
-        ContextHubServiceUtil.checkPermissions(mContext);
+        super.sendMessage_enforcePermission();
         Message halMessage = ContextHubServiceUtil.createHalMessage(message);
         synchronized (mOpenSessionLock) {
             if (!mActiveSessionIds.contains(sessionId)
@@ -227,8 +232,9 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     @Override
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void sendMessageDeliveryStatus(int sessionId, int messageSeqNumber, byte errorCode) {
-        ContextHubServiceUtil.checkPermissions(mContext);
+        super.sendMessageDeliveryStatus_enforcePermission();
         MessageDeliveryStatus status = new MessageDeliveryStatus();
         status.messageSequenceNumber = messageSeqNumber;
         status.errorCode = errorCode;
@@ -276,7 +282,8 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         }
         if (mContextHubEndpointCallback != null) {
             try {
-                mContextHubEndpointCallback.onSessionClosed(sessionId, reason);
+                mContextHubEndpointCallback.onSessionClosed(
+                        sessionId, ContextHubServiceUtil.toAppHubEndpointReason(reason));
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onSessionClosed", e);
             }

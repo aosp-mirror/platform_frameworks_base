@@ -296,9 +296,19 @@ fun CommunalHub(
                                     offset.y,
                                 ) - contentOffset
                             val index = firstIndexAtOffset(gridState, adjustedOffset)
-                            val key =
+                            val tappedKey =
                                 index?.let { keyAtIndexIfEditable(contentListState.list, index) }
-                            viewModel.setSelectedKey(key)
+
+                            viewModel.setSelectedKey(
+                                if (
+                                    Flags.hubEditModeTouchAdjustments() &&
+                                        selectedKey.value == tappedKey
+                                ) {
+                                    null
+                                } else {
+                                    tappedKey
+                                }
+                            )
                         }
                     }
                 }
@@ -1080,17 +1090,27 @@ private fun Toolbar(
                 .onSizeChanged { setToolbarSize(it) }
     ) {
         val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
-        ToolbarButton(
-            isPrimary = !removeEnabled,
-            modifier = Modifier.align(Alignment.CenterStart),
-            onClick = onOpenWidgetPicker,
-        ) {
-            Icon(Icons.Default.Add, null)
-            Text(text = addWidgetText)
+
+        if (!(Flags.hubEditModeTouchAdjustments() && removeEnabled)) {
+            ToolbarButton(
+                isPrimary = !removeEnabled,
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = onOpenWidgetPicker,
+            ) {
+                Icon(Icons.Default.Add, null)
+                Text(text = addWidgetText)
+            }
         }
 
         AnimatedVisibility(
-            modifier = Modifier.align(Alignment.Center),
+            modifier =
+                Modifier.align(
+                    if (Flags.hubEditModeTouchAdjustments()) {
+                        Alignment.CenterStart
+                    } else {
+                        Alignment.Center
+                    }
+                ),
             visible = removeEnabled,
             enter = fadeIn(),
             exit = fadeOut(),
@@ -1113,7 +1133,11 @@ private fun Toolbar(
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             ButtonDefaults.IconSpacing,
-                            Alignment.CenterHorizontally,
+                            if (Flags.hubEditModeTouchAdjustments()) {
+                                Alignment.Start
+                            } else {
+                                Alignment.CenterHorizontally
+                            },
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

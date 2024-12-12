@@ -1274,7 +1274,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testInputDeviceNotifyConfigurationChanged() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_FILTER_IRRELEVANT_INPUT_DEVICE_CHANGE);
         spyOn(mDisplayContent);
         doReturn(false).when(mDisplayContent).sendNewConfiguration();
         final InputDevice deviceA = mock(InputDevice.class);

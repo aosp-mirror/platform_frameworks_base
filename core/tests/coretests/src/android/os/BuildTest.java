@@ -178,6 +178,20 @@ public class BuildTest {
     }
 
     @Test
+    public void testParseFullVersionIncorrectInputMajorVersionTooLarge() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Build.parseFullVersion("40000.1");
+        });
+    }
+
+    @Test
+    public void testParseFullVersionIncorrectInputMinorVersionTooLarge() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Build.parseFullVersion("3.99999999");
+        });
+    }
+
+    @Test
     public void testFullVersionToStringCorrectInput() throws Exception {
         assertEquals("0.0", Build.fullVersionToString(0));
         assertEquals("1.0", Build.fullVersionToString(1 * 100000 + 0));

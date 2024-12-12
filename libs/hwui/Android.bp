@@ -154,7 +154,10 @@ cc_defaults {
                 "libstatssocket_lazy",
                 "libtonemap",
             ],
-            whole_static_libs: ["hwui_flags_cc_lib"],
+            whole_static_libs: [
+                "hwui_flags_cc_lib",
+                "libsurfaceflingerflags",
+            ],
         },
         host: {
             static_libs: [

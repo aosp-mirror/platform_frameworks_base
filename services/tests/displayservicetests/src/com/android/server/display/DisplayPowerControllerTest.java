@@ -2626,8 +2626,8 @@ public final class DisplayPowerControllerTest {
                 mock(ScreenOffBrightnessSensorController.class);
         final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
         final HdrClamper hdrClamper = mock(HdrClamper.class);
-        final NormalBrightnessModeController normalBrightnessModeController = mock(
-                NormalBrightnessModeController.class);
+        final NormalBrightnessModeController normalBrightnessModeController =
+                new NormalBrightnessModeController();
         BrightnessClamperController clamperController = mock(BrightnessClamperController.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);

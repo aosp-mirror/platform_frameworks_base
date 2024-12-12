@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.combine
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -34,7 +35,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -59,6 +59,7 @@ constructor(
                 deviceEntryInteractor.isDeviceEntered,
                 deviceEntryInteractor.isUnlocked,
                 keyguardInteractor.isDreamingWithOverlay,
+                keyguardInteractor.isAbleToDream,
                 transform = ::homeScene,
             )
             .stateIn(
@@ -71,6 +72,7 @@ constructor(
                         isDeviceEntered = deviceEntryInteractor.isDeviceEntered.value,
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         isDreamingWithOverlay = false,
+                        isAbleToDream = false,
                     ),
             )
 
@@ -82,10 +84,11 @@ constructor(
         isDeviceEntered: Boolean,
         isUnlocked: Boolean,
         isDreamingWithOverlay: Boolean,
+        isAbleToDream: Boolean,
     ): SceneKey =
         when {
             // Dream can run even if Keyguard is disabled, thus it has the highest priority here.
-            isDreamingWithOverlay -> Scenes.Dream
+            isDreamingWithOverlay && isAbleToDream -> Scenes.Dream
             !isKeyguardEnabled -> Scenes.Gone
             canSwipeToEnter == true -> Scenes.Lockscreen
             !isDeviceEntered -> Scenes.Lockscreen
