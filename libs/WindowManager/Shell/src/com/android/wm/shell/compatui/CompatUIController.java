@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -58,6 +59,7 @@ import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
 import dagger.Lazy;
@@ -70,7 +72,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -196,6 +197,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final CompatUIStatusManager mCompatUIStatusManager;
 
     @NonNull
+    private final FocusTransitionObserver mFocusTransitionObserver;
+
+    @NonNull
     private final Optional<DesktopUserRepositories> mDesktopUserRepositories;
 
     public CompatUIController(@NonNull Context context,
@@ -212,7 +216,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
             @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler,
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull CompatUIStatusManager compatUIStatusManager,
-            @NonNull Optional<DesktopUserRepositories> desktopUserRepositories) {
+            @NonNull Optional<DesktopUserRepositories> desktopUserRepositories,
+            @NonNull FocusTransitionObserver focusTransitionObserver) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -229,6 +234,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 DISAPPEAR_DELAY_MS, flags);
         mCompatUIStatusManager = compatUIStatusManager;
         mDesktopUserRepositories = desktopUserRepositories;
+        mFocusTransitionObserver = focusTransitionObserver;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -405,7 +411,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         // start tracking the buttons visibility for this task.
         if (mTopActivityTaskId != taskInfo.taskId
                 && !taskInfo.isTopActivityTransparent
-                && taskInfo.isVisible && taskInfo.isFocused) {
+                && taskInfo.isVisible
+                && mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)) {
             mTopActivityTaskId = taskInfo.taskId;
             setHasShownUserAspectRatioSettingsButton(false);
         }
