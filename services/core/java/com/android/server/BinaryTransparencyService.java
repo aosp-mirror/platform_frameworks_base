@@ -228,20 +228,31 @@ public class BinaryTransparencyService extends SystemService {
                     computePackageSignerSha256Digests(packageState.getSigningInfo());
 
             AndroidPackage pkg = packageState.getAndroidPackage();
-            for (AndroidPackageSplit split : pkg.getSplits()) {
+            if(pkg != null) {
+                for (AndroidPackageSplit split : pkg.getSplits()) {
+                    var appInfo = new IBinaryTransparencyService.AppInfo();
+                    appInfo.packageName = packageName;
+                    appInfo.longVersion = versionCode;
+                    appInfo.splitName = split.getName();  // base's split name is null
+                    // Signer digests are consistent between splits, guaranteed by Package Manager.
+                    appInfo.signerDigests = signerDigests;
+                    appInfo.mbaStatus = mbaStatus;
+
+                    // Only digest and split name are different between splits.
+                    Digest digest = measureApk(split.getPath());
+                    appInfo.digest = digest.value();
+                    appInfo.digestAlgorithm = digest.algorithm();
+
+                    results.add(appInfo);
+                }
+            } else {
+                Slog.w(TAG, packageName + " APK file is not physically present,"
+                    + " skipping split and digest measurement");
                 var appInfo = new IBinaryTransparencyService.AppInfo();
                 appInfo.packageName = packageName;
                 appInfo.longVersion = versionCode;
-                appInfo.splitName = split.getName();  // base's split name is null
-                // Signer digests are consistent between splits, guaranteed by Package Manager.
                 appInfo.signerDigests = signerDigests;
                 appInfo.mbaStatus = mbaStatus;
-
-                // Only digest and split name are different between splits.
-                Digest digest = measureApk(split.getPath());
-                appInfo.digest = digest.value();
-                appInfo.digestAlgorithm = digest.algorithm();
-
                 results.add(appInfo);
             }
 
