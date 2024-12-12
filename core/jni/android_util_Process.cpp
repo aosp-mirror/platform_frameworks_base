@@ -584,32 +584,6 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
     return pri;
 }
 
-jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
-                                          jint pid, jboolean is_increased)
-{
-    char text[64];
-
-    if (is_increased) {
-        strcpy(text, "/sys/fs/cgroup/memory/sw/tasks");
-    } else {
-        strcpy(text, "/sys/fs/cgroup/memory/tasks");
-    }
-
-    struct stat st;
-    if (stat(text, &st) || !S_ISREG(st.st_mode)) {
-        return false;
-    }
-
-    int fd = open(text, O_WRONLY | O_CLOEXEC);
-    if (fd >= 0) {
-        sprintf(text, "%" PRId32, pid);
-        write(fd, text, strlen(text));
-        close(fd);
-    }
-
-    return true;
-}
-
 void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
 {
     if (name == NULL) {
@@ -1392,7 +1366,6 @@ static const JNINativeMethod methods[] = {
         {"getProcessGroup", "(I)I", (void*)android_os_Process_getProcessGroup},
         {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
-        {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
         {"setArgV0Native", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
         {"setUid", "(I)I", (void*)android_os_Process_setUid},
         {"setGid", "(I)I", (void*)android_os_Process_setGid},
