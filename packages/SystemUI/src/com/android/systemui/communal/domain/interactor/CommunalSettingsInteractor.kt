@@ -69,6 +69,12 @@ constructor(
             // Start this eagerly since the value is accessed synchronously in many places.
             .stateIn(scope = bgScope, started = SharingStarted.Eagerly, initialValue = false)
 
+    /** Whether or not screensaver (dreams) is enabled for the currently selected user. */
+    val isScreensaverEnabled: Flow<Boolean> =
+        userInteractor.selectedUserInfo.flatMapLatest { user ->
+            repository.getScreensaverEnabledState(user)
+        }
+
     /**
      * Returns true if any glanceable hub functionality should be enabled via configs and flags.
      *

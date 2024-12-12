@@ -295,6 +295,34 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun screensaverDisabledByUser() =
+        testScope.runTest {
+            val enabledState by collectLastValue(underTest.getScreensaverEnabledState(PRIMARY_USER))
+
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.SCREENSAVER_ENABLED,
+                0,
+                PRIMARY_USER.id,
+            )
+
+            assertThat(enabledState).isFalse()
+        }
+
+    @Test
+    fun screensaverEnabledByUser() =
+        testScope.runTest {
+            val enabledState by collectLastValue(underTest.getScreensaverEnabledState(PRIMARY_USER))
+
+            kosmos.fakeSettings.putIntForUser(
+                Settings.Secure.SCREENSAVER_ENABLED,
+                1,
+                PRIMARY_USER.id,
+            )
+
+            assertThat(enabledState).isTrue()
+        }
+
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
         whenever(kosmos.devicePolicyManager.getKeyguardDisabledFeatures(nullable(), eq(user.id)))
             .thenReturn(disabledFlags)

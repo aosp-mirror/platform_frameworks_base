@@ -17,6 +17,7 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.provider.Settings
 import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -29,12 +30,16 @@ import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.statusbar.policy.batteryController
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -56,10 +61,9 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun shouldShowDreamButtonOnHub_trueWhenCanDream() =
+    fun shouldShowDreamButtonOnHub_trueWhenPluggedIn() =
         with(kosmos) {
             runTest {
-                whenever(dreamManager.canStartDreaming(any())).thenReturn(true)
                 whenever(batteryController.isPluggedIn()).thenReturn(true)
 
                 val shouldShowButton by collectLastValue(underTest.shouldShowDreamButtonOnHub)
@@ -68,22 +72,9 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun shouldShowDreamButtonOnHub_falseWhenCannotDream() =
-        with(kosmos) {
-            runTest {
-                whenever(dreamManager.canStartDreaming(any())).thenReturn(false)
-                whenever(batteryController.isPluggedIn()).thenReturn(true)
-
-                val shouldShowButton by collectLastValue(underTest.shouldShowDreamButtonOnHub)
-                assertThat(shouldShowButton).isFalse()
-            }
-        }
-
-    @Test
     fun shouldShowDreamButtonOnHub_falseWhenNotPluggedIn() =
         with(kosmos) {
             runTest {
-                whenever(dreamManager.canStartDreaming(any())).thenReturn(true)
                 whenever(batteryController.isPluggedIn()).thenReturn(false)
 
                 val shouldShowButton by collectLastValue(underTest.shouldShowDreamButtonOnHub)
@@ -92,13 +83,40 @@ class CommunalToDreamButtonViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun onShowDreamButtonTap_startsDream() =
+    fun onShowDreamButtonTap_dreamsEnabled_startsDream() =
         with(kosmos) {
             runTest {
+                val currentUser = fakeUserRepository.asMainUser()
+                kosmos.fakeSettings.putIntForUser(
+                    Settings.Secure.SCREENSAVER_ENABLED,
+                    1,
+                    currentUser.id,
+                )
+                runCurrent()
+
                 underTest.onShowDreamButtonTap()
                 runCurrent()
 
                 verify(dreamManager).startDream()
+            }
+        }
+
+    @Test
+    fun onShowDreamButtonTap_dreamsDisabled_startsActivity() =
+        with(kosmos) {
+            runTest {
+                val currentUser = fakeUserRepository.asMainUser()
+                kosmos.fakeSettings.putIntForUser(
+                    Settings.Secure.SCREENSAVER_ENABLED,
+                    0,
+                    currentUser.id,
+                )
+                runCurrent()
+
+                underTest.onShowDreamButtonTap()
+                runCurrent()
+
+                verify(activityStarter).postStartActivityDismissingKeyguard(any(), anyInt())
             }
         }
 }
