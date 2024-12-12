@@ -31,6 +31,7 @@ import android.media.IMediaRoute2ProviderServiceCallback;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
+import android.media.MediaRoute2ProviderService.Reason;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -89,6 +91,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             mRequestIdToSessionCreationRequest;
 
     @GuardedBy("mLock")
+    private final Map<String, SystemMediaSessionCallback> mSystemSessionCallbacks;
+
+    @GuardedBy("mLock")
+    private final LongSparseArray<SystemMediaSessionCallback> mRequestIdToSystemSessionRequest;
+
+    @GuardedBy("mLock")
     private final Map<String, SessionCreationOrTransferRequest> mSessionOriginalIdToTransferRequest;
 
     MediaRoute2ProviderServiceProxy(
@@ -102,6 +110,8 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         mContext = Objects.requireNonNull(context, "Context must not be null.");
         mRequestIdToSessionCreationRequest = new LongSparseArray<>();
         mSessionOriginalIdToTransferRequest = new HashMap<>();
+        mRequestIdToSystemSessionRequest = new LongSparseArray<>();
+        mSystemSessionCallbacks = new ArrayMap<>();
         mIsSelfScanOnlyProvider = isSelfScanOnlyProvider;
         mSupportsSystemMediaRouting = supportsSystemMediaRouting;
         mUserId = userId;
@@ -236,6 +246,48 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         }
     }
 
+    /**
+     * Requests the creation of a system media routing session.
+     *
+     * @param requestId The id of the request.
+     * @param uid The uid of the package whose media to route, or {@link
+     *     android.os.Process#INVALID_UID} if not applicable (for example, if all the system's media
+     *     must be routed).
+     * @param packageName The package name to populate {@link
+     *     RoutingSessionInfo#getClientPackageName()}.
+     * @param routeId The id of the route to be initially {@link
+     *     RoutingSessionInfo#getSelectedRoutes()}.
+     * @param sessionHints An optional bundle with paramets.
+     * @param callback A {@link SystemMediaSessionCallback} to notify of session events.
+     * @see MediaRoute2ProviderService#onCreateSystemRoutingSession
+     */
+    public void requestCreateSystemMediaSession(
+            long requestId,
+            int uid,
+            String packageName,
+            String routeId,
+            @Nullable Bundle sessionHints,
+            @NonNull SystemMediaSessionCallback callback) {
+        if (!Flags.enableMirroringInMediaRouter2()) {
+            throw new IllegalStateException(
+                    "Unexpected call to requestCreateSystemMediaSession. Governing flag is"
+                            + " disabled.");
+        }
+        if (mConnectionReady) {
+            boolean binderRequestSucceeded =
+                    mActiveConnection.requestCreateSystemMediaSession(
+                            requestId, uid, packageName, routeId, sessionHints);
+            if (!binderRequestSucceeded) {
+                // notify failure.
+                return;
+            }
+            updateBinding();
+            synchronized (mLock) {
+                mRequestIdToSystemSessionRequest.put(requestId, callback);
+            }
+        }
+    }
+
     public boolean hasComponentName(String packageName, String className) {
         return mComponentName.getPackageName().equals(packageName)
                 && mComponentName.getClassName().equals(className);
@@ -292,7 +344,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
                 mLastDiscoveryPreference != null
                         && mLastDiscoveryPreference.shouldPerformActiveScan()
                         && mSupportsSystemMediaRouting;
+        boolean bindDueToOngoingSystemMediaRoutingSessions = false;
+        if (Flags.enableMirroringInMediaRouter2()) {
+            synchronized (mLock) {
+                bindDueToOngoingSystemMediaRoutingSessions = !mSystemSessionCallbacks.isEmpty();
+            }
+        }
         if (!getSessionInfos().isEmpty()
+                || bindDueToOngoingSystemMediaRoutingSessions
                 || bindDueToManagerScan
                 || bindDueToSystemMediaRoutingSupport) {
             return true;
@@ -438,6 +497,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         String newSessionId = newSession.getId();
 
         synchronized (mLock) {
+            var systemMediaSessionCallback = mRequestIdToSystemSessionRequest.get(requestId);
+            if (systemMediaSessionCallback != null) {
+                mSystemSessionCallbacks.put(newSession.getOriginalId(), systemMediaSessionCallback);
+                systemMediaSessionCallback.onSessionUpdate(newSession);
+                return;
+            }
+
             if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
                 newSession =
                         createSessionWithPopulatedTransferInitiationDataLocked(
@@ -569,6 +635,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
 
         boolean found = false;
         synchronized (mLock) {
+            var sessionCallback = mSystemSessionCallbacks.get(releasedSession.getOriginalId());
+            if (sessionCallback != null) {
+                sessionCallback.onSessionReleased();
+                return;
+            }
+
             mSessionOriginalIdToTransferRequest.remove(releasedSession.getId());
             for (RoutingSessionInfo session : mSessionInfos) {
                 if (TextUtils.equals(session.getId(), releasedSession.getId())) {
@@ -673,6 +745,26 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
                 pendingTransferCount);
     }
 
+    /**
+     * Callback for events related to system media sessions.
+     *
+     * @see MediaRoute2ProviderService#onCreateSystemRoutingSession
+     */
+    public interface SystemMediaSessionCallback {
+
+        /**
+         * Called when the corresponding session's {@link RoutingSessionInfo}, or upon the creation
+         * of the given session info.
+         */
+        void onSessionUpdate(@NonNull RoutingSessionInfo sessionInfo);
+
+        /** Called when the request with the given id fails for the given reason. */
+        void onRequestFailed(long requestId, @Reason int reason);
+
+        /** Called when the corresponding session is released. */
+        void onSessionReleased();
+    }
+
     // All methods in this class are called on the main thread.
     private final class ServiceConnectionImpl implements ServiceConnection {
 
@@ -737,6 +829,28 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
             } catch (RemoteException ex) {
                 Slog.e(TAG, "requestCreateSession: Failed to deliver request.");
             }
+        }
+
+        /**
+         * Sends a system media session creation request to the provider service, and returns
+         * whether the request transaction succeeded.
+         *
+         * <p>The transaction might fail, for example, if the recipient process has died.
+         */
+        public boolean requestCreateSystemMediaSession(
+                long requestId,
+                int uid,
+                String packageName,
+                String routeId,
+                @Nullable Bundle sessionHints) {
+            try {
+                mService.requestCreateSystemMediaSession(
+                        requestId, uid, packageName, routeId, sessionHints);
+                return true;
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "requestCreateSystemMediaSession: Failed to deliver request.");
+            }
+            return false;
         }
 
         public void releaseSession(long requestId, String sessionId) {
