@@ -28,6 +28,7 @@ import static com.android.server.vcn.routeselection.NetworkPriorityClassifier.ge
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IpSecTransform;
@@ -40,6 +41,7 @@ import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.net.vcn.util.LogUtils;
+import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.telephony.TelephonyCallback;
@@ -73,6 +75,8 @@ import java.util.TreeSet;
  *
  * @hide
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class UnderlyingNetworkController {
     @NonNull private static final String TAG = UnderlyingNetworkController.class.getSimpleName();
 

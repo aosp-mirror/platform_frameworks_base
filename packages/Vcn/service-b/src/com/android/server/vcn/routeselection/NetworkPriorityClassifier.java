@@ -29,12 +29,14 @@ import static com.android.server.VcnManagementService.LOCAL_LOG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.net.NetworkCapabilities;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.VcnCellUnderlyingNetworkTemplate;
 import android.net.vcn.VcnManager;
 import android.net.vcn.VcnUnderlyingNetworkTemplate;
 import android.net.vcn.VcnWifiUnderlyingNetworkTemplate;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -50,6 +52,8 @@ import java.util.Map;
 import java.util.Set;
 
 /** @hide */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 class NetworkPriorityClassifier {
     @NonNull private static final String TAG = NetworkPriorityClassifier.class.getSimpleName();
     /**
