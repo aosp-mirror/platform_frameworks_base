@@ -1307,8 +1307,7 @@ private inline fun <T> computeValue(
 
     val currentContent = currentContentState.contents.last()
 
-    // The element is shared: interpolate between the value in fromContent and the value in
-    // toContent.
+    // The element is shared: interpolate between the value in fromContent and toContent.
     // TODO(b/290184746): Support non linear shared paths as well as a way to make sure that shared
     // elements follow the finger direction.
     val isSharedElement = fromState != null && toState != null
@@ -1343,153 +1342,52 @@ private inline fun <T> computeValue(
     // The content for which we compute the transformation. Note that this is not necessarily
     // [currentContent] because [currentContent] could be a different content than the transition
     // fromContent or toContent during interruptions or when a ancestor transition is running.
-    val content: ContentKey
+    val transformationContentKey: ContentKey =
+        getTransformationContentKey(
+            isDisabledSharedElement = isSharedElement,
+            currentContent = currentContent,
+            layoutImpl = layoutImpl,
+            transition = transition,
+            element = element,
+            currentSceneState = currentSceneState,
+        )
     // Get the transformed value, i.e. the target value at the beginning (for entering elements) or
     // end (for leaving elements) of the transition.
-    val contentState: Element.State
-    when {
-        isSharedElement -> {
-            content = currentContent
-            contentState = currentContentState
-        }
-        isAncestorTransition(layoutImpl, transition) -> {
-            if (
-                fromState != null &&
-                    transition.transformationSpec.hasTransformation(element.key, fromContent)
-            ) {
-                content = fromContent
-                contentState = fromState
-            } else if (
-                toState != null &&
-                    transition.transformationSpec.hasTransformation(element.key, toContent)
-            ) {
-                content = toContent
-                contentState = toState
-            } else {
-                throw IllegalStateException(
-                    "Ancestor transition is active but no transformation " +
-                        "spec was found. The ancestor transition should have only been selected " +
-                        "when a transformation for that element and content was defined."
-                )
-            }
-        }
-        currentSceneState != null && currentContent == transition.currentScene -> {
-            content = currentContent
-            contentState = currentSceneState
-        }
-        fromState != null -> {
-            content = fromContent
-            contentState = fromState
-        }
-        else -> {
-            content = toContent
-            contentState = toState!!
-        }
-    }
+    val targetState: Element.State = element.stateByContent.getValue(transformationContentKey)
+    val idleValue = contentValue(targetState)
 
     val transformationWithRange =
-        transformation(transition.transformationSpec.transformations(element.key, content))
+        transformation(
+            transition.transformationSpec.transformations(element.key, transformationContentKey)
+        )
+
+    val isElementEntering =
+        when {
+            transformationContentKey == toContent -> true
+            transformationContentKey == fromContent -> false
+            isAncestorTransition(layoutImpl, transition) ->
+                isEnteringAncestorTransition(layoutImpl, transition)
+            transformationContentKey == transition.currentScene -> toState == null
+            else -> transformationContentKey == toContent
+        }
 
     val previewTransformation =
         transition.previewTransformationSpec?.let {
-            transformation(it.transformations(element.key, content))
+            transformation(it.transformations(element.key, transformationContentKey))
         }
+
     if (previewTransformation != null) {
-        val isInPreviewStage = transition.isInPreviewStage
-
-        val idleValue = contentValue(contentState)
-        val isEntering = content == toContent
-        val previewTargetValue =
-            with(
-                previewTransformation.transformation.requireInterpolatedTransformation(
-                    element,
-                    transition,
-                ) {
-                    "Custom transformations in preview specs should not be possible"
-                }
-            ) {
-                layoutImpl.propertyTransformationScope.transform(
-                    content,
-                    element.key,
-                    transition,
-                    idleValue,
-                )
-            }
-
-        val targetValueOrNull =
-            transformationWithRange?.let { transformation ->
-                with(
-                    transformation.transformation.requireInterpolatedTransformation(
-                        element,
-                        transition,
-                    ) {
-                        "Custom transformations are not allowed for properties with a preview"
-                    }
-                ) {
-                    layoutImpl.propertyTransformationScope.transform(
-                        content,
-                        element.key,
-                        transition,
-                        idleValue,
-                    )
-                }
-            }
-
-        // Make sure we don't read progress if values are the same and we don't need to interpolate,
-        // so we don't invalidate the phase where this is read.
-        when {
-            isInPreviewStage && isEntering && previewTargetValue == targetValueOrNull ->
-                return previewTargetValue
-            isInPreviewStage && !isEntering && idleValue == previewTargetValue -> return idleValue
-            previewTargetValue == targetValueOrNull && idleValue == previewTargetValue ->
-                return idleValue
-            else -> {}
-        }
-
-        val previewProgress = transition.previewProgress
-        // progress is not needed for all cases of the below when block, therefore read it lazily
-        // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range
-        val previewRangeProgress =
-            previewTransformation.range?.progress(previewProgress) ?: previewProgress
-
-        if (isInPreviewStage) {
-            // if we're in the preview stage of the transition, interpolate between start state and
-            // preview target state:
-            return if (isEntering) {
-                // i.e. in the entering case between previewTargetValue and targetValue (or
-                // idleValue if no transformation is defined in the second stage transition)...
-                lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress)
-            } else {
-                // ...and in the exiting case between the idleValue and the previewTargetValue.
-                lerp(idleValue, previewTargetValue, previewRangeProgress)
-            }
-        }
-
-        // if we're in the second stage of the transition, interpolate between the state the
-        // element was left at the end of the preview-phase and the target state:
-        return if (isEntering) {
-            // i.e. in the entering case between preview-end-state and the idleValue...
-            lerp(
-                lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress),
-                idleValue,
-                transformationWithRange?.range?.progress(transition.progress) ?: transition.progress,
-            )
-        } else {
-            if (targetValueOrNull == null) {
-                // ... and in the exiting case, the element should remain in the preview-end-state
-                // if no further transformation is defined in the second-stage transition...
-                lerp(idleValue, previewTargetValue, previewRangeProgress)
-            } else {
-                // ...and otherwise it should be interpolated between preview-end-state and
-                // targetValue
-                lerp(
-                    lerp(idleValue, previewTargetValue, previewRangeProgress),
-                    targetValueOrNull,
-                    transformationWithRange.range?.progress(transition.progress)
-                        ?: transition.progress,
-                )
-            }
-        }
+        return computePreviewTransformationValue(
+            transition,
+            idleValue,
+            transformationContentKey,
+            isElementEntering,
+            previewTransformation,
+            element,
+            layoutImpl,
+            transformationWithRange,
+            lerp,
+        )
     }
 
     if (transformationWithRange == null) {
@@ -1504,7 +1402,7 @@ private inline fun <T> computeValue(
         is CustomPropertyTransformation ->
             return with(transformation) {
                 layoutImpl.propertyTransformationScope.transform(
-                    content,
+                    transformationContentKey,
                     element.key,
                     transition,
                     transition.coroutineScope,
@@ -1515,11 +1413,10 @@ private inline fun <T> computeValue(
         }
     }
 
-    val idleValue = contentValue(contentState)
     val targetValue =
         with(transformation) {
             layoutImpl.propertyTransformationScope.transform(
-                content,
+                transformationContentKey,
                 element.key,
                 transition,
                 idleValue,
@@ -1536,20 +1433,164 @@ private inline fun <T> computeValue(
     // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range.
     val rangeProgress = transformationWithRange.range?.progress(progress) ?: progress
 
-    // Interpolate between the value at rest and the value before entering/after leaving.
-    val isEntering =
-        when {
-            content == toContent -> true
-            content == fromContent -> false
-            isAncestorTransition(layoutImpl, transition) ->
-                isEnteringAncestorTransition(layoutImpl, transition)
-            content == transition.currentScene -> toState == null
-            else -> content == toContent
-        }
-    return if (isEntering) {
+    return if (isElementEntering) {
         lerp(targetValue, idleValue, rangeProgress)
     } else {
         lerp(idleValue, targetValue, rangeProgress)
+    }
+}
+
+private fun getTransformationContentKey(
+    isDisabledSharedElement: Boolean,
+    currentContent: ContentKey,
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition,
+    element: Element,
+    currentSceneState: Element.State?,
+): ContentKey {
+    return when {
+        isDisabledSharedElement -> {
+            currentContent
+        }
+        isAncestorTransition(layoutImpl, transition) -> {
+            if (
+                element.stateByContent[transition.fromContent] != null &&
+                    transition.transformationSpec.hasTransformation(
+                        element.key,
+                        transition.fromContent,
+                    )
+            ) {
+                transition.fromContent
+            } else if (
+                element.stateByContent[transition.toContent] != null &&
+                    transition.transformationSpec.hasTransformation(
+                        element.key,
+                        transition.toContent,
+                    )
+            ) {
+                transition.toContent
+            } else {
+                throw IllegalStateException(
+                    "Ancestor transition is active but no transformation " +
+                        "spec was found. The ancestor transition should have only been selected " +
+                        "when a transformation for that element and content was defined."
+                )
+            }
+        }
+        currentSceneState != null && currentContent == transition.currentScene -> {
+            currentContent
+        }
+        element.stateByContent[transition.fromContent] != null -> {
+            transition.fromContent
+        }
+        else -> {
+            transition.toContent
+        }
+    }
+}
+
+private inline fun <T> computePreviewTransformationValue(
+    transition: TransitionState.Transition,
+    idleValue: T,
+    transformationContentKey: ContentKey,
+    isEntering: Boolean,
+    previewTransformation: TransformationWithRange<PropertyTransformation<T>>,
+    element: Element,
+    layoutImpl: SceneTransitionLayoutImpl,
+    transformationWithRange: TransformationWithRange<PropertyTransformation<T>>?,
+    lerp: (T, T, Float) -> T,
+): T {
+    val isInPreviewStage = transition.isInPreviewStage
+
+    val previewTargetValue =
+        with(
+            previewTransformation.transformation.requireInterpolatedTransformation(
+                element,
+                transition,
+            ) {
+                "Custom transformations in preview specs should not be possible"
+            }
+        ) {
+            layoutImpl.propertyTransformationScope.transform(
+                transformationContentKey,
+                element.key,
+                transition,
+                idleValue,
+            )
+        }
+
+    val targetValueOrNull =
+        transformationWithRange?.let { transformation ->
+            with(
+                transformation.transformation.requireInterpolatedTransformation(
+                    element,
+                    transition,
+                ) {
+                    "Custom transformations are not allowed for properties with a preview"
+                }
+            ) {
+                layoutImpl.propertyTransformationScope.transform(
+                    transformationContentKey,
+                    element.key,
+                    transition,
+                    idleValue,
+                )
+            }
+        }
+
+    // Make sure we don't read progress if values are the same and we don't need to interpolate,
+    // so we don't invalidate the phase where this is read.
+    when {
+        isInPreviewStage && isEntering && previewTargetValue == targetValueOrNull ->
+            return previewTargetValue
+        isInPreviewStage && !isEntering && idleValue == previewTargetValue -> return idleValue
+        previewTargetValue == targetValueOrNull && idleValue == previewTargetValue ->
+            return idleValue
+        else -> {}
+    }
+
+    val previewProgress = transition.previewProgress
+    // progress is not needed for all cases of the below when block, therefore read it lazily
+    // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range
+    val previewRangeProgress =
+        previewTransformation.range?.progress(previewProgress) ?: previewProgress
+
+    if (isInPreviewStage) {
+        // if we're in the preview stage of the transition, interpolate between start state and
+        // preview target state:
+        return if (isEntering) {
+            // i.e. in the entering case between previewTargetValue and targetValue (or
+            // idleValue if no transformation is defined in the second stage transition)...
+            lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress)
+        } else {
+            // ...and in the exiting case between the idleValue and the previewTargetValue.
+            lerp(idleValue, previewTargetValue, previewRangeProgress)
+        }
+    }
+
+    // if we're in the second stage of the transition, interpolate between the state the
+    // element was left at the end of the preview-phase and the target state:
+    return if (isEntering) {
+        // i.e. in the entering case between preview-end-state and the idleValue...
+        lerp(
+            lerp(previewTargetValue, targetValueOrNull ?: idleValue, previewRangeProgress),
+            idleValue,
+            transformationWithRange?.range?.progress(transition.progress) ?: transition.progress,
+        )
+    } else {
+        if (targetValueOrNull == null) {
+            // ... and in the exiting case, the element should remain in the preview-end-state
+            // if no further transformation is defined in the second-stage transition...
+            lerp(idleValue, previewTargetValue, previewRangeProgress)
+        } else {
+            // ...and otherwise it should be interpolated between preview-end-state and
+            // targetValue
+            lerp(
+                lerp(idleValue, previewTargetValue, previewRangeProgress),
+                targetValueOrNull,
+                transformationWithRange.range?.progress(transition.progress) ?: transition.progress,
+            )
+        }
     }
 }
 
@@ -1564,7 +1605,7 @@ private fun isAncestorTransition(
 
 private fun isEnteringAncestorTransition(
     layoutImpl: SceneTransitionLayoutImpl,
-    transition: TransitionState.Transition
+    transition: TransitionState.Transition,
 ): Boolean {
     return layoutImpl.ancestors.fastAny { it.inContent == transition.toContent }
 }
