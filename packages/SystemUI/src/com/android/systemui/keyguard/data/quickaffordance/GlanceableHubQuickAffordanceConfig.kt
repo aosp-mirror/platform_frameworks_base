@@ -36,7 +36,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 /** Lockscreen affordance that opens the glanceable hub. */
 @SysUISingleton
@@ -60,13 +60,13 @@ constructor(
         get() = R.drawable.ic_widgets
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState>
-        get() = flow {
-            emit(
+        get() =
+            communalInteractor.isCommunalAvailable.map { available ->
                 if (!communalSettingsInteractor.isV2FlagEnabled()) {
                     Log.i(TAG, "Button hidden on lockscreen: flag not enabled.")
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden
-                } else if (!communalInteractor.isCommunalEnabled.value) {
-                    Log.i(TAG, "Button hidden on lockscreen: hub not enabled in settings.")
+                } else if (!available) {
+                    Log.i(TAG, "Button hidden on lockscreen: hub not available.")
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden
                 } else {
                     KeyguardQuickAffordanceConfig.LockScreenState.Visible(
@@ -77,8 +77,7 @@ constructor(
                             )
                     )
                 }
-            )
-        }
+            }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return if (!communalSettingsInteractor.isV2FlagEnabled()) {

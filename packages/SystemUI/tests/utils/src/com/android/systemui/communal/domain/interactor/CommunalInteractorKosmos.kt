@@ -99,10 +99,6 @@ suspend fun Kosmos.setCommunalAvailable(available: Boolean) {
 }
 
 suspend fun Kosmos.setCommunalV2Available(available: Boolean) {
-    setCommunalV2ConfigEnabled(true)
-    setCommunalEnabled(available)
-    with(fakeKeyguardRepository) {
-        setIsEncryptedOrLockdown(!available)
-        setKeyguardShowing(available)
-    }
+    setCommunalV2ConfigEnabled(available)
+    setCommunalAvailable(available)
 }
