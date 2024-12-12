@@ -28,6 +28,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
@@ -90,6 +91,7 @@ constructor(
     private val devicePolicyManager: DevicePolicyManager,
     private val dockManager: DockManager,
     private val biometricSettingsRepository: BiometricSettingsRepository,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @ShadeDisplayAware private val appContext: Context,
     private val sceneInteractor: Lazy<SceneInteractor>,
@@ -462,7 +464,10 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_LOCK_SCREEN_QUICK_AFFORDANCES_ENABLED,
                 value =
                     !isFeatureDisabledByDevicePolicy() &&
-                        appContext.resources.getBoolean(R.bool.custom_lockscreen_shortcuts_enabled),
+                        // TODO(b/383391342): remove isV2FlagEnabled check once trunkfood is reached
+                        (appContext.resources.getBoolean(
+                            R.bool.custom_lockscreen_shortcuts_enabled
+                        ) || communalSettingsInteractor.isV2FlagEnabled()),
             ),
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_CUSTOM_CLOCKS_ENABLED,
