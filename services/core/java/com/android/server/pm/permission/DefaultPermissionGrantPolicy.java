@@ -216,12 +216,12 @@ final class DefaultPermissionGrantPolicy {
 
     private static final Set<String> SENSORS_PERMISSIONS = new ArraySet<>();
     static {
+        SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
+        SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_BACKGROUND);
+
         if (Flags.replaceBodySensorPermissionEnabled()) {
             SENSORS_PERMISSIONS.add(HealthPermissions.READ_HEART_RATE);
             SENSORS_PERMISSIONS.add(HealthPermissions.READ_HEALTH_DATA_IN_BACKGROUND);
-        } else {
-            SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
-            SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_BACKGROUND);
         }
     }
 
