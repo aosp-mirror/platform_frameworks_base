@@ -7419,7 +7419,7 @@ PLcom/android/server/app/GameManagerService;->sendUserMessage(IILjava/lang/Strin
 PLcom/android/server/app/GameManagerService;->updateConfigsForUser(IZ[Ljava/lang/String;)V
 PLcom/android/server/app/GameManagerService;->writeGameModeInterventionsToFile(I)V
 PLcom/android/server/app/GameManagerSettings;-><init>(Ljava/io/File;)V
-HPLcom/android/server/app/GameManagerSettings;->getConfigOverride(Ljava/lang/String;)Lcom/android/server/app/GameManagerService$GamePackageConfiguration;
+HPLcom/android/server/app/GameManagerSettings;->getConfigOverrideLocked(Ljava/lang/String;)Lcom/android/server/app/GameManagerService$GamePackageConfiguration;
 HPLcom/android/server/app/GameManagerSettings;->getGameModeLocked(Ljava/lang/String;)I
 PLcom/android/server/app/GameManagerSettings;->readPersistentDataLocked()Z
 PLcom/android/server/appbinding/AppBindingConstants;-><init>(Ljava/lang/String;)V
