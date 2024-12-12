@@ -220,7 +220,7 @@ constructor(
 
         if (satelliteManager != null) {
             // Outer scope launch allows us to delay until MIN_UPTIME
-            scope.launch {
+            scope.launch(context = bgDispatcher) {
                 // First, check that satellite is supported on this device
                 satelliteSupport.value = checkSatelliteSupportAfterMinUptime(satelliteManager)
                 logBuffer.i(
@@ -229,7 +229,9 @@ constructor(
                 )
 
                 // Second, register a listener to let us know if there are changes to support
-                scope.launch { listenForChangesToSatelliteSupport(satelliteManager) }
+                scope.launch(context = bgDispatcher) {
+                    listenForChangesToSatelliteSupport(satelliteManager)
+                }
             }
         } else {
             logBuffer.i { "Satellite manager is null" }
