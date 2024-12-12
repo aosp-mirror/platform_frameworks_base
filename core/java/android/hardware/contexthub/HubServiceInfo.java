@@ -132,6 +132,21 @@ public final class HubServiceInfo implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        out.append("Service: ");
+        out.append("descriptor=");
+        out.append(mServiceDescriptor);
+        out.append(", format=");
+        out.append(mFormat);
+        out.append(", version=");
+        out.append(Integer.toHexString(mMajorVersion));
+        out.append(".");
+        out.append(Integer.toHexString(mMinorVersion));
+        return out.toString();
+    }
+
     /** Parcel implementation details */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
