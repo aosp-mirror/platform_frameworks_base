@@ -4276,16 +4276,16 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-        public @NonNull String[] getTypeAdjustmentDeniedPackages() {
+        public @NonNull int[] getAllowedAdjustmentKeyTypesForPackage(String pkg) {
             checkCallerIsSystemOrSystemUiOrShell();
-            return mAssistants.getTypeAdjustmentDeniedPackages();
+            return mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg);
         }
 
-        @Override
         @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-        public void setTypeAdjustmentForPackageState(String pkg, boolean enabled) {
+        public void setAssistantAdjustmentKeyTypeStateForPackage(String pkg, int type,
+                                                                 boolean enabled) {
             checkCallerIsSystemOrSystemUiOrShell();
-            mAssistants.setTypeAdjustmentForPackageState(pkg, enabled);
+            mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, type, enabled);
 
             handleSavePolicyFile();
         }
@@ -7083,7 +7083,7 @@ public class NotificationManagerService extends SystemService {
                         toRemove.add(potentialKey);
                     } else if (notificationClassificationUi()
                             && !mAssistants.isTypeAdjustmentAllowedForPackage(
-                            r.getSbn().getPackageName())) {
+                            r.getSbn().getPackageName(), adjustments.getInt(KEY_TYPE))) {
                         toRemove.add(potentialKey);
                     }
                 }
@@ -11740,7 +11740,11 @@ public class NotificationManagerService extends SystemService {
         private static final String ATT_DENIED = "denied_adjustments";
         private static final String ATT_ENABLED_TYPES = "enabled_key_types";
         private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
-        private static final String ATT_TYPES_DENIED_APPS = "types_denied_apps";
+        // Encapsulates a list of packages and the bundle types enabled for each package.
+        private static final String TAG_TYPES_ENABLED_FOR_APPS = "types_enabled_for_apps";
+        // Encapsulates the bundle types enabled for a package.
+        private static final String ATT_APP_ENABLED_TYPES = "app_enabled_types";
+        private static final String ATT_PACKAGE = "package";
 
         private final Object mLock = new Object();
 
@@ -11756,8 +11760,14 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mLock")
         private Map<Integer, HashSet<String>> mNasUnsupported = new ArrayMap<>();
 
+        // Types of classifications (aka bundles) enabled/allowed for this package.
+        // If the set is NULL (or package is not in the list), default classification allow list
+        // (the global one) should be used.
+        // If the set is empty, that indicates the package explicitly has all classifications
+        // disallowed.
         @GuardedBy("mLock")
-        private Set<String> mClassificationTypeDeniedPackages = new ArraySet<>();
+        private Map<String, Set<Integer>> mClassificationTypePackagesEnabledTypes =
+                new ArrayMap<>();
 
         protected ComponentName mDefaultFromConfig = null;
 
@@ -11958,41 +11968,88 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        /**
+         * Returns whether the type adjustment is allowed for this particular package.
+         * If no package-specific restrictions have been set, defaults to the same value as
+         * isAdjustmentKeyTypeAllowed(type).
+         */
         @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-        protected @NonNull boolean isTypeAdjustmentAllowedForPackage(String pkg) {
+        protected boolean isTypeAdjustmentAllowedForPackage(String pkg,
+                                                                     @Adjustment.Types int type) {
             synchronized (mLock) {
                 if (notificationClassificationUi()) {
-                    return !mClassificationTypeDeniedPackages.contains(pkg);
+                    if (mClassificationTypePackagesEnabledTypes.containsKey(pkg)) {
+                        Set<Integer> enabled = mClassificationTypePackagesEnabledTypes.get(pkg);
+                        if (enabled != null) {
+                            return enabled.contains(type);
+                        }
+                    }
+                    // If mClassificationTypePackagesEnabledTypes does not contain the pkg, or
+                    // the stored set is null, return the default.
+                    return isAdjustmentKeyTypeAllowed(type);
                 }
             }
-            return true;
+            return false;
         }
 
         @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-        protected @NonNull String[] getTypeAdjustmentDeniedPackages() {
+        protected @NonNull int[] getAllowedAdjustmentKeyTypesForPackage(String pkg) {
             synchronized (mLock) {
                 if (notificationClassificationUi()) {
-                    return mClassificationTypeDeniedPackages.toArray(new String[0]);
+                    if (mClassificationTypePackagesEnabledTypes.containsKey(pkg)) {
+                        Set<Integer> enabled = mClassificationTypePackagesEnabledTypes.get(pkg);
+                        if (enabled != null) {
+                            // Convert Set to int[] for return.
+                            int[] returnEnabled = new int[enabled.size()];
+                            int i = 0;
+                            for (int val: enabled) {
+                                returnEnabled[i] = val;
+                                i++;
+                            }
+                            return returnEnabled;
+                        }
+                    }
+                    // If package is not in the map, or the value is null, return the default.
+                    return getAllowedAdjustmentKeyTypes();
                 }
             }
-            return new String[]{};
+            return new int[]{};
         }
 
         /**
          * Set whether a particular package can have its notification channels adjusted to have a
          * different type by NotificationAssistants.
+         * Note: once this method is called to enable or disable a specific type for a package,
+         * the global default is set as the starting point, and the type is enabled/disabled from
+         * there. Future changes to the global default will not apply automatically to this package.
          */
         @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-        public void setTypeAdjustmentForPackageState(String pkg, boolean enabled) {
+        public void setAssistantAdjustmentKeyTypeStateForPackage(String pkg,
+                                                       @Adjustment.Types int type,
+                                                       boolean enabled) {
             if (!notificationClassificationUi()) {
                 return;
             }
             synchronized (mLock) {
-                if (enabled) {
-                    mClassificationTypeDeniedPackages.remove(pkg);
-                } else {
-                    mClassificationTypeDeniedPackages.add(pkg);
+                Set<Integer> enabledTypes = null;
+                if (mClassificationTypePackagesEnabledTypes.containsKey(pkg)) {
+                    enabledTypes = mClassificationTypePackagesEnabledTypes.get(pkg);
                 }
+                if (enabledTypes == null) {
+                    // Use global default to start.
+                    enabledTypes = new ArraySet<Integer>();
+                    // Convert from int[] to Set<Integer>
+                    for (int value : getAllowedAdjustmentKeyTypes()) {
+                        enabledTypes.add(value);
+                    }
+                }
+
+                if (enabled) {
+                    enabledTypes.add(type);
+                } else {
+                    enabledTypes.remove(type);
+                }
+                mClassificationTypePackagesEnabledTypes.put(pkg, enabledTypes);
             }
         }
 
@@ -12459,16 +12516,25 @@ public class NotificationManagerService extends SystemService {
                         TextUtils.join(",", mAllowedAdjustmentKeyTypes));
                 out.endTag(null, ATT_ENABLED_TYPES);
                 if (notificationClassificationUi()) {
-                    out.startTag(null, ATT_TYPES_DENIED_APPS);
-                    out.attribute(null, ATT_TYPES,
-                            TextUtils.join(",", mClassificationTypeDeniedPackages));
-                    out.endTag(null, ATT_TYPES_DENIED_APPS);
+                    out.startTag(null, TAG_TYPES_ENABLED_FOR_APPS);
+                    for (String pkg: mClassificationTypePackagesEnabledTypes.keySet()) {
+                        Set<Integer> allowedTypes =
+                                mClassificationTypePackagesEnabledTypes.get(pkg);
+                        if (allowedTypes != null) {
+                            out.startTag(null, ATT_APP_ENABLED_TYPES);
+                            out.attribute(null, ATT_PACKAGE, pkg);
+                            out.attribute(null, ATT_TYPES, TextUtils.join(",", allowedTypes));
+                            out.endTag(null, ATT_APP_ENABLED_TYPES);
+                        }
+                    }
+                    out.endTag(null, TAG_TYPES_ENABLED_FOR_APPS);
                 }
             }
         }
 
         @Override
-        protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
+        protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException,
+                XmlPullParserException {
             if (!notificationClassification()) {
                 return;
             }
@@ -12495,12 +12561,25 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                 }
-            } else if (notificationClassificationUi() && ATT_TYPES_DENIED_APPS.equals(tag)) {
-                final String apps = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+            } else if (TAG_TYPES_ENABLED_FOR_APPS.equals(tag)) {
+                final int appsOuterDepth = parser.getDepth();
                 synchronized (mLock) {
-                    mClassificationTypeDeniedPackages.clear();
-                    if (!TextUtils.isEmpty(apps)) {
-                        mClassificationTypeDeniedPackages.addAll(Arrays.asList(apps.split(",")));
+                    mClassificationTypePackagesEnabledTypes.clear();
+                    while (XmlUtils.nextElementWithin(parser, appsOuterDepth)) {
+                        if (!ATT_APP_ENABLED_TYPES.equals(parser.getName())) {
+                            continue;
+                        }
+                        final String app = XmlUtils.readStringAttribute(parser, ATT_PACKAGE);
+                        Set<Integer> allowedTypes = new ArraySet<>();
+                        final String typesString = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                        if (!TextUtils.isEmpty(typesString)) {
+                            allowedTypes = Arrays.stream(typesString.split(","))
+                                    .map(Integer::valueOf)
+                                    .collect(Collectors.toSet());
+                        }
+                        // Empty type list is allowed, because empty type list signifies the user
+                        // has manually cleared the package of allowed types.
+                        mClassificationTypePackagesEnabledTypes.put(app, allowedTypes);
                     }
                 }
             }
