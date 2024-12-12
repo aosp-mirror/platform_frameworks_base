@@ -30,14 +30,20 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.IpcDataCache;
 import android.os.IpcDataCache.Config;
+import android.os.ParcelFileDescriptor;
 import android.os.UpdateLock;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastPrintWriter;
+
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 /** @hide */
 public class BroadcastStickyCache {
@@ -219,6 +225,43 @@ public class BroadcastStickyCache {
         }
 
         return sActionConfigMap.get(action);
+    }
+
+    public static void dumpCacheInfo(@NonNull ParcelFileDescriptor pfd) {
+        if (!Flags.useStickyBcastCache()) {
+            return;
+        }
+        final PrintWriter pw = new FastPrintWriter(new FileOutputStream(pfd.getFileDescriptor()));
+        synchronized (BroadcastStickyCache.class) {
+            dumpCacheLocked(pw);
+        }
+        pw.flush();
+    }
+
+    @GuardedBy("BroadcastStickyCache.class")
+    private static void dumpCacheLocked(@NonNull PrintWriter pw) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(
+                pw, "  " /* singleIndent */, "  " /* prefix */);
+        ipw.println("Cached sticky broadcasts:");
+        ipw.increaseIndent();
+        final int count = sFilterCacheMap.size();
+        if (count == 0) {
+            ipw.println("<empty>");
+        } else {
+            for (int i = 0; i < count; ++i) {
+                final StickyBroadcastFilter stickyBroadcast = sFilterCacheMap.keyAt(i);
+                final IpcDataCache<Void, Intent> ipcDataCache = sFilterCacheMap.valueAt(i);
+                ipw.print("Entry #");
+                ipw.print(i);
+                ipw.println(":");
+                ipw.increaseIndent();
+                ipw.print("action", stickyBroadcast.action).println();
+                ipw.print("filter", stickyBroadcast.filter.toLongString()).println();
+                ipcDataCache.dumpCacheEntries(pw);
+                ipw.decreaseIndent();
+            }
+        }
+        ipw.decreaseIndent();
     }
 
     @VisibleForTesting

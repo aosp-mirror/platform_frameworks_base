@@ -179,6 +179,8 @@
     <!-- Text informing the user that their media is now playing on this tablet device. [CHAR LIMIT=50] -->
     <string name="media_transfer_playing_this_device" product="tablet">Playing on this tablet</string>
 
-
+    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
+    <string name="finder_active" product="default">You can locate this phone with Find My Device even when powered off</string>
+    <string name="finder_active" product="tablet">You can locate this tablet with Find My Device even when powered off</string>
 
 </resources>

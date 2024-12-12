@@ -37,6 +37,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -164,6 +165,8 @@ import java.util.concurrent.TimeUnit;
  * @hide
  */
 // TODO(b/180451994): ensure all incoming + outgoing calls have a cleared calling identity
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class VcnManagementService extends IVcnManagementService.Stub {
     @NonNull private static final String TAG = VcnManagementService.class.getSimpleName();
     @NonNull private static final String CONTEXT_ATTRIBUTION_TAG = "VCN";
@@ -297,8 +300,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         });
     }
 
-    // Package-visibility for SystemServer to create instances.
-    static VcnManagementService create(@NonNull Context context) {
+    /** Called by ConnectivityServiceInitializerB to create instances. */
+    // VcnManagementService will be jarjared but ConnectivityServiceInitializerB will not. Thus this
+    // method needs to be public for ConnectivityServiceInitializerB to access
+    public static VcnManagementService create(@NonNull Context context) {
         return new VcnManagementService(context, new Dependencies());
     }
 

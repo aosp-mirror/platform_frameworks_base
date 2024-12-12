@@ -26,12 +26,12 @@ import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAV
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 import static com.android.server.policy.PhoneWindowManager.SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL;
 
-import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGestureEvent;
 import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
@@ -758,54 +758,57 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG})
-    public void testKeyGestureToggleStickyKeys() {
+    public void testKeyGestureToggleDoNotDisturb() {
+        mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_OFF);
         Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB));
+        mPhoneWindowManager.assertZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
+        mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB));
+        mPhoneWindowManager.assertZenMode(Settings.Global.ZEN_MODE_OFF);
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG})
-    public void testKeyGestureToggleSlowKeys() {
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+    public void testLaunchSettingsAndSearchDoesntOpenAnything_withKeyguardOn() {
+        mPhoneWindowManager.overrideKeyguardOn(true);
 
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH);
+
+        mPhoneWindowManager.assertNoActivityLaunched();
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS})
-    public void testKeyGestureToggleMouseKeys() {
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+    public void testLaunchSettingsAndSearchDoesntOpenAnything_withUserSetupIncomplete() {
+        mPhoneWindowManager.overrideIsUserSetupComplete(false);
 
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH);
+
+        mPhoneWindowManager.assertNoActivityLaunched();
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG})
-    public void testKeyGestureToggleBounceKeys() {
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
+    public void testLaunchAssistantDoesntWork_withKeyguardOn() {
+        mPhoneWindowManager.overrideKeyguardOn(true);
 
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT);
+
+        mPhoneWindowManager.assertSearchManagerDoesntLaunchAssist();
+    }
+
+    @Test
+    public void testLaunchAssistantDoesntWork_withUserSetupIncomplete() {
+        mPhoneWindowManager.overrideIsUserSetupComplete(false);
+
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT);
+
+        mPhoneWindowManager.assertSearchManagerDoesntLaunchAssist();
     }
 }

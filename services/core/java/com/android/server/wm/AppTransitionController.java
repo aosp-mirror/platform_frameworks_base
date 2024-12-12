@@ -996,8 +996,7 @@ public class AppTransitionController {
                 // If the current window container is a task with adjacent task set, the both
                 // adjacent tasks will be opened or closed together. To get their opening or
                 // closing animation target independently, skip promoting their animation targets.
-                if (current.asTask() != null
-                        && current.asTask().getAdjacentTask() != null) {
+                if (current.asTask() != null && current.asTask().hasAdjacentTask()) {
                     canPromote = false;
                 }
 

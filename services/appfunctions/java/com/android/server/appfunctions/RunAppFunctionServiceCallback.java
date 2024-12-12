@@ -52,6 +52,7 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
             @NonNull IAppFunctionService service,
             @NonNull ServiceUsageCompleteListener serviceUsageCompleteListener) {
         try {
+            mSafeExecuteAppFunctionCallback.setExecutionStartTimeMillis();
             service.executeAppFunction(
                     mRequestInternal.getClientRequest(),
                     mRequestInternal.getCallingPackage(),

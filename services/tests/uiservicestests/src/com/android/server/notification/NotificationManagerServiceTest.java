@@ -311,6 +311,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.TestableFlagResolver;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -7637,7 +7638,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel, 1, null, true));
         when(r1.getLifespanMs(anyLong())).thenReturn(234);
 
-        r1.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        InstanceId instanceId1 = mNotificationInstanceIdSequence.newInstanceId();
+        r1.getSbn().setInstanceId(instanceId1);
         // Enqueues the notification to be posted, so hasPosted will be false.
         mService.addEnqueuedNotification(r1);
 
@@ -7648,8 +7650,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 r1.getSbn().getPackageName(), r1.getKey(), signals, "",
                 r1.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment1);
-        assertTrue(mService.checkLastClassificationChannelLog(false /*hasPosted*/,
-                true /*isAlerting*/, 3 /*TYPE_NEWS*/, 234));
+        assertTrue(mService.checkLastClassificationChannelLog(false /*=hasPosted*/,
+                true /*=isAlerting*/, Adjustment.TYPE_NEWS, 234,
+                NOTIFICATION_ADJUSTED.getId(),
+                instanceId1.getId(), r1.getUid()));
 
         // Set up notifications that will be adjusted
         // This notification starts on a low importance channel, so isAlerting is false.
@@ -7659,7 +7663,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mLowImportanceNotificationChannel, 1, null, true));
         when(r2.getLifespanMs(anyLong())).thenReturn(345);
 
-        r2.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        InstanceId instanceId2 = mNotificationInstanceIdSequence.newInstanceId();
+        r2.getSbn().setInstanceId(instanceId2);
         // Adds the notification as already posted, so hasPosted will be true.
         mService.addNotification(r2);
         // The signal is removed when used so it has to be readded.
@@ -7669,15 +7674,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 r2.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment2);
         assertTrue(mService.checkLastClassificationChannelLog(true /*hasPosted*/,
-                false /*isAlerting*/, 3 /*TYPE_NEWS*/, 345)); // currently failing
+                false /*isAlerting*/, Adjustment.TYPE_NEWS, 345,
+                NOTIFICATION_ADJUSTED.getId(),
+                instanceId2.getId() /*instance_id*/, r2.getUid()));
 
         signals.putInt(Adjustment.KEY_TYPE, Adjustment.TYPE_PROMOTION);
         Adjustment adjustment3 = new Adjustment(
                 r2.getSbn().getPackageName(), r2.getKey(), signals, "",
                 r2.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment3);
-        assertTrue(mService.checkLastClassificationChannelLog(true /*hasPosted*/,
-                false /*isAlerting*/, 1 /*TYPE_PROMOTION*/, 345));
+        assertTrue(mService.checkLastClassificationChannelLog(true /*=hasPosted*/,
+                false /*=isAlerting*/, Adjustment.TYPE_PROMOTION, 345,
+                NOTIFICATION_ADJUSTED.getId(),
+                instanceId2.getId() /*instance_id*/, r2.getUid()));
     }
 
     @Test

@@ -26,7 +26,6 @@ filegroup {
     name: "wm_shell-shared-utils",
     srcs: [
         "src/com/android/wm/shell/shared/TransitionUtil.java",
-        "src/com/android/wm/shell/shared/Utils.java",
     ],
 }
 

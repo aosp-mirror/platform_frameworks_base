@@ -37,6 +37,8 @@ import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityDiagnosticsManager.ConnectivityDiagnosticsCallback;
@@ -82,6 +84,7 @@ import android.net.vcn.util.LogUtils;
 import android.net.vcn.util.MtuUtils;
 import android.net.vcn.util.OneWayBoolean;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelUuid;
@@ -171,6 +174,8 @@ import java.util.function.Consumer;
  *
  * @hide
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class VcnGatewayConnection extends StateMachine {
     private static final String TAG = VcnGatewayConnection.class.getSimpleName();
 
@@ -2942,6 +2947,10 @@ public class VcnGatewayConnection extends StateMachine {
          *
          * <p>Synchronize this action to minimize locking around WakeLock use.
          */
+        // WakelockTimeout suppressed because the time the wake lock is needed for is unknown. The
+        // wakelock is only acquired when a Message is sent to this state machine and will be
+        // released when the message is processed or the state machin quits
+        @SuppressLint("WakelockTimeout")
         public synchronized void acquire() {
             mImpl.acquire();
         }

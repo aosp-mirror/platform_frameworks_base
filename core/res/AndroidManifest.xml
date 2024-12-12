@@ -4535,11 +4535,11 @@
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_GLASSES"
         android:protectionLevel="normal" />
 
-    <!-- Allows application to request to be associated with a virtual display capable of streaming
+    <!-- Allows application to request to be associated with a virtual device capable of streaming
          Android applications
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_APP_STREAMING})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING"
                 android:protectionLevel="signature|privileged" />
@@ -4547,16 +4547,25 @@
     <!-- Allows application to request to stream content from an Android host to a nearby device
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_NEARBY_DEVICE_STREAMING})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Allows application to request to stream content from an Android host to a nearby device
+         ({@link android.companion.AssociationRequest#DEVICE_PROFILE_SENSOR_DEVICE_STREAMING})
+         by {@link android.companion.CompanionDeviceManager}.
+         <p>Not for use by third-party applications.
+         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING"
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows application to request to be associated with a vehicle head unit capable of
          automotive projection
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_AUTOMOTIVE_PROJECTION})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"
                 android:protectionLevel="internal|role" />
@@ -4565,7 +4574,7 @@
          and/or data with other devices, such as notifications, photos and media
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_COMPUTER})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER"
                 android:protectionLevel="signature|privileged" />

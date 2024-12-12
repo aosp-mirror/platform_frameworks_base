@@ -100,9 +100,14 @@ public final class T4tNdefNfcee {
     public static final int WRITE_DATA_ERROR_EMPTY_PAYLOAD = -7;
     /**
      * Returns flag for {@link #writeData(int, byte[])}.
-     * It idicates write data fail due to invalid ndef format.
+     * It indicates write data fail due to invalid ndef format.
      */
     public static final int WRITE_DATA_ERROR_NDEF_VALIDATION_FAILED = -8;
+    /**
+     * Returns flag for {@link #writeData(int, byte[])}.
+     * It indicates write data fail if a concurrent NDEF NFCEE operation is ongoing.
+     */
+    public static final int WRITE_DATA_ERROR_DEVICE_BUSY = -9;
 
     /**
      * Possible return values for {@link #writeData(int, byte[])}.
@@ -119,6 +124,7 @@ public final class T4tNdefNfcee {
         WRITE_DATA_ERROR_CONNECTION_FAILED,
         WRITE_DATA_ERROR_EMPTY_PAYLOAD,
         WRITE_DATA_ERROR_NDEF_VALIDATION_FAILED,
+        WRITE_DATA_ERROR_DEVICE_BUSY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WriteDataStatus{}
@@ -128,6 +134,9 @@ public final class T4tNdefNfcee {
      *
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread.</p>
+     * <p>Applications must send complete Ndef Message payload, do not need to fragment
+     * the payload, it will be automatically fragmented and defragmented by
+     * {@link #writeData} if it exceeds max message length limits</p>
      *
      * @param fileId File id (Refer NFC Forum Type 4 Tag Specification
      *               Section 4.2 File Identifiers and Access Conditions
@@ -155,9 +164,10 @@ public final class T4tNdefNfcee {
      * @param fileId File Id (Refer
      *               Section 4.2 File Identifiers and Access Conditions
      *               for more information) from which to read.
-     * @return - Returns Ndef message if success
+     * @return - Returns complete Ndef message if success
      *           Refer to Nfc forum NDEF specification NDEF Message section
-     * @throws IllegalStateException if read fails because the fileId is invalid.
+     * @throws IllegalStateException if read fails because the fileId is invalid
+     *         or if a concurrent operation is in progress.
      * @hide
      */
     @SystemApi
@@ -179,6 +189,12 @@ public final class T4tNdefNfcee {
      * It indicates clear data failed due to internal error while processing the clear.
      */
     public static final int CLEAR_DATA_FAILED_INTERNAL = 0;
+    /**
+     * Return flag for {@link #clearNdefData()}.
+     * It indicates clear data failed  if a concurrent NDEF NFCEE operation is ongoing.
+     */
+    public static final int CLEAR_DATA_FAILED_DEVICE_BUSY = -1;
+
 
     /**
      * Possible return values for {@link #clearNdefData()}.
@@ -188,6 +204,7 @@ public final class T4tNdefNfcee {
     @IntDef(prefix = { "CLEAR_DATA_" }, value = {
         CLEAR_DATA_SUCCESS,
         CLEAR_DATA_FAILED_INTERNAL,
+        CLEAR_DATA_FAILED_DEVICE_BUSY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ClearDataStatus{}
@@ -245,6 +262,7 @@ public final class T4tNdefNfcee {
      * Refer to the NFC forum specification "NFCForum-TS-T4T-1.1 section 4.4" for more details.
      *
      * @return Returns CC file content if success or null if failed to read.
+     * @throws IllegalStateException if the device is busy.
      * @hide
      */
     @SystemApi

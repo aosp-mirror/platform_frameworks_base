@@ -809,7 +809,7 @@ public final class MediaRouter2 {
      * updates} in order to keep the system UI in a consistent state. You can also call this method
      * at any other point to update the listing preference dynamically.
      *
-     * <p>Any calls to this method from a privileged router will throw an {@link
+     * <p>Calling this method on a proxy router instance will throw an {@link
      * UnsupportedOperationException}.
      *
      * <p>Notes:
@@ -2675,7 +2675,7 @@ public final class MediaRouter2 {
         @Override
         public void setRouteListingPreference(@Nullable RouteListingPreference preference) {
             throw new UnsupportedOperationException(
-                    "RouteListingPreference cannot be set by a privileged MediaRouter2 instance.");
+                    "RouteListingPreference cannot be set by a proxy MediaRouter2 instance.");
         }
 
         @Override

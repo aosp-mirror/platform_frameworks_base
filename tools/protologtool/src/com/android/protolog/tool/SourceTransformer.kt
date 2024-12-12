@@ -91,7 +91,8 @@ class SourceTransformer(
             call: MethodCallExpr,
             messageString: String,
             level: LogLevel,
-            group: LogGroup
+            group: LogGroup,
+            lineNumber: Int,
         ) {
             validateCall(call)
             val processedCallStatement =

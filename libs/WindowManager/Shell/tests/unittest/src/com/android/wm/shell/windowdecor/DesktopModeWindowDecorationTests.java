@@ -114,6 +114,7 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
@@ -121,6 +122,9 @@ import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.MainCoroutineDispatcher;
 
 import org.junit.After;
 import org.junit.Before;
@@ -173,6 +177,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private Choreographer mMockChoreographer;
     @Mock
+    private MainCoroutineDispatcher mMockMainCoroutineDispatcher;
+    @Mock
+    private CoroutineScope mMockBgCoroutineScope;
+    @Mock
     private SyncTransactionQueue mMockSyncQueue;
     @Mock
     private AppHeaderViewHolder.Factory mMockAppHeaderViewHolderFactory;
@@ -224,6 +232,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private DesktopModeEventLogger mDesktopModeEventLogger;
     @Mock
     private DesktopRepository mDesktopRepository;
+    @Mock
+    private WindowDecorTaskResourceLoader mMockTaskResourceLoader;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
     @Captor
@@ -234,6 +244,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private StaticMockitoSession mMockitoSession;
     private TestableContext mTestableContext;
     private final ShellExecutor mBgExecutor = new TestShellExecutor();
+    private final ShellExecutor mMainExecutor = new TestShellExecutor();
     private final AssistContent mAssistContent = new AssistContent();
     private final Region mExclusionRegion = Region.obtain();
 
@@ -273,13 +284,13 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController).getDisplay(Display.DEFAULT_DISPLAY);
         doReturn(mInsetsState).when(mMockDisplayController).getInsetsState(anyInt());
-        when(mMockHandleMenuFactory.create(any(), any(), anyInt(), any(), any(), any(),
+        when(mMockHandleMenuFactory.create(any(), any(), any(), any(), any(), anyInt(), any(),
                 anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 any(), anyInt(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
-        when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
-                any())).thenReturn(mMockAppHeaderViewHolder);
+        when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any()))
+                .thenReturn(mMockAppHeaderViewHolder);
         when(mMockDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
         when(mMockDesktopUserRepositories.getProfile(anyInt())).thenReturn(mDesktopRepository);
         when(mMockWindowDecorViewHostSupplier.acquire(any(), eq(defaultDisplay)))
@@ -1692,7 +1703,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
 
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
-        verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
+        verify(mMockHandleMenuFactory).create(any(), any(), any(), any(), any(), anyInt(),
                 any(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
                 anyBoolean(), argThat(intent ->
                         (uri == null && intent == null) || intent.getData().equals(uri)),
@@ -1760,12 +1771,14 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             MaximizeMenuFactory maximizeMenuFactory,
             boolean relayout) {
         final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
-                mContext, mMockDisplayController, mMockSplitScreenController,
-                mMockDesktopUserRepositories, mMockShellTaskOrganizer, taskInfo,
-                mMockSurfaceControl, mMockHandler, mBgExecutor, mMockChoreographer, mMockSyncQueue,
-                mMockAppHeaderViewHolderFactory, mMockRootTaskDisplayAreaOrganizer,
-                mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
-                mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
+                mContext, mMockDisplayController, mMockTaskResourceLoader,
+                mMockSplitScreenController, mMockDesktopUserRepositories, mMockShellTaskOrganizer,
+                taskInfo, mMockSurfaceControl, mMockHandler, mMainExecutor,
+                mMockMainCoroutineDispatcher, mMockBgCoroutineScope, mBgExecutor,
+                mMockChoreographer, mMockSyncQueue, mMockAppHeaderViewHolderFactory,
+                mMockRootTaskDisplayAreaOrganizer, mMockGenericLinksParser,
+                mMockAssistContentRequester, SurfaceControl.Builder::new, mMockTransactionSupplier,
+                WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
                 mMockWindowDecorViewHostSupplier, maximizeMenuFactory, mMockHandleMenuFactory,
                 mMockMultiInstanceHelper, mMockCaptionHandleRepository, mDesktopModeEventLogger);

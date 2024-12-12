@@ -159,15 +159,17 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         new SafeOneTimeExecuteAppFunctionCallback.CompletionCallback() {
                             @Override
                             public void finalizeOnSuccess(
-                                    @NonNull ExecuteAppFunctionResponse result) {
+                                    @NonNull ExecuteAppFunctionResponse result,
+                                    long executionStartTimeMillis) {
                                 mLoggerWrapper.logAppFunctionSuccess(requestInternal, result,
-                                        callingUid);
+                                        callingUid, executionStartTimeMillis);
                             }
 
                             @Override
-                            public void finalizeOnError(@NonNull AppFunctionException error) {
+                            public void finalizeOnError(@NonNull AppFunctionException error,
+                                    long executionStartTimeMillis) {
                                 mLoggerWrapper.logAppFunctionError(requestInternal,
-                                        error.getErrorCode(), callingUid);
+                                        error.getErrorCode(), callingUid, executionStartTimeMillis);
                             }
                         });
 

@@ -6,6 +6,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -23,8 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import androidx.test.annotation.UiThreadTest;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -40,8 +41,6 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wifitrackerlib.WifiEntry;
 
-import kotlinx.coroutines.CoroutineScope;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +50,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 
 import java.util.List;
+
+import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -127,7 +128,7 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
                 .spyStatic(WifiEnterpriseRestrictionUtils.class)
                 .startMocking();
         when(WifiEnterpriseRestrictionUtils.isChangeWifiStateAllowed(mContext)).thenReturn(true);
-        when(mSystemUIDialogFactory.create(any(SystemUIDialog.Delegate.class)))
+        when(mSystemUIDialogFactory.create(any(SystemUIDialog.Delegate.class), eq(mContext)))
                 .thenReturn(mSystemUIDialog);
         when(mSystemUIDialog.getContext()).thenReturn(mContext);
         when(mSystemUIDialog.getWindow()).thenReturn(mWindow);

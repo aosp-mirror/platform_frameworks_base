@@ -88,6 +88,12 @@ interface HeadsUpManager : Dumpable {
     /** Returns whether there are any pinned Heads Up Notifications or not. */
     fun hasPinnedHeadsUp(): Boolean
 
+    /**
+     * Returns the status of the top Heads Up Notification, or returns [PinnedStatus.NotPinned] if
+     * there is no pinned HUN.
+     */
+    fun pinnedHeadsUpStatus(): PinnedStatus
+
     /** Returns whether or not the given notification is managed by this manager. */
     fun isHeadsUpEntry(key: String): Boolean
 
@@ -204,8 +210,10 @@ interface HeadsUpManager : Dumpable {
      * the notification to be managed.
      *
      * @param entry entry to show
+     * @param isPinnedByUser true if the notification was pinned by the user and false if the
+     *   notification was pinned by the system.
      */
-    fun showNotification(entry: NotificationEntry)
+    fun showNotification(entry: NotificationEntry, isPinnedByUser: Boolean = false)
 
     fun snooze()
 
@@ -216,7 +224,15 @@ interface HeadsUpManager : Dumpable {
      */
     fun unpinAll(userUnPinned: Boolean)
 
-    fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
+    /**
+     * Called when the notification state has been updated.
+     *
+     * @param key the key of the entry that was updated
+     * @param requestedPinnedStatus whether and how the notification should be pinned. If equal to
+     *   [PinnedStatus.NotPinned], the notification won't show again. Otherwise, the notification
+     *   should show again and will force reevaluation of removal time.
+     */
+    fun updateNotification(key: String, requestedPinnedStatus: PinnedStatus)
 
     fun onEntryAnimatingAwayEnded(entry: NotificationEntry)
 }
@@ -262,6 +278,8 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
 
     override fun hasPinnedHeadsUp() = false
 
+    override fun pinnedHeadsUpStatus() = PinnedStatus.NotPinned
+
     override fun isHeadsUpEntry(key: String) = false
 
     override fun isHeadsUpAnimatingAwayValue() = false
@@ -306,13 +324,13 @@ class HeadsUpManagerEmptyImpl @Inject constructor() : HeadsUpManager {
 
     override fun shouldSwallowClick(key: String): Boolean = false
 
-    override fun showNotification(entry: NotificationEntry) {}
+    override fun showNotification(entry: NotificationEntry, isPinnedByUser: Boolean) {}
 
     override fun snooze() {}
 
     override fun unpinAll(userUnPinned: Boolean) {}
 
-    override fun updateNotification(key: String, alert: Boolean) {}
+    override fun updateNotification(key: String, requestedPinnedStatus: PinnedStatus) {}
 
     override fun onEntryAnimatingAwayEnded(entry: NotificationEntry) {}
 }

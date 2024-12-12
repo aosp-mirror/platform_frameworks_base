@@ -20,9 +20,9 @@ import android.view.MotionEvent
 import com.android.systemui.touchpad.tutorial.ui.gesture.Velocity
 import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
 
-class FakeVelocityTracker : VelocityTracker {
+class FakeVelocityTracker(velocity: Float = 0f) : VelocityTracker {
 
-    private var fakeVelocity = Velocity(0f)
+    private var fakeVelocity = Velocity(velocity)
 
     override fun calculateVelocity(): Velocity {
         return fakeVelocity

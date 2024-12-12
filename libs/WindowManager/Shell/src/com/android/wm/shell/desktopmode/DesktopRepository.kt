@@ -220,11 +220,18 @@ class DesktopRepository(
     fun isMinimizedTask(taskId: Int) = desktopTaskDataSequence().any { taskId in it.minimizedTasks }
 
     /** Checks if a task is the only visible, non-closing, non-minimized task on its display. */
-    fun isOnlyVisibleNonClosingTask(taskId: Int): Boolean =
-        desktopTaskDataSequence().any {
+    fun isOnlyVisibleNonClosingTask(taskId: Int, displayId: Int = INVALID_DISPLAY): Boolean {
+        val seq =
+            if (displayId != INVALID_DISPLAY) {
+                sequenceOf(desktopTaskDataByDisplayId[displayId]).filterNotNull()
+            } else {
+                desktopTaskDataSequence()
+            }
+        return seq.any {
             it.visibleTasks.subtract(it.closingTasks).subtract(it.minimizedTasks).singleOrNull() ==
                 taskId
         }
+    }
 
     fun getActiveTasks(displayId: Int): ArraySet<Int> =
         ArraySet(desktopTaskDataByDisplayId[displayId]?.activeTasks)

@@ -172,16 +172,16 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun selectedKey_onReorderWidgets_isCleared() =
+    fun selectedKey_onReorderWidgets_isSet() =
         testScope.runTest {
             val selectedKey by collectLastValue(underTest.selectedKey)
 
-            val key = CommunalContentModel.KEY.widget(123)
-            underTest.setSelectedKey(key)
-            assertThat(selectedKey).isEqualTo(key)
-
-            underTest.onReorderWidgetStart()
+            underTest.setSelectedKey(null)
             assertThat(selectedKey).isNull()
+
+            val key = CommunalContentModel.KEY.widget(123)
+            underTest.onReorderWidgetStart(key)
+            assertThat(selectedKey).isEqualTo(key)
         }
 
     @Test
@@ -234,7 +234,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
 
     @Test
     fun reorderWidget_uiEventLogging_start() {
-        underTest.onReorderWidgetStart()
+        underTest.onReorderWidgetStart(CommunalContentModel.KEY.widget(123))
         verify(uiEventLogger).log(CommunalUiEvent.COMMUNAL_HUB_REORDER_WIDGET_START)
     }
 

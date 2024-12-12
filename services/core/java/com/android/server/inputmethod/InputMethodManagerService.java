@@ -1209,8 +1209,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Hide soft input before user switch task since switch task may block main handler a while
         // and delayed the hideCurrentInputLocked().
         final var userData = getUserData(userId);
-        hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow, 0 /* flags */,
-                SoftInputShowHideReason.HIDE_SWITCH_USER, userId);
+        if (Flags.refactorInsetsController()) {
+            final var statsToken = createStatsTokenForFocusedClient(false /* show */,
+                    SoftInputShowHideReason.HIDE_SWITCH_USER, userId);
+            setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
+        } else {
+            hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow, 0 /* flags */,
+                    SoftInputShowHideReason.HIDE_SWITCH_USER, userId);
+        }
         final UserSwitchHandlerTask task = new UserSwitchHandlerTask(this, userId,
                 clientToBeReset);
         mUserSwitchHandlerTask = task;
