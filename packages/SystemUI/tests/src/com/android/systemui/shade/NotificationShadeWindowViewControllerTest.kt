@@ -17,7 +17,6 @@
 package com.android.systemui.shade
 
 import android.content.Context
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.flag.junit.FlagsParameterization
@@ -32,7 +31,6 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.Flags
-import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
@@ -406,18 +404,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
         }
 
     @Test
-    @DisableSceneContainer
-    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-    fun handleDispatchTouchEvent_nsslMigrationOff_userActivity_not_called() {
-        underTest.setStatusBarViewController(phoneStatusBarViewController)
-
-        interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
-
-        verify(centralSurfaces, times(0)).userActivity()
-    }
-
-    @Test
-    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun handleDispatchTouchEvent_nsslMigrationOn_userActivity() {
         underTest.setStatusBarViewController(phoneStatusBarViewController)
 
@@ -438,7 +424,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
-    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozing_touchNotInLockIconArea_touchIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -451,7 +436,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
-    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozing_touchInStatusBar_touchIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -464,7 +448,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
-    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun shouldInterceptTouchEvent_dozingAndPulsing_touchIntercepted() {
         // GIVEN dozing
         whenever(sysuiStatusBarStateController.isDozing).thenReturn(true)
@@ -609,7 +592,6 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization) : 
     }
 
     @Test
-    @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun cancelCurrentTouch_callsDragDownHelper() {
         underTest.cancelCurrentTouch()
 
