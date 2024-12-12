@@ -14341,7 +14341,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(record.getNotification().getAllowlistToken()).isNull();
 
         mWorkerHandler.post(
-                mService.new EnqueueNotificationRunnable(mUserId, record, false, false,
+                mService.new EnqueueNotificationRunnable(mUserId, record, false,
                 mPostNotificationTrackerFactory.newTracker(null)));
         waitForIdle();
 
