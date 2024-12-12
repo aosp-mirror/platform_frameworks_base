@@ -20,6 +20,7 @@ import android.content.Context
 import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.IconProvider
 import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.shared.split.SplitScreenConstants
@@ -52,6 +53,8 @@ class StageOrderOperator (
         stageCallbacks: StageTaskListener.StageListenerCallbacks,
         syncQueue: SyncTransactionQueue,
         iconProvider: IconProvider,
+        mainExecutor: ShellExecutor,
+        bgExecutor: ShellExecutor,
         windowDecorViewModel: Optional<WindowDecorViewModel>
     ) {
 
@@ -83,6 +86,8 @@ class StageOrderOperator (
                 stageCallbacks,
                 syncQueue,
                 iconProvider,
+                mainExecutor,
+                bgExecutor,
                 windowDecorViewModel,
                 stageIds[i])
             )

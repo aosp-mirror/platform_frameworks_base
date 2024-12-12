@@ -2485,7 +2485,7 @@ public class DisplayPolicy {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final boolean adjacentTasksVisible =
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
-                        && task.getTopLeafTask().getAdjacentTask() != null)
+                        && task.getTopLeafTask().hasAdjacentTask())
                         != null;
         final Task topFreeformTask = defaultTaskDisplayArea
                 .getTopRootTaskInWindowingMode(WINDOWING_MODE_FREEFORM);

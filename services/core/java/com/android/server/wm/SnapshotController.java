@@ -202,7 +202,7 @@ class SnapshotController {
             final Task task = wc.asTask();
             if (task != null && wc.isVisibleRequested() && !task.inPinnedWindowingMode()) {
                 final TaskSnapshot snapshot = mTaskSnapshotController.getSnapshot(task.mTaskId,
-                        task.mUserId, false /* restoreFromDisk */, false /* isLowResolution */);
+                        false /* isLowResolution */);
                 if (snapshot != null) {
                     mTaskSnapshotController.removeAndDeleteSnapshot(task.mTaskId, task.mUserId);
                 }

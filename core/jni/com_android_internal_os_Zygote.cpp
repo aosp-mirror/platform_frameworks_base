@@ -88,8 +88,8 @@
 #include "nativebridge/native_bridge.h"
 
 #if defined(__BIONIC__)
+#include <android/dlext_private.h>
 extern "C" void android_reset_stack_guards();
-extern "C" void android_set_16kb_appcompat_mode(bool enable_app_compat);
 #endif
 
 namespace {

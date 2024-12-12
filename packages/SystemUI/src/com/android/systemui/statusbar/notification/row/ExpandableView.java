@@ -40,6 +40,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -199,6 +200,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public boolean isPinned() {
         return false;
+    }
+
+    @NonNull
+    public PinnedStatus getPinnedStatus() {
+        return PinnedStatus.NotPinned;
     }
 
     public boolean isHeadsUpAnimatingAway() {

@@ -25,6 +25,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -97,18 +98,21 @@ constructor(
         }
     }
 
-    /** Are there any pinned heads up rows to display? */
-    val hasPinnedRows: Flow<Boolean> =
+    /** What [PinnedStatus] does the top row have? */
+    private val topPinnedStatus: Flow<PinnedStatus> =
         headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
             if (rows.isNotEmpty()) {
                 combine(rows.map { it.pinnedStatus }) { pinnedStatus ->
-                    pinnedStatus.any { it.isPinned }
+                    pinnedStatus.firstOrNull { it.isPinned } ?: PinnedStatus.NotPinned
                 }
             } else {
                 // if the set is empty, there are no flows to combine
-                flowOf(false)
+                flowOf(PinnedStatus.NotPinned)
             }
         }
+
+    /** Are there any pinned heads up rows to display? */
+    val hasPinnedRows: Flow<Boolean> = topPinnedStatus.map { it.isPinned }
 
     val isHeadsUpOrAnimatingAway: Flow<Boolean> by lazy {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
@@ -138,9 +142,14 @@ constructor(
             }
         }
 
-    val showHeadsUpStatusBar =
-        combine(hasPinnedRows, canShowHeadsUp) { hasPinnedRows, canShowHeadsUp ->
-            hasPinnedRows && canShowHeadsUp
+    /** Emits the pinned notification state as it relates to the status bar. */
+    val statusBarHeadsUpState: Flow<PinnedStatus> =
+        combine(topPinnedStatus, canShowHeadsUp) { topPinnedStatus, canShowHeadsUp ->
+            if (canShowHeadsUp) {
+                topPinnedStatus
+            } else {
+                PinnedStatus.NotPinned
+            }
         }
 
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowInteractor =

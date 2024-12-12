@@ -19,6 +19,7 @@ package com.android.server.location.contexthub;
 import android.content.Context;
 import android.hardware.contexthub.EndpointInfo;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.IContextHubEndpoint;
 import android.hardware.contexthub.IContextHubEndpointCallback;
 import android.os.RemoteException;
@@ -59,6 +60,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
     private final HubInfoRegistry mHubInfoRegistry;
 
+    private final ContextHubTransactionManager mTransactionManager;
+
     /** A map of endpoint IDs to brokers currently registered. */
     private final Map<Long, ContextHubEndpointBroker> mEndpointMap = new ConcurrentHashMap<>();
 
@@ -93,10 +96,14 @@ import java.util.concurrent.ConcurrentHashMap;
     private final boolean mSessionIdsValid;
 
     /* package */ ContextHubEndpointManager(
-            Context context, IContextHubWrapper contextHubProxy, HubInfoRegistry hubInfoRegistry) {
+            Context context,
+            IContextHubWrapper contextHubProxy,
+            HubInfoRegistry hubInfoRegistry,
+            ContextHubTransactionManager transactionManager) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mHubInfoRegistry = hubInfoRegistry;
+        mTransactionManager = transactionManager;
         int[] range = null;
         try {
             range = mContextHubProxy.requestSessionIdRange(SERVICE_SESSION_RANGE);
@@ -132,11 +139,14 @@ import java.util.concurrent.ConcurrentHashMap;
      *
      * @param pendingEndpointInfo the object describing the endpoint being registered
      * @param callback the callback interface of the endpoint to register
+     * @param packageName the name of the package of the calling client
      * @return the endpoint interface
      * @throws IllegalStateException if max number of endpoints have already registered
      */
     /* package */ IContextHubEndpoint registerEndpoint(
-            HubEndpointInfo pendingEndpointInfo, IContextHubEndpointCallback callback)
+            HubEndpointInfo pendingEndpointInfo,
+            IContextHubEndpointCallback callback,
+            String packageName)
             throws RemoteException {
         if (!mSessionIdsValid) {
             throw new IllegalStateException("ContextHubEndpointManager failed to initialize");
@@ -158,7 +168,9 @@ import java.util.concurrent.ConcurrentHashMap;
                         mContextHubProxy,
                         this /* endpointManager */,
                         halEndpointInfo,
-                        callback);
+                        callback,
+                        packageName,
+                        mTransactionManager);
         mEndpointMap.put(endpointId, broker);
 
         try {
@@ -280,6 +292,38 @@ import java.util.concurrent.ConcurrentHashMap;
 
         if (!callbackInvoked) {
             Log.w(TAG, "onEndpointSessionOpenComplete: unknown session ID " + sessionId);
+        }
+    }
+
+    @Override
+    public void onMessageReceived(int sessionId, HubMessage message) {
+        boolean callbackInvoked = false;
+        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
+            if (broker.hasSessionId(sessionId)) {
+                broker.onMessageReceived(sessionId, message);
+                callbackInvoked = true;
+                break;
+            }
+        }
+
+        if (!callbackInvoked) {
+            Log.w(TAG, "onMessageReceived: unknown session ID " + sessionId);
+        }
+    }
+
+    @Override
+    public void onMessageDeliveryStatusReceived(int sessionId, int sequenceNumber, byte errorCode) {
+        boolean callbackInvoked = false;
+        for (ContextHubEndpointBroker broker : mEndpointMap.values()) {
+            if (broker.hasSessionId(sessionId)) {
+                broker.onMessageDeliveryStatusReceived(sessionId, sequenceNumber, errorCode);
+                callbackInvoked = true;
+                break;
+            }
+        }
+
+        if (!callbackInvoked) {
+            Log.w(TAG, "onMessageDeliveryStatusReceived: unknown session ID " + sessionId);
         }
     }
 

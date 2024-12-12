@@ -23,6 +23,7 @@ import com.android.launcher3.icons.IconProvider
 import com.android.wm.shell.Flags.enableFlexibleSplit
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_33_66
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
@@ -40,6 +41,10 @@ import java.util.Optional
 @RunWith(AndroidJUnit4::class)
 class StageOrderOperatorTests : ShellTestCase() {
 
+    @Mock
+    lateinit var mMainExecutor: ShellExecutor
+    @Mock
+    lateinit var mBgExecutor: ShellExecutor
     @Mock
     lateinit var mTaskOrganizer: ShellTaskOrganizer
     @Mock
@@ -62,6 +67,8 @@ class StageOrderOperatorTests : ShellTestCase() {
             stageListenerCallbacks,
             mSyncQueue,
             iconProvider,
+            mMainExecutor,
+            mBgExecutor,
             windowDecorViewModel,
             )
         assert(stageOrderOperator.activeStages.size == 0)

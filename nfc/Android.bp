@@ -71,6 +71,7 @@ java_sdk_library {
         "//cts/hostsidetests/multidevices/nfc:__subpackages__",
         "//cts/tests/tests/nfc",
         "//packages/apps/Nfc:__subpackages__",
+        "//packages/modules/Nfc:__subpackages__",
     ],
     jarjar_rules: ":nfc-jarjar-rules",
     lint: {

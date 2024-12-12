@@ -96,3 +96,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "add_accessibility_title_for_augmented_autofill_dropdown"
+  namespace: "autofill"
+  description: "Add accessibility title for augmented autofill dropdown"
+  bug: "375284244"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

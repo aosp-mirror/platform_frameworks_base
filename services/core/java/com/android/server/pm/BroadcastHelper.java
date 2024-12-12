@@ -365,8 +365,8 @@ public final class BroadcastHelper {
         if (isForWholeApp || !android.content.pm.Flags.reduceBroadcastsForComponentStateChanges()) {
             tracePackageChangedBroadcastEvent(
                     android.content.pm.Flags.reduceBroadcastsForComponentStateChanges(),
-                    reasonForTrace, "all" /* targetName */, "whole" /* targetComponent */,
-                    componentNames.size());
+                    reasonForTrace, packageName, "<implicit>" /* targetPackageName */,
+                    "whole" /* targetComponent */, componentNames.size());
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp, componentNames,
                     packageUid, reason, userIds, instantUserIds, broadcastAllowList,
                     null /* targetPackageName */, null /* requiredPermissions */);
@@ -388,8 +388,8 @@ public final class BroadcastHelper {
 
             // First, send the PACKAGE_CHANGED broadcast to the system.
             if (!TextUtils.equals(packageName, "android")) {
-                tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
-                        "system" /* targetName */, "notExported" /* targetComponent */,
+                tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace, packageName,
+                        "android" /* targetPackageName */, "notExported" /* targetComponent */,
                         notExportedComponentNames.size());
                 sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                         notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
@@ -399,8 +399,8 @@ public final class BroadcastHelper {
             }
 
             // Second, send the PACKAGE_CHANGED broadcast to the application itself.
-            tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
-                    "applicationItself" /* targetName */, "notExported" /* targetComponent */,
+            tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace, packageName,
+                    packageName /* targetPackageName */, "notExported" /* targetComponent */,
                     notExportedComponentNames.size());
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                     notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
@@ -413,8 +413,8 @@ public final class BroadcastHelper {
                 if (TextUtils.equals(packageName, sharedPackage)) {
                     continue;
                 }
-                tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
-                        "sharedUidPackages" /* targetName */, "notExported" /* targetComponent */,
+                tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace, packageName,
+                        sharedPackage /* targetPackageName */, "notExported" /* targetComponent */,
                         notExportedComponentNames.size());
                 sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                         notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
@@ -425,8 +425,8 @@ public final class BroadcastHelper {
         }
 
         if (!exportedComponentNames.isEmpty()) {
-            tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace,
-                    "all" /* targetName */, "exported" /* targetComponent */,
+            tracePackageChangedBroadcastEvent(true /* applyFlag */, reasonForTrace, packageName,
+                    "<implicit>" /* targetPackageName */, "exported" /* targetComponent */,
                     exportedComponentNames.size());
             sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                     exportedComponentNames, packageUid, reason, userIds, instantUserIds,
@@ -1274,8 +1274,10 @@ public final class BroadcastHelper {
                 uids, mHandler);
     }
 
-    private static void tracePackageChangedBroadcastEvent(boolean applyFlag, String reasonForTrace,
-            String targetName, String targetComponent, int componentSize) {
+    private static void tracePackageChangedBroadcastEvent(boolean applyFlag,
+            @NonNull String reasonForTrace, @Nullable String packageName,
+            @Nullable String targetPackageName, @Nullable String targetComponent,
+            int componentSize) {
 
         if (!Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             return;
@@ -1285,7 +1287,8 @@ public final class BroadcastHelper {
         builder.append("broadcastPackageChanged; ");
         builder.append("af="); builder.append(applyFlag);
         builder.append(",rft="); builder.append(reasonForTrace);
-        builder.append(",tn="); builder.append(targetName);
+        builder.append(",pn="); builder.append(packageName);
+        builder.append(",tpn="); builder.append(targetPackageName);
         builder.append(",tc="); builder.append(targetComponent);
         builder.append(",cs="); builder.append(componentSize);
 

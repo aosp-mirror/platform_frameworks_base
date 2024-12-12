@@ -34,6 +34,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.bluetooth.BluetoothAdapter;
@@ -2625,38 +2626,14 @@ public class InputManagerService extends IInputManager.Stub
         return mWindowManagerCallbacks.interceptUnhandledKey(event, focus);
     }
 
+    @SuppressLint("MissingPermission")
     private void initKeyGestures() {
         InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
         im.registerKeyGestureEventHandler(new InputManager.KeyGestureEventHandler() {
             @Override
             public boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
                     @Nullable IBinder focussedToken) {
-                int deviceId = event.getDeviceId();
-                boolean complete = event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
-                        && !event.isCancelled();
-                switch (event.getKeyGestureType()) {
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
-                        if (complete) {
-                            mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
-                        }
-                        return true;
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
-                        if (complete) {
-                            mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
-                        }
-                        return true;
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
-                        // TODO(b/367748270): Add functionality to turn keyboard backlight on/off.
-                        return true;
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
-                        if (complete) {
-                            mNative.toggleCapsLock(deviceId);
-                        }
-                        return true;
-                    default:
-                        return false;
-
-                }
+                return InputManagerService.this.handleKeyGestureEvent(event);
             }
 
             @Override
@@ -2666,6 +2643,10 @@ public class InputManagerService extends IInputManager.Stub
                     case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
                         return true;
                     default:
                         return false;
@@ -2673,6 +2654,73 @@ public class InputManagerService extends IInputManager.Stub
                 }
             }
         });
+    }
+
+    @SuppressLint("MissingPermission")
+    @VisibleForTesting
+    boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event) {
+        int deviceId = event.getDeviceId();
+        boolean complete = event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                && !event.isCancelled();
+        switch (event.getKeyGestureType()) {
+            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
+                if (complete) {
+                    mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
+                if (complete) {
+                    mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
+                // TODO(b/367748270): Add functionality to turn keyboard backlight on/off.
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
+                if (complete) {
+                    mNative.toggleCapsLock(deviceId);
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                if (complete && InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
+                    final boolean bounceKeysEnabled =
+                            InputSettings.isAccessibilityBounceKeysEnabled(mContext);
+                    InputSettings.setAccessibilityBounceKeysThreshold(mContext,
+                            bounceKeysEnabled ? 0
+                                    : InputSettings.DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS);
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                if (complete && InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()) {
+                    final boolean mouseKeysEnabled = InputSettings.isAccessibilityMouseKeysEnabled(
+                            mContext);
+                    InputSettings.setAccessibilityMouseKeysEnabled(mContext, !mouseKeysEnabled);
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
+                if (complete && InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+                    final boolean stickyKeysEnabled =
+                            InputSettings.isAccessibilityStickyKeysEnabled(mContext);
+                    InputSettings.setAccessibilityStickyKeysEnabled(mContext, !stickyKeysEnabled);
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                if (complete && InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()) {
+                    final boolean slowKeysEnabled =
+                            InputSettings.isAccessibilitySlowKeysEnabled(mContext);
+                    InputSettings.setAccessibilitySlowKeysThreshold(mContext,
+                            slowKeysEnabled ? 0 : InputSettings.DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS);
+                    return true;
+                }
+                break;
+            default:
+                return false;
+
+        }
+        return false;
     }
 
     // Native callback.

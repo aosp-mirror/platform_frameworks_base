@@ -678,7 +678,7 @@ public class TextUtils {
      * @return true if a and b are equal
      */
     @android.ravenwood.annotation.RavenwoodKeep
-    public static boolean equals(CharSequence a, CharSequence b) {
+    public static boolean equals(@Nullable CharSequence a, @Nullable CharSequence b) {
         if (a == b) return true;
         int length;
         if (a != null && b != null && (length = a.length()) == b.length()) {

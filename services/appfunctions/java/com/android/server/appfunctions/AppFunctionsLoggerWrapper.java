@@ -41,25 +41,34 @@ public class AppFunctionsLoggerWrapper {
     }
 
     void logAppFunctionSuccess(ExecuteAppFunctionAidlRequest request,
-            ExecuteAppFunctionResponse response, int callingUid) {
+            ExecuteAppFunctionResponse response, int callingUid, long executionStartTimeMillis) {
         logAppFunctionsRequestReported(request, SUCCESS_RESPONSE_CODE,
-                response.getResponseDataSize(), callingUid);
+                response.getResponseDataSize(), callingUid, executionStartTimeMillis);
     }
 
-    void logAppFunctionError(ExecuteAppFunctionAidlRequest request, int errorCode, int callingUid) {
-        logAppFunctionsRequestReported(request, errorCode, /* responseSizeBytes = */ 0, callingUid);
+    void logAppFunctionError(ExecuteAppFunctionAidlRequest request, int errorCode, int callingUid,
+            long executionStartTimeMillis) {
+        logAppFunctionsRequestReported(request, errorCode, /* responseSizeBytes = */ 0, callingUid,
+                executionStartTimeMillis);
     }
 
     private void logAppFunctionsRequestReported(ExecuteAppFunctionAidlRequest request,
-            int errorCode, int responseSizeBytes, int callingUid) {
-        final long latency = SystemClock.elapsedRealtime() - request.getRequestTime();
+            int errorCode, int responseSizeBytes, int callingUid, long executionStartTimeMillis) {
+        final long e2eRequestLatencyMillis =
+                SystemClock.elapsedRealtime() - request.getRequestTime();
+        final long requestOverheadMillis =
+                executionStartTimeMillis > 0 ? (executionStartTimeMillis - request.getRequestTime())
+                        : e2eRequestLatencyMillis;
         LOGGING_THREAD_EXECUTOR.execute(() -> AppFunctionsStatsLog.write(
                 AppFunctionsStatsLog.APP_FUNCTIONS_REQUEST_REPORTED,
-                callingUid,
+                /* callerPackageUid= */ callingUid,
+                /* targetPackageUid= */
                 getPackageUid(request.getClientRequest().getTargetPackageName()),
-                errorCode,
-                request.getClientRequest().getRequestDataSize(), responseSizeBytes,
-                latency)
+                /* errorCode= */ errorCode,
+                /* requestSizeBytes= */ request.getClientRequest().getRequestDataSize(),
+                /* responseSizeBytes= */  responseSizeBytes,
+                /* requestDurationMs= */ e2eRequestLatencyMillis,
+                /* requestOverheadMs= */ requestOverheadMillis)
         );
     }
 

@@ -28,7 +28,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.HeadsUpCoordinator;
-import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 
@@ -73,7 +72,10 @@ public class HeadsUpViewBinder {
      * Bind heads up view to the notification row.
      * @param callback callback after heads up view is bound
      */
-    public void bindHeadsUpView(NotificationEntry entry, @Nullable BindCallback callback) {
+    public void bindHeadsUpView(
+            NotificationEntry entry,
+            boolean isPinnedByUser,
+            @Nullable HeadsUpBindCallback callback) {
         RowContentBindParams params = mStage.getStageParams(entry);
         final boolean isImportantMessage = mNotificationMessagingUtil.isImportantMessaging(
                 entry.getSbn(), entry.getImportance());
@@ -84,16 +86,16 @@ public class HeadsUpViewBinder {
         CancellationSignal signal = mStage.requestRebind(entry, en -> {
             mLogger.entryBoundSuccessfully(entry);
             en.getRow().setUsesIncreasedHeadsUpHeight(params.useIncreasedHeadsUpHeight());
-            // requestRebing promises that if we called cancel before this callback would be
+            // requestRebind promises that if we called cancel before this callback would be
             // invoked, then we will not enter this callback, and because we always cancel before
             // adding to this map, we know this will remove the correct signal.
             mOngoingBindCallbacks.remove(entry);
             if (callback != null) {
-                callback.onBindFinished(en);
+                callback.onHeadsUpBindFinished(en, isPinnedByUser);
             }
         });
         abortBindCallback(entry);
-        mLogger.startBindingHun(entry);
+        mLogger.startBindingHun(entry, isPinnedByUser);
         mOngoingBindCallbacks.put(entry, signal);
     }
 
@@ -128,5 +130,15 @@ public class HeadsUpViewBinder {
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_HEADS_UP);
         mLogger.entryContentViewMarkedFreeable(entry);
         mStage.requestRebind(entry, e -> mLogger.entryUnbound(e));
+    }
+
+    /**
+     * Interface for bind callback.
+     */
+    public interface HeadsUpBindCallback {
+        /**
+         * Called when all views are fully bound on the notification.
+         */
+        void onHeadsUpBindFinished(NotificationEntry entry, boolean isPinnedByUser);
     }
 }

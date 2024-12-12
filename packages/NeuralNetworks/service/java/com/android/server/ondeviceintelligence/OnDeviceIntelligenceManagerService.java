@@ -760,13 +760,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (mTemporaryConfigNamespace != null) {
                 return mTemporaryConfigNamespace;
             }
-            return mContext.getResources()
-                    .getString(
-                            mContext.getResources()
-                                    .getIdentifier(
-                                            "config_defaultOnDeviceIntelligenceDeviceConfigNamespace",
-                                            "string",
-                                            "android"));
+            return mContext.getResources().getString(
+                    android.R.string.config_defaultOnDeviceIntelligenceDeviceConfigNamespace);
         }
     }
 
@@ -948,22 +943,10 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 return mTemporaryServiceNames;
             }
         }
-        return new String[]{
-                mContext.getResources()
-                        .getString(
-                        mContext.getResources()
-                                .getIdentifier(
-                                        "config_defaultOnDeviceIntelligenceService",
-                                        "string",
-                                        "android")),
-                mContext.getResources()
-                        .getString(
-                        mContext.getResources()
-                                .getIdentifier(
-                                        "config_defaultOnDeviceSandboxedInferenceService",
-                                        "string",
-                                        "android"))
-        };
+        return new String[]{mContext.getResources().getString(
+                android.R.string.config_defaultOnDeviceIntelligenceService),
+                mContext.getResources().getString(
+                        android.R.string.config_defaultOnDeviceSandboxedInferenceService)};
     }
 
     protected String[] getBroadcastKeys() throws Resources.NotFoundException {

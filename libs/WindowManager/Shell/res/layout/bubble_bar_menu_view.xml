@@ -51,7 +51,8 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:textColor="@androidprv:color/materialColorOnSurface"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault" />
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault"
+            android:textDirection="locale" />
 
         <ImageView
             android:id="@+id/bubble_bar_manage_menu_dismiss_icon"

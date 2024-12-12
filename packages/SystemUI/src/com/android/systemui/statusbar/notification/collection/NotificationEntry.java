@@ -666,7 +666,16 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public boolean isRowPinned() {
-        return row != null && row.isPinned();
+        return getPinnedStatus().isPinned();
+    }
+
+    /** Returns this notification's current pinned status. */
+    public PinnedStatus getPinnedStatus() {
+        if (row != null) {
+            return row.getPinnedStatus();
+        } else {
+            return PinnedStatus.NotPinned;
+        }
     }
 
     /**

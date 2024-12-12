@@ -28,10 +28,11 @@ import android.hardware.display.DisplayViewport
 import android.hardware.display.VirtualDisplay
 import android.hardware.input.InputManager
 import android.hardware.input.InputManagerGlobal
+import android.hardware.input.InputSettings
+import android.hardware.input.KeyGestureEvent
 import android.os.InputEventInjectionSync
 import android.os.SystemClock
 import android.os.test.TestLooper
-import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings
@@ -99,6 +100,7 @@ class InputManagerServiceTests {
             .mockStatic(LocalServices::class.java)
             .mockStatic(PermissionChecker::class.java)
             .mockStatic(KeyCharacterMap::class.java)
+            .mockStatic(InputSettings::class.java)
             .build()!!
 
     @get:Rule
@@ -481,32 +483,102 @@ class InputManagerServiceTests {
     }
 
     @Test
-    @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     fun handleKeyGestures_keyboardBacklight() {
-        service.systemRunning()
-
-        val backlightDownEvent = createKeyEvent(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN)
-        service.interceptKeyBeforeDispatching(null, backlightDownEvent, /* policyFlags = */0)
+        val backlightDownEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(backlightDownEvent)
         verify(kbdController).decrementKeyboardBacklight(anyInt())
 
-        val backlightUpEvent = createKeyEvent(KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP)
-        service.interceptKeyBeforeDispatching(null, backlightUpEvent, /* policyFlags = */0)
+        val backlightUpEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(backlightUpEvent)
         verify(kbdController).incrementKeyboardBacklight(anyInt())
     }
 
     @Test
-    @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
-    fun handleKeyGestures_toggleCapsLock() {
-        service.systemRunning()
+    fun handleKeyGestures_a11yBounceKeysShortcut() {
+        ExtendedMockito.doReturn(true).`when` {
+            InputSettings.isAccessibilityBounceKeysFeatureEnabled()
+        }
+        val toggleBounceKeysEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(toggleBounceKeysEvent)
+        ExtendedMockito.verify {
+            InputSettings.setAccessibilityBounceKeysThreshold(
+                any(),
+                eq(InputSettings.DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS)
+            )
+        }
+    }
 
-        val metaDownEvent = createKeyEvent(KeyEvent.KEYCODE_META_LEFT)
-        service.interceptKeyBeforeDispatching(null, metaDownEvent, /* policyFlags = */0)
-        val altDownEvent =
-            createKeyEvent(KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_META_ON, KeyEvent.ACTION_DOWN)
-        service.interceptKeyBeforeDispatching(null, altDownEvent, /* policyFlags = */0)
-        val altUpEvent =
-            createKeyEvent(KeyEvent.KEYCODE_ALT_LEFT, KeyEvent.META_META_ON, KeyEvent.ACTION_UP)
-        service.interceptKeyBeforeDispatching(null, altUpEvent, /* policyFlags = */0)
+    @Test
+    fun handleKeyGestures_a11yMouseKeysShortcut() {
+        ExtendedMockito.doReturn(true).`when` {
+            InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
+        }
+        val toggleMouseKeysEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(toggleMouseKeysEvent)
+        ExtendedMockito.verify {
+            InputSettings.setAccessibilityMouseKeysEnabled(any(), eq(true))
+        }
+    }
+
+    @Test
+    fun handleKeyGestures_a11yStickyKeysShortcut() {
+        ExtendedMockito.doReturn(true).`when` {
+            InputSettings.isAccessibilityStickyKeysFeatureEnabled()
+        }
+        val toggleStickyKeysEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(toggleStickyKeysEvent)
+        ExtendedMockito.verify {
+            InputSettings.setAccessibilityStickyKeysEnabled(any(), eq(true))
+        }
+    }
+
+    @Test
+    fun handleKeyGestures_a11ySlowKeysShortcut() {
+        ExtendedMockito.doReturn(true).`when` {
+            InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
+        }
+        val toggleSlowKeysEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(toggleSlowKeysEvent)
+        ExtendedMockito.verify {
+            InputSettings.setAccessibilitySlowKeysThreshold(
+                any(),
+                eq(InputSettings.DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS)
+            )
+        }
+    }
+
+    @Test
+    fun handleKeyGestures_toggleCapsLock() {
+        val toggleCapsLockEvent =
+            KeyGestureEvent.Builder()
+                .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK)
+                .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+                .build()
+        service.handleKeyGestureEvent(toggleCapsLockEvent)
 
         verify(native).toggleCapsLock(anyInt())
     }
@@ -544,25 +616,6 @@ class InputManagerServiceTests {
             /* uid = */0
         )
         whenever(windowManagerInternal.getKeyInterceptionInfoFromToken(any())).thenReturn(info)
-    }
-
-    private fun createKeyEvent(
-        keycode: Int,
-        modifierState: Int = 0,
-        action: Int = KeyEvent.ACTION_DOWN
-    ): KeyEvent {
-        return KeyEvent(
-            /* downTime = */0,
-            /* eventTime = */0,
-            action,
-            keycode,
-            /* repeat = */0,
-            modifierState,
-            KeyCharacterMap.VIRTUAL_KEYBOARD,
-            /* scancode = */0,
-            /* flags = */0,
-            InputDevice.SOURCE_KEYBOARD
-        )
     }
 }
 

@@ -106,6 +106,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     @Mock ShellExecutor mMainExecutor;
     @Mock Handler mMainHandler;
+    @Mock ShellExecutor mBgExecutor;
     @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock DisplayInsetsController mDisplayInsetsController;
@@ -137,7 +138,8 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
                 mIconProvider, Optional.of(mRecentTasks), mLaunchAdjacentController,
                 Optional.of(mWindowDecorViewModel), Optional.of(mDesktopTasksController),
-                mStageCoordinator, mMultiInstanceHelper, mSplitState, mMainExecutor, mMainHandler));
+                mStageCoordinator, mMultiInstanceHelper, mSplitState, mMainExecutor, mMainHandler,
+                mBgExecutor));
     }
 
     @Test

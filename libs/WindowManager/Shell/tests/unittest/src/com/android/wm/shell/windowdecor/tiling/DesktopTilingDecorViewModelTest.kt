@@ -32,7 +32,10 @@ import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainCoroutineDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +50,8 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 class DesktopTilingDecorViewModelTest : ShellTestCase() {
     private val contextMock: Context = mock()
+    private val mainDispatcher: MainCoroutineDispatcher = mock()
+    private val bgScope: CoroutineScope = mock()
     private val displayControllerMock: DisplayController = mock()
     private val rootTdaOrganizerMock: RootTaskDisplayAreaOrganizer = mock()
     private val syncQueueMock: SyncTransactionQueue = mock()
@@ -61,6 +66,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
 
     private val desktopModeWindowDecorationMock: DesktopModeWindowDecoration = mock()
     private val desktopTilingDecoration: DesktopTilingWindowDecoration = mock()
+    private val taskResourceLoader: WindowDecorTaskResourceLoader = mock()
     private lateinit var desktopTilingDecorViewModel: DesktopTilingDecorViewModel
 
     @Before
@@ -68,6 +74,8 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
         desktopTilingDecorViewModel =
             DesktopTilingDecorViewModel(
                 contextMock,
+                mainDispatcher,
+                bgScope,
                 displayControllerMock,
                 rootTdaOrganizerMock,
                 syncQueueMock,
@@ -77,6 +85,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
                 returnToDragStartAnimatorMock,
                 userRepositories,
                 desktopModeEventLogger,
+                taskResourceLoader,
             )
         whenever(contextMock.createContextAsUser(any(), any())).thenReturn(contextMock)
     }

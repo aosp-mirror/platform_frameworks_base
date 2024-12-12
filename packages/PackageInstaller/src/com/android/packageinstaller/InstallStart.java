@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -62,9 +63,12 @@ public class InstallStart extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        boolean testOverrideForPiaV2 = Settings.System.getInt(getContentResolver(),
+                "use_pia_v2", 0) == 1;
+        boolean usePiaV2aConfig = usePiaV2();
 
-        if (usePiaV2()) {
-            Log.i(TAG, "Using Pia V2");
+        if (usePiaV2aConfig || testOverrideForPiaV2) {
+            logReasonForDebug(usePiaV2aConfig, testOverrideForPiaV2);
 
             Intent piaV2 = new Intent(getIntent());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getLaunchedFromPackage());
@@ -380,5 +384,21 @@ public class InstallStart extends Activity {
                         R.string.unknown_apps_user_restriction_dlg_text);
         }
         return null;
+    }
+
+    private void logReasonForDebug(boolean usePiaV2aConfig, boolean testOverrideForPiaV2) {
+        StringBuilder sb = new StringBuilder("Using Pia V2 due to: ");
+        boolean aconfigUsed = false;
+        if (usePiaV2aConfig) {
+            sb.append("aconfig flag USE_PIA_V2");
+            aconfigUsed = true;
+        }
+        if (testOverrideForPiaV2) {
+            if (aconfigUsed) {
+                sb.append(" and ");
+            }
+            sb.append("testOverrideForPiaV2.");
+        }
+        Log.i(TAG, sb.toString());
     }
 }

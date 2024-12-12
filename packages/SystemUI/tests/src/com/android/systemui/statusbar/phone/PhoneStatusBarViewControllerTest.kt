@@ -45,6 +45,7 @@ import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.StatusBarLongPressGestureDetector
+import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
 import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.CommandQueue
@@ -77,6 +78,7 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.verifyNoMoreInteractions
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -86,6 +88,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private val statusBarContentInsetsProvider = statusBarContentInsetsProviderStore.defaultDisplay
 
     private val fakeDarkIconDispatcher = kosmos.fakeDarkIconDispatcher
+    private val fakeShadeDisplaysRepository = kosmos.fakeShadeDisplaysRepository
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var panelExpansionInteractor: PanelExpansionInteractor
     @Mock private lateinit var featureFlags: FeatureFlags
@@ -257,6 +260,64 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         view.onTouchEvent(event)
 
         verify(shadeViewController, never()).handleExternalTouch(any())
+    }
+
+    @Test
+    @DisableFlags(AconfigFlags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS)
+    fun handleTouchEventFromStatusBar_statusBarConnectedDisplaysDisabled_viewReceivesEvent() {
+        `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
+        `when`(shadeViewController.isViewEnabled).thenReturn(true)
+        fakeShadeDisplaysRepository.setDisplayId(SECONDARY_DISPLAY_ID)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        view.onTouchEvent(event)
+
+        verify(shadeViewController).handleExternalTouch(event)
+    }
+
+    @Test
+    @EnableFlags(
+        AconfigFlags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS,
+        AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND,
+    )
+    fun handleTouchEventFromStatusBar_statusBarConnectedDisplaysEnabled_shadeWindowGoesAroundEnabled_viewReceivesEvent() {
+        `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
+        `when`(shadeViewController.isViewEnabled).thenReturn(true)
+        fakeShadeDisplaysRepository.setDisplayId(SECONDARY_DISPLAY_ID)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        view.onTouchEvent(event)
+
+        verify(shadeViewController).handleExternalTouch(event)
+    }
+
+    @Test
+    @EnableFlags(AconfigFlags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS)
+    @DisableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun handleTouchEventFromStatusBar_touchOnShadeDisplay_statusBarConnectedDisplaysEnabled_shadeWindowGoesAroundDisabled_viewReceivesEvent() {
+        `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
+        `when`(shadeViewController.isViewEnabled).thenReturn(true)
+        fakeShadeDisplaysRepository.setDisplayId(DISPLAY_ID)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        view.onTouchEvent(event)
+
+        verify(shadeViewController).handleExternalTouch(event)
+    }
+
+    @Test
+    @EnableFlags(AconfigFlags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS)
+    @DisableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun handleTouchEventFromStatusBar_touchNotOnShadeDisplay_statusBarConnectedDisplaysEnabled_shadeWindowGoesAroundDisabled_viewDoesNotReceiveEvent() {
+        `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
+        `when`(shadeViewController.isViewEnabled).thenReturn(true)
+        fakeShadeDisplaysRepository.setDisplayId(SECONDARY_DISPLAY_ID)
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
+
+        view.onTouchEvent(event)
+
+        verify(shadeViewController).isViewEnabled
+        verifyNoMoreInteractions(shadeViewController)
     }
 
     @Test
@@ -432,6 +493,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
                 fakeDarkIconDispatcher,
                 statusBarContentInsetsProviderStore,
                 Lazy { statusBarTouchShadeDisplayPolicy },
+                fakeShadeDisplaysRepository,
             )
             .create(view)
             .also { it.init() }
@@ -445,6 +507,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     private companion object {
-        const val DISPLAY_ID = 1
+        const val DISPLAY_ID = 0
+        const val SECONDARY_DISPLAY_ID = 2
     }
 }

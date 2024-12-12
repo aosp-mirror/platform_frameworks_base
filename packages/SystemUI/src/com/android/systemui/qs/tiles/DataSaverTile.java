@@ -102,7 +102,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         // Show a dialog to confirm first. Dialogs shown by the DialogTransitionAnimator must be
         // created and shown on the main thread, so we post it to the UI handler.
         mUiHandler.post(() -> {
-            SystemUIDialog dialog = mSystemUIDialogFactory.create();
+            SystemUIDialog dialog = mSystemUIDialogFactory.create(mContext);
             dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
             dialog.setMessage(com.android.internal.R.string.data_saver_description);
             dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
