@@ -74,6 +74,7 @@ import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.dismissCallbackRegistry
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.dozeInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardEnabledInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -1270,8 +1271,11 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 authenticationMethod = AuthenticationMethodModel.None,
                 isLockscreenEnabled = false,
             )
-            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+            powerInteractor.setAsleepForTest()
             underTest.start()
+            runCurrent()
+            assertThat(currentSceneKey).isEqualTo(Scenes.Lockscreen)
+
             powerInteractor.setAwakeForTest()
             runCurrent()
 
@@ -2139,6 +2143,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val transitionStateFlow = prepareState()
             underTest.start()
+            runCurrent()
             emulateSceneTransition(transitionStateFlow, toScene = Scenes.Bouncer)
             assertThat(currentScene).isNotEqualTo(Scenes.Lockscreen)
 
@@ -2153,6 +2158,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val transitionStateFlow = prepareState()
             underTest.start()
+            runCurrent()
             emulateSceneTransition(transitionStateFlow, toScene = Scenes.Bouncer)
             assertThat(currentScene).isEqualTo(Scenes.Bouncer)
 
@@ -2269,6 +2275,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(Scenes.Gone)
             assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isTrue()
             underTest.start()
+            runCurrent()
             sceneInteractor.changeScene(Scenes.Shade, "")
             assertThat(currentScene).isEqualTo(Scenes.Shade)
             assertThat(kosmos.deviceEntryInteractor.isDeviceEntered.value).isTrue()
@@ -2350,6 +2357,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             prepareState()
             underTest.start()
+            runCurrent()
 
             // run all pending dismiss succeeded/cancelled calls from setup:
             kosmos.fakeExecutor.runAllReady()
@@ -2461,13 +2469,18 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromDreamToLockscreen_whenLockedAndDreamStopped() =
         testScope.runTest {
-            keyguardInteractor.setDreaming(true)
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             prepareState(initialSceneKey = Scenes.Dream)
-            assertThat(currentScene).isEqualTo(Scenes.Dream)
             underTest.start()
+            advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
+            runCurrent()
+            keyguardInteractor.setDreaming(true)
+            advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
 
             keyguardInteractor.setDreaming(false)
+            advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
             runCurrent()
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
         }
@@ -2475,13 +2488,18 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromDreamToGone_whenUnlockedAndDreamStopped() =
         testScope.runTest {
-            keyguardInteractor.setDreaming(true)
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             prepareState(initialSceneKey = Scenes.Dream, isDeviceUnlocked = true)
-            assertThat(currentScene).isEqualTo(Scenes.Dream)
             underTest.start()
+            advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
+            runCurrent()
+            keyguardInteractor.setDreaming(true)
+            advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
+            runCurrent()
+            assertThat(currentScene).isEqualTo(Scenes.Dream)
 
             keyguardInteractor.setDreaming(false)
+            advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
             runCurrent()
             assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
@@ -2684,6 +2702,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             underTest.start()
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val currentOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            runCurrent()
             sceneInteractor.changeScene(Scenes.Shade, "reason")
             sceneInteractor.showOverlay(Overlays.NotificationsShade, "reason")
             assertThat(currentScene).isEqualTo(Scenes.Shade)
@@ -2835,8 +2854,15 @@ class SceneContainerStartableTest : SysuiTestCase() {
             )
         sceneInteractor.setTransitionState(transitionStateFlow)
         initialSceneKey?.let {
+            if (isDeviceUnlocked && initialSceneKey != Scenes.Gone) {
+                // Pass through the Gone scene to populate device entry state properly.
+                transitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
+                sceneInteractor.changeScene(Scenes.Gone, "prepareState, passing through Gone scene")
+                runCurrent()
+            }
+
             transitionStateFlow.value = ObservableTransitionState.Idle(it)
-            sceneInteractor.changeScene(it, "reason")
+            sceneInteractor.changeScene(it, "prepareState, initialSceneKey isn't null")
         }
         if (startsAwake) {
             powerInteractor.setAwakeForTest()
