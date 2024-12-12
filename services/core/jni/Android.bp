@@ -61,6 +61,7 @@ cc_library_static {
         "com_android_server_SystemServer.cpp",
         "com_android_server_tv_TvUinputBridge.cpp",
         "com_android_server_tv_TvInputHal.cpp",
+        "com_android_server_UsbAlsaDevice.cpp",
         "com_android_server_UsbAlsaJackDetector.cpp",
         "com_android_server_UsbAlsaMidiDevice.cpp",
         "com_android_server_UsbDeviceManager.cpp",

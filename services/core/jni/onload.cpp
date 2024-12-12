@@ -33,6 +33,7 @@ int register_android_server_power_stats_CpuPowerStatsCollector(JNIEnv* env);
 int register_android_server_HintManagerService(JNIEnv* env);
 int register_android_server_storage_AppFuse(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
+int register_android_server_UsbAlsaDevice(JNIEnv* env);
 int register_android_server_UsbAlsaJackDetector(JNIEnv* env);
 int register_android_server_UsbAlsaMidiDevice(JNIEnv* env);
 int register_android_server_UsbDeviceManager(JavaVM* vm, JNIEnv* env);
@@ -98,6 +99,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_InputManager(env);
     register_android_server_LightsService(env);
     register_android_server_UsbDeviceManager(vm, env);
+    register_android_server_UsbAlsaDevice(env);
     register_android_server_UsbAlsaJackDetector(env);
     register_android_server_UsbAlsaMidiDevice(env);
     register_android_server_UsbHostManager(env);
