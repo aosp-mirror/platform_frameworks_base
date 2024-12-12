@@ -1327,7 +1327,10 @@ public final class CardEmulation {
 
         /**
          * This method is called when an AID conflict is detected during an NFC transaction. This
-         * can happen when multiple services are registered for the same AID.
+         * can happen when multiple services are registered for the same AID. If your service is
+         * registered for this AID you may want to instruct users to bring your app to the
+         * foreground and ensure you call {@link #setPreferredService(Activity, ComponentName)}
+         * to ensure the transaction is routed to your service.
          *
          * @param aid The AID that is in conflict
          */
