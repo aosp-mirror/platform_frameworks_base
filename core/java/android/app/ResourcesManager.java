@@ -77,6 +77,7 @@ import java.util.function.Function;
 public class ResourcesManager {
     static final String TAG = "ResourcesManager";
     private static final boolean DEBUG = false;
+    public static final String RESOURCE_CACHE_DIR = "/data/resource-cache/";
 
     private static volatile ResourcesManager sResourcesManager;
 
@@ -581,7 +582,7 @@ public class ResourcesManager {
     }
 
     private static String overlayPathToIdmapPath(String path) {
-        return "/data/resource-cache/" + path.substring(1).replace('/', '@') + "@idmap";
+        return RESOURCE_CACHE_DIR + path.substring(1).replace('/', '@') + "@idmap";
     }
 
     /**
