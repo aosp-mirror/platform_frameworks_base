@@ -2473,7 +2473,7 @@ public final class Settings {
      * when a new SIM subscription has become available.
      * <p>
      * This Activity will only launch successfully if the newly active subscription ID is set as the
-     * value of {@link EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
+     * value of {@link #EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
      * <p>
      * Input: {@link #EXTRA_SUB_ID}: the subscription ID of the newly active SIM subscription.
      * <p>
