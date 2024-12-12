@@ -365,10 +365,6 @@ object BiometricViewBinder {
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
                         }
                         if (authState.isAuthenticatedAndConfirmed) {
-                            view.announceForAccessibility(
-                                view.resources.getString(R.string.biometric_dialog_authenticated)
-                            )
-
                             launch {
                                 delay(authState.delay)
                                 if (authState.isAuthenticatedAndExplicitlyConfirmed) {
