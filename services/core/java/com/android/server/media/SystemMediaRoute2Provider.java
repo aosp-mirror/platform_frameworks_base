@@ -73,6 +73,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     // For apps without MODIFYING_AUDIO_ROUTING permission.
     // This should be the currently selected route.
     MediaRoute2Info mDefaultRoute;
+
+    @GuardedBy("mLock")
+    RoutingSessionInfo mSystemSessionInfo;
+
     RoutingSessionInfo mDefaultSessionInfo;
 
     private final AudioManagerBroadcastReceiver mAudioReceiver =
@@ -180,7 +184,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             if (TextUtils.equals(routeOriginalId, mSelectedRouteId)) {
                 RoutingSessionInfo currentSessionInfo;
                 synchronized (mLock) {
-                    currentSessionInfo = mSessionInfos.get(0);
+                    currentSessionInfo =
+                            Flags.enableMirroringInMediaRouter2()
+                                    ? mSystemSessionInfo
+                                    : mSessionInfos.get(0);
                 }
                 mCallback.onSessionCreated(this, requestId, currentSessionInfo);
                 return;
@@ -354,7 +361,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             }
 
             if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
-                RoutingSessionInfo oldSessionInfo = mSessionInfos.get(0);
+                var oldSessionInfo =
+                        Flags.enableMirroringInMediaRouter2()
+                                ? mSystemSessionInfo
+                                : mSessionInfos.get(0);
                 builder.setTransferReason(oldSessionInfo.getTransferReason())
                         .setTransferInitiator(oldSessionInfo.getTransferInitiatorUserHandle(),
                                 oldSessionInfo.getTransferInitiatorPackageName());
@@ -362,6 +372,31 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
             return builder.setProviderId(mUniqueId).build();
         }
+    }
+
+    /**
+     * Notifies the system provider of a {@link MediaRoute2ProviderServiceProxy} update.
+     *
+     * <p>To be overridden so as to generate system media routes for {@link
+     * MediaRoute2ProviderService} routes that {@link MediaRoute2Info#supportsSystemMediaRouting()
+     * support system media routing}).
+     *
+     * @param serviceProxy The proxy of the service that updated its state.
+     */
+    public void updateSystemMediaRoutesFromProxy(MediaRoute2ProviderServiceProxy serviceProxy) {
+        // Do nothing. This implementation doesn't support MR2ProviderService system media routes.
+        // The subclass overrides this method to implement app-managed system media routing (aka
+        // mirroring).
+    }
+
+    /**
+     * Called when the system provider state changes.
+     *
+     * <p>To be overridden by {@link SystemMediaRoute2Provider2}, so that app-provided system media
+     * routing routes are added before setting the provider state.
+     */
+    public void onSystemProviderRoutesChanged(MediaRoute2ProviderInfo providerInfo) {
+        setProviderState(providerInfo);
     }
 
     protected void updateProviderState() {
@@ -373,7 +408,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             for (MediaRoute2Info route : deviceRoutes) {
                 builder.addRoute(route);
             }
-            setProviderState(builder.build());
+            if (!Flags.enableMirroringInMediaRouter2()) {
+                setProviderState(builder.build());
+            }
         } else {
             builder.addRoute(mDeviceRouteController.getSelectedRoute());
         }
@@ -382,7 +419,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             builder.addRoute(route);
         }
         MediaRoute2ProviderInfo providerInfo = builder.build();
-        setProviderState(providerInfo);
+        onSystemProviderRoutesChanged(providerInfo);
         if (DEBUG) {
             Slog.d(TAG, "Updating system provider info : " + providerInfo);
         }
@@ -393,8 +430,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
      */
     boolean updateSessionInfosIfNeeded() {
         synchronized (mLock) {
-            RoutingSessionInfo oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(
-                    0);
+            RoutingSessionInfo oldSessionInfo;
+            if (Flags.enableMirroringInMediaRouter2()) {
+                oldSessionInfo = mSystemSessionInfo;
+            } else {
+                oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(0);
+            }
 
             RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
                     SYSTEM_SESSION_ID, "" /* clientPackageName */)
@@ -483,8 +524,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 if (DEBUG) {
                     Slog.d(TAG, "Updating system routing session info : " + newSessionInfo);
                 }
-                mSessionInfos.clear();
-                mSessionInfos.add(newSessionInfo);
+                mSystemSessionInfo = newSessionInfo;
+                onSystemSessionInfoUpdated();
                 mDefaultSessionInfo =
                         new RoutingSessionInfo.Builder(
                                         SYSTEM_SESSION_ID, "" /* clientPackageName */)
@@ -499,6 +540,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 return true;
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    protected void onSystemSessionInfoUpdated() {
+        mSessionInfos.clear();
+        mSessionInfos.add(mSystemSessionInfo);
     }
 
     @GuardedBy("mRequestLock")
@@ -587,6 +634,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         RoutingSessionInfo sessionInfo;
         synchronized (mLock) {
             sessionInfo = mSessionInfos.get(0);
+            if (sessionInfo == null) {
+                return;
+            }
         }
 
         mCallback.onSessionUpdated(this, sessionInfo);
