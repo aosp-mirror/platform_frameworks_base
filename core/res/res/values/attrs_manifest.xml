@@ -2892,6 +2892,17 @@
         <attr name="name" />
     </declare-styleable>
 
+    <!-- Private tag to declare the package name that the permissions of this package
+         is based on.  Only used for packages installed in the system image.  If
+         given, the permissions from the other package will be propagated into the
+         new package.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestAdoptPermissions" parent="AndroidManifest">
+        <attr name="name" />
+    </declare-styleable>
+
     <!-- The <code>processes</code> tag specifies the processes the application will run code in
          and optionally characteristics of those processes.  This tag is optional; if not
          specified, components will simply run in the processes they specify.  If supplied,
