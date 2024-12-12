@@ -1558,6 +1558,7 @@ public class Build {
      * @hide
      */
     @SuppressWarnings("FlaggedApi") // SDK_INT_MULTIPLIER is defined in this file
+    @SuppressLint("InlinedApi")
     public static @SdkIntFull int parseFullVersion(@NonNull String version) {
         int index = version.indexOf('.');
         int major;
@@ -1569,12 +1570,22 @@ public class Build {
                 major = Integer.parseInt(version.substring(0, index));
                 minor = Integer.parseInt(version.substring(index + 1));
             }
-            if (major < 0 || minor < 0) {
-                throw new NumberFormatException();
+            if (major < 0) {
+                throw new NumberFormatException("negative major version");
+            }
+            if (major >= 21474) {
+                throw new NumberFormatException("major version too large, must be less than 21474");
+            }
+            if (minor < 0) {
+                throw new NumberFormatException("negative minor version");
+            }
+            if (minor >= VERSION_CODES_FULL.SDK_INT_MULTIPLIER) {
+                throw new NumberFormatException("minor version too large, must be less than "
+                        + VERSION_CODES_FULL.SDK_INT_MULTIPLIER);
             }
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("failed to parse '" + version
-                    + "' as a major.minor version code");
+                    + "' as a major.minor version code", e);
         }
         return major * VERSION_CODES_FULL.SDK_INT_MULTIPLIER + minor;
     }
