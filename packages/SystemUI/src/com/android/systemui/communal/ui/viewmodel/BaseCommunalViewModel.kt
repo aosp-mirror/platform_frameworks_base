@@ -195,7 +195,7 @@ abstract class BaseCommunalViewModel(
     open fun onDismissCtaTile() {}
 
     /** Called as the user starts dragging a widget to reorder. */
-    open fun onReorderWidgetStart() {}
+    open fun onReorderWidgetStart(draggingItemKey: String) {}
 
     /** Called as the user finishes dragging a widget to reorder. */
     open fun onReorderWidgetEnd() {}

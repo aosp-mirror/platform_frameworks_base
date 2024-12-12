@@ -35,7 +35,15 @@ import android.os.UserHandle;
                     SystemMediaRoute2Provider2.class.getPackage().getName(),
                     SystemMediaRoute2Provider2.class.getName());
 
-    SystemMediaRoute2Provider2(Context context, UserHandle user, Looper looper) {
+    public static SystemMediaRoute2Provider2 create(
+            Context context, UserHandle user, Looper looper) {
+        var instance = new SystemMediaRoute2Provider2(context, user, looper);
+        instance.updateProviderState();
+        instance.updateSessionInfosIfNeeded();
+        return instance;
+    }
+
+    private SystemMediaRoute2Provider2(Context context, UserHandle user, Looper looper) {
         super(context, COMPONENT_NAME, user, looper);
     }
 }

@@ -3020,6 +3020,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
     }
 
+    public void updateMetricsIfNeeded() {
+        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        if (displayManager != null) {
+            final Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                display.getMetrics(mMetrics);
+            }
+        }
+    }
+
     private void notifyPackageUseInternal(String packageName, int reason) {
         long time = System.currentTimeMillis();
         synchronized (mLock) {

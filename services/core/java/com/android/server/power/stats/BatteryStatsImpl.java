@@ -5723,7 +5723,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     displayStats.screenDozeTimer.stopRunningLocked(elapsedRealtimeMs);
                     shouldScheduleSync = true;
                     break;
-                case Display.STATE_OFF: // fallthrough
+                case Display.STATE_OFF:
+                    shouldScheduleSync = true;
+                    break;
                 case Display.STATE_UNKNOWN:
                     // Not tracked by timers.
                     break;
@@ -5756,7 +5758,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     displayStats.screenDozeTimer.startRunningLocked(elapsedRealtimeMs);
                     shouldScheduleSync = true;
                     break;
-                case Display.STATE_OFF: // fallthrough
+                case Display.STATE_OFF:
+                    shouldScheduleSync = true;
+                    break;
                 case Display.STATE_UNKNOWN:
                     // Not tracked by timers.
                     break;
@@ -5873,7 +5877,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (shouldScheduleSync) {
             if (mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_SCREEN)) {
-                mScreenPowerStatsCollector.schedule();
+                mScreenPowerStatsCollector.onScreenStateChange();
             } else {
                 final int numDisplays = mPerDisplayBatteryStats.length;
                 final int[] displayStates = new int[numDisplays];

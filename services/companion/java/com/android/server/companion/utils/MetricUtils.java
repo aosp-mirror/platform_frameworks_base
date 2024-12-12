@@ -21,6 +21,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PRO
 import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_GLASSES;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_SENSOR_DEVICE_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 
 import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION;
@@ -31,6 +32,7 @@ import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION
 import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_COMPUTER;
 import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_GLASSES;
 import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
+import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_SENSOR_DEVICE_STREAMING;
 import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_NULL;
 import static com.android.internal.util.FrameworkStatsLog.CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_WATCH;
 import static com.android.internal.util.FrameworkStatsLog.write;
@@ -70,6 +72,10 @@ public final class MetricUtils {
         map.put(
                 DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
                 CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_NEARBY_DEVICE_STREAMING
+        );
+        map.put(
+                DEVICE_PROFILE_SENSOR_DEVICE_STREAMING,
+                CDM_ASSOCIATION_ACTION__DEVICE_PROFILE__DEVICE_PROFILE_SENSOR_DEVICE_STREAMING
         );
 
         METRIC_DEVICE_PROFILE = unmodifiableMap(map);

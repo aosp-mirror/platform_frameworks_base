@@ -29,10 +29,24 @@ aconfig_declarations {
     ],
 }
 
+// TODO: b/374174952 Remove this library when VCN modularization is done
 java_aconfig_library {
     name: "android.net.vcn.flags-aconfig-java-export",
     aconfig_declarations: "android.net.vcn.flags-aconfig",
     mode: "exported",
     min_sdk_version: "35",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    apex_available: [
+        "//apex_available:platform",
+    ],
+}
+
+java_aconfig_library {
+    name: "android.net.vcn.flags-aconfig-java",
+    aconfig_declarations: "android.net.vcn.flags-aconfig",
+    min_sdk_version: "35",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    apex_available: [
+        "com.android.tethering",
+    ],
 }

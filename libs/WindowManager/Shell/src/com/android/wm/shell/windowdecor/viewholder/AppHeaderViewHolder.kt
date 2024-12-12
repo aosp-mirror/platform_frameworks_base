@@ -72,8 +72,6 @@ class AppHeaderViewHolder(
         onCaptionButtonClickListener: View.OnClickListener,
         private val onLongClickListener: OnLongClickListener,
         onCaptionGenericMotionListener: View.OnGenericMotionListener,
-        appName: CharSequence,
-        appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
 ) : WindowDecorationViewHolder<AppHeaderViewHolder.HeaderData>(rootView) {
 
@@ -154,8 +152,6 @@ class AppHeaderViewHolder(
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         minimizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         minimizeWindowButton.setOnTouchListener(onCaptionTouchListener)
-        appNameTextView.text = appName
-        appIconImageView.setImageBitmap(appIconBitmap)
         maximizeButtonView.onHoverAnimationFinishedListener =
                 onMaximizeHoverAnimationFinishedListener
     }
@@ -168,6 +164,16 @@ class AppHeaderViewHolder(
             data.hasGlobalFocus,
             data.enableMaximizeLongClick
         )
+    }
+
+    /** Sets the app's name in the header. */
+    fun setAppName(name: CharSequence) {
+        appNameTextView.text = name
+    }
+
+    /** Sets the app's icon in the header. */
+    fun setAppIcon(icon: Bitmap) {
+        appIconImageView.setImageBitmap(icon)
     }
 
     private fun bindData(
@@ -628,8 +634,6 @@ class AppHeaderViewHolder(
             onCaptionButtonClickListener: View.OnClickListener,
             onLongClickListener: OnLongClickListener,
             onCaptionGenericMotionListener: View.OnGenericMotionListener,
-            appName: CharSequence,
-            appIconBitmap: Bitmap,
             onMaximizeHoverAnimationFinishedListener: () -> Unit,
         ): AppHeaderViewHolder = AppHeaderViewHolder(
             rootView,
@@ -637,8 +641,6 @@ class AppHeaderViewHolder(
             onCaptionButtonClickListener,
             onLongClickListener,
             onCaptionGenericMotionListener,
-            appName,
-            appIconBitmap,
             onMaximizeHoverAnimationFinishedListener,
         )
     }

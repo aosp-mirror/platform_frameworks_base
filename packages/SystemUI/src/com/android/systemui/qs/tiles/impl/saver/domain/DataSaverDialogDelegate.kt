@@ -20,18 +20,19 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.R
 import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileUserActionInteractor
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 class DataSaverDialogDelegate(
     private val sysuiDialogFactory: SystemUIDialog.Factory,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val backgroundContext: CoroutineContext,
     private val dataSaverController: DataSaverController,
     private val sharedPreferences: SharedPreferences,

@@ -23,6 +23,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +32,7 @@ import android.net.ConnectivityManager;
 import android.net.IpSecTransformState;
 import android.net.Network;
 import android.net.vcn.VcnManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.OutcomeReceiver;
 import android.os.PowerManager;
@@ -59,6 +61,8 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>This class is flag gated by "network_metric_monitor" and "ipsec_tramsform_state"
  */
+// TODO(b/374174952) Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     private static final String TAG = IpSecPacketLossDetector.class.getSimpleName();
 

@@ -24,6 +24,7 @@ import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.PowerRepository
+import com.android.systemui.power.shared.model.DozeScreenStateModel
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
@@ -33,6 +34,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -72,7 +74,11 @@ constructor(
     /** Helper flow in case "isAsleep" reads better than "!isAwake". */
     val isAsleep = isAwake.map { !it }
 
-    val screenPowerState = repository.screenPowerState
+    /** The physical on/off state of the display. */
+    val screenPowerState: StateFlow<ScreenPowerState> = repository.screenPowerState
+
+    /** The screen state, related to power and controlled by [DozeScreenState] */
+    val dozeScreenState: StateFlow<DozeScreenStateModel> = repository.dozeScreenState.asStateFlow()
 
     /**
      * Notifies the power interactor that a user touch happened.

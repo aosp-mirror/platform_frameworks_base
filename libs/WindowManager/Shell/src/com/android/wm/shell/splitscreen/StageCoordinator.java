@@ -213,6 +213,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final SplitscreenEventLogger mLogger;
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
+    private final ShellExecutor mBgExecutor;
     // Cache live tile tasks while entering recents, evict them from stages in finish transaction
     // if user is opening another task(s).
     private final ArrayList<Integer> mPausingTasks = new ArrayList<>();
@@ -340,12 +341,20 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             };
 
-    protected StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-            ShellTaskOrganizer taskOrganizer, DisplayController displayController,
+    protected StageCoordinator(Context context,
+            int displayId,
+            SyncTransactionQueue syncQueue,
+            ShellTaskOrganizer taskOrganizer,
+            DisplayController displayController,
             DisplayImeController displayImeController,
-            DisplayInsetsController displayInsetsController, Transitions transitions,
-            TransactionPool transactionPool, IconProvider iconProvider, ShellExecutor mainExecutor,
-            Handler mainHandler, Optional<RecentTasksController> recentTasks,
+            DisplayInsetsController displayInsetsController,
+            Transitions transitions,
+            TransactionPool transactionPool,
+            IconProvider iconProvider,
+            ShellExecutor mainExecutor,
+            Handler mainHandler,
+            ShellExecutor bgExecutor,
+            Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState) {
         mContext = context;
@@ -355,6 +364,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mRecentTasks = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;
@@ -370,6 +380,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     this /*stageListenerCallbacks*/,
                     mSyncQueue,
                     iconProvider,
+                    mMainExecutor,
+                    mBgExecutor,
                     mWindowDecorViewModel);
         } else {
             mMainStage = new StageTaskListener(
@@ -379,6 +391,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     this /*stageListenerCallbacks*/,
                     mSyncQueue,
                     iconProvider,
+                    mMainExecutor,
+                    mBgExecutor,
                     mWindowDecorViewModel, STAGE_TYPE_MAIN);
             mSideStage = new StageTaskListener(
                     mContext,
@@ -387,6 +401,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     this /*stageListenerCallbacks*/,
                     mSyncQueue,
                     iconProvider,
+                    mMainExecutor,
+                    mBgExecutor,
                     mWindowDecorViewModel, STAGE_TYPE_SIDE);
         }
         mDisplayController = displayController;
@@ -408,13 +424,22 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     @VisibleForTesting
-    StageCoordinator(Context context, int displayId, SyncTransactionQueue syncQueue,
-            ShellTaskOrganizer taskOrganizer, StageTaskListener mainStage,
-            StageTaskListener sideStage, DisplayController displayController,
+    StageCoordinator(Context context,
+            int displayId,
+            SyncTransactionQueue syncQueue,
+            ShellTaskOrganizer taskOrganizer,
+            StageTaskListener mainStage,
+            StageTaskListener sideStage,
+            DisplayController displayController,
             DisplayImeController displayImeController,
-            DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
-            Transitions transitions, TransactionPool transactionPool, ShellExecutor mainExecutor,
-            Handler mainHandler, Optional<RecentTasksController> recentTasks,
+            DisplayInsetsController displayInsetsController,
+            SplitLayout splitLayout,
+            Transitions transitions,
+            TransactionPool transactionPool,
+            ShellExecutor mainExecutor,
+            Handler mainHandler,
+            ShellExecutor bgExecutor,
+            Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState) {
         mContext = context;
@@ -433,6 +458,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger = new SplitscreenEventLogger();
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mRecentTasks = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;

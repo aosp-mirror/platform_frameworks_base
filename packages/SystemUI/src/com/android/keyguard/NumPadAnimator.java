@@ -25,7 +25,9 @@ import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.ContextThemeWrapper;
@@ -122,7 +124,11 @@ class NumPadAnimator {
 
         int[] customAttrs = {android.R.attr.colorControlNormal};
         ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
-        mNormalBackgroundColor = ctw.getColor(NUM_PAD_BACKGROUND);
+        @SuppressLint("ResourceType") TypedArray a = ctw.obtainStyledAttributes(customAttrs);
+
+        mNormalBackgroundColor = a.getColor(0, context.getColor(NUM_PAD_BACKGROUND));
+
+        a.recycle();
 
         mPressedBackgroundColor = context.getColor(NUM_PAD_BACKGROUND_PRESSED);
         mTextColorPressed = context.getColor(NUM_PAD_PRESSED);

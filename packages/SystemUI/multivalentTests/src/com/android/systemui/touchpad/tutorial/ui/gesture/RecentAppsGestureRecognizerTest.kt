@@ -21,7 +21,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.testKosmos
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
@@ -58,22 +57,9 @@ class RecentAppsGestureRecognizerTest : SysuiTestCase() {
     }
 
     @Test
-    fun triggersGestureFinishedForThreeFingerGestureUp() {
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = Finished)
-    }
-
-    @Test
     fun doesntTriggerGestureFinished_onGestureSpeedTooHigh() {
         velocityTracker.setVelocity(Velocity(FAST))
         assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = NotStarted)
-    }
-
-    @Test
-    fun triggersGestureProgressForThreeFingerGestureStarted() {
-        assertStateAfterEvents(
-            events = ThreeFingerGesture.startEvents(x = 0f, y = 0f),
-            expectedState = InProgress(progress = 0f),
-        )
     }
 
     @Test
@@ -95,31 +81,6 @@ class RecentAppsGestureRecognizerTest : SysuiTestCase() {
         assertProgressWhileMovingFingers(deltaY = SWIPE_DISTANCE / 2, expectedProgress = 0f)
         // going further than required distance
         assertProgressWhileMovingFingers(deltaY = -SWIPE_DISTANCE * 2, expectedProgress = 1f)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onGestureDistanceTooShort() {
-        assertStateAfterEvents(
-            events = ThreeFingerGesture.swipeUp(distancePx = SWIPE_DISTANCE / 2),
-            expectedState = NotStarted,
-        )
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onThreeFingersSwipeInOtherDirections() {
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeDown(), expectedState = NotStarted)
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeLeft(), expectedState = NotStarted)
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeRight(), expectedState = NotStarted)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onTwoFingersSwipe() {
-        assertStateAfterEvents(events = TwoFingerGesture.swipeUp(), expectedState = NotStarted)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onFourFingersSwipe() {
-        assertStateAfterEvents(events = FourFingerGesture.swipeUp(), expectedState = NotStarted)
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {
