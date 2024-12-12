@@ -3303,7 +3303,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // just kill it. And if it is a window of foreground activity, the activity can be
             // restarted automatically if needed.
             Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
-            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid) {
+            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid
+                    && android.os.Process.getThreadGroupLeader(mSession.mPid) == mSession.mPid) {
                 android.os.Process.killProcess(mSession.mPid);
             }
         }
