@@ -382,7 +382,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Compute the [TransformationSpec] when the transition starts.
         val fromContent = transition.fromContent
         val toContent = transition.toContent
-        val orientation = (transition as? TransitionState.DirectionProperties)?.orientation
 
         // Update the transition specs.
         transition.transformationSpec =
@@ -393,14 +392,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
             transitions
                 .transitionSpec(fromContent, toContent, key = transition.key)
                 .previewTransformationSpec(transition)
-        if (orientation != null) {
-            transition.updateOverscrollSpecs(
-                fromSpec = transitions.overscrollSpec(fromContent, orientation),
-                toSpec = transitions.overscrollSpec(toContent, orientation),
-            )
-        } else {
-            transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
-        }
     }
 
     private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {

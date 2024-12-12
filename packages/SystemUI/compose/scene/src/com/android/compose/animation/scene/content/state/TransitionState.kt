@@ -20,15 +20,12 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
-import com.android.compose.animation.scene.OverscrollSpecImpl
 import com.android.compose.animation.scene.ProgressVisibilityThreshold
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
@@ -254,40 +251,13 @@ sealed interface TransitionState {
         internal open val isInPreviewStage: Boolean = false
 
         /**
-         * The current [TransformationSpecImpl] and [OverscrollSpecImpl] associated to this
-         * transition.
+         * The current [TransformationSpecImpl] associated to this transition.
          *
          * Important: These will be set exactly once, when this transition is
          * [started][MutableSceneTransitionLayoutStateImpl.startTransition].
          */
         internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
         internal var previewTransformationSpec: TransformationSpecImpl? = null
-        private var fromOverscrollSpec: OverscrollSpecImpl? = null
-        private var toOverscrollSpec: OverscrollSpecImpl? = null
-
-        /**
-         * The current [OverscrollSpecImpl], if this transition is currently overscrolling.
-         *
-         * Note: This is backed by a State<OverscrollSpecImpl?> because the overscroll spec is
-         * derived from progress, and we don't want readers of currentOverscrollSpec to recompose
-         * every time progress is changed.
-         */
-        private val _currentOverscrollSpec: State<OverscrollSpecImpl?>? =
-            if (this !is DirectionProperties) {
-                null
-            } else {
-                derivedStateOf {
-                    val progress = progress
-                    val bouncingContent = bouncingContent
-                    when {
-                        progress < 0f || bouncingContent == fromContent -> fromOverscrollSpec
-                        progress > 1f || bouncingContent == toContent -> toOverscrollSpec
-                        else -> null
-                    }
-                }
-            }
-        internal val currentOverscrollSpec: OverscrollSpecImpl?
-            get() = _currentOverscrollSpec?.value
 
         /**
          * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
@@ -395,14 +365,6 @@ sealed interface TransitionState {
             }
         }
 
-        internal fun updateOverscrollSpecs(
-            fromSpec: OverscrollSpecImpl?,
-            toSpec: OverscrollSpecImpl?,
-        ) {
-            fromOverscrollSpec = fromSpec
-            toOverscrollSpec = toSpec
-        }
-
         /**
          * Checks if the given [progress] value is within the valid range for this transition.
          *
@@ -438,36 +400,7 @@ sealed interface TransitionState {
         }
     }
 
-    interface DirectionProperties {
-        /**
-         * The position of the [Transition.toContent].
-         *
-         * Used to understand the direction of the overscroll.
-         */
-        val isUpOrLeft: Boolean
-
-        /**
-         * The relative orientation between [Transition.fromContent] and [Transition.toContent].
-         *
-         * Used to understand the orientation of the overscroll.
-         */
-        val orientation: Orientation
-
-        /**
-         * Return the absolute distance between fromScene and toScene, if available, otherwise
-         * [DistanceUnspecified].
-         */
-        val absoluteDistance: Float
-
-        /**
-         * The content (scene or overlay) around which the transition is currently bouncing. When
-         * not `null`, this transition is currently oscillating around this content and will soon
-         * settle to that content.
-         */
-        val bouncingContent: ContentKey?
-
-        companion object {
-            const val DistanceUnspecified = 0f
-        }
+    companion object {
+        const val DistanceUnspecified = 0f
     }
 }

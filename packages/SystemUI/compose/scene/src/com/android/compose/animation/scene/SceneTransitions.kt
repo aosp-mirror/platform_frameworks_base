@@ -21,7 +21,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -36,18 +35,13 @@ class SceneTransitions
 internal constructor(
     internal val defaultSwipeSpec: SpringSpec<Float>,
     internal val transitionSpecs: List<TransitionSpecImpl>,
-    internal val overscrollSpecs: List<OverscrollSpecImpl>,
     internal val interruptionHandler: InterruptionHandler,
-    internal val defaultProgressConverter: ProgressConverter,
 ) {
     private val transitionCache =
         mutableMapOf<
             ContentKey,
             MutableMap<ContentKey, MutableMap<TransitionKey?, TransitionSpecImpl>>,
         >()
-
-    private val overscrollCache =
-        mutableMapOf<ContentKey, MutableMap<Orientation, OverscrollSpecImpl?>>()
 
     internal fun transitionSpec(
         from: ContentKey,
@@ -119,28 +113,6 @@ internal constructor(
     private fun defaultTransition(from: ContentKey, to: ContentKey) =
         TransitionSpecImpl(key = null, from, to, null, null, TransformationSpec.EmptyProvider)
 
-    internal fun overscrollSpec(scene: ContentKey, orientation: Orientation): OverscrollSpecImpl? =
-        overscrollCache
-            .getOrPut(scene) { mutableMapOf() }
-            .getOrPut(orientation) { overscroll(scene, orientation) { it.content == scene } }
-
-    private fun overscroll(
-        scene: ContentKey,
-        orientation: Orientation,
-        filter: (OverscrollSpecImpl) -> Boolean,
-    ): OverscrollSpecImpl? {
-        var match: OverscrollSpecImpl? = null
-        overscrollSpecs.fastForEach { spec ->
-            if (spec.orientation == orientation && filter(spec)) {
-                if (match != null) {
-                    error("Found multiple overscroll specs for overscroll $scene")
-                }
-                match = spec
-            }
-        }
-        return match
-    }
-
     companion object {
         internal val DefaultSwipeSpec =
             spring(
@@ -153,9 +125,7 @@ internal constructor(
             SceneTransitions(
                 defaultSwipeSpec = DefaultSwipeSpec,
                 transitionSpecs = emptyList(),
-                overscrollSpecs = emptyList(),
                 interruptionHandler = DefaultInterruptionHandler,
-                defaultProgressConverter = ProgressConverter.Default,
             )
     }
 }
@@ -285,36 +255,6 @@ internal class TransitionSpecImpl(
         transition: TransitionState.Transition
     ): TransformationSpecImpl? = previewTransformationSpec?.invoke(transition)
 }
-
-/** The definition of the overscroll behavior of the [content]. */
-internal interface OverscrollSpec {
-    /** The scene we are over scrolling. */
-    val content: ContentKey
-
-    /** The orientation of this [OverscrollSpec]. */
-    val orientation: Orientation
-
-    /** The [TransformationSpec] associated to this [OverscrollSpec]. */
-    val transformationSpec: TransformationSpec
-
-    /**
-     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
-     * outputs the desired **overscroll progress value**.
-     *
-     * When the progress value is:
-     * - 0, the user is not overscrolling.
-     * - 1, the user overscrolled by exactly the [OverscrollBuilder.distance].
-     * - Greater than 1, the user overscrolled more than the [OverscrollBuilder.distance].
-     */
-    val progressConverter: ProgressConverter?
-}
-
-internal class OverscrollSpecImpl(
-    override val content: ContentKey,
-    override val orientation: Orientation,
-    override val transformationSpec: TransformationSpecImpl,
-    override val progressConverter: ProgressConverter?,
-) : OverscrollSpec
 
 /**
  * An implementation of [TransformationSpec] that allows the quick retrieval of an element

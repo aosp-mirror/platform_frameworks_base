@@ -40,22 +40,14 @@ import com.android.compose.animation.scene.transformation.Translate
 
 internal fun transitionsImpl(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
     val impl = SceneTransitionsBuilderImpl().apply(builder)
-    return SceneTransitions(
-        impl.defaultSwipeSpec,
-        impl.transitionSpecs,
-        impl.transitionOverscrollSpecs,
-        impl.interruptionHandler,
-        impl.defaultOverscrollProgressConverter,
-    )
+    return SceneTransitions(impl.defaultSwipeSpec, impl.transitionSpecs, impl.interruptionHandler)
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
     override var interruptionHandler: InterruptionHandler = DefaultInterruptionHandler
-    override var defaultOverscrollProgressConverter: ProgressConverter = ProgressConverter.Default
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
-    val transitionOverscrollSpecs = mutableListOf<OverscrollSpecImpl>()
 
     override fun to(
         to: ContentKey,

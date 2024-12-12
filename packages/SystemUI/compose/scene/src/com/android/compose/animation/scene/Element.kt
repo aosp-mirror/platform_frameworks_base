@@ -388,32 +388,6 @@ internal class ElementNode(
 
         val transition = elementState as? TransitionState.Transition
 
-        // If this element is not supposed to be laid out now, either because it is not part of any
-        // ongoing transition or the other content of its transition is overscrolling, then lay out
-        // the element normally and don't place it.
-        val overscrollContent = transition?.currentOverscrollSpec?.content
-        if (overscrollContent != null && overscrollContent != content.key) {
-            when (transition) {
-                is TransitionState.Transition.ChangeScene ->
-                    return doNotPlace(measurable, constraints)
-
-                // If we are overscrolling an overlay that does not contain an element that is in
-                // the current scene, place it in that scene otherwise the element won't be placed
-                // at all.
-                is TransitionState.Transition.ShowOrHideOverlay,
-                is TransitionState.Transition.ReplaceOverlay -> {
-                    if (
-                        content.key == transition.currentScene &&
-                            overscrollContent !in element.stateByContent
-                    ) {
-                        return placeNormally(measurable, constraints)
-                    } else {
-                        return doNotPlace(measurable, constraints)
-                    }
-                }
-            }
-        }
-
         val placeable =
             measure(layoutImpl, element, transition, stateInContent, measurable, constraints)
         stateInContent.lastSize = placeable.size()
@@ -1257,53 +1231,6 @@ private inline fun <T> computeValue(
     }
 
     val currentContent = currentContentState.content
-    if (transition is TransitionState.DirectionProperties) {
-        val overscroll = transition.currentOverscrollSpec
-        if (overscroll?.content == currentContent) {
-            val elementSpec =
-                overscroll.transformationSpec.transformations(element.key, currentContent)
-            val propertySpec = transformation(elementSpec) ?: return currentValue()
-            val overscrollState =
-                checkNotNull(if (currentContent == toContent) toState else fromState)
-            val idleValue = contentValue(overscrollState)
-            val targetValue =
-                with(
-                    propertySpec.transformation.requireInterpolatedTransformation(
-                        element,
-                        transition,
-                    ) {
-                        "Custom transformations in overscroll specs should not be possible"
-                    }
-                ) {
-                    layoutImpl.propertyTransformationScope.transform(
-                        currentContent,
-                        element.key,
-                        transition,
-                        idleValue,
-                    )
-                }
-
-            // Make sure we don't read progress if values are the same and we don't need to
-            // interpolate, so we don't invalidate the phase where this is read.
-            if (targetValue == idleValue) {
-                return targetValue
-            }
-
-            // TODO(b/290184746): Make sure that we don't overflow transformations associated to a
-            // range.
-            val directionSign = if (transition.isUpOrLeft) -1 else 1
-            val isToContent = overscroll.content == transition.toContent
-            val linearProgress = transition.progress.let { if (isToContent) it - 1f else it }
-            val progressConverter =
-                overscroll.progressConverter
-                    ?: layoutImpl.state.transitions.defaultProgressConverter
-            val progress = directionSign * progressConverter.convert(linearProgress)
-            val rangeProgress = propertySpec.range?.progress(progress) ?: progress
-
-            // Interpolate between the value at rest and the over scrolled value.
-            return lerp(idleValue, targetValue, rangeProgress)
-        }
-    }
 
     // The element is shared: interpolate between the value in fromContent and the value in
     // toContent.

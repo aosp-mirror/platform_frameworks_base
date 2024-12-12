@@ -251,13 +251,6 @@ private class ContainerRevealAlphaTransformation(
 
     private fun targetAlpha(transition: TransitionState.Transition, content: ContentKey): Float {
         if (transition.isUserInputOngoing) {
-            if (transition !is TransitionState.DirectionProperties) {
-                error(
-                    "Unsupported transition driven by user input but that does not have " +
-                        "overscroll properties: $transition"
-                )
-            }
-
             return if (transition.progressTo(content) > 0f) 1f else 0f
         }
 

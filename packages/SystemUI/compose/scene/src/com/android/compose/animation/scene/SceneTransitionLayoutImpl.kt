@@ -558,15 +558,7 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val overscrollSpec = transition.currentOverscrollSpec
-                val progress =
-                    when {
-                        overscrollSpec == null -> transition.progress
-                        overscrollSpec.content == transition.toScene -> 1f
-                        else -> 0f
-                    }
-
-                val size = lerp(fromSize, toSize, progress)
+                val size = lerp(fromSize, toSize, transition.progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }

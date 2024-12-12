@@ -70,7 +70,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
-import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.effect.OffsetOverscrollEffect
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
@@ -1518,14 +1517,7 @@ class ElementTest {
             }
 
         scope.launch {
-            state.startTransition(
-                transition(
-                    from = SceneA,
-                    to = SceneB,
-                    progress = { -1f },
-                    orientation = Orientation.Horizontal,
-                )
-            )
+            state.startTransition(transition(from = SceneA, to = SceneB, progress = { -1f }))
         }
         rule.waitForIdle()
 
@@ -2256,7 +2248,6 @@ class ElementTest {
         // Start an overscrollable transition driven by progress.
         var progress by mutableFloatStateOf(0f)
         val transition = transition(from = SceneA, to = SceneB, progress = { progress })
-        assertThat(transition).isInstanceOf(TransitionState.DirectionProperties::class.java)
         scope.launch { state.startTransition(transition) }
 
         // Reset the counters after the first animation frame.
