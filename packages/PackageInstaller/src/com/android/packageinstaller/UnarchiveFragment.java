@@ -21,9 +21,13 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.widget.Button;
 
 public class UnarchiveFragment extends DialogFragment implements
         DialogInterface.OnClickListener {
+
+    private Dialog mDialog;
+    private Button mRestoreButton;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -40,7 +44,32 @@ public class UnarchiveFragment extends DialogFragment implements
         dialogBuilder.setPositiveButton(R.string.restore, this);
         dialogBuilder.setNegativeButton(android.R.string.cancel, this);
 
-        return dialogBuilder.create();
+        mDialog = dialogBuilder.create();
+        return mDialog;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mDialog != null) {
+            mRestoreButton = ((AlertDialog) mDialog).getButton(DialogInterface.BUTTON_POSITIVE);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mRestoreButton != null) {
+            mRestoreButton.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mRestoreButton != null) {
+            mRestoreButton.setEnabled(true);
+        }
     }
 
     @Override
