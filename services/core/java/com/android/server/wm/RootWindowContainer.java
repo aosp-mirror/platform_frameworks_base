@@ -2926,7 +2926,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void prepareForShutdown() {
-        mWindowManager.mSnapshotController.mTaskSnapshotController.prepareShutdown();
         for (int i = 0; i < getChildCount(); i++) {
             createSleepToken("shutdown", getChildAt(i).mDisplayId);
         }
