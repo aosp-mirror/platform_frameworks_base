@@ -16,6 +16,8 @@ package com.android.systemui.utils.leaks;
 
 import android.content.res.Configuration;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 public class FakeConfigurationController
@@ -42,5 +44,11 @@ public class FakeConfigurationController
     @Override
     public String getNightModeName() {
         return "undefined";
+    }
+
+    @Override
+    public void dispatchOnMovedToDisplay(int newDisplayId,
+            @NonNull Configuration newConfiguration) {
+
     }
 }
