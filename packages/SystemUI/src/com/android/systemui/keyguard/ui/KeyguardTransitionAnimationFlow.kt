@@ -36,7 +36,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 /**
@@ -51,17 +50,11 @@ constructor(
     private val logger: KeyguardTransitionAnimationLogger,
 ) {
     /** Invoke once per transition between FROM->TO states to get access to a shared flow. */
-    fun setup(
-        duration: Duration,
-        edge: Edge,
-    ): FlowBuilder {
+    fun setup(duration: Duration, edge: Edge): FlowBuilder {
         return FlowBuilder(duration, edge)
     }
 
-    inner class FlowBuilder(
-        private val transitionDuration: Duration,
-        private val edge: Edge,
-    ) {
+    inner class FlowBuilder(private val transitionDuration: Duration, private val edge: Edge) {
         fun setupWithoutSceneContainer(edge: Edge.StateToState): FlowBuilder {
             if (SceneContainerFlag.isEnabled) return this
             return setup(this.transitionDuration, edge)
@@ -72,6 +65,8 @@ constructor(
          * in the range of [0, 1]. View animations should begin and end within a subset of this
          * range. This function maps the [startTime] and [duration] into [0, 1], when this subset is
          * valid.
+         *
+         * Note that [onCancel] isn't used when the scene framework is enabled.
          */
         fun sharedFlow(
             duration: Duration,
@@ -81,7 +76,7 @@ constructor(
             onCancel: (() -> Float)? = null,
             onFinish: (() -> Float)? = null,
             interpolator: Interpolator = LINEAR,
-            name: String? = null
+            name: String? = null,
         ): Flow<Float> {
             return sharedFlowWithState(
                     duration = duration,
@@ -113,7 +108,7 @@ constructor(
             onCancel: (() -> Float)? = null,
             onFinish: (() -> Float)? = null,
             interpolator: Interpolator = LINEAR,
-            name: String? = null
+            name: String? = null,
         ): Flow<StateToValue> {
             if (!duration.isPositive()) {
                 throw IllegalArgumentException("duration must be a positive number: $duration")
@@ -155,20 +150,40 @@ constructor(
 
             return transitionInteractor
                 .transition(edge)
-                .map { step ->
-                    StateToValue(
-                            from = step.from,
-                            to = step.to,
-                            transitionState = step.transitionState,
-                            value =
-                                when (step.transitionState) {
-                                    STARTED -> stepToValue(step)
-                                    RUNNING -> stepToValue(step)
-                                    CANCELED -> onCancel?.invoke()
-                                    FINISHED -> onFinish?.invoke()
-                                }
-                        )
-                        .also { logger.logTransitionStep(name, step, it.value) }
+                .mapNotNull { step ->
+                    if (SceneContainerFlag.isEnabled && step.transitionState == CANCELED) {
+                        // When the scene framework is enabled, there's no need to emit an alpha
+                        // value when the keyguard transition animation is canceled because there's
+                        // always going to be a new, reversed keyguard transition animation back to
+                        // the original KeyguardState that starts right when this one was canceled.
+                        //
+                        // For example, if swiping up slightly on the Lockscreen scene and then
+                        // releasing before the transition to the Bouncer scene is committed, the
+                        // KTF transition of LOCKSCREEN -> PRIMARY_BOUNCER received a CANCELED and
+                        // the scene framework immediately starts a reversed transition of
+                        // PRIMARY_BOUNCER -> LOCKSCREEN, which picks up where the previous one left
+                        // off.
+                        //
+                        // If it were allowed for the CANCELED from the original KTF transition to
+                        // emit a value, a race condition could form where the value from CANCELED
+                        // arrives downstream _after_ the reversed transition is finished, causing
+                        // the transition to end up in an incorrect state at rest.
+                        null
+                    } else {
+                        StateToValue(
+                                from = step.from,
+                                to = step.to,
+                                transitionState = step.transitionState,
+                                value =
+                                    when (step.transitionState) {
+                                        STARTED -> stepToValue(step)
+                                        RUNNING -> stepToValue(step)
+                                        CANCELED -> onCancel?.invoke()
+                                        FINISHED -> onFinish?.invoke()
+                                    },
+                            )
+                            .also { logger.logTransitionStep(name, step, it.value) }
+                    }
                 }
                 .distinctUntilChanged()
         }
@@ -181,7 +196,7 @@ constructor(
                 duration = 1.milliseconds,
                 onStep = { value },
                 onCancel = { value },
-                onFinish = { value }
+                onFinish = { value },
             )
         }
     }

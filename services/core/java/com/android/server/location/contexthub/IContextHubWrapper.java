@@ -21,6 +21,7 @@ import android.chre.flags.Flags;
 import android.hardware.contexthub.EndpointId;
 import android.hardware.contexthub.HostEndpointInfo;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.Message;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -263,6 +264,13 @@ public abstract class IContextHubWrapper {
 
     /** Notifies the completion of a session opened by the HAL */
     public void endpointSessionOpenComplete(int sessionId) throws RemoteException {}
+
+    /** Sends a message to a remote endpoint */
+    public void sendMessageToEndpoint(int sessionId, Message msg) throws RemoteException {}
+
+    /** Sends a message delivery status to a remote endpoint */
+    public void sendMessageDeliveryStatusToEndpoint(int sessionId, MessageDeliveryStatus msgStatus)
+            throws RemoteException {}
 
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
@@ -755,6 +763,25 @@ public abstract class IContextHubWrapper {
                 return;
             }
             hub.endpointSessionOpenComplete(sessionId);
+        }
+
+        @Override
+        public void sendMessageToEndpoint(int sessionId, Message msg) throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return;
+            }
+            hub.sendMessageToEndpoint(sessionId, msg);
+        }
+
+        @Override
+        public void sendMessageDeliveryStatusToEndpoint(
+                int sessionId, MessageDeliveryStatus msgStatus) throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return;
+            }
+            hub.sendMessageDeliveryStatusToEndpoint(sessionId, msgStatus);
         }
 
         public boolean supportsLocationSettingNotifications() {

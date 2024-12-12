@@ -638,7 +638,7 @@
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ಈಗ ಬಳಕೆದಾರರನ್ನು ಸೆಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ಸಾಧನವನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಮತ್ತು ಅದರ ಸ್ಥಳವನ್ನು ಹೊಂದಿಸಲು ವ್ಯಕ್ತಿಯು ಲಭ್ಯವಿದ್ದಾರೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ಇದೀಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಹೊಂದಿಸುವುದೇ?"</string>
-    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ಇದೀಗ ಹೊಂದಿಸಿ"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ಇದೀಗ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ಈಗಲೇ ಬೇಡ"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"ಸೇರಿಸಿ"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"ಹೊಸ ಬಳಕೆದಾರರು"</string>
@@ -646,7 +646,7 @@
     <string name="user_info_settings_title" msgid="6351390762733279907">"ಬಳಕೆದಾರರ ಮಾಹಿತಿ"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ಪ್ರೊಫೈಲ್‌‌ ಮಾಹಿತಿ"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ನೀವು ನಿರ್ಬಂಧಿತ ಪ್ರೊಫೈಲ್ ಅನ್ನು ರಚಿಸಬಹುದಾದರ ಮೊದಲು, ನಿಮ್ಮ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ರಕ್ಷಿಸಲು ನೀವು ಪರದೆಯ ಲಾಕ್‌ ಹೊಂದಿಸುವ ಅಗತ್ಯವಿದೆ."</string>
-    <string name="user_set_lock_button" msgid="1427128184982594856">"ಲಾಕ್ ಹೊಂದಿಸಿ"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"ಲಾಕ್ ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>ಗೆ ಬದಲಿಸಿ"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ಹೊಸ ಅತಿಥಿಯನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ…"</string>

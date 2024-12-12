@@ -754,6 +754,7 @@ public final class ContextHubManager {
      * @param executor the executor to invoke callbacks for this client
      * @return the callback interface
      */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     private IContextHubEndpointDiscoveryCallback createDiscoveryCallback(
             IHubEndpointDiscoveryCallback callback,
             Executor executor,
@@ -767,21 +768,9 @@ public final class ContextHubManager {
                 }
                 executor.execute(
                         () -> {
-                            // TODO(b/380293951): Refactor
                             List<HubDiscoveryInfo> discoveryList =
-                                    new ArrayList<>(hubEndpointInfoList.length);
-                            for (HubEndpointInfo info : hubEndpointInfoList) {
-                                if (serviceDescriptor != null) {
-                                    for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
-                                        if (sInfo.getServiceDescriptor()
-                                                .equals(serviceDescriptor)) {
-                                            discoveryList.add(new HubDiscoveryInfo(info, sInfo));
-                                        }
-                                    }
-                                } else {
-                                    discoveryList.add(new HubDiscoveryInfo(info));
-                                }
-                            }
+                                    getMatchingEndpointDiscoveryList(
+                                            hubEndpointInfoList, serviceDescriptor);
                             if (discoveryList.isEmpty()) {
                                 Log.w(TAG, "onEndpointsStarted: no matching service descriptor");
                             } else {
@@ -799,19 +788,8 @@ public final class ContextHubManager {
                 executor.execute(
                         () -> {
                             List<HubDiscoveryInfo> discoveryList =
-                                    new ArrayList<>(hubEndpointInfoList.length);
-                            for (HubEndpointInfo info : hubEndpointInfoList) {
-                                if (serviceDescriptor != null) {
-                                    for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
-                                        if (sInfo.getServiceDescriptor()
-                                                .equals(serviceDescriptor)) {
-                                            discoveryList.add(new HubDiscoveryInfo(info, sInfo));
-                                        }
-                                    }
-                                } else {
-                                    discoveryList.add(new HubDiscoveryInfo(info));
-                                }
-                            }
+                                    getMatchingEndpointDiscoveryList(
+                                            hubEndpointInfoList, serviceDescriptor);
                             if (discoveryList.isEmpty()) {
                                 Log.w(TAG, "onEndpointsStopped: no matching service descriptor");
                             } else {
@@ -820,6 +798,34 @@ public final class ContextHubManager {
                         });
             }
         };
+    }
+
+    /**
+     * Generates a list of matching endpoint discovery info, given the list and an (optional)
+     * service descriptor. If service descriptor is null, all endpoints are added to the filtered
+     * output list.
+     *
+     * @param hubEndpointInfoList The hub endpoints to filter.
+     * @param serviceDescriptor The optional service descriptor to match, null if adding all
+     *     endpoints.
+     * @return The list of filtered HubDiscoveryInfo which matches the serviceDescriptor.
+     */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    private List<HubDiscoveryInfo> getMatchingEndpointDiscoveryList(
+            HubEndpointInfo[] hubEndpointInfoList, @Nullable String serviceDescriptor) {
+        List<HubDiscoveryInfo> discoveryList = new ArrayList<>(hubEndpointInfoList.length);
+        for (HubEndpointInfo info : hubEndpointInfoList) {
+            if (serviceDescriptor != null) {
+                for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
+                    if (sInfo.getServiceDescriptor().equals(serviceDescriptor)) {
+                        discoveryList.add(new HubDiscoveryInfo(info, sInfo));
+                    }
+                }
+            } else {
+                discoveryList.add(new HubDiscoveryInfo(info));
+            }
+        }
+        return discoveryList;
     }
 
     /**

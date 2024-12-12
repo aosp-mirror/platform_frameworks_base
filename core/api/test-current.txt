@@ -1402,9 +1402,9 @@ package android.credentials.selection {
     method @NonNull public android.credentials.selection.GetCredentialProviderData.Builder setRemoteEntry(@Nullable android.credentials.selection.Entry);
   }
 
-  @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public class IntentFactory {
-    method @NonNull public static android.content.Intent createCancelUiIntent(@NonNull android.content.Context, @NonNull android.os.IBinder, boolean, @NonNull String);
-    method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.content.Context, @NonNull android.credentials.selection.RequestInfo, @NonNull java.util.ArrayList<android.credentials.selection.ProviderData>, @NonNull java.util.ArrayList<android.credentials.selection.DisabledProviderData>, @NonNull android.os.ResultReceiver);
+  @FlaggedApi("android.credentials.flags.propagate_user_context_for_intent_creation") public class IntentFactory {
+    method @NonNull public static android.content.Intent createCancelUiIntent(@NonNull android.content.Context, @NonNull android.os.IBinder, boolean, @NonNull String, int);
+    method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.content.Context, @NonNull android.credentials.selection.RequestInfo, @NonNull java.util.ArrayList<android.credentials.selection.ProviderData>, @NonNull java.util.ArrayList<android.credentials.selection.DisabledProviderData>, @NonNull android.os.ResultReceiver, int);
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public abstract class ProviderData implements android.os.Parcelable {
@@ -2429,6 +2429,12 @@ package android.os {
     method public static boolean contains(java.io.File, java.io.File);
     method @NonNull public static byte[] digest(@NonNull java.io.File, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
     method @NonNull public static byte[] digest(@NonNull java.io.InputStream, @NonNull String) throws java.io.IOException, java.security.NoSuchAlgorithmException;
+  }
+
+  public class Handler {
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final boolean hasMessagesOrCallbacks();
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeCallbacksAndEqualMessages(@Nullable Object);
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeEqualMessages(int, @Nullable Object);
   }
 
   public class IpcDataCache<Query, Result> extends android.app.PropertyInvalidatedCache<Query,Result> {

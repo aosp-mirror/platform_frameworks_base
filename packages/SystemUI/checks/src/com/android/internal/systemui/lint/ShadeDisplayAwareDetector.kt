@@ -59,9 +59,9 @@ class ShadeDisplayAwareDetector : Detector(), SourceCodeScanner {
         private const val INJECT_ANNOTATION = "javax.inject.Inject"
         private const val APPLICATION_ANNOTATION =
             "com.android.systemui.dagger.qualifiers.Application"
-        private const val GLOBAL_CONFIG_ANNOTATION = "com.android.systemui.common.ui.GlobalConfig"
         private const val SHADE_DISPLAY_AWARE_ANNOTATION =
             "com.android.systemui.shade.ShadeDisplayAware"
+        private const val MAIN_ANNOTATION = "com.android.systemui.dagger.qualifiers.Main"
 
         private const val CONTEXT = "android.content.Context"
         private const val WINDOW_MANAGER = "android.view.WindowManager"
@@ -108,13 +108,10 @@ class ShadeDisplayAwareDetector : Detector(), SourceCodeScanner {
 
             // check if the parameter is a context-dependent class relevant to shade
             if (className !in CONTEXT_DEPENDENT_SHADE_CLASSES) return false
-            // check if it has @ShadeDisplayAware
-            if (hasAnnotation(SHADE_DISPLAY_AWARE_ANNOTATION)) return false
+            if (hasAnnotation(SHADE_DISPLAY_AWARE_ANNOTATION) || hasAnnotation(MAIN_ANNOTATION))
+                return false
             // check if its a @Application-annotated Context
             if (className == CONTEXT && hasAnnotation(APPLICATION_ANNOTATION)) return false
-            // check if its a @GlobalConfig-annotated ConfigurationState, ConfigurationController
-            // or ConfigurationInteractor
-            if (className in CONFIG_CLASSES && hasAnnotation(GLOBAL_CONFIG_ANNOTATION)) return false
 
             return true
         }

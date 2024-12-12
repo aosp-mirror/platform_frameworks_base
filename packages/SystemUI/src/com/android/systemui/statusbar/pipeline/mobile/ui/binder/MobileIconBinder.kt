@@ -29,9 +29,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.Flags.statusBarStaticInoutIndicators
-import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.DarkIconDispatcher
@@ -48,12 +48,8 @@ import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarViewBin
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import com.android.app.tracing.coroutines.launchTraced as launch
 
-private data class Colors(
-    @ColorInt val tint: Int,
-    @ColorInt val contrast: Int,
-)
+private data class Colors(@ColorInt val tint: Int, @ColorInt val contrast: Int)
 
 object MobileIconBinder {
     /** Binds the view to the view-model, continuing to update the former based on the latter */
@@ -87,7 +83,7 @@ object MobileIconBinder {
             MutableStateFlow(
                 Colors(
                     tint = DarkIconDispatcher.DEFAULT_ICON_TINT,
-                    contrast = DarkIconDispatcher.DEFAULT_INVERSE_ICON_TINT
+                    contrast = DarkIconDispatcher.DEFAULT_INVERSE_ICON_TINT,
                 )
             )
         val decorTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
@@ -105,7 +101,7 @@ object MobileIconBinder {
                             viewModel.verboseLogger?.logBinderReceivedVisibility(
                                 view,
                                 viewModel.subscriptionId,
-                                isVisible
+                                isVisible,
                             )
                             view.isVisible = isVisible
                             // [StatusIconContainer] can get out of sync sometimes. Make sure to
@@ -152,7 +148,7 @@ object MobileIconBinder {
 
                     launch {
                         viewModel.contentDescription.distinctUntilChanged().collect {
-                            ContentDescriptionViewBinder.bind(it, view)
+                            MobileContentDescriptionViewBinder.bind(it, view)
                         }
                     }
 

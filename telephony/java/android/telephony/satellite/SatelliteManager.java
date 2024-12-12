@@ -2574,6 +2574,8 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle the selected satellite subscription changed event.
      *
+     * @return The {@link SatelliteResult} result of the operation.
+     *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      *
@@ -3301,7 +3303,7 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle the satellite supoprted state changed event.
      *
-     * @return The result of the operation.
+     * @return The {@link SatelliteResult} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -3383,7 +3385,7 @@ public final class SatelliteManager {
      *
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle satellite communication allowed state changed event.
-     * @return The result of the operation.
+     * @return The {@link SatelliteResult} result of the operation.
      * @throws SecurityException     if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
@@ -3621,8 +3623,6 @@ public final class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @hide
      */
-    @SystemApi
-    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     public void requestSatelliteDisplayName(
             @NonNull @CallbackExecutor Executor executor,

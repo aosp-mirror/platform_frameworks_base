@@ -409,7 +409,7 @@ internal fun <K : Any, A> switchDeferredImpl(
                 // Schedule for evaluation if any switched-in nodes have already emitted within
                 // this transaction.
                 if (muxNode.upstreamData.isNotEmpty()) {
-                    evalScope.schedule(muxNode)
+                    muxNode.schedule(evalScope)
                 }
                 return muxNode.takeUnless { muxNode.switchedIn.isEmpty() && !isIndirect }
             }

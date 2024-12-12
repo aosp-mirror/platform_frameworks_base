@@ -190,3 +190,10 @@ flag {
   description: "Adds new API in WindowManager class to check if the window can override the power key double tap behavior."
   bug: "378736024"
   }
+
+flag {
+    name: "pointer_acceleration"
+    namespace: "input"
+    description: "Allows the user to disable pointer acceleration for mouse and touchpads."
+    bug: "349006858"
+}

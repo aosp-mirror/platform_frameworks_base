@@ -27,7 +27,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.bluetooth.qsdialog.DeviceItem;
 import com.android.systemui.res.R;
 
@@ -131,10 +130,9 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
             }
 
             // tint different color in different state for bad color contrast problem
-            int tintColor = item.isActive() ? Utils.getColorAttr(mContext,
-                    com.android.internal.R.attr.materialColorOnPrimaryContainer).getDefaultColor()
-                    : Utils.getColorAttr(mContext,
-                            com.android.internal.R.attr.materialColorOnSurface).getDefaultColor();
+            int tintColor = item.isActive() ? mContext.getColor(
+                    com.android.internal.R.color.materialColorOnPrimaryContainer)
+                    : mContext.getColor(com.android.internal.R.color.materialColorOnSurface);
 
             Pair<Drawable, String> iconPair = item.getIconWithDescription();
             if (iconPair != null) {

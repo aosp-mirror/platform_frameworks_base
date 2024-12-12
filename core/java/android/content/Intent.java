@@ -12291,7 +12291,6 @@ public class Intent implements Parcelable, Cloneable {
         private IBinder mCreatorToken;
         // Stores all extra keys whose values are intents for a top level intent.
         private ArraySet<NestedIntentKey> mNestedIntentKeys;
-
     }
 
     /**
@@ -12353,6 +12352,7 @@ public class Intent implements Parcelable, Cloneable {
         public int hashCode() {
             return Objects.hash(mType, mKey, mIndex);
         }
+
     }
 
     private @Nullable CreatorTokenInfo mCreatorTokenInfo;
@@ -12416,7 +12416,7 @@ public class Intent implements Parcelable, Cloneable {
                     // removeLaunchSecurityProtection() is called before it is launched.
                     value = null;
                 }
-                if (value instanceof Intent intent && !visited.contains(intent)) {
+                if (value instanceof Intent intent) {
                     handleNestedIntent(intent, visited, new NestedIntentKey(
                             NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0));
                 } else if (value instanceof Parcelable[] parcelables) {
@@ -12439,7 +12439,6 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     private void handleNestedIntent(Intent intent, Set<Intent> visited, NestedIntentKey key) {
-        visited.add(intent);
         if (mCreatorTokenInfo == null) {
             mCreatorTokenInfo = new CreatorTokenInfo();
         }
@@ -12447,7 +12446,10 @@ public class Intent implements Parcelable, Cloneable {
             mCreatorTokenInfo.mNestedIntentKeys = new ArraySet<>();
         }
         mCreatorTokenInfo.mNestedIntentKeys.add(key);
-        intent.collectNestedIntentKeysRecur(visited);
+        if (!visited.contains(intent)) {
+            visited.add(intent);
+            intent.collectNestedIntentKeysRecur(visited);
+        }
     }
 
     private void handleParcelableArray(Parcelable[] parcelables, String key, Set<Intent> visited) {

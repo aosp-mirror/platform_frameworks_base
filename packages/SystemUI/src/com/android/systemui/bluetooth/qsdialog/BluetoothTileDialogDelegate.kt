@@ -405,13 +405,10 @@ internal constructor(
                     }
 
                     // updating icon colors
-                    val tintColor =
-                        com.android.settingslib.Utils.getColorAttr(
-                                context,
-                                if (item.isActive) InternalR.attr.materialColorOnPrimaryContainer
-                                else InternalR.attr.materialColorOnSurface,
-                            )
-                            .defaultColor
+                    val tintColor = context.getColor(
+                        if (item.isActive) InternalR.color.materialColorOnPrimaryContainer
+                        else InternalR.color.materialColorOnSurface
+                    )
 
                     // update icons
                     iconView.apply {

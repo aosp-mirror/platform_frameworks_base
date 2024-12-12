@@ -47,15 +47,25 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isGone
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
-import com.android.wm.shell.apptoweb.isBrowserApp
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.calculateMenuPosition
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.android.wm.shell.windowdecor.extension.isMultiWindow
 import com.android.wm.shell.windowdecor.extension.isPinned
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainCoroutineDispatcher
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Handle menu opened when the appropriate button is clicked on.
@@ -66,11 +76,12 @@ import com.android.wm.shell.windowdecor.extension.isPinned
  * Additional Options: Miscellaneous functions including screenshot and closing task.
  */
 class HandleMenu(
+    @ShellMainThread private val mainDispatcher: CoroutineDispatcher,
+    @ShellBackgroundThread private val bgScope: CoroutineScope,
     private val parentDecor: DesktopModeWindowDecoration,
     private val windowManagerWrapper: WindowManagerWrapper,
+    private val taskResourceLoader: WindowDecorTaskResourceLoader,
     private val layoutResId: Int,
-    private val appIconBitmap: Bitmap?,
-    private val appName: CharSequence?,
     private val splitScreenController: SplitScreenController,
     private val shouldShowWindowingPill: Boolean,
     private val shouldShowNewWindowButton: Boolean,
@@ -103,7 +114,8 @@ class HandleMenu(
 
     @VisibleForTesting
     var handleMenuViewContainer: AdditionalViewContainer? = null
-    private var handleMenuView: HandleMenuView? = null
+    @VisibleForTesting
+    var handleMenuView: HandleMenuView? = null
 
     // Position of the handle menu used for laying out the handle view.
     @VisibleForTesting
@@ -121,6 +133,8 @@ class HandleMenu(
     private val shouldShowMoreActionsPill: Boolean
         get() = SHOULD_SHOW_SCREENSHOT_BUTTON || shouldShowNewWindowButton ||
             shouldShowManageWindowsButton || shouldShowChangeAspectRatioButton
+
+    private var loadAppInfoJob: Job? = null
 
     init {
         updateHandleMenuPillPositions(captionX, captionY)
@@ -190,7 +204,7 @@ class HandleMenu(
             shouldShowDesktopModeButton = shouldShowDesktopModeButton,
             isBrowserApp = isBrowserApp
         ).apply {
-            bind(taskInfo, appIconBitmap, appName, shouldShowMoreActionsPill)
+            bind(taskInfo, shouldShowMoreActionsPill)
             this.onToDesktopClickListener = onToDesktopClickListener
             this.onToFullscreenClickListener = onToFullscreenClickListener
             this.onToSplitScreenClickListener = onToSplitScreenClickListener
@@ -204,7 +218,16 @@ class HandleMenu(
             this.onCloseMenuClickListener = onCloseMenuClickListener
             this.onOutsideTouchListener = onOutsideTouchListener
         }
-
+        loadAppInfoJob = bgScope.launch {
+            if (!isActive) return@launch
+            val name = taskResourceLoader.getName(taskInfo)
+            val icon = taskResourceLoader.getHeaderIcon(taskInfo)
+            withContext(mainDispatcher) {
+                if (!isActive) return@withContext
+                handleMenuView.setAppName(name)
+                handleMenuView.setAppIcon(icon)
+            }
+        }
         val x = handleMenuPosition.x.toInt()
         val y = handleMenuPosition.y.toInt()
         handleMenuViewContainer =
@@ -240,7 +263,19 @@ class HandleMenu(
         val menuX: Int
         val menuY: Int
         val taskBounds = taskInfo.getConfiguration().windowConfiguration.bounds
-        updateGlobalMenuPosition(taskBounds, captionX, captionY)
+        globalMenuPosition.set(
+            calculateMenuPosition(
+                splitScreenController,
+                taskInfo,
+                marginStart = marginMenuStart,
+                marginMenuTop,
+                captionX,
+                captionY,
+                captionWidth,
+                menuWidth,
+                context.isRtl()
+            )
+        )
         if (layoutResId == R.layout.desktop_mode_app_header) {
             // Align the handle menu to the start of the header.
             menuX = if (context.isRtl()) {
@@ -263,53 +298,6 @@ class HandleMenu(
         }
         // Handle Menu position setup.
         handleMenuPosition.set(menuX.toFloat(), menuY.toFloat())
-    }
-
-    private fun updateGlobalMenuPosition(taskBounds: Rect, captionX: Int, captionY: Int) {
-        val nonFreeformX = captionX + (captionWidth / 2) - (menuWidth / 2)
-        when {
-            taskInfo.isFreeform -> {
-                if (context.isRtl()) {
-                    globalMenuPosition.set(
-                        /* x= */ taskBounds.right - menuWidth - marginMenuStart,
-                        /* y= */ taskBounds.top + captionY + marginMenuTop
-                    )
-                } else {
-                    globalMenuPosition.set(
-                        /* x= */ taskBounds.left + marginMenuStart,
-                        /* y= */ taskBounds.top + captionY + marginMenuTop
-                    )
-                }
-            }
-            taskInfo.isFullscreen -> {
-                globalMenuPosition.set(
-                    /* x = */ nonFreeformX,
-                    /* y = */ marginMenuTop + captionY
-                )
-            }
-            taskInfo.isMultiWindow -> {
-                val splitPosition = splitScreenController.getSplitPosition(taskInfo.taskId)
-                val leftOrTopStageBounds = Rect()
-                val rightOrBottomStageBounds = Rect()
-                splitScreenController.getStageBounds(leftOrTopStageBounds, rightOrBottomStageBounds)
-                // TODO(b/343561161): This needs to be calculated differently if the task is in
-                //  top/bottom split.
-                when (splitPosition) {
-                    SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT -> {
-                        globalMenuPosition.set(
-                            /* x = */ leftOrTopStageBounds.width() + nonFreeformX,
-                            /* y = */ captionY + marginMenuTop
-                        )
-                    }
-                    SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT -> {
-                        globalMenuPosition.set(
-                            /* x = */ nonFreeformX,
-                            /* y = */ captionY + marginMenuTop
-                        )
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -374,8 +362,6 @@ class HandleMenu(
             )
             if (splitScreenController.getSplitPosition(taskInfo.taskId)
                 == SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT) {
-                // TODO(b/343561161): This also needs to be calculated differently if
-                //  the task is in top/bottom split.
                 val leftStageBounds = Rect()
                 splitScreenController.getStageBounds(leftStageBounds, Rect())
                 inputRelativeToMenu.x += leftStageBounds.width().toFloat()
@@ -449,6 +435,7 @@ class HandleMenu(
         resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
 
     fun close() {
+        loadAppInfoJob?.cancel()
         handleMenuView?.animateCloseMenu {
             handleMenuViewContainer?.releaseView()
             handleMenuViewContainer = null
@@ -476,8 +463,10 @@ class HandleMenu(
         private val appInfoPill = rootView.requireViewById<View>(R.id.app_info_pill)
         private val collapseMenuButton = appInfoPill.requireViewById<HandleMenuImageButton>(
             R.id.collapse_menu_button)
-        private val appIconView = appInfoPill.requireViewById<ImageView>(R.id.application_icon)
-        private val appNameView = appInfoPill.requireViewById<TextView>(R.id.application_name)
+        @VisibleForTesting
+        val appIconView = appInfoPill.requireViewById<ImageView>(R.id.application_icon)
+        @VisibleForTesting
+        val appNameView = appInfoPill.requireViewById<TextView>(R.id.application_name)
 
         // Windowing Pill.
         private val windowingPill = rootView.requireViewById<View>(R.id.windowing_pill)
@@ -546,14 +535,12 @@ class HandleMenu(
         /** Binds the menu views to the new data. */
         fun bind(
             taskInfo: RunningTaskInfo,
-            appIconBitmap: Bitmap?,
-            appName: CharSequence?,
             shouldShowMoreActionsPill: Boolean
         ) {
             this.taskInfo = taskInfo
             this.style = calculateMenuStyle(taskInfo)
 
-            bindAppInfoPill(style, appIconBitmap, appName)
+            bindAppInfoPill(style)
             if (shouldShowWindowingPill) {
                 bindWindowingPill(style)
             }
@@ -562,6 +549,16 @@ class HandleMenu(
                 bindMoreActionsPill(style)
             }
             bindOpenInAppOrBrowserPill(style)
+        }
+
+        /** Sets the app's name. */
+        fun setAppName(name: CharSequence) {
+            appNameView.text = name
+        }
+
+        /** Sets the app's icon. */
+        fun setAppIcon(icon: Bitmap) {
+            appIconView.setImageBitmap(icon)
         }
 
         /** Animates the menu openInAppOrBrowserg. */
@@ -630,22 +627,14 @@ class HandleMenu(
             )
         }
 
-        private fun bindAppInfoPill(
-            style: MenuStyle,
-            appIconBitmap: Bitmap?,
-            appName: CharSequence?
-        ) {
+        private fun bindAppInfoPill(style: MenuStyle) {
             appInfoPill.background.setTint(style.backgroundColor)
 
             collapseMenuButton.apply {
                 imageTintList = ColorStateList.valueOf(style.textColor)
                 this.taskInfo = this@HandleMenuView.taskInfo
             }
-            appIconView.setImageBitmap(appIconBitmap)
-            appNameView.apply {
-                text = appName
-                setTextColor(style.textColor)
-            }
+            appNameView.setTextColor(style.textColor)
         }
 
         private fun bindWindowingPill(style: MenuStyle) {
@@ -735,11 +724,12 @@ class HandleMenu(
 /** A factory interface to create a [HandleMenu]. */
 interface HandleMenuFactory {
     fun create(
+        @ShellMainThread mainDispatcher: MainCoroutineDispatcher,
+        @ShellBackgroundThread bgScope: CoroutineScope,
         parentDecor: DesktopModeWindowDecoration,
         windowManagerWrapper: WindowManagerWrapper,
+        taskResourceLoader: WindowDecorTaskResourceLoader,
         layoutResId: Int,
-        appIconBitmap: Bitmap?,
-        appName: CharSequence?,
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
@@ -758,11 +748,12 @@ interface HandleMenuFactory {
 /** A [HandleMenuFactory] implementation that creates a [HandleMenu].  */
 object DefaultHandleMenuFactory : HandleMenuFactory {
     override fun create(
+        @ShellMainThread mainDispatcher: MainCoroutineDispatcher,
+        @ShellBackgroundThread bgScope: CoroutineScope,
         parentDecor: DesktopModeWindowDecoration,
         windowManagerWrapper: WindowManagerWrapper,
+        taskResourceLoader: WindowDecorTaskResourceLoader,
         layoutResId: Int,
-        appIconBitmap: Bitmap?,
-        appName: CharSequence?,
         splitScreenController: SplitScreenController,
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
@@ -777,11 +768,12 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         captionY: Int,
     ): HandleMenu {
         return HandleMenu(
+            mainDispatcher,
+            bgScope,
             parentDecor,
             windowManagerWrapper,
+            taskResourceLoader,
             layoutResId,
-            appIconBitmap,
-            appName,
             splitScreenController,
             shouldShowWindowingPill,
             shouldShowNewWindowButton,

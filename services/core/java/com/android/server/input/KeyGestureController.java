@@ -801,7 +801,15 @@ final class KeyGestureController {
                         + " interceptKeyBeforeQueueing");
                 return true;
             case KeyEvent.KEYCODE_DO_NOT_DISTURB:
-                // TODO(b/365920375): Implement 25Q2 keycode implementation in system
+                if (enableNew25q2Keycodes()) {
+                    if (firstDown) {
+                        handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_DO_NOT_DISTURB},
+                                /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, focusedToken,
+                                /* flags = */0, /* appLaunchData = */null);
+                    }
+                }
                 return true;
         }
 

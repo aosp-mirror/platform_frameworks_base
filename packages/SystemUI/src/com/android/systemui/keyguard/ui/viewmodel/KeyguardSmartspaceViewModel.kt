@@ -94,13 +94,18 @@ constructor(
     val isShadeLayoutWide: StateFlow<Boolean> = shadeInteractor.isShadeLayoutWide
 
     companion object {
-        fun getSmartspaceStartMargin(context: Context): Int {
+        fun getDateWeatherStartMargin(context: Context): Int {
             return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
                 context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
         }
 
-        fun getSmartspaceEndMargin(context: Context): Int {
+        fun getDateWeatherEndMargin(context: Context): Int {
             return context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
+                context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
+        }
+
+        fun getSmartspaceHorizontalMargin(context: Context): Int {
+            return context.resources.getDimensionPixelSize(R.dimen.smartspace_padding_horizontal) +
                 context.resources.getDimensionPixelSize(customR.dimen.status_view_margin_horizontal)
         }
     }

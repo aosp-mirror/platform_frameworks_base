@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +37,8 @@ import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
 import android.telephony.ims.aidl.IRcsUcePublishStateCallback;
 import android.util.Log;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -226,8 +229,11 @@ public class RcsUceAdapter {
 
     /**
      * A capability update has been requested due to moving to eHRPD.
+     * @deprecated Legacy CDMA is unsupported.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_CDMA)
+    @Deprecated
     @SystemApi
     public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 4;
 

@@ -48,26 +48,37 @@ class TaskSnapshotCache extends SnapshotCache<Task> {
     }
 
     /**
-     * If {@param restoreFromDisk} equals {@code true}, DO NOT HOLD THE WINDOW MANAGER LOCK!
+     * Retrieves a snapshot from cache.
      */
-    @Nullable TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
-            boolean isLowResolution) {
-        final TaskSnapshot snapshot = getSnapshot(taskId);
-        if (snapshot != null) {
-            return snapshot;
-        }
+    @Nullable TaskSnapshot getSnapshot(int taskId, boolean isLowResolution) {
+        return getSnapshot(taskId, isLowResolution, TaskSnapshot.REFERENCE_NONE);
+    }
 
-        // Try to restore from disk if asked.
-        if (!restoreFromDisk) {
-            return null;
+    // TODO (b/238206323) Respect isLowResolution.
+    @Nullable TaskSnapshot getSnapshot(int taskId, boolean isLowResolution,
+            @TaskSnapshot.ReferenceFlags int usage) {
+        synchronized (mLock) {
+            final TaskSnapshot snapshot = getSnapshotInner(taskId);
+            if (snapshot != null) {
+                if (usage != TaskSnapshot.REFERENCE_NONE) {
+                    snapshot.addReference(usage);
+                }
+                return snapshot;
+            }
         }
-        return tryRestoreFromDisk(taskId, userId, isLowResolution);
+        return null;
     }
 
     /**
-     * DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING THIS METHOD!
+     * Restore snapshot from disk, DO NOT HOLD THE WINDOW MANAGER LOCK!
      */
-    private TaskSnapshot tryRestoreFromDisk(int taskId, int userId, boolean isLowResolution) {
-        return mLoader.loadTask(taskId, userId, isLowResolution);
+    @Nullable TaskSnapshot getSnapshotFromDisk(int taskId, int userId, boolean isLowResolution,
+            @TaskSnapshot.ReferenceFlags int usage) {
+        final TaskSnapshot snapshot = mLoader.loadTask(taskId, userId, isLowResolution);
+        // Note: This can be weird if the caller didn't ask for reference.
+        if (snapshot != null && usage != TaskSnapshot.REFERENCE_NONE) {
+            snapshot.addReference(usage);
+        }
+        return snapshot;
     }
 }

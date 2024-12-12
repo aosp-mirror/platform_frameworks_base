@@ -153,7 +153,7 @@ public class CachedBluetoothDeviceManager {
     /**
      * Returns device summary of the pair of the hearing aid / CSIP passed as the parameter.
      *
-     * @param CachedBluetoothDevice device
+     * @param device the remote device
      * @return Device summary, or if the pair does not exist or if it is not a hearing aid or
      * a CSIP set member, then {@code null}.
      */
@@ -394,6 +394,7 @@ public class CachedBluetoothDeviceManager {
     }
 
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
+        mHearingAidDeviceManager.clearLocalDataIfNeeded(device);
         device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
         // Should iterate through the cloned set to avoid ConcurrentModificationException

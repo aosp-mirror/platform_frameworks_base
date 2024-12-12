@@ -6469,6 +6469,7 @@ android.os.connectivity.WifiActivityEnergyInfo$1
 android.os.connectivity.WifiActivityEnergyInfo
 android.os.connectivity.WifiBatteryStats$1
 android.os.connectivity.WifiBatteryStats
+android.os.flagging.AconfigPackage
 android.os.health.HealthKeys$Constant
 android.os.health.HealthKeys$Constants
 android.os.health.HealthKeys$SortedIntArray

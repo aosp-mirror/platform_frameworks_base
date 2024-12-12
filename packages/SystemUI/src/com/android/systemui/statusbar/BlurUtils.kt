@@ -35,6 +35,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import java.io.PrintWriter
 import javax.inject.Inject
+import com.android.systemui.Flags.notificationShadeBlur
 
 @SysUISingleton
 open class BlurUtils @Inject constructor(
@@ -43,7 +44,14 @@ open class BlurUtils @Inject constructor(
     dumpManager: DumpManager
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
-    val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
+    val maxBlurRadius =
+        if (notificationShadeBlur()) {
+            resources.getDimensionPixelSize(R.dimen.max_shade_window_blur_radius)
+        } else {
+            resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
+        }
+
+
     private var lastAppliedBlur = 0
     private var earlyWakeupEnabled = false
 

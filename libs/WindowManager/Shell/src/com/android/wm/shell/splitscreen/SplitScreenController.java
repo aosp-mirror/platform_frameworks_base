@@ -185,6 +185,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     private final LauncherApps mLauncherApps;
     private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     private final ShellExecutor mMainExecutor;
+    private final ShellExecutor mBgExecutor;
     private final Handler mMainHandler;
     private final SplitScreenImpl mImpl = new SplitScreenImpl();
     private final DisplayController mDisplayController;
@@ -231,7 +232,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             MultiInstanceHelper multiInstanceHelper,
             SplitState splitState,
             ShellExecutor mainExecutor,
-            Handler mainHandler) {
+            Handler mainHandler,
+            ShellExecutor bgExecutor) {
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mTaskOrganizer = shellTaskOrganizer;
@@ -241,6 +243,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mRootTDAOrganizer = rootTDAOrganizer;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -298,8 +301,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         return new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
-                mMainExecutor, mMainHandler, mRecentTasksOptional, mLaunchAdjacentController,
-                mWindowDecorViewModel, mSplitState);
+                mMainExecutor, mMainHandler, mBgExecutor, mRecentTasksOptional,
+                mLaunchAdjacentController, mWindowDecorViewModel, mSplitState);
     }
 
     @Override
@@ -510,6 +513,11 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
 
     public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
         mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
+    }
+
+    /** Get the parent-based coordinates for split stages. */
+    public void getRefStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        mStageCoordinator.getRefStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
     }
 
     public void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {

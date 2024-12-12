@@ -141,6 +141,7 @@ interface FgsManagerController {
 class FgsManagerControllerImpl
 @Inject
 constructor(
+    @ShadeDisplayAware private val context: Context,
     @ShadeDisplayAware private val resources: Resources,
     @Main private val mainExecutor: Executor,
     @Background private val backgroundExecutor: Executor,
@@ -387,7 +388,7 @@ constructor(
     override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
             if (dialog == null) {
-                val dialog = systemUIDialogFactory.create()
+                val dialog = systemUIDialogFactory.create(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
                 dialog.setMessage(R.string.fgs_manager_dialog_message)
 

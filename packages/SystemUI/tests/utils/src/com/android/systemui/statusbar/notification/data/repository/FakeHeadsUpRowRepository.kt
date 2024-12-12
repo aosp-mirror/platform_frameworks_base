@@ -26,7 +26,8 @@ class FakeHeadsUpRowRepository(override val key: String, override val elementKey
         elementKey: Any = Any(),
         isPinned: Boolean,
     ) : this(key = key, elementKey = elementKey) {
-        this.pinnedStatus.value = if (isPinned) PinnedStatus.PinnedBySystem else PinnedStatus.NotPinned
+        this.pinnedStatus.value =
+            if (isPinned) PinnedStatus.PinnedBySystem else PinnedStatus.NotPinned
     }
 
     constructor(
@@ -40,3 +41,10 @@ class FakeHeadsUpRowRepository(override val key: String, override val elementKey
     override val pinnedStatus: MutableStateFlow<PinnedStatus> =
         MutableStateFlow(PinnedStatus.NotPinned)
 }
+
+/** Use this fake if you're using [UnconfinedTestDispatcher]. See b/383528592 for reasoning. */
+class UnconfinedFakeHeadsUpRowRepository(
+    override val key: String,
+    override val elementKey: Any = Any(),
+    override val pinnedStatus: MutableStateFlow<PinnedStatus>,
+) : HeadsUpRowRepository

@@ -11,3 +11,12 @@ flag {
     }
 }
 
+flag {
+    name: "scroll_capture_relax_scroll_view_criteria"
+    namespace: "systemui"
+    description: "Treat all custom ViewGroups which support scrollTo as ScrollView"
+    bug: "189827634"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

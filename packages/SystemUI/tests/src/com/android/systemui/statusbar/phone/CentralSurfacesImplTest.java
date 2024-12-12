@@ -36,8 +36,6 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.MSG_DISMISS_K
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static kotlinx.coroutines.flow.FlowKt.flowOf;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -55,6 +53,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptySet;
+
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
@@ -138,6 +138,7 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.domain.startable.ScrimStartable;
@@ -181,6 +182,7 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.AvalancheProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
@@ -198,7 +200,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -217,10 +218,6 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
-import dagger.Lazy;
-
-import kotlinx.coroutines.test.TestScope;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -236,6 +233,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Provider;
+
+import dagger.Lazy;
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -667,6 +667,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.startKeyguard();
         mInitController.executePostInitTasks();
         mCentralSurfaces.registerCallbacks();
+        // Clear first invocations caused by registering flows with JavaAdapter
+        mTestScope.getTestScheduler().runCurrent();
+        clearInvocations(mScrimController);
     }
 
     @Test
@@ -1159,8 +1162,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     @EnableSceneContainer
-    public void brightnesShowingChanged_flagEnabled_ScrimControllerNotified() {
-        mCentralSurfaces.registerCallbacks();
+    public void brightnesShowingChanged_sceneContainerFlagEnabled_ScrimControllerNotified() {
         final ScrimStartable scrimStartable = mKosmos.getScrimStartable();
         scrimStartable.start();
 
@@ -1178,9 +1180,25 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
     @Test
     @DisableSceneContainer
-    public void brightnesShowingChanged_flagDisabled_ScrimControllerNotified() {
-        mCentralSurfaces.registerCallbacks();
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    public void brightnesShowingChanged_qsUiRefactorFlagEnabled_ScrimControllerNotified() {
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
+        mTestScope.getTestScheduler().runCurrent();
+        verify(mScrimController, atLeastOnce()).legacyTransitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        clearInvocations(mScrimController);
 
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(false);
+        mTestScope.getTestScheduler().runCurrent();
+        ArgumentCaptor<ScrimState> captor = ArgumentCaptor.forClass(ScrimState.class);
+        // The default is to call the one with the callback argument
+        verify(mScrimController, atLeastOnce()).legacyTransitionTo(captor.capture(), any());
+        assertThat(captor.getValue()).isNotEqualTo(ScrimState.BRIGHTNESS_MIRROR);
+    }
+
+    @Test
+    @DisableSceneContainer
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
+    public void brightnesShowingChanged_flagsDisabled_ScrimControllerNotified() {
         mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
         mTestScope.getTestScheduler().runCurrent();
         verify(mScrimController, never()).legacyTransitionTo(ScrimState.BRIGHTNESS_MIRROR);

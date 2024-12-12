@@ -362,3 +362,9 @@ flag {
     is_fixed_read_only: true
 }
 
+flag {
+    name: "remove_hidden_module_usage"
+    namespace: "modularization"
+    description: "Feature flag to remove the consumption of the hidden module status (ModuleInfo#IsHidden) in the Android source tree."
+    bug: "363952383"
+}

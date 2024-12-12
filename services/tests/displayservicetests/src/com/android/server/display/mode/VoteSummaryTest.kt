@@ -186,6 +186,44 @@ class VoteSummaryTest {
 
         assertThat(result).hasSize(1)
     }
+
+    enum class RejectedModesTestCase(
+            internal val summaryRejectedModes: Set<Int>?,
+            val modesToFilter: Array<Display.Mode>,
+            val expectedModeIds: Set<Int>
+    ) {
+        HAS_NO_MATCHING_VOTE(
+                setOf(4, 5),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                setOf(1, 2, 3)
+        ),
+        HAS_SINGLE_MATCHING_VOTE(
+                setOf(1),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                setOf(2, 3)
+        ),
+        HAS_MULTIPLE_MATCHING_VOTES(
+                setOf(1, 2),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                setOf(3)
+        ),
+    }
+
+    @Test
+    fun testFilterModes_rejectedModes(@TestParameter testCase: RejectedModesTestCase) {
+        val summary = createSummary()
+        summary.rejectedModeIds = testCase.summaryRejectedModes
+
+        val result = summary.filterModes(testCase.modesToFilter)
+
+        assertThat(result.map {it.modeId}).containsExactlyElementsIn(testCase.expectedModeIds)
+    }
 }
 
 

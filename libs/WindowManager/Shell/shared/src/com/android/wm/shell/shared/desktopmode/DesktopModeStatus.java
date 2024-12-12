@@ -16,9 +16,15 @@
 
 package com.android.wm.shell.shared.desktopmode;
 
+import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
+import android.view.Display;
+import android.view.WindowManager;
 import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
@@ -26,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Constants for desktop mode feature
@@ -34,6 +41,9 @@ import java.io.PrintWriter;
 public class DesktopModeStatus {
 
     private static final String TAG = "DesktopModeStatus";
+
+    @Nullable
+    private static Boolean sIsLargeScreenDevice = null;
 
     /**
      * Flag to indicate whether task resizing is veiled.
@@ -227,13 +237,12 @@ public class DesktopModeStatus {
      * necessarily enabling desktop mode
      */
     public static boolean overridesShowAppHandle(@NonNull Context context) {
-        return Flags.showAppHandleLargeScreens()
-                && context.getResources().getBoolean(R.bool.config_enableAppHandle);
+        return Flags.showAppHandleLargeScreens() && deviceHasLargeScreen(context);
     }
 
     /**
      * @return {@code true} if the app handle should be shown because desktop mode is enabled or
-     * the device is overriding {@code R.bool.config_enableAppHandle}
+     * the device has a large screen
      */
     public static boolean canEnterDesktopModeOrShowAppHandle(@NonNull Context context) {
         return canEnterDesktopMode(context) || overridesShowAppHandle(context);
@@ -276,6 +285,21 @@ public class DesktopModeStatus {
     }
 
     /**
+     * @return {@code true} if this device has an internal large screen
+     */
+    private static boolean deviceHasLargeScreen(@NonNull Context context) {
+        if (sIsLargeScreenDevice == null) {
+            sIsLargeScreenDevice = Arrays.stream(
+                context.getSystemService(DisplayManager.class)
+                        .getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED))
+                .filter(display -> display.getType() == Display.TYPE_INTERNAL)
+                .anyMatch(display -> display.getMinSizeDimensionDp()
+                        >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
+        }
+        return sIsLargeScreenDevice;
+    }
+
+    /**
      * Return {@code true} if a display should enter desktop mode by default when the windowing mode
      * of the display's root [TaskDisplayArea] is set to WINDOWING_MODE_FREEFORM.
      */
@@ -315,6 +339,6 @@ public class DesktopModeStatus {
         pw.println(maxTaskLimitHandle == null ? "null" : maxTaskLimitHandle.getInt(/* def= */ -1));
 
         pw.print(innerPrefix); pw.print("showAppHandle config override=");
-        pw.print(context.getResources().getBoolean(R.bool.config_enableAppHandle));
+        pw.print(overridesShowAppHandle(context));
     }
 }

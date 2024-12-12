@@ -5723,7 +5723,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     displayStats.screenDozeTimer.stopRunningLocked(elapsedRealtimeMs);
                     shouldScheduleSync = true;
                     break;
-                case Display.STATE_OFF: // fallthrough
+                case Display.STATE_OFF:
+                    shouldScheduleSync = true;
+                    break;
                 case Display.STATE_UNKNOWN:
                     // Not tracked by timers.
                     break;
@@ -5756,7 +5758,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     displayStats.screenDozeTimer.startRunningLocked(elapsedRealtimeMs);
                     shouldScheduleSync = true;
                     break;
-                case Display.STATE_OFF: // fallthrough
+                case Display.STATE_OFF:
+                    shouldScheduleSync = true;
+                    break;
                 case Display.STATE_UNKNOWN:
                     // Not tracked by timers.
                     break;
@@ -5873,7 +5877,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (shouldScheduleSync) {
             if (mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_SCREEN)) {
-                mScreenPowerStatsCollector.schedule();
+                mScreenPowerStatsCollector.onScreenStateChange();
             } else {
                 final int numDisplays = mPerDisplayBatteryStats.length;
                 final int[] displayStates = new int[numDisplays];
@@ -11443,7 +11447,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mWifiPowerStatsCollector.addConsumer(this::recordPowerStats);
 
         mBluetoothPowerStatsCollector = new BluetoothPowerStatsCollector(
-                mPowerStatsCollectorInjector);
+                mPowerStatsCollectorInjector, this::onBluetoothPowerStatsRetrieved);
         mBluetoothPowerStatsCollector.addConsumer(this::recordPowerStats);
 
         mCameraPowerStatsCollector = new CameraPowerStatsCollector(mPowerStatsCollectorInjector);
@@ -13413,6 +13417,13 @@ public class BatteryStatsImpl extends BatteryStats {
     private final BluetoothActivityInfoCache mLastBluetoothActivityInfo
             = new BluetoothActivityInfoCache();
 
+    private void onBluetoothPowerStatsRetrieved(BluetoothActivityEnergyInfo info,
+            long elapsedRealtimeMs, long uptimeMs) {
+        // Do not populate consumed energy, because energy attribution is done by
+        // BluetoothPowerStatsProcessor.
+        updateBluetoothStateLocked(info, POWER_DATA_UNAVAILABLE, elapsedRealtimeMs, uptimeMs);
+    }
+
     /**
      * Distribute Bluetooth energy info and network traffic to apps.
      *
@@ -13421,10 +13432,6 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info,
             final long consumedChargeUC, long elapsedRealtimeMs, long uptimeMs) {
-        if (mBluetoothPowerStatsCollector.isEnabled()) {
-            return;
-        }
-
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating bluetooth stats: " + info);
         }

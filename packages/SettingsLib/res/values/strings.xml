@@ -990,6 +990,9 @@
     <!-- UI debug setting: simulate secondary display devices using overlays [CHAR LIMIT=45] -->
     <string name="overlay_display_devices_title">Simulate secondary displays</string>
 
+    <!-- UI debug setting: shade display awareness title [CHAR LIMIT=45] -->
+    <string name="shade_display_awareness_title">Shade display position</string>
+
     <!-- Preference category for application debugging development settings. [CHAR LIMIT=25] -->
     <string name="debug_applications_category">Apps</string>
 

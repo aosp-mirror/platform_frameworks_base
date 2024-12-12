@@ -31,6 +31,8 @@ import com.android.systemui.kairos.internal.TStateSource
 import com.android.systemui.kairos.util.Just
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.flatMap
+import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.none
 import com.android.systemui.kairos.util.orElseGet
 
@@ -177,4 +179,25 @@ private fun <A> TStateImpl<A>.getUnsafe(): Maybe<A> =
         is TStateDerived -> getCachedUnsafe()
         is TStateSource -> getStorageUnsafe()
         is DerivedMapCheap<*, *> -> none
+    }
+
+private fun <A> TStateImpl<A>.getUnsafeWithEpoch(): Maybe<Pair<A, Long>> =
+    when (this) {
+        is TStateDerived -> getCachedUnsafe().map { it to invalidatedEpoch }
+        is TStateSource -> getStorageUnsafe().map { it to writeEpoch }
+        is DerivedMapCheap<*, *> -> none
+    }
+
+/**
+ * Returns the current value held in this [TState], or [none] if the [TState] has not been
+ * initialized.
+ *
+ * The returned [Long] is the *epoch* at which the internal cache was last updated. This can be used
+ * to identify values which are out-of-date.
+ */
+fun <A> TState<A>.sampleUnsafe(): Maybe<Pair<A, Long>> =
+    when (this) {
+        is MutableTState -> tState.init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
+        is TStateInit -> init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
+        is TStateLoop -> this.init.getUnsafe().flatMap { it.getUnsafeWithEpoch() }
     }

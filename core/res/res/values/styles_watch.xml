@@ -1,0 +1,73 @@
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <!-- TextAppearance for Wear Material3 Button - Filled  -->
+    <style name="TextAppearance.Widget.Button.Material.Filled">
+        <item name="textColor">@color/btn_material_filled_content_color_watch</item>
+    </style>
+
+    <!-- TextAppearance for Wear Material3 Button - Filled Tonal  -->
+    <style name="TextAppearance.Widget.Button.Material" parent="TextAppearance.DeviceDefault">
+        <item name="android:fontFamily">font-family-flex-device-default</item>
+        <item name="android:fontVariationSettings">"'wdth' 90, 'wght' 500, 'ROND' 100, 'opsz' 15, 'GRAD' 0"</item>
+        <item name="textSize">@dimen/btn_textSize</item>
+        <item name="textColor">@color/btn_material_filled_tonal_content_color_watch</item>
+        <item name="lineHeight">@dimen/btn_lineHeight</item>
+    </style>
+
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3" parent="Widget.DeviceDefault.Button">
+        <item name="android:textSize">0sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:drawablePadding">0dp</item>
+    </style>
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3.Confirm">
+        <!-- Use a ImageView as background -->
+        <item name="background">@android:color/transparent</item>
+        <item name="minWidth">@dimen/dialog_btn_confirm_width</item>
+        <item name="minHeight">@dimen/dialog_btn_confirm_height</item>
+    </style>
+    <style name="Widget.DeviceDefault.Button.ButtonBar.AlertDialog.WearMaterial3.Negative">
+        <item name="background">@drawable/dialog_alert_button_negative_watch</item>
+        <item name="minWidth">@dimen/dialog_btn_negative_width</item>
+        <item name="minHeight">@dimen/dialog_btn_negative_height</item>
+        <item name="maxWidth">@dimen/dialog_btn_negative_width</item>
+        <item name="maxHeight">@dimen/dialog_btn_negative_height</item>
+    </style>
+
+    <!-- TextAppearance for wear material3 AlertDialog Body  -->
+    <style name="TextAppearance.AlertDialog.Body1" parent="TextAppearance.Material.Body1">
+        <item name="android:fontFamily">font-family-flex-device-default</item>
+        <item name="android:fontVariationSettings">"'wdth' 90, 'wght' 450, 'ROND' 100, 'GRAD' 0"</item>
+        <item name="android:textSize">@dimen/alertDialog_material_text_size_body_1</item>
+        <item name="android:lineHeight">@dimen/alertDialog_material_line_height_body_1</item>
+        <item name="android:letterSpacing">@dimen/alertDialog_material_letter_spacing_body_1</item>
+    </style>
+
+    <!-- TextAppearance for wear material3 AlertDialog Title  -->
+    <style name="TextAppearance.AlertDialog.Title" parent="TextAppearance.Material.Title">
+        <item name="android:fontFamily">font-family-flex-device-default</item>
+        <item name="android:fontVariationSettings">"'wdth' 100, 'wght' 550, 'ROND' 100, 'GRAD' 0"</item>
+        <item name="android:textSize">@dimen/alertDialog_material_text_size_title</item>
+        <item name="android:lineHeight">@dimen/alertDialog_material_line_height_title</item>
+        <item name="android:letterSpacing">@dimen/alertDialog_material_letter_spacing_title</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:shadowRadius">0</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+</resources>

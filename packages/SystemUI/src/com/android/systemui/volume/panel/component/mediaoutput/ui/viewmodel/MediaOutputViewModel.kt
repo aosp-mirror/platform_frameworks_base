@@ -80,10 +80,10 @@ constructor(
                     label = label,
                     labelColor =
                         if (Flags.volumeRedesign()) {
-                            Color.Attribute(com.android.internal.R.attr.materialColorOnSurface)
+                            Color.Resource(com.android.internal.R.color.materialColorOnSurface)
                         } else {
-                            Color.Attribute(
-                                com.android.internal.R.attr.materialColorOnSurfaceVariant
+                            Color.Resource(
+                                com.android.internal.R.color.materialColorOnSurfaceVariant
                             )
                         },
                     deviceName =
@@ -96,10 +96,10 @@ constructor(
                         },
                     deviceNameColor =
                         if (mediaOutputModel.canOpenAudioSwitcher) {
-                            Color.Attribute(com.android.internal.R.attr.materialColorOnSurface)
+                            Color.Resource(com.android.internal.R.color.materialColorOnSurface)
                         } else {
-                            Color.Attribute(
-                                com.android.internal.R.attr.materialColorOnSurfaceVariant
+                            Color.Resource(
+                                com.android.internal.R.color.materialColorOnSurfaceVariant
                             )
                         },
                 )
@@ -126,32 +126,32 @@ constructor(
                         iconColor =
                             if (mediaOutputModel.canOpenAudioSwitcher) {
                                 if (Flags.volumeRedesign()) {
-                                    Color.Attribute(
-                                        com.android.internal.R.attr.materialColorOnPrimary
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorOnPrimary
                                     )
                                 } else {
-                                    Color.Attribute(
-                                        com.android.internal.R.attr.materialColorSurface
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorSurface
                                     )
                                 }
                             } else {
-                                Color.Attribute(
-                                    com.android.internal.R.attr.materialColorSurfaceContainerHighest
+                                Color.Resource(
+                                    com.android.internal.R.color.materialColorSurfaceContainerHighest
                                 )
                             },
                         backgroundColor =
                             if (mediaOutputModel.canOpenAudioSwitcher) {
                                 if (Flags.volumeRedesign()) {
-                                    Color.Attribute(
-                                        com.android.internal.R.attr.materialColorPrimary
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorPrimary
                                     )
                                 } else {
-                                    Color.Attribute(
-                                        com.android.internal.R.attr.materialColorSecondary
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorSecondary
                                     )
                                 }
                             } else {
-                                Color.Attribute(com.android.internal.R.attr.materialColorOutline)
+                                Color.Resource(com.android.internal.R.color.materialColorOutline)
                             },
                     )
                 } else {
@@ -160,16 +160,16 @@ constructor(
                         iconColor =
                             if (mediaOutputModel.canOpenAudioSwitcher) {
                                 if (Flags.volumeRedesign()) {
-                                    Color.Attribute(
-                                        com.android.internal.R.attr.materialColorPrimary
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorPrimary
                                     )
                                 } else {
-                                    Color.Attribute(
-                                        com.android.internal.R.attr.materialColorOnSurfaceVariant
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorOnSurfaceVariant
                                     )
                                 }
                             } else {
-                                Color.Attribute(com.android.internal.R.attr.materialColorOutline)
+                                Color.Resource(com.android.internal.R.color.materialColorOutline)
                             },
                         backgroundColor = Color.Loaded(GraphicsColor.TRANSPARENT),
                     )

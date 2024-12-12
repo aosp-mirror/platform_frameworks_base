@@ -17,9 +17,11 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.qs.panels.domain.interactor.editTilesListInteractor
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutMap
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutTypeInteractor
@@ -35,10 +37,12 @@ val Kosmos.editModeViewModel by
             currentTilesInteractor,
             tilesAvailabilityInteractor,
             minimumTilesInteractor,
+            uiEventLoggerFake,
             configurationInteractor,
             applicationContext,
             infiniteGridLayout,
             applicationCoroutineScope,
+            testDispatcher,
             gridLayoutTypeInteractor,
             gridLayoutMap,
         )

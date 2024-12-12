@@ -533,7 +533,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
         when(mOngoingCallController.hasOngoingCall()).thenReturn(true);
-        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+        when(mHeadsUpAppearanceController.shouldHeadsUpStatusBarBeVisible()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -775,7 +775,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 /* hasPrimaryOngoingActivity= */ true,
                 /* hasSecondaryOngoingActivity= */ false,
                 /* shouldAnimate= */ false);
-        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+        when(mHeadsUpAppearanceController.shouldHeadsUpStatusBarBeVisible()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -792,7 +792,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 /* hasPrimaryOngoingActivity= */ true,
                 /* hasSecondaryOngoingActivity= */ true,
                 /* shouldAnimate= */ false);
-        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+        when(mHeadsUpAppearanceController.shouldHeadsUpStatusBarBeVisible()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -1091,9 +1091,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
   @Test
   @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
-  public void disable_headsUpShouldBeVisibleTrue_clockDisabled() {
+  public void disable_shouldHeadsUpStatusBarBeVisibleTrue_clockDisabled() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
-        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(true);
+        when(mHeadsUpAppearanceController.shouldHeadsUpStatusBarBeVisible()).thenReturn(true);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
@@ -1102,9 +1102,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
   @Test
   @DisableFlags({StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME})
-  public void disable_headsUpShouldBeVisibleFalse_clockNotDisabled() {
+  public void disable_shouldHeadsUpStatusBarBeVisibleFalse_clockNotDisabled() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
-        when(mHeadsUpAppearanceController.shouldBeVisible()).thenReturn(false);
+        when(mHeadsUpAppearanceController.shouldHeadsUpStatusBarBeVisible()).thenReturn(false);
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 

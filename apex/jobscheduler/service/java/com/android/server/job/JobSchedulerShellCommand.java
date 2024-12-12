@@ -433,9 +433,6 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case com.android.server.job.Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT:
                 pw.println(com.android.server.job.Flags.doNotForceRushExecutionAtBoot());
                 break;
-            case android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION:
-                pw.println(android.app.job.Flags.backupJobsExemption());
-                break;
             case android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND:
                 pw.println(android.app.job.Flags.ignoreImportantWhileForeground());
                 break;

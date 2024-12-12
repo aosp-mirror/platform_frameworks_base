@@ -30,11 +30,13 @@ import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
+import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -72,7 +74,7 @@ class OngoingCallInteractorTest : SysuiTestCase() {
                                 whenTime = 1000L,
                                 callType = CallType.Ongoing,
                                 statusBarChipIcon = testIconView,
-                                contentIntent = testIntent
+                                contentIntent = testIntent,
                             )
                         )
                     }
@@ -95,7 +97,9 @@ class OngoingCallInteractorTest : SysuiTestCase() {
                     .apply {
                         addIndividualNotif(
                             activeNotificationModel(
-                                key = "notif1", whenTime = 1000L, callType = CallType.Ongoing
+                                key = "notif1",
+                                whenTime = 1000L,
+                                callType = CallType.Ongoing,
                             )
                         )
                     }
@@ -114,7 +118,9 @@ class OngoingCallInteractorTest : SysuiTestCase() {
                     .apply {
                         addIndividualNotif(
                             activeNotificationModel(
-                                key = "notif1", whenTime = 1000L, callType = CallType.Ongoing
+                                key = "notif1",
+                                whenTime = 1000L,
+                                callType = CallType.Ongoing,
                             )
                         )
                     }
@@ -138,7 +144,7 @@ class OngoingCallInteractorTest : SysuiTestCase() {
                                 key = "notif1",
                                 whenTime = 1000L,
                                 callType = CallType.Ongoing,
-                                uid = UID
+                                uid = UID,
                             )
                         )
                     }
@@ -161,7 +167,7 @@ class OngoingCallInteractorTest : SysuiTestCase() {
                                 key = "notif1",
                                 whenTime = 1000L,
                                 callType = CallType.Ongoing,
-                                uid = UID
+                                uid = UID,
                             )
                         )
                     }
@@ -185,13 +191,12 @@ class OngoingCallInteractorTest : SysuiTestCase() {
                                 key = "notif1",
                                 whenTime = 1000L,
                                 callType = CallType.Ongoing,
-                                uid = UID
+                                uid = UID,
                             )
                         )
                     }
                     .build()
-            assertThat(latest)
-                .isInstanceOf(OngoingCallModel.InCall::class.java)
+            assertThat(latest).isInstanceOf(OngoingCallModel.InCall::class.java)
 
             // App becomes visible
             kosmos.activityManagerRepository.fake.setIsAppVisible(UID, true)
@@ -200,6 +205,120 @@ class OngoingCallInteractorTest : SysuiTestCase() {
             // App becomes invisible again
             kosmos.activityManagerRepository.fake.setIsAppVisible(UID, false)
             assertThat(latest).isInstanceOf(OngoingCallModel.InCall::class.java)
+        }
+
+    @Test
+    fun ongoingCallNotification_setsRequiresStatusBarVisibleTrue() =
+        kosmos.runTest {
+            val ongoingCallState by collectLastValue(underTest.ongoingCallState)
+
+            val requiresStatusBarVisibleInRepository by
+                collectLastValue(
+                    kosmos.fakeStatusBarModeRepository.defaultDisplay
+                        .ongoingProcessRequiresStatusBarVisible
+                )
+            val requiresStatusBarVisibleInWindowController by
+                collectLastValue(
+                    kosmos.fakeStatusBarWindowControllerStore.defaultDisplay
+                        .ongoingProcessRequiresStatusBarVisible
+                )
+            repository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                whenTime = 1000L,
+                                callType = CallType.Ongoing,
+                                uid = UID,
+                            )
+                        )
+                    }
+                    .build()
+
+            assertThat(ongoingCallState).isInstanceOf(OngoingCallModel.InCall::class.java)
+            assertThat(requiresStatusBarVisibleInRepository).isTrue()
+            assertThat(requiresStatusBarVisibleInWindowController).isTrue()
+        }
+
+    @Test
+    fun notificationRemoved_setsRequiresStatusBarVisibleFalse() =
+        kosmos.runTest {
+            val ongoingCallState by collectLastValue(underTest.ongoingCallState)
+
+            val requiresStatusBarVisibleInRepository by
+                collectLastValue(
+                    kosmos.fakeStatusBarModeRepository.defaultDisplay
+                        .ongoingProcessRequiresStatusBarVisible
+                )
+            val requiresStatusBarVisibleInWindowController by
+                collectLastValue(
+                    kosmos.fakeStatusBarWindowControllerStore.defaultDisplay
+                        .ongoingProcessRequiresStatusBarVisible
+                )
+
+            repository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                whenTime = 1000L,
+                                callType = CallType.Ongoing,
+                                uid = UID,
+                            )
+                        )
+                    }
+                    .build()
+
+            repository.activeNotifications.value = ActiveNotificationsStore()
+
+            assertThat(ongoingCallState).isInstanceOf(OngoingCallModel.NoCall::class.java)
+            assertThat(requiresStatusBarVisibleInRepository).isFalse()
+            assertThat(requiresStatusBarVisibleInWindowController).isFalse()
+        }
+
+    @Test
+    fun ongoingCallNotification_appBecomesVisible_setsRequiresStatusBarVisibleFalse() =
+        kosmos.runTest {
+            val ongoingCallState by collectLastValue(underTest.ongoingCallState)
+
+            val requiresStatusBarVisibleInRepository by
+                collectLastValue(
+                    kosmos.fakeStatusBarModeRepository.defaultDisplay
+                        .ongoingProcessRequiresStatusBarVisible
+                )
+            val requiresStatusBarVisibleInWindowController by
+                collectLastValue(
+                    kosmos.fakeStatusBarWindowControllerStore.defaultDisplay
+                        .ongoingProcessRequiresStatusBarVisible
+                )
+
+            kosmos.activityManagerRepository.fake.startingIsAppVisibleValue = false
+            repository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                whenTime = 1000L,
+                                callType = CallType.Ongoing,
+                                uid = UID,
+                            )
+                        )
+                    }
+                    .build()
+
+            assertThat(ongoingCallState).isInstanceOf(OngoingCallModel.InCall::class.java)
+            assertThat(requiresStatusBarVisibleInRepository).isTrue()
+            assertThat(requiresStatusBarVisibleInWindowController).isTrue()
+
+            kosmos.activityManagerRepository.fake.setIsAppVisible(UID, true)
+
+            assertThat(ongoingCallState)
+                .isInstanceOf(OngoingCallModel.InCallWithVisibleApp::class.java)
+            assertThat(requiresStatusBarVisibleInRepository).isFalse()
+            assertThat(requiresStatusBarVisibleInWindowController).isFalse()
         }
 
     companion object {

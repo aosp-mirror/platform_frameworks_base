@@ -16,11 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
-import static android.content.Intent.EXTRA_PACKAGE_NAME;
-import static android.content.Intent.EXTRA_VERSION_CODE;
 import static android.content.pm.PackageInstaller.SessionParams.MODE_INHERIT_EXISTING;
-import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
@@ -40,9 +36,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.DataLoaderType;
@@ -68,7 +62,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.incremental.IncrementalManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;

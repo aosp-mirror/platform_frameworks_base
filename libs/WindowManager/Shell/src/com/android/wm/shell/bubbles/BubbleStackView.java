@@ -40,7 +40,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -1326,10 +1325,9 @@ public class BubbleStackView extends FrameLayout
                 R.layout.bubble_manage_menu, this, false);
         mManageMenu.setVisibility(View.INVISIBLE);
 
-        final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                com.android.internal.R.attr.materialColorSurfaceBright});
-        final int menuBackgroundColor = ta.getColor(0, Color.WHITE);
-        ta.recycle();
+        final int menuBackgroundColor = mContext.getColor(
+                com.android.internal.R.color.materialColorSurfaceBright);
+
         mManageMenu.getBackground().setColorFilter(menuBackgroundColor, PorterDuff.Mode.SRC_IN);
 
         PhysicsAnimator.getInstance(mManageMenu).setDefaultSpringConfig(mManageSpringConfig);

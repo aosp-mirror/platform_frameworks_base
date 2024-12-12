@@ -34,6 +34,7 @@ import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.SystemClock;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -179,7 +180,8 @@ public final class AppFunctionManager {
 
         ExecuteAppFunctionAidlRequest aidlRequest =
                 new ExecuteAppFunctionAidlRequest(
-                        request, mContext.getUser(), mContext.getPackageName());
+                        request, mContext.getUser(), mContext.getPackageName(),
+                        /* requestTime= */ SystemClock.elapsedRealtime());
 
         try {
             ICancellationSignal cancellationTransport =

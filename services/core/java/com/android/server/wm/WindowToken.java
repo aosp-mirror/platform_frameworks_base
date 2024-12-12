@@ -49,6 +49,7 @@ import android.window.WindowContext;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -386,7 +387,15 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        dc.reParentWindowToken(this);
+        if (!Flags.reparentWindowTokenApi()) {
+            dc.reParentWindowToken(this);
+        } else {
+            // This check is needed to break recursion, as DisplayContent#reparentWindowToken also
+            // triggers a WindowToken#onDisplayChanged.
+            if (dc.getWindowToken(token) == null) {
+                dc.reParentWindowToken(this);
+            }
+        }
 
         // TODO(b/36740756): One day this should perhaps be hooked
         // up with goodToGo, so we don't move a window

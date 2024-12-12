@@ -17,14 +17,6 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import android.graphics.Rect
 
-/**
- * Lookup the colors to use for the notification icons based on the bounds of the icon container. A
- * result of `null` indicates that no color changes should be applied.
- */
-fun interface NotificationIconColorLookup {
-    fun iconColors(viewBounds: Rect): NotificationIconColors?
-}
-
 /** Colors to apply to notification icons. */
 interface NotificationIconColors {
 

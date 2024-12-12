@@ -66,13 +66,14 @@ public class HubEndpoint {
                 REASON_CLOSE_ENDPOINT_SESSION_REQUESTED,
                 REASON_ENDPOINT_INVALID,
                 REASON_ENDPOINT_STOPPED,
+                REASON_PERMISSION_DENIED,
             })
     public @interface Reason {}
 
     /** Unclassified failure */
     public static final int REASON_FAILURE = 0;
 
-    // The values 1 and 2 are reserved at the Context Hub HAL but not exposed to apps.
+    // The values 1-2 are reserved at the Context Hub HAL but not exposed to apps.
 
     /** The peer rejected the request to open this endpoint session. */
     public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3;
@@ -82,6 +83,11 @@ public class HubEndpoint {
 
     /** The peer endpoint is invalid. */
     public static final int REASON_ENDPOINT_INVALID = 5;
+
+    // The values 6-8 are reserved at the Context Hub HAL but not exposed to apps.
+
+    /** The endpoint did not have the required permissions. */
+    public static final int REASON_PERMISSION_DENIED = 9;
 
     /**
      * The endpoint is now stopped. The app should retrieve the endpoint info using {@link
@@ -349,7 +355,10 @@ public class HubEndpoint {
         }
         try {
             IContextHubEndpoint serviceToken =
-                    service.registerEndpoint(mPendingHubEndpointInfo, mServiceCallback);
+                    service.registerEndpoint(
+                            mPendingHubEndpointInfo,
+                            mServiceCallback,
+                            mPendingHubEndpointInfo.getTag());
             mAssignedHubEndpointInfo = serviceToken.getAssignedHubEndpointInfo();
             mServiceToken = serviceToken;
         } catch (RemoteException e) {
