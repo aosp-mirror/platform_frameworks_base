@@ -60,6 +60,7 @@ import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.Flags
 import com.android.systemui.FontSizeUtils
+import com.android.systemui.FontStyles
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
@@ -312,9 +313,11 @@ constructor(
 
         if (Flags.gsfQuickSettings()) {
             label.apply {
-                typeface = Typeface.create("gsf-title-small-emphasized", Typeface.NORMAL)
+                typeface = Typeface.create(FontStyles.GSF_TITLE_SMALL_EMPHASIZED, Typeface.NORMAL)
             }
-            secondaryLabel.apply { typeface = Typeface.create("gsf-label-medium", Typeface.NORMAL) }
+            secondaryLabel.apply {
+                typeface = Typeface.create(FontStyles.GSF_LABEL_MEDIUM, Typeface.NORMAL)
+            }
         }
 
         addView(labelContainer)

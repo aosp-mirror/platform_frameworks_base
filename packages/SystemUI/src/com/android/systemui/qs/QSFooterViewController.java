@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.systemui.FontStyles;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
@@ -68,7 +69,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
         mBuildText = mView.findViewById(R.id.build);
         if (gsfQuickSettings()) {
-            mBuildText.setTypeface(Typeface.create("gsf-body-medium", Typeface.NORMAL));
+            mBuildText.setTypeface(Typeface.create(FontStyles.GSF_BODY_MEDIUM, Typeface.NORMAL));
         }
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
         mEditButton = mView.findViewById(android.R.id.edit);
