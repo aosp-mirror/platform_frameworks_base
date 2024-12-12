@@ -3133,9 +3133,9 @@ public class ParsingPackageUtils {
 
     private static ParseResult<ParsingPackage> parseAdoptPermissions(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser) {
-        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestOriginalPackage);
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestAdoptPermissions);
         try {
-            String name = nonConfigString(0, R.styleable.AndroidManifestOriginalPackage_name, sa);
+            String name = nonConfigString(0, R.styleable.AndroidManifestAdoptPermissions_name, sa);
             if (name != null) {
                 pkg.addAdoptPermission(name);
             }
