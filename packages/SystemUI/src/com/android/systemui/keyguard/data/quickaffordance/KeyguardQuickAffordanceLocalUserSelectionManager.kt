@@ -25,7 +25,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -102,7 +101,7 @@ constructor(
                     // common case anyway as restoration really only happens on initial device
                     // setup).
                     emit(Unit)
-                }
+                },
             ) { _, _ ->
             }
             .flatMapLatest {
@@ -164,10 +163,7 @@ constructor(
         return result
     }
 
-    override fun setSelections(
-        slotId: String,
-        affordanceIds: List<String>,
-    ) {
+    override fun setSelections(slotId: String, affordanceIds: List<String>) {
         val key = "$KEY_PREFIX_SLOT$slotId"
         val value = affordanceIds.joinToString(AFFORDANCE_DELIMITER)
         sharedPrefs.edit().putString(key, value).apply()
