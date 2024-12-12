@@ -418,6 +418,9 @@ android_library {
         "androidx.slice_slice-view",
     ],
     manifest: "AndroidManifest-res.xml",
+    flags_packages: [
+        "com_android_systemui_flags",
+    ],
 }
 
 android_library {
