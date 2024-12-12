@@ -115,14 +115,25 @@ class DefaultClockFaceLayout(val view: View) : ClockFaceLayout {
                 // and we're not planning to add this vide in clockHostView
                 // so we only need position of device entry icon to constrain clock
                 // Copied calculation codes from applyConstraints in DefaultDeviceEntrySection
-                val bottomPaddingPx = getDimen(context, "lock_icon_margin_bottom")
-                val defaultDensity =
-                    DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
-                        DisplayMetrics.DENSITY_DEFAULT.toFloat()
-                val lockIconRadiusPx = (defaultDensity * 36).toInt()
-                val clockBottomMargin = bottomPaddingPx + 2 * lockIconRadiusPx
+                clockPreviewConfig.lockId?.let { lockId ->
+                    connect(lockscreenClockViewLargeId, BOTTOM, lockId, TOP)
+                }
+                    ?: run {
+                        val bottomPaddingPx = getDimen(context, "lock_icon_margin_bottom")
+                        val defaultDensity =
+                            DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
+                                DisplayMetrics.DENSITY_DEFAULT.toFloat()
+                        val lockIconRadiusPx = (defaultDensity * 36).toInt()
+                        val clockBottomMargin = bottomPaddingPx + 2 * lockIconRadiusPx
+                        connect(
+                            lockscreenClockViewLargeId,
+                            BOTTOM,
+                            PARENT_ID,
+                            BOTTOM,
+                            clockBottomMargin,
+                        )
+                    }
 
-                connect(lockscreenClockViewLargeId, BOTTOM, PARENT_ID, BOTTOM, clockBottomMargin)
                 val smallClockViewId = getId(context, "lockscreen_clock_view")
                 constrainWidth(smallClockViewId, WRAP_CONTENT)
                 constrainHeight(smallClockViewId, getDimen(context, "small_clock_height"))

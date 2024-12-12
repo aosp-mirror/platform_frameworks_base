@@ -136,8 +136,16 @@ object KeyguardPreviewClockViewBinder {
         viewModel: KeyguardPreviewClockViewModel,
     ) {
         val cs = ConstraintSet().apply { clone(rootView) }
-        previewClock.largeClock.layout.applyPreviewConstraints(clockPreviewConfig, cs)
-        previewClock.smallClock.layout.applyPreviewConstraints(clockPreviewConfig, cs)
+
+        val configWithUpdatedLockId =
+            if (rootView.getViewById(lockId) != null) {
+                clockPreviewConfig.copy(lockId = lockId)
+            } else {
+                clockPreviewConfig
+            }
+
+        previewClock.largeClock.layout.applyPreviewConstraints(configWithUpdatedLockId, cs)
+        previewClock.smallClock.layout.applyPreviewConstraints(configWithUpdatedLockId, cs)
 
         // When selectedClockSize is the initial value, make both clocks invisible to avoid
         // flickering
