@@ -1274,6 +1274,53 @@ public class HintManagerServiceTest {
     }
 
     @Test
+    public void testCpuHeadroomInvalidParams() {
+        HintManagerService service = createService();
+        final CpuHeadroomParamsInternal param1 = new CpuHeadroomParamsInternal();
+        param1.calculationType = 100;
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getCpuHeadroom(param1);
+        });
+
+        final CpuHeadroomParamsInternal param2 = new CpuHeadroomParamsInternal();
+        param2.calculationWindowMillis = 49;
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getCpuHeadroom(param2);
+        });
+        param2.calculationWindowMillis = 10001;
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getCpuHeadroom(param2);
+        });
+
+        final CpuHeadroomParamsInternal param3 = new CpuHeadroomParamsInternal();
+        param3.tids = new int[]{1, 2, 3, 4, 5, 6};
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getCpuHeadroom(param3);
+        });
+    }
+
+    @Test
+    public void testGpuHeadroomInvalidParams() {
+        HintManagerService service = createService();
+        final GpuHeadroomParamsInternal param1 = new GpuHeadroomParamsInternal();
+        param1.calculationType = 100;
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getGpuHeadroom(param1);
+        });
+
+        final GpuHeadroomParamsInternal param2 = new GpuHeadroomParamsInternal();
+        param2.calculationWindowMillis = 49;
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getGpuHeadroom(param2);
+        });
+        param2.calculationWindowMillis = 10001;
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.getBinderServiceInstance().getGpuHeadroom(param2);
+        });
+    }
+
+
+    @Test
     public void testCpuHeadroomCache() throws Exception {
         CpuHeadroomParamsInternal params1 = new CpuHeadroomParamsInternal();
         CpuHeadroomParams halParams1 = new CpuHeadroomParams();
