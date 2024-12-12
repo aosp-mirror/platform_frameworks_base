@@ -54,6 +54,9 @@ constexpr bool resample_gainmap_regions() {
 constexpr bool query_global_priority() {
     return false;
 }
+constexpr bool early_preload_gl_context() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -289,6 +292,11 @@ bool Properties::resampleGainmapRegions() {
     static bool sResampleGainmapRegions = base::GetBoolProperty(
             "debug.hwui.resample_gainmap_regions", hwui_flags::resample_gainmap_regions());
     return sResampleGainmapRegions;
+}
+
+bool Properties::earlyPreloadGlContext() {
+    return base::GetBoolProperty(PROPERTY_EARLY_PRELOAD_GL_CONTEXT,
+                                 hwui_flags::early_preload_gl_context());
 }
 
 }  // namespace uirenderer

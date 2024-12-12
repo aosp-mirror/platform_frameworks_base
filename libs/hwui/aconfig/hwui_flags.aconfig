@@ -167,3 +167,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "early_preload_gl_context"
+  namespace: "core_graphics"
+  description: "Initialize GL context and GraphicBufferAllocater init on renderThread preload. This improves app startup time for apps using GL."
+  bug: "383612849"
+}
