@@ -685,12 +685,21 @@ class DragState {
         mAnimator = createCancelAnimationLocked();
     }
 
-    void updateDragSurfaceLocked(boolean keepHandling, float x, float y) {
+    /**
+     * Updates the position of the drag surface.
+     *
+     * @param keepHandling whether to keep handling the drag.
+     * @param displayId the display ID of the drag surface.
+     * @param displayX the x-coordinate of the drag surface in the display's coordinate frame.
+     * @param displayY the y-coordinate of the drag surface in the display's coordinate frame.
+     */
+    void updateDragSurfaceLocked(boolean keepHandling, int displayId, float displayX,
+            float displayY) {
         if (mAnimator != null) {
             return;
         }
-        mCurrentX = x;
-        mCurrentY = y;
+        mCurrentX = displayX;
+        mCurrentY = displayY;
 
         if (!keepHandling) {
             return;
@@ -700,9 +709,10 @@ class DragState {
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG_WM, ">>> OPEN TRANSACTION notifyMoveLocked");
         }
-        mTransaction.setPosition(mSurfaceControl, x - mThumbOffsetX, y - mThumbOffsetY).apply();
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "DRAG %s: pos=(%d,%d)", mSurfaceControl,
-                (int) (x - mThumbOffsetX), (int) (y - mThumbOffsetY));
+        mTransaction.setPosition(mSurfaceControl, displayX - mThumbOffsetX,
+                displayY - mThumbOffsetY).apply();
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "DRAG %s: displayId=%d, pos=(%d,%d)", mSurfaceControl,
+                displayId, (int) (displayX - mThumbOffsetX), (int) (displayY - mThumbOffsetY));
     }
 
     /**

@@ -150,8 +150,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 mProcess).build();
 
         // Use a new TestIWindow so we don't collect events for other windows
-        final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, activity, name,
-                ownerId, false, new TestIWindow());
+        final WindowState window = newWindowBuilder(name, TYPE_BASE_APPLICATION).setWindowToken(
+                activity).setOwnerId(ownerId).setClientWindow(new TestIWindow()).build();
         InputChannel channel = new InputChannel();
         window.openInputChannel(channel);
         window.mHasSurface = true;
@@ -249,7 +249,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         mTarget.mDeferDragStateClosed = true;
                         mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
                         // Verify the drop event includes the drag surface
-                        mTarget.handleMotionEvent(false, 0, 0);
+                        mTarget.handleMotionEvent(false, mWindow.getDisplayId(), 0, 0);
                         final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
                         assertTrue(dropEvent.getDragSurface() != null);
 
@@ -296,7 +296,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                             0).getClipData().willParcelWithActivityInfo());
 
                     mTarget.reportDropWindow(globalInterceptWindow.mInputChannelToken, 0, 0);
-                    mTarget.handleMotionEvent(false, 0, 0);
+                    mTarget.handleMotionEvent(false, globalInterceptWindow.getDisplayId(), 0, 0);
                     mToken = globalInterceptWindow.mClient.asBinder();
 
                     // Verify the drop event is only sent for the global intercept window
@@ -334,8 +334,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                     try {
                         mTarget.mDeferDragStateClosed = true;
                         mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
-                        // // Verify the drop event does not have the drag flags
-                        mTarget.handleMotionEvent(false, 0, 0);
+                        // Verify the drop event does not have the drag flags
+                        mTarget.handleMotionEvent(false, mWindow.getDisplayId(), 0, 0);
                         final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
                         assertTrue(dropEvent.getDragFlags() == (View.DRAG_FLAG_GLOBAL
                                 | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
@@ -520,7 +520,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                     // Verify after consuming that the drag surface is relinquished
                     mTarget.reportDropWindow(otherWindow.mInputChannelToken, 0, 0);
-                    mTarget.handleMotionEvent(false, 0, 0);
+                    mTarget.handleMotionEvent(false, otherWindow.getDisplayId(), 0, 0);
                     mToken = otherWindow.mClient.asBinder();
                     mTarget.reportDropResult(otherIWindow, true);
 
@@ -551,7 +551,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                     // Verify after consuming that the drag surface is relinquished
                     mTarget.reportDropWindow(otherWindow.mInputChannelToken, 0, 0);
-                    mTarget.handleMotionEvent(false, 0, 0);
+                    mTarget.handleMotionEvent(false, otherWindow.getDisplayId(), 0, 0);
                     mToken = otherWindow.mClient.asBinder();
                     mTarget.reportDropResult(otherIWindow, false);
 
@@ -586,7 +586,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 ClipData.newPlainText("label", "Test"), () -> {
                     // Trigger an unhandled drop and verify the global drag listener was called
                     mTarget.reportDropWindow(mWindow.mInputChannelToken, invalidXY, invalidXY);
-                    mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+                    mTarget.handleMotionEvent(false /* keepHandling */, mWindow.getDisplayId(),
+                            invalidXY, invalidXY);
                     mTarget.reportDropResult(mWindow.mClient, false);
                     mTarget.onUnhandledDropCallback(true);
                     mToken = null;
@@ -610,7 +611,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 ClipData.newPlainText("label", "Test"), () -> {
                     // Trigger an unhandled drop and verify the global drag listener was called
                     mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
-                    mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+                    mTarget.handleMotionEvent(false /* keepHandling */, mWindow.getDisplayId(),
+                            invalidXY, invalidXY);
                     mTarget.onUnhandledDropCallback(true);
                     mToken = null;
                     try {
@@ -632,7 +634,8 @@ public class DragDropControllerTests extends WindowTestsBase {
         startDrag(View.DRAG_FLAG_GLOBAL, ClipData.newPlainText("label", "Test"), () -> {
             // Trigger an unhandled drop and verify the global drag listener was not called
             mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
-            mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+            mTarget.handleMotionEvent(false /* keepHandling */, mDisplayContent.getDisplayId(),
+                    invalidXY, invalidXY);
             mToken = null;
             try {
                 verify(listener, never()).onUnhandledDrop(any(), any());
@@ -654,7 +657,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 ClipData.newPlainText("label", "Test"), () -> {
                     // Trigger an unhandled drop and verify the global drag listener was called
                     mTarget.reportDropWindow(mock(IBinder.class), invalidXY, invalidXY);
-                    mTarget.handleMotionEvent(false /* keepHandling */, invalidXY, invalidXY);
+                    mTarget.handleMotionEvent(false /* keepHandling */,
+                            mDisplayContent.getDisplayId(), invalidXY, invalidXY);
 
                     // Verify that the unhandled drop listener callback timeout has been scheduled
                     final Handler handler = mTarget.getHandler();
@@ -673,7 +677,8 @@ public class DragDropControllerTests extends WindowTestsBase {
     private void doDragAndDrop(int flags, ClipData data, float dropX, float dropY) {
         startDrag(flags, data, () -> {
             mTarget.reportDropWindow(mWindow.mInputChannelToken, dropX, dropY);
-            mTarget.handleMotionEvent(false /* keepHandling */, dropX, dropY);
+            mTarget.handleMotionEvent(false /* keepHandling */, mWindow.getDisplayId(), dropX,
+                    dropY);
             mToken = mWindow.mClient.asBinder();
         });
     }
