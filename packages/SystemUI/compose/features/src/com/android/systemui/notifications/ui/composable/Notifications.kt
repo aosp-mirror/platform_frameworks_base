@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -480,6 +481,7 @@ fun ContentScope.NotificationScrollingStack(
         modifier =
             modifier
                 .element(Notifications.Elements.NotificationScrim)
+                .overscroll(verticalOverscrollEffect)
                 .offset {
                     // if scrim is expanded while transitioning to Gone or QS scene, increase the
                     // offset in step with the corresponding transition so that it is 0 when it

@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.InspectorInfo
  * not consumed by the [SceneTransitionLayout] unless specifically requested via
  * [nestedScrollToScene].
  */
-enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
+enum class NestedScrollBehavior {
     /**
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
      * gesture begins at the edge of the scrollable component (so that a scroll in that direction
@@ -42,7 +42,7 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeNoPreview(canStartOnPostFling = false),
+    EdgeNoPreview,
 
     /**
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
@@ -52,7 +52,7 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeWithPreview(canStartOnPostFling = true),
+    @Deprecated("This will be removed, see b/378470603") EdgeWithPreview,
 
     /**
      * Any overscroll will be used by the [SceneTransitionLayout] to move to the next scene.
@@ -60,7 +60,7 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeAlways(canStartOnPostFling = true);
+    EdgeAlways;
 
     companion object {
         val Default = EdgeNoPreview

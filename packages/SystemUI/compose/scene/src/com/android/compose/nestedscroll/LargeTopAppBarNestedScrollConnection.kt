@@ -56,7 +56,6 @@ fun LargeTopAppBarNestedScrollConnection(
         canStartPostScroll = { offsetAvailable, _, _ ->
             offsetAvailable > 0 && height() < maxHeight()
         },
-        canStartPostFling = { false },
         onStart = {
             LargeTopAppBarScrollController(
                 height = height,

@@ -62,7 +62,6 @@ fun NotificationScrimNestedScrollConnection(
         canStartPostScroll = { offsetAvailable, _, _ ->
             offsetAvailable > 0 && (scrimOffset() < maxScrimOffset || isCurrentGestureOverscroll())
         },
-        canStartPostFling = { false },
         onStart = { firstScroll ->
             onStart(firstScroll)
             object : ScrollController {
