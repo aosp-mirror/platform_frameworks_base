@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
@@ -42,6 +43,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.time.SystemClock;
+
 import com.google.android.msdl.domain.MSDLPlayer;
 
 import javax.inject.Inject;
@@ -89,7 +91,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         }
     };
 
-    BrightnessSliderController(
+    protected BrightnessSliderController(
             BrightnessSliderView brightnessSliderView,
             FalsingManager falsingManager,
             UiEventLogger uiEventLogger,
@@ -247,16 +249,20 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         return mView.isVisibleToUser();
     }
 
+    protected void handleSliderProgressChange(SeekBar seekBar, int progress, boolean fromUser) {
+        if (mListener != null) {
+            mListener.onChanged(mTracking, progress, false);
+            if (fromUser) {
+                mBrightnessSliderHapticPlugin.onProgressChanged(progress, true);
+            }
+        }
+    }
+
     private final SeekBar.OnSeekBarChangeListener mSeekListener =
             new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            if (mListener != null) {
-                mListener.onChanged(mTracking, progress, false);
-                if (fromUser) {
-                    mBrightnessSliderHapticPlugin.onProgressChanged(progress, true);
-                }
-            }
+            handleSliderProgressChange(seekBar, progress, fromUser);
         }
 
         @Override
@@ -289,11 +295,21 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         }
     };
 
+    /** Factory interface for creating a {@link BrightnessSliderController}. */
+    public interface Factory {
+        @NonNull
+        BrightnessSliderController create(
+                Context context,
+                @Nullable ViewGroup viewRoot);
+
+        int getLayout();
+    }
+
     /**
      * Creates a {@link BrightnessSliderController} with its associated view.
      */
-    public static class Factory {
 
+    public static class BrightnessSliderControllerFactory implements Factory {
         private final FalsingManager mFalsingManager;
         private final UiEventLogger mUiEventLogger;
         private final VibratorHelper mVibratorHelper;
@@ -303,7 +319,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         private final BrightnessWarningToast mBrightnessWarningToast;
 
         @Inject
-        public Factory(
+        public BrightnessSliderControllerFactory(
                 FalsingManager falsingManager,
                 UiEventLogger uiEventLogger,
                 VibratorHelper vibratorHelper,
@@ -328,6 +344,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
          * @param viewRoot the {@link ViewGroup} that will contain the hierarchy. The inflated
          *                 hierarchy will not be attached
          */
+        @Override
+        @NonNull
         public BrightnessSliderController create(
                 Context context,
                 @Nullable ViewGroup viewRoot) {
@@ -345,7 +363,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         }
 
         /** Get the layout to inflate based on what slider to use */
-        private int getLayout() {
+        public int getLayout() {
             return R.layout.quick_settings_brightness_dialog;
         }
     }
