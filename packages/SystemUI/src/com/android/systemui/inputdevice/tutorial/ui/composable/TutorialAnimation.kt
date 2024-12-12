@@ -47,8 +47,10 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.LottieDynamicProperties
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Error
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgressAfterError
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
 import com.android.systemui.res.R
 
@@ -72,16 +74,18 @@ fun TutorialAnimation(
             },
         ) { state ->
             when (state) {
-                NotStarted::class ->
+                NotStarted::class,
+                Error::class ->
                     EducationAnimation(
                         config.animations.educationResId,
                         config.colors.animationColors,
                     )
-                InProgress::class ->
+                InProgress::class,
+                InProgressAfterError::class ->
                     InProgressAnimation(
                         // actionState can be already of different class while this composable is
                         // transitioning to another one
-                        actionState as? InProgress,
+                        actionState as? Progress,
                         config.animations.educationResId,
                         config.colors.animationColors,
                     )
@@ -138,14 +142,14 @@ private fun SuccessAnimation(
 
 @Composable
 private fun InProgressAnimation(
-    state: InProgress?,
+    state: Progress?,
     @RawRes inProgressAnimationId: Int,
     animationProperties: LottieDynamicProperties,
 ) {
     // Caching latest progress for when we're animating this view away and state is null.
     // Without this there's jumpcut in the animation while it's animating away.
     // state should never be null when composable appears, only when disappearing
-    val cached = remember { Ref<InProgress>() }
+    val cached = remember { Ref<Progress>() }
     cached.value = state ?: cached.value
     val progress = cached.value?.progress ?: 0f
 

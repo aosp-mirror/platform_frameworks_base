@@ -45,6 +45,8 @@ fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     bodyResId = R.string.touchpad_back_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_back_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_back_gesture_success_body,
+                    titleErrorResId = R.string.gesture_error_title,
+                    bodyErrorResId = R.string.touchpad_back_gesture_error_body,
                 ),
             animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_back_edu),
         )
