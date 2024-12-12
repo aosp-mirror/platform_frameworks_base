@@ -310,8 +310,14 @@
     <!-- Size of the stroke with for the emphasized notification button style -->
     <dimen name="emphasized_button_stroke_width">1dp</dimen>
 
-    <!-- height of the content margin to accomodate for the header -->
+    <!-- height of the content margin to accommodate for the header -->
     <dimen name="notification_content_margin_top">50dp</dimen>
+
+    <!-- The spacing between the content and the header text above it, scaling with text size.
+         This value is chosen so that, taking into account the text spacing for both the text in the
+         top line and the text in the content, the distance between them is 4dp with the default
+         screen configuration (and will grow accordingly for larger font sizes) -->
+    <dimen name="notification_2025_content_margin_top">10sp</dimen>
 
     <!-- height of the content margin that is applied at the end of the notification content -->
     <dimen name="notification_content_margin">20dp</dimen>

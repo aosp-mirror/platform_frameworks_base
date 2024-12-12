@@ -6453,6 +6453,13 @@ public class Notification implements Parcelable
             big.setColorStateList(R.id.snooze_button, "setImageTintList", actionColor);
             big.setColorStateList(R.id.bubble_button, "setImageTintList", actionColor);
 
+            if (Flags.notificationsRedesignTemplates()) {
+                int margin = getContentMarginTop(mContext,
+                        R.dimen.notification_2025_content_margin_top);
+                big.setViewLayoutMargin(R.id.notification_main_column, RemoteViews.MARGIN_TOP,
+                        margin, TypedValue.COMPLEX_UNIT_PX);
+            }
+
             boolean validRemoteInput = false;
 
             // In the UI, contextual actions appear separately from the standard actions, so we
@@ -6547,6 +6554,30 @@ public class Notification implements Parcelable
             }
 
             return big;
+        }
+
+        /**
+         * Calculate the top margin for the content in px, to allow enough space for the top line
+         * above, using the given resource ID for the desired spacing.
+         *
+         * @hide
+         */
+        public static int getContentMarginTop(Context context, @DimenRes int spacingRes) {
+            final Resources resources = context.getResources();
+            // The margin above the text, at the top of the notification (originally in dp)
+            int notifMargin = resources.getDimensionPixelSize(R.dimen.notification_2025_margin);
+            // Spacing between the text lines, scaling with the font size (originally in sp)
+            int spacing = resources.getDimensionPixelSize(spacingRes);
+
+            // Size of the text in the notification top line (originally in sp)
+            int[] textSizeAttr = new int[] { android.R.attr.textSize };
+            TypedArray typedArray = context.obtainStyledAttributes(
+                    R.style.TextAppearance_DeviceDefault_Notification_Info, textSizeAttr);
+            int textSize = typedArray.getDimensionPixelSize(0 /* index */, -1 /* default */);
+            typedArray.recycle();
+
+            // Adding up all the values as pixels
+            return notifMargin + spacing + textSize;
         }
 
         private boolean hasValidRemoteInput(Action action) {
