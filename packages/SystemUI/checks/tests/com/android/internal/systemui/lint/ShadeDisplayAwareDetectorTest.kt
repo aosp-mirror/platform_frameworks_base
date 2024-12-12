@@ -73,12 +73,12 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
             )
             .indented()
 
-    private val globalConfigStub: TestFile =
+    private val mainStub: TestFile =
         kotlin(
                 """
-                package com.android.systemui.common.ui
+                package com.android.systemui.dagger.qualifiers
 
-                @Retention(AnnotationRetention.RUNTIME) annotation class GlobalConfig
+                @Retention(AnnotationRetention.RUNTIME) annotation class Main
                 """
             )
             .indented()
@@ -119,7 +119,7 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
             qsContext,
             shadeDisplayAwareStub,
             applicationStub,
-            globalConfigStub,
+            mainStub,
             configStateStub,
             configControllerStub,
             configInteractorStub,
@@ -308,7 +308,7 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
     }
 
     @Test
-    fun injectedConstructor_inRelevantPackage_withGlobalConfigAnnotatedConfigurationClass() {
+    fun injectedConstructor_inRelevantPackage_withMainAnnotatedConfigurationClass() {
         lint()
             .files(
                 TestFiles.kotlin(
@@ -317,11 +317,11 @@ class ShadeDisplayAwareDetectorTest : SystemUILintDetectorTest() {
 
                         import javax.inject.Inject
                         import com.android.systemui.common.ui.ConfigurationState
-                        import com.android.systemui.common.ui.GlobalConfig
+                        import com.android.systemui.dagger.qualifiers.Main
 
                         class ExampleClass
                             @Inject
-                            constructor(@GlobalConfig private val configState: ConfigurationState)
+                            constructor(@Main private val configState: ConfigurationState)
                     """
                         .trimIndent()
                 ),

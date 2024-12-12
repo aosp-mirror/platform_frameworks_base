@@ -388,7 +388,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
     }
 
     @Test
-    fun testOnDecorMaximizedOrRestored_togglesTaskSize() {
+    fun testOnDecorMaximizedOrRestored_togglesTaskSize_maximize() {
         val maxOrRestoreListenerCaptor = forClass(Function0::class.java)
                 as ArgumentCaptor<Function0<Unit>>
         val decor = createOpenTaskDecoration(
@@ -403,6 +403,52 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             ToggleTaskSizeInteraction(
                 ToggleTaskSizeInteraction.Direction.MAXIMIZE,
                 ToggleTaskSizeInteraction.Source.MAXIMIZE_MENU_TO_MAXIMIZE,
+                InputMethod.UNKNOWN_INPUT_METHOD
+            )
+        )
+    }
+
+    @Test
+    fun testOnDecorMaximizedOrRestored_togglesTaskSize_maximizeFromMaximizedSize() {
+        val maxOrRestoreListenerCaptor = forClass(Function0::class.java)
+                as ArgumentCaptor<Function0<Unit>>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onMaxOrRestoreListenerCaptor = maxOrRestoreListenerCaptor
+        )
+        val movedMaximizedBounds = Rect(STABLE_BOUNDS)
+        movedMaximizedBounds.offset(10, 10)
+        decor.mTaskInfo.configuration.windowConfiguration.bounds.set(movedMaximizedBounds)
+
+        maxOrRestoreListenerCaptor.value.invoke()
+
+        verify(mockDesktopTasksController).toggleDesktopTaskSize(
+            decor.mTaskInfo,
+            ToggleTaskSizeInteraction(
+                ToggleTaskSizeInteraction.Direction.MAXIMIZE,
+                ToggleTaskSizeInteraction.Source.MAXIMIZE_MENU_TO_MAXIMIZE,
+                InputMethod.UNKNOWN_INPUT_METHOD
+            )
+        )
+    }
+
+    @Test
+    fun testOnDecorMaximizedOrRestored_togglesTaskSize_restore() {
+        val maxOrRestoreListenerCaptor = forClass(Function0::class.java)
+                as ArgumentCaptor<Function0<Unit>>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onMaxOrRestoreListenerCaptor = maxOrRestoreListenerCaptor
+        )
+        decor.mTaskInfo.configuration.windowConfiguration.bounds.set(STABLE_BOUNDS)
+
+        maxOrRestoreListenerCaptor.value.invoke()
+
+        verify(mockDesktopTasksController).toggleDesktopTaskSize(
+            decor.mTaskInfo,
+            ToggleTaskSizeInteraction(
+                ToggleTaskSizeInteraction.Direction.RESTORE,
+                ToggleTaskSizeInteraction.Source.MAXIMIZE_MENU_TO_RESTORE,
                 InputMethod.UNKNOWN_INPUT_METHOD
             )
         )
@@ -591,7 +637,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         verify(mockDesktopTasksController).moveTaskToDesktop(
             eq(decor.mTaskInfo.taskId),
             any(),
-            eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON)
+            eq(DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON),
+            anyOrNull()
         )
     }
 
@@ -824,7 +871,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         )
 
         verify(mockDesktopTasksController, times(1))
-            .moveTaskToDesktop(any(), any(), any())
+            .moveTaskToDesktop(any(), any(), any(), anyOrNull())
     }
 
     @Test

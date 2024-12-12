@@ -170,13 +170,15 @@ public class PowerStatsAggregator {
                     }
                 }
             }
-            if (endTimeMs != MonotonicClock.UNDEFINED) {
-                lastTime = endTimeMs;
-            }
-            if (lastTime > baseTime) {
-                mStats.setDuration(lastTime - baseTime);
-                mStats.finish(lastTime);
-                consumer.accept(mStats);
+            if (startedSession) {
+                if (endTimeMs != MonotonicClock.UNDEFINED) {
+                    lastTime = endTimeMs;
+                }
+                if (lastTime > baseTime) {
+                    mStats.setDuration(lastTime - baseTime);
+                    mStats.finish(lastTime);
+                    consumer.accept(mStats);
+                }
             }
 
             mStats.reset();     // to free up memory

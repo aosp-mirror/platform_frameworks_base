@@ -2581,9 +2581,9 @@ class MediaRouter2ServiceImpl {
             mUserRecord = userRecord;
             mSystemProvider =
                     Flags.enableMirroringInMediaRouter2()
-                            ? new SystemMediaRoute2Provider2(
+                            ? SystemMediaRoute2Provider2.create(
                                     service.mContext, UserHandle.of(userRecord.mUserId), looper)
-                            : new SystemMediaRoute2Provider(
+                            : SystemMediaRoute2Provider.create(
                                     service.mContext, UserHandle.of(userRecord.mUserId), looper);
             mRouteProviders.add(getSystemProvider());
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,

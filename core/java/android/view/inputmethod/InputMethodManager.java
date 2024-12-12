@@ -948,7 +948,7 @@ public final class InputMethodManager {
                             // requestedVisibleTypes of WindowInsetsController by hiding the IME
                             final var statsToken = ImeTracker.forLogging().onStart(
                                     ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_CLIENT,
-                                    SoftInputShowHideReason.REASON_HIDE_WINDOW_LOST_FOCUS,
+                                    SoftInputShowHideReason.HIDE_WINDOW_LOST_FOCUS,
                                     false /* fromUser */);
                             if (DEBUG) {
                                 Log.d(TAG, "onWindowLostFocus, hiding IME because "

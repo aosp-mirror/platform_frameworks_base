@@ -54,7 +54,7 @@ var Kosmos.brightnessWarningToast: BrightnessWarningToast by
  * that kosmos instance
  */
 fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) =
-    testScope.runTest { this@runTest.testBody() }
+    testScope.runTest testBody@{ this@runTest.testBody() }
 
 fun Kosmos.runCurrent() = testScope.runCurrent()
 

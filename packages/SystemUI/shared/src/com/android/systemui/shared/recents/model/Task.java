@@ -330,6 +330,11 @@ public class Task {
     }
 
     @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "[" + key.toString() + "] " + title;
     }

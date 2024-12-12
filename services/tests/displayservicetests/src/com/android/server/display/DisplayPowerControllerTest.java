@@ -2471,6 +2471,26 @@ public final class DisplayPowerControllerTest {
                 eq(false));
     }
 
+    @Test
+    public void onDisplayChange_canceledAfterStop() {
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+
+        // stop the dpc (turn it down)
+        mHolder.dpc.stop();
+        advanceTime(1);
+
+        // To trigger all the changes that can happen, we will completely change the underlying
+        // display device.
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mock(DisplayDeviceConfig.class), /* isEnabled= */ true);
+
+        // Call onDisplayChange after we stopped DPC and make sure it doesn't crash
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+        advanceTime(1);
+
+        // No crash = success
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */

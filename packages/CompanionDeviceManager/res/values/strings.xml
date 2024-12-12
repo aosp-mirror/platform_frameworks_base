@@ -88,6 +88,17 @@
     <!-- Description of the helper dialog for NEARBY_DEVICE_STREAMING profile. [CHAR LIMIT=NONE] -->
     <string name="helper_summary_nearby_device_streaming"><xliff:g id="app_name" example="Exo">%1$s</xliff:g> is requesting permission on behalf of <xliff:g id="device_name" example="Chromebook">%2$s</xliff:g> to stream apps from your <xliff:g id="device_type" example="phone">%3$s</xliff:g></string>
 
+    <!-- ================= DEVICE_PROFILE_SENSOR_DEVICE_STREAMING ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of SENSOR_DEVICE_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_sensor_device_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to stream audio and system features between your <xliff:g id="device_type" example="phone">%2$s</xliff:g> and &lt;strong&gt;<xliff:g id="device_name" example="Chromebook">%3$s</xliff:g>&lt;/strong&gt;?</string>
+
+    <!-- Summary for associating an application with a companion device of SENSOR_DEVICE_STREAMING profile [CHAR LIMIT=NONE] -->
+    <string name="summary_sensor_device_streaming"><xliff:g id="app_name" example="Exo">%1$s</xliff:g> will have access to anything that’s played on your <xliff:g id="device_name" example="Chromebook">%3$s</xliff:g>.&lt;br/>&lt;br/><xliff:g id="app_name" example="Exo">%1$s</xliff:g> will be able to stream audio to <xliff:g id="device_name" example="Chromebook">%3$s</xliff:g> until you remove access to this permission.</string>
+
+    <!-- Description of the helper dialog for SENSOR_DEVICE_STREAMING profile. [CHAR LIMIT=NONE] -->
+    <string name="helper_summary_sensor_device_streaming"><xliff:g id="app_name" example="Exo">%1$s</xliff:g> is requesting permission on behalf of <xliff:g id="device_name" example="Chromebook">%2$s</xliff:g> to stream audio and system features between your devices.</string>
+
     <!-- ================= null profile ================= -->
 
     <!-- A noun for a companion device with unspecified profile (type) [CHAR LIMIT=30] -->

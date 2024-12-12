@@ -20,7 +20,7 @@
         android:color="?android:attr/colorControlHighlight">
     <item>
         <shape>
-            <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh" />
+            <solid android:color="@androidprv:color/materialColorSurfaceContainerHigh" />
         </shape>
     </item>
     <item>

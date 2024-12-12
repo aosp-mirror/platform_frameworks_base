@@ -562,6 +562,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             e.printStackTrace();
         }
 
+        mAppOpsListener.setCallback(mTouchHandler.getMotionHelper());
+
         // Handle for system task stack changes.
         mTaskStackListener.addListener(
                 new TaskStackListenerCallback() {

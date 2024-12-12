@@ -23,8 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.compat.Compatibility;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.vcn.IVcnManagementService;
@@ -40,17 +38,15 @@ import android.os.SystemProperties;
 @FlaggedApi(FLAG_MAINLINE_VCN_MODULE_API)
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class ConnectivityFrameworkInitializerBaklava {
-    /**
-     * Starting with {@link VANILLA_ICE_CREAM}, Telephony feature flags (e.g. {@link
-     * PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}) are being checked before returning managers
-     * that depend on them. If the feature is missing, {@link Context#getSystemService} will return
-     * null.
-     *
-     * <p>This change is specific to VcnManager.
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
-    private static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
+
+    // This is a copy of TelephonyFrameworkInitializer.ENABLE_CHECKING_TELEPHONY_FEATURES. This
+    // ChangeId will replace ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN to gate VcnManager
+    // feature flag enforcement.
+    // This replacement is safe because both ChangeIds have been enabled since Android V and serve
+    // the same purpose: enforcing telephony feature flag checks before using telephony-based
+    // features. This also simplifies VCN modularization by avoiding the need to handle different
+    // states, such as: SDK < B vs. SDK >= B; VCN in platform vs. VCN in the apex.
+    private static final long ENABLE_CHECKING_TELEPHONY_FEATURES = 330583731;
 
     /**
      * The corresponding vendor API for Android V
@@ -71,7 +67,7 @@ public final class ConnectivityFrameworkInitializerBaklava {
     private static String getVcnFeatureDependency() {
         // Check SDK version of the client app. Apps targeting pre-V SDK might
         // have not checked for existence of these features.
-        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN)) {
+        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES)) {
             return null;
         }
 

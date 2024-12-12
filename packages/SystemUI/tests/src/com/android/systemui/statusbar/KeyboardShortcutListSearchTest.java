@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.drawable.Icon;
 import android.os.Handler;
-import android.platform.test.annotations.EnableFlags;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
 import android.view.WindowManager;
@@ -34,7 +33,6 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -95,7 +93,6 @@ public class KeyboardShortcutListSearchTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_VALIDATE_KEYBOARD_SHORTCUT_HELPER_ICON_URI)
     public void requestAppKeyboardShortcuts_callback_sanitisesIcons() {
         KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
 
@@ -114,7 +111,6 @@ public class KeyboardShortcutListSearchTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_VALIDATE_KEYBOARD_SHORTCUT_HELPER_ICON_URI)
     public void requestImeKeyboardShortcuts_callback_sanitisesIcons() {
         KeyboardShortcutGroup group = createKeyboardShortcutGroupForIconTests();
 

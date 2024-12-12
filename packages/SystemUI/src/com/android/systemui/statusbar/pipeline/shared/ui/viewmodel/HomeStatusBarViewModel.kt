@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationSt
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
@@ -235,14 +236,18 @@ constructor(
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
-            headsUpNotificationInteractor.showHeadsUpStatusBar,
+            headsUpNotificationInteractor.statusBarHeadsUpState,
             collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, showHeadsUp, visibilityViaDisableFlags ->
+        ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags ->
+            val hideClockForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
             val showClock =
-                shouldStatusBarBeVisible && visibilityViaDisableFlags.isClockAllowed && !showHeadsUp
+                shouldStatusBarBeVisible &&
+                    visibilityViaDisableFlags.isClockAllowed &&
+                    !hideClockForHeadsUp
             // Always use View.INVISIBLE here, so that animations work
             VisibilityModel(showClock.toVisibleOrInvisible(), visibilityViaDisableFlags.animate)
         }
+
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,

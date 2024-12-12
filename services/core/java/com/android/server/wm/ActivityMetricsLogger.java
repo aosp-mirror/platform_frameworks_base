@@ -110,6 +110,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.apphibernation.AppHibernationService;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -778,11 +779,12 @@ class ActivityMetricsLogger {
      */
     private void updateSplitPairLaunches(@NonNull TransitionInfo info) {
         final Task launchedActivityTask = info.mLastLaunchedActivity.getTask();
-        final Task adjacentToLaunchedTask = launchedActivityTask.getAdjacentTask();
-        if (adjacentToLaunchedTask == null) {
+        final Task launchedSplitRootTask = launchedActivityTask.getTaskWithAdjacent();
+        if (launchedSplitRootTask == null) {
             // Not a part of a split pair
             return;
         }
+
         for (int i = mTransitionInfoList.size() - 1; i >= 0; i--) {
             final TransitionInfo otherInfo = mTransitionInfoList.get(i);
             if (otherInfo == info) {
@@ -790,7 +792,15 @@ class ActivityMetricsLogger {
             }
             final Task otherTask = otherInfo.mLastLaunchedActivity.getTask();
             // The adjacent task is the split root in which activities are started
-            if (otherTask.isDescendantOf(adjacentToLaunchedTask)) {
+            final boolean isDescendantOfAdjacent;
+            if (Flags.allowMultipleAdjacentTaskFragments()) {
+                isDescendantOfAdjacent = launchedSplitRootTask.forOtherAdjacentTasks(
+                        otherTask::isDescendantOf);
+            } else {
+                isDescendantOfAdjacent = otherTask.isDescendantOf(
+                        launchedSplitRootTask.getAdjacentTask());
+            }
+            if (isDescendantOfAdjacent) {
                 if (DEBUG_METRICS) {
                     Slog.i(TAG, "Found adjacent tasks t1=" + launchedActivityTask.mTaskId
                             + " t2=" + otherTask.mTaskId);

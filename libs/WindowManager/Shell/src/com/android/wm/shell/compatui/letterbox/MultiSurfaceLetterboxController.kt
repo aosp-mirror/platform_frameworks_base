@@ -20,6 +20,8 @@ import android.graphics.Rect
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.compatui.letterbox.LetterboxUtils.Maps.runOnItem
+import com.android.wm.shell.compatui.letterbox.LetterboxUtils.Transactions.moveAndCrop
 import com.android.wm.shell.dagger.WMSingleton
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_APP_COMPAT
 import javax.inject.Inject
@@ -101,23 +103,6 @@ class MultiSurfaceLetterboxController @Inject constructor(
         ProtoLog.v(WM_SHELL_APP_COMPAT, "%s: %s", TAG, "${letterboxMap.keys}")
     }
 
-    /*
-     * Executes [onFound] on the [LetterboxItem] if present or [onMissed] if not present.
-     */
-    private fun MutableMap<LetterboxKey, LetterboxSurfaces>.runOnItem(
-        key: LetterboxKey,
-        onFound: (LetterboxSurfaces) -> Unit = { _ -> },
-        onMissed: (
-            LetterboxKey,
-            MutableMap<LetterboxKey, LetterboxSurfaces>
-        ) -> Unit = { _, _ -> }
-    ) {
-        this[key]?.let {
-            return onFound(it)
-        }
-        return onMissed(key, this)
-    }
-
     private fun SurfaceControl?.remove(
         tx: Transaction
     ) = this?.let {
@@ -130,17 +115,6 @@ class MultiSurfaceLetterboxController @Inject constructor(
     ) = this?.let {
         tx.setVisibility(this, visible)
     }
-
-    private fun Transaction.moveAndCrop(
-        surface: SurfaceControl,
-        rect: Rect
-    ): Transaction =
-        setPosition(surface, rect.left.toFloat(), rect.top.toFloat())
-            .setWindowCrop(
-                surface,
-                rect.width(),
-                rect.height()
-            )
 
     private fun LetterboxSurfaces.updateSurfacesBounds(
         tx: Transaction,

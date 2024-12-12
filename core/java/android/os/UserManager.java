@@ -6501,7 +6501,11 @@ public class UserManager {
      * @hide
      */
     public static final void invalidateCacheOnUserDataChanged() {
-        if (android.multiuser.Flags.cacheProfilesReadOnly()) {
+        if (android.multiuser.Flags.cacheProfilesReadOnly()
+                || android.multiuser.Flags.cacheUserInfoReadOnly()) {
+            // TODO(b/383175685): Rename the invalidation call to make it clearer that it
+            // invalidates the caches for both getProfiles and getUserInfo (since they both use the
+            // same user_manager_user_data CachedProperty.api).
             UserManagerCache.invalidateProfiles();
         }
     }

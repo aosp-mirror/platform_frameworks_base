@@ -770,19 +770,19 @@ public class PackageWatchdog {
      * The minimum value that can be returned by any observer.
      * It represents that no mitigations were available.
      */
-    public static final int LEAST_PACKAGE_HEALTH_OBSERVER_IMPACT =
+    public static final int USER_IMPACT_THRESHOLD_NONE =
             PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
 
     /**
      * The mitigation impact beyond which the user will start noticing the mitigations.
      */
-    public static final int MEDIUM_USER_IMPACT_THRESHOLD =
+    public static final int USER_IMPACT_THRESHOLD_MEDIUM =
             PackageHealthObserverImpact.USER_IMPACT_LEVEL_20;
 
     /**
      * The mitigation impact beyond which the user impact is severely high.
      */
-    public static final int HIGH_USER_IMPACT_THRESHOLD =
+    public static final int USER_IMPACT_THRESHOLD_HIGH =
             PackageHealthObserverImpact.USER_IMPACT_LEVEL_71;
 
     /**
@@ -827,11 +827,9 @@ public class PackageWatchdog {
     public interface PackageHealthObserver {
         /**
          * Called when health check fails for the {@code versionedPackage}.
-         *
-         * Note: if the returned user impact is higher than
-         * {@link #DEFAULT_HIGH_USER_IMPACT_THRESHOLD}, then
-         * {@link #onExecuteHealthCheckMitigation} would be called only in severe device conditions
-         * like boot-loop or network failure.
+         * Note: if the returned user impact is higher than {@link #USER_IMPACT_THRESHOLD_HIGH},
+         * then {@link #onExecuteHealthCheckMitigation} would be called only in severe device
+         * conditions like boot-loop or network failure.
          *
          * @param versionedPackage the package that is failing. This may be null if a native
          *                          service is crashing.
@@ -839,9 +837,9 @@ public class PackageWatchdog {
          * @param mitigationCount the number of times mitigation has been called for this package
          *                        (including this time).
          *
-         *
-         * @return any value greater than {@link #LEAST_PACKAGE_HEALTH_OBSERVER_IMPACT} to express
-         * the impact of mitigation on the user in {@link #onExecuteHealthCheckMitigation}
+         * @return any value greater than {@link #USER_IMPACT_THRESHOLD_NONE} to express
+         * the impact of mitigation on the user in {@link #onExecuteHealthCheckMitigation}.
+         * Returning {@link #USER_IMPACT_THRESHOLD_NONE} would indicate no mitigations available.
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
@@ -871,8 +869,9 @@ public class PackageWatchdog {
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
          *
-         * @return any value greater than {@link #LEAST_PACKAGE_HEALTH_OBSERVER_IMPACT} to express
-         * the impact of mitigation on the user in {@link #onExecuteBootLoopMitigation}
+         * @return any value greater than {@link #USER_IMPACT_THRESHOLD_NONE} to express
+         * the impact of mitigation on the user in {@link #onExecuteBootLoopMitigation}.
+         * Returning {@link #USER_IMPACT_THRESHOLD_NONE} would indicate no mitigations available.
          */
         default @PackageHealthObserverImpact int onBootLoop(int mitigationCount) {
             return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;

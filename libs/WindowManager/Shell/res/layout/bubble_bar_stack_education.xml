@@ -29,7 +29,7 @@
     <ImageView
         android:layout_width="@dimen/bubble_popup_icon_size"
         android:layout_height="@dimen/bubble_popup_icon_size"
-        android:tint="?androidprv:attr/materialColorOutline"
+        android:tint="@androidprv:color/materialColorOutline"
         android:contentDescription="@null"
         android:src="@drawable/ic_floating_landscape"/>
 
@@ -41,7 +41,7 @@
         android:maxLines="1"
         android:ellipsize="end"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Headline"
-        android:textColor="?androidprv:attr/materialColorOnSurface"
+        android:textColor="@androidprv:color/materialColorOnSurface"
         android:text="@string/bubble_bar_education_stack_title"/>
 
     <TextView
@@ -51,7 +51,7 @@
         android:paddingBottom="@dimen/bubble_popup_padding_bottom"
         android:maxWidth="@dimen/bubble_popup_content_max_width"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault"
-        android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
+        android:textColor="@androidprv:color/materialColorOnSurfaceVariant"
         android:textAlignment="center"
         android:text="@string/bubble_bar_education_stack_text"/>
 

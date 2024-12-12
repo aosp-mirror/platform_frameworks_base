@@ -76,6 +76,17 @@ public final class SessionCommittedEventLogger {
     });
   }
 
+  /** Set commit_reason if not already set */
+  public void maybeSetCommitReasonIfUnset(@AutofillCommitReason int val) {
+      mEventInternal.ifPresent(
+          event -> {
+            if (event.mCommitReason != COMMIT_REASON_UNKNOWN) {
+              return;
+            }
+            event.mCommitReason = val;
+          });
+  }
+
   /**
    * Set session_duration_millis as long as mEventInternal presents.
    */

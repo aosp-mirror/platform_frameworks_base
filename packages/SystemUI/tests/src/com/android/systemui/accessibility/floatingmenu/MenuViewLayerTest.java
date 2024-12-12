@@ -159,7 +159,8 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 new WindowMetrics(mDisplayBounds, fakeDisplayInsets(), /* density = */ 0.0f));
         doReturn(mWindowMetrics).when(mStubWindowManager).getCurrentWindowMetrics();
 
-        mMenuViewModel = new MenuViewModel(mSpyContext, mSecureSettings);
+        mMenuViewModel = new MenuViewModel(
+                mSpyContext, mStubAccessibilityManager, mSecureSettings);
         MenuViewAppearance menuViewAppearance = new MenuViewAppearance(
                 mSpyContext, mStubWindowManager);
         mMenuView = spy(

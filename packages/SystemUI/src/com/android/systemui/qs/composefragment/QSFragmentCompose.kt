@@ -33,7 +33,6 @@ import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,6 +48,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -77,6 +77,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -246,51 +247,57 @@ constructor(
     private fun Content() {
         PlatformTheme(isDarkTheme = true) {
             ProvideShortcutHelperIndication(interactionsConfig = interactionsConfig()) {
-                AnimatedVisibility(
-                    visible = viewModel.isQsVisibleAndAnyShadeExpanded,
-                    modifier =
-                        Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
-                            // Clipping before translation to match QSContainerImpl.onDraw
-                            .offset {
-                                IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
-                            }
-                            .thenIf(notificationScrimClippingParams.isEnabled) {
-                                Modifier.notificationScrimClip {
-                                    notificationScrimClippingParams.params
+                if (viewModel.isQsVisibleAndAnyShadeExpanded) {
+                    Box(
+                        modifier =
+                            Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
+                                // Clipping before translation to match QSContainerImpl.onDraw
+                                .offset {
+                                    IntOffset(
+                                        x = 0,
+                                        y = viewModel.viewTranslationY.fastRoundToInt(),
+                                    )
                                 }
+                                .thenIf(notificationScrimClippingParams.isEnabled) {
+                                    Modifier.notificationScrimClip {
+                                        notificationScrimClippingParams.params
+                                    }
+                                }
+                                // Disable touches in the whole composable while the mirror is
+                                // showing. While the mirror is showing, an ancestor of the
+                                // ComposeView is made alpha 0, but touches are still being captured
+                                // by the composables.
+                                .gesturesDisabled(viewModel.showingMirror)
+                    ) {
+                        val isEditing by
+                            viewModel.containerViewModel.editModeViewModel.isEditing
+                                .collectAsStateWithLifecycle()
+                        val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                        AnimatedContent(
+                            targetState = isEditing,
+                            transitionSpec = {
+                                fadeIn(animationSpecEditMode) togetherWith
+                                    fadeOut(animationSpecEditMode)
+                            },
+                            label = "EditModeAnimatedContent",
+                        ) { editing ->
+                            if (editing) {
+                                val qqsPadding = viewModel.qqsHeaderHeight
+                                EditMode(
+                                    viewModel = viewModel.containerViewModel.editModeViewModel,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(top = { qqsPadding })
+                                            .padding(
+                                                horizontal = {
+                                                    QuickSettingsShade.Dimensions.Padding
+                                                        .roundToPx()
+                                                }
+                                            ),
+                                )
+                            } else {
+                                CollapsableQuickSettingsSTL()
                             }
-                            // Disable touches in the whole composable while the mirror is showing.
-                            // While the mirror is showing, an ancestor of the ComposeView is made
-                            // alpha 0, but touches are still being captured by the composables.
-                            .gesturesDisabled(viewModel.showingMirror),
-                ) {
-                    val isEditing by
-                        viewModel.containerViewModel.editModeViewModel.isEditing
-                            .collectAsStateWithLifecycle()
-                    val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                    AnimatedContent(
-                        targetState = isEditing,
-                        transitionSpec = {
-                            fadeIn(animationSpecEditMode) togetherWith
-                                fadeOut(animationSpecEditMode)
-                        },
-                        label = "EditModeAnimatedContent",
-                    ) { editing ->
-                        if (editing) {
-                            val qqsPadding = viewModel.qqsHeaderHeight
-                            EditMode(
-                                viewModel = viewModel.containerViewModel.editModeViewModel,
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .padding(top = { qqsPadding })
-                                        .padding(
-                                            horizontal = {
-                                                QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                            }
-                                        ),
-                            )
-                        } else {
-                            CollapsableQuickSettingsSTL()
                         }
                     }
                 }
@@ -325,9 +332,15 @@ constructor(
         }
 
         SceneTransitionLayout(state = sceneState, modifier = Modifier.fillMaxSize()) {
-            scene(QuickSettings) { QuickSettingsElement() }
+            scene(QuickSettings) {
+                LaunchedEffect(Unit) { viewModel.onQSOpen() }
+                QuickSettingsElement()
+            }
 
-            scene(QuickQuickSettings) { QuickQuickSettingsElement() }
+            scene(QuickQuickSettings) {
+                LaunchedEffect(Unit) { viewModel.onQQSOpen() }
+                QuickQuickSettingsElement()
+            }
         }
     }
 
@@ -616,7 +629,14 @@ constructor(
                 val Media =
                     @Composable {
                         if (viewModel.qqsMediaVisible) {
-                            MediaObject(mediaHost = viewModel.qqsMediaHost)
+                            MediaObject(
+                                // In order to have stable constraints passed to the AndroidView
+                                // during expansion (available height changing due to squishiness),
+                                // We always allow the media here to be as tall as it wants.
+                                // (b/383085298)
+                                modifier = Modifier.requiredHeightIn(max = Dp.Infinity),
+                                mediaHost = viewModel.qqsMediaHost,
+                            )
                         }
                     }
 

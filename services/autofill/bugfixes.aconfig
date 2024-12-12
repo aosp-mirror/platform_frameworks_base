@@ -86,3 +86,23 @@ flag {
   description: "Highlight single field after autofill selection"
   bug: "41496744"
 }
+
+flag {
+  name: "metrics_fixes"
+  namespace: "autofill"
+  description: "Fixes various framework reported metrics"
+  bug: "362581326, 363011343"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "add_accessibility_title_for_augmented_autofill_dropdown"
+  namespace: "autofill"
+  description: "Add accessibility title for augmented autofill dropdown"
+  bug: "375284244"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

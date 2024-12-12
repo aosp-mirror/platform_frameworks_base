@@ -15,6 +15,6 @@
   -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <item android:color="?androidprv:attr/materialColorSurfaceContainerHighest" android:state_enabled="false" />
-    <item android:color="?androidprv:attr/materialColorPrimary" />
+    <item android:color="@androidprv:color/materialColorSurfaceContainerHighest" android:state_enabled="false" />
+    <item android:color="@androidprv:color/materialColorPrimary" />
 </selector>

@@ -110,6 +110,11 @@ sealed interface CommunalContentModel {
             get() = fixedHalfOrResponsiveSize()
     }
 
+    /** An empty spacer to reserve space in the grid. */
+    data class Spacer(override val size: CommunalContentSize) : CommunalContentModel {
+        override val key: String = KEY.spacer()
+    }
+
     /** A CTA tile in the glanceable hub view mode which can be dismissed. */
     class CtaTileInViewMode : CommunalContentModel {
         override val key: String = KEY.CTA_TILE_IN_VIEW_MODE_KEY
@@ -170,6 +175,10 @@ sealed interface CommunalContentModel {
 
             fun umo(): String {
                 return "umo"
+            }
+
+            fun spacer(): String {
+                return "spacer_${UUID.randomUUID()}"
             }
         }
     }

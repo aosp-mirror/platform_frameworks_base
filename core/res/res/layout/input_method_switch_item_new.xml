@@ -56,7 +56,7 @@
             android:marqueeRepeatLimit="1"
             android:singleLine="true"
             android:fontFamily="google-sans-text"
-            android:textColor="?attr/materialColorOnSurfaceVariant"
+            android:textColor="@color/materialColorOnSurfaceVariant"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
             android:textAllCaps="true"
             android:visibility="gone"/>

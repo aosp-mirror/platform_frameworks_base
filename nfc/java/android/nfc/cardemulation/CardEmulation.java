@@ -1114,6 +1114,14 @@ public final class CardEmulation {
     @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
     public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED = 3;
 
+    /**
+     * Setting the default subscription ID failed because of unknown error.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_UNKNOWN = -1;
+
     /** @hide */
     @IntDef(prefix = "SET_SUBSCRIPTION_ID_STATUS_",
             value = {
@@ -1121,6 +1129,7 @@ public final class CardEmulation {
                     SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID,
                     SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR,
                     SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED,
+                    SET_SUBSCRIPTION_ID_STATUS_UNKNOWN
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SetSubscriptionIdStatus {}
@@ -1129,9 +1138,10 @@ public final class CardEmulation {
      * Sets the system's default NFC subscription id.
      *
      * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this sets the
-     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     * default UICC NFCEE that will handle NFC offhost CE transactions </p>
      *
-     * @param subscriptionId the default NFC subscription Id to set.
+     * @param subscriptionId the default NFC subscription Id to set. User can get subscription id
+     *                       from {@link SubscriptionManager#getSubscriptionId(int)}
      * @return status of the operation.
      *
      * @throws UnsupportedOperationException If the device does not have
@@ -1153,7 +1163,7 @@ public final class CardEmulation {
      * Returns the system's default NFC subscription id.
      *
      * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this returns the
-     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     * default UICC NFCEE that will handle NFC offhost CE transactions </p>
      * <p> If the device has no UICC that can serve as NFCEE, this will return
      * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.</p>
      *

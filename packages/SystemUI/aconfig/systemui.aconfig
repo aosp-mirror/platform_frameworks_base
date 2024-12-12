@@ -679,7 +679,7 @@ flag {
 flag {
     name: "volume_redesign"
     namespace: "systemui"
-    description: "Enables Volume BC25 visuals update"
+    description: "Enables Volume visuals update"
     bug: "368308908"
 }
 
@@ -1325,7 +1325,7 @@ flag {
   name: "media_controls_ui_update"
   namespace: "systemui"
   description: "Enables media visuals update"
-  bug: "380053768"
+  bug: "379044958"
 }
 
 flag {
@@ -1333,16 +1333,6 @@ flag {
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
   bug: "336521992"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "validate_keyboard_shortcut_helper_icon_uri"
-  namespace: "systemui"
-  description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
-  bug: "331180422"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -1878,4 +1868,11 @@ flag {
     namespace: "systemui"
     description: "Larger privacy indicators on large screen"
     bug: "381864715"
+}
+
+flag {
+   name: "glanceable_hub_direct_edit_mode"
+   namespace: "systemui"
+   description: "Invokes edit mode directly from long press in glanceable hub"
+   bug: "382531177"
 }

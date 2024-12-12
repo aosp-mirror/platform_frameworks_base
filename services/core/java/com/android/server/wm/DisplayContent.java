@@ -260,6 +260,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.RegionUtils;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -437,6 +438,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @see WindowManagerService#setSandboxDisplayApis(int, boolean)
      */
     private boolean mSandboxDisplayApis = true;
+
+    /** Whether {@link #setIgnoreOrientationRequest} is called to override the default policy. */
+    @VisibleForTesting
+    boolean mHasSetIgnoreOrientationRequest;
 
     /**
      * Overridden display density for current user. Initialized with {@link #mInitialDisplayDensity}
@@ -1390,11 +1395,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mTokenMap.put(binder, token);
 
         if (token.asActivityRecord() == null) {
-            // Set displayContent for non-app token to prevent same token will add twice after
-            // onDisplayChanged.
-            // TODO: Check if it's fine that super.onDisplayChanged of WindowToken
-            //  (WindowsContainer#onDisplayChanged) may skipped when token.mDisplayContent assigned.
-            token.mDisplayContent = this;
+            // Setting the mDisplayContent to the token is not needed: it is done by da.addChild
+            // below, that also calls onDisplayChanged once moved.
+            if (!Flags.reparentWindowTokenApi()) {
+                // Set displayContent for non-app token to prevent same token will add twice after
+                // onDisplayChanged.
+                // TODO: Check if it's fine that super.onDisplayChanged of WindowToken
+                //  (WindowsContainer#onDisplayChanged) may skipped when token.mDisplayContent
+                //  assigned.
+                token.mDisplayContent = this;
+            }
             // Add non-app token to container hierarchy on the display. App tokens are added through
             // the parent container managing them (e.g. Tasks).
             final DisplayArea.Tokens da = findAreaForToken(token).asTokens();
@@ -6716,8 +6726,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayPolicy.getSystemUiContext();
     }
 
+    /** Returns {@code} true if the smallest screen width dp >= 600. */
+    boolean isLargeScreen() {
+        return getConfiguration().smallestScreenWidthDp
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
+    }
+
+    @Override
+    boolean getIgnoreOrientationRequest() {
+        if (mHasSetIgnoreOrientationRequest
+                || !com.android.window.flags.Flags.universalResizableByDefault()) {
+            return super.getIgnoreOrientationRequest();
+        }
+        // Large screen (sw >= 600dp) ignores orientation request by default.
+        return isLargeScreen() && !mWmService.isIgnoreOrientationRequestDisabled();
+    }
+
     @Override
     boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
+        mHasSetIgnoreOrientationRequest = true;
         if (mSetIgnoreOrientationRequest == ignoreOrientationRequest) return false;
         final boolean rotationChanged = super.setIgnoreOrientationRequest(ignoreOrientationRequest);
         mWmService.mDisplayWindowSettings.setIgnoreOrientationRequest(

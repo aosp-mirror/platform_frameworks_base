@@ -20,12 +20,16 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clipScrollableContainer
@@ -43,6 +47,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -69,6 +74,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,6 +86,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.MeasureScope
@@ -111,6 +118,7 @@ import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.BounceableInfo
 import com.android.systemui.qs.panels.ui.compose.DragAndDropState
+import com.android.systemui.qs.panels.ui.compose.DragType
 import com.android.systemui.qs.panels.ui.compose.EditTileListState
 import com.android.systemui.qs.panels.ui.compose.bounceableInfo
 import com.android.systemui.qs.panels.ui.compose.dragAndDropRemoveZone
@@ -120,6 +128,9 @@ import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.TileArrangementPadding
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.TileHeight
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.ToggleTargetSize
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.EditModeTileDefaults.AUTO_SCROLL_DISTANCE
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.EditModeTileDefaults.AUTO_SCROLL_SPEED
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.EditModeTileDefaults.AvailableTilesGridMinHeight
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.EditModeTileDefaults.CurrentTilesGridPadding
 import com.android.systemui.qs.panels.ui.compose.selection.MutableSelectionState
 import com.android.systemui.qs.panels.ui.compose.selection.ResizableTileContainer
@@ -139,8 +150,10 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.model.groupAndSort
 import com.android.systemui.res.R
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 
 object TileType
@@ -201,8 +214,12 @@ fun DefaultEditTileGrid(
     ) { innerPadding ->
         CompositionLocalProvider(LocalOverscrollFactory provides null) {
             val scrollState = rememberScrollState()
-            LaunchedEffect(listState.dragInProgress) {
-                if (listState.dragInProgress) {
+
+            AutoScrollGrid(listState, scrollState, innerPadding)
+
+            LaunchedEffect(listState.dragType) {
+                // Only scroll to the top when adding a new tile, not when reordering existing ones
+                if (listState.dragInProgress && listState.dragType == DragType.Add) {
                     scrollState.animateScrollTo(0)
                 }
             }
@@ -223,7 +240,7 @@ fun DefaultEditTileGrid(
                 AnimatedContent(
                     targetState = listState.dragInProgress,
                     modifier = Modifier.wrapContentSize(),
-                    label = "",
+                    label = "QSEditHeader",
                 ) { dragIsInProgress ->
                     EditGridHeader(Modifier.dragAndDropRemoveZone(listState, onRemoveTile)) {
                         if (dragIsInProgress) {
@@ -243,33 +260,83 @@ fun DefaultEditTileGrid(
                     onSetTiles,
                 )
 
-                // Hide available tiles when dragging
-                AnimatedVisibility(
-                    visible = !listState.dragInProgress,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
+                // Sets a minimum height to be used when available tiles are hidden
+                Box(
+                    Modifier.fillMaxWidth()
+                        .requiredHeightIn(AvailableTilesGridMinHeight)
+                        .animateContentSize()
+                        .dragAndDropRemoveZone(listState, onRemoveTile)
                 ) {
-                    Column(
-                        verticalArrangement =
-                            spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
-                        modifier = modifier.fillMaxSize(),
+                    // Using the fully qualified name here as a workaround for AnimatedVisibility
+                    // not being available from a Box
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = !listState.dragInProgress,
+                        enter = fadeIn(),
+                        exit = fadeOut(),
                     ) {
-                        EditGridHeader {
-                            Text(text = stringResource(id = R.string.drag_to_add_tiles))
-                        }
+                        // Hide available tiles when dragging
+                        Column(
+                            verticalArrangement =
+                                spacedBy(dimensionResource(id = R.dimen.qs_label_container_margin)),
+                            modifier = modifier.fillMaxSize(),
+                        ) {
+                            EditGridHeader {
+                                Text(text = stringResource(id = R.string.drag_to_add_tiles))
+                            }
 
-                        AvailableTileGrid(otherTiles, selectionState, columns, listState)
+                            AvailableTileGrid(otherTiles, selectionState, columns, listState)
+                        }
                     }
                 }
-
-                // Drop zone to remove tiles dragged out of the tile grid
-                Spacer(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .weight(1f)
-                            .dragAndDropRemoveZone(listState, onRemoveTile)
-                )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Composable
+private fun AutoScrollGrid(
+    listState: EditTileListState,
+    scrollState: ScrollState,
+    padding: PaddingValues,
+) {
+    val density = LocalDensity.current
+    val (top, bottom) =
+        remember(density) {
+            with(density) {
+                padding.calculateTopPadding().roundToPx() to
+                    padding.calculateBottomPadding().roundToPx()
+            }
+        }
+    val scrollTarget by
+        remember(listState, scrollState, top, bottom) {
+            derivedStateOf {
+                val position = listState.draggedPosition
+                if (position.isSpecified) {
+                    // Return the scroll target needed based on the position of the drag movement,
+                    // or null if we don't need to scroll
+                    val y = position.y.roundToInt()
+                    when {
+                        y < AUTO_SCROLL_DISTANCE + top -> 0
+                        y > scrollState.viewportSize - bottom - AUTO_SCROLL_DISTANCE ->
+                            scrollState.maxValue
+                        else -> null
+                    }
+                } else {
+                    null
+                }
+            }
+        }
+    LaunchedEffect(scrollTarget) {
+        scrollTarget?.let {
+            // Change the duration of the animation based on the distance to maintain the
+            // same scrolling speed
+            val distance = abs(it - scrollState.value)
+            scrollState.animateScrollTo(
+                it,
+                animationSpec =
+                    tween(durationMillis = distance * AUTO_SCROLL_SPEED, easing = LinearEasing),
+            )
         }
     }
 }
@@ -423,7 +490,7 @@ private fun AvailableTileGrid(
 }
 
 fun gridHeight(rows: Int, tileHeight: Dp, tilePadding: Dp, gridPadding: Dp): Dp {
-    return ((tileHeight + tilePadding) * rows) - tilePadding + gridPadding * 2
+    return ((tileHeight + tilePadding) * rows) + gridPadding * 2
 }
 
 private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
@@ -596,6 +663,7 @@ private fun TileGridCell(
                 .dragAndDropTileSource(
                     SizedTileImpl(cell.tile, cell.width),
                     dragAndDropState,
+                    DragType.Move,
                     selectionState::unSelect,
                 )
                 .tileBackground(colors.background)
@@ -631,7 +699,11 @@ private fun AvailableTileGridCell(
                     onClick(onClickActionName) { false }
                     this.stateDescription = stateDescription
                 }
-                .dragAndDropTileSource(SizedTileImpl(cell.tile, cell.width), dragAndDropState) {
+                .dragAndDropTileSource(
+                    SizedTileImpl(cell.tile, cell.width),
+                    dragAndDropState,
+                    DragType.Add,
+                ) {
                     selectionState.unSelect()
                 }
                 .tileBackground(colors.background)
@@ -739,7 +811,10 @@ private fun Modifier.tileBackground(color: Color): Modifier {
 
 private object EditModeTileDefaults {
     const val PLACEHOLDER_ALPHA = .3f
+    const val AUTO_SCROLL_DISTANCE = 100
+    const val AUTO_SCROLL_SPEED = 2 // 2ms per pixel
     val CurrentTilesGridPadding = 8.dp
+    val AvailableTilesGridMinHeight = 200.dp
 
     @Composable
     fun editTileColors(): TileColors =

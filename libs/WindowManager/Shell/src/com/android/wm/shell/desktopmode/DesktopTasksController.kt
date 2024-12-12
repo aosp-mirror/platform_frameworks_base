@@ -383,12 +383,13 @@ class DesktopTasksController(
         taskId: Int,
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
+        remoteTransition: RemoteTransition? = null,
     ): Boolean {
         val runningTask = shellTaskOrganizer.getRunningTaskInfo(taskId)
         if (runningTask == null) {
-            return moveBackgroundTaskToDesktop(taskId, wct, transitionSource)
+            return moveBackgroundTaskToDesktop(taskId, wct, transitionSource, remoteTransition)
         }
-        moveRunningTaskToDesktop(runningTask, wct, transitionSource)
+        moveRunningTaskToDesktop(runningTask, wct, transitionSource, remoteTransition)
         return true
     }
 
@@ -396,6 +397,7 @@ class DesktopTasksController(
         taskId: Int,
         wct: WindowContainerTransaction,
         transitionSource: DesktopModeTransitionSource,
+        remoteTransition: RemoteTransition? = null,
     ): Boolean {
         if (recentTasksController?.findTaskInBackground(taskId) == null) {
             logW("moveBackgroundTaskToDesktop taskId=%d not found", taskId)
@@ -418,8 +420,17 @@ class DesktopTasksController(
                 .apply { launchWindowingMode = WINDOWING_MODE_FREEFORM }
                 .toBundle(),
         )
-        // TODO(343149901): Add DPI changes for task launch
-        val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+
+        val transition: IBinder
+        if (remoteTransition != null) {
+            val transitionType = transitionType(remoteTransition)
+            val remoteTransitionHandler = OneShotRemoteHandler(mainExecutor, remoteTransition)
+            transition = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
+            remoteTransitionHandler.setTransition(transition)
+        } else {
+            // TODO(343149901): Add DPI changes for task launch
+            transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        }
         desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
             FREEFORM_ANIMATION_DURATION
         )
@@ -433,6 +444,7 @@ class DesktopTasksController(
         task: RunningTaskInfo,
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
+        remoteTransition: RemoteTransition? = null,
     ) {
         if (
             DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue() &&
@@ -450,12 +462,21 @@ class DesktopTasksController(
                 excludeTaskId = task.taskId,
                 reason = DesktopImmersiveController.ExitReason.TASK_LAUNCH,
             )
+
         // Bring other apps to front first
         val taskIdToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
         addMoveToDesktopChanges(wct, task)
 
-        val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        val transition: IBinder
+        if (remoteTransition != null) {
+            val transitionType = transitionType(remoteTransition)
+            val remoteTransitionHandler = OneShotRemoteHandler(mainExecutor, remoteTransition)
+            transition = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
+            remoteTransitionHandler.setTransition(transition)
+        } else {
+            transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        }
         desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
             FREEFORM_ANIMATION_DURATION
         )
@@ -550,7 +571,7 @@ class DesktopTasksController(
     ): ((IBinder) -> Unit)? {
         val taskId = taskInfo.taskId
         desktopTilingDecorViewModel.removeTaskIfTiled(displayId, taskId)
-        performDesktopExitCleanupIfNeeded(taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskId, displayId, wct)
         taskRepository.addClosingTask(displayId, taskId)
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(displayId, taskId)
@@ -589,7 +610,7 @@ class DesktopTasksController(
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
-        performDesktopExitCleanupIfNeeded(taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskId, displayId, wct)
         // Notify immersive handler as it might need to exit immersive state.
         val exitResult =
             desktopImmersiveController.exitImmersiveIfApplicable(
@@ -842,6 +863,10 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         if (!task.isFreeform) addMoveToDesktopChanges(wct, task, displayId)
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
+
+        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
+        }
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
     }
@@ -1327,9 +1352,22 @@ class DesktopTasksController(
      * Remove wallpaper activity if task provided is last task and wallpaper activity token is not
      * null
      */
-    private fun performDesktopExitCleanupIfNeeded(taskId: Int, wct: WindowContainerTransaction) {
-        if (!taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
-            return
+    private fun performDesktopExitCleanupIfNeeded(
+        taskId: Int,
+        displayId: Int,
+        wct: WindowContainerTransaction,
+    ) {
+        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            if (!taskRepository.isOnlyVisibleNonClosingTask(taskId, displayId)) {
+                return
+            }
+            if (displayId != DEFAULT_DISPLAY) {
+                return
+            }
+        } else {
+            if (!taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
+                return
+            }
         }
         desktopModeEnterExitTransitionListener?.onExitDesktopModeTransitionStarted(
             FULLSCREEN_ANIMATION_DURATION
@@ -1823,7 +1861,7 @@ class DesktopTasksController(
         if (!isDesktopModeShowing(task.displayId)) return null
 
         val wct = WindowContainerTransaction()
-        performDesktopExitCleanupIfNeeded(task.taskId, wct)
+        performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
 
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
@@ -1906,7 +1944,7 @@ class DesktopTasksController(
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
 
-        performDesktopExitCleanupIfNeeded(taskInfo.taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskInfo.taskId, taskInfo.displayId, wct)
     }
 
     private fun cascadeWindow(bounds: Rect, displayLayout: DisplayLayout, displayId: Int) {
@@ -1940,7 +1978,7 @@ class DesktopTasksController(
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
 
-        performDesktopExitCleanupIfNeeded(taskInfo.taskId, wct)
+        performDesktopExitCleanupIfNeeded(taskInfo.taskId, taskInfo.displayId, wct)
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */
@@ -2657,9 +2695,17 @@ class DesktopTasksController(
             }
         }
 
-        override fun moveToDesktop(taskId: Int, transitionSource: DesktopModeTransitionSource) {
+        override fun moveToDesktop(
+            taskId: Int,
+            transitionSource: DesktopModeTransitionSource,
+            remoteTransition: RemoteTransition?,
+        ) {
             executeRemoteCallWithTaskPermission(controller, "moveTaskToDesktop") { c ->
-                c.moveTaskToDesktop(taskId, transitionSource = transitionSource)
+                c.moveTaskToDesktop(
+                    taskId,
+                    transitionSource = transitionSource,
+                    remoteTransition = remoteTransition,
+                )
             }
         }
 

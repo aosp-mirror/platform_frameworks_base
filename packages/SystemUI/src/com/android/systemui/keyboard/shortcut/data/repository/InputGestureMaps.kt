@@ -136,10 +136,6 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to R.string.system_multitasking_lhs,
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to R.string.system_multitasking_rhs,
             KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to R.string.system_multitasking_full_screen,
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT to
-                R.string.system_multitasking_splitscreen_focus_lhs,
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to
-                R.string.system_multitasking_splitscreen_focus_rhs,
         )
 
     val shortcutLabelToKeyGestureTypeMap: Map<String, Int>

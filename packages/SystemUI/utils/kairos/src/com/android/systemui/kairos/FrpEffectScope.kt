@@ -22,16 +22,17 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * Scope for external side-effects triggered by the Frp network. This still occurs within the
  * context of a transaction, so general suspending calls are disallowed to prevent blocking the
- * transaction. You can use [frpCoroutineScope] to [launch] new coroutines to perform long-running
- * asynchronous work. This scope is alive for the duration of the containing [FrpBuildScope] that
- * this side-effect scope is running in.
+ * transaction. You can use [frpCoroutineScope] to [launch][kotlinx.coroutines.launch] new
+ * coroutines to perform long-running asynchronous work. This scope is alive for the duration of the
+ * containing [FrpBuildScope] that this side-effect scope is running in.
  */
 @RestrictsSuspension
 @ExperimentalFrpApi
 interface FrpEffectScope : FrpTransactionScope {
     /**
      * A [CoroutineScope] whose lifecycle lives for as long as this [FrpEffectScope] is alive. This
-     * is generally until the [Job] returned by [FrpBuildScope.effect] is cancelled.
+     * is generally until the [Job][kotlinx.coroutines.Job] returned by [FrpBuildScope.effect] is
+     * cancelled.
      */
     @ExperimentalFrpApi val frpCoroutineScope: CoroutineScope
 

@@ -45,7 +45,10 @@ import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.DragResizeWindowGeometry
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainCoroutineDispatcher
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -99,6 +102,9 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     private val desktopTilingDividerWindowManager: DesktopTilingDividerWindowManager = mock()
     private val motionEvent: MotionEvent = mock()
     private val desktopRepository: DesktopRepository = mock()
+    private val mainDispatcher: MainCoroutineDispatcher = mock()
+    private val bgScope: CoroutineScope = mock()
+    private val taskResourceLoader: WindowDecorTaskResourceLoader = mock()
     private lateinit var tilingDecoration: DesktopTilingWindowDecoration
 
     private val split_divider_width = 10
@@ -110,8 +116,11 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         tilingDecoration =
             DesktopTilingWindowDecoration(
                 context,
+                mainDispatcher,
+                bgScope,
                 syncQueue,
                 displayController,
+                taskResourceLoader,
                 displayId,
                 rootTdaOrganizer,
                 transitions,

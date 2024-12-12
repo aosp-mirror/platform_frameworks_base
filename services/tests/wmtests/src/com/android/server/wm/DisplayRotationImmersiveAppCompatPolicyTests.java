@@ -77,7 +77,7 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
         when(mMockActivityRecord.findMainWindow()).thenReturn(mMockWindowState);
 
         doReturn(mMockActivityRecord).when(mDisplayContent).topRunningActivity();
-        when(mDisplayContent.getIgnoreOrientationRequest()).thenReturn(true);
+        mDisplayContent.setIgnoreOrientationRequest(true);
 
         mMockAppCompatConfiguration = mock(AppCompatConfiguration.class);
         when(mMockAppCompatConfiguration.isDisplayRotationImmersiveAppCompatPolicyEnabled())
@@ -195,7 +195,7 @@ public class DisplayRotationImmersiveAppCompatPolicyTests extends WindowTestsBas
 
     @Test
     public void testIsRotationLockEnforced_ignoreOrientationRequestDisabled_lockNotEnforced() {
-        when(mDisplayContent.getIgnoreOrientationRequest()).thenReturn(false);
+        mDisplayContent.setIgnoreOrientationRequest(false);
 
         assertIsRotationLockEnforcedReturnsFalseForAllRotations();
     }

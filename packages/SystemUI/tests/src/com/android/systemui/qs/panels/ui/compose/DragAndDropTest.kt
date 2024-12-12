@@ -87,7 +87,7 @@ class DragAndDropTest : SysuiTestCase() {
         }
         composeRule.waitForIdle()
 
-        listState.onStarted(TestEditTiles[0])
+        listState.onStarted(TestEditTiles[0], DragType.Add)
 
         // Tile is being dragged, it should be replaced with a placeholder
         composeRule.onNodeWithContentDescription("tileA").assertDoesNotExist()
@@ -113,8 +113,8 @@ class DragAndDropTest : SysuiTestCase() {
         }
         composeRule.waitForIdle()
 
-        listState.onStarted(TestEditTiles[0])
-        listState.onMoved(1, false)
+        listState.onStarted(TestEditTiles[0], DragType.Add)
+        listState.onTargeting(1, false)
         listState.onDrop()
 
         // Available tiles should re-appear
@@ -140,7 +140,7 @@ class DragAndDropTest : SysuiTestCase() {
         }
         composeRule.waitForIdle()
 
-        listState.onStarted(TestEditTiles[0])
+        listState.onStarted(TestEditTiles[0], DragType.Add)
         listState.movedOutOfBounds()
         listState.onDrop()
 
@@ -165,11 +165,11 @@ class DragAndDropTest : SysuiTestCase() {
         }
         composeRule.waitForIdle()
 
-        listState.onStarted(createEditTile("newTile"))
+        listState.onStarted(createEditTile("newTile"), DragType.Add)
         // Insert after tileD, which is at index 4
         // [ a ] [ b ] [ c ] [ empty ]
         // [ tile d ] [ e ]
-        listState.onMoved(4, insertAfter = true)
+        listState.onTargeting(4, insertAfter = true)
         listState.onDrop()
 
         // Available tiles should re-appear

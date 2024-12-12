@@ -358,6 +358,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
 import com.android.server.wallpaper.WallpaperCropper.WallpaperCropUtils;
+import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -2672,7 +2673,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (outRelayoutResult != null) {
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
-                        && win.mSyncSeqId > lastSyncSeqId) {
+                        && win.mSyncSeqId > lastSyncSeqId && !displayContent.mWaitingForConfig) {
                     outRelayoutResult.syncSeqId = win.shouldSyncWithBuffers()
                             ? win.mSyncSeqId
                             : -1;
@@ -3039,6 +3040,81 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public boolean reparentWindowContextToDisplayArea(
+            @NonNull IApplicationThread appThread, @NonNull IBinder clientToken, int displayId) {
+        if (!Flags.reparentWindowTokenApi()) {
+            return false;
+        }
+        Objects.requireNonNull(appThread);
+        Objects.requireNonNull(clientToken);
+        final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
+                "reparentWindowContextToDisplayArea", false /* printLog */);
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mAtmService.getProcessController(appThread);
+                if (wpc == null) {
+                    ProtoLog.w(WM_ERROR, "reparentWindowContextToDisplayArea: calling from"
+                            + " non-existing process pid=%d uid=%d", callingPid, callingUid);
+                    return false;
+                }
+                final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+                if (dc == null) {
+                    ProtoLog.w(WM_ERROR, "reparentWindowContextToDisplayArea: trying to attach"
+                            + " to a non-existing display:%d", displayId);
+                    return false;
+                }
+
+                if (!mWindowContextListenerController.assertCallerCanReparentListener(clientToken,
+                        callerCanManageAppTokens, callingUid, displayId)) {
+                    return false;
+                }
+                final WindowContainer<?> container = mWindowContextListenerController.getContainer(
+                                clientToken);
+
+                final WindowToken token = container != null ? container.asWindowToken() : null;
+                if (token != null && token.isFromClient()) {
+                    ProtoLog.d(WM_DEBUG_ADD_REMOVE, "Reparenting from dc to displayId=%d",
+                            displayId);
+                    // Reparent the window created for this window context.
+                    dc.reParentWindowToken(token);
+                    hideUntilNextDraw(token);
+                    // This makes sure there is a traversal scheduled that will eventually report
+                    // the window resize to the client.
+                    dc.setLayoutNeeded();
+                    requestTraversal();
+                    return true;
+                }
+
+                final int type = mWindowContextListenerController.getWindowType(clientToken);
+                final Bundle options = mWindowContextListenerController.getOptions(clientToken);
+                // No window yet, switch listening DA.
+                final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
+                        callerCanManageAppTokens, false /* roundedCornerOverlay */);
+                mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
+                        da, type, options, true /* shouldDispatchConfigWhenRegistering */);
+                return true;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void hideUntilNextDraw(@NonNull WindowToken token) {
+        final WindowState topChild = token.getTopChild();
+        if (topChild != null) {
+            mTransactionFactory.get().hide(token.mSurfaceControl).apply();
+            topChild.applyWithNextDraw(t -> {
+                if (token.mSurfaceControl != null) {
+                    t.show(token.mSurfaceControl);
+                }
+            });
         }
     }
 
@@ -4213,16 +4289,6 @@ public class WindowManagerService extends IWindowManager.Stub
         });
 
         return true;
-    }
-
-    /**
-     * Retrieves a snapshot. If restoreFromDisk equals equals {@code true}, DO NOT HOLD THE WINDOW
-     * MANAGER LOCK WHEN CALLING THIS METHOD!
-     */
-    public TaskSnapshot getTaskSnapshot(int taskId, int userId, boolean isLowResolution,
-            boolean restoreFromDisk) {
-        return mTaskSnapshotController.getSnapshot(taskId, userId, restoreFromDisk,
-                isLowResolution);
     }
 
     /**
@@ -9945,11 +10011,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     && imeTargetWindow.mActivityRecord.mLastImeShown) {
                 return true;
             }
+            final TaskSnapshot snapshot = mTaskSnapshotController.getSnapshot(
+                    imeTargetWindowTask.mTaskId, false /* isLowResolution */);
+            return snapshot != null && snapshot.hasImeSurface();
         }
-        final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
-                imeTargetWindowTask.mUserId, false /* isLowResolution */,
-                false /* restoreFromDisk */);
-        return snapshot != null && snapshot.hasImeSurface();
     }
 
     @Override

@@ -213,6 +213,13 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         default int getCurrentCardTopPadding() {
             throw new UnsupportedOperationException("Not implemented by " + getClass());
         }
+
+        /**
+         * Set the horizontal paddings for applicable children inside the SmartspaceView.
+         */
+        default void setHorizontalPaddings(int horizontalPadding) {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

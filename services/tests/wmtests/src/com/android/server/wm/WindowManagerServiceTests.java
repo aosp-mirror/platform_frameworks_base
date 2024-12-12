@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
@@ -70,6 +71,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -86,10 +88,10 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
@@ -150,9 +152,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Rule
     public Expect mExpect = Expect.create();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @After
     public void tearDown() {
@@ -1411,6 +1410,84 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         assertThat(result).isEqualTo(WindowManagerGlobal.ADD_INVALID_DISPLAY);
     }
+
+    /** Mocks some deps to associate a display content to a specific display id. */
+    private void setupReparentWindowContextToDisplayAreaTest(WindowToken windowToken,
+            DisplayContent dc, int displayId) {
+        spyOn(mWm.mWindowContextListenerController);
+        doReturn(dc).when(mWm.mRoot).getDisplayContentOrCreate(displayId);
+        doReturn(true).when(mWm.mWindowContextListenerController).assertCallerCanReparentListener(
+                any(), anyBoolean(), anyInt(), eq(displayId));
+        doReturn(windowToken).when(mWm.mWindowContextListenerController).getContainer(
+                eq(windowToken.token));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContextToDisplayArea_newDisplay_reparented() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+
+        assertThat(windowToken.getDisplayContent()).isEqualTo(mDisplayContent);
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isTrue();
+
+        assertThat(windowToken.getDisplayContent()).isNotEqualTo(mDisplayContent);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContextToDisplayArea_newDisplayButFlagDisabled_notReparented() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isFalse();
+
+        assertThat(windowToken.getDisplayContent()).isEqualTo(mDisplayContent);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContext_afterReparent_DCNeedsLayout() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isTrue();
+
+        assertThat(dc.isLayoutNeeded()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void reparentWindowContext_afterReparent_traversalScheduled() {
+        final WindowToken windowToken = createTestClientWindowToken(TYPE_NOTIFICATION_SHADE,
+                mDisplayContent);
+        final int newDisplayId = 1;
+        final DisplayContent dc = createNewDisplay();
+        setupReparentWindowContextToDisplayAreaTest(windowToken, dc, newDisplayId);
+        spyOn(mWm.mWindowPlacerLocked);
+        reset(mWm.mWindowPlacerLocked);
+
+        verify(mWm.mWindowPlacerLocked, never()).requestTraversal();
+
+        assertThat(mWm.reparentWindowContextToDisplayArea(mAppThread, windowToken.token,
+                newDisplayId)).isTrue();
+
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
+    }
+
 
     class TestResultReceiver implements IResultReceiver {
         public android.os.Bundle resultData;

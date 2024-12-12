@@ -89,8 +89,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @Nullable
     private volatile SessionCreationOrTransferRequest mPendingTransferRequest;
 
-    SystemMediaRoute2Provider(Context context, UserHandle user, Looper looper) {
-        this(context, COMPONENT_NAME, user, looper);
+    public static SystemMediaRoute2Provider create(
+            Context context, UserHandle user, Looper looper) {
+        var instance = new SystemMediaRoute2Provider(context, COMPONENT_NAME, user, looper);
+        instance.updateProviderState();
+        instance.updateSessionInfosIfNeeded();
+        return instance;
     }
 
     protected SystemMediaRoute2Provider(
@@ -124,8 +128,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                                                 notifySessionInfoUpdated();
                                             }
                                         }));
-        updateProviderState();
-        updateSessionInfosIfNeeded();
     }
 
     public void start() {
@@ -362,7 +364,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
     }
 
-    private void updateProviderState() {
+    protected void updateProviderState() {
         MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
 
         // We must have a device route in the provider info.

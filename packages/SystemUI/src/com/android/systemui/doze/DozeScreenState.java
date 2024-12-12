@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -82,6 +83,7 @@ public class DozeScreenState implements DozeMachine.Part {
     private final DozeLog mDozeLog;
     private final DozeScreenBrightness mDozeScreenBrightness;
     private final SelectedUserInteractor mSelectedUserInteractor;
+    private final DozeInteractor mDozeInteractor;
 
     private int mPendingScreenState = Display.STATE_UNKNOWN;
     private SettableWakeLock mWakeLock;
@@ -97,6 +99,7 @@ public class DozeScreenState implements DozeMachine.Part {
             Provider<UdfpsController> udfpsControllerProvider,
             DozeLog dozeLog,
             DozeScreenBrightness dozeScreenBrightness,
+            DozeInteractor dozeInteractor,
             SelectedUserInteractor selectedUserInteractor) {
         mDozeService = service;
         mHandler = handler;
@@ -108,6 +111,7 @@ public class DozeScreenState implements DozeMachine.Part {
         mDozeLog = dozeLog;
         mDozeScreenBrightness = dozeScreenBrightness;
         mSelectedUserInteractor = selectedUserInteractor;
+        mDozeInteractor = dozeInteractor;
 
         updateUdfpsController();
         if (mUdfpsController == null) {
@@ -225,6 +229,7 @@ public class DozeScreenState implements DozeMachine.Part {
         if (screenState != Display.STATE_UNKNOWN) {
             if (DEBUG) Log.d(TAG, "setDozeScreenState(" + screenState + ")");
             mDozeService.setDozeScreenState(screenState);
+            mDozeInteractor.setDozeScreenState(screenState);
             if (screenState == Display.STATE_DOZE) {
                 // If we're entering doze, update the doze screen brightness. We might have been
                 // clamping it to the dim brightness during the screen off animation, and we should

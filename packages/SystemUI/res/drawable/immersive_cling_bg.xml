@@ -20,5 +20,5 @@
     <corners
         android:bottomLeftRadius="28dp"
         android:bottomRightRadius="28dp"/>
-    <solid android:color="?androidprv:attr/materialColorSurfaceContainer" />
+    <solid android:color="@androidprv:color/materialColorSurfaceContainer" />
 </shape>

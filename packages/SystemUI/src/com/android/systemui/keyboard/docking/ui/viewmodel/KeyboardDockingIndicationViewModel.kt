@@ -21,11 +21,10 @@ import android.view.Surface
 import android.view.WindowManager
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.Utils
-import com.android.systemui.common.ui.GlobalConfig
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.docking.domain.interactor.KeyboardDockingIndicationInteractor
 import com.android.systemui.surfaceeffects.glowboxeffect.GlowBoxConfig
 import javax.inject.Inject
@@ -37,10 +36,10 @@ import kotlinx.coroutines.flow.asStateFlow
 class KeyboardDockingIndicationViewModel
 @Inject
 constructor(
-    private val windowManager: WindowManager,
-    @Application private val context: Context,
+    @Main private val windowManager: WindowManager,
+    @Main private val context: Context,
     keyboardDockingIndicationInteractor: KeyboardDockingIndicationInteractor,
-    @GlobalConfig configurationInteractor: ConfigurationInteractor,
+    @Main configurationInteractor: ConfigurationInteractor,
     @Background private val backgroundScope: CoroutineScope,
 ) {
 

@@ -119,7 +119,8 @@ class ProtoLogCallProcessorImpl(
                         }
 
                         logCallVisitor?.processCall(call, messageString, getLevelForMethodName(
-                            call.name.toString(), call, context), groupMap.getValue(groupName))
+                            call.name.toString(), call, context), groupMap.getValue(groupName),
+                            context.lineNumber)
                     } else if (call.name.id == "init") {
                         // No processing
                     } else {

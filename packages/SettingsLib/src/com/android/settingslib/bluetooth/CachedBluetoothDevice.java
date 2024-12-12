@@ -1591,6 +1591,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private int getHearingDeviceSummaryRes(int leftBattery, int rightBattery,
             boolean shortSummary) {
+        if (getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_MONO
+                || getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT) {
+            return !shortSummary && (getBatteryLevel() > BluetoothDevice.BATTERY_LEVEL_UNKNOWN)
+                    ? R.string.bluetooth_active_battery_level
+                    : R.string.bluetooth_active_no_battery_level;
+        }
         boolean isLeftDeviceConnected = getConnectedHearingAidSide(
                 HearingAidInfo.DeviceSide.SIDE_LEFT).isPresent();
         boolean isRightDeviceConnected = getConnectedHearingAidSide(
@@ -1646,8 +1652,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             @HearingAidInfo.DeviceSide int side) {
         return Stream.concat(Stream.of(this, mSubDevice), mMemberDevices.stream())
                 .filter(Objects::nonNull)
-                .filter(device -> device.getDeviceSide() == side
-                        || device.getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT)
+                .filter(device -> device.getDeviceSide() == side)
                 .filter(device -> device.getDevice().isConnected())
                 // For hearing aids, we should expect only one device assign to one side, but if
                 // it happens, we don't care which one.
@@ -1909,6 +1914,25 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         LeAudioProfile leAudio = mProfileManager.getLeAudioProfile();
         return leAudio != null && leAudio.getConnectionStatus(mDevice) ==
                 BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} supports broadcast assistant profile
+     */
+    public boolean isConnectedLeAudioBroadcastAssistantDevice() {
+        LocalBluetoothLeBroadcastAssistant leBroadcastAssistant =
+                mProfileManager.getLeAudioBroadcastAssistantProfile();
+        return leBroadcastAssistant != null && leBroadcastAssistant.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} supports volume control profile
+     */
+    public boolean isConnectedVolumeControlDevice() {
+        VolumeControlProfile volumeControl = mProfileManager.getVolumeControlProfile();
+        return volumeControl != null && volumeControl.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
     }
 
     private boolean isConnectedSapDevice() {

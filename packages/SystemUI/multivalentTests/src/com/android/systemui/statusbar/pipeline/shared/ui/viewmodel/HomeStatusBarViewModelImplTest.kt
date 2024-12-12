@@ -67,8 +67,9 @@ import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationSt
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
-import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
+import com.android.systemui.statusbar.notification.data.repository.UnconfinedFakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
@@ -76,6 +77,7 @@ import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBar
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
@@ -518,7 +520,8 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isClockVisible_allowedByFlags_hunActive_notVisible() =
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun isClockVisible_allowedByFlags_hunPinnedByUser_visible() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.isClockVisible)
             transitionKeyguardToGone()
@@ -527,7 +530,29 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
             // there is an active HUN
             headsUpNotificationRepository.setNotifications(
-                fakeHeadsUpRowRepository(isPinned = true)
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "key",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
+                )
+            )
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    fun isClockVisible_allowedByFlags_hunPinnedBySystem_notVisible() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.isClockVisible)
+            transitionKeyguardToGone()
+
+            fakeDisableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+            // there is an active HUN
+            headsUpNotificationRepository.setNotifications(
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "key",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedBySystem),
+                )
             )
 
             assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
@@ -541,10 +566,14 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
 
             fakeDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
-            // there is an active HUN
+            // there is an active HUN pinned by the system
             headsUpNotificationRepository.setNotifications(
-                fakeHeadsUpRowRepository(isPinned = true)
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "key",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedBySystem),
+                )
             )
+            assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
 
             // hun goes away
             headsUpNotificationRepository.setNotifications(listOf())
@@ -562,7 +591,10 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
                 DisableFlagsModel(DISABLE_CLOCK, DISABLE2_NONE)
             // there is an active HUN
             headsUpNotificationRepository.setNotifications(
-                fakeHeadsUpRowRepository(isPinned = true)
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "key",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedBySystem),
+                )
             )
 
             assertThat(latest!!.visibility).isEqualTo(View.INVISIBLE)
@@ -897,10 +929,6 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(notifIconsVisible!!.visibility).isEqualTo(View.GONE)
             assertThat(systemInfoVisible!!.baseVisibility.visibility).isEqualTo(View.GONE)
         }
-
-    // Cribbed from [HeadsUpNotificationInteractorTest.kt]
-    private fun fakeHeadsUpRowRepository(key: String = "test key", isPinned: Boolean = false) =
-        FakeHeadsUpRowRepository(key = key, isPinned = isPinned)
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =
         ActiveNotificationsStore.Builder()

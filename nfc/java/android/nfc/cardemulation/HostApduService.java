@@ -289,7 +289,7 @@ public abstract class HostApduService extends Service {
                         try {
                             mNfcService.send(responseMsg);
                         } catch (RemoteException e) {
-                            Log.e("TAG", "Response not sent; RemoteException calling into " +
+                            Log.e(TAG, "Response not sent; RemoteException calling into " +
                                     "NfcService.");
                         }
                     }

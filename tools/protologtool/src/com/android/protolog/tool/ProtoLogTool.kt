@@ -69,7 +69,8 @@ object ProtoLogTool {
         val messageString: String,
         val logLevel: LogLevel,
         val logGroup: LogGroup,
-        val position: String
+        val position: String,
+        val lineNumber: Int,
     )
 
     private fun showHelpAndExit() {
@@ -435,9 +436,10 @@ object ProtoLogTool {
                 call: MethodCallExpr,
                 messageString: String,
                 level: LogLevel,
-                group: LogGroup
+                group: LogGroup,
+                lineNumber: Int,
             ) {
-                val logCall = LogCall(messageString, level, group, packagePath)
+                val logCall = LogCall(messageString, level, group, packagePath, lineNumber)
                 calls.add(logCall)
             }
         }

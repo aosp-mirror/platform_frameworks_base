@@ -64,6 +64,7 @@ import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
@@ -529,6 +530,13 @@ public abstract class WMShellBaseModule {
             PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
         return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
                 pipKeepClearAlgorithm, pipDisplayLayoutState, sizeSpecSource);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAppOpsListener providePipAppOpsListener(Context context,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, mainExecutor);
     }
 
     //
