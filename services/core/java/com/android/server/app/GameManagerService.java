@@ -1422,10 +1422,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             final GameManagerSettings settings = mSettings.get(userId);
             // look for the existing GamePackageConfiguration override
-            configOverride = settings.getConfigOverride(packageName);
+            configOverride = settings.getConfigOverrideLocked(packageName);
             if (configOverride == null) {
                 configOverride = new GamePackageConfiguration(packageName);
-                settings.setConfigOverride(packageName, configOverride);
+                settings.setConfigOverrideLocked(packageName, configOverride);
             }
         }
         GamePackageConfiguration.GameModeConfiguration internalConfig =
@@ -1758,10 +1758,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             final GameManagerSettings settings = mSettings.get(userId);
             // look for the existing GamePackageConfiguration override
-            configOverride = settings.getConfigOverride(packageName);
+            configOverride = settings.getConfigOverrideLocked(packageName);
             if (configOverride == null) {
                 configOverride = new GamePackageConfiguration(packageName);
-                settings.setConfigOverride(packageName, configOverride);
+                settings.setConfigOverrideLocked(packageName, configOverride);
             }
         }
         // modify GameModeConfiguration intervention settings
@@ -1800,7 +1800,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             final GameManagerSettings settings = mSettings.get(userId);
             if (gameModeToReset != -1) {
-                final GamePackageConfiguration configOverride = settings.getConfigOverride(
+                final GamePackageConfiguration configOverride = settings.getConfigOverrideLocked(
                         packageName);
                 if (configOverride == null) {
                     return;
@@ -1811,10 +1811,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
                 configOverride.removeModeConfig(gameModeToReset);
                 if (!configOverride.hasActiveGameModeConfig()) {
-                    settings.removeConfigOverride(packageName);
+                    settings.removeConfigOverrideLocked(packageName);
                 }
             } else {
-                settings.removeConfigOverride(packageName);
+                settings.removeConfigOverrideLocked(packageName);
             }
         }
 
@@ -2029,7 +2029,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         synchronized (mLock) {
             if (mSettings.containsKey(userId)) {
-                overrideConfig = mSettings.get(userId).getConfigOverride(packageName);
+                overrideConfig = mSettings.get(userId).getConfigOverrideLocked(packageName);
             }
         }
         if (overrideConfig == null || config == null) {
@@ -2074,7 +2074,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                                 }
                                 synchronized (mLock) {
                                     if (mSettings.containsKey(userId)) {
-                                        mSettings.get(userId).removeGame(packageName);
+                                        mSettings.get(userId).removeGameLocked(packageName);
                                     }
                                     sendUserMessage(userId, WRITE_SETTINGS,
                                             Intent.ACTION_PACKAGE_REMOVED, WRITE_DELAY_MILLIS);
