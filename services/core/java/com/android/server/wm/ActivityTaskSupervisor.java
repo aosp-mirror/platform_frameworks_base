@@ -1268,7 +1268,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Checks if the caller can be shown in the given public display.
             int userId = UserHandle.getUserId(callingUid);
             int displayId = display.getDisplayId();
-            boolean allowed = mWindowManager.mUmInternal.isUserVisible(userId, displayId);
+            boolean allowed = userId == UserHandle.USER_SYSTEM
+                    || mWindowManager.mUmInternal.isUserVisible(userId, displayId);
             ProtoLog.d(WM_DEBUG_TASKS,
                     "Launch on display check: %s launch for userId=%d on displayId=%d",
                     (allowed ? "allow" : "disallow"), userId, displayId);
