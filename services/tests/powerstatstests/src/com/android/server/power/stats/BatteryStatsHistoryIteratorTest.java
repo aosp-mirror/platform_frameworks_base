@@ -17,6 +17,7 @@
 package com.android.server.power.stats;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -297,6 +298,88 @@ public class BatteryStatsHistoryIteratorTest {
         assertThat(item = iterator.next()).isNotNull();
         assertThat(item.batteryLevel).isEqualTo(79);
         assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS);
+
+        assertThat(item = iterator.next()).isNull();
+    }
+
+    @Test
+    public void batteryLevelAccuracy() {
+        // Check that battery values are recorded correctly throughout their valid ranges:
+        // - Battery level range: [0, 100]
+        // - Voltage and temperature range: [-2**15, 2**15-1] (note: exceeds physical requirements)
+
+        int i16Min = Short.MIN_VALUE;
+        int i16Max = Short.MAX_VALUE;
+        int[][] testValues = {
+                // { level, temperature, voltage }
+
+                // Min/max values
+                {   0,      0,      0 },
+                {   0, i16Min, i16Min },
+                { 100, i16Max, i16Max },
+
+                // Level changes
+                {  0, 0, 0 },
+                { 12, 0, 0 },
+                { 90, 0, 0 },
+                { 34, 0, 0 },
+                { 78, 0, 0 },
+                { 56, 0, 0 },
+
+                // Temperature changes
+                { 0,           0, 0 },
+                { 0, i16Max,      0 }, // Large change to max
+                { 0, i16Max - 12, 0 }, // Small change near max
+                { 0, i16Max - 56, 0 }, // Small change near max
+                { 0, i16Max - 34, 0 }, // Small change near max
+                { 0,           0, 0 }, // Large change to 0
+                { 0,          12, 0 }, // Small change near 0
+                { 0,         -34, 0 }, // Small change near 0
+                { 0,          56, 0 }, // Small change near 0
+                { 0,         -78, 0 }, // Small change near 0
+                { 0, i16Min,      0 }, // Large change to min
+                { 0, i16Min + 12, 0 }, // Small change near min
+                { 0, i16Min + 56, 0 }, // Small change near min
+                { 0, i16Min + 34, 0 }, // Small change near min
+
+                // Voltage changes
+                { 0, 0,            0 },
+                { 0, 0, i16Max       }, // Large change to max
+                { 0, 0, i16Max - 120 }, // Small change near max
+                { 0, 0, i16Max - 560 }, // Small change near max
+                { 0, 0, i16Max - 340 }, // Small change near max
+                { 0, 0,            0 }, // Large change to 0
+                { 0, 0,          120 }, // Small change near 0
+                { 0, 0,         -340 }, // Small change near 0
+                { 0, 0,          560 }, // Small change near 0
+                { 0, 0,         -780 }, // Small change near 0
+                { 0, 0, i16Min       }, // Large change to min
+                { 0, 0, i16Min + 120 }, // Small change near min
+                { 0, 0, i16Min + 560 }, // Small change near min
+                { 0, 0, i16Min + 340 }, // Small change near min
+        };
+
+        for (int[] val : testValues) {
+            mBatteryStats.setBatteryStateLocked(
+                    BatteryManager.BATTERY_STATUS_DISCHARGING,
+                    100, 0, val[0], val[1], val[2], 1000_000, 1000_000, 0, 0, 0, 0);
+        }
+
+        final BatteryStatsHistoryIterator iterator =
+                mBatteryStats.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
+
+        BatteryStats.HistoryItem item;
+        assertThat(item = iterator.next()).isNotNull();
+        assertThat(item.cmd).isEqualTo((int) BatteryStats.HistoryItem.CMD_RESET);
+
+        for (int i = 0; i < testValues.length; i++) {
+            int[] val = testValues[i];
+            String msg = String.format("Incorrect battery value returned at index %d:", i);
+            assertThat(item = iterator.next()).isNotNull();
+            assertWithMessage(msg).that(item.batteryLevel).isEqualTo(val[0]);
+            assertWithMessage(msg).that(item.batteryTemperature).isEqualTo(val[1]);
+            assertWithMessage(msg).that(item.batteryVoltage).isEqualTo(val[2]);
+        }
 
         assertThat(item = iterator.next()).isNull();
     }

@@ -77,7 +77,7 @@ public class BatteryStatsHistory {
     private static final String TAG = "BatteryStatsHistory";
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    private static final int VERSION = 212;
+    private static final int VERSION = 213;
 
     // Part of initial delta int that specifies the time delta.
     static final int DELTA_TIME_MASK = 0x7ffff;
@@ -109,9 +109,26 @@ public class BatteryStatsHistory {
     static final int STATE_BATTERY_PLUG_MASK = 0x00000003;
     static final int STATE_BATTERY_PLUG_SHIFT = 24;
 
+    // Pieces of data that are packed into the battery level int
+    static final int BATTERY_LEVEL_LEVEL_MASK = 0xFF000000;
+    static final int BATTERY_LEVEL_LEVEL_SHIFT = 24;
+    static final int BATTERY_LEVEL_TEMP_MASK = 0x00FF8000;
+    static final int BATTERY_LEVEL_TEMP_SHIFT = 15;
+    static final int BATTERY_LEVEL_VOLT_MASK = 0x00007FFC;
+    static final int BATTERY_LEVEL_VOLT_SHIFT = 2;
+    // Flag indicating that the voltage and temperature deltas are too large to
+    // store in the battery level int and full volt/temp values are instead
+    // stored in a following int.
+    static final int BATTERY_LEVEL_OVERFLOW_FLAG = 0x00000002;
     // We use the low bit of the battery state int to indicate that we have full details
     // from a battery level change.
     static final int BATTERY_LEVEL_DETAILS_FLAG = 0x00000001;
+
+    // Pieces of data that are packed into the extended battery level int
+    static final int BATTERY_LEVEL2_TEMP_MASK = 0xFFFF0000;
+    static final int BATTERY_LEVEL2_TEMP_SHIFT = 16;
+    static final int BATTERY_LEVEL2_VOLT_MASK = 0x0000FFFF;
+    static final int BATTERY_LEVEL2_VOLT_SHIFT = 0;
 
     // Flag in history tag index: indicates that this is the first occurrence of this tag,
     // therefore the tag value is written in the parcel
@@ -1808,12 +1825,22 @@ public class BatteryStatsHistory {
 
         Battery level int: if A in the first token is set,
         31              23              15               7             0
-        █L|L|L|L|L|L|L|T█T|T|T|T|T|T|T|T█T|V|V|V|V|V|V|V█V|V|V|V|V|V|V|D█
+        █L|L|L|L|L|L|L|L█T|T|T|T|T|T|T|T█T|V|V|V|V|V|V|V█V|V|V|V|V|V|E|D█
 
         D: indicates that extra history details follow.
-        V: the battery voltage.
-        T: the battery temperature.
-        L: the battery level (out of 100).
+        E: indicates that the voltage delta or temperature delta is too large to fit in the
+           respective V or T field of this int. If this flag is set, an extended battery level
+           int containing the complete voltage and temperature values immediately follows.
+        V: the signed battery voltage delta in millivolts.
+        T: the signed battery temperature delta in tenths of a degree Celsius.
+        L: the signed battery level delta (out of 100).
+
+        Extended battery level int: if E in the battery level int is set,
+        31              23              15               7             0
+        █T|T|T|T|T|T|T|T█T|T|T|T|T|T|T|T█V|V|V|V|V|V|V|V█V|V|V|V|V|V|V|V█
+
+        V: the current battery voltage (complete 16-bit value, not a delta).
+        T: the current battery temperature (complete 16-bit value, not a delta).
 
         State change int: if B in the first token is set,
         31              23              15               7             0
@@ -1869,7 +1896,7 @@ public class BatteryStatsHistory {
 
         int extensionFlags = 0;
         final long deltaTime = cur.time - last.time;
-        final int lastBatteryLevelInt = buildBatteryLevelInt(last);
+        int batteryLevelInt = buildBatteryLevelInt(cur, last);
         final int lastStateInt = buildStateInt(last);
 
         int deltaTimeToken;
@@ -1881,7 +1908,6 @@ public class BatteryStatsHistory {
             deltaTimeToken = (int) deltaTime;
         }
         int firstToken = deltaTimeToken | (cur.states & BatteryStatsHistory.DELTA_STATE_MASK);
-        int batteryLevelInt = buildBatteryLevelInt(cur);
 
         if (cur.batteryLevel < mLastHistoryStepLevel || mLastHistoryStepLevel == 0) {
             cur.stepDetails = mStepDetailsCalculator.getHistoryStepDetails();
@@ -1894,7 +1920,7 @@ public class BatteryStatsHistory {
             mLastHistoryStepLevel = cur.batteryLevel;
         }
 
-        final boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
+        final boolean batteryLevelIntChanged = batteryLevelInt != 0;
         if (batteryLevelIntChanged) {
             firstToken |= BatteryStatsHistory.DELTA_BATTERY_LEVEL_FLAG;
         }
@@ -1948,10 +1974,21 @@ public class BatteryStatsHistory {
             }
         }
         if (batteryLevelIntChanged) {
+            boolean overflow = (batteryLevelInt & BATTERY_LEVEL_OVERFLOW_FLAG) != 0;
+            int extendedBatteryLevelInt = 0;
+
             dest.writeInt(batteryLevelInt);
+            if (overflow) {
+                extendedBatteryLevelInt = buildExtendedBatteryLevelInt(cur);
+                dest.writeInt(extendedBatteryLevelInt);
+            }
+
             if (DEBUG) {
                 Slog.i(TAG, "WRITE DELTA: batteryToken=0x"
                         + Integer.toHexString(batteryLevelInt)
+                        + (overflow
+                                ? " batteryToken2=0x" + Integer.toHexString(extendedBatteryLevelInt)
+                                : "")
                         + " batteryLevel=" + cur.batteryLevel
                         + " batteryTemp=" + cur.batteryTemperature
                         + " batteryVolt=" + (int) cur.batteryVoltage);
@@ -2049,16 +2086,43 @@ public class BatteryStatsHistory {
         }
     }
 
-    private int buildBatteryLevelInt(HistoryItem h) {
-        int bits = 0;
-        bits = setBitField(bits, h.batteryLevel, 25, 0xfe000000 /* 7F << 25 */);
-        bits = setBitField(bits, h.batteryTemperature, 15, 0x01ff8000 /* 3FF << 15 */);
-        short voltage = (short) h.batteryVoltage;
-        if (voltage == -1) {
-            voltage = 0x3FFF;
+    private boolean signedValueFits(int value, int mask, int shift) {
+        mask >>>= shift;
+        // The original value can only be restored if all of the lost
+        // high-order bits match the MSB of the packed value. Extract both the
+        // MSB and the lost bits, and check if they match (i.e. they are all
+        // zeros or all ones).
+        int msbAndLostBitsMask = ~(mask >>> 1);
+        int msbAndLostBits = value & msbAndLostBitsMask;
+
+        return msbAndLostBits == 0 || msbAndLostBits == msbAndLostBitsMask;
+    }
+
+    private int buildBatteryLevelInt(HistoryItem cur, HistoryItem prev) {
+        final int levelDelta = (int) cur.batteryLevel - (int) prev.batteryLevel;
+        final int tempDelta = (int) cur.batteryTemperature - (int) prev.batteryTemperature;
+        final int voltDelta = (int) cur.batteryVoltage - (int) prev.batteryVoltage;
+        final boolean overflow =
+                !signedValueFits(tempDelta, BATTERY_LEVEL_TEMP_MASK, BATTERY_LEVEL_VOLT_SHIFT)
+                || !signedValueFits(voltDelta, BATTERY_LEVEL_VOLT_MASK, BATTERY_LEVEL_TEMP_SHIFT);
+
+        int batt = 0;
+        batt |= (levelDelta << BATTERY_LEVEL_LEVEL_SHIFT) & BATTERY_LEVEL_LEVEL_MASK;
+        if (overflow) {
+            batt |= BATTERY_LEVEL_OVERFLOW_FLAG;
+        } else {
+            batt |= (tempDelta << BATTERY_LEVEL_TEMP_SHIFT) & BATTERY_LEVEL_TEMP_MASK;
+            batt |= (voltDelta << BATTERY_LEVEL_VOLT_SHIFT) & BATTERY_LEVEL_VOLT_MASK;
         }
-        bits = setBitField(bits, voltage, 1, 0x00007ffe /* 3FFF << 1 */);
-        return bits;
+
+        return batt;
+    }
+
+    private int buildExtendedBatteryLevelInt(HistoryItem cur) {
+        int battExt = 0;
+        battExt |= (cur.batteryTemperature << BATTERY_LEVEL2_TEMP_SHIFT) & BATTERY_LEVEL2_TEMP_MASK;
+        battExt |= (cur.batteryVoltage << BATTERY_LEVEL2_VOLT_SHIFT) & BATTERY_LEVEL2_VOLT_MASK;
+        return battExt;
     }
 
     private int buildStateInt(HistoryItem h) {
