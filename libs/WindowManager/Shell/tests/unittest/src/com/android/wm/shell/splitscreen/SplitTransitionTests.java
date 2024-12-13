@@ -149,7 +149,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
                 mTransactionPool, mMainExecutor, mMainHandler, mBgExecutor, Optional.empty(),
-                mLaunchAdjacentController, Optional.empty(), mSplitState);
+                mLaunchAdjacentController, Optional.empty(), mSplitState, Optional.empty());
         mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
