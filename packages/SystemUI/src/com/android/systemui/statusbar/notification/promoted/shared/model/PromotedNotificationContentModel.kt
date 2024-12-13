@@ -28,7 +28,7 @@ import com.android.systemui.statusbar.notification.promoted.PromotedNotification
  * like the skeleton view on AOD or the status bar chip.
  */
 data class PromotedNotificationContentModel(
-    val key: String,
+    val identity: Identity,
 
     // for all styles:
     val skeletonSmallIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
@@ -82,7 +82,7 @@ data class PromotedNotificationContentModel(
 
         fun build() =
             PromotedNotificationContentModel(
-                key = key,
+                identity = Identity(key, style),
                 skeletonSmallIcon = skeletonSmallIcon,
                 appName = appName,
                 subText = subText,
@@ -102,6 +102,8 @@ data class PromotedNotificationContentModel(
                 progress = progress,
             )
     }
+
+    data class Identity(val key: String, val style: Style)
 
     /** The timestamp associated with a notification, along with the mode used to display it. */
     data class When(val time: Long, val mode: Mode) {
