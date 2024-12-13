@@ -540,6 +540,33 @@ import java.util.List;
     }
 
     /**
+     * Converts a byte integer defined by Reason.aidl to HubEndpoint.Reason values exposed to apps.
+     *
+     * @param reason The Reason.aidl value
+     * @return The converted HubEndpoint.Reason value
+     */
+    /* package */
+    static byte toHalReason(@HubEndpoint.Reason int reason) {
+        switch (reason) {
+            case HubEndpoint.REASON_FAILURE:
+                return Reason.UNSPECIFIED;
+            case HubEndpoint.REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED:
+                return Reason.OPEN_ENDPOINT_SESSION_REQUEST_REJECTED;
+            case HubEndpoint.REASON_CLOSE_ENDPOINT_SESSION_REQUESTED:
+                return Reason.CLOSE_ENDPOINT_SESSION_REQUESTED;
+            case HubEndpoint.REASON_ENDPOINT_INVALID:
+                return Reason.ENDPOINT_INVALID;
+            case HubEndpoint.REASON_ENDPOINT_STOPPED:
+                return Reason.ENDPOINT_GONE;
+            case HubEndpoint.REASON_PERMISSION_DENIED:
+                return Reason.PERMISSION_DENIED;
+            default:
+                Log.w(TAG, "toHalReason: invalid reason: " + reason);
+                return Reason.UNSPECIFIED;
+        }
+    }
+
+    /**
      * Checks that the module with the provided context/pid/uid has all of the provided permissions.
      *
      * @param context The context to validate permissions for
