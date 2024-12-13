@@ -80,6 +80,7 @@ public class SettingsHelper {
     // Error messages for logging metrics.
     private static final String ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA =
         "remote_exception_setting_locale_data";
+    private static final String ERROR_FAILED_TO_RESTORE_SETTING = "failed_to_restore_setting";
 
     private Context mContext;
     private AudioManager mAudioManager;
@@ -179,12 +180,15 @@ public class SettingsHelper {
      * whether or not the setting should be saved to the database as well.
      * @param name the name of the setting
      * @param value the string value of the setting
+     * @param backupRestoreEventLogger the logger to log metrics for backup and restore.
+     * @param datatype the datatype for logging purposes.
      * @return whether to continue with writing the value to the database. In
      * some cases the data will be written by the call to the appropriate API,
      * and in some cases the property value needs to be modified before setting.
      */
     public void restoreValue(Context context, ContentResolver cr, ContentValues contentValues,
-            Uri destination, String name, String value, int restoredFromSdkInt) {
+            Uri destination, String name, String value, int restoredFromSdkInt,
+            BackupRestoreEventLogger backupRestoreEventLogger, String datatype) {
         if (isReplacedSystemSetting(name)) {
             return;
         }
@@ -223,6 +227,7 @@ public class SettingsHelper {
         }
 
         try {
+            // TODO(b/379861078): Log metrics for cases that fall in the if-else block.
             if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
                 setSoundEffects(Integer.parseInt(value) == 1);
                 // fall through to the ordinary write to settings
@@ -290,12 +295,19 @@ public class SettingsHelper {
             contentValues.put(Settings.NameValueTable.NAME, name);
             contentValues.put(Settings.NameValueTable.VALUE, value);
             cr.insert(destination, contentValues);
+            if (Flags.enableMetricsSettingsBackupAgents()) {
+                backupRestoreEventLogger.logItemsRestored(datatype, /* count= */ 1);
+            }
         } catch (Exception e) {
             // If we fail to apply the setting, by definition nothing happened
             sendBroadcast = false;
             sendBroadcastSystemUI = false;
             sendBroadcastAccessibility = false;
             Log.e(TAG, "Failed to restore setting name: " + name + " + value: " + value, e);
+            if (Flags.enableMetricsSettingsBackupAgents()) {
+                backupRestoreEventLogger.logItemsRestoreFailed(
+                    datatype, /* count= */ 1, ERROR_FAILED_TO_RESTORE_SETTING);
+            }
         } finally {
             // If this was an element of interest, send the "we just restored it"
             // broadcast with the historical value now that the new value has

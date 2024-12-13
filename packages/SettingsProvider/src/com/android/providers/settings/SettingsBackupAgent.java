@@ -1058,14 +1058,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 Log.d(TAG, "Restored font scale from: " + toRestore + " to " + value);
             }
 
-            // TODO(b/379861078): Log metrics inside this method.
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
-                    mRestoredFromSdkInt);
+                    mRestoredFromSdkInt, mBackupRestoreEventLogger, finalSettingsKey);
 
             Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
-            if (areAgentMetricsEnabled) {
-                mBackupRestoreEventLogger.logItemsRestored(finalSettingsKey, /* count= */ 1);
-            }
         }
 
     }

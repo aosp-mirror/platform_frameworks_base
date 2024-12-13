@@ -168,7 +168,9 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.getUriFor(settingName),
                 settingName,
                 String.valueOf(restoreSettingValue),
-                Build.VERSION.SDK_INT);
+                Build.VERSION.SDK_INT,
+                null,
+                "");
 
         assertEquals(
                 configuredSettingValue,
@@ -191,7 +193,9 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.getUriFor(settingName),
                 settingName,
                 String.valueOf(restoreSettingValue),
-                Build.VERSION.SDK_INT);
+                Build.VERSION.SDK_INT,
+                null,
+                "");
 
         assertEquals(
                 restoreSettingValue,
@@ -234,7 +238,9 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.getUriFor(settingName),
                 settingName,
                 String.valueOf(0),
-                Build.VERSION.SDK_INT);
+                Build.VERSION.SDK_INT,
+                null,
+                "");
 
         assertEquals(configuredSettingValue, Settings.Secure.getInt(mContentResolver, settingName));
     }
@@ -256,7 +262,9 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.getUriFor(settingName),
                 settingName,
                 String.valueOf(restoreSettingValue),
-                Build.VERSION.SDK_INT);
+                Build.VERSION.SDK_INT,
+                null,
+                "");
 
         assertEquals(restoreSettingValue, Settings.Secure.getInt(mContentResolver, settingName));
     }
@@ -278,7 +286,9 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.getUriFor(settingName),
                 settingName,
                 restoreSettingValue,
-                Build.VERSION.SDK_INT);
+                Build.VERSION.SDK_INT,
+                null,
+                "");
 
         Intent intentReceived = futureIntent.get();
         assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
@@ -303,7 +313,9 @@ public class SettingsHelperRestoreTest {
                 Settings.Secure.getUriFor(settingName),
                 settingName,
                 restoredValue,
-                Build.VERSION.SDK_INT);
+                Build.VERSION.SDK_INT,
+                null,
+                "");
 
         Intent intentReceived = futureIntent.get();
         assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
