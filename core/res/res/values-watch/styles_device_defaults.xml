@@ -85,4 +85,11 @@
         <item name="maxHeight">@dimen/progress_bar_height</item>
         <item name="mirrorForRtl">true</item>
     </style>
+
+    <style name="Widget.DeviceDefault.ProgressBar" parent="Widget.Material.ProgressBar">
+        <!-- Allow determinate option -->
+        <item name="indeterminateOnly">false</item>
+        <!-- Use Wear Material3 ring shape as default determinate drawable -->
+        <item name="progressDrawable">@drawable/progress_ring_watch</item>
+    </style>
 </resources>
