@@ -17,7 +17,6 @@
 package com.android.systemui.animation
 
 import android.app.ActivityManager
-import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
@@ -292,7 +291,7 @@ constructor(
                 ?: throw IllegalStateException(
                     "ActivityTransitionAnimator.callback must be set before using this animator"
                 )
-        val runner = createRunner(controller)
+        val runner = createEphemeralRunner(controller)
         val runnerDelegate = runner.delegate
         val hideKeyguardWithAnimation = callback.isOnKeyguard() && !showOverLockscreen
 
@@ -416,7 +415,7 @@ constructor(
 
         var cleanUpRunnable: Runnable? = null
         val returnRunner =
-            createRunner(
+            createEphemeralRunner(
                 object : DelegateTransitionAnimatorController(launchController) {
                     override val isLaunching = false
 
@@ -458,11 +457,7 @@ constructor(
                 "${launchController.transitionCookie}_returnTransition",
             )
 
-        transitionRegister?.register(
-            filter,
-            transition,
-            includeTakeover = longLivedReturnAnimationsEnabled(),
-        )
+        transitionRegister?.register(filter, transition, includeTakeover = false)
         cleanUpRunnable = Runnable { transitionRegister?.unregister(transition) }
     }
 
@@ -476,12 +471,14 @@ constructor(
         listeners.remove(listener)
     }
 
-    /** Create a new animation [Runner] controlled by [controller]. */
+    /**
+     * Create a new animation [Runner] controlled by [controller].
+     *
+     * This method must only be used for ephemeral (launch or return) transitions. Otherwise, use
+     * [createLongLivedRunner].
+     */
     @VisibleForTesting
-    @JvmOverloads
-    fun createRunner(controller: Controller, longLived: Boolean = false): Runner {
-        if (longLived) assertLongLivedReturnAnimations()
-
+    fun createEphemeralRunner(controller: Controller): Runner {
         // Make sure we use the modified timings when animating a dialog into an app.
         val transitionAnimator =
             if (controller.isDialogLaunch) {
@@ -490,7 +487,22 @@ constructor(
                 transitionAnimator
             }
 
-        return Runner(controller, callback!!, transitionAnimator, lifecycleListener, longLived)
+        return Runner(controller, callback!!, transitionAnimator, lifecycleListener)
+    }
+
+    /**
+     * Create a new animation [Runner] controlled by the [Controller] that [controllerFactory] can
+     * create based on [forLaunch].
+     *
+     * This method must only be used for long-lived registrations. Otherwise, use
+     * [createEphemeralRunner].
+     */
+    @VisibleForTesting
+    fun createLongLivedRunner(controllerFactory: ControllerFactory, forLaunch: Boolean): Runner {
+        assertLongLivedReturnAnimations()
+        return Runner(callback!!, transitionAnimator, lifecycleListener) {
+            controllerFactory.createController(forLaunch)
+        }
     }
 
     interface PendingIntentStarter {
@@ -534,6 +546,23 @@ constructor(
 
         /** Called when an activity transition animation made progress. */
         fun onTransitionAnimationProgress(linearProgress: Float) {}
+    }
+
+    /**
+     * A factory used to create instances of [Controller] linked to a specific cookie [cookie] and
+     * [component].
+     */
+    abstract class ControllerFactory(
+        val cookie: TransitionCookie,
+        val component: ComponentName?,
+        val launchCujType: Int? = null,
+        val returnCujType: Int? = null,
+    ) {
+        /**
+         * Creates a [Controller] for launching or returning from the activity linked to [cookie]
+         * and [component].
+         */
+        abstract fun createController(forLaunch: Boolean): Controller
     }
 
     /**
@@ -656,13 +685,13 @@ constructor(
     }
 
     /**
-     * Registers [controller] as a long-lived transition handler for launch and return animations.
+     * Registers [controllerFactory] as a long-lived transition handler for launch and return
+     * animations.
      *
-     * The [controller] will only be used for transitions matching the [TransitionCookie] defined
-     * within it, or the [ComponentName] if the cookie matching fails. Both fields are mandatory for
-     * this registration.
+     * The [Controller]s created by [controllerFactory] will only be used for transitions matching
+     * the [cookie], or the [ComponentName] defined within it if the cookie matching fails.
      */
-    fun register(controller: Controller) {
+    fun register(cookie: TransitionCookie, controllerFactory: ControllerFactory) {
         assertLongLivedReturnAnimations()
 
         if (transitionRegister == null) {
@@ -672,13 +701,8 @@ constructor(
             )
         }
 
-        val cookie =
-            controller.transitionCookie
-                ?: throw IllegalStateException(
-                    "A cookie must be defined in order to use long-lived animations"
-                )
         val component =
-            controller.component
+            controllerFactory.component
                 ?: throw IllegalStateException(
                     "A component must be defined in order to use long-lived animations"
                 )
@@ -699,15 +723,11 @@ constructor(
             }
         val launchRemoteTransition =
             RemoteTransition(
-                OriginTransition(createRunner(controller, longLived = true)),
+                OriginTransition(createLongLivedRunner(controllerFactory, forLaunch = true)),
                 "${cookie}_launchTransition",
             )
         transitionRegister.register(launchFilter, launchRemoteTransition, includeTakeover = true)
 
-        val returnController =
-            object : Controller by controller {
-                override val isLaunching: Boolean = false
-            }
         // Cross-task close transitions should not use this animation, so we only register it for
         // when the opening window is Launcher.
         val returnFilter =
@@ -727,7 +747,7 @@ constructor(
             }
         val returnRemoteTransition =
             RemoteTransition(
-                OriginTransition(createRunner(returnController, longLived = true)),
+                OriginTransition(createLongLivedRunner(controllerFactory, forLaunch = false)),
                 "${cookie}_returnTransition",
             )
         transitionRegister.register(returnFilter, returnRemoteTransition, includeTakeover = true)
@@ -918,32 +938,61 @@ constructor(
     }
 
     @VisibleForTesting
-    inner class Runner(
+    inner class Runner
+    private constructor(
         /**
          * This can hold a reference to a view, so it needs to be cleaned up and can't be held on to
-         * forever when ![longLived].
+         * forever. In case of a long-lived [Runner], this must be null and [controllerFactory] must
+         * be defined instead.
          */
         private var controller: Controller?,
+        /**
+         * Reusable factory to generate single-use controllers. In case of an ephemeral [Runner],
+         * this must be null and [controller] must be defined instead.
+         */
+        private val controllerFactory: (() -> Controller)?,
         private val callback: Callback,
         /** The animator to use to animate the window transition. */
         private val transitionAnimator: TransitionAnimator,
         /** Listener for animation lifecycle events. */
-        private val listener: Listener? = null,
-        /**
-         * Whether the internal should be kept around after execution for later usage. IMPORTANT:
-         * should always be false if this [Runner] is to be used directly with [ActivityOptions]
-         * (i.e. for ephemeral launches), or the controller will leak its view.
-         */
-        private val longLived: Boolean = false,
+        private val listener: Listener?,
     ) : IRemoteAnimationRunner.Stub() {
+        constructor(
+            controller: Controller,
+            callback: Callback,
+            transitionAnimator: TransitionAnimator,
+            listener: Listener? = null,
+        ) : this(
+            controller = controller,
+            controllerFactory = null,
+            callback = callback,
+            transitionAnimator = transitionAnimator,
+            listener = listener,
+        )
+
+        constructor(
+            callback: Callback,
+            transitionAnimator: TransitionAnimator,
+            listener: Listener? = null,
+            controllerFactory: () -> Controller,
+        ) : this(
+            controller = null,
+            controllerFactory = controllerFactory,
+            callback = callback,
+            transitionAnimator = transitionAnimator,
+            listener = listener,
+        )
+
         // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
         // etc.) are possible. So we need to make sure we drop any references that might
         // transitively cause leaks when we're done with animation.
         @VisibleForTesting var delegate: AnimationDelegate?
 
         init {
+            assert((controller != null).xor(controllerFactory != null))
+
             delegate = null
-            if (!longLived) {
+            if (controller != null) {
                 // Ephemeral launches bundle the runner with the launch request (instead of being
                 // registered ahead of time for later use). This means that there could be a timeout
                 // between creation and invocation, so the delegate needs to exist from the
@@ -1021,17 +1070,21 @@ constructor(
 
         @AnyThread
         private fun maybeSetUp() {
-            if (!longLived || delegate != null) return
+            if (controllerFactory == null || delegate != null) return
             createDelegate()
         }
 
         @AnyThread
         private fun createDelegate() {
-            if (controller == null) return
+            var controller = controller
+            val factory = controllerFactory
+            if (controller == null && factory == null) return
+
+            controller = controller ?: factory!!.invoke()
             delegate =
                 AnimationDelegate(
                     mainExecutor,
-                    controller!!,
+                    controller,
                     callback,
                     DelegatingAnimationCompletionListener(listener, this::dispose),
                     transitionAnimator,
@@ -1041,13 +1094,12 @@ constructor(
 
         @AnyThread
         fun dispose() {
-            // Drop references to animation controller once we're done with the animation
-            // to avoid leaking.
+            // Drop references to animation controller once we're done with the animation to avoid
+            // leaking in case of ephemeral launches. When long-lived, [controllerFactory] will
+            // still be around to create new controllers.
             mainExecutor.execute {
                 delegate = null
-                // When long lived, the same Runner can be used more than once. In this case we need
-                // to keep the controller around so we can rebuild the delegate on demand.
-                if (!longLived) controller = null
+                controller = null
             }
         }
     }
