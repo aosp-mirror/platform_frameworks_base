@@ -16,6 +16,8 @@
 
 package com.android.systemui.scrim;
 
+import static com.android.systemui.Flags.notificationShadeBlur;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -214,8 +216,7 @@ public class ScrimDrawable extends Drawable {
     public void draw(@NonNull Canvas canvas) {
         mPaint.setColor(mMainColor);
         mPaint.setAlpha(mAlpha);
-        if (WindowBlurFlag.isEnabled()) {
-            // TODO(b/370555223): Match the alpha to the visual spec when it is finalized.
+        if (notificationShadeBlur() || WindowBlurFlag.isEnabled()) {
             // TODO (b/381263600), wire this at ScrimController, move it to PrimaryBouncerTransition
             mPaint.setAlpha((int) (0.5f * mAlpha));
         }

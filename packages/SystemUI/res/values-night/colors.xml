@@ -108,6 +108,9 @@
 
     <color name="people_tile_background">@color/material_dynamic_secondary20</color>
 
+    <!-- Dark Theme colors for notification shade/scrim -->
+    <color name="shade_panel">@android:color/system_accent1_900</color>
+
     <!-- Keyboard shortcut helper dialog -->
     <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_dark</color>
 </resources>
