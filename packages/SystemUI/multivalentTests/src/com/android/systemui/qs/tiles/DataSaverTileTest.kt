@@ -36,6 +36,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIconWithRes
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.FakeShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.DataSaverController
 import com.android.systemui.util.mockito.whenever
@@ -96,6 +97,7 @@ class DataSaverTileTest(flags: FlagsParameterization) : SysuiTestCase() {
                 dataSaverController,
                 mDialogTransitionAnimator,
                 systemUIDialogFactory,
+                FakeShadeDialogContextInteractor(mContext),
             )
     }
 
