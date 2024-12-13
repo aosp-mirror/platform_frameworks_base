@@ -43,11 +43,12 @@ import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo.SingleShortcutCustomization
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
 import com.android.systemui.keyboard.shortcut.shared.model.shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.shortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.shortcutCommand
 import com.android.systemui.res.R
 
 object TestShortcuts {
@@ -596,14 +597,27 @@ object TestShortcuts {
         )
 
     val allAppsShortcutAddRequest =
-        ShortcutCustomizationRequestInfo.Add(
+        SingleShortcutCustomization.Add(
             label = "Open apps list",
             categoryType = System,
             subCategoryLabel = "System controls",
         )
 
+    val launchCalendarShortcutAddRequest =
+        SingleShortcutCustomization.Add(
+            label = "Calendar",
+            categoryType = ShortcutCategoryType.AppCategories,
+            subCategoryLabel = "Applications",
+            shortcutCommand =
+                shortcutCommand {
+                    key("Ctrl")
+                    key("Alt")
+                    key("A")
+                },
+        )
+
     val allAppsShortcutDeleteRequest =
-        ShortcutCustomizationRequestInfo.Delete(
+        SingleShortcutCustomization.Delete(
             label = "Open apps list",
             categoryType = System,
             subCategoryLabel = "System controls",
@@ -698,7 +712,7 @@ object TestShortcuts {
         )
 
     val standardAddShortcutRequest =
-        ShortcutCustomizationRequestInfo.Add(
+        SingleShortcutCustomization.Add(
             label = "Standard shortcut",
             categoryType = System,
             subCategoryLabel = "Standard subcategory",

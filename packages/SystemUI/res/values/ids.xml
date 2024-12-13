@@ -280,7 +280,7 @@
     <item type="id" name="udfps_accessibility_overlay_top_guideline" />
 
     <!-- Ids for communal hub widgets -->
-    <item type="id" name="communal_widget_disposable_tag"/>
+    <item type="id" name="communal_widget_listener_tag"/>
 
     <!-- snapshot view-binding IDs -->
     <item type="id" name="snapshot_view_binding" />

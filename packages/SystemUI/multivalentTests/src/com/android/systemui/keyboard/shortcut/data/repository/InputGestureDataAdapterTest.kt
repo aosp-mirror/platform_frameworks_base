@@ -28,6 +28,7 @@ import android.hardware.input.AppLaunchData
 import android.hardware.input.AppLaunchData.RoleData
 import android.hardware.input.InputGestureData
 import android.hardware.input.InputGestureData.createKeyTrigger
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION
 import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CTRL_ON
@@ -55,14 +56,15 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class InputGestureDataAdapterTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().also { kosmos ->
-        kosmos.userTracker = FakeUserTracker(onCreateCurrentUserContext = { kosmos.mockedContext })
-    }
+    private val kosmos =
+        testKosmos().also { kosmos ->
+            kosmos.userTracker =
+                FakeUserTracker(onCreateCurrentUserContext = { kosmos.mockedContext })
+        }
     private val adapter = kosmos.inputGestureDataAdapter
     private val roleManager = kosmos.roleManager
     private val packageManager: PackageManager = kosmos.packageManager
@@ -139,24 +141,40 @@ class InputGestureDataAdapterTest : SysuiTestCase() {
             val inputGestureData = buildInputGestureDataForAppLaunchShortcut()
             val internalGroups = adapter.toInternalGroupSources(listOf(inputGestureData))
 
-            assertThat(internalGroups).containsExactly(
-                InternalGroupsSource(
-                    type = ShortcutCategoryType.AppCategories,
-                    groups = listOf(
-                        InternalKeyboardShortcutGroup(
-                            label = APPLICATION_SHORTCUT_GROUP_LABEL,
-                            items = listOf(
-                                InternalKeyboardShortcutInfo(
-                                    label = expectedShortcutLabelForFirstAppMatchingIntent,
-                                    keycode = KEYCODE_A,
-                                    modifiers = META_CTRL_ON or META_ALT_ON,
-                                    isCustomShortcut = true
+            assertThat(internalGroups)
+                .containsExactly(
+                    InternalGroupsSource(
+                        type = ShortcutCategoryType.AppCategories,
+                        groups =
+                            listOf(
+                                InternalKeyboardShortcutGroup(
+                                    label = APPLICATION_SHORTCUT_GROUP_LABEL,
+                                    items =
+                                        listOf(
+                                            InternalKeyboardShortcutInfo(
+                                                label =
+                                                    expectedShortcutLabelForFirstAppMatchingIntent,
+                                                keycode = KEYCODE_A,
+                                                modifiers = META_CTRL_ON or META_ALT_ON,
+                                                isCustomShortcut = true,
+                                            )
+                                        ),
                                 )
-                            )
-                        )
+                            ),
                     )
                 )
-            )
+        }
+
+    @Test
+    fun keyGestureType_returnsTypeLaunchApplicationForAppLaunchShortcutCategory() =
+        kosmos.runTest {
+            assertThat(
+                    adapter.getKeyGestureTypeForShortcut(
+                        shortcutLabel = "Test Shortcut label",
+                        shortcutCategoryType = ShortcutCategoryType.AppCategories,
+                    )
+                )
+                .isEqualTo(KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
         }
 
     private fun setApiToRetrieveResolverActivity() {
@@ -169,11 +187,10 @@ class InputGestureDataAdapterTest : SysuiTestCase() {
             .thenReturn(fakeActivityInfo)
     }
 
-
     private fun buildInputGestureDataForAppLaunchShortcut(
         keyCode: Int = KEYCODE_A,
         modifiers: Int = META_CTRL_ON or META_ALT_ON,
-        appLaunchData: AppLaunchData = RoleData(TEST_ROLE)
+        appLaunchData: AppLaunchData = RoleData(TEST_ROLE),
     ): InputGestureData {
         return InputGestureData.Builder()
             .setTrigger(createKeyTrigger(keyCode, modifiers))

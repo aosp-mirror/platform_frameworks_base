@@ -22,4 +22,5 @@ data class ClockPreviewConfig(
     val previewContext: Context,
     val isShadeLayoutWide: Boolean,
     val isSceneContainerFlagEnabled: Boolean = false,
+    val lockId: Int? = null,
 )

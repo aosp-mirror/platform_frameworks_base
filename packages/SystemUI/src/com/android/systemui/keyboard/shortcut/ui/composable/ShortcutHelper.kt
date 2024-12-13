@@ -115,7 +115,6 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
-import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
@@ -127,6 +126,7 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCategoryUi
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutsUiState
 import com.android.systemui.res.R
 import kotlinx.coroutines.delay
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 
 @Composable
 fun ShortcutHelper(
@@ -505,10 +505,10 @@ private fun EndSidePanel(
                 isCustomizing = isCustomizing and category.type.includeInCustomization,
                 onCustomizationRequested = { requestInfo ->
                     when (requestInfo) {
-                        is ShortcutCustomizationRequestInfo.Add ->
+                        is ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Add ->
                             onCustomizationRequested(requestInfo.copy(categoryType = category.type))
 
-                        is ShortcutCustomizationRequestInfo.Delete ->
+                        is ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Delete ->
                             onCustomizationRequested(requestInfo.copy(categoryType = category.type))
 
                         ShortcutCustomizationRequestInfo.Reset ->
@@ -568,12 +568,12 @@ private fun SubCategoryContainerDualPane(
                     isCustomizing = isCustomizing && shortcut.isCustomizable,
                     onCustomizationRequested = { requestInfo ->
                         when (requestInfo) {
-                            is ShortcutCustomizationRequestInfo.Add ->
+                            is ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Add ->
                                 onCustomizationRequested(
                                     requestInfo.copy(subCategoryLabel = subCategory.label)
                                 )
 
-                            is ShortcutCustomizationRequestInfo.Delete ->
+                            is ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Delete ->
                                 onCustomizationRequested(
                                     requestInfo.copy(subCategoryLabel = subCategory.label)
                                 )
@@ -644,12 +644,18 @@ private fun Shortcut(
             isCustomizing = isCustomizing,
             onAddShortcutRequested = {
                 onCustomizationRequested(
-                    ShortcutCustomizationRequestInfo.Add(label = shortcut.label)
+                    ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Add(
+                        label = shortcut.label,
+                        shortcutCommand = shortcut.commands.first(),
+                    )
                 )
             },
             onDeleteShortcutRequested = {
                 onCustomizationRequested(
-                    ShortcutCustomizationRequestInfo.Delete(label = shortcut.label)
+                    ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Delete(
+                        label = shortcut.label,
+                        shortcutCommand = shortcut.commands.first(),
+                    )
                 )
             },
         )

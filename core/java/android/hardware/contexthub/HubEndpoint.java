@@ -404,11 +404,11 @@ public class HubEndpoint {
 
         HubEndpointSession newSession;
         try {
-            // Request system service to assign session id.
-            int sessionId = mServiceToken.openSession(destinationInfo, serviceDescriptor);
-
-            // Save the newly created session
             synchronized (mLock) {
+                // Request system service to assign session id.
+                int sessionId = mServiceToken.openSession(destinationInfo, serviceDescriptor);
+
+                // Save the newly created session
                 newSession =
                         new HubEndpointSession(
                                 sessionId,

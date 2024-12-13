@@ -26,5 +26,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.primaryBouncerToLockscreenTransitionViewModel by Fixture {
     PrimaryBouncerToLockscreenTransitionViewModel(
         animationFlow = keyguardTransitionAnimationFlow,
+        shadeDependentFlows = shadeDependentFlows,
     )
 }

@@ -302,7 +302,8 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
                 mMainExecutor, mMainHandler, mBgExecutor, mRecentTasksOptional,
-                mLaunchAdjacentController, mWindowDecorViewModel, mSplitState);
+                mLaunchAdjacentController, mWindowDecorViewModel, mSplitState,
+                mDesktopTasksController);
     }
 
     @Override

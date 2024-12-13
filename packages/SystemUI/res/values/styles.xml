@@ -84,6 +84,16 @@
         <item name="android:textColor">?android:attr/colorPrimary</item>
     </style>
 
+    <!-- Style for a status bar chip text that has a maximum width. Since there's so little room in
+         the status bar chip area, don't ellipsize the text and instead just fade it out a bit at
+         the end. -->
+    <style name="StatusBar.Chip.Text.LimitedWidth">
+        <item name="android:ellipsize">none</item>
+        <item name="android:requiresFadingEdge">horizontal</item>
+        <item name="android:fadingEdgeLength">@dimen/ongoing_activity_chip_text_fading_edge_length</item>
+        <item name="android:maxWidth">@dimen/ongoing_activity_chip_max_text_width</item>
+    </style>
+
     <style name="Chipbar" />
 
     <style name="Chipbar.Text" parent="@*android:style/TextAppearance.DeviceDefault.Notification.Title">

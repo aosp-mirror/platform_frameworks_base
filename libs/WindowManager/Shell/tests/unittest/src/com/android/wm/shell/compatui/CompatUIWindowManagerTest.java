@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
 
@@ -40,9 +39,6 @@ import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.DisplayInfo;
@@ -56,7 +52,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
@@ -65,7 +60,6 @@ import com.android.wm.shell.compatui.api.CompatUIEvent;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -82,13 +76,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUIWindowManagerTest extends ShellTestCase {
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
+public class CompatUIWindowManagerTest extends CompatUIShellTestCase {
 
     private static final int TASK_ID = 1;
     private static final int TASK_WIDTH = 2000;

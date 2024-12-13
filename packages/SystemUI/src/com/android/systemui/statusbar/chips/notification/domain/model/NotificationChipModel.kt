@@ -23,7 +23,5 @@ import com.android.systemui.statusbar.notification.promoted.shared.model.Promote
 data class NotificationChipModel(
     val key: String,
     val statusBarChipIconView: StatusBarIconView?,
-    // TODO(b/364653005): Use [PromotedNotificationContentModel.time] instead of a custom field.
-    val whenTime: Long,
     val promotedContent: PromotedNotificationContentModel,
 )

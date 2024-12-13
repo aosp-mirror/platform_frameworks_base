@@ -71,6 +71,7 @@ constructor(
         contentBuilder.appName = notification.loadHeaderAppName(context)
         contentBuilder.subText = notification.subText()
         contentBuilder.time = notification.extractWhen()
+        contentBuilder.shortCriticalText = notification.shortCriticalText()
         contentBuilder.lastAudiblyAlertedMs = entry.lastAudiblyAlertedMs
         contentBuilder.profileBadgeResId = null // TODO
         contentBuilder.title = notification.title()
@@ -97,6 +98,13 @@ private fun Notification.text(): CharSequence? = extras?.getCharSequence(EXTRA_T
 
 private fun Notification.subText(): String? = extras?.getString(EXTRA_SUB_TEXT)
 
+private fun Notification.shortCriticalText(): String? {
+    if (!android.app.Flags.apiRichOngoing()) {
+        return null
+    }
+    return this.shortCriticalText
+}
+
 private fun Notification.chronometerCountDown(): Boolean =
     extras?.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN, /* defaultValue= */ false) ?: false
 
@@ -107,7 +115,7 @@ private fun Notification.extractWhen(): When? {
     val countDown = chronometerCountDown()
 
     return when {
-        showsTime -> When(time, When.Mode.Absolute)
+        showsTime -> When(time, When.Mode.BasicTime)
         showsChronometer -> When(time, if (countDown) When.Mode.CountDown else When.Mode.CountUp)
         else -> null
     }

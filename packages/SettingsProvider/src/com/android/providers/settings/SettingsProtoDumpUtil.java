@@ -1778,6 +1778,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
                 SecureSettingsProto.Accessibility.HIGH_TEXT_CONTRAST_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_HCT_RECT_PROMPT_STATUS,
+                SecureSettingsProto.Accessibility.HCT_RECT_PROMPT_STATUS);
+        dumpSetting(s, p,
                 Settings.Secure.CONTRAST_LEVEL,
                 SecureSettingsProto.Accessibility.CONTRAST_LEVEL);
         dumpSetting(s, p,

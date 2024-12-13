@@ -109,6 +109,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.pm.RoSystemFeatures;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.ProtoLog;
@@ -1001,6 +1002,17 @@ public final class SystemServer implements Dumpable {
                 mActivityManagerService.frozenBinderTransactionDetected(pid, code, flags, err);
             }
         });
+
+        // Register callback to report native memory metrics post GC cleanup
+        // for system_server
+        if (android.app.Flags.reportPostgcMemoryMetrics() &&
+            com.android.libcore.readonly.Flags.postCleanupApis()) {
+            VMRuntime.addPostCleanupCallback(new Runnable() {
+                @Override public void run() {
+                    MetricsLoggerWrapper.logPostGcMemorySnapshot();
+                }
+            });
+        }
 
         // Loop forever.
         Looper.loop();

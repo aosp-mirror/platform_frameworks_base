@@ -66,8 +66,9 @@ constructor(
             }
 
     fun onShortcutCustomizationRequested(requestInfo: ShortcutCustomizationRequestInfo) {
+        shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
         when (requestInfo) {
-            is ShortcutCustomizationRequestInfo.Add -> {
+            is ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Add -> {
                 _shortcutCustomizationUiState.value =
                     AddShortcutDialog(
                         shortcutLabel = requestInfo.label,
@@ -75,12 +76,10 @@ constructor(
                             shortcutCustomizationInteractor.getDefaultCustomShortcutModifierKey(),
                         pressedKeys = emptyList(),
                     )
-                shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
 
-            is ShortcutCustomizationRequestInfo.Delete -> {
+            is ShortcutCustomizationRequestInfo.SingleShortcutCustomization.Delete -> {
                 _shortcutCustomizationUiState.value = DeleteShortcutDialog
-                shortcutCustomizationInteractor.onCustomizationRequested(requestInfo)
             }
 
             ShortcutCustomizationRequestInfo.Reset -> {

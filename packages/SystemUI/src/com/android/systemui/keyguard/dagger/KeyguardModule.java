@@ -62,6 +62,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransitionModule;
 import com.android.systemui.keyguard.ui.view.AlternateBouncerWindowViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModelModule;
 import com.android.systemui.log.SessionTracker;
@@ -112,6 +113,7 @@ import java.util.concurrent.Executor;
         includes = {
             DeviceEntryIconTransitionModule.class,
             FalsingModule.class,
+            PrimaryBouncerTransitionModule.class,
             KeyguardDataQuickAffordanceModule.class,
             KeyguardQuickAffordancesCombinedViewModelModule.class,
             KeyguardRepositoryModule.class,

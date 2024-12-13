@@ -28,4 +28,13 @@ import android.content.res.Configuration
 interface ConfigurationForwarder {
     /** Should be called when a new configuration is received. */
     fun onConfigurationChanged(newConfiguration: Configuration)
+
+    /**
+     * Should be called when the view associated to this configuration forwarded moved to another
+     * display, usually as a consequence of [View.onMovedToDisplay].
+     *
+     * For the default configuration forwarder (associated with the global configuration) this is
+     * never expected to be called.
+     */
+    fun dispatchOnMovedToDisplay(newDisplayId: Int, newConfiguration: Configuration)
 }

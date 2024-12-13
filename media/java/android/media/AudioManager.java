@@ -8466,9 +8466,13 @@ public class AudioManager {
     /**
      * @hide
      * Registers a callback for notification of audio server state changes.
-     * @param executor {@link Executor} to handle the callbacks
-     * @param stateCallback the callback to receive the audio server state changes
-     *        To remove the callabck, pass a null reference for both executor and stateCallback.
+     * @param executor {@link Executor} to handle the callbacks. Must be non null.
+     * @param stateCallback the callback to receive the audio server state changes.
+     *                      Must be non null. To remove the callabck,
+     *                      call {@link #clearAudioServerStateCallback()}
+     * @throws IllegalArgumentException If a null argument is specified.
+     * @throws IllegalStateException If a callback is already registered
+     * *
      */
     @SystemApi
     public void setAudioServerStateCallback(@NonNull Executor executor,

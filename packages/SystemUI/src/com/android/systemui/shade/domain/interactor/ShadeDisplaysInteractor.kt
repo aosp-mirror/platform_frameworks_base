@@ -27,6 +27,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shade.ShadeTraceLogger.logMoveShadeWindowTo
+import com.android.systemui.shade.ShadeTraceLogger.traceReparenting
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.util.kotlin.getOrNull
@@ -68,6 +70,7 @@ constructor(
     /** Tries to move the shade. If anything wrong happens, fails gracefully without crashing. */
     private suspend fun moveShadeWindowTo(destinationId: Int) {
         Log.d(TAG, "Trying to move shade window to display with id $destinationId")
+        logMoveShadeWindowTo(destinationId)
         // Why using the shade context here instead of the view's Display?
         // The context's display is updated before the view one, so it is a better indicator of
         // which display the shade is supposed to be at. The View display is updated after the first
@@ -83,7 +86,9 @@ constructor(
             return
         }
         try {
-            withContext(mainThreadContext) { reparentToDisplayId(id = destinationId) }
+            withContext(mainThreadContext) {
+                traceReparenting { reparentToDisplayId(id = destinationId) }
+            }
         } catch (e: IllegalStateException) {
             Log.e(
                 TAG,

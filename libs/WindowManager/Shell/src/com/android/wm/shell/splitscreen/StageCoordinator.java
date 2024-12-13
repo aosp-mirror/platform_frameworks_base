@@ -142,6 +142,7 @@ import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.common.split.SplitWindowManager;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
@@ -222,6 +223,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final Optional<RecentTasksController> mRecentTasks;
     private final LaunchAdjacentController mLaunchAdjacentController;
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
+    private final Optional<DesktopTasksController> mDesktopTasksController;
     /** Singleton source of truth for the current state of split screen on this device. */
     private final SplitState mSplitState;
 
@@ -358,7 +360,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             ShellExecutor bgExecutor,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
-            Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState) {
+            Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState,
+            Optional<DesktopTasksController> desktopTasksController) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -371,6 +374,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;
         mSplitState = splitState;
+        mDesktopTasksController = desktopTasksController;
 
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_FULLSCREEN, this /* listener */);
 
@@ -443,7 +447,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             ShellExecutor bgExecutor,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
-            Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState) {
+            Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState,
+            Optional<DesktopTasksController> desktopTasksController) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -465,6 +470,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;
         mSplitState = splitState;
+        mDesktopTasksController = desktopTasksController;
 
         mDisplayController.addDisplayWindowListener(this);
         transitions.addHandler(this);
@@ -2768,11 +2774,17 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final @WindowManager.TransitionType int type = request.getType();
         final boolean isOpening = isOpeningType(type);
         final boolean inFullscreen = triggerTask.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
-        final boolean inDesktopMode = DesktopModeStatus.canEnterDesktopMode(mContext)
-                && triggerTask.getWindowingMode() == WINDOWING_MODE_FREEFORM;
+        final boolean inDesktopMode = mDesktopTasksController.isPresent()
+                && mDesktopTasksController.get().isDesktopModeShowing(mDisplayId);
+        final boolean isLaunchingDesktopTask = isOpening && DesktopModeStatus.canEnterDesktopMode(
+                mContext) && triggerTask.getWindowingMode() == WINDOWING_MODE_FREEFORM;
         final StageTaskListener stage = getStageOfTask(triggerTask);
 
-        if (isOpening && inFullscreen) {
+        if (inDesktopMode || isLaunchingDesktopTask) {
+            // Don't handle request when desktop mode is showing (since they don't coexist), or
+            // when launching a desktop task (defer to DesktopTasksController)
+            return null;
+        } else if (isOpening && inFullscreen) {
             // One task is opening into fullscreen mode, remove the corresponding split record.
             mRecentTasks.ifPresent(recentTasks -> recentTasks.removeSplitPair(triggerTask.taskId));
             logExit(EXIT_REASON_FULLSCREEN_REQUEST);
@@ -2824,12 +2836,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mSplitTransitions.setDismissTransition(transition, stageType,
                             EXIT_REASON_FULLSCREEN_REQUEST);
                 }
-            } else if (isOpening && inDesktopMode) {
-                // If the app being opened is in Desktop mode, set it to full screen and dismiss
-                // split screen stage.
-                prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
-                out.setWindowingMode(triggerTask.token, WINDOWING_MODE_UNDEFINED)
-                        .setBounds(triggerTask.token, null);
             } else if (isOpening && inFullscreen) {
                 final int activityType = triggerTask.getActivityType();
                 if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
