@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.compose.modifiers.thenIf
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
@@ -97,18 +96,15 @@ constructor(
                             )
                         }
 
-                        Box {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             with(topAreaSection) {
                                 DefaultClockLayout(
                                     smartSpacePaddingTop = viewModel::getSmartSpacePaddingTop,
                                     isShadeLayoutWide = isShadeLayoutWide,
                                     modifier =
-                                        Modifier.thenIf(isShadeLayoutWide) {
-                                                Modifier.fillMaxWidth(0.5f)
-                                            }
-                                            .graphicsLayer {
-                                                translationX = unfoldTranslations.start
-                                            },
+                                        Modifier.fillMaxWidth().graphicsLayer {
+                                            translationX = unfoldTranslations.start
+                                        },
                                 )
                             }
                             if (isShadeLayoutWide && !isBypassEnabled) {
