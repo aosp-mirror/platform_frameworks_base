@@ -5840,11 +5840,16 @@
   <!-- Default toggle for fp screen of unlcok-->
   <java-symbol type="bool" name="config_screen_off_udfps_default_on" />
 
-  <!-- Style for Wear Material3 Button. Will only be used for sdk 36 or above. -->
-  <java-symbol type="style" name="Widget.DeviceDefault.Button.WearMaterial3" />
+  <!-- Style for Material3. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="Widget.Material3" />
+  <java-symbol type="style" name="Widget.Material3.Button" />
+  <java-symbol type="style" name="Widget.Material3.Button.Filled" />
+  <java-symbol type="style" name="Widget.Material3.Button.FilledTonal" />
+  <java-symbol type="style" name="Widget.Material3.Button.Outlined" />
+  <java-symbol type="style" name="Widget.Material3.Button.Text" />
 
-  <!-- Style for Wear Material3 AlertDialog. Will only be used for sdk 36 or above. -->
-  <java-symbol type="style" name="AlertDialog.DeviceDefault.WearMaterial3" />
+  <!-- Style for Material3 AlertDialog. Will only be used for sdk 36 or above. -->
+  <java-symbol type="style" name="AlertDialog.Material3" />
 
   <java-symbol type="bool" name="config_allowNormalBrightnessForDozePolicy" />
 

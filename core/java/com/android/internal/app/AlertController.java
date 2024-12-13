@@ -258,7 +258,7 @@ public class AlertController {
 
     private int getAlertDialogDefStyleRes() {
         if (sUseWearMaterial3Style) {
-            return com.android.internal.R.style.AlertDialog_DeviceDefault_WearMaterial3;
+            return com.android.internal.R.style.AlertDialog_Material3;
         }
         return 0;
     }
