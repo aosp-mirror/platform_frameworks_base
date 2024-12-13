@@ -101,6 +101,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
                     setSubText(TEST_SUB_TEXT)
                     setContentTitle(TEST_CONTENT_TITLE)
                     setContentText(TEST_CONTENT_TEXT)
+                    setShortCriticalText(TEST_SHORT_CRITICAL_TEXT)
                 }
                 .also { provider.promotedEntries.add(it) }
 
@@ -110,6 +111,52 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
         assertThat(content?.subText).isEqualTo(TEST_SUB_TEXT)
         assertThat(content?.title).isEqualTo(TEST_CONTENT_TITLE)
         assertThat(content?.text).isEqualTo(TEST_CONTENT_TEXT)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    @DisableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    fun extractContent_apiFlagOff_shortCriticalTextNotExtracted() {
+        val entry =
+            createEntry { setShortCriticalText(TEST_SHORT_CRITICAL_TEXT) }
+                .also { provider.promotedEntries.add(it) }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.text).isNull()
+    }
+
+    @Test
+    @EnableFlags(
+        PromotedNotificationUi.FLAG_NAME,
+        StatusBarNotifChips.FLAG_NAME,
+        android.app.Flags.FLAG_API_RICH_ONGOING,
+    )
+    fun extractContent_apiFlagOn_shortCriticalTextExtracted() {
+        val entry =
+            createEntry { setShortCriticalText(TEST_SHORT_CRITICAL_TEXT) }
+                .also { provider.promotedEntries.add(it) }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.shortCriticalText).isEqualTo(TEST_SHORT_CRITICAL_TEXT)
+    }
+
+    @Test
+    @EnableFlags(
+        PromotedNotificationUi.FLAG_NAME,
+        StatusBarNotifChips.FLAG_NAME,
+        android.app.Flags.FLAG_API_RICH_ONGOING,
+    )
+    fun extractContent_noShortCriticalTextSet_textIsNull() {
+        val entry = createEntry {}.also { provider.promotedEntries.add(it) }
+
+        val content = extractContent(entry)
+
+        assertThat(content).isNotNull()
+        assertThat(content?.shortCriticalText).isNull()
     }
 
     @Test
@@ -201,6 +248,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
         private const val TEST_SUB_TEXT = "sub text"
         private const val TEST_CONTENT_TITLE = "content title"
         private const val TEST_CONTENT_TEXT = "content text"
+        private const val TEST_SHORT_CRITICAL_TEXT = "short"
 
         private const val TEST_PERSON_NAME = "person name"
         private const val TEST_PERSON_KEY = "person key"

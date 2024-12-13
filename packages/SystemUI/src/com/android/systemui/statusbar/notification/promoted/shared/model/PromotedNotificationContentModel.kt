@@ -34,6 +34,11 @@ data class PromotedNotificationContentModel(
     val skeletonSmallIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
     val appName: CharSequence?,
     val subText: CharSequence?,
+    val shortCriticalText: String?,
+    /**
+     * The timestamp associated with the notification. Null if the timestamp should not be
+     * displayed.
+     */
     val time: When?,
     val lastAudiblyAlertedMs: Long,
     @DrawableRes val profileBadgeResId: Int?,
@@ -57,6 +62,7 @@ data class PromotedNotificationContentModel(
         var appName: CharSequence? = null
         var subText: CharSequence? = null
         var time: When? = null
+        var shortCriticalText: String? = null
         var lastAudiblyAlertedMs: Long = 0L
         @DrawableRes var profileBadgeResId: Int? = null
         var title: CharSequence? = null
@@ -80,6 +86,7 @@ data class PromotedNotificationContentModel(
                 skeletonSmallIcon = skeletonSmallIcon,
                 appName = appName,
                 subText = subText,
+                shortCriticalText = shortCriticalText,
                 time = time,
                 lastAudiblyAlertedMs = lastAudiblyAlertedMs,
                 profileBadgeResId = profileBadgeResId,
@@ -100,8 +107,11 @@ data class PromotedNotificationContentModel(
     data class When(val time: Long, val mode: Mode) {
         /** The mode used to display a notification's `when` value. */
         enum class Mode {
-            Absolute,
+            /** No custom mode requested by the notification. */
+            BasicTime,
+            /** Show the notification's time as a chronometer that counts down to [time]. */
             CountDown,
+            /** Show the notification's time as a chronometer that counts up from [time]. */
             CountUp,
         }
     }

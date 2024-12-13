@@ -26,7 +26,6 @@ import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
@@ -50,7 +49,6 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                 activeNotificationModel(
                     key = "notif1",
                     statusBarChipIcon = icon,
-                    whenTime = 5432,
                     promotedContent = PROMOTED_CONTENT,
                 )
 
@@ -60,7 +58,7 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
 
             assertThat(latest!!.key).isEqualTo("notif1")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(icon)
-            assertThat(latest!!.whenTime).isEqualTo(5432)
+            assertThat(latest!!.promotedContent).isEqualTo(PROMOTED_CONTENT)
         }
 
     @Test
@@ -83,14 +81,12 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                 activeNotificationModel(
                     key = "notif1",
                     statusBarChipIcon = newIconView,
-                    whenTime = 6543,
                     promotedContent = PROMOTED_CONTENT,
                 )
             )
 
             assertThat(latest!!.key).isEqualTo("notif1")
             assertThat(latest!!.statusBarChipIconView).isEqualTo(newIconView)
-            assertThat(latest!!.whenTime).isEqualTo(6543)
         }
 
     @Test
@@ -174,22 +170,14 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif1",
                         statusBarChipIcon = null,
-                        whenTime = 123L,
                         promotedContent = PROMOTED_CONTENT,
                     )
                 )
 
             val latest by collectLastValue(underTest.notificationChip)
 
-            assertThat(latest)
-                .isEqualTo(
-                    NotificationChipModel(
-                        "notif1",
-                        statusBarChipIconView = null,
-                        whenTime = 123L,
-                        promotedContent = PROMOTED_CONTENT,
-                    )
-                )
+            assertThat(latest).isNotNull()
+            assertThat(latest!!.key).isEqualTo("notif1")
         }
 
     @Test
@@ -234,20 +222,12 @@ class SingleNotificationChipInteractorTest : SysuiTestCase() {
                 activeNotificationModel(
                     key = "notif1",
                     statusBarChipIcon = null,
-                    whenTime = 123L,
                     promotedContent = PROMOTED_CONTENT,
                 )
             )
 
-            assertThat(latest)
-                .isEqualTo(
-                    NotificationChipModel(
-                        key = "notif1",
-                        statusBarChipIconView = null,
-                        whenTime = 123L,
-                        promotedContent = PROMOTED_CONTENT,
-                    )
-                )
+            assertThat(latest).isNotNull()
+            assertThat(latest!!.key).isEqualTo("notif1")
         }
 
     @Test

@@ -116,7 +116,8 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             // TODO(b/361346412): Enforce a max length requirement?
             val text: String,
-        ) : Shown(icon, colors, onClickListener = null) {
+            override val onClickListener: View.OnClickListener? = null,
+        ) : Shown(icon, colors, onClickListener) {
             override val logName = "Shown.Text"
         }
     }
