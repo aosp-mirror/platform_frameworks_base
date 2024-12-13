@@ -4700,7 +4700,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
 
             mKeyguardInteractor.setAlpha(alpha);
-            //todo was this needed?
 
             if (mKeyguardQsUserSwitchController != null) {
                 mKeyguardQsUserSwitchController.setAlpha(alpha);
