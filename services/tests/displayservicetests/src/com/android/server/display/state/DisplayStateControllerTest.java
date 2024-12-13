@@ -52,7 +52,9 @@ public final class DisplayStateControllerTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        mDisplayStateController = new DisplayStateController(mDisplayPowerProximityStateController);
+        final boolean shouldSkipScreenOffTransition = false;
+        mDisplayStateController = new DisplayStateController(
+                mDisplayPowerProximityStateController, /* shouldSkipScreenOffTransition= */ false);
     }
 
     @Test
@@ -234,6 +236,38 @@ public final class DisplayStateControllerTest {
 
         assertTrue(Display.STATE_ON == stateAndReason.first);
         assertTrue(Display.STATE_REASON_OFFLOAD == stateAndReason.second);
+    }
+
+    @Test
+    public void shouldPerformScreenOffTransition_whenRequestedOffAndNotConfiguredToSkip_true() {
+        mDisplayStateController = new DisplayStateController(
+                mDisplayPowerProximityStateController, /* shouldSkipScreenOffTransition= */ false);
+        when(mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()).thenReturn(
+                false);
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+        displayPowerRequest.policyReason = Display.STATE_REASON_KEY;
+        mDisplayStateController.updateDisplayState(
+                displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
+        assertEquals(true, mDisplayStateController.shouldPerformScreenOffTransition());
+    }
+
+    @Test
+    public void shouldPerformScreenOffTransition_whenRequestedOffAndConfiguredToSkip_false() {
+        mDisplayStateController = new DisplayStateController(
+                mDisplayPowerProximityStateController, /* shouldSkipScreenOffTransition= */ true);
+        when(mDisplayPowerProximityStateController.isScreenOffBecauseOfProximity()).thenReturn(
+                false);
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+
+        displayPowerRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
+        displayPowerRequest.policyReason = Display.STATE_REASON_KEY;
+        mDisplayStateController.updateDisplayState(
+                displayPowerRequest, DISPLAY_ENABLED, !DISPLAY_IN_TRANSITION);
+        assertEquals(false, mDisplayStateController.shouldPerformScreenOffTransition());
     }
 
     private void validDisplayState(int policy, int displayState, boolean isEnabled,
