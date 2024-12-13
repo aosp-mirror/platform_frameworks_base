@@ -99,7 +99,7 @@ class DesktopTasksTransitionObserverTest {
                 shellTaskOrganizer,
                 mixedHandler,
                 backAnimationController,
-                shellInit
+                shellInit,
             )
     }
 
@@ -139,7 +139,10 @@ class DesktopTasksTransitionObserverTest {
         verify(taskRepository).minimizeTask(task.displayId, task.taskId)
         val pendingTransition =
             DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
-                transition, task.taskId, isLastTask = false)
+                transition,
+                task.taskId,
+                isLastTask = false,
+            )
         verify(mixedHandler).addPendingMixedTransition(pendingTransition)
     }
 
@@ -162,7 +165,10 @@ class DesktopTasksTransitionObserverTest {
         verify(taskRepository).minimizeTask(task.displayId, task.taskId)
         val pendingTransition =
             DesktopMixedTransitionHandler.PendingMixedTransition.Minimize(
-                transition, task.taskId, isLastTask = true)
+                transition,
+                task.taskId,
+                isLastTask = true,
+            )
         verify(mixedHandler).addPendingMixedTransition(pendingTransition)
     }
 
@@ -251,7 +257,8 @@ class DesktopTasksTransitionObserverTest {
                     parent = null
                     taskInfo = task
                     flags = flags
-                })
+                }
+            )
             if (withWallpaper) {
                 addChange(
                     Change(mock(), mock()).apply {
@@ -259,14 +266,15 @@ class DesktopTasksTransitionObserverTest {
                         parent = null
                         taskInfo = createWallpaperTaskInfo()
                         flags = flags
-                    })
+                    }
+                )
             }
         }
     }
 
     private fun createOpenChangeTransition(
         task: RunningTaskInfo?,
-        type: Int = TRANSIT_OPEN
+        type: Int = TRANSIT_OPEN,
     ): TransitionInfo {
         return TransitionInfo(TRANSIT_OPEN, 0 /* flags */).apply {
             addChange(
@@ -275,7 +283,8 @@ class DesktopTasksTransitionObserverTest {
                     parent = null
                     taskInfo = task
                     flags = flags
-                })
+                }
+            )
         }
     }
 
@@ -287,13 +296,14 @@ class DesktopTasksTransitionObserverTest {
                     parent = null
                     taskInfo = task
                     flags = flags
-                })
+                }
+            )
         }
     }
 
     private fun getLatestWct(
         @WindowManager.TransitionType type: Int = TRANSIT_OPEN,
-        handlerClass: Class<out Transitions.TransitionHandler>? = null
+        handlerClass: Class<out Transitions.TransitionHandler>? = null,
     ): WindowContainerTransaction {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (handlerClass == null) {
@@ -330,8 +340,6 @@ class DesktopTasksTransitionObserverTest {
         RunningTaskInfo().apply {
             token = mock<WindowContainerToken>()
             baseIntent =
-                Intent().apply {
-                    component = DesktopWallpaperActivity.wallpaperActivityComponent
-                }
+                Intent().apply { component = DesktopWallpaperActivity.wallpaperActivityComponent }
         }
 }

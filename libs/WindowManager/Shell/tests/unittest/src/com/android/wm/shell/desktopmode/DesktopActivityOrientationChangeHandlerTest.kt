@@ -36,7 +36,6 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
 import com.android.window.flags.Flags.FLAG_RESPECT_ORIENTATION_CHANGE_FOR_UNRESIZEABLE
-import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
@@ -47,6 +46,7 @@ import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import junit.framework.Assert.assertEquals
@@ -129,16 +129,22 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
                 persistentRepository,
                 repositoryInitializer,
                 testScope,
-                userManager
+                userManager,
             )
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
-        whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
-            Desktop.getDefaultInstance()
-        )
+        whenever(runBlocking { persistentRepository.readDesktop(any(), any()) })
+            .thenReturn(Desktop.getDefaultInstance())
 
-        handler = DesktopActivityOrientationChangeHandler(context, shellInit, shellTaskOrganizer,
-            taskStackListener, resizeTransitionHandler, userRepositories)
+        handler =
+            DesktopActivityOrientationChangeHandler(
+                context,
+                shellInit,
+                shellTaskOrganizer,
+                taskStackListener,
+                resizeTransitionHandler,
+                userRepositories,
+            )
 
         shellInit.init()
     }
@@ -161,19 +167,28 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         whenever(DesktopModeStatus.canEnterDesktopMode(context)).thenReturn(false)
         clearInvocations(shellInit)
 
-        handler = DesktopActivityOrientationChangeHandler(context, shellInit, shellTaskOrganizer,
-            taskStackListener, resizeTransitionHandler, userRepositories)
+        handler =
+            DesktopActivityOrientationChangeHandler(
+                context,
+                shellInit,
+                shellTaskOrganizer,
+                taskStackListener,
+                resizeTransitionHandler,
+                userRepositories,
+            )
 
-        verify(shellInit, never()).addInitCallback(any(),
-            any<DesktopActivityOrientationChangeHandler>())
+        verify(shellInit, never())
+            .addInitCallback(any(), any<DesktopActivityOrientationChangeHandler>())
     }
 
     @Test
     fun handleActivityOrientationChange_resizeable_doNothing() {
         val task = setUpFreeformTask()
 
-        taskStackListener.onActivityRequestedOrientationChanged(task.taskId,
-            SCREEN_ORIENTATION_LANDSCAPE)
+        taskStackListener.onActivityRequestedOrientationChanged(
+            task.taskId,
+            SCREEN_ORIENTATION_LANDSCAPE,
+        )
 
         verify(resizeTransitionHandler, never()).startTransition(any(), any())
     }
@@ -189,8 +204,10 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         userRepositories.current.addTask(DEFAULT_DISPLAY, task.taskId, isVisible = true)
         runningTasks.add(task)
 
-        taskStackListener.onActivityRequestedOrientationChanged(task.taskId,
-            SCREEN_ORIENTATION_LANDSCAPE)
+        taskStackListener.onActivityRequestedOrientationChanged(
+            task.taskId,
+            SCREEN_ORIENTATION_LANDSCAPE,
+        )
 
         verify(resizeTransitionHandler, never()).startTransition(any(), any())
     }
@@ -198,8 +215,11 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Test
     fun handleActivityOrientationChange_nonResizeablePortrait_requestSameOrientation_doNothing() {
         val task = setUpFreeformTask(isResizeable = false)
-        val newTask = setUpFreeformTask(isResizeable = false,
-            orientation = SCREEN_ORIENTATION_SENSOR_PORTRAIT)
+        val newTask =
+            setUpFreeformTask(
+                isResizeable = false,
+                orientation = SCREEN_ORIENTATION_SENSOR_PORTRAIT,
+            )
 
         handler.handleActivityOrientationChange(task, newTask)
 
@@ -211,8 +231,10 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         val task = setUpFreeformTask(isResizeable = false)
         userRepositories.current.updateTask(task.displayId, task.taskId, isVisible = false)
 
-        taskStackListener.onActivityRequestedOrientationChanged(task.taskId,
-            SCREEN_ORIENTATION_LANDSCAPE)
+        taskStackListener.onActivityRequestedOrientationChanged(
+            task.taskId,
+            SCREEN_ORIENTATION_LANDSCAPE,
+        )
 
         verify(resizeTransitionHandler, never()).startTransition(any(), any())
     }
@@ -221,8 +243,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     fun handleActivityOrientationChange_nonResizeablePortrait_respectLandscapeRequest() {
         val task = setUpFreeformTask(isResizeable = false)
         val oldBounds = task.configuration.windowConfiguration.bounds
-        val newTask = setUpFreeformTask(isResizeable = false,
-            orientation = SCREEN_ORIENTATION_LANDSCAPE)
+        val newTask =
+            setUpFreeformTask(isResizeable = false, orientation = SCREEN_ORIENTATION_LANDSCAPE)
 
         handler.handleActivityOrientationChange(task, newTask)
 
@@ -242,9 +264,12 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Test
     fun handleActivityOrientationChange_nonResizeableLandscape_respectPortraitRequest() {
         val oldBounds = Rect(0, 0, 500, 200)
-        val task = setUpFreeformTask(
-            isResizeable = false, orientation = SCREEN_ORIENTATION_LANDSCAPE, bounds = oldBounds
-        )
+        val task =
+            setUpFreeformTask(
+                isResizeable = false,
+                orientation = SCREEN_ORIENTATION_LANDSCAPE,
+                bounds = oldBounds,
+            )
         val newTask = setUpFreeformTask(isResizeable = false, bounds = oldBounds)
 
         handler.handleActivityOrientationChange(task, newTask)
@@ -266,7 +291,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         displayId: Int = DEFAULT_DISPLAY,
         isResizeable: Boolean = true,
         orientation: Int = SCREEN_ORIENTATION_PORTRAIT,
-        bounds: Rect? = Rect(0, 0, 200, 500)
+        bounds: Rect? = Rect(0, 0, 200, 500),
     ): RunningTaskInfo {
         val task = createFreeformTask(displayId, bounds)
         val activityInfo = ActivityInfo()
