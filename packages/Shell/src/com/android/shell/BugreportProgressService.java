@@ -2404,8 +2404,8 @@ public class BugreportProgressService extends Service {
             bugreportLocationInfo = new BugreportLocationInfo(readFile(in));
 
             int screenshotSize = in.readInt();
+            screenshotLocationInfo = new ScreenshotLocationInfo(null);
             for (int i = 1; i <= screenshotSize; i++) {
-                screenshotLocationInfo = new ScreenshotLocationInfo(null);
                 screenshotLocationInfo.mScreenshotFiles.add(readFile(in));
             }
 
