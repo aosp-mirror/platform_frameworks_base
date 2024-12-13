@@ -275,12 +275,8 @@ class BackNavigationController {
             final boolean isOccluded = isKeyguardOccluded(window);
             if (!canAnimate) {
                 backType = BackNavigationInfo.TYPE_CALLBACK;
-            } else if ((window.getParent().getChildCount() > 1
-                    && window.getParent().getChildAt(0) != window)) {
-                // TODO Dialog window does not need to attach on activity, check
-                // window.mAttrs.type != TYPE_BASE_APPLICATION
-                // Are we the top window of our parent? If not, we are a window on top of the
-                // activity, we won't close the activity.
+            } else if (window.mAttrs.type != TYPE_BASE_APPLICATION) {
+                // The focus window belongs to an activity and it's not the base window.
                 backType = BackNavigationInfo.TYPE_DIALOG_CLOSE;
                 removedWindowContainer = window;
             } else if (hasTranslucentActivity(currentActivity, prevActivities)) {
