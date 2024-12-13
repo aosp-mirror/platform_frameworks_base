@@ -26,6 +26,7 @@ import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.isEdgeResizePermitted;
 
 import static java.util.stream.Collectors.joining;
 
@@ -965,11 +966,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         return mDesktopModeExcludeRegion.contains(x, y);
     }
 
-    private boolean isWithinTouchRegion(int x, int y) {
+    private boolean isWithinTouchRegion(MotionEvent ev) {
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
+        int x = (int) ev.getX();
+        int y = (int) ev.getY();
         final boolean isInsidePip = mIsInPip && mPipExcludedBounds.contains(x, y);
-        final boolean isInDesktopExcludeRegion = desktopExcludeRegionContains(x, y);
+        final boolean isInDesktopExcludeRegion = desktopExcludeRegionContains(x, y)
+                && isEdgeResizePermitted(ev);
         if (isInsidePip || isInDesktopExcludeRegion
                 || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
@@ -1098,8 +1102,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         && isValidTrackpadBackGesture(true /* isTrackpadEvent */);
             } else {
                 mAllowGesture = isBackAllowedCommon && !mUsingThreeButtonNav && isWithinInsets
-                        && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
-                        && !isButtonPressFromTrackpad(ev);
+                        && isWithinTouchRegion(ev) && !isButtonPressFromTrackpad(ev);
             }
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
