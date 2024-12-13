@@ -16,7 +16,6 @@
 
 package android.os;
 
-import static android.app.Flags.FLAG_PIC_CACHE_NULLS;
 import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
 
 import static org.junit.Assert.assertEquals;
@@ -511,7 +510,6 @@ public class IpcDataCacheTest {
         IpcDataCache.setTestMode(true);
     }
 
-    @RequiresFlagsEnabled(FLAG_PIC_CACHE_NULLS)
     @Test
     public void testCachingNulls() {
         IpcDataCache.Config c =

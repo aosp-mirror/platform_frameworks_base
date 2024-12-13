@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.fail;
 
 import android.app.ActivityManager;
 import android.app.LocaleManager;
@@ -26,6 +27,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.multiuser.Flags;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -261,6 +263,162 @@ public final class UserManagerCacheTest {
         assertThat(um.getUserName()).isEqualTo(newName);
     }
 
+
+    @MediumTest
+    @Test
+    public void testDefaultRestrictionsApplied() throws Exception {
+        final UserInfo userInfo = mUserManager.createUser("Useroid",
+                UserManager.USER_TYPE_FULL_SECONDARY, 0);
+        mUsersToRemove.add(userInfo.id);
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_FULL_SECONDARY);
+        final Bundle expectedRestrictions = userTypeDetails.getDefaultRestrictions();
+        // Note this can fail if DO unset those restrictions.
+        for (String restriction : expectedRestrictions.keySet()) {
+            if (expectedRestrictions.getBoolean(restriction)) {
+                assertThat(mUserManager.hasUserRestriction(restriction, UserHandle.of(userInfo.id)))
+                        .isTrue();
+                // Test cached value
+                assertThat(mUserManager.hasUserRestriction(restriction, UserHandle.of(userInfo.id)))
+                        .isTrue();
+            }
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testSetDefaultGuestRestrictions() {
+        final Bundle origRestrictions = mUserManager.getDefaultGuestRestrictions();
+        try {
+            final boolean isFunDisallowed = origRestrictions.getBoolean(UserManager.DISALLOW_FUN,
+                    false);
+            final UserInfo guest1 = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
+            assertThat(guest1).isNotNull();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest1.getUserHandle())).isEqualTo(isFunDisallowed);
+            removeUser(guest1.id, true);
+            // Cache return false after user was removed
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest1.getUserHandle())).isFalse();
+
+            Bundle restrictions = new Bundle();
+            restrictions.putBoolean(UserManager.DISALLOW_FUN, !isFunDisallowed);
+            mUserManager.setDefaultGuestRestrictions(restrictions);
+            UserInfo guest2 = mUserManager.createUser("Guest 2", UserInfo.FLAG_GUEST);
+            assertThat(guest2).isNotNull();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest2.getUserHandle())).isNotEqualTo(isFunDisallowed);
+            removeUser(guest2.id, true);
+            assertThat(mUserManager.getUserInfo(guest2.id)).isNull();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest2.getUserHandle())).isFalse();
+        } finally {
+            mUserManager.setDefaultGuestRestrictions(origRestrictions);
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testCacheInvalidatedAfterUserAddedOrRemoved() {
+        final Bundle origRestrictions = mUserManager.getDefaultGuestRestrictions();
+        try {
+            final boolean isFunDisallowed = origRestrictions.getBoolean(UserManager.DISALLOW_FUN,
+                    false);
+            final UserInfo guest1 = mUserManager.createUser("Guest 1", UserInfo.FLAG_GUEST);
+            assertThat(guest1).isNotNull();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest1.getUserHandle())).isEqualTo(isFunDisallowed);
+            removeUser(guest1.id, true);
+
+            Bundle restrictions = new Bundle();
+            restrictions.putBoolean(UserManager.DISALLOW_FUN, !isFunDisallowed);
+            mUserManager.setDefaultGuestRestrictions(restrictions);
+            int latest_id = guest1.id;
+            // Cache removed id and few next ids.
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    UserHandle.of(latest_id))).isFalse();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    UserHandle.of(latest_id + 1))).isFalse();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    UserHandle.of(latest_id + 2))).isFalse();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    UserHandle.of(latest_id + 3))).isFalse();
+
+            UserInfo guest2 = mUserManager.createUser("Guest 2", UserInfo.FLAG_GUEST);
+            assertThat(guest2).isNotNull();
+            // Cache was invalidated after user was added
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest2.getUserHandle())).isTrue();
+            removeUser(guest2.id, true);
+            assertThat(mUserManager.getUserInfo(guest2.id)).isNull();
+            // Cache was invalidated after user was removed
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    guest2.getUserHandle())).isFalse();
+        } finally {
+            mUserManager.setDefaultGuestRestrictions(origRestrictions);
+        }
+    }
+
+
+    @MediumTest
+    @Test
+    public void testAddRemoveUsersAndRestrictions() {
+        try {
+            final UserInfo userInfo = mUserManager.createUser("Useroid",
+                    UserManager.USER_TYPE_FULL_SECONDARY, 0);
+            mUsersToRemove.add(userInfo.id);
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    userInfo.getUserHandle())).isFalse();
+            mUserManager.setUserRestriction(UserManager.DISALLOW_FUN, true,
+                    userInfo.getUserHandle());
+
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    userInfo.getUserHandle())).isTrue();
+            removeUser(userInfo.id, true);
+            assertThat(mUserManager.getUserSerialNumber(userInfo.id)).isEqualTo(-1);
+            assertThat(mUserManager.getUserInfo(userInfo.id)).isNull();
+            assertThat(mUserManager.hasUserRestriction(UserManager.DISALLOW_FUN,
+                    userInfo.getUserHandle())).isFalse();
+        } catch (java.lang.Exception e) {
+        }
+    }
+
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @MediumTest
+    @Test
+    public void testDefaultUserRestrictionsForPrivateProfile() {
+        assumeTrue(mUserManager.canAddPrivateProfile());
+        final int currentUserId = ActivityManager.getCurrentUser();
+        UserInfo privateProfileInfo = null;
+        try {
+            privateProfileInfo = mUserManager.createProfileForUser(
+                    "Private", UserManager.USER_TYPE_PROFILE_PRIVATE, 0, currentUserId, null);
+            assertThat(privateProfileInfo).isNotNull();
+        } catch (Exception e) {
+            fail("Creation of private profile failed due to " + e.getMessage());
+        }
+        assertDefaultPrivateProfileRestrictions(privateProfileInfo.getUserHandle());
+        // Assert cached values
+        assertDefaultPrivateProfileRestrictions(privateProfileInfo.getUserHandle());
+    }
+
+    private void assertDefaultPrivateProfileRestrictions(UserHandle userHandle) {
+        Bundle defaultPrivateProfileRestrictions =
+                UserTypeFactory.getDefaultPrivateProfileRestrictions();
+        for (String restriction : defaultPrivateProfileRestrictions.keySet()) {
+            assertThat(mUserManager.hasUserRestrictionForUser(restriction, userHandle)).isTrue();
+        }
+    }
+
     private void assumeManagedUsersSupported() {
         // In Automotive, if headless system user is enabled, a managed user cannot be created
         // under a primary user.
@@ -270,9 +428,23 @@ public final class UserManagerCacheTest {
     }
 
     private void removeUser(int userId) {
+        removeUser(userId, false);
+    }
+
+    private void removeUser(int userId, boolean waitForCompleteRemoval) {
         mUserManager.removeUser(userId);
         mUserRemovalWaiter.waitFor(userId);
         mUsersToRemove.remove(userId);
+        if (waitForCompleteRemoval) {
+            int serialNumber = mUserManager.getUserSerialNumber(userId);
+            int timeout = REMOVE_USER_TIMEOUT_SECONDS * 5; // called every 200ms
+            // Wait for the user to be removed from memory
+            while (serialNumber > 0 && timeout > 0) {
+                sleep(200);
+                timeout--;
+                serialNumber = mUserManager.getUserSerialNumber(userId);
+            }
+        }
     }
 
     private boolean isAutomotive() {

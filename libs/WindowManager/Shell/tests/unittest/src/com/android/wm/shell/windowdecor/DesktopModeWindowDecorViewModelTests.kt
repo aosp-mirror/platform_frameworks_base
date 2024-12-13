@@ -1015,11 +1015,11 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
             onCaptionButtonTouchListener = onTouchListenerCaptor
         )
 
-        whenever(mockTaskPositioner.onDragPositioningStart(any(), any(), any()))
+        whenever(mockTaskPositioner.onDragPositioningStart(any(), any(), any(), any()))
             .thenReturn(INITIAL_BOUNDS)
-        whenever(mockTaskPositioner.onDragPositioningMove(any(), any()))
+        whenever(mockTaskPositioner.onDragPositioningMove(any(), any(), any()))
             .thenReturn(INITIAL_BOUNDS)
-        whenever(mockTaskPositioner.onDragPositioningEnd(any(), any()))
+        whenever(mockTaskPositioner.onDragPositioningEnd(any(), any(), any()))
             .thenReturn(INITIAL_BOUNDS)
 
         val view = mock(View::class.java)

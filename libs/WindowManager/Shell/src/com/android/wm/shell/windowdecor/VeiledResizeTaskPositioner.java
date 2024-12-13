@@ -104,7 +104,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     @Override
-    public Rect onDragPositioningStart(int ctrlType, float x, float y) {
+    public Rect onDragPositioningStart(int ctrlType, int displayId, float x, float y) {
         mCtrlType = ctrlType;
         mTaskBoundsAtDragStart.set(
                 mDesktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
@@ -136,7 +136,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     @Override
-    public Rect onDragPositioningMove(float x, float y) {
+    public Rect onDragPositioningMove(int displayId, float x, float y) {
         if (Looper.myLooper() != mHandler.getLooper()) {
             // This method must run on the shell main thread to use the correct Choreographer
             // instance below.
@@ -170,7 +170,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     @Override
-    public Rect onDragPositioningEnd(float x, float y) {
+    public Rect onDragPositioningEnd(int displayId, float x, float y) {
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y,
                 mRepositionStartPoint);
         if (isResizing()) {

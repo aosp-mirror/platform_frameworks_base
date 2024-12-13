@@ -30,7 +30,6 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.customization.R as customR
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.res.R
@@ -62,9 +61,6 @@ constructor(
     private lateinit var nic: NotificationIconContainer
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         nic =
             NotificationIconContainer(context, null).apply {
                 id = nicId
@@ -81,10 +77,6 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         nicBindingDisposable?.dispose()
         nicBindingDisposable =
             NotificationIconContainerViewBinder.bindWhileAttached(
@@ -98,10 +90,6 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         val bottomMargin =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
         val isVisible = rootViewModel.isNotifIconContainerVisible.value

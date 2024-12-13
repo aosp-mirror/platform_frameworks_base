@@ -197,3 +197,10 @@ flag {
     description: "Allows the user to disable pointer acceleration for mouse and touchpads."
     bug: "349006858"
 }
+
+flag {
+    name: "mouse_scrolling_acceleration"
+    namespace: "input"
+    description: "Allows the user to disable input scrolling acceleration for mouse."
+    bug: "383555305"
+}

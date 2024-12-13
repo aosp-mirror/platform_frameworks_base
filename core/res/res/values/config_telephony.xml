@@ -506,4 +506,10 @@
     <!-- Whether to allow TN scanning during satellite session. -->
     <bool name="config_satellite_allow_tn_scanning_during_satellite_session">true</bool>
     <java-symbol type="bool" name="config_satellite_allow_tn_scanning_during_satellite_session" />
+
+    <!-- List of integer tag Ids representing VZW satellite coverage. -->
+    <integer-array name="config_verizon_satellite_enabled_tagids">
+    </integer-array>
+    <java-symbol type="array" name="config_verizon_satellite_enabled_tagids" />
+
 </resources>

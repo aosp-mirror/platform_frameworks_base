@@ -1140,7 +1140,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     if (dragAllowed) {
                         mDragPointerId = e.getPointerId(0);
                         final Rect initialBounds = mDragPositioningCallback.onDragPositioningStart(
-                                0 /* ctrlType */, e.getRawX(0),
+                                0 /* ctrlType */, e.getDisplayId(), e.getRawX(0),
                                 e.getRawY(0));
                         updateDragStatus(e.getActionMasked());
                         mOnDragStartInitialBounds.set(initialBounds);
@@ -1161,6 +1161,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningMove(
+                            e.getDisplayId(),
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.onDragPositioningMove(taskInfo,
                             decoration.mTaskSurface,
@@ -1191,6 +1192,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             (int) (e.getRawX(dragPointerIdx) - e.getX(dragPointerIdx)),
                             (int) (e.getRawY(dragPointerIdx) - e.getY(dragPointerIdx)));
                     final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
+                            e.getDisplayId(),
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     // Tasks bounds haven't actually been updated (only its leash), so pass to
                     // DesktopTasksController to allow secondary transformations (i.e. snap resizing

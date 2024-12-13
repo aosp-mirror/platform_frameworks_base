@@ -52,6 +52,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.DualToneHandler;
+import com.android.systemui.FontStyles;
 import com.android.systemui.battery.unified.BatteryColors;
 import com.android.systemui.battery.unified.BatteryDrawableState;
 import com.android.systemui.battery.unified.BatteryLayersDrawable;
@@ -387,7 +388,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         float fontHeight = mBatteryPercentView.getPaint().getFontMetricsInt(null);
         mBatteryPercentView.setLineHeight(TypedValue.COMPLEX_UNIT_PX, fontHeight);
         if (gsfQuickSettings()) {
-            mBatteryPercentView.setTypeface(Typeface.create("gsf-label-large", Typeface.NORMAL));
+            mBatteryPercentView.setTypeface(
+                    Typeface.create(FontStyles.GSF_LABEL_LARGE, Typeface.NORMAL));
         }
         if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
         addView(mBatteryPercentView, new LayoutParams(

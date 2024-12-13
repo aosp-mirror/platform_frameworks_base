@@ -3323,6 +3323,18 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Make sure this String is safe to put into a bundle.
+     * @hide
+     */
+    public static String safeString(String str) {
+        if (str == null) return str;
+        if (str.length() > MAX_CHARSEQUENCE_LENGTH) {
+            str = str.substring(0, MAX_CHARSEQUENCE_LENGTH);
+        }
+        return str;
+    }
+
+    /**
      * Make sure this CharSequence is safe to put into a bundle, which basically
      * means it had better not be some custom Parcelable implementation.
      * @hide
@@ -5051,7 +5063,7 @@ public class Notification implements Parcelable
         @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
         @NonNull
         public Builder setShortCriticalText(@Nullable String shortCriticalText) {
-            mN.extras.putString(EXTRA_SHORT_CRITICAL_TEXT, shortCriticalText);
+            mN.extras.putString(EXTRA_SHORT_CRITICAL_TEXT, safeString(shortCriticalText));
             return this;
         }
 
