@@ -98,6 +98,21 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun onMovedToDisplays_updatesOnMovedToDisplay() =
+        testScope.runTest {
+            val lastOnMovedToDisplay by collectLastValue(underTest.onMovedToDisplay)
+            assertThat(lastOnMovedToDisplay).isNull()
+
+            val configurationCallback = withArgCaptor {
+                verify(configurationController).addCallback(capture())
+            }
+
+            configurationCallback.onMovedToDisplay(1, Configuration())
+            runCurrent()
+            assertThat(lastOnMovedToDisplay).isEqualTo(1)
+        }
+
+    @Test
     fun onAnyConfigurationChange_updatesOnConfigChanged() =
         testScope.runTest {
             val lastAnyConfigurationChange by collectLastValue(underTest.onAnyConfigurationChange)

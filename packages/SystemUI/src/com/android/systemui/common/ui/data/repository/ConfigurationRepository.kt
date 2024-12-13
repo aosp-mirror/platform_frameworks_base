@@ -53,7 +53,11 @@ interface ConfigurationRepository {
     val onConfigurationChange: Flow<Unit>
 
     val scaleForResolution: Flow<Float>
+
     val configurationValues: Flow<Configuration>
+
+    /** Emits the latest display this configuration controller has been moved to. */
+    val onMovedToDisplay: Flow<Int>
 
     fun getResolutionScale(): Float
 
@@ -117,6 +121,20 @@ constructor(
         configurationController.addCallback(callback)
         awaitClose { configurationController.removeCallback(callback) }
     }
+    override val onMovedToDisplay: Flow<Int>
+        get() = conflatedCallbackFlow {
+            val callback =
+                object : ConfigurationController.ConfigurationListener {
+                    override fun onMovedToDisplay(
+                        newDisplayId: Int,
+                        newConfiguration: Configuration?,
+                    ) {
+                        trySend(newDisplayId)
+                    }
+                }
+            configurationController.addCallback(callback)
+            awaitClose { configurationController.removeCallback(callback) }
+        }
 
     override val scaleForResolution: StateFlow<Float> =
         onConfigurationChange
