@@ -1020,7 +1020,7 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 text = titleForEmptyStateCTA,
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
-                color = colors.primary,
+                color = colors.onPrimary,
                 modifier =
                     Modifier.focusable().semantics(mergeDescendants = true) {
                         contentDescription = titleForEmptyStateCTA
