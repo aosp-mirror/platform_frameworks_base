@@ -1607,6 +1607,10 @@
          brightness value and will repeat for the following ramp if autobrightness is enabled. -->
     <bool name="config_skipScreenOnBrightnessRamp">false</bool>
 
+    <!-- Whether or not to skip a color fade transition to black when the display transitions to
+         STATE_OFF. Setting this to true will skip the color fade transition. -->
+    <bool name="config_skipScreenOffTransition">false</bool>
+
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
 

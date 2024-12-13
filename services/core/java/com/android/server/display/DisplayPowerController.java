@@ -521,6 +521,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
             Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata,
             boolean bootCompleted, DisplayManagerFlags flags) {
+        final Resources resources = context.getResources();
+
         mFlags = flags;
         mInjector = injector != null ? injector : new Injector();
         mClock = mInjector.getClock();
@@ -540,7 +542,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
                 () -> updatePowerState(), mDisplayId, mSensorManager);
-        mDisplayStateController = new DisplayStateController(mDisplayPowerProximityStateController);
+        mDisplayStateController = new DisplayStateController(
+            mDisplayPowerProximityStateController,
+            resources.getBoolean(R.bool.config_skipScreenOffTransition));
         mTag = TAG + "[" + mDisplayId + "]";
         mThermalBrightnessThrottlingDataId =
                 logicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
@@ -574,17 +578,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 Settings.Global.getUriFor(Settings.Global.Wearable.BEDTIME_MODE),
                 false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
 
-        final Resources resources = context.getResources();
-
         // DOZE AND DIM SETTINGS
         mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
                 mDisplayDeviceConfig.getDefaultDozeBrightness());
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 R.bool.config_skipScreenOnBrightnessRamp);
-        mDozeScaleFactor = context.getResources().getFraction(
-                R.fraction.config_screenAutoBrightnessDozeScaleFactor,
-                1, 1);
+        mDozeScaleFactor = resources.getFraction(
+                R.fraction.config_screenAutoBrightnessDozeScaleFactor, 1, 1);
 
         Runnable modeChangeCallback = () -> {
             sendUpdatePowerState();
