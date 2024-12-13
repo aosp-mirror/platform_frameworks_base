@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.Content
-import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
+import com.android.compose.animation.scene.content.state.TransitionState.DirectionProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.OnStopScope
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import com.android.compose.nestedscroll.ScrollController

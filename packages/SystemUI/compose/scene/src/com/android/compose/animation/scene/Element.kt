@@ -1257,7 +1257,7 @@ private inline fun <T> computeValue(
     }
 
     val currentContent = currentContentState.content
-    if (transition is TransitionState.HasOverscrollProperties) {
+    if (transition is TransitionState.DirectionProperties) {
         val overscroll = transition.currentOverscrollSpec
         if (overscroll?.content == currentContent) {
             val elementSpec =

@@ -71,7 +71,7 @@ fun transition(
 ): TestOverlayTransition {
     return object :
         TestOverlayTransition(fromScene, overlay, replacedTransition),
-        TransitionState.HasOverscrollProperties {
+        TransitionState.DirectionProperties {
         override val isEffectivelyShown: Boolean
             get() = isEffectivelyShown()
 

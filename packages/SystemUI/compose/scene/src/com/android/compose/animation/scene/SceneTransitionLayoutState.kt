@@ -382,7 +382,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Compute the [TransformationSpec] when the transition starts.
         val fromContent = transition.fromContent
         val toContent = transition.toContent
-        val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
+        val orientation = (transition as? TransitionState.DirectionProperties)?.orientation
 
         // Update the transition specs.
         transition.transformationSpec =
