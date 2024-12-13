@@ -289,7 +289,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider {
         // doesn't have any registered discovery preference, we should still be able to route their
         // system media.
         boolean bindDueToSystemMediaRoutingSupport =
-                mIsManagerScanning && mSupportsSystemMediaRouting;
+                mLastDiscoveryPreference != null
+                        && mLastDiscoveryPreference.shouldPerformActiveScan()
+                        && mSupportsSystemMediaRouting;
         if (!getSessionInfos().isEmpty()
                 || bindDueToManagerScan
                 || bindDueToSystemMediaRoutingSupport) {

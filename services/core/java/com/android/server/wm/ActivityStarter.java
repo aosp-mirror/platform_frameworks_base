@@ -65,6 +65,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TAS
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS;
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -3097,6 +3098,10 @@ class ActivityStarter {
         // options if set.
         if (mStartActivity.mLaunchCookie != null) {
             intentActivity.mLaunchCookie = mStartActivity.mLaunchCookie;
+            ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Updating launch cookie=%s act=%s(%d)",
+                    intentActivity.mLaunchCookie, intentActivity.packageName,
+                    System.identityHashCode(intentActivity));
         }
         if (mStartActivity.mPendingRemoteAnimation != null) {
             intentActivity.mPendingRemoteAnimation = mStartActivity.mPendingRemoteAnimation;

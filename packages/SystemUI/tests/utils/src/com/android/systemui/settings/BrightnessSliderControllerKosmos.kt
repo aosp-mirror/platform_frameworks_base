@@ -29,7 +29,7 @@ import com.android.systemui.util.time.systemClock
 /** This factory creates empty mocks. */
 var Kosmos.brightnessSliderControllerFactory by
     Kosmos.Fixture<BrightnessSliderController.Factory> {
-        BrightnessSliderController.Factory(
+        BrightnessSliderController.BrightnessSliderControllerFactory(
             falsingManager,
             uiEventLogger,
             vibratorHelper,

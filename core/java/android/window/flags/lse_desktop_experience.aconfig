@@ -175,13 +175,6 @@ flag {
 }
 
 flag {
-    name: "enable_a11y_metrics"
-    namespace: "lse_desktop_experience"
-    description: "Whether to enable log collection for a11y actions in desktop windowing mode"
-    bug: "341319597"
-}
-
-flag {
     name: "enable_caption_compat_inset_force_consumption"
     namespace: "lse_desktop_experience"
     description: "Enables force-consumption of caption bar insets for immersive apps in freeform"

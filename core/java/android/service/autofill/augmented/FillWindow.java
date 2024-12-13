@@ -17,7 +17,6 @@ package android.service.autofill.augmented;
 
 import static android.service.autofill.augmented.AugmentedAutofillService.sDebug;
 import static android.service.autofill.augmented.AugmentedAutofillService.sVerbose;
-import static android.service.autofill.Flags.addAccessibilityTitleForAugmentedAutofillDropdown;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -37,7 +36,6 @@ import android.view.WindowManager;
 import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.R;
 
 import dalvik.system.CloseGuard;
 
@@ -210,12 +208,6 @@ public final class FillWindow implements AutoCloseable {
             if (mWm != null && mFillView != null) {
                 try {
                     p.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-                    if (addAccessibilityTitleForAugmentedAutofillDropdown()) {
-                        p.accessibilityTitle =
-                            mFillView
-                                    .getContext()
-                                    .getString(R.string.autofill_picker_accessibility_title);
-                    }
                     if (!mShowing) {
                         mWm.addView(mFillView, p);
                         mShowing = true;

@@ -2072,10 +2072,7 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void suppressionChanged(Bubble bubble, boolean isSuppressed) {
-            if (mLayerView != null) {
-                // TODO (b/273316505) handle suppression changes, although might not need to
-                //  to do anything on the layerview side for this...
-            }
+            // Nothing to do for our views, handled by launcher / in the bubble bar.
         }
 
         @Override

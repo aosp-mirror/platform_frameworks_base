@@ -3253,7 +3253,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity.isVisibleRequested());
 
         player.start();
-        mSetFlagsRule.enableFlags(Flags.FLAG_RESET_DRAW_STATE_ON_CLIENT_INVISIBLE);
         // ActivityRecord#commitVisibility(false) -> WindowState#sendAppVisibilityToClients().
         player.finish();
         assertFalse(activity.isVisible());

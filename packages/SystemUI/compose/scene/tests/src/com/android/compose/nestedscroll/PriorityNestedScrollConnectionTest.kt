@@ -39,7 +39,6 @@ import org.junit.runner.RunWith
 class PriorityNestedScrollConnectionTest {
     private var canStartPreScroll = false
     private var canStartPostScroll = false
-    private var canStartPostFling = false
     private var canStopOnPreFling = true
     private var isStarted = false
     private var lastScroll: Float? = null
@@ -63,7 +62,6 @@ class PriorityNestedScrollConnectionTest {
             orientation = Orientation.Vertical,
             canStartPreScroll = { _, _, _ -> canStartPreScroll },
             canStartPostScroll = { _, _, _ -> canStartPostScroll },
-            canStartPostFling = { canStartPostFling },
             onStart = { _ ->
                 isStarted = true
                 object : ScrollController {
@@ -236,36 +234,6 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.reset()
 
         assertThat(isCancelled).isTrue()
-    }
-
-    @Test
-    fun receive_onPostFling() = runTest {
-        canStartPostFling = true
-
-        scrollConnection.onPostFling(consumed = Velocity(1f, 1f), available = Velocity(2f, 2f))
-
-        assertThat(lastStop).isEqualTo(2f)
-    }
-
-    @Test
-    fun step1_priorityModeShouldStartOnlyOnPostFling() = runTest {
-        canStartPostFling = true
-
-        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
-        assertThat(isStarted).isEqualTo(false)
-
-        scrollConnection.onPostScroll(
-            consumed = Offset.Zero,
-            available = Offset.Zero,
-            source = UserInput,
-        )
-        assertThat(isStarted).isEqualTo(false)
-
-        scrollConnection.onPreFling(available = Velocity.Zero)
-        assertThat(isStarted).isEqualTo(false)
-
-        scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
-        assertThat(isStarted).isEqualTo(true)
     }
 
     @Test

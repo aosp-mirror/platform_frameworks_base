@@ -80,6 +80,7 @@ import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -296,11 +297,7 @@ public final class HintManagerService extends SystemService {
         mPowerHalVersion = 0;
         mUsesFmq = false;
         if (mPowerHal != null) {
-            try {
-                mSupportInfo = getSupportInfo();
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Could not contact PowerHAL!", e);
-            }
+            mSupportInfo = getSupportInfo();
         }
         mDefaultCpuHeadroomCalculationWindowMillis =
                 new CpuHeadroomParamsInternal().calculationWindowMillis;
@@ -318,7 +315,7 @@ public final class HintManagerService extends SystemService {
         }
     }
 
-    SupportInfo getSupportInfo() throws RemoteException {
+    SupportInfo getSupportInfo() {
         try {
             mPowerHalVersion = mPowerHal.getInterfaceVersion();
             if (mPowerHalVersion >= 6) {
@@ -329,40 +326,9 @@ public final class HintManagerService extends SystemService {
         }
 
         SupportInfo supportInfo = new SupportInfo();
-        supportInfo.usesSessions = isHintSessionSupported();
-        // Global boosts & modes aren't currently relevant for HMS clients
-        supportInfo.boosts = 0;
-        supportInfo.modes = 0;
-        supportInfo.sessionHints = 0;
-        supportInfo.sessionModes = 0;
-        supportInfo.sessionTags = 0;
-
         supportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
         supportInfo.headroom.isCpuSupported = false;
         supportInfo.headroom.isGpuSupported = false;
-        if (isHintSessionSupported()) {
-            if (mPowerHalVersion == 4) {
-                // Assume we support the V4 hints & modes unless specified
-                // otherwise; this is to avoid breaking backwards compat
-                // since we historically just assumed they were.
-                supportInfo.sessionHints = 31; // first 5 bits are ones
-            }
-            if (mPowerHalVersion == 5) {
-                // Assume we support the V5 hints & modes unless specified
-                // otherwise; this is to avoid breaking backwards compat
-                // since we historically just assumed they were.
-
-                // Hal V5 has 8 modes, all of which it assumes are supported,
-                // so we represent that by having the first 8 bits set
-                supportInfo.sessionHints = 255; // first 8 bits are ones
-                // Hal V5 has 1 mode which it assumes is supported, so we
-                // represent that by having the first bit set
-                supportInfo.sessionModes = 1;
-                // Hal V5 has 5 tags, all of which it assumes are supported,
-                // so we represent that by having the first 5 bits set
-                supportInfo.sessionTags = 31;
-            }
-        }
         return supportInfo;
     }
 
@@ -1263,7 +1229,7 @@ public final class HintManagerService extends SystemService {
                     @SessionTag int tag, SessionCreationConfig creationConfig,
                     SessionConfig config) {
             if (!isHintSessionSupported()) {
-                throw new UnsupportedOperationException("PowerHintSessions are not supported!");
+                throw new UnsupportedOperationException("PowerHAL is not supported!");
             }
 
             java.util.Objects.requireNonNull(token);
@@ -1459,6 +1425,12 @@ public final class HintManagerService extends SystemService {
             removeChannelItem(callingTgid, callingUid);
         };
 
+        @Override
+        public long getHintSessionPreferredRate() {
+            return mHintSessionPreferredRate;
+        }
+
+        @Override
         public int getMaxGraphicsPipelineThreadsCount() {
             return MAX_GRAPHICS_PIPELINE_THREADS_COUNT;
         }
@@ -1480,6 +1452,7 @@ public final class HintManagerService extends SystemService {
             if (!mSupportInfo.headroom.isCpuSupported) {
                 throw new UnsupportedOperationException();
             }
+            checkCpuHeadroomParams(params);
             final CpuHeadroomParams halParams = new CpuHeadroomParams();
             halParams.tids = new int[]{Binder.getCallingPid()};
             halParams.calculationType = params.calculationType;
@@ -1487,10 +1460,6 @@ public final class HintManagerService extends SystemService {
             if (params.usesDeviceHeadroom) {
                 halParams.tids = new int[]{};
             } else if (params.tids != null && params.tids.length > 0) {
-                if (params.tids.length > 5) {
-                    throw new IllegalArgumentException(
-                            "More than 5 TIDs is requested: " + params.tids.length);
-                }
                 if (SystemProperties.getBoolean(PROPERTY_CHECK_HEADROOM_TID, true)) {
                     final int tgid = Process.getThreadGroupLeader(Binder.getCallingPid());
                     for (int tid : params.tids) {
@@ -1530,11 +1499,45 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        private void checkCpuHeadroomParams(CpuHeadroomParamsInternal params) {
+            boolean calculationTypeMatched = false;
+            try {
+                for (final Field field :
+                        CpuHeadroomParams.CalculationType.class.getDeclaredFields()) {
+                    if (field.getType() == byte.class) {
+                        byte value = field.getByte(null);
+                        if (value == params.calculationType) {
+                            calculationTypeMatched = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                Slog.wtf(TAG, "Checking the calculation type was unexpectedly not allowed");
+            }
+            if (!calculationTypeMatched) {
+                throw new IllegalArgumentException(
+                        "Unknown CPU headroom calculation type " + (int) params.calculationType);
+            }
+            if (params.calculationWindowMillis < 50 || params.calculationWindowMillis > 10000) {
+                throw new IllegalArgumentException(
+                        "Invalid CPU headroom calculation window, expected [50, 10000] but got "
+                                + params.calculationWindowMillis);
+            }
+            if (!params.usesDeviceHeadroom) {
+                if (params.tids != null && params.tids.length > 5) {
+                    throw new IllegalArgumentException(
+                            "More than 5 TIDs requested: " + params.tids.length);
+                }
+            }
+        }
+
         @Override
         public GpuHeadroomResult getGpuHeadroom(@NonNull GpuHeadroomParamsInternal params) {
             if (!mSupportInfo.headroom.isGpuSupported) {
                 throw new UnsupportedOperationException();
             }
+            checkGpuHeadroomParams(params);
             final GpuHeadroomParams halParams = new GpuHeadroomParams();
             halParams.calculationType = params.calculationType;
             halParams.calculationWindowMillis = params.calculationWindowMillis;
@@ -1565,6 +1568,33 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        private void checkGpuHeadroomParams(GpuHeadroomParamsInternal params) {
+            boolean calculationTypeMatched = false;
+            try {
+                for (final Field field :
+                        GpuHeadroomParams.CalculationType.class.getDeclaredFields()) {
+                    if (field.getType() == byte.class) {
+                        byte value = field.getByte(null);
+                        if (value == params.calculationType) {
+                            calculationTypeMatched = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                Slog.wtf(TAG, "Checking the calculation type was unexpectedly not allowed");
+            }
+            if (!calculationTypeMatched) {
+                throw new IllegalArgumentException(
+                        "Unknown GPU headroom calculation type " + (int) params.calculationType);
+            }
+            if (params.calculationWindowMillis < 50 || params.calculationWindowMillis > 10000) {
+                throw new IllegalArgumentException(
+                        "Invalid GPU headroom calculation window, expected [50, 10000] but got "
+                                + params.calculationWindowMillis);
+            }
+        }
+
         @Override
         public long getCpuHeadroomMinIntervalMillis() {
             if (!mSupportInfo.headroom.isCpuSupported) {
@@ -1590,16 +1620,6 @@ public final class HintManagerService extends SystemService {
             mSessionManager = ISessionManager.Stub.asInterface(sessionManager);
         }
 
-        public IHintManager.HintManagerClientData
-                registerClient(@NonNull IHintManager.IHintManagerClient clientBinder) {
-            IHintManager.HintManagerClientData out = new IHintManager.HintManagerClientData();
-            out.preferredRateNanos = mHintSessionPreferredRate;
-            out.maxGraphicsPipelineThreads = getMaxGraphicsPipelineThreadsCount();
-            out.powerHalVersion = mPowerHalVersion;
-            out.supportInfo = mSupportInfo;
-            return out;
-        }
-
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) {
@@ -1607,7 +1627,7 @@ public final class HintManagerService extends SystemService {
             }
             pw.println("HintSessionPreferredRate: " + mHintSessionPreferredRate);
             pw.println("MaxGraphicsPipelineThreadsCount: " + MAX_GRAPHICS_PIPELINE_THREADS_COUNT);
-            pw.println("Hint Session Support: " + isHintSessionSupported());
+            pw.println("HAL Support: " + isHintSessionSupported());
             pw.println("Active Sessions:");
             synchronized (mLock) {
                 for (int i = 0; i < mActiveSessions.size(); i++) {

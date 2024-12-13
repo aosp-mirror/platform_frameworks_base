@@ -848,7 +848,7 @@ class MediaRouter2ServiceImpl {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
                 List<RoutingSessionInfo> sessionInfos;
                 if (hasSystemRoutingPermissions) {
-                    if (setDeviceRouteSelected) {
+                    if (setDeviceRouteSelected && !Flags.enableMirroringInMediaRouter2()) {
                         // Return a fake system session that shows the device route as selected and
                         // available bluetooth routes as transferable.
                         return userRecord.mHandler.getSystemProvider()
@@ -2731,6 +2731,15 @@ class MediaRouter2ServiceImpl {
                 mLastProviderInfos.remove(oldInfo);
                 newRouteIds = Collections.emptySet();
                 newRoutes = Collections.emptySet();
+            }
+
+            if (Flags.enableMirroringInMediaRouter2()
+                    && provider instanceof MediaRoute2ProviderServiceProxy proxyProvider) {
+                // We notify the system provider of service updates, so that it can update the
+                // system routing session by adding them as transferable routes. And we remove those
+                // that don't support remote routing.
+                mSystemProvider.updateSystemMediaRoutesFromProxy(proxyProvider);
+                newRoutes.removeIf(it -> !it.supportsRemoteRouting());
             }
 
             // Add new routes to the maps.

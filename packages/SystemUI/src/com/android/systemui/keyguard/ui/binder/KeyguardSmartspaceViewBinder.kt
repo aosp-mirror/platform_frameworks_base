@@ -22,7 +22,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
@@ -44,13 +43,12 @@ object KeyguardSmartspaceViewBinder {
         return keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch("$TAG#clockViewModel.hasCustomWeatherDataDisplay") {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
                         ->
                         updateDateWeatherToBurnInLayer(
                             keyguardRootView,
                             clockViewModel,
-                            smartspaceViewModel
+                            smartspaceViewModel,
                         )
                         blueprintInteractor.refreshBlueprint(
                             Config(
@@ -63,7 +61,6 @@ object KeyguardSmartspaceViewBinder {
                 }
 
                 launch("$TAG#smartspaceViewModel.bcSmartspaceVisibility") {
-                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     smartspaceViewModel.bcSmartspaceVisibility.collect {
                         updateBCSmartspaceInBurnInLayer(keyguardRootView, clockViewModel)
                         blueprintInteractor.refreshBlueprint(
@@ -100,7 +97,7 @@ object KeyguardSmartspaceViewBinder {
     private fun updateDateWeatherToBurnInLayer(
         keyguardRootView: ConstraintLayout,
         clockViewModel: KeyguardClockViewModel,
-        smartspaceViewModel: KeyguardSmartspaceViewModel
+        smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) {
         if (clockViewModel.hasCustomWeatherDataDisplay.value) {
             removeDateWeatherFromBurnInLayer(keyguardRootView, smartspaceViewModel)
@@ -112,7 +109,7 @@ object KeyguardSmartspaceViewBinder {
 
     private fun addDateWeatherToBurnInLayer(
         constraintLayout: ConstraintLayout,
-        smartspaceViewModel: KeyguardSmartspaceViewModel
+        smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) {
         val burnInLayer = constraintLayout.requireViewById<Layer>(R.id.burn_in_layer)
         burnInLayer.apply {
@@ -129,7 +126,7 @@ object KeyguardSmartspaceViewBinder {
 
     private fun removeDateWeatherFromBurnInLayer(
         constraintLayout: ConstraintLayout,
-        smartspaceViewModel: KeyguardSmartspaceViewModel
+        smartspaceViewModel: KeyguardSmartspaceViewModel,
     ) {
         val burnInLayer = constraintLayout.requireViewById<Layer>(R.id.burn_in_layer)
         burnInLayer.apply {

@@ -19,7 +19,9 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.overscroll
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
@@ -102,7 +104,7 @@ class DraggableHandlerTest {
                 userActions =
                     mapOf(Swipe.Up to SceneB, Swipe.Up(fromSource = Edge.Bottom) to SceneA),
             ) {
-                Text("SceneC")
+                Text("SceneC", Modifier.overscroll(verticalOverscrollEffect))
             }
             overlay(
                 key = OverlayA,
@@ -434,35 +436,12 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun onDragIntoNoAction_startTransitionToOppositeDirection() = runGestureTest {
+    fun onDragIntoNoAction_stayIdle() = runGestureTest {
         navigateToSceneC()
 
         // We are on SceneC which has no action in Down direction
-        val dragController = onDragStarted(overSlop = 10f)
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = -0.1f,
-        )
-
-        // Reverse drag direction, it will consume the previous drag
-        dragController.onDragDelta(pixels = -10f)
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = 0.0f,
-        )
-
-        // Continue reverse drag direction, it should record progress to Scene B
-        dragController.onDragDelta(pixels = -10f)
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = 0.1f,
-        )
+        onDragStarted(overSlop = 10f, expectedConsumedOverSlop = 0f)
+        assertIdle(currentScene = SceneC)
     }
 
     @Test
@@ -942,30 +921,6 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun scrollFromIdleWithNoTargetScene_shouldUseOverscrollSpecIfAvailable() = runGestureTest {
-        layoutState.transitions = transitions {
-            overscroll(SceneC, Orientation.Vertical) { fade(TestElements.Foo) }
-        }
-        // Start at scene C.
-        navigateToSceneC()
-
-        val scene = layoutState.transitionState.currentScene
-        // We should have overscroll spec for scene C
-        assertThat(layoutState.transitions.overscrollSpec(scene, Orientation.Vertical)).isNotNull()
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNull()
-
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-
-        // We scrolled down, under scene C there is nothing, so we can use the overscroll spec
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNotNull()
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec?.content).isEqualTo(SceneC)
-        val transition = layoutState.currentTransition
-        assertThat(transition).isNotNull()
-        assertThat(transition!!.progress).isEqualTo(-0.1f)
-    }
-
-    @Test
     fun nestedScrollUseFromSourceInfo() = runGestureTest {
         // Start at scene C.
         navigateToSceneC()
@@ -1225,72 +1180,6 @@ class DraggableHandlerTest {
         // the animation.
         assertIdle(SceneC)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasOverscrollSpec()
-    }
-
-    @Test
-    fun overscroll_releaseAtNegativePercent_up() = runGestureTest {
-        // Make Scene A overscrollable.
-        layoutState.transitions = transitions {
-            from(SceneA, to = SceneB) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
-            overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
-        }
-
-        mutableUserActionsA = mapOf(Swipe.Up to UserActionResult(SceneB))
-
-        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
-        val dragController = onDragStarted(pointersInfo = middle, overSlop = down(1f))
-        val transition = assertThat(transitionState).isSceneTransition()
-        assertThat(transition).hasFromScene(SceneA)
-        assertThat(transition).hasToScene(SceneB)
-        assertThat(transition).hasProgress(-1f)
-
-        // Release to A.
-        dragController.onDragStoppedAnimateNow(
-            velocity = 0f,
-            onAnimationStart = {
-                assertTransition(fromScene = SceneA, toScene = SceneB, progress = -1f)
-            },
-            expectedConsumedVelocity = 0f,
-        )
-
-        // We kept the overscroll at 100% so that the placement logic didn't change at the end of
-        // the animation.
-        assertIdle(SceneA)
-        assertThat(transition).hasProgress(0f)
-        assertThat(transition).hasOverscrollSpec()
-    }
-
-    @Test
-    fun overscroll_releaseAtNegativePercent_down() = runGestureTest {
-        // Make Scene A overscrollable.
-        layoutState.transitions = transitions {
-            from(SceneA, to = SceneC) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
-            overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
-        }
-
-        mutableUserActionsA = mapOf(Swipe.Down to UserActionResult(SceneC))
-
-        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
-        val dragController = onDragStarted(pointersInfo = middle, overSlop = up(1f))
-        val transition = assertThat(transitionState).isSceneTransition()
-        assertThat(transition).hasFromScene(SceneA)
-        assertThat(transition).hasToScene(SceneC)
-        assertThat(transition).hasProgress(-1f)
-
-        // Release to A.
-        dragController.onDragStoppedAnimateNow(
-            velocity = 0f,
-            onAnimationStart = {
-                assertTransition(fromScene = SceneA, toScene = SceneC, progress = -1f)
-            },
-            expectedConsumedVelocity = 0f,
-        )
-
-        // We kept the overscroll at 100% so that the placement logic didn't change at the end of
-        // the animation.
-        assertIdle(SceneA)
-        assertThat(transition).hasProgress(0f)
         assertThat(transition).hasOverscrollSpec()
     }
 

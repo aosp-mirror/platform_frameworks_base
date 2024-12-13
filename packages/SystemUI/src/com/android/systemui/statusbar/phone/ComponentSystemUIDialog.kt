@@ -67,6 +67,7 @@ class ComponentSystemUIDialog(
         broadcastDispatcher,
         dialogTransitionAnimator,
         delegate,
+        true, /* shouldAcsdDismissDialog */
     ),
     LifecycleOwner,
     SavedStateRegistryOwner,
