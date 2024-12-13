@@ -16712,6 +16712,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mResources.getResourceName(eq(iconResId))).thenReturn(iconResName);
         when(mResources.getIdentifier(eq(iconResName), any(), any())).thenReturn(iconResId);
         when(mPackageManagerClient.getResourcesForApplication(eq(pkg))).thenReturn(mResources);
+
+        // Ensure that there is a zen configuration for the user running the test (won't be
+        // USER_SYSTEM if running on HSUM).
+        mService.mZenModeHelper.onUserSwitched(mUserId);
     }
 
     @Test
