@@ -30,6 +30,7 @@ import com.android.app.tracing.TraceUtils.traceAsync
 object ShadeTraceLogger {
     private const val TAG = "ShadeTraceLogger"
 
+    @JvmStatic
     fun logOnMovedToDisplay(displayId: Int, config: Configuration) {
         if (!Trace.isEnabled()) return
         Trace.instantForTrack(
@@ -39,6 +40,7 @@ object ShadeTraceLogger {
         )
     }
 
+    @JvmStatic
     fun logOnConfigChanged(config: Configuration) {
         if (!Trace.isEnabled()) return
         Trace.instantForTrack(

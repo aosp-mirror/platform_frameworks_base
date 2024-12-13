@@ -169,7 +169,7 @@ public class NotificationShadeWindowView extends WindowRootView {
     public void onMovedToDisplay(int displayId, Configuration config) {
         super.onMovedToDisplay(displayId, config);
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
-        ShadeTraceLogger.INSTANCE.logOnMovedToDisplay(displayId, config);
+        ShadeTraceLogger.logOnMovedToDisplay(displayId, config);
         if (mConfigurationForwarder != null) {
             mConfigurationForwarder.dispatchOnMovedToDisplay(displayId, config);
         }
@@ -181,7 +181,7 @@ public class NotificationShadeWindowView extends WindowRootView {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        ShadeTraceLogger.INSTANCE.logOnConfigChanged(newConfig);
+        ShadeTraceLogger.logOnConfigChanged(newConfig);
         if (mConfigurationForwarder != null) {
             ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
             mConfigurationForwarder.onConfigurationChanged(newConfig);
