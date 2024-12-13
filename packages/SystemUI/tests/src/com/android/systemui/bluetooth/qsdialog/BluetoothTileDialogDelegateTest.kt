@@ -32,6 +32,9 @@ import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.SysUiState
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
@@ -43,9 +46,8 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -93,7 +95,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
 
     private val fakeSystemClock = FakeSystemClock()
 
-    private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
     private lateinit var testScope: TestScope
     private lateinit var icon: Pair<Drawable, String>
@@ -104,9 +105,8 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        scheduler = TestCoroutineScheduler()
-        dispatcher = UnconfinedTestDispatcher(scheduler)
-        testScope = TestScope(dispatcher)
+        dispatcher = kosmos.testDispatcher
+        testScope = kosmos.testScope
 
         whenever(sysuiState.setFlag(anyLong(), anyBoolean())).thenReturn(sysuiState)
 
@@ -124,23 +124,19 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 kosmos.shadeDialogContextInteractor,
             )
 
-        whenever(
-            sysuiDialogFactory.create(
-                any(SystemUIDialog.Delegate::class.java),
-                any()
-            )
-        ).thenAnswer {
-            SystemUIDialog(
-                mContext,
-                0,
-                SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
-                dialogManager,
-                sysuiState,
-                fakeBroadcastDispatcher,
-                dialogTransitionAnimator,
-                it.getArgument(0),
-            )
-        }
+        whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java), any()))
+            .thenAnswer {
+                SystemUIDialog(
+                    mContext,
+                    0,
+                    SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
+                    dialogManager,
+                    sysuiState,
+                    fakeBroadcastDispatcher,
+                    dialogTransitionAnimator,
+                    it.getArgument(0),
+                )
+            }
 
         icon = Pair(drawable, DEVICE_NAME)
         deviceItem =
@@ -194,20 +190,29 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
 
     @Test
     fun testDeviceItemViewHolder_cachedDeviceNotBusy() {
-        deviceItem.isEnabled = true
+        testScope.runTest {
+            deviceItem.isEnabled = true
 
-        val view =
-            LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
-        val viewHolder =
-            mBluetoothTileDialogDelegate
-                .Adapter(bluetoothTileDialogCallback)
-                .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, bluetoothTileDialogCallback)
-        val container = view.requireViewById<View>(R.id.bluetooth_device_row)
+            val view =
+                LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
+            val viewHolder = mBluetoothTileDialogDelegate.Adapter().DeviceItemViewHolder(view)
+            viewHolder.bind(deviceItem)
+            val container = view.requireViewById<View>(R.id.bluetooth_device_row)
 
-        assertThat(container).isNotNull()
-        assertThat(container.isEnabled).isTrue()
-        assertThat(container.hasOnClickListeners()).isTrue()
+            assertThat(container).isNotNull()
+            assertThat(container.isEnabled).isTrue()
+            assertThat(container.hasOnClickListeners()).isTrue()
+            val value by collectLastValue(mBluetoothTileDialogDelegate.deviceItemClick)
+            runCurrent()
+            container.performClick()
+            runCurrent()
+            assertThat(value).isNotNull()
+            value?.let {
+                assertThat(it.target).isEqualTo(DeviceItemClick.Target.ENTIRE_ROW)
+                assertThat(it.clickedView).isEqualTo(container)
+                assertThat(it.deviceItem).isEqualTo(deviceItem)
+            }
+        }
     }
 
     @Test
@@ -229,14 +234,40 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                     sysuiDialogFactory,
                     kosmos.shadeDialogContextInteractor,
                 )
-                .Adapter(bluetoothTileDialogCallback)
+                .Adapter()
                 .DeviceItemViewHolder(view)
-        viewHolder.bind(deviceItem, bluetoothTileDialogCallback)
+        viewHolder.bind(deviceItem)
         val container = view.requireViewById<View>(R.id.bluetooth_device_row)
 
         assertThat(container).isNotNull()
         assertThat(container.isEnabled).isFalse()
         assertThat(container.hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun testDeviceItemViewHolder_clickActionIcon() {
+        testScope.runTest {
+            deviceItem.isEnabled = true
+
+            val view =
+                LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
+            val viewHolder = mBluetoothTileDialogDelegate.Adapter().DeviceItemViewHolder(view)
+            viewHolder.bind(deviceItem)
+            val actionIconView = view.requireViewById<View>(R.id.gear_icon)
+
+            assertThat(actionIconView).isNotNull()
+            assertThat(actionIconView.hasOnClickListeners()).isTrue()
+            val value by collectLastValue(mBluetoothTileDialogDelegate.deviceItemClick)
+            runCurrent()
+            actionIconView.performClick()
+            runCurrent()
+            assertThat(value).isNotNull()
+            value?.let {
+                assertThat(it.target).isEqualTo(DeviceItemClick.Target.ACTION_ICON)
+                assertThat(it.clickedView).isEqualTo(actionIconView)
+                assertThat(it.deviceItem).isEqualTo(deviceItem)
+            }
+        }
     }
 
     @Test

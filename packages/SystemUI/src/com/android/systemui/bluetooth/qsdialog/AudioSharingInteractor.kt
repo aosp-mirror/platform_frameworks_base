@@ -29,6 +29,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -61,7 +62,7 @@ interface AudioSharingInteractor {
 
 @SysUISingleton
 @OptIn(ExperimentalCoroutinesApi::class)
-class AudioSharingInteractorImpl
+open class AudioSharingInteractorImpl
 @Inject
 constructor(
     private val context: Context,
@@ -99,6 +100,9 @@ constructor(
             if (audioSharingAvailable()) {
                 audioSharingRepository.leAudioBroadcastProfile?.let { profile ->
                     isAudioSharingOn
+                        // Skip the default value, we only care about adding source for newly
+                        // started audio sharing session
+                        .drop(1)
                         .mapNotNull { audioSharingOn ->
                             if (audioSharingOn) {
                                 // onBroadcastMetadataChanged could emit multiple times during one

@@ -227,8 +227,21 @@ constructor(
                 // deviceItemClick is emitted when user clicked on a device item.
                 dialogDelegate.deviceItemClick
                     .onEach {
-                        deviceItemActionInteractor.onClick(it, dialog)
-                        logger.logDeviceClick(it.cachedBluetoothDevice.address, it.type)
+                        when (it.target) {
+                            DeviceItemClick.Target.ENTIRE_ROW -> {
+                                deviceItemActionInteractor.onClick(it.deviceItem, dialog)
+                                logger.logDeviceClick(
+                                    it.deviceItem.cachedBluetoothDevice.address,
+                                    it.deviceItem.type,
+                                )
+                            }
+
+                            DeviceItemClick.Target.ACTION_ICON -> {
+                                // TODO(b/382397280): Move this to DeviceItemActionInteractor, and
+                                // handle click events according to device item type
+                                onDeviceItemGearClicked(it.deviceItem, it.clickedView)
+                            }
+                        }
                     }
                     .launchIn(this)
 
@@ -287,7 +300,7 @@ constructor(
         )
     }
 
-    override fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
+    private fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
         uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_GEAR_CLICKED)
         val intent =
             Intent(ACTION_BLUETOOTH_DEVICE_DETAILS).apply {
@@ -382,8 +395,6 @@ constructor(
 }
 
 interface BluetoothTileDialogCallback {
-    fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View)
-
     fun onSeeAllClicked(view: View)
 
     fun onPairNewDeviceClicked(view: View)
