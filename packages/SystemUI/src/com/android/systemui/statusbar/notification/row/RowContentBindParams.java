@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.RedactionType;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
@@ -31,6 +33,7 @@ public final class RowContentBindParams {
     private boolean mUseIncreasedHeadsUpHeight;
     private boolean mViewsNeedReinflation;
     private @InflationFlag int mContentViews = DEFAULT_INFLATION_FLAGS;
+    private @RedactionType int mRedactionType = REDACTION_TYPE_NONE;
 
     /**
      * Content views that are out of date and need to be rebound.
@@ -55,6 +58,20 @@ public final class RowContentBindParams {
      */
     public boolean useMinimized() {
         return mUseMinimized;
+    }
+
+    /**
+     * @return What type of redaction should be used by the public view (if requested)
+     */
+    public @RedactionType int getRedactionType() {
+        return mRedactionType;
+    }
+
+    /**
+     * Set the redaction type, which controls what sort of public view is shown.
+     */
+    public void setRedactionType(@RedactionType int redactionType) {
+        mRedactionType = redactionType;
     }
 
     /**
