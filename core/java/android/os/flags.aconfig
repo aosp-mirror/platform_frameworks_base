@@ -234,3 +234,11 @@ flag {
     is_fixed_read_only: true
     bug: "377557749"
 }
+
+flag {
+    name: "api_for_backported_fixes"
+    namespace: "media_reliability"
+    description: "Public API app developers use to check if a known issue is fixed on a device."
+    bug: "308461809"
+    is_exported: true
+}
