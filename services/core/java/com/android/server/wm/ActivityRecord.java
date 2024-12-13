@@ -137,6 +137,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATIO
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SWITCH;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
@@ -248,7 +249,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.sEnableShellTransitions;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
-import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -2138,6 +2138,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mHandoverLaunchDisplayId = options.getLaunchDisplayId();
             mLaunchCookie = options.getLaunchCookie();
             mLaunchRootTask = options.getLaunchRootTask();
+            if (mLaunchCookie != null) {
+                ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Activity created with launch cookie=%s act=%s(%d)",
+                        mLaunchCookie, packageName, System.identityHashCode(this));
+            }
         } else {
             mHasSceneTransition = false;
         }
@@ -4142,6 +4147,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     r -> r.mLaunchCookie == null && !r.finishing && r.isUid(getUid()),
                     this, false /* includeBoundary */, false /* traverseTopToBottom */);
             if (nextCookieTarget != null) {
+                ProtoLog.v(WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Transferring launch cookie=%s on finish from=%s(%d) to=%s(%d)",
+                        mLaunchCookie, packageName, System.identityHashCode(this),
+                        nextCookieTarget.packageName, System.identityHashCode(nextCookieTarget));
                 nextCookieTarget.mLaunchCookie = mLaunchCookie;
                 mLaunchCookie = null;
             }
@@ -5607,18 +5616,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // stopped, then we need to set up to wait for its windows to be ready.
             if (!isVisible() || mAppStopped) {
                 clearAllDrawn();
-                // Reset the draw state in order to prevent the starting window to be immediately
-                // dismissed when the app still has the surface.
-                if (!Flags.resetDrawStateOnClientInvisible()
-                        && !isVisible() && !isClientVisible()) {
-                    forAllWindows(w -> {
-                        if (w.mWinAnimator.mDrawState == HAS_DRAWN) {
-                            w.mWinAnimator.resetDrawState();
-                            // Force add to mResizingWindows, so the window will report drawn.
-                            w.forceReportingResized();
-                        }
-                    }, true /* traverseTopToBottom */);
-                }
             }
 
             // In the case where we are making an app visible but holding off for a transition,

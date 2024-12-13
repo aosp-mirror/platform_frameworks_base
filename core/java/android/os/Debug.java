@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.android.internal.util.FastPrintWriter;
@@ -2136,6 +2137,47 @@ public final class Debug
     public static void dumpHprofData(String fileName, FileDescriptor fd)
             throws IOException {
         VMDebug.dumpHprofData(fileName, fd);
+    }
+
+    /**
+     * Like dumpHprofData(String), but takes an argument of bitmapFormat,
+     * which can be png, jpg, webp, or null (no bitmaps in heapdump).
+     *
+     * @hide
+     */
+    public static void dumpHprofData(String fileName, String bitmapFormat)
+            throws IOException {
+        try {
+            if (bitmapFormat != null) {
+                Bitmap.dumpAll(bitmapFormat);
+            }
+            VMDebug.dumpHprofData(fileName);
+        } finally {
+            if (bitmapFormat != null) {
+                Bitmap.dumpAll(null); // clear dump data
+            }
+        }
+    }
+
+    /**
+     * Like dumpHprofData(String, FileDescriptor), but takes an argument
+     * of bitmapFormat, which can be png, jpg, webp, or null (no bitmaps
+     * in heapdump).
+     *
+     * @hide
+     */
+    public static void dumpHprofData(String fileName, FileDescriptor fd,
+            String bitmapFormat) throws IOException {
+        try {
+            if (bitmapFormat != null) {
+                Bitmap.dumpAll(bitmapFormat);
+            }
+            VMDebug.dumpHprofData(fileName, fd);
+        } finally {
+            if (bitmapFormat != null) {
+                Bitmap.dumpAll(null); // clear dump data
+            }
+        }
     }
 
     /**

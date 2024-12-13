@@ -18,8 +18,10 @@ package com.android.systemui.statusbar
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import org.mockito.kotlin.mock
+
+var Kosmos.splitShadeLockScreenOverScroller by Fixture { mock<SplitShadeLockScreenOverScroller>() }
 
 var Kosmos.splitShadeLockScreenOverScrollerFactory by Fixture {
-    mock<SplitShadeLockScreenOverScroller.Factory>()
+    SplitShadeLockScreenOverScroller.Factory { _, _ -> splitShadeLockScreenOverScroller }
 }

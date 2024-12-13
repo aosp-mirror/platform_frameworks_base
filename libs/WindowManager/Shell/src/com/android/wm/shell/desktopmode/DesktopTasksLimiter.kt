@@ -214,12 +214,17 @@ class DesktopTasksLimiter(
     fun addAndGetMinimizeTaskChanges(
         displayId: Int,
         wct: WindowContainerTransaction,
-        newFrontTaskId: Int,
+        newFrontTaskId: Int?,
+        launchingNewIntent: Boolean = false,
     ): Int? {
         logV("addAndGetMinimizeTaskChanges, newFrontTask=%d", newFrontTaskId)
         val taskRepository = desktopUserRepositories.current
         val taskIdToMinimize =
-            getTaskIdToMinimize(taskRepository.getExpandedTasksOrdered(displayId), newFrontTaskId)
+            getTaskIdToMinimize(
+                taskRepository.getExpandedTasksOrdered(displayId),
+                newFrontTaskId,
+                launchingNewIntent,
+            )
         // If it's a running task, reorder it to back.
         taskIdToMinimize
             ?.let { shellTaskOrganizer.getRunningTaskInfo(it) }
@@ -242,15 +247,24 @@ class DesktopTasksLimiter(
      * Returns the minimized task from the list of visible tasks ordered from front to back with the
      * new task placed in front of other tasks.
      */
-    fun getTaskIdToMinimize(visibleOrderedTasks: List<Int>, newTaskIdInFront: Int? = null): Int? {
+    fun getTaskIdToMinimize(
+        visibleOrderedTasks: List<Int>,
+        newTaskIdInFront: Int? = null,
+        launchingNewIntent: Boolean = false,
+    ): Int? {
         return getTaskIdToMinimize(
-            createOrderedTaskListWithGivenTaskInFront(visibleOrderedTasks, newTaskIdInFront)
+            createOrderedTaskListWithGivenTaskInFront(visibleOrderedTasks, newTaskIdInFront),
+            launchingNewIntent,
         )
     }
 
     /** Returns the Task to minimize given a list of visible tasks ordered from front to back. */
-    private fun getTaskIdToMinimize(visibleOrderedTasks: List<Int>): Int? {
-        if (visibleOrderedTasks.size <= maxTasksLimit) {
+    private fun getTaskIdToMinimize(
+        visibleOrderedTasks: List<Int>,
+        launchingNewIntent: Boolean,
+    ): Int? {
+        val newTasksOpening = if (launchingNewIntent) 1 else 0
+        if (visibleOrderedTasks.size + newTasksOpening <= maxTasksLimit) {
             logV("No need to minimize; tasks below limit")
             // No need to minimize anything
             return null

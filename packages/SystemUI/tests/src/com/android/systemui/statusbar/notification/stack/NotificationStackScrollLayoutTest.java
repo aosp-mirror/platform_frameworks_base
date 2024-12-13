@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShade
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
+import com.android.systemui.statusbar.notification.headsup.AvalancheController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
@@ -103,7 +104,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.notification.headsup.AvalancheController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor;
 
@@ -352,6 +352,31 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // THEN stackHeight is measured from the stack top
         verify(mAmbientState).setStackEndHeight(stackEndHeight);
         verify(mAmbientState).setInterpolatedStackHeight(stackEndHeight);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void updateStackCutoff_updatesStackEndHeight() {
+        // GIVEN shade is fully open
+        final float stackTop = 200f;
+        final float stackCutoff = 1000f;
+        final float stackHeight = stackCutoff - stackTop;
+        mAmbientState.setStackTop(stackTop);
+        mAmbientState.setStackCutoff(stackCutoff);
+        mAmbientState.setStatusBarState(StatusBarState.SHADE);
+        mStackScroller.setMaxDisplayedNotifications(-1); // no limit on the shade
+        mStackScroller.setExpandFraction(1f); // shade is fully expanded
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(stackHeight);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(stackHeight);
+
+        // WHEN stackCutoff changes
+        final float newStackCutoff = 800;
+        mStackScroller.setStackCutoff(newStackCutoff);
+
+        // THEN stackEndHeight is updated
+        final float newStackHeight = newStackCutoff - stackTop;
+        assertThat(mAmbientState.getStackEndHeight()).isEqualTo(newStackHeight);
+        assertThat(mAmbientState.getInterpolatedStackHeight()).isEqualTo(newStackHeight);
     }
 
     @Test

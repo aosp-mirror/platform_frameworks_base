@@ -42,6 +42,7 @@ import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -494,6 +495,7 @@ class CommunalSceneStartableTest(flags: FlagsParameterization) : SysuiTestCase()
 
                 // Start dreaming.
                 updateDreaming(true)
+                advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
 
                 // Hub times out immediately.
                 assertThat(scene).isEqualTo(CommunalScenes.Blank)
@@ -650,6 +652,7 @@ class CommunalSceneStartableTest(flags: FlagsParameterization) : SysuiTestCase()
 
                 // Start dreaming.
                 updateDreaming(true)
+                advanceTimeBy(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
 
                 // Hub times out immediately.
                 assertThat(scene).isEqualTo(Scenes.Dream)

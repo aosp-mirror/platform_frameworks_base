@@ -50,6 +50,8 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_PUBLIC
 import com.android.systemui.statusbar.RankingBuilder
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -840,7 +842,13 @@ class SensitiveContentCoordinatorTest(flags: FlagsParameterization) : SysuiTestC
                 whenever(sbn).thenReturn(mockSbn)
                 whenever(row).thenReturn(mockRow)
             }
-        whenever(lockscreenUserManager.needsRedaction(mockEntry)).thenReturn(needsRedaction)
+        val redactionType =
+            if (needsRedaction) {
+                REDACTION_TYPE_PUBLIC
+            } else {
+                REDACTION_TYPE_NONE
+            }
+        whenever(lockscreenUserManager.getRedactionType(mockEntry)).thenReturn(redactionType)
         whenever(mockEntry.rowExists()).thenReturn(true)
         return object : ListEntry("key", 0) {
             override fun getRepresentativeEntry(): NotificationEntry = mockEntry

@@ -2061,8 +2061,9 @@
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
     <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
 
+    <!-- TODO: b/381099727 - Mark translatable once feedback layout is finalized. -->
     <!-- [CHAR LIMIT=80] Text shown in feedback button in notification guts for a bundled notification -->
-    <string name="notification_guts_bundle_feedback">Provide Bundle Feedback</string>
+    <string name="notification_guts_bundle_feedback" translatable="false">Provide Bundle Feedback</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -2590,8 +2591,6 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
 
-    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
-    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
     <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
     <string name="shutdown_progress">Shutting down\u2026</string>
 

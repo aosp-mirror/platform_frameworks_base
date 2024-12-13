@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.server.notification.Flags.screenshareNotificationHiding;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -256,9 +256,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseMinimized(isMinimized);
-        boolean needsRedaction = screenshareNotificationHiding()
-                ? inflaterParams.getNeedsRedaction()
-                : mNotificationLockscreenUserManager.needsRedaction(entry);
+        // TODO b/358403414: use the different types of redaction
+        boolean needsRedaction = inflaterParams.getRedactionType() != REDACTION_TYPE_NONE;
 
         if (needsRedaction) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);

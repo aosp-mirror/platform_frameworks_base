@@ -52,6 +52,7 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
      */
     private static final float SCALE_FACTOR = 100f;
     private static final float FLING_FRICTION = 8f;
+    private static final float BUTTON_SPRING_STIFFNESS = 100;
     private final SpringAnimation mSpring;
     private ProgressCallback mCallback;
     private float mProgress = 0;
@@ -156,7 +157,7 @@ public class BackProgressAnimator implements DynamicAnimation.OnAnimationUpdateL
                 /* frameTime */ System.nanoTime() / TimeUtils.NANOS_PER_MS);
         if (predictiveBackSwipeEdgeNoneApi()) {
             if (event.getSwipeEdge() == EDGE_NONE) {
-                mButtonSpringForce.setStiffness(SpringForce.STIFFNESS_LOW);
+                mButtonSpringForce.setStiffness(BUTTON_SPRING_STIFFNESS);
                 mSpring.setSpring(mButtonSpringForce);
                 mSpring.animateToFinalPosition(SCALE_FACTOR);
             } else {

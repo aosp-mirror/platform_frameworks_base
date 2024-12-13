@@ -25,10 +25,12 @@ import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifCh
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /** A view model for status bar chips for promoted ongoing notifications. */
@@ -38,18 +40,24 @@ class NotifChipsViewModel
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val notifChipsInteractor: StatusBarNotificationChipsInteractor,
+    headsUpNotificationInteractor: HeadsUpNotificationInteractor,
 ) {
     /**
      * A flow modeling the notification chips that should be shown. Emits an empty list if there are
      * no notifications that should show a status bar chip.
      */
     val chips: Flow<List<OngoingActivityChipModel.Shown>> =
-        notifChipsInteractor.notificationChips.map { notifications ->
-            notifications.map { it.toActivityChipModel() }
+        combine(
+            notifChipsInteractor.notificationChips,
+            headsUpNotificationInteractor.statusBarHeadsUpState,
+        ) { notifications, headsUpState ->
+            notifications.map { it.toActivityChipModel(headsUpState) }
         }
 
     /** Converts the notification to the [OngoingActivityChipModel] object. */
-    private fun NotificationChipModel.toActivityChipModel(): OngoingActivityChipModel.Shown {
+    private fun NotificationChipModel.toActivityChipModel(
+        headsUpState: PinnedStatus
+    ): OngoingActivityChipModel.Shown {
         StatusBarNotifChips.assertInNewMode()
         val icon =
             if (this.statusBarChipIconView != null) {
@@ -74,12 +82,18 @@ constructor(
                     )
                 }
             }
-        return OngoingActivityChipModel.Shown.ShortTimeDelta(
-            icon,
-            colors,
-            time = this.whenTime,
-            onClickListener,
-        )
+        return if (headsUpState == PinnedStatus.PinnedByUser) {
+            // If the user tapped the chip to show the HUN, we want to just show the icon because
+            // the HUN will show the rest of the information.
+            OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        } else {
+            OngoingActivityChipModel.Shown.ShortTimeDelta(
+                icon,
+                colors,
+                time = this.whenTime,
+                onClickListener,
+            )
+        }
         // TODO(b/364653005): Use Notification.showWhen to determine if we should show the time.
         // TODO(b/364653005): If Notification.shortCriticalText is set, use that instead of `when`.
         // TODO(b/364653005): If the app that posted the notification is in the foreground, don't

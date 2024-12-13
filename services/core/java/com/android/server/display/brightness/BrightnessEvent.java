@@ -78,6 +78,8 @@ public final class BrightnessEvent {
     private String mDisplayBrightnessStrategyName;
     @AutomaticBrightnessController.AutomaticBrightnessMode
     private int mAutoBrightnessMode;
+    private boolean mSlowChange;
+    private float mRampSpeed;
 
     public BrightnessEvent(BrightnessEvent that) {
         copyFrom(that);
@@ -126,6 +128,8 @@ public final class BrightnessEvent {
         mAutomaticBrightnessEnabled = that.isAutomaticBrightnessEnabled();
         mDisplayBrightnessStrategyName = that.getDisplayBrightnessStrategyName();
         mAutoBrightnessMode = that.mAutoBrightnessMode;
+        mSlowChange = that.mSlowChange;
+        mRampSpeed = that.mRampSpeed;
     }
 
     /**
@@ -163,6 +167,8 @@ public final class BrightnessEvent {
         mAutomaticBrightnessEnabled = true;
         mDisplayBrightnessStrategyName = "";
         mAutoBrightnessMode = AUTO_BRIGHTNESS_MODE_DEFAULT;
+        mSlowChange = false;
+        mRampSpeed = 0;
     }
 
     /**
@@ -248,7 +254,9 @@ public final class BrightnessEvent {
                 + ", powerFactor=" + mPowerFactor
                 // Meta
                 + ", physDisp=" + mPhysicalDisplayName + "(" + mPhysicalDisplayId + ")"
-                + ", logicalId=" + mDisplayId;
+                + ", logicalId=" + mDisplayId
+                + ", slowChange=" + mSlowChange
+                + ", rampSpeed=" + mRampSpeed;
     }
 
     @Override
@@ -469,8 +477,8 @@ public final class BrightnessEvent {
         return mDisplayBrightnessStrategyName;
     }
 
-    public void setAutomaticBrightnessEnabled(boolean mAutomaticBrightnessEnabled) {
-        this.mAutomaticBrightnessEnabled = mAutomaticBrightnessEnabled;
+    public void setAutomaticBrightnessEnabled(boolean automaticBrightnessEnabled) {
+        mAutomaticBrightnessEnabled = automaticBrightnessEnabled;
     }
 
     @AutomaticBrightnessController.AutomaticBrightnessMode
@@ -481,6 +489,14 @@ public final class BrightnessEvent {
     public void setAutoBrightnessMode(
             @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
         mAutoBrightnessMode = mode;
+    }
+
+    public void setSlowChange(boolean slowChange) {
+        mSlowChange = slowChange;
+    }
+
+    public void setRampSpeed(float rampSpeed) {
+        mRampSpeed = rampSpeed;
     }
 
     /**

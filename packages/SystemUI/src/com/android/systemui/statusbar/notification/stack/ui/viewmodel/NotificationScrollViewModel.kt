@@ -192,12 +192,6 @@ constructor(
     /** Whether we should close any open notification guts. */
     val shouldCloseGuts: Flow<Boolean> = stackAppearanceInteractor.shouldCloseGuts
 
-    val shouldResetStackTop: Flow<Boolean> =
-        sceneInteractor.transitionState
-            .mapNotNull { state -> state is Idle && state.currentScene == Scenes.Gone }
-            .distinctUntilChanged()
-            .dumpWhileCollecting("shouldResetStackTop")
-
     /** Whether the Notification Stack is visibly on the lockscreen scene. */
     val isShowingStackOnLockscreen: Flow<Boolean> =
         sceneInteractor.transitionState

@@ -3576,7 +3576,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_I:
-                if (firstDown && event.isMetaPressed()) {
+                if (firstDown && event.isMetaPressed() && isUserSetupComplete() && !keyguardOn) {
                     showSystemSettings();
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
@@ -4106,6 +4106,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB:
                         return true;
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD:
@@ -4120,18 +4121,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 .isAccessibilityShortcutAvailable(false);
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
                         return enableTalkbackAndMagnifierKeyGestures();
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
-                        return InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
-                                && keyboardA11yShortcutControl();
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
-                        return InputSettings.isAccessibilityBounceKeysFeatureEnabled()
-                                && keyboardA11yShortcutControl();
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
-                        return InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
-                                && keyboardA11yShortcutControl();
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
-                        return InputSettings.isAccessibilityStickyKeysFeatureEnabled()
-                                && keyboardA11yShortcutControl();
                     default:
                         return false;
                 }
@@ -4149,6 +4138,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int displayId = event.getDisplayId();
         int modifierState = event.getModifierState();
         boolean keyguardOn = keyguardOn();
+        boolean canLaunchApp = isUserSetupComplete() && !keyguardOn;
         switch (gestureType) {
             case KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS:
                 if (complete) {
@@ -4166,7 +4156,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT:
             case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT:
-                if (complete) {
+                if (complete && canLaunchApp) {
                     launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD,
                             deviceId, SystemClock.uptimeMillis(),
                             AssistUtils.INVOCATION_TYPE_UNKNOWN);
@@ -4179,7 +4169,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS:
-                if (complete) {
+                if (complete && canLaunchApp) {
                     showSystemSettings();
                 }
                 return true;
@@ -4282,7 +4272,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH:
-                if (complete) {
+                if (complete && canLaunchApp) {
                     launchTargetSearchActivity();
                 }
                 return true;
@@ -4363,63 +4353,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION:
                 AppLaunchData data = event.getAppLaunchData();
-                if (complete && isUserSetupComplete() && !keyguardOn
-                        && data != null && mModifierShortcutManager.launchApplication(data)) {
+                if (complete && canLaunchApp && data != null
+                        && mModifierShortcutManager.launchApplication(data)) {
                     dismissKeyboardShortcutsMenu();
                 }
                 return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
-                if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (complete) {
-                        final boolean bounceKeysEnabled =
-                                InputSettings.isAccessibilityBounceKeysEnabled(
-                                        mContext);
-                        InputSettings.setAccessibilityBounceKeysThreshold(mContext,
-                                bounceKeysEnabled ? 0
-                                        : InputSettings.DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS);
-                    }
-                    return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB:
+                NotificationManager nm = getNotificationService();
+                if (nm != null) {
+                    boolean isEnabled = nm.getZenMode() != Settings.Global.ZEN_MODE_OFF;
+                    nm.setZenMode(isEnabled ? Settings.Global.ZEN_MODE_OFF
+                                    : Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null,
+                            "Key gesture DND", true);
                 }
-                break;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
-                if (InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (complete) {
-                        final boolean mouseKeysEnabled =
-                                InputSettings.isAccessibilityMouseKeysEnabled(
-                                        mContext);
-                        InputSettings.setAccessibilityMouseKeysEnabled(mContext,
-                                !mouseKeysEnabled);
-                    }
-                    return true;
-                }
-                break;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
-                if (InputSettings.isAccessibilityStickyKeysFeatureEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (complete) {
-                        final boolean stickyKeysEnabled =
-                                InputSettings.isAccessibilityStickyKeysEnabled(mContext);
-                        InputSettings.setAccessibilityStickyKeysEnabled(mContext,
-                                !stickyKeysEnabled);
-                    }
-                    return true;
-                }
-                break;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
-                if (InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()
-                        && keyboardA11yShortcutControl()) {
-                    if (complete) {
-                        final boolean slowKeysEnabled =
-                                InputSettings.isAccessibilitySlowKeysEnabled(mContext);
-                        InputSettings.setAccessibilitySlowKeysThreshold(mContext,
-                                slowKeysEnabled ? 0
-                                        : InputSettings.DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS);
-                    }
-                    return true;
-                }
-                break;
+                return true;
         }
         return false;
     }

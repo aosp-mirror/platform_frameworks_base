@@ -562,6 +562,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             e.printStackTrace();
         }
 
+        mAppOpsListener.setCallback(mTouchHandler.getMotionHelper());
+
         // Handle for system task stack changes.
         mTaskStackListener.addListener(
                 new TaskStackListenerCallback() {
@@ -779,6 +781,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 // cancel any running animator, as it is using stale display layout information
                 animator.cancel();
             }
+            mMenuController.hideMenu();
             onDisplayChangedUncheck(layout, saveRestoreSnapFraction);
         }
     }

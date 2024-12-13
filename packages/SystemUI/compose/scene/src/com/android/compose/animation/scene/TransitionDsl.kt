@@ -111,6 +111,9 @@ interface SceneTransitionsBuilder {
      * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
      * [distance] down/right, -1f when moving in the opposite direction.
      */
+    @Deprecated(
+        "Use verticalOverscrollEffect (or horizontalOverscrollEffect) directly from SceneScope."
+    )
     fun overscroll(
         content: ContentKey,
         orientation: Orientation,

@@ -16,7 +16,6 @@
 
 package android.app;
 
-import static android.app.Flags.FLAG_PIC_CACHE_NULLS;
 import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
 import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
 import static android.app.PropertyInvalidatedCache.MODULE_BLUETOOTH;
@@ -711,7 +710,6 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
-    @RequiresFlagsEnabled(FLAG_PIC_CACHE_NULLS)
     @Test
     public void testCachingNulls() {
         TestCache cache = new TestCache(new Args(MODULE_TEST)

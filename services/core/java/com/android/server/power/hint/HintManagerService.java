@@ -80,6 +80,7 @@ import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -340,6 +341,8 @@ public final class HintManagerService extends SystemService {
         supportInfo.headroom = new SupportInfo.HeadroomSupportInfo();
         supportInfo.headroom.isCpuSupported = false;
         supportInfo.headroom.isGpuSupported = false;
+
+        supportInfo.compositionData = new SupportInfo.CompositionDataSupportInfo();
         if (isHintSessionSupported()) {
             if (mPowerHalVersion == 4) {
                 // Assume we support the V4 hints & modes unless specified
@@ -1480,6 +1483,7 @@ public final class HintManagerService extends SystemService {
             if (!mSupportInfo.headroom.isCpuSupported) {
                 throw new UnsupportedOperationException();
             }
+            checkCpuHeadroomParams(params);
             final CpuHeadroomParams halParams = new CpuHeadroomParams();
             halParams.tids = new int[]{Binder.getCallingPid()};
             halParams.calculationType = params.calculationType;
@@ -1487,10 +1491,6 @@ public final class HintManagerService extends SystemService {
             if (params.usesDeviceHeadroom) {
                 halParams.tids = new int[]{};
             } else if (params.tids != null && params.tids.length > 0) {
-                if (params.tids.length > 5) {
-                    throw new IllegalArgumentException(
-                            "More than 5 TIDs is requested: " + params.tids.length);
-                }
                 if (SystemProperties.getBoolean(PROPERTY_CHECK_HEADROOM_TID, true)) {
                     final int tgid = Process.getThreadGroupLeader(Binder.getCallingPid());
                     for (int tid : params.tids) {
@@ -1530,11 +1530,45 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        private void checkCpuHeadroomParams(CpuHeadroomParamsInternal params) {
+            boolean calculationTypeMatched = false;
+            try {
+                for (final Field field :
+                        CpuHeadroomParams.CalculationType.class.getDeclaredFields()) {
+                    if (field.getType() == byte.class) {
+                        byte value = field.getByte(null);
+                        if (value == params.calculationType) {
+                            calculationTypeMatched = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                Slog.wtf(TAG, "Checking the calculation type was unexpectedly not allowed");
+            }
+            if (!calculationTypeMatched) {
+                throw new IllegalArgumentException(
+                        "Unknown CPU headroom calculation type " + (int) params.calculationType);
+            }
+            if (params.calculationWindowMillis < 50 || params.calculationWindowMillis > 10000) {
+                throw new IllegalArgumentException(
+                        "Invalid CPU headroom calculation window, expected [50, 10000] but got "
+                                + params.calculationWindowMillis);
+            }
+            if (!params.usesDeviceHeadroom) {
+                if (params.tids != null && params.tids.length > 5) {
+                    throw new IllegalArgumentException(
+                            "More than 5 TIDs requested: " + params.tids.length);
+                }
+            }
+        }
+
         @Override
         public GpuHeadroomResult getGpuHeadroom(@NonNull GpuHeadroomParamsInternal params) {
             if (!mSupportInfo.headroom.isGpuSupported) {
                 throw new UnsupportedOperationException();
             }
+            checkGpuHeadroomParams(params);
             final GpuHeadroomParams halParams = new GpuHeadroomParams();
             halParams.calculationType = params.calculationType;
             halParams.calculationWindowMillis = params.calculationWindowMillis;
@@ -1565,6 +1599,33 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        private void checkGpuHeadroomParams(GpuHeadroomParamsInternal params) {
+            boolean calculationTypeMatched = false;
+            try {
+                for (final Field field :
+                        GpuHeadroomParams.CalculationType.class.getDeclaredFields()) {
+                    if (field.getType() == byte.class) {
+                        byte value = field.getByte(null);
+                        if (value == params.calculationType) {
+                            calculationTypeMatched = true;
+                            break;
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                Slog.wtf(TAG, "Checking the calculation type was unexpectedly not allowed");
+            }
+            if (!calculationTypeMatched) {
+                throw new IllegalArgumentException(
+                        "Unknown GPU headroom calculation type " + (int) params.calculationType);
+            }
+            if (params.calculationWindowMillis < 50 || params.calculationWindowMillis > 10000) {
+                throw new IllegalArgumentException(
+                        "Invalid GPU headroom calculation window, expected [50, 10000] but got "
+                                + params.calculationWindowMillis);
+            }
+        }
+
         @Override
         public long getCpuHeadroomMinIntervalMillis() {
             if (!mSupportInfo.headroom.isCpuSupported) {
@@ -1590,6 +1651,7 @@ public final class HintManagerService extends SystemService {
             mSessionManager = ISessionManager.Stub.asInterface(sessionManager);
         }
 
+        @Override
         public IHintManager.HintManagerClientData
                 registerClient(@NonNull IHintManager.IHintManagerClient clientBinder) {
             IHintManager.HintManagerClientData out = new IHintManager.HintManagerClientData();

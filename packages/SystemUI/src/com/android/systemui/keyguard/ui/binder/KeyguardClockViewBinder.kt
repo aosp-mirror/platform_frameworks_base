@@ -27,7 +27,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
@@ -73,7 +72,6 @@ object KeyguardClockViewBinder {
                     // When changing to new clock, we need to remove old views from burnInLayer
                     var lastClock: ClockController? = null
                     launch {
-                            if (!MigrateClocksToBlueprint.isEnabled) return@launch
                             viewModel.currentClock.collect { currentClock ->
                                 if (lastClock != currentClock) {
                                     cleanupClockViews(
@@ -99,7 +97,6 @@ object KeyguardClockViewBinder {
                         }
 
                     launch {
-                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         viewModel.clockSize.collect { clockSize ->
                             updateBurnInLayer(keyguardRootView, viewModel, clockSize)
                             blueprintInteractor.refreshBlueprint(Type.ClockSize)
@@ -107,7 +104,6 @@ object KeyguardClockViewBinder {
                     }
 
                     launch {
-                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         viewModel.clockShouldBeCentered.collect {
                             viewModel.currentClock.value?.let {
                                 // TODO(b/301502635): remove "!it.config.useCustomClockScene" when
@@ -125,7 +121,6 @@ object KeyguardClockViewBinder {
                     }
 
                     launch {
-                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         combine(
                                 viewModel.hasAodIcons,
                                 rootViewModel.isNotifIconContainerVisible.map { it.value },
@@ -143,7 +138,6 @@ object KeyguardClockViewBinder {
                     }
 
                     launch {
-                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         aodBurnInViewModel.movement.collect { burnInModel ->
                             viewModel.currentClock.value
                                 ?.largeClock
@@ -159,7 +153,6 @@ object KeyguardClockViewBinder {
                     }
 
                     launch {
-                        if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         viewModel.largeClockTextSize.collect { fontSizePx ->
                             viewModel.currentClock.value
                                 ?.largeClock

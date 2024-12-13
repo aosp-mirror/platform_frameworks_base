@@ -531,6 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ウィジェット"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"[ウィジェット] ショートカットを追加するには、設定で [ロック画面でのウィジェットの表示] が有効になっていることを確認してください。"</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"設定"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"スクリーンセーバー表示ボタン"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
@@ -591,8 +592,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"サイレント通知がすべて消去されます"</string>
-    <!-- no translation found for accessibility_notification_section_header_open_settings (6235202417954844004) -->
-    <skip />
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"通知設定を開く"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"サイレント モードにより通知は一時停止中です"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{通知なし}=1{{mode} により通知は一時停止中です}=2{{mode} と他 1 個のモードにより通知は一時停止中です}other{{mode} と他 # 個のモードにより通知は一時停止中です}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
@@ -707,8 +707,7 @@
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ヘ⁠ッ⁠ド ト⁠ラ⁠ッ⁠キ⁠ン⁠グ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_mode" msgid="6867838048430807128">"着信音のモード"</string>
-    <!-- no translation found for volume_ringer_drawer_closed_content_description (4737792429808781745) -->
-    <skip />
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>、タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"バイブレーション"</string>
@@ -873,9 +872,12 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"メモを入力する"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"マルチタスク"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"分割画面の使用（現在のアプリを右側に表示）"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"分割画面の使用（現在のアプリを左側に表示）"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"分割画面から全画面に切り替える"</string>
+    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
+    <skip />
+    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
+    <skip />
+    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
+    <skip />
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"分割画面の使用時に右側または下部のアプリに切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"分割画面の使用時に左側または上部のアプリに切り替える"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"分割画面中: アプリを順に置換する"</string>
@@ -1480,8 +1482,7 @@
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"キーボードのアクションキーを押します"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"完了です！"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"「すべてのアプリを表示する」ジェスチャーを学習しました"</string>
-    <!-- no translation found for tutorial_animation_content_description (2698816574982370184) -->
-    <skip />
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"チュートリアルのアニメーションです。クリックすると一時停止、もう一度クリックすると再開します。"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>

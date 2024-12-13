@@ -42,6 +42,7 @@ import android.view.animation.AnimationUtils;
 
 import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Coordinates the timing of animations, input and drawing.
@@ -208,7 +209,7 @@ public final class Choreographer {
     private final FrameData mFrameData = new FrameData();
     private volatile boolean mInDoFrameCallback = false;
 
-    private static class BufferStuffingData {
+    private static class BufferStuffingState {
         enum RecoveryAction {
             // No recovery
             NONE,
@@ -218,20 +219,14 @@ public final class Choreographer {
             // back toward threshold.
             DELAY_FRAME
         }
-        // The maximum number of times frames will be delayed per buffer stuffing event.
-        // Since buffer stuffing can persist for several consecutive frames following the
-        // initial missed frame, we want to adjust the timeline with enough frame delays and
-        // offsets to return the queued buffer count back to threshold.
-        public static final int MAX_FRAME_DELAYS = 3;
+        // Indicates if recovery should begin. Is true whenever the client was blocked
+        // on dequeuing a buffer. When buffer stuffing recovery begins, this is reset
+        // since the scheduled frame delay reduces the number of queued buffers.
+        public AtomicBoolean isStuffed = new AtomicBoolean(false);
 
         // Whether buffer stuffing recovery has begun. Recovery can only end
         // when events are idle.
         public boolean isRecovering = false;
-
-        // The number of frames delayed so far during recovery. Used to compare with
-        // MAX_FRAME_DELAYS to safeguard against excessive frame delays during recovery.
-        // Also used as unique cookie for tracing.
-        public int numberFrameDelays = 0;
 
         // The number of additional frame delays scheduled during recovery to wait for the next
         // vsync. These are scheduled when frame times appear to go backward or frames are
@@ -245,12 +240,20 @@ public final class Choreographer {
          */
         public void reset() {
             isRecovering = false;
-            numberFrameDelays = 0;
             numberWaitsForNextVsync = 0;
         }
     }
 
-    private final BufferStuffingData mBufferStuffingData = new BufferStuffingData();
+    private final BufferStuffingState mBufferStuffingState = new BufferStuffingState();
+
+    /**
+     * Set flag to indicate that client is blocked waiting for buffer release and
+     * buffer stuffing recovery should soon begin.
+     * @hide
+     */
+    public void onWaitForBufferRelease() {
+        mBufferStuffingState.isStuffed.set(true);
+    }
 
     /**
      * Contains information about the current frame for jank-tracking,
@@ -901,67 +904,56 @@ public final class Choreographer {
 
     // Conducts logic for beginning or ending buffer stuffing recovery.
     // Returns an enum for the recovery action that should be taken in doFrame().
-    BufferStuffingData.RecoveryAction checkBufferStuffingRecovery(long frameTimeNanos,
+    BufferStuffingState.RecoveryAction updateBufferStuffingState(long frameTimeNanos,
             DisplayEventReceiver.VsyncEventData vsyncEventData) {
-        // Canned animations can recover from buffer stuffing whenever more
-        // than 2 buffers are queued.
-        if (vsyncEventData.numberQueuedBuffers > 2) {
-            mBufferStuffingData.isRecovering = true;
-            // Intentional frame delay that can happen at most MAX_FRAME_DELAYS times per
-            // buffer stuffing event until the buffer count returns to threshold. The
-            // delayed frames are compensated for by the negative offsets added to the
-            // animation timestamps.
-            if (mBufferStuffingData.numberFrameDelays < mBufferStuffingData.MAX_FRAME_DELAYS) {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    Trace.asyncTraceForTrackBegin(
-                            Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery", "Thread "
-                            + android.os.Process.myTid() + ", recover frame #"
-                            + mBufferStuffingData.numberFrameDelays,
-                            mBufferStuffingData.numberFrameDelays);
-                }
-                mBufferStuffingData.numberFrameDelays++;
-                scheduleVsyncLocked();
-                return BufferStuffingData.RecoveryAction.DELAY_FRAME;
+        if (!mBufferStuffingState.isRecovering) {
+            if (!mBufferStuffingState.isStuffed.getAndSet(false)) {
+                return BufferStuffingState.RecoveryAction.NONE;
             }
+            // Canned animations can recover from buffer stuffing whenever the
+            // client is blocked on dequeueBuffer. Frame delay only occurs at
+            // the start of recovery to free a buffer.
+            mBufferStuffingState.isRecovering = true;
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.asyncTraceForTrackBegin(
+                        Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery", "Thread "
+                        + android.os.Process.myTid() + ", recover frame", 0);
+            }
+            return BufferStuffingState.RecoveryAction.DELAY_FRAME;
         }
 
-        if (mBufferStuffingData.isRecovering) {
-            // Includes an additional expected frame delay from the natural scheduling
-            // of the next vsync event.
-            int totalFrameDelays = mBufferStuffingData.numberFrameDelays
-                    + mBufferStuffingData.numberWaitsForNextVsync + 1;
-            long vsyncsSinceLastCallback = mLastFrameIntervalNanos > 0
-                    ? (frameTimeNanos - mLastNoOffsetFrameTimeNanos) / mLastFrameIntervalNanos : 0;
+        // Total number of frame delays used to detect idle state. Includes an additional
+        // expected frame delay from the natural scheduling of the next vsync event and
+        // the intentional frame delay that was scheduled when stuffing was first detected.
+        int totalFrameDelays = mBufferStuffingState.numberWaitsForNextVsync + 2;
+        long vsyncsSinceLastCallback = mLastFrameIntervalNanos > 0
+                ? (frameTimeNanos - mLastNoOffsetFrameTimeNanos) / mLastFrameIntervalNanos : 0;
 
-            // Detected idle state due to a longer inactive period since the last vsync callback
-            // than the total expected number of vsync frame delays. End buffer stuffing recovery.
-            // There are no frames to animate and offsets no longer need to be added
-            // since the idle state gives the animation a chance to catch up.
-            if (vsyncsSinceLastCallback > totalFrameDelays) {
-                if (DEBUG_JANK) {
-                    Log.d(TAG, "End buffer stuffing recovery");
-                }
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    for (int i = 0; i < mBufferStuffingData.numberFrameDelays; i++) {
-                        Trace.asyncTraceForTrackEnd(
-                                Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery", i);
-                    }
-                }
-                mBufferStuffingData.reset();
-
-            } else {
-                if (DEBUG_JANK) {
-                    Log.d(TAG, "Adjust animation timeline with a negative offset");
-                }
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    Trace.instantForTrack(
-                            Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery",
-                            "Negative offset added to animation");
-                }
-                return BufferStuffingData.RecoveryAction.OFFSET;
+        // Detected idle state due to a longer inactive period since the last vsync callback
+        // than the total expected number of vsync frame delays. End buffer stuffing recovery.
+        // There are no frames to animate and offsets no longer need to be added
+        // since the idle state gives the animation a chance to catch up.
+        if (vsyncsSinceLastCallback > totalFrameDelays) {
+            if (DEBUG_JANK) {
+                Log.d(TAG, "End buffer stuffing recovery");
             }
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.asyncTraceForTrackEnd(
+                        Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery", 0);
+            }
+            mBufferStuffingState.reset();
+            return BufferStuffingState.RecoveryAction.NONE;
         }
-        return BufferStuffingData.RecoveryAction.NONE;
+
+        if (DEBUG_JANK) {
+            Log.d(TAG, "Adjust animation timeline with a negative offset");
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.instantForTrack(
+                    Trace.TRACE_TAG_VIEW, "Buffer stuffing recovery",
+                    "Negative offset added to animation");
+        }
+        return BufferStuffingState.RecoveryAction.OFFSET;
     }
 
     void doFrame(long frameTimeNanos, int frame,
@@ -973,7 +965,7 @@ public final class Choreographer {
 
         // Evaluate if buffer stuffing recovery needs to start or end, and
         // what actions need to be taken for recovery.
-        switch (checkBufferStuffingRecovery(frameTimeNanos, vsyncEventData)) {
+        switch (updateBufferStuffingState(frameTimeNanos, vsyncEventData)) {
             case NONE:
                 // Without buffer stuffing recovery, offsetFrameTimeNanos is
                 // synonymous with frameTimeNanos.
@@ -984,7 +976,8 @@ public final class Choreographer {
                 offsetFrameTimeNanos = frameTimeNanos - frameIntervalNanos;
                 break;
             case DELAY_FRAME:
-                // Intentional frame delay to help restore queued buffer count to threshold.
+                // Intentional frame delay to help reduce queued buffer count.
+                scheduleVsyncLocked();
                 return;
             default:
                 break;
@@ -1037,7 +1030,7 @@ public final class Choreographer {
                                     + " ms in the past.");
                         }
                     }
-                    if (mBufferStuffingData.isRecovering) {
+                    if (mBufferStuffingState.isRecovering) {
                         frameTimeNanos -= frameIntervalNanos;
                         if (DEBUG_JANK) {
                             Log.d(TAG, "Adjusted animation timeline with a negative offset after"
@@ -1055,8 +1048,8 @@ public final class Choreographer {
                                 + "previously skipped frame.  Waiting for next vsync.");
                     }
                     traceMessage("Frame time goes backward");
-                    if (mBufferStuffingData.isRecovering) {
-                        mBufferStuffingData.numberWaitsForNextVsync++;
+                    if (mBufferStuffingState.isRecovering) {
+                        mBufferStuffingState.numberWaitsForNextVsync++;
                     }
                     scheduleVsyncLocked();
                     return;
@@ -1066,8 +1059,8 @@ public final class Choreographer {
                     long timeSinceVsync = frameTimeNanos - mLastFrameTimeNanos;
                     if (timeSinceVsync < (frameIntervalNanos * mFPSDivisor) && timeSinceVsync > 0) {
                         traceMessage("Frame skipped due to FPSDivisor");
-                        if (mBufferStuffingData.isRecovering) {
-                            mBufferStuffingData.numberWaitsForNextVsync++;
+                        if (mBufferStuffingState.isRecovering) {
+                            mBufferStuffingState.numberWaitsForNextVsync++;
                         }
                         scheduleVsyncLocked();
                         return;

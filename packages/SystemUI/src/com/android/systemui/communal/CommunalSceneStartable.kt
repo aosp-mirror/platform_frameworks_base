@@ -183,7 +183,12 @@ constructor(
                     this@CommunalSceneStartable.isDreaming = isDreaming
                     if (scene.isCommunal() && isDreaming && timeoutJob == null) {
                         // If dreaming starts after timeout has expired, ex. if dream restarts under
-                        // the hub, just close the hub immediately.
+                        // the hub, wait for IS_ABLE_TO_DREAM_DELAY_MS and then close the hub. The
+                        // delay is necessary so the KeyguardInteractor.isAbleToDream flow passes
+                        // through that same amount of delay and publishes a new value which is then
+                        // picked up by the HomeSceneFamilyResolver such that the next call to
+                        // SceneInteractor.changeScene(Home) will resolve "Home" to "Dream".
+                        delay(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
                         communalSceneInteractor.changeScene(
                             CommunalScenes.Blank,
                             "dream started after timeout",

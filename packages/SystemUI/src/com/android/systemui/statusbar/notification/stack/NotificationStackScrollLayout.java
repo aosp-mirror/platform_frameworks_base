@@ -1284,7 +1284,11 @@ public class NotificationStackScrollLayout
     @Override
     public void setStackCutoff(float stackCutoff) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        mAmbientState.setStackCutoff(stackCutoff);
+        if (mAmbientState.getStackCutoff() != stackCutoff) {
+            mAmbientState.setStackCutoff(stackCutoff);
+            updateStackEndHeightAndStackHeight(mAmbientState.getExpansionFraction());
+            requestChildrenUpdate();
+        }
     }
 
     @Override

@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
@@ -32,6 +33,7 @@ import android.net.NetworkProvider;
 import android.net.NetworkRequest;
 import android.net.NetworkScore;
 import android.net.vcn.VcnGatewayConnectionConfig;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.ArraySet;
@@ -54,6 +56,8 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+// TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
+@TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class VcnNetworkProvider extends NetworkProvider {
     private static final String TAG = VcnNetworkProvider.class.getSimpleName();
 

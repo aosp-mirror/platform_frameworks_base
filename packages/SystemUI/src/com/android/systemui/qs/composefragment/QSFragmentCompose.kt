@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -76,6 +77,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -627,7 +629,14 @@ constructor(
                 val Media =
                     @Composable {
                         if (viewModel.qqsMediaVisible) {
-                            MediaObject(mediaHost = viewModel.qqsMediaHost)
+                            MediaObject(
+                                // In order to have stable constraints passed to the AndroidView
+                                // during expansion (available height changing due to squishiness),
+                                // We always allow the media here to be as tall as it wants.
+                                // (b/383085298)
+                                modifier = Modifier.requiredHeightIn(max = Dp.Infinity),
+                                mediaHost = viewModel.qqsMediaHost,
+                            )
                         }
                     }
 

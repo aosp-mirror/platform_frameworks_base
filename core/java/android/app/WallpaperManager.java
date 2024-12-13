@@ -2730,6 +2730,7 @@ public class WallpaperManager {
      * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
      *                    image for restore to a future device; {@code false} otherwise.
      * @param which       Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
      * @hide
      */
     @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)

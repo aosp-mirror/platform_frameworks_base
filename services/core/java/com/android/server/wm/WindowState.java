@@ -1631,8 +1631,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final InsetsState rawInsetsState =
                 mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
-        final InsetsState insetsStateForWindow = insetsPolicy.enforceInsetsPolicyForTarget(
-                mAttrs, getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
+        final InsetsState insetsStateForWindow = insetsPolicy.enforceInsetsPolicyForTarget(this,
+                rawInsetsState);
         return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
                 includeTransient);
     }
@@ -3303,7 +3303,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // just kill it. And if it is a window of foreground activity, the activity can be
             // restarted automatically if needed.
             Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
-            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid) {
+            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid
+                    && android.os.Process.getThreadGroupLeader(mSession.mPid) == mSession.mPid) {
                 android.os.Process.killProcess(mSession.mPid);
             }
         }
@@ -3311,8 +3312,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Because the client is notified to be invisible, it should no longer be considered as
         // drawn state. This prevent the app from showing incomplete content if the app is
         // requested to be visible in a short time (e.g. before activity stopped).
-        if (Flags.resetDrawStateOnClientInvisible() && !clientVisible && mActivityRecord != null
-                && mWinAnimator.mDrawState == HAS_DRAWN) {
+        if (!clientVisible && mActivityRecord != null && mWinAnimator.mDrawState == HAS_DRAWN) {
             mWinAnimator.resetDrawState();
             // Make sure the app can report drawn if it becomes visible again.
             forceReportingResized();

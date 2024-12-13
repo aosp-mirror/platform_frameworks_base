@@ -66,6 +66,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -107,7 +108,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private LightBarTransitionsController mLightBarTransitionsController;
     private TaskStackChangeListeners mTaskStackChangeListeners;
     private Optional<Pip> mPipOptional;
-    private int mDisplayId;
+    private int mDefaultDisplayId;
     private int mNavigationIconHints;
     private final NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater =
             new NavBarHelper.NavbarTaskbarStateUpdater() {
@@ -141,7 +142,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         @Override
         public void onLockTaskModeChanged(int mode) {
             mSysUiState.setFlag(SYSUI_STATE_SCREEN_PINNING, mode == LOCK_TASK_MODE_PINNED)
-                    .commitUpdate(mDisplayId);
+                    .commitUpdate(mDefaultDisplayId);
         }
     };
 
@@ -159,7 +160,10 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private final AutoHideUiElement mAutoHideUiElement = new AutoHideUiElement() {
         @Override
         public void synchronizeState() {
-            checkNavBarModes(mDisplayId);
+            Display[] displays = mDisplayTracker.getAllDisplays();
+            for (Display display : displays) {
+                checkNavBarModes(display.getDisplayId());
+            }
         }
 
         @Override
@@ -177,6 +181,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final StatusBarStateController mStatusBarStateController;
+    private DisplayTracker mDisplayTracker;
+
     @Inject
     public TaskbarDelegate(Context context,
             LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
@@ -203,7 +209,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             LightBarController lightBarController,
             Optional<Pip> pipOptional,
             BackAnimation backAnimation,
-            TaskStackChangeListeners taskStackChangeListeners) {
+            TaskStackChangeListeners taskStackChangeListeners,
+            DisplayTracker displayTracker) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -218,6 +225,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarTransitionsController = createLightBarTransitionsController();
         mTaskStackChangeListeners = taskStackChangeListeners;
         mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
+        mDisplayTracker = displayTracker;
     }
 
     @Override
@@ -255,7 +263,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             if (mInitialized) {
                 return;
             }
-            mDisplayId = displayId;
+            mDefaultDisplayId = displayId;
             parseCurrentSysuiState();
             mCommandQueue.addCallback(this);
             mOverviewProxyService.addCallback(this);
@@ -315,7 +323,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private void parseCurrentSysuiState() {
         NavBarHelper.CurrentSysuiState state = mNavBarHelper.getCurrentSysuiState();
-        if (state.mWindowStateDisplayId == mDisplayId) {
+        if (state.mWindowStateDisplayId == mDefaultDisplayId) {
             mTaskBarWindowState = state.mWindowState;
         }
     }
@@ -340,7 +348,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isWindowVisible())
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
-                .commitUpdate(mDisplayId);
+                .commitUpdate(mDefaultDisplayId);
     }
 
     boolean isOverviewEnabled() {
@@ -466,7 +474,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     @Override
     public void setWindowState(int displayId, int window, int state) {
-        if (displayId == mDisplayId
+        if (displayId == mDefaultDisplayId
                 && window == StatusBarManager.WINDOW_NAVIGATION_BAR
                 && mTaskBarWindowState != state) {
             mTaskBarWindowState = state;
@@ -498,7 +506,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             nbModeChanged = updateTransitionMode(
                     transitionMode(mTaskbarTransientShowing, appearance));
         }
-        if (displayId == mDisplayId) {
+        if (displayId == mDefaultDisplayId) {
             mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
                     mTransitionMode, navbarColorManagedByIme);
         }
@@ -510,7 +518,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     @Override
     public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
-        if (displayId != mDisplayId) {
+        if (displayId != mDefaultDisplayId) {
             return;
         }
         if ((types & WindowInsets.Type.navigationBars()) == 0) {
@@ -524,7 +532,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     @Override
     public void abortTransient(int displayId, @InsetsType int types) {
-        if (displayId != mDisplayId) {
+        if (displayId != mDefaultDisplayId) {
             return;
         }
         if ((types & WindowInsets.Type.navigationBars()) == 0) {
@@ -654,7 +662,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("TaskbarDelegate (displayId=" + mDisplayId + "):");
+        pw.println("TaskbarDelegate (mDefaultDisplayId=" + mDefaultDisplayId + "):");
         pw.println("  mNavigationIconHints=" + mNavigationIconHints);
         pw.println("  mNavigationMode=" + mNavigationMode);
         pw.println("  mDisabledFlags=" + mDisabledFlags);

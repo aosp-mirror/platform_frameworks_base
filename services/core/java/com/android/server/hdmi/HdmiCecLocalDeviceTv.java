@@ -212,11 +212,11 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                     HdmiConfig.TIMEOUT_MS);
         }
 
-        launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
-                reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
         startQueuedActions();
+        final boolean routingForBootup = reason != HdmiControlService.INITIATED_BY_ENABLE_CEC
+                && reason != HdmiControlService.INITIATED_BY_BOOT_UP;
         List<HdmiCecMessage> bufferedActiveSource = mDelayedMessageBuffer
                 .getBufferedMessagesWithOpcode(Constants.MESSAGE_ACTIVE_SOURCE);
         if (bufferedActiveSource.isEmpty()) {
@@ -227,14 +227,8 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
                 @Override
                 public void onComplete(int result) {
-                    if (!mService.getLocalActiveSource().isValid()
-                            && result != HdmiControlManager.RESULT_SUCCESS) {
-                        mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
-                                getDeviceInfo().getLogicalAddress(),
-                                getDeviceInfo().getPhysicalAddress()));
-                        updateActiveSource(getDeviceInfo().getLogicalAddress(),
-                                getDeviceInfo().getPhysicalAddress(),
-                                "RequestActiveSourceAction#finishWithCallback()");
+                    if (result != HdmiControlManager.RESULT_SUCCESS) {
+                        launchRoutingControl(routingForBootup);
                     }
                 }
             }));
@@ -1384,8 +1378,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         } else {
             int activePath = mService.getPhysicalAddress();
             setActivePath(activePath);
-            if (!routingForBootup
-                    && !mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
+            if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
                 mService.sendCecCommand(
                         HdmiCecMessageBuilder.buildActiveSource(
                                 getDeviceInfo().getLogicalAddress(), activePath));

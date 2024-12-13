@@ -2322,10 +2322,10 @@ public class PackageParser {
 
             } else if (tagName.equals(TAG_ADOPT_PERMISSIONS)) {
                 sa = res.obtainAttributes(parser,
-                        com.android.internal.R.styleable.AndroidManifestOriginalPackage);
+                        com.android.internal.R.styleable.AndroidManifestAdoptPermissions);
 
                 String name = sa.getNonConfigurationString(
-                        com.android.internal.R.styleable.AndroidManifestOriginalPackage_name, 0);
+                        com.android.internal.R.styleable.AndroidManifestAdoptPermissions_name, 0);
 
                 sa.recycle();
 

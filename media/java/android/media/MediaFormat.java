@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  * The format of the media data is specified as key/value pairs. Keys are strings. Values can
  * be integer, long, float, String or ByteBuffer.
  * <p>
- * The feature metadata is specificed as string/boolean pairs.
+ * The feature metadata is specified as string/boolean pairs.
  * <p>
  * Keys common to all audio/video formats, <b>all keys not marked optional are mandatory</b>:
  *
@@ -1244,12 +1244,12 @@ public final class MediaFormat {
 
     /**
     * An optional key describing the desired encoder latency in frames. This is an optional
-    * parameter that applies only to video encoders. If encoder supports it, it should ouput
+    * parameter that applies only to video encoders. If encoder supports it, it should output
     * at least one output frame after being queued the specified number of frames. This key
     * is ignored if the video encoder does not support the latency feature. Use the output
     * format to verify that this feature was enabled and the actual value used by the encoder.
     * <p>
-    * If the key is not specified, the default latency will be implenmentation specific.
+    * If the key is not specified, the default latency will be implementation specific.
     * The associated value is an integer.
     */
     public static final String KEY_LATENCY = "latency";
@@ -1507,16 +1507,16 @@ public final class MediaFormat {
      */
     public static final String KEY_COLOR_STANDARD = "color-standard";
 
-    /** BT.709 color chromacity coordinates with KR = 0.2126, KB = 0.0722. */
+    /** BT.709 color chromaticity coordinates with KR = 0.2126, KB = 0.0722. */
     public static final int COLOR_STANDARD_BT709 = 1;
 
-    /** BT.601 625 color chromacity coordinates with KR = 0.299, KB = 0.114. */
+    /** BT.601 625 color chromaticity coordinates with KR = 0.299, KB = 0.114. */
     public static final int COLOR_STANDARD_BT601_PAL = 2;
 
-    /** BT.601 525 color chromacity coordinates with KR = 0.299, KB = 0.114. */
+    /** BT.601 525 color chromaticity coordinates with KR = 0.299, KB = 0.114. */
     public static final int COLOR_STANDARD_BT601_NTSC = 4;
 
-    /** BT.2020 color chromacity coordinates with KR = 0.2627, KB = 0.0593. */
+    /** BT.2020 color chromaticity coordinates with KR = 0.2627, KB = 0.0593. */
     public static final int COLOR_STANDARD_BT2020 = 6;
 
     /** @hide */
@@ -2150,7 +2150,7 @@ public final class MediaFormat {
      * Sets the value of a string key.
      * <p>
      * If value is {@code null}, it sets a null value that behaves similarly to a missing key.
-     * This could be used prior to API level {@link android os.Build.VERSION_CODES#Q} to effectively
+     * This could be used prior to API level {@link android.os.Build.VERSION_CODES#Q} to effectively
      * remove a key.
      */
     public final void setString(@NonNull String name, @Nullable String value) {
@@ -2161,7 +2161,7 @@ public final class MediaFormat {
      * Sets the value of a ByteBuffer key.
      * <p>
      * If value is {@code null}, it sets a null value that behaves similarly to a missing key.
-     * This could be used prior to API level {@link android os.Build.VERSION_CODES#Q} to effectively
+     * This could be used prior to API level {@link android.os.Build.VERSION_CODES#Q} to effectively
      * remove a key.
      */
     public final void setByteBuffer(@NonNull String name, @Nullable ByteBuffer bytes) {

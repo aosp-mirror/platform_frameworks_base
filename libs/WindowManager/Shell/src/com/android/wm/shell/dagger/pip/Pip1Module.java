@@ -203,14 +203,6 @@ public abstract class Pip1Module {
 
     @WMSingleton
     @Provides
-    static PipAppOpsListener providePipAppOpsListener(Context context,
-            PipTouchHandler pipTouchHandler,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new PipAppOpsListener(context, pipTouchHandler.getMotionHelper(), mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
     static PipMotionHelper providePipMotionHelper(Context context,
             @ShellMainThread ShellExecutor mainExecutor,
             PipBoundsState pipBoundsState, PipTaskOrganizer pipTaskOrganizer,

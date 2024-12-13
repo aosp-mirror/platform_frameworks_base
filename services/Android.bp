@@ -233,8 +233,7 @@ ondeviceintelligence_module_java_defaults {
             libs: ["service-ondeviceintelligence.stubs.system_server"],
         },
         release_ondevice_intelligence_platform: {
-            srcs: [":service-ondeviceintelligence-sources"],
-            static_libs: ["modules-utils-backgroundthread"],
+            srcs: [":service-ondeviceintelligence-sources-platform"],
         },
     },
 }
@@ -312,9 +311,11 @@ system_java_library {
         "services.wifi",
         "service-blobstore",
         "service-jobscheduler",
-        "service-connectivity-b-pre-jarjar", // Move it to mainline module
         "android.hidl.base-V1.0-java",
-    ],
+    ] + select(release_flag("RELEASE_MOVE_VCN_TO_MAINLINE"), {
+        true: [],
+        default: ["service-connectivity-b-platform"],
+    }),
 
     libs: [
         "android.hidl.manager-V1.0-java",
