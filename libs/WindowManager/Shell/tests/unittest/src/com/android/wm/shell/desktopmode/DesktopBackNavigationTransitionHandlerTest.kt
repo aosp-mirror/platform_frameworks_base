@@ -56,11 +56,7 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
     @Before
     fun setUp() {
         handler =
-            DesktopBackNavigationTransitionHandler(
-                testExecutor,
-                testExecutor,
-                displayController
-            )
+            DesktopBackNavigationTransitionHandler(testExecutor, testExecutor, displayController)
         whenever(displayController.getDisplayContext(any())).thenReturn(mContext)
     }
 
@@ -75,13 +71,13 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
             handler.startAnimation(
                 transition = mock(),
                 info =
-                createTransitionInfo(
-                    type = WindowManager.TRANSIT_OPEN,
-                    task = createTask(WINDOWING_MODE_FREEFORM)
-                ),
+                    createTransitionInfo(
+                        type = WindowManager.TRANSIT_OPEN,
+                        task = createTask(WINDOWING_MODE_FREEFORM),
+                    ),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertFalse("Should not animate open transition", animates)
@@ -95,7 +91,7 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
                 info = createTransitionInfo(task = createTask(WINDOWING_MODE_FULLSCREEN)),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertFalse("Should not animate fullscreen task to back transition", animates)
@@ -107,13 +103,13 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
             handler.startAnimation(
                 transition = mock(),
                 info =
-                createTransitionInfo(
-                    changeMode = WindowManager.TRANSIT_OPEN,
-                    task = createTask(WINDOWING_MODE_FREEFORM)
-                ),
+                    createTransitionInfo(
+                        changeMode = WindowManager.TRANSIT_OPEN,
+                        task = createTask(WINDOWING_MODE_FREEFORM),
+                    ),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertFalse("Should not animate opening freeform task to back transition", animates)
@@ -127,7 +123,7 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
                 info = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM)),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertTrue("Should animate going to back freeform task close transition", animates)
@@ -138,22 +134,24 @@ class DesktopBackNavigationTransitionHandlerTest : ShellTestCase() {
         val animates =
             handler.startAnimation(
                 transition = mock(),
-                info = createTransitionInfo(
-                    type = TRANSIT_CLOSE,
-                    changeMode = TRANSIT_CLOSE,
-                    task = createTask(WINDOWING_MODE_FREEFORM)
-                ),
+                info =
+                    createTransitionInfo(
+                        type = TRANSIT_CLOSE,
+                        changeMode = TRANSIT_CLOSE,
+                        task = createTask(WINDOWING_MODE_FREEFORM),
+                    ),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertTrue("Should animate going to back freeform task close transition", animates)
     }
+
     private fun createTransitionInfo(
         type: Int = WindowManager.TRANSIT_TO_BACK,
         changeMode: Int = WindowManager.TRANSIT_TO_BACK,
-        task: RunningTaskInfo
+        task: RunningTaskInfo,
     ): TransitionInfo =
         TransitionInfo(type, 0 /* flags */).apply {
             addChange(

@@ -31,67 +31,71 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class WindowDecorCaptionHandleRepositoryTest {
-  private lateinit var captionHandleRepository: WindowDecorCaptionHandleRepository
+    private lateinit var captionHandleRepository: WindowDecorCaptionHandleRepository
 
-  @Before
-  fun setUp() {
-    captionHandleRepository = WindowDecorCaptionHandleRepository()
-  }
+    @Before
+    fun setUp() {
+        captionHandleRepository = WindowDecorCaptionHandleRepository()
+    }
 
-  @Test
-  fun initialState_noAction_returnsNoCaption() {
-    // Check the initial value of `captionStateFlow`.
-    assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(CaptionState.NoCaption)
-  }
+    @Test
+    fun initialState_noAction_returnsNoCaption() {
+        // Check the initial value of `captionStateFlow`.
+        assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(CaptionState.NoCaption)
+    }
 
-  @Test
-  fun notifyCaptionChange_toAppHandleVisible_updatesStateWithCorrectData() {
-    val taskInfo = createTaskInfo(WINDOWING_MODE_FULLSCREEN, GMAIL_PACKAGE_NAME)
-    val appHandleCaptionState =
-        CaptionState.AppHandle(
-          runningTaskInfo = taskInfo,
-          isHandleMenuExpanded = false,
-          globalAppHandleBounds = Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3),
-          isCapturedLinkAvailable = false)
+    @Test
+    fun notifyCaptionChange_toAppHandleVisible_updatesStateWithCorrectData() {
+        val taskInfo = createTaskInfo(WINDOWING_MODE_FULLSCREEN, GMAIL_PACKAGE_NAME)
+        val appHandleCaptionState =
+            CaptionState.AppHandle(
+                runningTaskInfo = taskInfo,
+                isHandleMenuExpanded = false,
+                globalAppHandleBounds =
+                    Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3),
+                isCapturedLinkAvailable = false,
+            )
 
-    captionHandleRepository.notifyCaptionChanged(appHandleCaptionState)
+        captionHandleRepository.notifyCaptionChanged(appHandleCaptionState)
 
-    assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(appHandleCaptionState)
-  }
+        assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(appHandleCaptionState)
+    }
 
-  @Test
-  fun notifyCaptionChange_toAppChipVisible_updatesStateWithCorrectData() {
-    val taskInfo = createTaskInfo(WINDOWING_MODE_FREEFORM, GMAIL_PACKAGE_NAME)
-    val appHeaderCaptionState =
-        CaptionState.AppHeader(
-          runningTaskInfo = taskInfo,
-          isHeaderMenuExpanded = true,
-          globalAppChipBounds = Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3),
-          isCapturedLinkAvailable = false)
+    @Test
+    fun notifyCaptionChange_toAppChipVisible_updatesStateWithCorrectData() {
+        val taskInfo = createTaskInfo(WINDOWING_MODE_FREEFORM, GMAIL_PACKAGE_NAME)
+        val appHeaderCaptionState =
+            CaptionState.AppHeader(
+                runningTaskInfo = taskInfo,
+                isHeaderMenuExpanded = true,
+                globalAppChipBounds =
+                    Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3),
+                isCapturedLinkAvailable = false,
+            )
 
-    captionHandleRepository.notifyCaptionChanged(appHeaderCaptionState)
+        captionHandleRepository.notifyCaptionChanged(appHeaderCaptionState)
 
-    assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(appHeaderCaptionState)
-  }
+        assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(appHeaderCaptionState)
+    }
 
-  @Test
-  fun notifyCaptionChange_toNoCaption_updatesState() {
-    captionHandleRepository.notifyCaptionChanged(CaptionState.NoCaption)
+    @Test
+    fun notifyCaptionChange_toNoCaption_updatesState() {
+        captionHandleRepository.notifyCaptionChanged(CaptionState.NoCaption)
 
-    assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(CaptionState.NoCaption)
-  }
+        assertThat(captionHandleRepository.captionStateFlow.value).isEqualTo(CaptionState.NoCaption)
+    }
 
-  private fun createTaskInfo(
-      deviceWindowingMode: Int = WINDOWING_MODE_UNDEFINED,
-      runningTaskPackageName: String = LAUNCHER_PACKAGE_NAME
-  ): RunningTaskInfo =
-      RunningTaskInfo().apply {
-        configuration.windowConfiguration.apply { windowingMode = deviceWindowingMode }
-        topActivityInfo?.apply { packageName = runningTaskPackageName }
-      }
+    private fun createTaskInfo(
+        deviceWindowingMode: Int = WINDOWING_MODE_UNDEFINED,
+        runningTaskPackageName: String = LAUNCHER_PACKAGE_NAME,
+    ): RunningTaskInfo =
+        RunningTaskInfo().apply {
+            configuration.windowConfiguration.apply { windowingMode = deviceWindowingMode }
+            topActivityInfo?.apply { packageName = runningTaskPackageName }
+        }
 
-  private companion object {
-    const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
-    const val LAUNCHER_PACKAGE_NAME = "com.google.android.apps.nexuslauncher"
-  }
+    private companion object {
+        const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
+        const val LAUNCHER_PACKAGE_NAME = "com.google.android.apps.nexuslauncher"
+    }
 }

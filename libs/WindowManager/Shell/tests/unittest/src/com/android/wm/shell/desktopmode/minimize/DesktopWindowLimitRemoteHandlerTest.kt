@@ -66,16 +66,27 @@ class DesktopWindowLimitRemoteHandlerTest {
 
     private fun createRemoteHandler(taskIdToMinimize: Int) =
         DesktopWindowLimitRemoteHandler(
-            shellExecutor, rootTaskDisplayAreaOrganizer, remoteTransition, taskIdToMinimize)
+            shellExecutor,
+            rootTaskDisplayAreaOrganizer,
+            remoteTransition,
+            taskIdToMinimize,
+        )
 
     @Test
     fun startAnimation_dontSetTransition_returnsFalse() {
         val minimizeTask = createDesktopTask()
         val remoteHandler = createRemoteHandler(taskIdToMinimize = minimizeTask.taskId)
 
-        assertThat(remoteHandler.startAnimation(transition,
-            createMinimizeTransitionInfo(minimizeTask), startT, finishT, finishCallback)
-        ).isFalse()
+        assertThat(
+                remoteHandler.startAnimation(
+                    transition,
+                    createMinimizeTransitionInfo(minimizeTask),
+                    startT,
+                    finishT,
+                    finishCallback,
+                )
+            )
+            .isFalse()
     }
 
     @Test
@@ -84,9 +95,8 @@ class DesktopWindowLimitRemoteHandlerTest {
         remoteHandler.setTransition(transition)
         val info = createToFrontTransitionInfo()
 
-        assertThat(
-            remoteHandler.startAnimation(transition, info, startT, finishT, finishCallback)
-        ).isFalse()
+        assertThat(remoteHandler.startAnimation(transition, info, startT, finishT, finishCallback))
+            .isFalse()
     }
 
     @Test
@@ -96,9 +106,8 @@ class DesktopWindowLimitRemoteHandlerTest {
         remoteHandler.setTransition(transition)
         val info = createMinimizeTransitionInfo(minimizeTask)
 
-        assertThat(
-            remoteHandler.startAnimation(transition, info, startT, finishT, finishCallback)
-        ).isTrue()
+        assertThat(remoteHandler.startAnimation(transition, info, startT, finishT, finishCallback))
+            .isTrue()
     }
 
     @Test
@@ -109,8 +118,7 @@ class DesktopWindowLimitRemoteHandlerTest {
 
         remoteHandler.startAnimation(transition, info, startT, finishT, finishCallback)
 
-        verify(rootTaskDisplayAreaOrganizer, times(0))
-            .reparentToDisplayArea(anyInt(), any(), any())
+        verify(rootTaskDisplayAreaOrganizer, times(0)).reparentToDisplayArea(anyInt(), any(), any())
     }
 
     @Test
@@ -154,14 +162,18 @@ class DesktopWindowLimitRemoteHandlerTest {
 
     private fun createToFrontTransitionInfo() =
         TransitionInfoBuilder(TRANSIT_TO_FRONT)
-            .addChange(TRANSIT_TO_FRONT,
-                TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build())
+            .addChange(
+                TRANSIT_TO_FRONT,
+                TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build(),
+            )
             .build()
 
     private fun createMinimizeTransitionInfo(minimizeTask: ActivityManager.RunningTaskInfo) =
         TransitionInfoBuilder(TRANSIT_TO_FRONT)
-            .addChange(TRANSIT_TO_FRONT,
-                TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build())
+            .addChange(
+                TRANSIT_TO_FRONT,
+                TestRunningTaskInfoBuilder().setWindowingMode(WINDOWING_MODE_FREEFORM).build(),
+            )
             .addChange(TRANSIT_TO_BACK, minimizeTask)
             .build()
 }
