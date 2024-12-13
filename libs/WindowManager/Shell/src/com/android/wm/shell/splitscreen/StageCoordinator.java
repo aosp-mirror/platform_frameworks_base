@@ -3005,7 +3005,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mSplitLayout.update(startTransaction, false /* resetImePosition */);
                 }
 
-                if (mMixedHandler.isEnteringPip(change, transitType)) {
+                if (mMixedHandler.isEnteringPip(change, transitType)
+                        && getSplitItemStage(change.getLastParent()) != STAGE_TYPE_UNDEFINED) {
                     pipChange = change;
                 }
 
