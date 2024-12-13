@@ -39,7 +39,7 @@ import android.nfc.ComponentNameAndUser;
 import android.nfc.Constants;
 import android.nfc.Flags;
 import android.nfc.INfcCardEmulation;
-import android.nfc.INfcEventListener;
+import android.nfc.INfcEventCallback;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.RemoteException;
@@ -1304,7 +1304,7 @@ public final class CardEmulation {
 
     /** Listener for preferred service state changes. */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public interface NfcEventListener {
+    public interface NfcEventCallback {
         /**
          * This method is called when this package gains or loses preferred Nfc service status,
          * either the Default Wallet Role holder (see {@link
@@ -1380,10 +1380,10 @@ public final class CardEmulation {
         default void onInternalErrorReported(@NfcInternalErrorType int errorType) {}
     }
 
-    private final ArrayMap<NfcEventListener, Executor> mNfcEventListeners = new ArrayMap<>();
+    private final ArrayMap<NfcEventCallback, Executor> mNfcEventCallbacks = new ArrayMap<>();
 
-    final INfcEventListener mINfcEventListener =
-            new INfcEventListener.Stub() {
+    final INfcEventCallback mINfcEventCallback =
+            new INfcEventCallback.Stub() {
                 public void onPreferredServiceChanged(ComponentNameAndUser componentNameAndUser) {
                     if (!android.nfc.Flags.nfcEventListener()) {
                         return;
@@ -1443,12 +1443,12 @@ public final class CardEmulation {
                 }
 
                 interface ListenerCall {
-                    void invoke(NfcEventListener listener);
+                    void invoke(NfcEventCallback listener);
                 }
 
                 private void callListeners(ListenerCall listenerCall) {
-                    synchronized (mNfcEventListeners) {
-                        mNfcEventListeners.forEach(
+                    synchronized (mNfcEventCallbacks) {
+                        mNfcEventCallbacks.forEach(
                             (listener, executor) -> {
                                 executor.execute(() -> listenerCall.invoke(listener));
                             });
@@ -1463,34 +1463,34 @@ public final class CardEmulation {
      * @param listener The listener to register
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public void registerNfcEventListener(
-            @NonNull @CallbackExecutor Executor executor, @NonNull NfcEventListener listener) {
+    public void registerNfcEventCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull NfcEventCallback listener) {
         if (!android.nfc.Flags.nfcEventListener()) {
             return;
         }
-        synchronized (mNfcEventListeners) {
-            mNfcEventListeners.put(listener, executor);
-            if (mNfcEventListeners.size() == 1) {
-                callService(() -> sService.registerNfcEventListener(mINfcEventListener));
+        synchronized (mNfcEventCallbacks) {
+            mNfcEventCallbacks.put(listener, executor);
+            if (mNfcEventCallbacks.size() == 1) {
+                callService(() -> sService.registerNfcEventCallback(mINfcEventCallback));
             }
         }
     }
 
     /**
      * Unregister a preferred service listener that was previously registered with {@link
-     * #registerNfcEventListener(Executor, NfcEventListener)}
+     * #registerNfcEventCallback(Executor, NfcEventCallback)}
      *
      * @param listener The previously registered listener to unregister
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public void unregisterNfcEventListener(@NonNull NfcEventListener listener) {
+    public void unregisterNfcEventCallback(@NonNull NfcEventCallback listener) {
         if (!android.nfc.Flags.nfcEventListener()) {
             return;
         }
-        synchronized (mNfcEventListeners) {
-            mNfcEventListeners.remove(listener);
-            if (mNfcEventListeners.size() == 0) {
-                callService(() -> sService.unregisterNfcEventListener(mINfcEventListener));
+        synchronized (mNfcEventCallbacks) {
+            mNfcEventCallbacks.remove(listener);
+            if (mNfcEventCallbacks.size() == 0) {
+                callService(() -> sService.unregisterNfcEventCallback(mINfcEventCallback));
             }
         }
     }

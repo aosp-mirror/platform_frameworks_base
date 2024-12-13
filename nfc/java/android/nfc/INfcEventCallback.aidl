@@ -5,7 +5,7 @@ import android.nfc.ComponentNameAndUser;
 /**
  * @hide
  */
-oneway interface INfcEventListener {
+oneway interface INfcEventCallback {
     void onPreferredServiceChanged(in ComponentNameAndUser ComponentNameAndUser);
     void onObserveModeStateChanged(boolean isEnabled);
     void onAidConflictOccurred(in String aid);
