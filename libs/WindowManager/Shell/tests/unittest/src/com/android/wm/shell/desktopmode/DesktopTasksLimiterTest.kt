@@ -442,6 +442,18 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     @Test
+    fun getTaskToMinimize_tasksAtLimit_newIntentReturnsBackTask() {
+        val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
+        val minimizedTask = desktopTasksLimiter.getTaskIdToMinimize(
+            visibleOrderedTasks = tasks.map { it.taskId },
+            newTaskIdInFront = null,
+            launchingNewIntent = true)
+
+        // first == front, last == back
+        assertThat(minimizedTask).isEqualTo(tasks.last().taskId)
+    }
+
+    @Test
     fun minimizeTransitionReadyAndFinished_logsJankInstrumentationBeginAndEnd() {
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
         val transition = Binder()

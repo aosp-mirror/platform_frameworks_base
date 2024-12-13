@@ -592,10 +592,15 @@ class DesktopTasksController(
         val isMinimizingToPip = taskInfo.pictureInPictureParams?.isAutoEnterEnabled() ?: false
         // If task is going to PiP, start a PiP transition instead of a minimize transition
         if (isMinimizingToPip) {
-            val requestInfo = TransitionRequestInfo(
-                TRANSIT_PIP, /* triggerTask= */ null, taskInfo, /* remoteTransition= */ null,
-                /* displayChange= */ null, /* flags= */ 0
-            )
+            val requestInfo =
+                TransitionRequestInfo(
+                    TRANSIT_PIP,
+                    /* triggerTask= */ null,
+                    taskInfo,
+                    /* remoteTransition= */ null,
+                    /* displayChange= */ null,
+                    /* flags= */ 0,
+                )
             val requestRes = transitions.dispatchRequest(Binder(), requestInfo, /* skip= */ null)
             wct.merge(requestRes.second, true)
             pendingPipTransitionAndTask =
@@ -759,15 +764,12 @@ class DesktopTasksController(
         displayId: Int = DEFAULT_DISPLAY,
     ): IBinder {
         val taskIdToMinimize =
-            if (launchingTaskId != null) {
-                addAndGetMinimizeChanges(displayId, wct, newTaskId = launchingTaskId)
-            } else {
-                logW("Starting desktop task launch without checking the task-limit")
-                // TODO(b/378920066): This currently does not respect the desktop window limit.
-                //  It's possible that |launchingTaskId| is null when launching using an intent, and
-                //  the task-limit should be respected then too.
-                null
-            }
+            addAndGetMinimizeChanges(
+                displayId,
+                wct,
+                newTaskId = launchingTaskId,
+                launchingNewIntent = launchingTaskId == null,
+            )
         val exitImmersiveResult =
             desktopImmersiveController.exitImmersiveIfApplicable(
                 wct = wct,
@@ -1409,7 +1411,7 @@ class DesktopTasksController(
     override fun onTransitionConsumed(
         transition: IBinder,
         aborted: Boolean,
-        finishT: Transaction?
+        finishT: Transaction?,
     ) {
         pendingPipTransitionAndTask?.let { (pipTransition, taskId) ->
             if (transition == pipTransition) {
@@ -1985,10 +1987,14 @@ class DesktopTasksController(
     private fun addAndGetMinimizeChanges(
         displayId: Int,
         wct: WindowContainerTransaction,
-        newTaskId: Int,
+        newTaskId: Int?,
+        launchingNewIntent: Boolean = false,
     ): Int? {
         if (!desktopTasksLimiter.isPresent) return null
-        return desktopTasksLimiter.get().addAndGetMinimizeTaskChanges(displayId, wct, newTaskId)
+        require(newTaskId == null || !launchingNewIntent)
+        return desktopTasksLimiter
+            .get()
+            .addAndGetMinimizeTaskChanges(displayId, wct, newTaskId, launchingNewIntent)
     }
 
     private fun addPendingMinimizeTransition(transition: IBinder, taskIdToMinimize: Int) {

@@ -264,6 +264,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 persistentDeviceId, mPermissionManagerServiceImpl::checkUidPermission);
     }
 
+    @Override
+    @Context.PermissionRequestState
+    public int getPermissionRequestState(@NonNull String packageName,
+            @NonNull String permissionName, int deviceId) {
+        Objects.requireNonNull(permissionName, "permission can't be null.");
+        Objects.requireNonNull(packageName, "package name can't be null.");
+        return mPermissionManagerServiceImpl.getPermissionRequestState(packageName, permissionName,
+                getPersistentDeviceId(deviceId));
+    }
+
     private String getPersistentDeviceId(int deviceId) {
         if (deviceId == Context.DEVICE_ID_DEFAULT) {
             return VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;

@@ -788,6 +788,40 @@ public abstract class Context {
     public static final int RECEIVER_NOT_EXPORTED = 0x4;
 
     /**
+     * The permission is granted.
+     *
+     * @hide
+     */
+    public static final int PERMISSION_REQUEST_STATE_GRANTED = 0;
+
+    /**
+     * The permission isn't granted, but apps can request the permission. When the app request
+     * the permission, user will be prompted with permission dialog to grant or deny the request.
+     *
+     * @hide
+     */
+    public static final int PERMISSION_REQUEST_STATE_REQUESTABLE = 1;
+
+    /**
+     * The permission is denied, and shouldn't be requested by apps. Permission request
+     * will be automatically denied by the system, preventing the permission dialog from being
+     * displayed to the user.
+     *
+     * @hide
+     */
+    public static final int PERMISSION_REQUEST_STATE_UNREQUESTABLE = 2;
+
+
+    /** @hide */
+    @IntDef(prefix = { "PERMISSION_REQUEST_STATE_" }, value = {
+            PERMISSION_REQUEST_STATE_GRANTED,
+            PERMISSION_REQUEST_STATE_REQUESTABLE,
+            PERMISSION_REQUEST_STATE_UNREQUESTABLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionRequestState {}
+
+    /**
      * Returns an AssetManager instance for the application's package.
      * <p>
      * <strong>Note:</strong> Implementations of this method should return
@@ -6987,6 +7021,31 @@ public abstract class Context {
     @PermissionMethod(orSelf = true)
     public abstract void enforceCallingOrSelfPermission(
             @NonNull @PermissionName String permission, @Nullable String message);
+
+    /**
+     * Returns the permission request state for a given runtime permission. This method provides a
+     * streamlined mechanism for applications to determine whether a permission can be
+     * requested (i.e. whether the user will be prompted with a permission dialog).
+     *
+     * <p>Traditionally, determining if a permission has been permanently denied (unrequestable)
+     * required applications to initiate a permission request and subsequently analyze the result
+     * of {@link android.app.Activity#shouldShowRequestPermissionRationale} in conjunction with the
+     * grant result within the {@link android.app.Activity#onRequestPermissionsResult} callback.
+     *
+     * @param permission The name of the permission.
+     *
+     * @return The current request state of the specified permission, represented by one of the
+     * following constants: {@link PermissionRequestState#PERMISSION_REQUEST_STATE_GRANTED},
+     * {@link PermissionRequestState#PERMISSION_REQUEST_STATE_REQUESTABLE}, or
+     * {@link PermissionRequestState#PERMISSION_REQUEST_STATE_UNREQUESTABLE}.
+     *
+     * @hide
+     */
+    @CheckResult
+    @PermissionRequestState
+    public int getPermissionRequestState(@NonNull String permission) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Grant permission to access a specific Uri to another package, regardless

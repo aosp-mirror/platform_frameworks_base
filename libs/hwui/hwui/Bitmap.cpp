@@ -19,6 +19,7 @@
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
 #ifdef __ANDROID__  // Layoutlib does not support render thread
+#include <com_android_graphics_surfaceflinger_flags.h>
 #include <private/android/AHardwareBufferHelpers.h>
 #include <ui/GraphicBuffer.h>
 #include <ui/GraphicBufferMapper.h>
@@ -562,7 +563,7 @@ BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, 
 
 bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* stream) {
 #ifdef __ANDROID__  // TODO: This isn't built for host for some reason?
-    if (hasGainmap() && format == JavaCompressFormat::Jpeg) {
+    if (hasGainmap()) {
         SkBitmap baseBitmap = getSkBitmap();
         SkBitmap gainmapBitmap = gainmap()->bitmap->getSkBitmap();
         if (gainmapBitmap.colorType() == SkColorType::kAlpha_8_SkColorType) {
@@ -572,12 +573,27 @@ bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* str
             greyGainmap.setPixelRef(sk_ref_sp(gainmapBitmap.pixelRef()), 0, 0);
             gainmapBitmap = std::move(greyGainmap);
         }
-        SkJpegEncoder::Options options{.fQuality = quality};
-        return SkJpegGainmapEncoder::EncodeHDRGM(stream, baseBitmap.pixmap(), options,
-                                                 gainmapBitmap.pixmap(), options, gainmap()->info);
+        switch (format) {
+            case JavaCompressFormat::Jpeg: {
+                SkJpegEncoder::Options options{.fQuality = quality};
+                return SkJpegGainmapEncoder::EncodeHDRGM(stream, baseBitmap.pixmap(), options,
+                                                         gainmapBitmap.pixmap(), options,
+                                                         gainmap()->info);
+            }
+            case JavaCompressFormat::Png: {
+                if (com::android::graphics::surfaceflinger::flags::true_hdr_screenshots()) {
+                    SkGainmapInfo info = gainmap()->info;
+                    SkPngEncoder::Options options{.fGainmap = &gainmapBitmap.pixmap(),
+                                                  .fGainmapInfo = &info};
+                    return SkPngEncoder::Encode(stream, baseBitmap.pixmap(), options);
+                }
+                // fallthrough if we're not supporting HDR screenshots
+            }
+            default:
+                ALOGI("Format: %d doesn't support gainmap compression!", format);
+        }
     }
 #endif
-
     SkBitmap skbitmap;
     getSkBitmap(&skbitmap);
     return compress(skbitmap, format, quality, stream);

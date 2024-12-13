@@ -714,6 +714,7 @@ public class ZenModeDiff {
         public static final String FIELD_DISABLE_TOUCH = "mDisableTouch";
         public static final String FIELD_MINIMIZE_RADIO_USAGE = "mMinimizeRadioUsage";
         public static final String FIELD_MAXIMIZE_DOZE = "mMaximizeDoze";
+        public static final String FIELD_NIGHT_LIGHT = "mNightLight";
         public static final String FIELD_EXTRA_EFFECTS = "mExtraEffects";
         // NOTE: new field strings must match the variable names in ZenDeviceEffects
 
@@ -780,6 +781,11 @@ public class ZenModeDiff {
             if (from.shouldMaximizeDoze() != to.shouldMaximizeDoze()) {
                 addField(FIELD_MAXIMIZE_DOZE, new FieldDiff<>(from.shouldMaximizeDoze(),
                         to.shouldMaximizeDoze()));
+            }
+            if (from.shouldUseNightLight() != to.shouldUseNightLight()) {
+                addField(
+                        FIELD_NIGHT_LIGHT,
+                        new FieldDiff<>(from.shouldUseNightLight(), to.shouldUseNightLight()));
             }
             if (!Objects.equals(from.getExtraEffects(), to.getExtraEffects())) {
                 addField(FIELD_EXTRA_EFFECTS, new FieldDiff<>(from.getExtraEffects(),

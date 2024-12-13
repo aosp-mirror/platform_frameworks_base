@@ -1554,15 +1554,18 @@ public class ZenModeHelper {
 
         if (isFromApp) {
             // Don't allow apps to toggle hidden (non-public-API) effects.
-            newEffects = new ZenDeviceEffects.Builder(newEffects)
-                    .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
-                    .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
-                    .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
-                    .setShouldDisableTouch(oldEffects.shouldDisableTouch())
-                    .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
-                    .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
-                    .setExtraEffects(oldEffects.getExtraEffects())
-                    .build();
+            newEffects =
+                    new ZenDeviceEffects.Builder(newEffects)
+                            .setShouldDisableAutoBrightness(
+                                    oldEffects.shouldDisableAutoBrightness())
+                            .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
+                            .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
+                            .setShouldDisableTouch(oldEffects.shouldDisableTouch())
+                            .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
+                            .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                            .setShouldUseNightLight(oldEffects.shouldUseNightLight())
+                            .setExtraEffects(oldEffects.getExtraEffects())
+                            .build();
         }
 
         zenRule.zenDeviceEffects = newEffects;
@@ -1600,6 +1603,9 @@ public class ZenModeHelper {
             }
             if (oldEffects.shouldMaximizeDoze() != newEffects.shouldMaximizeDoze()) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_MAXIMIZE_DOZE;
+            }
+            if (oldEffects.shouldUseNightLight() != newEffects.shouldUseNightLight()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_NIGHT_LIGHT;
             }
             if (!Objects.equals(oldEffects.getExtraEffects(), newEffects.getExtraEffects())) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_EXTRA_EFFECTS;

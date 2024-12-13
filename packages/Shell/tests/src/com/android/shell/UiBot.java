@@ -18,9 +18,12 @@ package com.android.shell;
 
 import android.app.Instrumentation;
 import android.app.StatusBarManager;
+import android.content.Context;
+import android.content.res.Resources;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.PluralsMessageFormatter;
 
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
@@ -34,7 +37,9 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A helper class for UI-related testing tasks.
@@ -206,11 +211,26 @@ final class UiBot {
      *
      * @param name name of the activity as displayed in the UI (typically the value set by
      *            {@code android:label} in the manifest).
+     * @param context Context of the target application
+     * @param count Number of files to be shared
      */
-    public void chooseActivity(String name) {
+    public void chooseActivity(String name, Context context, int count) {
         // It uses an intent chooser now, so just getting the activity by text is enough...
-        final String share = mInstrumentation.getContext().getString(
-                com.android.internal.R.string.share);
+        Resources res = null;
+        try {
+            res = context.getPackageManager()
+                    .getResourcesForApplication("com.android.intentresolver");
+        } catch (Exception e)  {
+            assertNotNull("could not get resources for com.android.intentresolver", res);
+        }
+        /* Resource read is defined as a string which contains a plural
+         * which needs some formatting */
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", count);
+        final String share = PluralsMessageFormatter.format(
+                res,
+                arguments,
+                res.getIdentifier("sharing_files", "string", "com.android.intentresolver"));
         boolean gotIt = mDevice.wait(Until.hasObject(By.text(share)), mTimeout);
         assertTrue("could not get share activity (" + share + ")", gotIt);
         swipeUp();

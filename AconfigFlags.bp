@@ -401,6 +401,7 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
+        "com.android.tethering",
         "com.android.wifi",
     ],
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
@@ -1215,6 +1216,7 @@ java_aconfig_library {
 // DevicePolicy
 aconfig_declarations {
     name: "device_policy_aconfig_flags",
+    exportable: true,
     package: "android.app.admin.flags",
     container: "system",
     srcs: [
@@ -1233,6 +1235,7 @@ java_aconfig_library {
     aconfig_declarations: "device_policy_aconfig_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
     min_sdk_version: "30",
+    mode: "exported",
     apex_available: [
         "//apex_available:platform",
         "com.android.permission",

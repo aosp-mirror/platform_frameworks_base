@@ -33,7 +33,6 @@ import com.android.systemui.scene.ui.composable.transitions.notificationsShadeTo
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.toNotificationsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.toQuickSettingsShadeTransition
-import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 
 /**
@@ -134,27 +133,11 @@ val SceneContainerTransitions = transitions {
     }
 
     // Scene overscroll
-
+    // TODO(b/382477212) Remove STL Overscroll DSL
     overscrollDisabled(Scenes.Gone, Orientation.Vertical)
     overscrollDisabled(Scenes.Lockscreen, Orientation.Vertical)
-    overscroll(Scenes.Bouncer, Orientation.Vertical) {
-        translate(Bouncer.Elements.Content, y = { absoluteDistance })
-    }
-    overscroll(Scenes.Shade, Orientation.Vertical) {
-        translate(
-            Notifications.Elements.NotificationScrim,
-            y = Shade.Dimensions.ScrimOverscrollLimit,
-        )
-        translate(Shade.Elements.SplitShadeStartColumn, y = Shade.Dimensions.ScrimOverscrollLimit)
-        translate(
-            Notifications.Elements.NotificationStackPlaceholder,
-            y = Shade.Dimensions.ScrimOverscrollLimit,
-        )
-    }
-    overscroll(Overlays.NotificationsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
-    }
-    overscroll(Overlays.QuickSettingsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
-    }
+    overscrollDisabled(Scenes.Bouncer, Orientation.Vertical)
+    overscrollDisabled(Scenes.Shade, Orientation.Vertical)
+    overscrollDisabled(Overlays.NotificationsShade, Orientation.Vertical)
+    overscrollDisabled(Overlays.QuickSettingsShade, Orientation.Vertical)
 }

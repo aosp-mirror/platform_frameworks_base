@@ -1113,6 +1113,7 @@ public class UserManagerService extends IUserManager.Stub {
                 UserManager.invalidateUserPropertiesCache();
             }
             UserManager.invalidateCacheOnUserListChange();
+            UserManager.invalidateUserRestriction();
         }
     }
 

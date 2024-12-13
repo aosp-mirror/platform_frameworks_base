@@ -21,6 +21,7 @@ import static android.media.audio.Flags.FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE;
 
 import static com.android.media.flags.Flags.FLAG_ENABLE_AUDIO_POLICIES_DEVICE_AND_BLUETOOTH_CONTROLLER;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
+import static com.android.media.flags.Flags.FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME;
 import static com.android.media.flags.Flags.FLAG_ENABLE_MIRRORING_IN_MEDIA_ROUTER_2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_MEDIA_ROUTE_2_INFO_TYPES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_NEW_WIRED_MEDIA_ROUTE_2_INFO_TYPES;
@@ -631,7 +632,7 @@ public final class MediaRoute2Info implements Parcelable {
     @ConnectionState
     private final int mConnectionState;
     private final String mClientPackageName;
-    private final String mPackageName;
+    private final String mProviderPackageName;
     @PlaybackVolume private final int mVolumeHandling;
     private final int mVolumeMax;
     private final int mVolume;
@@ -655,7 +656,7 @@ public final class MediaRoute2Info implements Parcelable {
         mDescription = builder.mDescription;
         mConnectionState = builder.mConnectionState;
         mClientPackageName = builder.mClientPackageName;
-        mPackageName = builder.mPackageName;
+        mProviderPackageName = builder.mProviderPackageName;
         mVolumeHandling = builder.mVolumeHandling;
         mVolumeMax = builder.mVolumeMax;
         mVolume = builder.mVolume;
@@ -681,7 +682,7 @@ public final class MediaRoute2Info implements Parcelable {
         mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mConnectionState = in.readInt();
         mClientPackageName = in.readString();
-        mPackageName = in.readString();
+        mProviderPackageName = in.readString();
         mVolumeHandling = in.readInt();
         mVolumeMax = in.readInt();
         mVolume = in.readInt();
@@ -801,14 +802,19 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the package name of the provider that published the route.
-     * <p>
-     * It is set by the system service.
-     * @hide
+     * Gets the package name of the {@link MediaRoute2ProviderService provider} that published the
+     * route, or null if it has not yet been populated.
+     *
+     * <p>The package name of the route provider is populated by the system as part of {@link
+     * MediaRoute2ProviderService#notifyRoutes(java.util.Collection)}. As a result, it's expectable
+     * that a {@link MediaRoute2Info} instance that hasn't yet been published will have a null
+     * provider package name. Otherwise, routes obtained via {@link MediaRouter2} should have a
+     * populated provider package name.
      */
+    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     @Nullable
-    public String getPackageName() {
-        return mPackageName;
+    public String getProviderPackageName() {
+        return mProviderPackageName;
     }
 
     /**
@@ -928,6 +934,15 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
+     * Returns whether this route supports {@link #FLAG_ROUTING_TYPE_REMOTE remote routing}.
+     *
+     * @hide
+     */
+    public boolean supportsRemoteRouting() {
+        return (mRoutingTypeFlags & MediaRoute2Info.FLAG_ROUTING_TYPE_REMOTE) != 0;
+    }
+
+    /**
      * Returns true if the route info has all of the required field.
      * A route is valid if and only if it is obtained from
      * {@link com.android.server.media.MediaRouterService}.
@@ -943,10 +958,13 @@ public final class MediaRoute2Info implements Parcelable {
 
     /**
      * Returns whether this route is visible to the package with the given name.
+     *
      * @hide
      */
+    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     public boolean isVisibleTo(String packageName) {
-        return !mIsVisibilityRestricted || getPackageName().equals(packageName)
+        return !mIsVisibilityRestricted
+                || TextUtils.equals(getProviderPackageName(), packageName)
                 || mAllowedPackages.contains(packageName);
     }
 
@@ -1020,7 +1038,7 @@ public final class MediaRoute2Info implements Parcelable {
         pw.println(indent + "mDescription=" + mDescription);
         pw.println(indent + "mConnectionState=" + mConnectionState);
         pw.println(indent + "mClientPackageName=" + mClientPackageName);
-        pw.println(indent + "mPackageName=" + mPackageName);
+        pw.println(indent + "mProviderPackageName=" + mProviderPackageName);
 
         dumpVolume(pw, indent);
 
@@ -1059,7 +1077,7 @@ public final class MediaRoute2Info implements Parcelable {
                 && Objects.equals(mDescription, other.mDescription)
                 && (mConnectionState == other.mConnectionState)
                 && Objects.equals(mClientPackageName, other.mClientPackageName)
-                && Objects.equals(mPackageName, other.mPackageName)
+                && Objects.equals(mProviderPackageName, other.mProviderPackageName)
                 && (mVolumeHandling == other.mVolumeHandling)
                 && (mVolumeMax == other.mVolumeMax)
                 && (mVolume == other.mVolume)
@@ -1086,7 +1104,7 @@ public final class MediaRoute2Info implements Parcelable {
                 mDescription,
                 mConnectionState,
                 mClientPackageName,
-                mPackageName,
+                mProviderPackageName,
                 mVolumeHandling,
                 mVolumeMax,
                 mVolume,
@@ -1162,7 +1180,7 @@ public final class MediaRoute2Info implements Parcelable {
         TextUtils.writeToParcel(mDescription, dest, flags);
         dest.writeInt(mConnectionState);
         dest.writeString(mClientPackageName);
-        dest.writeString(mPackageName);
+        dest.writeString(mProviderPackageName);
         dest.writeInt(mVolumeHandling);
         dest.writeInt(mVolumeMax);
         dest.writeInt(mVolume);
@@ -1314,7 +1332,7 @@ public final class MediaRoute2Info implements Parcelable {
         @ConnectionState
         private int mConnectionState;
         private String mClientPackageName;
-        private String mPackageName;
+        private String mProviderPackageName;
         @PlaybackVolume private int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         private int mVolumeMax;
         private int mVolume;
@@ -1387,7 +1405,7 @@ public final class MediaRoute2Info implements Parcelable {
             mDescription = routeInfo.mDescription;
             mConnectionState = routeInfo.mConnectionState;
             mClientPackageName = routeInfo.mClientPackageName;
-            mPackageName = routeInfo.mPackageName;
+            mProviderPackageName = routeInfo.mProviderPackageName;
             mVolumeHandling = routeInfo.mVolumeHandling;
             mVolumeMax = routeInfo.mVolumeMax;
             mVolume = routeInfo.mVolume;
@@ -1534,11 +1552,13 @@ public final class MediaRoute2Info implements Parcelable {
 
         /**
          * Sets the package name of the route.
+         *
          * @hide
          */
+        // It is set by the MediaRouterService.
         @NonNull
-        public Builder setPackageName(@NonNull String packageName) {
-            mPackageName = packageName;
+        public Builder setProviderPackageName(@NonNull String providerPackageName) {
+            mProviderPackageName = providerPackageName;
             return this;
         }
 
