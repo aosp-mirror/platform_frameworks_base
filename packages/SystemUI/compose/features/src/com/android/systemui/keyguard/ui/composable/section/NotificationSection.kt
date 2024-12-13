@@ -29,11 +29,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,7 +49,6 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.res.R
-import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
@@ -179,16 +175,13 @@ constructor(
             return
         }
 
-        val splitShadeTopMargin: Dp =
-            LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
-
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
             viewModel = rememberViewModel("Notifications") { viewModelFactory.create() },
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = splitShadeTopMargin) }
+                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = 12.dp) }
                     .let {
                         if (burnInParams == null) {
                             it

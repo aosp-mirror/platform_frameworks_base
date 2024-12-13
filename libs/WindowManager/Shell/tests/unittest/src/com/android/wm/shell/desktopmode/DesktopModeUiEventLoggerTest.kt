@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-
 import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -67,8 +66,7 @@ class DesktopModeUiEventLoggerTest : ShellTestCase() {
 
     @Test
     fun log_eventLogged() {
-        val event =
-            DESKTOP_WINDOW_EDGE_DRAG_RESIZE
+        val event = DESKTOP_WINDOW_EDGE_DRAG_RESIZE
         logger.log(UID, PACKAGE_NAME, event)
         assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
         assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(event.id)
@@ -97,8 +95,7 @@ class DesktopModeUiEventLoggerTest : ShellTestCase() {
 
     @Test
     fun logWithInstanceId_eventLogged() {
-        val event =
-            DESKTOP_WINDOW_EDGE_DRAG_RESIZE
+        val event = DESKTOP_WINDOW_EDGE_DRAG_RESIZE
         logger.logWithInstanceId(INSTANCE_ID, UID, PACKAGE_NAME, event)
         assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
         assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(event.id)
@@ -109,12 +106,12 @@ class DesktopModeUiEventLoggerTest : ShellTestCase() {
 
     @Test
     fun logWithTaskInfo_eventLogged() {
-        val event =
-            DESKTOP_WINDOW_EDGE_DRAG_RESIZE
-        val taskInfo = TestRunningTaskInfoBuilder()
-            .setUserId(USER_ID)
-            .setBaseActivity(ComponentName(PACKAGE_NAME, "test"))
-            .build()
+        val event = DESKTOP_WINDOW_EDGE_DRAG_RESIZE
+        val taskInfo =
+            TestRunningTaskInfoBuilder()
+                .setUserId(USER_ID)
+                .setBaseActivity(ComponentName(PACKAGE_NAME, "test"))
+                .build()
         whenever(mockPackageManager.getApplicationInfoAsUser(PACKAGE_NAME, /* flags= */ 0, USER_ID))
             .thenReturn(ApplicationInfo().apply { uid = UID })
         logger.log(taskInfo, event)

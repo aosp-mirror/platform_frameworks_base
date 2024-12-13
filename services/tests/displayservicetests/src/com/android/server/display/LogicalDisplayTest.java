@@ -609,4 +609,69 @@ public class LogicalDisplayTest {
         DisplayInfo info = mLogicalDisplay.getDisplayInfoLocked();
         assertArrayEquals(appSupportedModes, info.appsSupportedModes);
     }
+
+    @Test
+    public void testSetCanHostTasks_defaultDisplay() {
+        mLogicalDisplay = new LogicalDisplay(Display.DEFAULT_DISPLAY, LAYER_STACK, mDisplayDevice);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+
+        mLogicalDisplay.setCanHostTasksLocked(true);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+
+        mLogicalDisplay.setCanHostTasksLocked(false);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+    }
+
+    @Test
+    public void testSetCanHostTasks_nonDefaultNormalDisplay() {
+        mLogicalDisplay =
+                new LogicalDisplay(Display.DEFAULT_DISPLAY + 1, LAYER_STACK, mDisplayDevice);
+
+        mLogicalDisplay.setCanHostTasksLocked(true);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+
+        mLogicalDisplay.setCanHostTasksLocked(false);
+        assertFalse(mLogicalDisplay.canHostTasksLocked());
+    }
+
+    @Test
+    public void testSetCanHostTasks_nonDefaultVirtualMirrorDisplay() {
+        mDisplayDeviceInfo.type = Display.TYPE_VIRTUAL;
+        when(mDisplayDevice.shouldOnlyMirror()).thenReturn(true);
+        mLogicalDisplay =
+                new LogicalDisplay(Display.DEFAULT_DISPLAY + 1, LAYER_STACK, mDisplayDevice);
+        mLogicalDisplay.updateLocked(mDeviceRepo, mSyntheticModeManager);
+
+        mLogicalDisplay.setCanHostTasksLocked(true);
+        assertFalse(mLogicalDisplay.canHostTasksLocked());
+
+        mLogicalDisplay.setCanHostTasksLocked(false);
+        assertFalse(mLogicalDisplay.canHostTasksLocked());
+    }
+
+    @Test
+    public void testSetCanHostTasks_nonDefaultRearDisplay() {
+        mLogicalDisplay =
+                new LogicalDisplay(Display.DEFAULT_DISPLAY + 1, LAYER_STACK, mDisplayDevice);
+        mLogicalDisplay.setDevicePositionLocked(Layout.Display.POSITION_REAR);
+
+        mLogicalDisplay.setCanHostTasksLocked(true);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+
+        mLogicalDisplay.setCanHostTasksLocked(false);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+    }
+
+    @Test
+    public void testSetCanHostTasks_nonDefaultOwnContentOnly() {
+        mDisplayDeviceInfo.flags = DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
+        mLogicalDisplay =
+                new LogicalDisplay(Display.DEFAULT_DISPLAY + 1, LAYER_STACK, mDisplayDevice);
+
+        mLogicalDisplay.setCanHostTasksLocked(true);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+
+        mLogicalDisplay.setCanHostTasksLocked(false);
+        assertTrue(mLogicalDisplay.canHostTasksLocked());
+    }
 }

@@ -34,6 +34,7 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags.notificationShadeBlur
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
@@ -53,7 +54,6 @@ import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.sign
-import com.android.systemui.Flags.notificationShadeBlur
 
 /**
  * Responsible for blurring the notification shade window, and applying a zoom effect to the
@@ -212,19 +212,13 @@ constructor(
             shadeRadius = 0f
         }
 
-        var zoomOut = MathUtils.saturate(blurUtils.ratioOfBlurRadius(shadeRadius))
         var blur = shadeRadius.toInt()
-
-        if (inSplitShade) {
-            zoomOut = 0f
-        }
-
+        val zoomOut = blurRadiusToZoomOut(blurRadius = shadeRadius)
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
             if (!notificationShadeBlur()) {
                 blur = 0
             }
-            zoomOut = 0f
         }
 
         if (!blurUtils.supportsBlursOnWindows()) {
@@ -237,23 +231,42 @@ constructor(
         return Pair(blur, zoomOut)
     }
 
+    private fun blurRadiusToZoomOut(blurRadius: Float): Float {
+        var zoomOut = MathUtils.saturate(blurUtils.ratioOfBlurRadius(blurRadius))
+        if (inSplitShade) {
+            zoomOut = 0f
+        }
+
+        if (scrimsVisible) {
+            zoomOut = 0f
+        }
+        return zoomOut
+    }
+
+    private val shouldBlurBeOpaque: Boolean
+        get() = if (notificationShadeBlur()) false else scrimsVisible && !blursDisabledForAppLaunch
+
     /** Callback that updates the window blur value and is called only once per frame. */
     @VisibleForTesting
     val updateBlurCallback =
         Choreographer.FrameCallback {
             updateScheduled = false
-            val (blur, zoomOut) = computeBlurAndZoomOut()
-            val opaque = if (notificationShadeBlur()) false else scrimsVisible && !blursDisabledForAppLaunch
+            val (blur, zoomOutFromShadeRadius) = computeBlurAndZoomOut()
+            val opaque = shouldBlurBeOpaque
             Trace.traceCounter(Trace.TRACE_TAG_APP, "shade_blur_radius", blur)
             blurUtils.applyBlur(root.viewRootImpl, blur, opaque)
-            lastAppliedBlur = blur
-            wallpaperController.setNotificationShadeZoom(zoomOut)
-            listeners.forEach {
-                it.onWallpaperZoomOutChanged(zoomOut)
-                it.onBlurRadiusChanged(blur)
-            }
-            notificationShadeWindowController.setBackgroundBlurRadius(blur)
+            onBlurApplied(blur, zoomOutFromShadeRadius)
         }
+
+    private fun onBlurApplied(appliedBlurRadius: Int, zoomOutFromShadeRadius: Float) {
+        lastAppliedBlur = appliedBlurRadius
+        wallpaperController.setNotificationShadeZoom(zoomOutFromShadeRadius)
+        listeners.forEach {
+            it.onWallpaperZoomOutChanged(zoomOutFromShadeRadius)
+            it.onBlurRadiusChanged(appliedBlurRadius)
+        }
+        notificationShadeWindowController.setBackgroundBlurRadius(appliedBlurRadius)
+    }
 
     /** Animate blurs when unlocking. */
     private val keyguardStateCallback =

@@ -16,6 +16,9 @@
 
 package com.android.server.location.fudger;
 
+import static com.android.internal.location.geometry.S2CellIdUtils.LAT_INDEX;
+import static com.android.internal.location.geometry.S2CellIdUtils.LNG_INDEX;
+
 import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
 import android.location.Location;
@@ -184,31 +187,33 @@ public class LocationFudger {
         synchronized (this) {
             cacheCopy = mLocationFudgerCache;
         }
-
+        double[] coarsened = new double[] {0.0, 0.0};
         // TODO(b/381204398): To ensure a safe rollout, two algorithms co-exist. The first is the
         // new density-based algorithm, while the second is the traditional coarsening algorithm.
         // Once rollout is done, clean up the unused algorithm.
-        if (Flags.densityBasedCoarseLocations() && cacheCopy != null
-                && cacheCopy.hasDefaultValue()) {
-            int level = cacheCopy.getCoarseningLevel(latitude, longitude);
-            double[] center = snapToCenterOfS2Cell(latitude, longitude, level);
-            latitude = center[S2CellIdUtils.LAT_INDEX];
-            longitude = center[S2CellIdUtils.LNG_INDEX];
+        // The new algorithm is applied if and only if (1) the flag is on, (2) the cache has been
+        // set, and (3) the cache has successfully queried the provider for the default coarsening
+        // value.
+        if (Flags.populationDensityProvider() && Flags.densityBasedCoarseLocations()
+                && cacheCopy != null) {
+            if (cacheCopy.hasDefaultValue()) {
+                // New algorithm that snaps to the center of a S2 cell.
+                int level = cacheCopy.getCoarseningLevel(latitude, longitude);
+                coarsened = snapToCenterOfS2Cell(latitude, longitude, level);
+            } else {
+                // Try to fetch the default value. The answer won't come in time, but will be used
+                // for the next location to coarsen.
+                cacheCopy.fetchDefaultCoarseningLevelIfNeeded();
+                // Previous algorithm that snaps to a grid of width mAccuracyM.
+                coarsened = snapToGrid(latitude, longitude);
+            }
         } else {
-            // quantize location by snapping to a grid. this is the primary means of obfuscation. it
-            // gives nice consistent results and is very effective at hiding the true location (as
-            // long as you are not sitting on a grid boundary, which the random offsets mitigate).
-            //
-            // note that we quantize the latitude first, since the longitude quantization depends on
-            // the latitude value and so leaks information about the latitude
-            double latGranularity = metersToDegreesLatitude(mAccuracyM);
-            latitude = wrapLatitude(Math.round(latitude / latGranularity) * latGranularity);
-            double lonGranularity = metersToDegreesLongitude(mAccuracyM, latitude);
-            longitude = wrapLongitude(Math.round(longitude / lonGranularity) * lonGranularity);
+            // Previous algorithm that snaps to a grid of width mAccuracyM.
+            coarsened = snapToGrid(latitude, longitude);
         }
 
-        coarse.setLatitude(latitude);
-        coarse.setLongitude(longitude);
+        coarse.setLatitude(coarsened[LAT_INDEX]);
+        coarse.setLongitude(coarsened[LNG_INDEX]);
         coarse.setAccuracy(Math.max(mAccuracyM, coarse.getAccuracy()));
 
         synchronized (this) {
@@ -217,6 +222,21 @@ public class LocationFudger {
         }
 
         return coarse;
+    }
+
+    // quantize location by snapping to a grid. this is the primary means of obfuscation. it
+    // gives nice consistent results and is very effective at hiding the true location (as
+    // long as you are not sitting on a grid boundary, which the random offsets mitigate).
+    //
+    // note that we quantize the latitude first, since the longitude quantization depends on
+    // the latitude value and so leaks information about the latitude
+    private double[] snapToGrid(double latitude, double longitude) {
+        double[] center = new double[] {0.0, 0.0};
+        double latGranularity = metersToDegreesLatitude(mAccuracyM);
+        center[LAT_INDEX] = wrapLatitude(Math.round(latitude / latGranularity) * latGranularity);
+        double lonGranularity = metersToDegreesLongitude(mAccuracyM, latitude);
+        center[LNG_INDEX] = wrapLongitude(Math.round(longitude / lonGranularity) * lonGranularity);
+        return center;
     }
 
     @VisibleForTesting

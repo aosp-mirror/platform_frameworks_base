@@ -210,6 +210,27 @@ public class AudioDevicePort extends AudioPort {
         return super.equals(o);
     }
 
+    /**
+     * Returns true if the AudioDevicePort passed as argument represents the same device (same
+     * type and same address). This is different from equals() in that the port IDs are not compared
+     * which allows matching devices across native audio server restarts.
+     * @param other the other audio device port to compare to.
+     * @return true if both device port correspond to the same audio device, false otherwise.
+     * @hide
+     */
+    public boolean isSameAs(AudioDevicePort other) {
+        if (mType != other.type()) {
+            return false;
+        }
+        if (mAddress == null && other.address() != null) {
+            return false;
+        }
+        if (!mAddress.equals(other.address())) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         String type = (mRole == ROLE_SOURCE ?

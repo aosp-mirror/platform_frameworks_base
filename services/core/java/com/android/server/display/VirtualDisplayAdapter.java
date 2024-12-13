@@ -307,13 +307,14 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
     private VirtualDisplayDevice removeVirtualDisplayDeviceLocked(IBinder appToken) {
         if (getFeatureFlags().isVirtualDisplayLimitEnabled()) {
-            int ownerUid = mOwnerUids.get(appToken);
-            int noOfDevices = mNoOfDevicesPerPackage.get(ownerUid, /* valueIfKeyNotFound= */ 0);
-            if (noOfDevices <= 1) {
-                mNoOfDevicesPerPackage.delete(ownerUid);
-                mOwnerUids.remove(appToken);
-            } else {
-                mNoOfDevicesPerPackage.put(ownerUid, noOfDevices - 1);
+            Integer ownerUid = mOwnerUids.remove(appToken);
+            if (ownerUid != null) {
+                int noOfDevices = mNoOfDevicesPerPackage.get(ownerUid, /* valueIfKeyNotFound= */ 0);
+                if (noOfDevices <= 1) {
+                    mNoOfDevicesPerPackage.delete(ownerUid);
+                } else {
+                    mNoOfDevicesPerPackage.put(ownerUid, noOfDevices - 1);
+                }
             }
         }
         return mVirtualDisplayDevices.remove(appToken);
@@ -498,6 +499,11 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 setSurfaceLocked(t, mSurface);
             }
             mPendingChanges = 0;
+        }
+
+        @Override
+        public boolean shouldOnlyMirror() {
+            return mProjection != null || ((mFlags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0);
         }
 
         public void setSurfaceLocked(Surface surface) {

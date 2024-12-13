@@ -280,6 +280,51 @@ public class LocationFudgerCacheTest {
                 eq(POINT_IN_TIMES_SQUARE[1]), eq(numAdditionalCells), any());
     }
 
+    @Test
+    public void fetchDefaultCoarseningLevelIfNeeded_withDefaultValue_doesNotQueryProvider()
+            throws RemoteException {
+        // Arrange.
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+
+        ArgumentCaptor<IS2LevelCallback> argumentCaptor = ArgumentCaptor.forClass(
+                IS2LevelCallback.class);
+        verify(provider, times(1)).getDefaultCoarseningLevel(argumentCaptor.capture());
+
+        IS2LevelCallback cb = argumentCaptor.getValue();
+        cb.onResult(10);
+
+        assertThat(cache.hasDefaultValue()).isTrue();
+
+        // Act.
+        cache.fetchDefaultCoarseningLevelIfNeeded();
+
+        // Assert. The method is not called again.
+        verify(provider, times(1)).getDefaultCoarseningLevel(any());
+    }
+
+    @Test
+    public void fetchDefaultCoarseningLevelIfNeeded_withoutDefaultValue_doesQueryProvider()
+            throws RemoteException {
+        // Arrange.
+        ProxyPopulationDensityProvider provider = mock(ProxyPopulationDensityProvider.class);
+        LocationFudgerCache cache = new LocationFudgerCache(provider);
+
+        ArgumentCaptor<IS2LevelCallback> argumentCaptor = ArgumentCaptor.forClass(
+                IS2LevelCallback.class);
+        verify(provider, times(1)).getDefaultCoarseningLevel(argumentCaptor.capture());
+
+        IS2LevelCallback cb = argumentCaptor.getValue();
+        cb.onError();
+
+        assertThat(cache.hasDefaultValue()).isFalse();
+
+        // Act.
+        cache.fetchDefaultCoarseningLevelIfNeeded();
+
+        // Assert. The method is called again.
+        verify(provider, times(2)).getDefaultCoarseningLevel(any());
+    }
 
     @Test
     public void locationFudgerCache_canContainUpToMaxSizeItems() {

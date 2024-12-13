@@ -30,6 +30,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_D
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
+import static android.provider.Settings.Secure.MIRROR_BUILT_IN_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
@@ -88,6 +89,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.Sensor;
@@ -3828,6 +3830,96 @@ public class DisplayManagerServiceTest {
         waitForIdleHandler(handler);
 
         assertThat(callback.receivedEvents()).isEmpty();
+    }
+
+    @Test
+    public void testMirrorBuiltInDisplay_flagEnabled() {
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(true);
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 0);
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.systemReady(/* safeMode= */ false);
+        assertThat(displayManager.shouldMirrorBuiltInDisplay()).isFalse();
+
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 1);
+        final ContentObserver observer = displayManager.getSettingsObserver();
+        observer.onChange(false, Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY));
+        assertThat(displayManager.shouldMirrorBuiltInDisplay()).isTrue();
+    }
+
+    @Test
+    public void testMirrorBuiltInDisplay_flagDisabled() {
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(false);
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 0);
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.systemReady(/* safeMode= */ false);
+        assertThat(displayManager.shouldMirrorBuiltInDisplay()).isFalse();
+
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 1);
+        final ContentObserver observer = displayManager.getSettingsObserver();
+        observer.onChange(false, Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY));
+        assertThat(displayManager.shouldMirrorBuiltInDisplay()).isFalse();
+    }
+
+    @Test
+    public void testShouldNotNotifyDefaultDisplayChanges_whenMirrorBuiltInDisplayChanges() {
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(true);
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 0);
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.systemReady(/* safeMode= */ false);
+
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(
+                callback, STANDARD_DISPLAY_EVENTS);
+        waitForIdleHandler(handler);
+
+        // Create a default display device
+        createFakeDisplayDevice(displayManager, new float[] {60f}, Display.TYPE_INTERNAL);
+
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 1);
+        final ContentObserver observer = displayManager.getSettingsObserver();
+        observer.onChange(false, Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY));
+        waitForIdleHandler(handler);
+
+        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_CHANGED);
+    }
+
+    @Test
+    public void testShouldNotifyNonDefaultDisplayChanges_whenMirrorBuiltInDisplayChanges() {
+        when(mMockFlags.isDisplayContentModeManagementEnabled()).thenReturn(true);
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 0);
+
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.systemReady(/* safeMode= */ false);
+
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        Handler handler = displayManager.getDisplayHandler();
+        waitForIdleHandler(handler);
+
+        FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        displayManagerBinderService.registerCallbackWithEventMask(
+                callback, STANDARD_DISPLAY_EVENTS);
+        waitForIdleHandler(handler);
+
+        // Create a default display device
+        createFakeDisplayDevice(displayManager, new float[] {60f}, Display.TYPE_INTERNAL);
+        // Create a non-default display device
+        createFakeDisplayDevice(displayManager, new float[] {60f}, Display.TYPE_EXTERNAL);
+
+        Settings.Secure.putInt(mContext.getContentResolver(), MIRROR_BUILT_IN_DISPLAY, 1);
+        final ContentObserver observer = displayManager.getSettingsObserver();
+        observer.onChange(false, Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY));
+        waitForIdleHandler(handler);
+
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {

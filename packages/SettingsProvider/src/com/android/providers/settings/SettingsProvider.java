@@ -2089,7 +2089,33 @@ public class SettingsProvider extends ContentProvider {
                 // setting.
                 return false;
             }
-            final String mimeType = getContext().getContentResolver().getType(audioUri);
+
+            // If the audioUri comes from FileProvider, the security check will fail. Currently, it
+            // should not have too many FileProvider Uri usage, using a workaround fix here.
+            // Only allow for caller is privileged apps
+            ApplicationInfo aInfo = null;
+            try {
+                aInfo = getCallingApplicationInfoOrThrow();
+            } catch (IllegalStateException ignored) {
+                Slog.w(LOG_TAG, "isValidMediaUri: cannot get calling app info for setting: "
+                        + name + " URI: " + audioUri);
+                return false;
+            }
+            final boolean isPrivilegedApp = aInfo != null ? aInfo.isPrivilegedApp() : false;
+            String mimeType = null;
+            if (isPrivilegedApp) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mimeType = getContext().getContentResolver().getType(audioUri);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } else {
+                mimeType = getContext().getContentResolver().getType(audioUri);
+            }
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "isValidMediaUri mimeType: " + mimeType);
+            }
             if (mimeType == null) {
                 Slog.e(LOG_TAG,
                         "mutateSystemSetting for setting: " + name + " URI: " + audioUri

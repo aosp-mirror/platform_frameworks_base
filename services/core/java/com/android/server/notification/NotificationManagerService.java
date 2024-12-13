@@ -6145,7 +6145,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void enforcePolicyAccess(int uid, String method) {
-            if (PERMISSION_GRANTED == getContext().checkCallingPermission(
+            if (PERMISSION_GRANTED == getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
                 return;
             }
@@ -6176,7 +6176,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void enforcePolicyAccess(String pkg, String method) {
-            if (PERMISSION_GRANTED == getContext().checkCallingPermission(
+            if (PERMISSION_GRANTED == getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
                 return;
             }
@@ -6985,6 +6985,7 @@ public class NotificationManagerService extends SystemService {
 
     protected void checkNotificationListenerAccess() {
         if (!isCallerSystemOrPhone()) {
+            // Safe to check calling permission as caller is already not system or phone
             getContext().enforceCallingPermission(
                     permission.MANAGE_NOTIFICATION_LISTENERS,
                     "Caller must hold " + permission.MANAGE_NOTIFICATION_LISTENERS);

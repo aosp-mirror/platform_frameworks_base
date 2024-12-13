@@ -16,20 +16,53 @@
 
 package com.android.systemui.shade.data.repository
 
-import android.view.Display
+import com.android.systemui.display.data.repository.displayRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.display.AnyExternalShadeDisplayPolicy
+import com.android.systemui.shade.display.DefaultDisplayShadePolicy
 import com.android.systemui.shade.display.ShadeDisplayPolicy
-import com.android.systemui.shade.display.SpecificDisplayIdPolicy
+import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
+import com.android.systemui.util.settings.fakeGlobalSettings
 
-val Kosmos.defaultShadeDisplayPolicy: ShadeDisplayPolicy by
-    Kosmos.Fixture { SpecificDisplayIdPolicy(Display.DEFAULT_DISPLAY) }
+val Kosmos.defaultShadeDisplayPolicy: DefaultDisplayShadePolicy by
+    Kosmos.Fixture { DefaultDisplayShadePolicy() }
+
+val Kosmos.anyExternalShadeDisplayPolicy: AnyExternalShadeDisplayPolicy by
+    Kosmos.Fixture {
+        AnyExternalShadeDisplayPolicy(
+            bgScope = testScope.backgroundScope,
+            displayRepository = displayRepository,
+        )
+    }
+
+val Kosmos.focusBasedShadeDisplayPolicy: StatusBarTouchShadeDisplayPolicy by
+    Kosmos.Fixture {
+        StatusBarTouchShadeDisplayPolicy(
+            displayRepository = displayRepository,
+            backgroundScope = testScope.backgroundScope,
+            keyguardRepository = keyguardRepository,
+            shadeOnDefaultDisplayWhenLocked = false,
+        )
+    }
 
 val Kosmos.shadeDisplaysRepository: MutableShadeDisplaysRepository by
     Kosmos.Fixture {
         ShadeDisplaysRepositoryImpl(
-            defaultPolicy = defaultShadeDisplayPolicy,
             bgScope = testScope.backgroundScope,
+            globalSettings = fakeGlobalSettings,
+            policies = shadeDisplayPolicies,
+            defaultPolicy = defaultShadeDisplayPolicy,
+        )
+    }
+
+val Kosmos.shadeDisplayPolicies: Set<ShadeDisplayPolicy> by
+    Kosmos.Fixture {
+        setOf(
+            defaultShadeDisplayPolicy,
+            anyExternalShadeDisplayPolicy,
+            focusBasedShadeDisplayPolicy,
         )
     }
 

@@ -82,20 +82,20 @@ class DesktopUserRepositoriesTest : ShellTestCase() {
         datastoreScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
 
-        val profiles: MutableList<UserInfo> = mutableListOf(
-            UserInfo(USER_ID_1, "User 1", 0),
-            UserInfo(PROFILE_ID_2, "Profile 2", 0))
+        val profiles: MutableList<UserInfo> =
+            mutableListOf(UserInfo(USER_ID_1, "User 1", 0), UserInfo(PROFILE_ID_2, "Profile 2", 0))
         whenever(userManager.getProfiles(USER_ID_1)).thenReturn(profiles)
 
-        userRepositories = DesktopUserRepositories(
-            context,
-            shellInit,
-            shellController,
-            persistentRepository,
-            repositoryInitializer,
-            datastoreScope,
-            userManager
-        )
+        userRepositories =
+            DesktopUserRepositories(
+                context,
+                shellInit,
+                shellController,
+                persistentRepository,
+                repositoryInitializer,
+                datastoreScope,
+                userManager,
+            )
     }
 
     @After

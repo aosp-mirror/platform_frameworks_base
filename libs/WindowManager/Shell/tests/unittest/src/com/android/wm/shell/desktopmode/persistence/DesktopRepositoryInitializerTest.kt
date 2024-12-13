@@ -47,15 +47,12 @@ import org.mockito.Mockito.spy
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
 class DesktopRepositoryInitializerTest : ShellTestCase() {
 
-    @JvmField
-    @Rule
-    val setFlagsRule = SetFlagsRule()
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     private lateinit var repositoryInitializer: DesktopRepositoryInitializer
     private lateinit var shellInit: ShellInit
@@ -82,7 +79,7 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
                 persistentRepository,
                 repositoryInitializer,
                 datastoreScope,
-                userManager
+                userManager,
             )
     }
 
@@ -90,101 +87,94 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE, FLAG_ENABLE_DESKTOP_WINDOWING_HSUM)
     fun initWithPersistence_multipleUsers_addedCorrectly() =
         runTest(StandardTestDispatcher()) {
-            whenever(persistentRepository.getUserDesktopRepositoryMap()).thenReturn(
-                mapOf(
-                    USER_ID_1 to desktopRepositoryState1,
-                    USER_ID_2 to desktopRepositoryState2
+            whenever(persistentRepository.getUserDesktopRepositoryMap())
+                .thenReturn(
+                    mapOf(
+                        USER_ID_1 to desktopRepositoryState1,
+                        USER_ID_2 to desktopRepositoryState2,
+                    )
                 )
-            )
             whenever(persistentRepository.getDesktopRepositoryState(USER_ID_1))
                 .thenReturn(desktopRepositoryState1)
             whenever(persistentRepository.getDesktopRepositoryState(USER_ID_2))
                 .thenReturn(desktopRepositoryState2)
-            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_1))
-                .thenReturn(desktop1)
-            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_2))
-                .thenReturn(desktop2)
-            whenever(persistentRepository.readDesktop(USER_ID_2, DESKTOP_ID_3))
-                .thenReturn(desktop3)
+            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_1)).thenReturn(desktop1)
+            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_2)).thenReturn(desktop2)
+            whenever(persistentRepository.readDesktop(USER_ID_2, DESKTOP_ID_3)).thenReturn(desktop3)
 
             repositoryInitializer.initialize(desktopUserRepositories)
 
             // Desktop Repository currently returns all tasks across desktops for a specific user
-            // since the repository currently doesn't handle desktops. This test logic should be updated
+            // since the repository currently doesn't handle desktops. This test logic should be
+            // updated
             // once the repository handles multiple desktops.
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_1)
-                    .getActiveTasks(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories.getProfile(USER_ID_1).getActiveTasks(DEFAULT_DISPLAY)
+                )
                 .containsExactly(1, 3, 4, 5)
                 .inOrder()
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_1)
-                    .getExpandedTasksOrdered(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories
+                        .getProfile(USER_ID_1)
+                        .getExpandedTasksOrdered(DEFAULT_DISPLAY)
+                )
                 .containsExactly(5, 1)
                 .inOrder()
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_1)
-                    .getMinimizedTasks(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories.getProfile(USER_ID_1).getMinimizedTasks(DEFAULT_DISPLAY)
+                )
                 .containsExactly(3, 4)
                 .inOrder()
 
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_2)
-                    .getActiveTasks(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories.getProfile(USER_ID_2).getActiveTasks(DEFAULT_DISPLAY)
+                )
                 .containsExactly(7, 8)
                 .inOrder()
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_2)
-                    .getExpandedTasksOrdered(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories
+                        .getProfile(USER_ID_2)
+                        .getExpandedTasksOrdered(DEFAULT_DISPLAY)
+                )
                 .contains(7)
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_2)
-                    .getMinimizedTasks(DEFAULT_DISPLAY)
-            ).containsExactly(8)
+                    desktopUserRepositories.getProfile(USER_ID_2).getMinimizedTasks(DEFAULT_DISPLAY)
+                )
+                .containsExactly(8)
         }
 
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
     fun initWithPersistence_singleUser_addedCorrectly() =
         runTest(StandardTestDispatcher()) {
-            whenever(persistentRepository.getUserDesktopRepositoryMap()).thenReturn(
-                mapOf(
-                    USER_ID_1 to desktopRepositoryState1,
-                )
-            )
+            whenever(persistentRepository.getUserDesktopRepositoryMap())
+                .thenReturn(mapOf(USER_ID_1 to desktopRepositoryState1))
             whenever(persistentRepository.getDesktopRepositoryState(USER_ID_1))
                 .thenReturn(desktopRepositoryState1)
-            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_1))
-                .thenReturn(desktop1)
-            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_2))
-                .thenReturn(desktop2)
+            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_1)).thenReturn(desktop1)
+            whenever(persistentRepository.readDesktop(USER_ID_1, DESKTOP_ID_2)).thenReturn(desktop2)
 
             repositoryInitializer.initialize(desktopUserRepositories)
 
             // Desktop Repository currently returns all tasks across desktops for a specific user
-            // since the repository currently doesn't handle desktops. This test logic should be updated
+            // since the repository currently doesn't handle desktops. This test logic should be
+            // updated
             // once the repository handles multiple desktops.
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_1)
-                    .getActiveTasks(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories.getProfile(USER_ID_1).getActiveTasks(DEFAULT_DISPLAY)
+                )
                 .containsExactly(1, 3, 4, 5)
                 .inOrder()
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_1)
-                    .getExpandedTasksOrdered(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories
+                        .getProfile(USER_ID_1)
+                        .getExpandedTasksOrdered(DEFAULT_DISPLAY)
+                )
                 .containsExactly(5, 1)
                 .inOrder()
             assertThat(
-                desktopUserRepositories.getProfile(USER_ID_1)
-                    .getMinimizedTasks(DEFAULT_DISPLAY)
-            )
+                    desktopUserRepositories.getProfile(USER_ID_1).getMinimizedTasks(DEFAULT_DISPLAY)
+                )
                 .containsExactly(3, 4)
                 .inOrder()
         }
@@ -202,70 +192,73 @@ class DesktopRepositoryInitializerTest : ShellTestCase() {
         const val DESKTOP_ID_3 = 4
 
         val freeformTasksInZOrder1 = listOf(1, 3)
-        val desktop1: Desktop = Desktop.newBuilder()
-            .setDesktopId(DESKTOP_ID_1)
-            .addAllZOrderedTasks(freeformTasksInZOrder1)
-            .putTasksByTaskId(
-                1,
-                DesktopTask.newBuilder()
-                    .setTaskId(1)
-                    .setDesktopTaskState(DesktopTaskState.VISIBLE)
-                    .build()
-            )
-            .putTasksByTaskId(
-                3,
-                DesktopTask.newBuilder()
-                    .setTaskId(3)
-                    .setDesktopTaskState(DesktopTaskState.MINIMIZED)
-                    .build()
-            )
-            .build()
+        val desktop1: Desktop =
+            Desktop.newBuilder()
+                .setDesktopId(DESKTOP_ID_1)
+                .addAllZOrderedTasks(freeformTasksInZOrder1)
+                .putTasksByTaskId(
+                    1,
+                    DesktopTask.newBuilder()
+                        .setTaskId(1)
+                        .setDesktopTaskState(DesktopTaskState.VISIBLE)
+                        .build(),
+                )
+                .putTasksByTaskId(
+                    3,
+                    DesktopTask.newBuilder()
+                        .setTaskId(3)
+                        .setDesktopTaskState(DesktopTaskState.MINIMIZED)
+                        .build(),
+                )
+                .build()
 
         val freeformTasksInZOrder2 = listOf(4, 5)
-        val desktop2: Desktop = Desktop.newBuilder()
-            .setDesktopId(DESKTOP_ID_2)
-            .addAllZOrderedTasks(freeformTasksInZOrder2)
-            .putTasksByTaskId(
-                4,
-                DesktopTask.newBuilder()
-                    .setTaskId(4)
-                    .setDesktopTaskState(DesktopTaskState.MINIMIZED)
-                    .build()
-            )
-            .putTasksByTaskId(
-                5,
-                DesktopTask.newBuilder()
-                    .setTaskId(5)
-                    .setDesktopTaskState(DesktopTaskState.VISIBLE)
-                    .build()
-            )
-            .build()
+        val desktop2: Desktop =
+            Desktop.newBuilder()
+                .setDesktopId(DESKTOP_ID_2)
+                .addAllZOrderedTasks(freeformTasksInZOrder2)
+                .putTasksByTaskId(
+                    4,
+                    DesktopTask.newBuilder()
+                        .setTaskId(4)
+                        .setDesktopTaskState(DesktopTaskState.MINIMIZED)
+                        .build(),
+                )
+                .putTasksByTaskId(
+                    5,
+                    DesktopTask.newBuilder()
+                        .setTaskId(5)
+                        .setDesktopTaskState(DesktopTaskState.VISIBLE)
+                        .build(),
+                )
+                .build()
 
         val freeformTasksInZOrder3 = listOf(7, 8)
-        val desktop3: Desktop = Desktop.newBuilder()
-            .setDesktopId(DESKTOP_ID_3)
-            .addAllZOrderedTasks(freeformTasksInZOrder3)
-            .putTasksByTaskId(
-                7,
-                DesktopTask.newBuilder()
-                    .setTaskId(7)
-                    .setDesktopTaskState(DesktopTaskState.VISIBLE)
-                    .build()
-            )
-            .putTasksByTaskId(
-                8,
-                DesktopTask.newBuilder()
-                    .setTaskId(8)
-                    .setDesktopTaskState(DesktopTaskState.MINIMIZED)
-                    .build()
-            )
-            .build()
-        val desktopRepositoryState1: DesktopRepositoryState = DesktopRepositoryState.newBuilder()
-            .putDesktop(DESKTOP_ID_1, desktop1)
-            .putDesktop(DESKTOP_ID_2, desktop2)
-            .build()
-        val desktopRepositoryState2: DesktopRepositoryState = DesktopRepositoryState.newBuilder()
-            .putDesktop(DESKTOP_ID_3, desktop3)
-            .build()
+        val desktop3: Desktop =
+            Desktop.newBuilder()
+                .setDesktopId(DESKTOP_ID_3)
+                .addAllZOrderedTasks(freeformTasksInZOrder3)
+                .putTasksByTaskId(
+                    7,
+                    DesktopTask.newBuilder()
+                        .setTaskId(7)
+                        .setDesktopTaskState(DesktopTaskState.VISIBLE)
+                        .build(),
+                )
+                .putTasksByTaskId(
+                    8,
+                    DesktopTask.newBuilder()
+                        .setTaskId(8)
+                        .setDesktopTaskState(DesktopTaskState.MINIMIZED)
+                        .build(),
+                )
+                .build()
+        val desktopRepositoryState1: DesktopRepositoryState =
+            DesktopRepositoryState.newBuilder()
+                .putDesktop(DESKTOP_ID_1, desktop1)
+                .putDesktop(DESKTOP_ID_2, desktop2)
+                .build()
+        val desktopRepositoryState2: DesktopRepositoryState =
+            DesktopRepositoryState.newBuilder().putDesktop(DESKTOP_ID_3, desktop3).build()
     }
 }

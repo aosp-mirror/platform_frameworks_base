@@ -19,6 +19,7 @@ package com.android.providers.settings;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -43,6 +44,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
+import com.android.server.backup.Flags;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 
 import java.io.FileNotFoundException;
@@ -67,6 +69,10 @@ public class SettingsHelper {
     private static final int LONG_PRESS_POWER_FOR_ASSISTANT = 5;
     /** See frameworks/base/core/res/res/values/config.xml#config_keyChordPowerVolumeUp **/
     private static final int KEY_CHORD_POWER_VOLUME_UP_GLOBAL_ACTIONS = 2;
+
+    // Error messages for logging metrics.
+    private static final String ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA =
+        "remote_exception_setting_locale_data";
 
     private Context mContext;
     private AudioManager mAudioManager;
@@ -528,6 +534,11 @@ public class SettingsHelper {
         return conf.getLocales().toLanguageTags().getBytes();
     }
 
+    LocaleList getLocaleList() {
+        Configuration conf = mContext.getResources().getConfiguration();
+        return conf.getLocales();
+    }
+
     private static Locale toFullLocale(@NonNull Locale locale) {
         if (locale.getScript().isEmpty() || locale.getCountry().isEmpty()) {
             return ULocale.addLikelySubtags(ULocale.forLocale(locale)).toLocale();
@@ -653,8 +664,12 @@ public class SettingsHelper {
      * code and {@code CC} is a two letter country code.
      *
      * @param data the comma separated BCP-47 language tags in bytes.
+     * @param size the size of the data in bytes.
+     * @param backupRestoreEventLogger the logger to log the restore event.
+     * @param dataType the data type of the setting for logging purposes.
      */
-    /* package */ void setLocaleData(byte[] data, int size) {
+    /* package */ void setLocaleData(
+        byte[] data, int size, BackupRestoreEventLogger backupRestoreEventLogger, String dataType) {
         final Configuration conf = mContext.getResources().getConfiguration();
 
         // Replace "_" with "-" to deal with older backups.
@@ -681,8 +696,18 @@ public class SettingsHelper {
 
             am.updatePersistentConfigurationWithAttribution(config, mContext.getOpPackageName(),
                     mContext.getAttributionTag());
+            if (Flags.enableMetricsSettingsBackupAgents()) {
+                backupRestoreEventLogger
+                    .logItemsRestored(dataType, localeList.size());
+            }
         } catch (RemoteException e) {
-            // Intentionally left blank
+            if (Flags.enableMetricsSettingsBackupAgents()) {
+                backupRestoreEventLogger
+                    .logItemsRestoreFailed(
+                        dataType,
+                        localeList.size(),
+                        ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA);
+            }
         }
     }
 

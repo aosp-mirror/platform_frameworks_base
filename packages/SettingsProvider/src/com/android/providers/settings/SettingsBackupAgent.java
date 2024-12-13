@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.net.wifi.SoftApConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -269,7 +270,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
         byte[] lockSettingsData   = getLockSettings(UserHandle.myUserId());
-        byte[] locale = mSettingsHelper.getLocaleData();
+        byte[] locale = getLocaleSettings();
         byte[] softApConfigData = getSoftAPConfiguration();
         byte[] netPoliciesData = getNetworkPolicies();
         byte[] wifiFullConfigData = getNewWifiConfigData();
@@ -408,7 +409,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 case KEY_LOCALE :
                     byte[] localeData = new byte[size];
                     data.readEntityData(localeData, 0, size);
-                    mSettingsHelper.setLocaleData(localeData, size);
+                    mSettingsHelper
+                        .setLocaleData(
+                            localeData,
+                            size,
+                            mBackupRestoreEventLogger,
+                            KEY_LOCALE);
                     break;
 
                 case KEY_WIFI_CONFIG :
@@ -545,7 +551,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of locale data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            mSettingsHelper.setLocaleData(buffer, nBytes);
+            mSettingsHelper
+                .setLocaleData(
+                    buffer, nBytes, mBackupRestoreEventLogger, KEY_LOCALE);
 
             // Restore older backups performing the necessary migrations.
             if (version < FULL_BACKUP_ADDED_WIFI_NEW) {
@@ -1408,6 +1416,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private byte[] getNewWifiConfigData() {
         return mWifiManager.retrieveBackupData();
+    }
+
+    private byte[] getLocaleSettings() {
+        if (!areAgentMetricsEnabled) {
+            return mSettingsHelper.getLocaleData();
+        }
+        LocaleList localeList = mSettingsHelper.getLocaleList();
+        numberOfSettingsPerKey.put(KEY_LOCALE, localeList.size());
+        return localeList.toLanguageTags().getBytes();
     }
 
     private void restoreNewWifiConfigData(byte[] bytes) {

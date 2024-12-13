@@ -63,109 +63,115 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidTestingRunner::class)
 class DesktopDisplayEventHandlerTest : ShellTestCase() {
 
-  @Mock lateinit var testExecutor: ShellExecutor
-  @Mock lateinit var transitions: Transitions
-  @Mock lateinit var displayController: DisplayController
-  @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
-  @Mock private lateinit var mockWindowManager: IWindowManager
+    @Mock lateinit var testExecutor: ShellExecutor
+    @Mock lateinit var transitions: Transitions
+    @Mock lateinit var displayController: DisplayController
+    @Mock lateinit var rootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
+    @Mock private lateinit var mockWindowManager: IWindowManager
 
-  private lateinit var shellInit: ShellInit
-  private lateinit var handler: DesktopDisplayEventHandler
+    private lateinit var shellInit: ShellInit
+    private lateinit var handler: DesktopDisplayEventHandler
 
-  @Before
-  fun setUp() {
-    shellInit = spy(ShellInit(testExecutor))
-    whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
-    val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
-    whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(tda)
-    handler =
-        DesktopDisplayEventHandler(
-            context,
-            shellInit,
-            transitions,
-            displayController,
-            rootTaskDisplayAreaOrganizer,
-            mockWindowManager,
+    @Before
+    fun setUp() {
+        shellInit = spy(ShellInit(testExecutor))
+        whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
+        val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(tda)
+        handler =
+            DesktopDisplayEventHandler(
+                context,
+                shellInit,
+                transitions,
+                displayController,
+                rootTaskDisplayAreaOrganizer,
+                mockWindowManager,
+            )
+        shellInit.init()
+    }
+
+    private fun testDisplayWindowingModeSwitch(
+        defaultWindowingMode: Int,
+        extendedDisplayEnabled: Boolean,
+        expectTransition: Boolean,
+    ) {
+        val externalDisplayId = 100
+        val captor = ArgumentCaptor.forClass(OnDisplaysChangedListener::class.java)
+        verify(displayController).addDisplayWindowListener(captor.capture())
+        val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+        tda.configuration.windowConfiguration.windowingMode = defaultWindowingMode
+        whenever(mockWindowManager.getWindowingMode(anyInt())).thenAnswer { defaultWindowingMode }
+        val settingsSession =
+            ExtendedDisplaySettingsSession(
+                context.contentResolver,
+                if (extendedDisplayEnabled) 1 else 0,
+            )
+
+        settingsSession.use {
+            // The external display connected.
+            whenever(rootTaskDisplayAreaOrganizer.getDisplayIds())
+                .thenReturn(intArrayOf(DEFAULT_DISPLAY, externalDisplayId))
+            captor.value.onDisplayAdded(externalDisplayId)
+            tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
+            // The external display disconnected.
+            whenever(rootTaskDisplayAreaOrganizer.getDisplayIds())
+                .thenReturn(intArrayOf(DEFAULT_DISPLAY))
+            captor.value.onDisplayRemoved(externalDisplayId)
+
+            if (expectTransition) {
+                val arg = argumentCaptor<WindowContainerTransaction>()
+                verify(transitions, times(2))
+                    .startTransition(eq(TRANSIT_CHANGE), arg.capture(), isNull())
+                assertThat(arg.firstValue.changes[tda.token.asBinder()]?.windowingMode)
+                    .isEqualTo(WINDOWING_MODE_FREEFORM)
+                assertThat(arg.secondValue.changes[tda.token.asBinder()]?.windowingMode)
+                    .isEqualTo(defaultWindowingMode)
+            } else {
+                verify(transitions, never()).startTransition(eq(TRANSIT_CHANGE), any(), isNull())
+            }
+        }
+    }
+
+    @Test
+    fun displayWindowingModeSwitchOnDisplayConnected_extendedDisplayDisabled() {
+        testDisplayWindowingModeSwitch(
+            defaultWindowingMode = WINDOWING_MODE_FULLSCREEN,
+            extendedDisplayEnabled = false,
+            expectTransition = false,
         )
-    shellInit.init()
-  }
-
-  private fun testDisplayWindowingModeSwitch(
-    defaultWindowingMode: Int,
-    extendedDisplayEnabled: Boolean,
-    expectTransition: Boolean
-  ) {
-    val externalDisplayId = 100
-    val captor = ArgumentCaptor.forClass(OnDisplaysChangedListener::class.java)
-    verify(displayController).addDisplayWindowListener(captor.capture())
-    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
-    tda.configuration.windowConfiguration.windowingMode = defaultWindowingMode
-    whenever(mockWindowManager.getWindowingMode(anyInt())).thenAnswer { defaultWindowingMode }
-    val settingsSession = ExtendedDisplaySettingsSession(
-      context.contentResolver, if (extendedDisplayEnabled) 1 else 0)
-
-    settingsSession.use {
-      // The external display connected.
-      whenever(rootTaskDisplayAreaOrganizer.getDisplayIds())
-        .thenReturn(intArrayOf(DEFAULT_DISPLAY, externalDisplayId))
-      captor.value.onDisplayAdded(externalDisplayId)
-      tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
-      // The external display disconnected.
-      whenever(rootTaskDisplayAreaOrganizer.getDisplayIds())
-        .thenReturn(intArrayOf(DEFAULT_DISPLAY))
-      captor.value.onDisplayRemoved(externalDisplayId)
-
-      if (expectTransition) {
-        val arg = argumentCaptor<WindowContainerTransaction>()
-        verify(transitions, times(2)).startTransition(eq(TRANSIT_CHANGE), arg.capture(), isNull())
-        assertThat(arg.firstValue.changes[tda.token.asBinder()]?.windowingMode)
-          .isEqualTo(WINDOWING_MODE_FREEFORM)
-        assertThat(arg.secondValue.changes[tda.token.asBinder()]?.windowingMode)
-          .isEqualTo(defaultWindowingMode)
-      } else {
-        verify(transitions, never()).startTransition(eq(TRANSIT_CHANGE), any(), isNull())
-      }
     }
-  }
 
-  @Test
-  fun displayWindowingModeSwitchOnDisplayConnected_extendedDisplayDisabled() {
-    testDisplayWindowingModeSwitch(
-      defaultWindowingMode = WINDOWING_MODE_FULLSCREEN,
-      extendedDisplayEnabled = false,
-      expectTransition = false
-    )
-  }
-
-  @Test
-  fun displayWindowingModeSwitchOnDisplayConnected_fullscreenDisplay() {
-    testDisplayWindowingModeSwitch(
-      defaultWindowingMode = WINDOWING_MODE_FULLSCREEN,
-      extendedDisplayEnabled = true,
-      expectTransition = true
-    )
-  }
-
-  @Test
-  fun displayWindowingModeSwitchOnDisplayConnected_freeformDisplay() {
-    testDisplayWindowingModeSwitch(
-      defaultWindowingMode = WINDOWING_MODE_FREEFORM,
-      extendedDisplayEnabled = true,
-      expectTransition = false
-    )
-  }
-
-  private class ExtendedDisplaySettingsSession(
-    private val contentResolver: ContentResolver,
-      private val overrideValue: Int
-  ) : AutoCloseable {
-    private val settingName = DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS
-    private val initialValue = Settings.Global.getInt(contentResolver, settingName, 0)
-
-    init { Settings.Global.putInt(contentResolver, settingName, overrideValue) }
-
-    override fun close() {
-      Settings.Global.putInt(contentResolver, settingName, initialValue)
+    @Test
+    fun displayWindowingModeSwitchOnDisplayConnected_fullscreenDisplay() {
+        testDisplayWindowingModeSwitch(
+            defaultWindowingMode = WINDOWING_MODE_FULLSCREEN,
+            extendedDisplayEnabled = true,
+            expectTransition = true,
+        )
     }
-  }
+
+    @Test
+    fun displayWindowingModeSwitchOnDisplayConnected_freeformDisplay() {
+        testDisplayWindowingModeSwitch(
+            defaultWindowingMode = WINDOWING_MODE_FREEFORM,
+            extendedDisplayEnabled = true,
+            expectTransition = false,
+        )
+    }
+
+    private class ExtendedDisplaySettingsSession(
+        private val contentResolver: ContentResolver,
+        private val overrideValue: Int,
+    ) : AutoCloseable {
+        private val settingName = DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS
+        private val initialValue = Settings.Global.getInt(contentResolver, settingName, 0)
+
+        init {
+            Settings.Global.putInt(contentResolver, settingName, overrideValue)
+        }
+
+        override fun close() {
+            Settings.Global.putInt(contentResolver, settingName, initialValue)
+        }
+    }
 }

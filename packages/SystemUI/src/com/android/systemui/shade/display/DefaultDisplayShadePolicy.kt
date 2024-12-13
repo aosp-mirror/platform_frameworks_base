@@ -21,12 +21,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Policy to specify a display id explicitly. */
-open class SpecificDisplayIdPolicy(id: Int) : ShadeDisplayPolicy {
-    override val name: String = "display_${id}_policy"
+/** Policy to specify a default display explicitly. */
+class DefaultDisplayShadePolicy @Inject constructor() : ShadeDisplayPolicy {
+    override val name: String = "default_display"
 
-    override val displayId: StateFlow<Int> = MutableStateFlow(id)
+    override val displayId: StateFlow<Int> = MutableStateFlow(Display.DEFAULT_DISPLAY)
 }
-
-class DefaultDisplayShadePolicy @Inject constructor() :
-    SpecificDisplayIdPolicy(Display.DEFAULT_DISPLAY)

@@ -176,8 +176,28 @@ public class LocationFudgerTest {
     }
 
     @Test
-    public void testDensityBasedCoarsening_ifFeatureIsDisabled_cacheIsNotUsed() {
+    public void testDensityBasedCoarsening_ifAnyFlagIsOff1_cacheIsNotUsed() {
+        // This feature requires two flags: one for the population density provider (which could
+        // be used by various client), and a second one for actually enabling the new coarsening
+        // algorithm.
         mSetFlagsRule.disableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
+        LocationFudgerCache cache = mock(LocationFudgerCache.class);
+
+        mFudger.setLocationFudgerCache(cache);
+
+        mFudger.createCoarse(createLocation("test", mRandom));
+
+        verify(cache, never()).getCoarseningLevel(anyDouble(), anyDouble());
+    }
+
+    @Test
+    public void testDensityBasedCoarsening_ifAnyFlagIsOff2_cacheIsNotUsed() {
+        // This feature requires two flags: one for the population density provider (which could
+        // be used by various client), and a second one for actually enabling the new coarsening
+        // algorithm.
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
         LocationFudgerCache cache = mock(LocationFudgerCache.class);
 
         mFudger.setLocationFudgerCache(cache);
@@ -190,6 +210,7 @@ public class LocationFudgerTest {
     @Test
     public void testDensityBasedCoarsening_ifFeatureIsEnabledButNoDefaultValue_cacheIsNotUsed() {
         mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
         LocationFudgerCache cache = mock(LocationFudgerCache.class);
         doReturn(false).when(cache).hasDefaultValue();
 
@@ -201,8 +222,23 @@ public class LocationFudgerTest {
     }
 
     @Test
+    public void testDensityBasedCoarsening_ifFeatureIsEnabledButNoDefaultValue_defaultIsFetched() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
+        LocationFudgerCache cache = mock(LocationFudgerCache.class);
+        doReturn(false).when(cache).hasDefaultValue();
+
+        mFudger.setLocationFudgerCache(cache);
+
+        mFudger.createCoarse(createLocation("test", mRandom));
+
+        verify(cache).fetchDefaultCoarseningLevelIfNeeded();
+    }
+
+    @Test
     public void testDensityBasedCoarsening_ifFeatureIsEnabledAndDefaultIsSet_cacheIsUsed() {
         mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
         LocationFudgerCache cache = mock(LocationFudgerCache.class);
         doReturn(true).when(cache).hasDefaultValue();
 
@@ -223,6 +259,7 @@ public class LocationFudgerTest {
         // location/geometry/S2CellIdUtilsTest.java
 
         mSetFlagsRule.enableFlags(Flags.FLAG_DENSITY_BASED_COARSE_LOCATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POPULATION_DENSITY_PROVIDER);
         // Arbitrary location in Times Square, NYC
         double[] latLng = new double[] {40.758896, -73.985130};
         int s2Level = 1;
