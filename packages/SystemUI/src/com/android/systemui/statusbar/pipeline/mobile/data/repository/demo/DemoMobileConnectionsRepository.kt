@@ -20,10 +20,11 @@ import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.util.Log
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
@@ -51,7 +52,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** This repository vends out data based on demo mode commands */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,7 +60,7 @@ class DemoMobileConnectionsRepository
 constructor(
     private val mobileDataSource: DemoModeMobileConnectionDataSource,
     private val wifiDataSource: DemoModeWifiDataSource,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     context: Context,
     private val logFactory: TableLogBufferFactory,
 ) : MobileConnectionsRepository {
@@ -115,7 +115,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
+                subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID,
             )
 
     override val activeMobileDataRepository: StateFlow<MobileConnectionRepository?> =
@@ -124,7 +124,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                getRepoForSubId(activeMobileDataSubscriptionId.value)
+                getRepoForSubId(activeMobileDataSubscriptionId.value),
             )
 
     // TODO(b/261029387): consider adding a demo command for this
@@ -160,7 +160,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                defaultMobileIconMapping.value.reverse()
+                defaultMobileIconMapping.value.reverse(),
             )
 
     private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
@@ -190,17 +190,9 @@ constructor(
 
     private fun createDemoMobileConnectionRepo(subId: Int): CacheContainer {
         val tableLogBuffer =
-            logFactory.getOrCreate(
-                "DemoMobileConnectionLog[$subId]",
-                MOBILE_CONNECTION_BUFFER_SIZE,
-            )
+            logFactory.getOrCreate("DemoMobileConnectionLog[$subId]", MOBILE_CONNECTION_BUFFER_SIZE)
 
-        val repo =
-            DemoMobileConnectionRepository(
-                subId,
-                tableLogBuffer,
-                scope,
-            )
+        val repo = DemoMobileConnectionRepository(subId, tableLogBuffer, scope)
         return CacheContainer(repo, lastMobileState = null)
     }
 
@@ -297,7 +289,7 @@ constructor(
                             TAG,
                             "processDisabledMobileState: Unable to infer subscription to " +
                                 "disable. Specify subId using '-e slot <subId>'" +
-                                "Known subIds: [${subIdsString()}]"
+                                "Known subIds: [${subIdsString()}]",
                         )
                         return
                     }

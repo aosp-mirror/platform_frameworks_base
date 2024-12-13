@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.satellite.data
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.statusbar.pipeline.satellite.data.demo.DemoDeviceBasedSatelliteRepository
@@ -59,7 +59,7 @@ constructor(
     private val realImpl: RealDeviceBasedSatelliteRepository,
     private val demoImpl: DemoDeviceBasedSatelliteRepository,
     private val demoModeController: DemoModeController,
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
 ) : DeviceBasedSatelliteRepository {
     private val isDemoMode =
         conflatedCallbackFlow {

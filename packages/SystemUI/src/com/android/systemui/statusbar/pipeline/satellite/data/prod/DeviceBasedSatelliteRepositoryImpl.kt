@@ -30,7 +30,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.LogBuffer
@@ -145,7 +144,7 @@ constructor(
     satelliteManagerOpt: Optional<SatelliteManager>,
     telephonyManager: TelephonyManager,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
     @VerboseDeviceBasedSatelliteInputLog private val verboseLogBuffer: LogBuffer,
     private val systemClock: SystemClock,
@@ -322,13 +321,14 @@ constructor(
             flowOf(false)
         } else {
             conflatedCallbackFlow {
-                val callback = Consumer<Boolean> { supported ->
-                    logBuffer.i {
-                        "onSatelliteSupportedStateChanged: " +
+                val callback =
+                    Consumer<Boolean> { supported ->
+                        logBuffer.i {
+                            "onSatelliteSupportedStateChanged: " +
                                 "${if (supported) "supported" else "not supported"}"
+                        }
+                        trySend(supported)
                     }
-                    trySend(supported)
-                }
 
                 var registered = false
                 try {

@@ -28,13 +28,11 @@ import androidx.core.util.keyIterator
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import java.io.PrintWriter
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
@@ -48,7 +46,6 @@ constructor(
     private val carrierConfigManager: CarrierConfigManager?,
     dumpManager: DumpManager,
     logger: MobileInputLogger,
-    @Application scope: CoroutineScope,
 ) : CarrierConfigRepository, Dumpable {
     private var isListening = false
     private val defaultConfig: PersistableBundle by lazy { CarrierConfigManager.getDefaultConfig() }

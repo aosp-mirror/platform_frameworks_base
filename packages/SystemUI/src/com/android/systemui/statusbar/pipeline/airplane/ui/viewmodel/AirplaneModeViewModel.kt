@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -48,7 +48,7 @@ class AirplaneModeViewModelImpl
 constructor(
     interactor: AirplaneModeInteractor,
     @AirplaneTableLog logger: TableLogBuffer,
-    @Application private val scope: CoroutineScope,
+    @Background scope: CoroutineScope,
 ) : AirplaneModeViewModel {
     override val isAirplaneModeIconVisible: StateFlow<Boolean> =
         combine(interactor.isAirplaneMode, interactor.isForceHidden) {

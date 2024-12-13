@@ -37,7 +37,6 @@ import com.android.settingslib.mobile.MobileMappings.Config
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -96,7 +95,7 @@ constructor(
     broadcastDispatcher: BroadcastDispatcher,
     private val context: Context,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     airplaneModeRepository: AirplaneModeRepository,
     // Some "wifi networks" should be rendered as a mobile connection, which is why the wifi
@@ -179,7 +178,7 @@ constructor(
                 val subId =
                     intent.getIntExtra(
                         SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        INVALID_SUBSCRIPTION_ID
+                        INVALID_SUBSCRIPTION_ID,
                     )
 
                 // Only emit if the subId is not associated with an active subscription
@@ -268,7 +267,7 @@ constructor(
     override val defaultDataSubId: StateFlow<Int> =
         broadcastDispatcher
             .broadcastFlow(
-                IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED),
+                IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
             ) { intent, _ ->
                 intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
             }
@@ -296,7 +295,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                initialValue = Config.readConfig(context)
+                initialValue = Config.readConfig(context),
             )
 
     override val defaultMobileIconMapping: Flow<Map<String, MobileIconGroup>> =
