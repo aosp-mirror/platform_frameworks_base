@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Describes the display the shade should be shown in. */
 interface ShadeDisplayPolicy {
+    /**
+     * String used to identify each policy and used to set policy via adb command. This value must
+     * match a value defined in the SettingsLib shade_display_awareness_values string array.
+     */
     val name: String
 
     /** The display id the shade should be at, according to this policy. */

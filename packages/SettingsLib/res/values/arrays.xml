@@ -683,9 +683,9 @@
 
     <!-- Values for showing shade on external display for developers -->
     <string-array name="shade_display_awareness_values" >
-        <item>device-display</item>
-        <item>external-display</item>
-        <item>focus-based</item>
+        <item>default_display</item>
+        <item>any_external_display</item>
+        <item>status_bar_latest_touch</item>
     </string-array>
 
 </resources>
