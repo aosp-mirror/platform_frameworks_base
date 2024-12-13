@@ -88,6 +88,8 @@ public class EventConditionProviderTest extends UiServiceTestCase {
         mService.mContext = this.getContext();
 
         mContext.addMockSystemService(UserManager.class, mUserManager);
+        when(mUserManager.getProfiles(eq(UserHandle.USER_SYSTEM))).thenReturn(
+                List.of(new UserInfo(UserHandle.USER_SYSTEM, "USER_SYSTEM", 0)));
         when(mUserManager.getProfiles(eq(mUserId))).thenReturn(
                 List.of(new UserInfo(mUserId, "mUserId", 0)));
 
