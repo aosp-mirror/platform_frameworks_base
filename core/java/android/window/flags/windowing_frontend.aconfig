@@ -9,16 +9,6 @@ flag {
 }
 
 flag {
-  name: "reset_draw_state_on_client_invisible"
-  namespace: "windowing_frontend"
-  description: "Reset draw state if the client is notified to be invisible"
-  bug: "373023636"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "wait_for_transition_on_display_switch"
     namespace: "windowing_frontend"
     description: "Waits for Shell transition to start before unblocking the screen after display switch"
@@ -33,16 +23,6 @@ flag {
     namespace: "windowing_frontend"
     description: "Make pip activity lifecyle change with windowing mode"
     bug: "333452456"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    name: "blast_sync_notification_shade_on_display_switch"
-    namespace: "windowing_frontend"
-    description: "Make the buffer content of notification shade synchronize with display switch"
-    bug: "337154331"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -204,16 +184,6 @@ flag {
   namespace: "windowing_frontend"
   description: "Show the app handle and the app menu also on large screens that don't enable desktop mode"
   bug: "377689543"
-}
-
-flag {
-  name: "filter_irrelevant_input_device_change"
-  namespace: "windowing_frontend"
-  description: "Recompute display configuration only for necessary input device changes"
-  bug: "368461853"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -452,6 +422,17 @@ flag {
     description: "Enable Predictive Back by default with targetSdk>=36"
     is_fixed_read_only: true
     bug: "376407910"
+}
+
+flag {
+    name: "remove_defer_hiding_client"
+    namespace: "windowing_frontend"
+    description: "Remove mDeferHidingClient since everything is in shell-transition."
+    is_fixed_read_only: true
+    bug: "382485959"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

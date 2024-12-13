@@ -18,13 +18,14 @@ package com.android.systemui.statusbar.notification.icon
 
 import android.app.Notification
 import android.content.Context
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.contentDescForNotification
 import javax.inject.Inject
 
 /** Testable wrapper around Context. */
-class IconBuilder @Inject constructor(private val context: Context) {
+class IconBuilder @Inject constructor(@Main private val context: Context) {
     @JvmOverloads
     fun createIconView(
         entry: NotificationEntry,

@@ -21,21 +21,11 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Qualifier
-
-/**
- * Annotates elements that provide information from the global configuration.
- *
- * The global configuration is the one associated with the main display. Secondary displays will
- * apply override to the global configuration. Elements annotated with this shouldn't be used for
- * secondary displays.
- */
-@Qualifier @Retention(AnnotationRetention.RUNTIME) annotation class GlobalConfig
 
 @Module
 interface ConfigurationModule {
@@ -45,32 +35,32 @@ interface ConfigurationModule {
      * now, without annotation the global config associated state is provided.
      */
     @Binds
-    @Deprecated("Use the @GlobalConfig annotated one instead of this.")
+    @Deprecated("Use the @Main annotated one instead of this.")
     fun provideGlobalConfigurationState(
-        @GlobalConfig configurationState: ConfigurationState
+        @Main configurationState: ConfigurationState
     ): ConfigurationState
 
     @Binds
-    @Deprecated("Use the @GlobalConfig annotated one instead of this.")
+    @Deprecated("Use the @Main annotated one instead of this.")
     fun provideDefaultConfigurationState(
-        @GlobalConfig configurationState: ConfigurationInteractor
+        @Main configurationState: ConfigurationInteractor
     ): ConfigurationInteractor
 
     companion object {
         @SysUISingleton
         @Provides
-        @GlobalConfig
+        @Main
         fun provideGlobalConfigurationState(
             configStateFactory: ConfigurationStateImpl.Factory,
             configurationController: ConfigurationController,
-            @Application context: Context,
+            @Main context: Context,
         ): ConfigurationState {
             return configStateFactory.create(context, configurationController)
         }
 
         @SysUISingleton
         @Provides
-        @GlobalConfig
+        @Main
         fun provideGlobalConfigurationInteractor(
             configurationRepository: ConfigurationRepository
         ): ConfigurationInteractor {

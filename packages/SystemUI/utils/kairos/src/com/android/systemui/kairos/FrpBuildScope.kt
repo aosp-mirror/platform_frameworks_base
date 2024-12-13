@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 
 /** A function that modifies the FrpNetwork. */
@@ -594,6 +595,26 @@ interface FrpBuildScope : FrpStateScope {
      */
     @ExperimentalFrpApi
     fun <A> Flow<A>.toTState(initialValue: A): TState<A> = toTFlow().hold(initialValue)
+
+    /**
+     * Shorthand for:
+     * ```kotlin
+     * flow.scan(initialValue, operation).toTFlow().hold(initialValue)
+     * ```
+     */
+    @ExperimentalFrpApi
+    fun <A, B> Flow<A>.scanToTState(initialValue: B, operation: (B, A) -> B): TState<B> =
+        scan(initialValue, operation).toTFlow().hold(initialValue)
+
+    /**
+     * Shorthand for:
+     * ```kotlin
+     * flow.scan(initialValue) { a, f -> f(a) }.toTFlow().hold(initialValue)
+     * ```
+     */
+    @ExperimentalFrpApi
+    fun <A> Flow<(A) -> A>.scanToTState(initialValue: A): TState<A> =
+        scanToTState(initialValue) { a, f -> f(a) }
 
     /**
      * Invokes [block] whenever this [TFlow] emits a value. [block] receives an [FrpBuildScope] that

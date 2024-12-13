@@ -17,10 +17,13 @@
 package com.android.systemui.qs.panels.ui.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.geometry.Offset
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.model.GridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
@@ -48,12 +51,17 @@ class EditTileListState(
     private val columns: Int,
     private val largeTilesSpan: Int,
 ) : DragAndDropState {
-    private val _draggedCell = mutableStateOf<SizedTile<EditTileViewModel>?>(null)
-    override val draggedCell
-        get() = _draggedCell.value
+    override var draggedCell by mutableStateOf<SizedTile<EditTileViewModel>?>(null)
+        private set
+
+    override var draggedPosition by mutableStateOf(Offset.Unspecified)
+        private set
+
+    override var dragType by mutableStateOf<DragType?>(null)
+        private set
 
     override val dragInProgress: Boolean
-        get() = _draggedCell.value != null
+        get() = draggedCell != null
 
     private val _tiles: SnapshotStateList<GridCell> =
         tiles.toGridCells(columns).toMutableStateList()
@@ -83,18 +91,19 @@ class EditTileListState(
     }
 
     override fun isMoving(tileSpec: TileSpec): Boolean {
-        return _draggedCell.value?.let { it.tile.tileSpec == tileSpec } ?: false
+        return draggedCell?.let { it.tile.tileSpec == tileSpec } ?: false
     }
 
-    override fun onStarted(cell: SizedTile<EditTileViewModel>) {
-        _draggedCell.value = cell
+    override fun onStarted(cell: SizedTile<EditTileViewModel>, dragType: DragType) {
+        draggedCell = cell
+        this.dragType = dragType
 
         // Add spacers to the grid to indicate where the user can move a tile
         regenerateGrid()
     }
 
-    override fun onMoved(target: Int, insertAfter: Boolean) {
-        val draggedTile = _draggedCell.value ?: return
+    override fun onTargeting(target: Int, insertAfter: Boolean) {
+        val draggedTile = draggedCell ?: return
 
         val fromIndex = indexOf(draggedTile.tile.tileSpec)
         if (fromIndex == target) {
@@ -115,16 +124,26 @@ class EditTileListState(
         regenerateGrid()
     }
 
+    override fun onMoved(offset: Offset) {
+        draggedPosition = offset
+    }
+
     override fun movedOutOfBounds() {
-        val draggedTile = _draggedCell.value ?: return
+        val draggedTile = draggedCell ?: return
 
         _tiles.removeIf { cell ->
             cell is TileGridCell && cell.tile.tileSpec == draggedTile.tile.tileSpec
         }
+        draggedPosition = Offset.Unspecified
+
+        // Regenerate spacers without the dragged tile
+        regenerateGrid()
     }
 
     override fun onDrop() {
-        _draggedCell.value = null
+        draggedCell = null
+        draggedPosition = Offset.Unspecified
+        dragType = null
 
         // Remove the spacers
         regenerateGrid()

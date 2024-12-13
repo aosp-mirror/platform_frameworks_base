@@ -166,6 +166,15 @@ public class NotificationShadeWindowView extends WindowRootView {
     }
 
     @Override
+    public void onMovedToDisplay(int displayId, Configuration config) {
+        super.onMovedToDisplay(displayId, config);
+        ShadeWindowGoesAround.isUnexpectedlyInLegacyMode();
+        // When the window is moved we're only receiving a call to this method instead of the
+        // onConfigurationChange itself. Let's just trigegr a normal config change.
+        onConfigurationChanged(config);
+    }
+
+    @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (mConfigurationForwarder != null) {

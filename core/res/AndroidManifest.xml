@@ -4535,11 +4535,11 @@
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_GLASSES"
         android:protectionLevel="normal" />
 
-    <!-- Allows application to request to be associated with a virtual display capable of streaming
+    <!-- Allows application to request to be associated with a virtual device capable of streaming
          Android applications
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_APP_STREAMING})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING"
                 android:protectionLevel="signature|privileged" />
@@ -4547,16 +4547,25 @@
     <!-- Allows application to request to stream content from an Android host to a nearby device
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_NEARBY_DEVICE_STREAMING})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Allows application to request to stream content from an Android host to a nearby device
+         ({@link android.companion.AssociationRequest#DEVICE_PROFILE_SENSOR_DEVICE_STREAMING})
+         by {@link android.companion.CompanionDeviceManager}.
+         <p>Not for use by third-party applications.
+         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ENABLE_LIMITED_VDM_ROLE)
+    -->
+    <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING"
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows application to request to be associated with a vehicle head unit capable of
          automotive projection
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_AUTOMOTIVE_PROJECTION})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"
                 android:protectionLevel="internal|role" />
@@ -4565,7 +4574,7 @@
          and/or data with other devices, such as notifications, photos and media
          ({@link android.companion.AssociationRequest#DEVICE_PROFILE_COMPUTER})
          by {@link android.companion.CompanionDeviceManager}.
-        <p>Not for use by third-party applications.
+         <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER"
                 android:protectionLevel="signature|privileged" />
@@ -5639,11 +5648,21 @@
 
     <!-- Allows an application to subscribe to device locked and keyguard locked (i.e., showing)
         state.
-         <p>Protection level: signature|role
-         <p>Intended for use by ROLE_ASSISTANT and signature apps only.
+         <p>Protection level: signature|module|role
+         <p>Intended for use by ROLE_ASSISTANT, VDM, and signature apps only.
     -->
     <permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE"
-                android:protectionLevel="signature|module|role"/>
+                android:protectionLevel="signature|module|role"
+                android:featureFlag="!android.security.subscribe_to_keyguard_locked_state_perm_priv_flag"/>
+
+    <!-- Allows an application to subscribe to device locked and keyguard locked (i.e., showing)
+        state.
+         <p>Protection level: signature|privileged|module|role
+         <p>Intended for use by ROLE_ASSISTANT, VDM, and signature / privileged apps only.
+    -->
+    <permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE"
+                android:protectionLevel="signature|privileged|module|role"
+                android:featureFlag="android.security.subscribe_to_keyguard_locked_state_perm_priv_flag"/>
 
     <!-- Must be required by a {@link android.service.autofill.AutofillService},
          to ensure that only the system can bind to it.
@@ -8288,20 +8307,21 @@
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows a trusted application to perform actions on behalf of users inside of
+    <!-- Allows a trusted application to perform actions on behalf of users inside of
          applications with privacy guarantees from the system.
          <p>This permission is currently only granted to system packages in the
          {@link android.app.role.SYSTEM_UI_INTELLIGENCE} role which complies with privacy
          requirements outlined in the Android CDD section "9.8.6 Content Capture".
          <p>Apps are not able to opt-out from caller having this permission.
          <p>Protection level: internal|role
+         @SystemApi
          @hide
-         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+         @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
     <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED"
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
         android:protectionLevel="internal|role" />
 
-    <!-- @SystemApi Allows an application to perform actions on behalf of users inside of
+    <!-- Allows an application to perform actions on behalf of users inside of
          applications.
          <p>This permission is currently only granted to preinstalled / system apps having the
          {@link android.app.role.ASSISTANT} role.
@@ -8309,8 +8329,7 @@
          limiting to only callers with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}
          instead.
          <p>Protection level: internal|role
-         @hide
-         @FlaggedApi("android.app.appfunctions.flags.enable_app_function_manager")  -->
+         @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
     <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS"
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
         android:protectionLevel="internal|role" />

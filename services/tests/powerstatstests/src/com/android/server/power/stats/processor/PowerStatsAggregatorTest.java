@@ -263,6 +263,34 @@ public class PowerStatsAggregatorTest {
         });
     }
 
+    @Test
+    public void emptyHistory() {
+        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(TEST_POWER_COMPONENT,
+                "majorDrain", 1, null, 0, 1, new PersistableBundle());
+        PowerStats powerStats = new PowerStats(descriptor);
+
+        mHistory.forceRecordAllHistory();
+
+        advance(1000);
+
+        long firstItemTimestamp = mMonotonicClock.monotonicTime();
+        powerStats.stats = new long[]{24};
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
+
+        advance(1000);
+
+        long secondItemTimestamp = mMonotonicClock.monotonicTime();
+        powerStats.stats = new long[]{42};
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
+
+        mAggregator.aggregatePowerStats(mHistory, firstItemTimestamp + 1, secondItemTimestamp,
+                stats -> {
+                    mAggregatedStatsCount++;
+                });
+
+        assertThat(mAggregatedStatsCount).isEqualTo(0);
+    }
+
     private void advance(long durationMs) {
         mClock.realtime += durationMs;
         mClock.uptime += durationMs;

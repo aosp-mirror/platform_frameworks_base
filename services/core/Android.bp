@@ -149,6 +149,9 @@ java_library_static {
 
         // Java/AIDL sources to be moved out to CrashRecovery module
         ":services-crashrecovery-sources",
+
+        // Indicate whether VCN is in platform or mainline
+        ":vcn-location-sources",
     ],
 
     libs: [
@@ -222,7 +225,6 @@ java_library_static {
         "securebox",
         "apache-commons-math",
         "battery_saver_flag_lib",
-        "guava",
         "notification_flags_lib",
         "power_hint_flags_lib",
         "biometrics_flags_lib",

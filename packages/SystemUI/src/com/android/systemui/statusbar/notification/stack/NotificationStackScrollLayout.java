@@ -83,7 +83,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
@@ -1285,7 +1284,11 @@ public class NotificationStackScrollLayout
     @Override
     public void setStackCutoff(float stackCutoff) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        mAmbientState.setStackCutoff(stackCutoff);
+        if (mAmbientState.getStackCutoff() != stackCutoff) {
+            mAmbientState.setStackCutoff(stackCutoff);
+            updateStackEndHeightAndStackHeight(mAmbientState.getExpansionFraction());
+            requestChildrenUpdate();
+        }
     }
 
     @Override
@@ -2630,6 +2633,7 @@ public class NotificationStackScrollLayout
     private void updateContentHeight() {
         if (SceneContainerFlag.isEnabled()) {
             updateIntrinsicStackHeight();
+            updateStackEndHeightAndStackHeight(mAmbientState.getExpansionFraction());
             return;
         }
 
@@ -4729,10 +4733,10 @@ public class NotificationStackScrollLayout
      * Update colors of section headers, shade footer, and empty shade views.
      */
     void updateDecorViews() {
-        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.materialColorOnSurface);
-        final @ColorInt int onSurfaceVariant = Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.materialColorOnSurfaceVariant);
+        final @ColorInt int onSurface = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurface);
+        final @ColorInt int onSurfaceVariant = mContext.getColor(
+                com.android.internal.R.color.materialColorOnSurfaceVariant);
 
         ColorUpdateLogger colorUpdateLogger = ColorUpdateLogger.getInstance();
         if (colorUpdateLogger != null) {

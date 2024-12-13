@@ -194,6 +194,19 @@ public class HearingDeviceLocalDataManagerTest {
         verify(mListener).onDeviceLocalDataChange(TEST_ADDRESS, newData);
     }
 
+    @Test
+    public void clear_dataIsRemoved() {
+        String settings = Settings.Global.getStringForUser(mContext.getContentResolver(),
+                Settings.Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, UserHandle.USER_SYSTEM);
+        assertThat(settings.contains(TEST_ADDRESS)).isTrue();
+
+        HearingDeviceLocalDataManager.clear(mContext, mDevice);
+
+        settings = Settings.Global.getStringForUser(mContext.getContentResolver(),
+                Settings.Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, UserHandle.USER_SYSTEM);
+        assertThat(settings.contains(TEST_ADDRESS)).isFalse();
+    }
+
     private void prepareTestDataInSettings() {
         String data = generateSettingsString(TEST_ADDRESS, TEST_AMBIENT, TEST_GROUP_AMBIENT,
                 TEST_AMBIENT_CONTROL_EXPANDED);

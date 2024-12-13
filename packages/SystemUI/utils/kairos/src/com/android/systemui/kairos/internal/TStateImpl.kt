@@ -314,6 +314,28 @@ internal fun <A, B, C, D, Z> zipStates(
         @Suppress("UNCHECKED_CAST") transform(a as A, b as B, c as C, d as D)
     }
 
+internal fun <A, B, C, D, E, Z> zipStates(
+    name: String?,
+    operatorName: String,
+    l1: TStateImpl<A>,
+    l2: TStateImpl<B>,
+    l3: TStateImpl<C>,
+    l4: TStateImpl<D>,
+    l5: TStateImpl<E>,
+    transform: suspend EvalScope.(A, B, C, D, E) -> Z,
+): TStateImpl<Z> =
+    zipStates(null, operatorName, mapOf(0 to l1, 1 to l2, 2 to l3, 3 to l4, 4 to l5)).map(
+        name,
+        operatorName,
+    ) {
+        val a = it.getValue(0)
+        val b = it.getValue(1)
+        val c = it.getValue(2)
+        val d = it.getValue(3)
+        val e = it.getValue(4)
+        @Suppress("UNCHECKED_CAST") transform(a as A, b as B, c as C, d as D, e as E)
+    }
+
 internal fun <K : Any, A> zipStates(
     name: String?,
     operatorName: String,

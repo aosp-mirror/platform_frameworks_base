@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import android.app.jank.AppJankStats;
 import android.app.jank.Flags;
-import android.app.jank.FrameOverrunHistogram;
 import android.app.jank.JankDataProcessor;
 import android.app.jank.StateTracker;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -165,7 +164,7 @@ public class JankDataProcessorTest {
 
         assertEquals(pendingStats.size(), 0);
 
-        AppJankStats jankStats = getAppJankStats();
+        AppJankStats jankStats = JankUtils.getAppJankStats();
         mJankDataProcessor.mergeJankStats(jankStats, sActivityName);
 
         pendingStats = mJankDataProcessor.getPendingJankStats();
@@ -182,14 +181,14 @@ public class JankDataProcessorTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_DETAILED_APP_JANK_METRICS_API)
     public void mergeAppJankStats_confirmStatsWithMatchingStatesAreCombinedIntoOnePendingStat() {
-        AppJankStats jankStats = getAppJankStats();
+        AppJankStats jankStats = JankUtils.getAppJankStats();
         mJankDataProcessor.mergeJankStats(jankStats, sActivityName);
 
         HashMap<String, JankDataProcessor.PendingJankStat> pendingStats =
                 mJankDataProcessor.getPendingJankStats();
         assertEquals(pendingStats.size(), 1);
 
-        AppJankStats secondJankStat = getAppJankStats();
+        AppJankStats secondJankStat = JankUtils.getAppJankStats();
         mJankDataProcessor.mergeJankStats(secondJankStat, sActivityName);
 
         pendingStats = mJankDataProcessor.getPendingJankStats();
@@ -200,7 +199,7 @@ public class JankDataProcessorTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_DETAILED_APP_JANK_METRICS_API)
     public void mergeAppJankStats_whenStatsWithMatchingStatesMerge_confirmFrameCountsAdded() {
-        AppJankStats jankStats = getAppJankStats();
+        AppJankStats jankStats = JankUtils.getAppJankStats();
         mJankDataProcessor.mergeJankStats(jankStats, sActivityName);
         mJankDataProcessor.mergeJankStats(jankStats, sActivityName);
 
@@ -345,27 +344,4 @@ public class JankDataProcessorTest {
 
         return mockData;
     }
-
-    private AppJankStats getAppJankStats() {
-        AppJankStats jankStats = new AppJankStats(
-                /*App Uid*/APP_ID,
-                /*Widget Id*/"test widget id",
-                /*Widget Category*/AppJankStats.SCROLL,
-                /*Widget State*/AppJankStats.SCROLLING,
-                /*Total Frames*/100,
-                /*Janky Frames*/25,
-                getOverrunHistogram()
-        );
-        return jankStats;
-    }
-
-    private FrameOverrunHistogram getOverrunHistogram() {
-        FrameOverrunHistogram overrunHistogram = new FrameOverrunHistogram();
-        overrunHistogram.addFrameOverrunMillis(-2);
-        overrunHistogram.addFrameOverrunMillis(1);
-        overrunHistogram.addFrameOverrunMillis(5);
-        overrunHistogram.addFrameOverrunMillis(25);
-        return overrunHistogram;
-    }
-
 }

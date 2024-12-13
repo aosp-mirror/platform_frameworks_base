@@ -130,9 +130,9 @@ public class GameManagerServiceSettingsTests {
         assertEquals(GameManager.GAME_MODE_STANDARD, settings.getGameModeLocked(PACKAGE_NAME_4));
 
         // test game mode configs
-        assertNull(settings.getConfigOverride(PACKAGE_NAME_1));
-        assertNull(settings.getConfigOverride(PACKAGE_NAME_3));
-        GamePackageConfiguration config = settings.getConfigOverride(PACKAGE_NAME_2);
+        assertNull(settings.getConfigOverrideLocked(PACKAGE_NAME_1));
+        assertNull(settings.getConfigOverrideLocked(PACKAGE_NAME_3));
+        GamePackageConfiguration config = settings.getConfigOverrideLocked(PACKAGE_NAME_2);
         assertNotNull(config);
 
         assertNull(config.getGameModeConfiguration(GameManager.GAME_MODE_STANDARD));
@@ -152,7 +152,7 @@ public class GameManagerServiceSettingsTests {
         assertEquals(batteryConfig.getFpsStr(), GameModeConfiguration.DEFAULT_FPS);
         assertFalse(batteryConfig.getUseAngle());
 
-        config = settings.getConfigOverride(PACKAGE_NAME_4);
+        config = settings.getConfigOverrideLocked(PACKAGE_NAME_4);
         assertNotNull(config);
         GameModeConfiguration customConfig = config.getGameModeConfiguration(
                 GameManager.GAME_MODE_CUSTOM);
@@ -177,7 +177,7 @@ public class GameManagerServiceSettingsTests {
         GameManagerSettings settings = new GameManagerSettings(context.getFilesDir());
         assertTrue(settings.readPersistentDataLocked());
 
-        final GamePackageConfiguration config = settings.getConfigOverride(PACKAGE_NAME_1);
+        final GamePackageConfiguration config = settings.getConfigOverrideLocked(PACKAGE_NAME_1);
         assertNotNull(config);
         final GameModeConfiguration batteryConfig = config.getGameModeConfiguration(
                 GameManager.GAME_MODE_BATTERY);
@@ -218,7 +218,7 @@ public class GameManagerServiceSettingsTests {
         assertEquals(2, settings.getGameModeLocked(PACKAGE_NAME_2));
         assertEquals(3, settings.getGameModeLocked(PACKAGE_NAME_3));
 
-        final GamePackageConfiguration config = settings.getConfigOverride(PACKAGE_NAME_2);
+        final GamePackageConfiguration config = settings.getConfigOverrideLocked(PACKAGE_NAME_2);
         assertNotNull(config);
         final GameModeConfiguration batteryConfig = config.getGameModeConfiguration(
                 GameManager.GAME_MODE_BATTERY);
@@ -248,7 +248,7 @@ public class GameManagerServiceSettingsTests {
         GameModeConfiguration batteryConfig = config.getOrAddDefaultGameModeConfiguration(
                 GameManager.GAME_MODE_BATTERY);
         batteryConfig.setScaling(0.77f);
-        settings.setConfigOverride(PACKAGE_NAME_2, config);
+        settings.setConfigOverrideLocked(PACKAGE_NAME_2, config);
 
         // set config for app4
         config = new GamePackageConfiguration(PACKAGE_NAME_4);
@@ -256,15 +256,15 @@ public class GameManagerServiceSettingsTests {
                 GameManager.GAME_MODE_CUSTOM);
         customConfig.setScaling(0.4f);
         customConfig.setFpsStr("30");
-        settings.setConfigOverride(PACKAGE_NAME_4, config);
+        settings.setConfigOverrideLocked(PACKAGE_NAME_4, config);
 
         settings.writePersistentDataLocked();
 
         // clear the settings in memory
-        settings.removeGame(PACKAGE_NAME_1);
-        settings.removeGame(PACKAGE_NAME_2);
-        settings.removeGame(PACKAGE_NAME_3);
-        settings.removeGame(PACKAGE_NAME_4);
+        settings.removeGameLocked(PACKAGE_NAME_1);
+        settings.removeGameLocked(PACKAGE_NAME_2);
+        settings.removeGameLocked(PACKAGE_NAME_3);
+        settings.removeGameLocked(PACKAGE_NAME_4);
 
         // read back in and verify
         assertTrue(settings.readPersistentDataLocked());
@@ -273,9 +273,9 @@ public class GameManagerServiceSettingsTests {
         assertEquals(1, settings.getGameModeLocked(PACKAGE_NAME_3));
         assertEquals(1, settings.getGameModeLocked(PACKAGE_NAME_4));
 
-        config = settings.getConfigOverride(PACKAGE_NAME_1);
+        config = settings.getConfigOverrideLocked(PACKAGE_NAME_1);
         assertNull(config);
-        config = settings.getConfigOverride(PACKAGE_NAME_2);
+        config = settings.getConfigOverrideLocked(PACKAGE_NAME_2);
         assertNotNull(config);
         batteryConfig = config.getGameModeConfiguration(GameManager.GAME_MODE_BATTERY);
         assertNotNull(batteryConfig);
@@ -292,7 +292,7 @@ public class GameManagerServiceSettingsTests {
         assertEquals(performanceConfig.getFpsStr(), "60");
         assertTrue(performanceConfig.getUseAngle());
 
-        config = settings.getConfigOverride(PACKAGE_NAME_4);
+        config = settings.getConfigOverrideLocked(PACKAGE_NAME_4);
         assertNotNull(config);
         customConfig = config.getGameModeConfiguration(GameManager.GAME_MODE_CUSTOM);
         assertNotNull(customConfig);

@@ -28,6 +28,7 @@ import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.UserChangeListener
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 class DesktopUserRepositories(
     context: Context,
     shellInit: ShellInit,
+    private val shellController: ShellController,
     private val persistentRepository: DesktopPersistentRepository,
     private val repositoryInitializer: DesktopRepositoryInitializer,
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
@@ -61,15 +63,16 @@ class DesktopUserRepositories(
     init {
         userId = ActivityManager.getCurrentUser()
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
-            shellInit.addInitCallback(::initRepoFromPersistentStorage, this)
+            shellInit.addInitCallback(::onInit, this)
         }
         if (Flags.enableDesktopWindowingHsum()) {
             userIdToProfileIdsMap[userId] = userManager.getProfiles(userId).map { it.id }
         }
     }
 
-    private fun initRepoFromPersistentStorage() {
+    private fun onInit() {
         repositoryInitializer.initialize(this)
+        shellController.addUserChangeListener(this)
     }
 
     /** Returns [DesktopRepository] for the parent user id. */

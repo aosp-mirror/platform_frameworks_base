@@ -1272,7 +1272,7 @@ public final class MessageQueue {
         return true;
     }
 
-    private Message legacyPeekOrPop(boolean peek) {
+    private Message legacyPeekOrPoll(boolean peek) {
         synchronized (this) {
             // Try to retrieve the next message.  Return if found.
             final long now = SystemClock.uptimeMillis();
@@ -1331,7 +1331,7 @@ public final class MessageQueue {
         if (mUseConcurrent) {
             ret = nextMessage(true);
         } else {
-            ret = legacyPeekOrPop(true);
+            ret = legacyPeekOrPoll(true);
         }
         return ret != null ? ret.when : null;
     }
@@ -1344,25 +1344,32 @@ public final class MessageQueue {
      */
     @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
     @Nullable
-    Message popForTest() {
+    Message pollForTest() {
         throwIfNotTest();
         if (mUseConcurrent) {
             return nextMessage(false);
         } else {
-            return legacyPeekOrPop(false);
+            return legacyPeekOrPoll(false);
         }
     }
 
     /**
      * @return true if we are blocked on a sync barrier
+     *
+     * Calls to this method must not be allowed to race with `next`.
+     * Specifically, the Looper thread must be paused before calling this method,
+     * and may not be resumed until after returning from this method.
      */
     boolean isBlockedOnSyncBarrier() {
         throwIfNotTest();
         if (mUseConcurrent) {
+            // Call nextMessage to get the stack drained into our priority queues
+            nextMessage(true);
+
             Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
             MessageNode queueNode = iterateNext(queueIter);
 
-            if (queueNode.isBarrier()) {
+            if (queueNode != null && queueNode.isBarrier()) {
                 long now = SystemClock.uptimeMillis();
 
                 /* Look for a deliverable async node. If one exists we are not blocked. */
@@ -1375,14 +1382,12 @@ public final class MessageQueue {
                  * Look for a deliverable sync node. In this case, if one exists we are blocked
                  * since the barrier prevents delivery of the Message.
                  */
-                while (queueNode.isBarrier()) {
+                while (queueNode != null && queueNode.isBarrier()) {
                     queueNode = iterateNext(queueIter);
                 }
                 if (queueNode != null && now >= queueNode.getWhen()) {
                     return true;
                 }
-
-                return false;
             }
         } else {
             Message msg = mMessages;
@@ -1409,10 +1414,8 @@ public final class MessageQueue {
                 if (iter != null && now >= iter.when) {
                     return true;
                 }
-                return false;
             }
         }
-        /* No barrier was found. */
         return false;
     }
 

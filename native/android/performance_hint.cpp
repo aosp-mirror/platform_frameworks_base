@@ -1170,7 +1170,7 @@ int APerformanceHint_notifyWorkloadSpike(APerformanceHintSession* session, bool 
     if (!useNewLoadHintBehavior()) {
         return ENOTSUP;
     }
-    return session->notifyWorkloadReset(cpu, gpu, debugName);
+    return session->notifyWorkloadSpike(cpu, gpu, debugName);
 }
 
 int APerformanceHint_setNativeSurfaces(APerformanceHintSession* session,

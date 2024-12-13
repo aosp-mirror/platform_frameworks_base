@@ -122,7 +122,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         mSystemClock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(mSystemClock);
         mBackgroundExecutor = new FakeExecutor(mSystemClock);
-        when(mSystemUIDialogFactory.create()).thenReturn(mSystemUIDialog);
+        when(mSystemUIDialogFactory.create(eq(mContext))).thenReturn(mSystemUIDialog);
 
         mUserProfiles = new ArrayList<>();
         Mockito.doReturn(mUserProfiles).when(mUserTracker).getUserProfiles();
@@ -346,6 +346,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
                 "true", false);
         FgsManagerController fmc = new FgsManagerControllerImpl(
+                mContext,
                 mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
@@ -373,6 +374,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
                 "false", false);
         fmc = new FgsManagerControllerImpl(
+                mContext,
                 mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
@@ -485,6 +487,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
         FgsManagerController result = new FgsManagerControllerImpl(
+                mContext,
                 mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,

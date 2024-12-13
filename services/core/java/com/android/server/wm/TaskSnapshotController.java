@@ -174,14 +174,32 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     }
 
     /**
-     * Retrieves a snapshot. If {@param restoreFromDisk} equals {@code true}, DO NOT HOLD THE WINDOW
-     * MANAGER LOCK WHEN CALLING THIS METHOD!
+     * Retrieves a snapshot from cache.
      */
     @Nullable
-    TaskSnapshot getSnapshot(int taskId, int userId, boolean restoreFromDisk,
-            boolean isLowResolution) {
-        return mCache.getSnapshot(taskId, userId, restoreFromDisk, isLowResolution
-                && mPersistInfoProvider.enableLowResSnapshots());
+    TaskSnapshot getSnapshot(int taskId, boolean isLowResolution) {
+        return getSnapshot(taskId, false /* isLowResolution */, TaskSnapshot.REFERENCE_NONE);
+    }
+
+    /**
+     * Retrieves a snapshot from cache.
+     */
+    @Nullable
+    TaskSnapshot getSnapshot(int taskId, boolean isLowResolution,
+            @TaskSnapshot.ReferenceFlags int usage) {
+        return mCache.getSnapshot(taskId, isLowResolution
+                && mPersistInfoProvider.enableLowResSnapshots(), usage);
+    }
+
+    /**
+     * Retrieves a snapshot from disk.
+     * DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING THIS METHOD!
+     */
+    @Nullable
+    TaskSnapshot getSnapshotFromDisk(int taskId, int userId,
+            boolean isLowResolution, @TaskSnapshot.ReferenceFlags int usage) {
+        return mCache.getSnapshotFromDisk(taskId, userId, isLowResolution
+                && mPersistInfoProvider.enableLowResSnapshots(), usage);
     }
 
     /**
@@ -189,7 +207,7 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
      * last taken, or -1 if no such snapshot exists for that task.
      */
     long getSnapshotCaptureTime(int taskId) {
-        final TaskSnapshot snapshot = mCache.getSnapshot(taskId);
+        final TaskSnapshot snapshot = mCache.getSnapshot(taskId, false /* isLowResolution */);
         if (snapshot != null) {
             return snapshot.getCaptureTime();
         }

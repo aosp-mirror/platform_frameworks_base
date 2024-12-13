@@ -111,6 +111,22 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
         return true;
     }
 
+    /**
+     * Must be called whenever the screen state (on/off/doze) changes.
+     */
+    public void onScreenStateChange() {
+        if (ensureInitialized() && mConsumedEnergyHelper.getEnergyConsumerCount() != 0) {
+            // Sync power monitor reading immediately, because the estimation algorithm
+            // distributes consumed power proportionally between screen states.
+            // Since screen power consumption differs dramatically between different states,
+            // this would lead an overestimation in the screen-off state.
+            forceSchedule();
+            return;
+        }
+        // Perhaps schedule a sync, allowing throttling
+        schedule();
+    }
+
     @Override
     public PowerStats collectStats() {
         if (!ensureInitialized()) {
@@ -126,7 +142,7 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
             long screenOnTimeMs = mScreenUsageTimeRetriever.getScreenOnTimeMs(display);
             if (!mFirstSample) {
                 mLayout.setScreenOnDuration(mPowerStats.stats, display,
-                        screenOnTimeMs - mLastScreenOnTime[display]);
+                        Math.max(0, screenOnTimeMs - mLastScreenOnTime[display]));
             }
             mLastScreenOnTime[display] = screenOnTimeMs;
 
@@ -135,14 +151,15 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
                         mScreenUsageTimeRetriever.getBrightnessLevelTimeMs(display, level);
                 if (!mFirstSample) {
                     mLayout.setBrightnessLevelDuration(mPowerStats.stats, display, level,
-                            brightnessLevelTimeMs - mLastBrightnessLevelTime[display][level]);
+                            Math.max(0, brightnessLevelTimeMs
+                                    - mLastBrightnessLevelTime[display][level]));
                 }
                 mLastBrightnessLevelTime[display][level] = brightnessLevelTimeMs;
             }
             long screenDozeTimeMs = mScreenUsageTimeRetriever.getScreenDozeTimeMs(display);
             if (!mFirstSample) {
                 mLayout.setScreenDozeDuration(mPowerStats.stats, display,
-                        screenDozeTimeMs - mLastDozeTime[display]);
+                        Math.max(0, screenDozeTimeMs - mLastDozeTime[display]));
             }
             mLastDozeTime[display] = screenDozeTimeMs;
         }
@@ -162,7 +179,7 @@ public class ScreenPowerStatsCollector extends PowerStatsCollector {
             }
 
             mLayout.setUidTopActivityDuration(uidStats,
-                    mLayout.getUidTopActivityDuration(uidStats) + topActivityDuration);
+                    Math.max(0, mLayout.getUidTopActivityDuration(uidStats) + topActivityDuration));
         });
 
         long elapsedRealtime = mClock.elapsedRealtime();

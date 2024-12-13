@@ -68,6 +68,8 @@ public final class BrightnessEventTest {
         mBrightnessEvent.setAutomaticBrightnessEnabled(true);
         mBrightnessEvent.setDisplayBrightnessStrategyName(DISPLAY_BRIGHTNESS_STRATEGY_NAME);
         mBrightnessEvent.setAutoBrightnessMode(AUTO_BRIGHTNESS_MODE_IDLE);
+        mBrightnessEvent.setSlowChange(true);
+        mBrightnessEvent.setRampSpeed(0.3f);
     }
 
     @Test
@@ -88,7 +90,7 @@ public final class BrightnessEventTest {
                         + "preLux=150.0, wasShortTermModelActive=true, autoBrightness=true (idle), "
                         + "unclampedBrt=0.65, hbmMax=0.62, hbmMode=off, thrmMax=0.65, "
                         + "rbcStrength=-1, powerFactor=0.2, physDisp=display_name(987654321), "
-                        + "logicalId=1";
+                        + "logicalId=1, slowChange=true, rampSpeed=0.3";
         assertEquals(expectedString, actualString);
     }
 

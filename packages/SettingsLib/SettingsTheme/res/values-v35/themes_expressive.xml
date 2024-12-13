@@ -18,8 +18,8 @@
 <resources>
     <style name="Theme.SettingsBase.Expressive">
         <!-- Set up Preference title text style -->
-        <!--item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle.SettingsLib</item-->
-        <!--item name="android:textAppearanceListItemSecondary">@style/textAppearanceListItemSecondary</item-->
+        <item name="android:textAppearanceListItem">@style/TextAppearance.SettingsLib.PreferenceTitle</item>
+        <item name="android:textAppearanceListItemSecondary">@style/TextAppearance.SettingsLib.PreferenceSummary</item>
 
         <!-- Set up  list item padding -->
         <item name="android:listPreferredItemPaddingStart">@dimen/settingslib_expressive_space_small1</item>

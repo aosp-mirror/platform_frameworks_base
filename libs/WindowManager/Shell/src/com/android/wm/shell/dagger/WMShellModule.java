@@ -151,6 +151,7 @@ import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer;
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader;
 import com.android.wm.shell.windowdecor.common.viewhost.DefaultWindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.common.viewhost.PooledWindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
@@ -517,7 +518,8 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             SplitState splitState,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellMainThread Handler mainHandler) {
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor) {
         return new SplitScreenController(
                 context,
                 shellInit,
@@ -541,7 +543,8 @@ public abstract class WMShellModule {
                 multiInstanceHelper,
                 splitState,
                 mainExecutor,
-                mainHandler);
+                mainHandler,
+                bgExecutor);
     }
 
     //
@@ -767,6 +770,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static DesktopTilingDecorViewModel provideDesktopTilingViewModel(Context context,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
@@ -775,9 +780,12 @@ public abstract class WMShellModule {
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             ReturnToDragStartAnimator returnToDragStartAnimator,
             @DynamicOverride DesktopUserRepositories desktopUserRepositories,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            WindowDecorTaskResourceLoader windowDecorTaskResourceLoader) {
         return new DesktopTilingDecorViewModel(
                 context,
+                mainDispatcher,
+                bgScope,
                 displayController,
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
@@ -786,7 +794,8 @@ public abstract class WMShellModule {
                 toggleResizeDesktopTaskTransitionHandler,
                 returnToDragStartAnimator,
                 desktopUserRepositories,
-                desktopModeEventLogger
+                desktopModeEventLogger,
+                windowDecorTaskResourceLoader
         );
     }
 
@@ -903,6 +912,8 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor shellExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread Choreographer mainChoreographer,
+            @ShellMainThread MainCoroutineDispatcher mainDispatcher,
+            @ShellBackgroundThread CoroutineScope bgScope,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -929,13 +940,15 @@ public abstract class WMShellModule {
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
-            DesktopModeUiEventLogger desktopModeUiEventLogger
+            DesktopModeUiEventLogger desktopModeUiEventLogger,
+            WindowDecorTaskResourceLoader taskResourceLoader
     ) {
         if (!DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.empty();
         }
         return Optional.of(new DesktopModeWindowDecorViewModel(context, shellExecutor, mainHandler,
-                mainChoreographer, bgExecutor, shellInit, shellCommandHandler, windowManager,
+                mainChoreographer, mainDispatcher, bgScope, bgExecutor,
+                shellInit, shellCommandHandler, windowManager,
                 taskOrganizer, desktopUserRepositories, displayController, shellController,
                 displayInsetsController, syncQueue, transitions, desktopTasksController,
                 desktopImmersiveController.get(),
@@ -943,7 +956,18 @@ public abstract class WMShellModule {
                 assistContentRequester, windowDecorViewHostSupplier, multiInstanceHelper,
                 desktopTasksLimiter, appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
-                focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger));
+                focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger,
+                taskResourceLoader));
+    }
+
+    @WMSingleton
+    @Provides
+    static WindowDecorTaskResourceLoader provideWindowDecorTaskResourceLoader(
+            @NonNull Context context, @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
+            @NonNull ShellCommandHandler shellCommandHandler) {
+        return new WindowDecorTaskResourceLoader(context, shellInit, shellController,
+                shellCommandHandler);
     }
 
     @WMSingleton
@@ -1025,12 +1049,14 @@ public abstract class WMShellModule {
     static DesktopUserRepositories provideDesktopUserRepositories(
             Context context,
             ShellInit shellInit,
+            ShellController shellController,
             DesktopPersistentRepository desktopPersistentRepository,
             DesktopRepositoryInitializer desktopRepositoryInitializer,
             @ShellMainThread CoroutineScope mainScope,
             UserManager userManager
     ) {
-        return new DesktopUserRepositories(context, shellInit, desktopPersistentRepository,
+        return new DesktopUserRepositories(context, shellInit, shellController,
+                desktopPersistentRepository,
                 desktopRepositoryInitializer,
                 mainScope, userManager);
     }

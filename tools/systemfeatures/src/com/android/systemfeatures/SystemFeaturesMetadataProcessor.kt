@@ -18,9 +18,11 @@ package com.android.systemfeatures
 
 import android.annotation.SdkConstant
 import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.CodeBlock
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import java.io.IOException
 import javax.annotation.processing.AbstractProcessor
@@ -101,8 +103,8 @@ class SystemFeaturesMetadataProcessor : AbstractProcessor() {
             TypeSpec.classBuilder("SystemFeaturesMetadata")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addJavadoc("@hide")
-                .addField(buildFeatureCount(featureVarNames))
-                .addMethod(buildFeatureIndexLookup(featureVarNames))
+                .addFeatureCount(featureVarNames)
+                .addFeatureIndexLookup(featureVarNames)
                 .build()
 
         try {
@@ -120,19 +122,55 @@ class SystemFeaturesMetadataProcessor : AbstractProcessor() {
         return true
     }
 
-    private fun buildFeatureCount(featureVarNames: Collection<String>): FieldSpec {
-        return FieldSpec.builder(Int::class.java, "SDK_FEATURE_COUNT")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-            .addJavadoc(
-                "# of {@link android.annotation.SdkConstant}` features defined in PackageManager."
-            )
-            .addJavadoc("\n\n@hide")
-            .initializer("\$L", featureVarNames.size)
-            .build()
+    private fun TypeSpec.Builder.addFeatureCount(
+        featureVarNames: Collection<String>
+    ): TypeSpec.Builder {
+        return addField(
+            FieldSpec.builder(Int::class.java, "SDK_FEATURE_COUNT")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addJavadoc(
+                    "# of {@link android.annotation.SdkConstant}` features in PackageManager."
+                )
+                .addJavadoc("\n\n@hide")
+                .initializer("\$L", featureVarNames.size)
+                .build()
+        )
     }
 
-    private fun buildFeatureIndexLookup(featureVarNames: Collection<String>): MethodSpec {
-        val methodBuilder =
+    private fun TypeSpec.Builder.addFeatureIndexLookup(
+        featureVarNames: Collection<String>
+    ): TypeSpec.Builder {
+        // NOTE: This was initially implemented in terms of a single, long switch() statement.
+        // However, this resulted in:
+        //   1) relatively large compiled code size for the lookup method (~20KB)
+        //   2) worse runtime lookup performance than a simple ArraySet
+        // The ArraySet approach adds just ~1KB to the code/image and is 2x faster at runtime.
+
+        // Provide the initial capacity of the ArraySet for efficiency.
+        addField(
+            FieldSpec.builder(
+                    ParameterizedTypeName.get(ARRAYSET_CLASS, ClassName.get(String::class.java)),
+                    "sFeatures",
+                )
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new ArraySet<>(\$L)", featureVarNames.size)
+                .build()
+        )
+
+        // Use a temp array + Collections.addAll() to minimizes the generated code size.
+        addStaticBlock(
+            CodeBlock.builder()
+                .add("final \$T[] features = {\n", String::class.java)
+                .indent()
+                .apply { featureVarNames.forEach { add("\$T.\$N,\n", PACKAGEMANAGER_CLASS, it) } }
+                .unindent()
+                .addStatement("}")
+                .addStatement("\$T.addAll(sFeatures, features)", COLLECTIONS_CLASS)
+                .build()
+        )
+
+        // Use ArraySet.indexOf to provide the implicit feature index mapping.
+        return addMethod(
             MethodSpec.methodBuilder("maybeGetSdkFeatureIndex")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addJavadoc("@return an index in [0, SDK_FEATURE_COUNT) for features defined ")
@@ -140,21 +178,15 @@ class SystemFeaturesMetadataProcessor : AbstractProcessor() {
                 .addJavadoc("\n\n@hide")
                 .returns(Int::class.java)
                 .addParameter(String::class.java, "featureName")
-        methodBuilder.beginControlFlow("switch (featureName)")
-        featureVarNames.forEachIndexed { index, featureVarName ->
-            methodBuilder
-                .addCode("case \$T.\$N: ", PACKAGEMANAGER_CLASS, featureVarName)
-                .addStatement("return \$L", index)
-        }
-        methodBuilder
-            .addCode("default: ")
-            .addStatement("return -1")
-            .endControlFlow()
-        return methodBuilder.build()
+                .addStatement("return sFeatures.indexOf(featureName)")
+                .build()
+        )
     }
 
     companion object {
         private val SDK_CONSTANT_ANNOTATION_NAME = SdkConstant::class.qualifiedName
         private val PACKAGEMANAGER_CLASS = ClassName.get("android.content.pm", "PackageManager")
+        private val ARRAYSET_CLASS = ClassName.get("android.util", "ArraySet")
+        private val COLLECTIONS_CLASS = ClassName.get("java.util", "Collections")
     }
 }

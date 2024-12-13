@@ -2473,7 +2473,7 @@ public final class Settings {
      * when a new SIM subscription has become available.
      * <p>
      * This Activity will only launch successfully if the newly active subscription ID is set as the
-     * value of {@link EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
+     * value of {@link #EXTRA_SUB_ID} and the value corresponds with an active SIM subscription.
      * <p>
      * Input: {@link #EXTRA_SUB_ID}: the subscription ID of the newly active SIM subscription.
      * <p>
@@ -13708,6 +13708,14 @@ public final class Settings {
         @Readable
         public static final String DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR =
                 "render_shadows_in_compositor";
+
+        /**
+         * Policy to be used for the display shade when connected to an external display.
+         * @hide
+         */
+        @Readable
+        public static final String DEVELOPMENT_SHADE_DISPLAY_AWARENESS =
+                "shade_display_awareness";
 
         /**
          * Path to the WindowManager display settings file. If unset, the default file path will

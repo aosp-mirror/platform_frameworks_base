@@ -17,6 +17,7 @@ package com.android.server.location.contexthub;
 
 import android.hardware.contexthub.EndpointId;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.IEndpointCallback;
 import android.hardware.contexthub.Message;
 import android.hardware.contexthub.MessageDeliveryStatus;
@@ -51,6 +52,12 @@ public class ContextHubHalEndpointCallback
 
         /** Called when a requested endpoint open session is completed */
         void onEndpointSessionOpenComplete(int sessionId);
+
+        /** Called when a message is received for the session */
+        void onMessageReceived(int sessionId, HubMessage message);
+
+        /** Called when a message delivery status is received for the session */
+        void onMessageDeliveryStatusReceived(int sessionId, int sequenceNumber, byte errorCode);
     }
 
     ContextHubHalEndpointCallback(
@@ -84,13 +91,6 @@ public class ContextHubHalEndpointCallback
     }
 
     @Override
-    public void onMessageReceived(int i, Message message) throws RemoteException {}
-
-    @Override
-    public void onMessageDeliveryStatusReceived(int i, MessageDeliveryStatus messageDeliveryStatus)
-            throws RemoteException {}
-
-    @Override
     public void onEndpointSessionOpenRequest(
             int i, EndpointId destination, EndpointId initiator, String s) throws RemoteException {
         HubEndpointInfo.HubEndpointIdentifier destinationId =
@@ -108,6 +108,19 @@ public class ContextHubHalEndpointCallback
     @Override
     public void onEndpointSessionOpenComplete(int i) throws RemoteException {
         mEndpointSessionCallback.onEndpointSessionOpenComplete(i);
+    }
+
+    @Override
+    public void onMessageReceived(int i, Message message) throws RemoteException {
+        HubMessage hubMessage = ContextHubServiceUtil.createHubMessage(message);
+        mEndpointSessionCallback.onMessageReceived(i, hubMessage);
+    }
+
+    @Override
+    public void onMessageDeliveryStatusReceived(int i, MessageDeliveryStatus messageDeliveryStatus)
+            throws RemoteException {
+        mEndpointSessionCallback.onMessageDeliveryStatusReceived(
+                i, messageDeliveryStatus.messageSequenceNumber, messageDeliveryStatus.errorCode);
     }
 
     @Override

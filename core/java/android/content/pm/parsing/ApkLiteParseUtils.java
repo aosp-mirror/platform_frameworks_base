@@ -539,9 +539,6 @@ public class ApkLiteParseUtils {
                                     hasBindDeviceAdminPermission);
                             break;
                         case TAG_USES_SDK_LIBRARY:
-                            if (!android.content.pm.Flags.sdkDependencyInstaller()) {
-                                break;
-                            }
                             String usesSdkLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
                             // TODO(b/379219371): Due to a bug in bundletool, some apps can use

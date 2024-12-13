@@ -174,7 +174,7 @@ public final class ApduServiceInfo implements Parcelable {
      * Whether or not this service wants to share the same routing priority as the
      * Wallet role owner.
      */
-    private boolean mShareRolePriority;
+    private boolean mWantsRoleHolderPriority;
 
     /**
      * @hide
@@ -314,8 +314,8 @@ public final class ApduServiceInfo implements Parcelable {
                         R.styleable.HostApduService_shouldDefaultToObserveMode,
                         false);
                 if (Flags.nfcAssociatedRoleServices()) {
-                    mShareRolePriority = sa.getBoolean(
-                            R.styleable.HostApduService_shareRolePriority,
+                    mWantsRoleHolderPriority = sa.getBoolean(
+                            R.styleable.HostApduService_wantsRoleHolderPriority,
                             false
                     );
                 }
@@ -350,8 +350,8 @@ public final class ApduServiceInfo implements Parcelable {
                 }
                 mStaticOffHostName = mOffHostName;
                 if (Flags.nfcAssociatedRoleServices()) {
-                    mShareRolePriority = sa.getBoolean(
-                            R.styleable.OffHostApduService_shareRolePriority,
+                    mWantsRoleHolderPriority = sa.getBoolean(
+                            R.styleable.OffHostApduService_wantsRoleHolderPriority,
                             false
                     );
                 }
@@ -752,8 +752,8 @@ public final class ApduServiceInfo implements Parcelable {
      * @return whether or not this service wants to share priority
      */
     @FlaggedApi(Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES)
-    public boolean shareRolePriority() {
-        return mShareRolePriority;
+    public boolean wantsRoleHolderPriority() {
+        return mWantsRoleHolderPriority;
     }
 
     /**

@@ -23,6 +23,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 
 import java.util.function.Consumer;
 
@@ -169,10 +170,15 @@ public class PowerStatsAggregator {
                     }
                 }
             }
-            if (lastTime > baseTime) {
-                mStats.setDuration(lastTime - baseTime);
-                mStats.finish(lastTime);
-                consumer.accept(mStats);
+            if (startedSession) {
+                if (endTimeMs != MonotonicClock.UNDEFINED) {
+                    lastTime = endTimeMs;
+                }
+                if (lastTime > baseTime) {
+                    mStats.setDuration(lastTime - baseTime);
+                    mStats.finish(lastTime);
+                    consumer.accept(mStats);
+                }
             }
 
             mStats.reset();     // to free up memory

@@ -2673,7 +2673,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (outRelayoutResult != null) {
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
-                        && win.mSyncSeqId > lastSyncSeqId) {
+                        && win.mSyncSeqId > lastSyncSeqId && !displayContent.mWaitingForConfig) {
                     outRelayoutResult.syncSeqId = win.shouldSyncWithBuffers()
                             ? win.mSyncSeqId
                             : -1;
@@ -4289,16 +4289,6 @@ public class WindowManagerService extends IWindowManager.Stub
         });
 
         return true;
-    }
-
-    /**
-     * Retrieves a snapshot. If restoreFromDisk equals equals {@code true}, DO NOT HOLD THE WINDOW
-     * MANAGER LOCK WHEN CALLING THIS METHOD!
-     */
-    public TaskSnapshot getTaskSnapshot(int taskId, int userId, boolean isLowResolution,
-            boolean restoreFromDisk) {
-        return mTaskSnapshotController.getSnapshot(taskId, userId, restoreFromDisk,
-                isLowResolution);
     }
 
     /**
@@ -9142,9 +9132,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void handlePointerDownOutsideFocus(InputTarget t, InputTarget focusedInputTarget) {
         synchronized (mGlobalLock) {
-            if (mFocusedInputTarget != focusedInputTarget) {
-                // Skip if the mFocusedInputTarget is already changed. This is possible if the
-                // pointer-down-outside-focus event is delayed to be handled.
+            final WindowState w = t.getWindowState();
+            // Skip if the mFocusedInputTarget is already changed or the touched Activity is no
+            // longer visible. This is possible if the pointer-down-outside-focus event is
+            // delayed to be handled.
+            if (mFocusedInputTarget != focusedInputTarget || (w != null
+                    && w.getActivityRecord() != null
+                    && !w.getActivityRecord().isVisibleRequested())) {
                 ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
                         "Skip onPointerDownOutsideFocusLocked due to input target changed %s", t);
                 return;
@@ -9156,7 +9150,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             clearPointerDownOutsideFocusRunnable();
 
-            final WindowState w = t.getWindowState();
             if (w != null) {
                 final Task task = w.getTask();
                 if (task != null && w.mTransitionController.isTransientHide(task)) {
@@ -10021,11 +10014,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     && imeTargetWindow.mActivityRecord.mLastImeShown) {
                 return true;
             }
+            final TaskSnapshot snapshot = mTaskSnapshotController.getSnapshot(
+                    imeTargetWindowTask.mTaskId, false /* isLowResolution */);
+            return snapshot != null && snapshot.hasImeSurface();
         }
-        final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
-                imeTargetWindowTask.mUserId, false /* isLowResolution */,
-                false /* restoreFromDisk */);
-        return snapshot != null && snapshot.hasImeSurface();
     }
 
     @Override

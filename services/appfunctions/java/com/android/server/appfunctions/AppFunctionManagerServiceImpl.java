@@ -30,6 +30,7 @@ import android.app.appfunctions.AppFunctionManagerHelper;
 import android.app.appfunctions.AppFunctionRuntimeMetadata;
 import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
+import android.app.appfunctions.ExecuteAppFunctionResponse;
 import android.app.appfunctions.IAppFunctionEnabledCallback;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
@@ -85,6 +86,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private final ServiceConfig mServiceConfig;
     private final Context mContext;
     private final Map<String, Object> mLocks = new WeakHashMap<>();
+    private final AppFunctionsLoggerWrapper mLoggerWrapper;
 
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(
@@ -93,7 +95,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         context, IAppFunctionService.Stub::asInterface, THREAD_POOL_EXECUTOR),
                 new CallerValidatorImpl(context),
                 new ServiceHelperImpl(context),
-                new ServiceConfigImpl());
+                new ServiceConfigImpl(),
+                new AppFunctionsLoggerWrapper(context));
     }
 
     @VisibleForTesting
@@ -102,12 +105,14 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             RemoteServiceCaller<IAppFunctionService> remoteServiceCaller,
             CallerValidator callerValidator,
             ServiceHelper appFunctionInternalServiceHelper,
-            ServiceConfig serviceConfig) {
+            ServiceConfig serviceConfig,
+            AppFunctionsLoggerWrapper loggerWrapper) {
         mContext = Objects.requireNonNull(context);
         mRemoteServiceCaller = Objects.requireNonNull(remoteServiceCaller);
         mCallerValidator = Objects.requireNonNull(callerValidator);
         mInternalServiceHelper = Objects.requireNonNull(appFunctionInternalServiceHelper);
         mServiceConfig = serviceConfig;
+        mLoggerWrapper = loggerWrapper;
     }
 
     /** Called when the user is unlocked. */
@@ -146,8 +151,27 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         Objects.requireNonNull(requestInternal);
         Objects.requireNonNull(executeAppFunctionCallback);
 
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
-                new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback);
+                new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback,
+                        new SafeOneTimeExecuteAppFunctionCallback.CompletionCallback() {
+                            @Override
+                            public void finalizeOnSuccess(
+                                    @NonNull ExecuteAppFunctionResponse result,
+                                    long executionStartTimeMillis) {
+                                mLoggerWrapper.logAppFunctionSuccess(requestInternal, result,
+                                        callingUid, executionStartTimeMillis);
+                            }
+
+                            @Override
+                            public void finalizeOnError(@NonNull AppFunctionException error,
+                                    long executionStartTimeMillis) {
+                                mLoggerWrapper.logAppFunctionError(requestInternal,
+                                        error.getErrorCode(), callingUid, executionStartTimeMillis);
+                            }
+                        });
 
         String validatedCallingPackage;
         try {
@@ -161,9 +185,6 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             AppFunctionException.ERROR_DENIED, exception.getMessage()));
             return null;
         }
-
-        int callingUid = Binder.getCallingUid();
-        int callingPid = Binder.getCallingPid();
 
         ICancellationSignal localCancelTransport = CancellationSignal.createTransport();
 

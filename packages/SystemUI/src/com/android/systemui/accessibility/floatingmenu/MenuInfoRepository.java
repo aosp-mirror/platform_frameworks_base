@@ -20,6 +20,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
+import static android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
@@ -42,6 +43,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
@@ -75,6 +77,9 @@ class MenuInfoRepository {
 
     private final Context mContext;
     private final Configuration mConfiguration;
+    private final AccessibilityManager mAccessibilityManager;
+    private final AccessibilityManager.AccessibilityServicesStateChangeListener
+            mA11yServicesStateChangeListener = manager -> onTargetFeaturesChanged();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final OnSettingsContentsChanged mSettingsContentsCallback;
     private final SecureSettings mSecureSettings;
@@ -142,9 +147,10 @@ class MenuInfoRepository {
         }
     };
 
-    MenuInfoRepository(Context context,
+    MenuInfoRepository(Context context, AccessibilityManager accessibilityManager,
             OnSettingsContentsChanged settingsContentsChanged, SecureSettings secureSettings) {
         mContext = context;
+        mAccessibilityManager = accessibilityManager;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mSettingsContentsCallback = settingsContentsChanged;
         mSecureSettings = secureSettings;
@@ -238,6 +244,13 @@ class MenuInfoRepository {
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mSecureSettings.registerContentObserverForUserSync(
+                    mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
+                    /* notifyForDescendants */ false,
+                    mMenuTargetFeaturesContentObserver,
+                    UserHandle.USER_CURRENT);
+        }
         mSecureSettings.registerContentObserverForUserSync(
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
                 /* notifyForDescendants */ false, mMenuSizeContentObserver,
@@ -251,6 +264,11 @@ class MenuInfoRepository {
                 /* notifyForDescendants */ false, mMenuFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
         mContext.registerComponentCallbacks(mComponentCallbacks);
+
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mAccessibilityManager.addAccessibilityServicesStateChangeListener(
+                    mA11yServicesStateChangeListener);
+        }
     }
 
     void unregisterObserversAndCallbacks() {
@@ -258,6 +276,11 @@ class MenuInfoRepository {
         mContext.getContentResolver().unregisterContentObserver(mMenuSizeContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);
         mContext.unregisterComponentCallbacks(mComponentCallbacks);
+
+        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+            mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
+                    mA11yServicesStateChangeListener);
+        }
     }
 
     interface OnSettingsContentsChanged {

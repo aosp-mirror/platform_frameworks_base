@@ -141,7 +141,7 @@ class DeviceControlsTileTest(flags: FlagsParameterization) : SysuiTestCase() {
             if (featureEnabled) {
                 Optional.of(controlsController)
             } else {
-                Optional.empty()
+                Optional.empty<ControlsController>()
             }
         }
 
@@ -149,7 +149,7 @@ class DeviceControlsTileTest(flags: FlagsParameterization) : SysuiTestCase() {
             if (featureEnabled) {
                 Optional.of(controlsListingController)
             } else {
-                Optional.empty()
+                Optional.empty<ControlsController>()
             }
         }
 
@@ -157,7 +157,7 @@ class DeviceControlsTileTest(flags: FlagsParameterization) : SysuiTestCase() {
             if (featureEnabled) {
                 Optional.of(controlsUiController)
             } else {
-                Optional.empty()
+                Optional.empty<ControlsController>()
             }
         }
 

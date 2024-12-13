@@ -45,6 +45,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener;
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingBannedListener;
@@ -99,6 +100,7 @@ public class HeadsUpManagerImpl
     protected int mTouchAcceptanceDelay;
     protected int mSnoozeLengthMs;
     protected boolean mHasPinnedNotification;
+    private PinnedStatus mPinnedNotificationStatus = PinnedStatus.NotPinned;
     protected int mUser;
 
     private final ArrayMap<String, Long> mSnoozedPackages;
@@ -183,7 +185,7 @@ public class HeadsUpManagerImpl
 
     @Inject
     public HeadsUpManagerImpl(
-            @NonNull final Context context,
+            @NonNull @ShadeDisplayAware final Context context,
             HeadsUpManagerLogger logger,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController,
@@ -303,28 +305,28 @@ public class HeadsUpManagerImpl
                 + resources.getDimensionPixelSize(R.dimen.heads_up_status_bar_padding);
     }
 
-    /**
-     * Called when posting a new notification that should appear on screen.
-     * Adds the notification to be managed.
-     * @param entry entry to show
-     */
     @Override
-    public void showNotification(@NonNull NotificationEntry entry) {
+    public void showNotification(
+            @NonNull NotificationEntry entry, boolean isPinnedByUser) {
         HeadsUpEntry headsUpEntry = createHeadsUpEntry(entry);
 
-        mLogger.logShowNotificationRequest(entry);
+        mLogger.logShowNotificationRequest(entry, isPinnedByUser);
 
         Runnable runnable = () -> {
-            mLogger.logShowNotification(entry);
+            mLogger.logShowNotification(entry, isPinnedByUser);
 
             // Add new entry and begin managing it
             mHeadsUpEntryMap.put(entry.getKey(), headsUpEntry);
-            onEntryAdded(headsUpEntry);
+            PinnedStatus requestedPinnedStatus =
+                    isPinnedByUser
+                            ? PinnedStatus.PinnedByUser
+                            : PinnedStatus.PinnedBySystem;
+            onEntryAdded(headsUpEntry, requestedPinnedStatus);
             // TODO(b/328390331) move accessibility events to the view layer
             entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
             entry.setIsHeadsUpEntry(true);
 
-            updateNotificationInternal(entry.getKey(), true /* shouldHeadsUpAgain */);
+            updateNotificationInternal(entry.getKey(), requestedPinnedStatus);
             entry.setInterruption();
         };
         mAvalancheController.update(headsUpEntry, runnable, "showNotification");
@@ -375,25 +377,22 @@ public class HeadsUpManagerImpl
         return false;
     }
 
-    /**
-     * Called when the notification state has been updated.
-     * @param key the key of the entry that was updated
-     * @param shouldHeadsUpAgain whether the notification should show again and force reevaluation
-     *                           of removal time
-     */
-    public void updateNotification(@NonNull String key, boolean shouldHeadsUpAgain) {
+    @Override
+    public void updateNotification(
+            @NonNull String key, @NonNull PinnedStatus requestedPinnedStatus) {
         HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
-        mLogger.logUpdateNotificationRequest(key, shouldHeadsUpAgain, headsUpEntry != null);
+        mLogger.logUpdateNotificationRequest(key, requestedPinnedStatus, headsUpEntry != null);
 
         Runnable runnable = () -> {
-            updateNotificationInternal(key, shouldHeadsUpAgain);
+            updateNotificationInternal(key, requestedPinnedStatus);
         };
         mAvalancheController.update(headsUpEntry, runnable, "updateNotification");
     }
 
-    private void updateNotificationInternal(@NonNull String key, boolean shouldHeadsUpAgain) {
+    private void updateNotificationInternal(
+            @NonNull String key, PinnedStatus requestedPinnedStatus) {
         HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
-        mLogger.logUpdateNotification(key, shouldHeadsUpAgain, headsUpEntry != null);
+        mLogger.logUpdateNotification(key, requestedPinnedStatus, headsUpEntry != null);
         if (headsUpEntry == null) {
             // the entry was released before this update (i.e by a listener) This can happen
             // with the groupmanager
@@ -404,11 +403,10 @@ public class HeadsUpManagerImpl
             headsUpEntry.mEntry.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         }
-        if (shouldHeadsUpAgain) {
+        if (requestedPinnedStatus.isPinned()) {
             headsUpEntry.updateEntry(true /* updatePostTime */, "updateNotification");
-            PinnedStatus pinnedStatus = shouldHeadsUpBecomePinned(headsUpEntry.mEntry)
-                    ? PinnedStatus.PinnedBySystem
-                    : PinnedStatus.NotPinned;
+            PinnedStatus pinnedStatus =
+                    getNewPinnedStatusForEntry(headsUpEntry, requestedPinnedStatus);
             if (headsUpEntry != null) {
                 setEntryPinned(headsUpEntry, pinnedStatus, "updateNotificationInternal");
             }
@@ -596,20 +594,41 @@ public class HeadsUpManagerImpl
      * Manager-specific logic that should occur when an entry is added.
      * @param headsUpEntry entry added
      */
-    protected void onEntryAdded(HeadsUpEntry headsUpEntry) {
+    @VisibleForTesting
+    void onEntryAdded(HeadsUpEntry headsUpEntry, PinnedStatus requestedPinnedStatus) {
         NotificationEntry entry = headsUpEntry.mEntry;
         entry.setHeadsUp(true);
 
-        final PinnedStatus pinnedStatus = shouldHeadsUpBecomePinned(entry)
-                ? PinnedStatus.PinnedBySystem
-                : PinnedStatus.NotPinned;
+        PinnedStatus pinnedStatus = getNewPinnedStatusForEntry(headsUpEntry, requestedPinnedStatus);
         setEntryPinned(headsUpEntry, pinnedStatus, "onEntryAdded");
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 1 /* visible */);
         for (OnHeadsUpChangedListener listener : mListeners) {
+            // TODO(b/382509804): It's odd that if pinnedStatus == PinnedStatus.NotPinned, then we
+            //  still send isHeadsUp=true to listeners. Is this causing bugs?
             listener.onHeadsUpStateChanged(entry, true);
         }
         updateTopHeadsUpFlow();
         updateHeadsUpFlow();
+    }
+
+    private PinnedStatus getNewPinnedStatusForEntry(
+            HeadsUpEntry headsUpEntry, PinnedStatus requestedPinnedStatus) {
+        NotificationEntry entry = headsUpEntry.mEntry;
+        if (entry == null) {
+            return PinnedStatus.NotPinned;
+        }
+        boolean shouldBecomePinned = shouldHeadsUpBecomePinned(entry);
+        if (!shouldBecomePinned) {
+            return PinnedStatus.NotPinned;
+        }
+
+        if (!StatusBarNotifChips.isEnabled()
+                && requestedPinnedStatus == PinnedStatus.PinnedByUser) {
+            Log.wtf(TAG, "PinnedStatus.PinnedByUser not allowed if StatusBarNotifChips flag off");
+            return PinnedStatus.NotPinned;
+        }
+
+        return requestedPinnedStatus;
     }
 
     /**
@@ -747,10 +766,11 @@ public class HeadsUpManagerImpl
 
     protected void updatePinnedMode() {
         boolean hasPinnedNotification = hasPinnedNotificationInternal();
+        mPinnedNotificationStatus = pinnedNotificationStatusInternal();
         if (hasPinnedNotification == mHasPinnedNotification) {
             return;
         }
-        mLogger.logUpdatePinnedMode(hasPinnedNotification);
+        mLogger.logUpdatePinnedMode(hasPinnedNotification, mPinnedNotificationStatus);
         mHasPinnedNotification = hasPinnedNotification;
         if (mHasPinnedNotification) {
             MetricsLogger.count(mContext, "note_peek", 1);
@@ -941,11 +961,18 @@ public class HeadsUpManagerImpl
         pw.println(mTouchableRegion);
     }
 
-    /**
-     * Returns if there are any pinned Heads Up Notifications or not.
-     */
+    @Override
     public boolean hasPinnedHeadsUp() {
         return mHasPinnedNotification;
+    }
+
+    @Override
+    @NonNull
+    public PinnedStatus pinnedHeadsUpStatus() {
+        if (!StatusBarNotifChips.isEnabled()) {
+            return mHasPinnedNotification ? PinnedStatus.PinnedBySystem : PinnedStatus.NotPinned;
+        }
+        return mPinnedNotificationStatus;
     }
 
     private boolean hasPinnedNotificationInternal() {
@@ -956,6 +983,16 @@ public class HeadsUpManagerImpl
             }
         }
         return false;
+    }
+
+    private PinnedStatus pinnedNotificationStatusInternal() {
+        for (String key : mHeadsUpEntryMap.keySet()) {
+            HeadsUpEntry entry = getHeadsUpEntry(key);
+            if (entry.mEntry != null && entry.mEntry.isRowPinned()) {
+                return entry.mEntry.getPinnedStatus();
+            }
+        }
+        return PinnedStatus.NotPinned;
     }
 
     /**
@@ -1303,10 +1340,6 @@ public class HeadsUpManagerImpl
                     entry.setSeenInShade(true);
                 }
             }
-        }
-
-        protected boolean isRowPinned() {
-            return mEntry != null && mEntry.isRowPinned();
         }
 
         protected void setRowPinnedStatus(PinnedStatus pinnedStatus) {

@@ -439,6 +439,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private boolean mSandboxDisplayApis = true;
 
+    /** Whether {@link #setIgnoreOrientationRequest} is called to override the default policy. */
+    @VisibleForTesting
+    boolean mHasSetIgnoreOrientationRequest;
+
     /**
      * Overridden display density for current user. Initialized with {@link #mInitialDisplayDensity}
      * but can be set from Settings or via shell command "adb shell wm density".
@@ -6722,8 +6726,25 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayPolicy.getSystemUiContext();
     }
 
+    /** Returns {@code} true if the smallest screen width dp >= 600. */
+    boolean isLargeScreen() {
+        return getConfiguration().smallestScreenWidthDp
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
+    }
+
+    @Override
+    boolean getIgnoreOrientationRequest() {
+        if (mHasSetIgnoreOrientationRequest
+                || !com.android.window.flags.Flags.universalResizableByDefault()) {
+            return super.getIgnoreOrientationRequest();
+        }
+        // Large screen (sw >= 600dp) ignores orientation request by default.
+        return isLargeScreen() && !mWmService.isIgnoreOrientationRequestDisabled();
+    }
+
     @Override
     boolean setIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
+        mHasSetIgnoreOrientationRequest = true;
         if (mSetIgnoreOrientationRequest == ignoreOrientationRequest) return false;
         final boolean rotationChanged = super.setIgnoreOrientationRequest(ignoreOrientationRequest);
         mWmService.mDisplayWindowSettings.setIgnoreOrientationRequest(

@@ -201,14 +201,10 @@ public class WindowTestsBase extends SystemServiceTestsBase {
      * {@link WindowTestsBase#setUpBase()}.
      */
     private static boolean sGlobalOverridesChecked;
+
     /**
      * Whether device-specific overrides have already been checked in
-     * {@link WindowTestsBase#setUpBase()} when the default display is used.
-     */
-    private static boolean sOverridesCheckedDefaultDisplay;
-    /**
-     * Whether device-specific overrides have already been checked in
-     * {@link WindowTestsBase#setUpBase()} when a {@link TestDisplayContent} is used.
+     * {@link WindowTestsBase#setUpBase()}.
      */
     private static boolean sOverridesCheckedTestDisplay;
 
@@ -332,17 +328,14 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     private void checkDeviceSpecificOverridesNotApplied() {
         // Check global overrides
         if (!sGlobalOverridesChecked) {
+            sGlobalOverridesChecked = true;
             assertEquals(0, mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                     0 /* delta */);
-            sGlobalOverridesChecked = true;
         }
         // Check display-specific overrides
-        if (!sOverridesCheckedDefaultDisplay && mDisplayContent == mDefaultDisplay) {
-            assertFalse(mDisplayContent.getIgnoreOrientationRequest());
-            sOverridesCheckedDefaultDisplay = true;
-        } else if (!sOverridesCheckedTestDisplay && mDisplayContent instanceof TestDisplayContent) {
-            assertFalse(mDisplayContent.getIgnoreOrientationRequest());
+        if (!sOverridesCheckedTestDisplay) {
             sOverridesCheckedTestDisplay = true;
+            assertFalse(mDisplayContent.mHasSetIgnoreOrientationRequest);
         }
     }
 
@@ -1121,7 +1114,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         displayContent.getDisplayRotation().configure(width, height);
         final Configuration c = new Configuration();
         displayContent.computeScreenConfiguration(c);
-        displayContent.onRequestedOverrideConfigurationChanged(c);
+        displayContent.performDisplayOverrideConfigUpdate(c);
     }
 
     static void makeDisplayLargeScreen(DisplayContent displayContent) {

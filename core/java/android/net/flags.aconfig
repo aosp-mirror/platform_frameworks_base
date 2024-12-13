@@ -31,9 +31,9 @@ flag {
 }
 
 flag {
-  name: "x509_extensions_certificate_transparency"
+  name: "mdns_improvement_for_25q2"
   is_exported: true
-  namespace: "network_security"
-  description: "Flag to use checkServerTrusted to verify SCTs in OCSP and TLS Data"
-  bug: "319829948"
+  namespace: "android_core_networking"
+  description: "Flag for MDNS quality, reliability and performance improvement in 25Q2"
+  bug: "373270045"
 }

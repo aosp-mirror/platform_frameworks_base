@@ -57,7 +57,7 @@ flag {
     is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
-    description: "enable enhanced confirmation incall apis"
+    description: "DEPRECATED, does not gate any apis"
     bug: "364535720"
 }
 
@@ -464,15 +464,6 @@ flag {
     namespace: "permissions"
     description: "Enables text classifier for OTP detection that is updatable from mainline module"
     bug: "377229653"
-}
-
-flag {
-    name: "cross_user_role_platform_api_enabled"
-    is_exported: true
-    is_fixed_read_only: true
-    namespace: "permissions"
-    description: "Enable cross-user roles platform API"
-    bug: "367732307"
 }
 
 flag {

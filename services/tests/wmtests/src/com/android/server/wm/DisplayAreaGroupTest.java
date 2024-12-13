@@ -84,6 +84,7 @@ public class DisplayAreaGroupTest extends WindowTestsBase {
 
     @Test
     public void testGetRequestedOrientationForDisplay() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task task = new TaskBuilder(mSupervisor)
                 .setTaskDisplayArea(mTaskDisplayArea).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopNonFinishingActivity();

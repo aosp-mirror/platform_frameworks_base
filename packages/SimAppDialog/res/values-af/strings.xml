@@ -19,8 +19,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"SIM-programdialoog"</string>
     <string name="install_carrier_app_title" msgid="334729104862562585">"Aktiveer mobiele diens"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"Jy sal die <xliff:g id="ID_1">%1$s</xliff:g>-program moet installeer om jou nuwe SIM behoorlik te laat werk"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"Jy sal die <xliff:g id="ID_1">%1$s</xliff:g>-app moet installeer om jou nuwe SIM behoorlik te laat werk"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Jy sal die diensverskafferprogram moet installeer om jou nuwe SIM behoorlik te laat werk"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Nie nou nie"</string>
-    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Laai program af"</string>
+    <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Laai app af"</string>
 </resources>

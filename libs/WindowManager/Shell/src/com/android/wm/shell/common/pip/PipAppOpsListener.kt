@@ -25,7 +25,6 @@ import com.android.wm.shell.common.ShellExecutor
 
 class PipAppOpsListener(
     private val mContext: Context,
-    private val mCallback: Callback,
     private val mMainExecutor: ShellExecutor
 ) {
     private val mAppOpsManager: AppOpsManager = checkNotNull(
@@ -46,12 +45,20 @@ class PipAppOpsListener(
                     packageName
                 ) != AppOpsManager.MODE_ALLOWED
             ) {
-                mMainExecutor.execute { mCallback.dismissPip() }
+                mCallback?.let {
+                    mMainExecutor.execute { it.dismissPip() }
+                }
             }
         } catch (e: PackageManager.NameNotFoundException) {
             // Unregister the listener if the package can't be found
             unregisterAppOpsListener()
         }
+    }
+
+    private var mCallback: Callback? = null
+
+    fun setCallback(callback: Callback) {
+        mCallback = callback
     }
 
     fun onActivityPinned(packageName: String) {

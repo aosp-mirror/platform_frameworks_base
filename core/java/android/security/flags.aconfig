@@ -138,3 +138,11 @@ flag {
     bug: "373422357"
     is_exported: true
 }
+
+flag {
+    name: "subscribe_to_keyguard_locked_state_perm_priv_flag"
+    namespace: "psap_ai"
+    description: "Feature flag to add the privileged flag to the SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE permission"
+    bug: "380120712"
+    is_fixed_read_only: true
+}

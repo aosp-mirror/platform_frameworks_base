@@ -19,17 +19,13 @@ package android.content.pm;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 
 /**
  * Indicates an error when verifying the
  * <a href="https://source.android.com/docs/security/features/apksigning">app signing</a>
  * information.
- *
- * @hide
  */
 @FlaggedApi(Flags.FLAG_CLOUD_COMPILATION_PM)
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public class SigningInfoException extends Exception {
     private final int mCode;
 

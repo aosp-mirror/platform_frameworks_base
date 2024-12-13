@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This class is responsible for registering callbacks that will receive JankData batches.
@@ -174,6 +175,15 @@ public class JankTracker {
     }
 
     /**
+     * Retrieve all pending jank stats before they are logged, this is intended for testing
+     * purposes only.
+     */
+    @VisibleForTesting
+    public HashMap<String, JankDataProcessor.PendingJankStat> getPendingJankStats() {
+        return mJankDataProcessor.getPendingJankStats();
+    }
+
+    /**
      * Only intended to be used by tests, the runnable that registers the listeners may not run
      * in time for tests to pass. This forces them to run immediately.
      */
@@ -192,7 +202,11 @@ public class JankTracker {
          */
     }
 
-    private boolean shouldTrack() {
+    /**
+     * Returns whether jank tracking is enabled or not.
+     */
+    @VisibleForTesting
+    public boolean shouldTrack() {
         return mTrackingEnabled && mListenersRegistered;
     }
 
