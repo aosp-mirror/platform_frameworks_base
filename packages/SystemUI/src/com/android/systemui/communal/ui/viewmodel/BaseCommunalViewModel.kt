@@ -19,7 +19,6 @@ package com.android.systemui.communal.ui.viewmodel
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
-import android.view.View
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -79,9 +78,6 @@ abstract class BaseCommunalViewModel(
      * vertical, which the lazy horizontal grid does not handle.
      */
     val glanceableTouchAvailable: Flow<Boolean> = anyOf(not(isTouchConsumed), isNestedScrolling)
-
-    /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
-    open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
 
     /**
      * The up-to-date value of the grid scroll offset. persisted to interactor on
