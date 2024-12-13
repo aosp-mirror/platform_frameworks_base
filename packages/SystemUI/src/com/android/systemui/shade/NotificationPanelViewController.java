@@ -187,7 +187,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
@@ -195,6 +194,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -366,7 +366,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final TouchHandler mTouchHandler = new TouchHandler();
 
     private long mDownTime;
-    private long mStatusBarLongPressDowntime;
+    private long mStatusBarLongPressDowntime = -1L;
     private boolean mTouchSlopExceededBeforeDown;
     private float mOverExpansion;
     private CentralSurfaces mCentralSurfaces;
@@ -3795,7 +3795,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void endMotionEvent(MotionEvent event, float x, float y, boolean forceCancel) {
         mShadeLog.logEndMotionEvent("endMotionEvent called", forceCancel, false);
         mTrackingPointer = -1;
-        mStatusBarLongPressDowntime = 0L;
+        mStatusBarLongPressDowntime = -1L;
         mAmbientState.setSwipingUp(false);
         if ((isTracking() && mTouchSlopExceeded) || Math.abs(x - mInitialExpandX) > mTouchSlop
                 || Math.abs(y - mInitialExpandY) > mTouchSlop
@@ -5199,7 +5199,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mUpdateFlingOnLayout = false;
                     mMotionAborted = false;
                     mDownTime = mSystemClock.uptimeMillis();
-                    mStatusBarLongPressDowntime = 0L;
+                    mStatusBarLongPressDowntime = -1L;
                     mTouchAboveFalsingThreshold = false;
                     mCollapsedAndHeadsUpOnDown =
                             isFullyCollapsed() && mHeadsUpManager.hasPinnedHeadsUp();
