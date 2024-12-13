@@ -91,6 +91,7 @@ import android.server.ServerProtoEnums;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
+import android.tracing.perfetto.InitArguments;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Dumpable;
@@ -791,6 +792,12 @@ public final class SystemServer implements Dumpable {
     private void run() {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         try {
+            if (android.tracing.Flags.systemServerLargePerfettoShmemBuffer()) {
+                // Explicitly initialize a 4 MB shmem buffer for Perfetto producers (b/382369925)
+                android.tracing.perfetto.Producer.init(new InitArguments(
+                        InitArguments.PERFETTO_BACKEND_SYSTEM, 4 * 1024));
+            }
+
             t.traceBegin("InitBeforeStartServices");
 
             // Record the process start information in sys props.
