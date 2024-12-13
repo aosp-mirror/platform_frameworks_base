@@ -244,18 +244,31 @@ soong_config_module_type {
     name: "system_java_library",
     module_type: "java_library",
     config_namespace: "system_services",
-    bool_variables: ["without_vibrator"],
+    variables: ["without_hal"],
     properties: ["vintf_fragment_modules"],
 }
 
+soong_config_string_variable {
+    name: "without_hal",
+    values: [
+        "vibrator",
+        "devicestate",
+    ],
+}
+
 vintf_fragment {
-    name: "manifest_services.xml",
-    src: "manifest_services.xml",
+    name: "manifest_services_android.frameworks.location.xml",
+    src: "manifest_services_android.frameworks.location.xml",
 }
 
 vintf_fragment {
     name: "manifest_services_android.frameworks.vibrator.xml",
     src: "manifest_services_android.frameworks.vibrator.xml",
+}
+
+vintf_fragment {
+    name: "manifest_services_android.frameworks.devicestate.xml",
+    src: "manifest_services_android.frameworks.devicestate.xml",
 }
 
 system_java_library {
@@ -328,14 +341,24 @@ system_java_library {
     ],
 
     soong_config_variables: {
-        without_vibrator: {
-            vintf_fragment_modules: [
-                "manifest_services.xml",
-            ],
+        without_hal: {
+            vibrator: {
+                vintf_fragment_modules: [
+                    "manifest_services_android.frameworks.location.xml",
+                    "manifest_services_android.frameworks.devicestate.xml",
+                ],
+            },
+            devicestate: {
+                vintf_fragment_modules: [
+                    "manifest_services_android.frameworks.location.xml",
+                    "manifest_services_android.frameworks.vibrator.xml",
+                ],
+            },
             conditions_default: {
                 vintf_fragment_modules: [
-                    "manifest_services.xml",
+                    "manifest_services_android.frameworks.location.xml",
                     "manifest_services_android.frameworks.vibrator.xml",
+                    "manifest_services_android.frameworks.devicestate.xml",
                 ],
             },
         },
