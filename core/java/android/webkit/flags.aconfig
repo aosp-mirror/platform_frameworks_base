@@ -36,6 +36,14 @@ flag {
 }
 
 flag {
+    name: "enable_chips"
+    is_exported: true
+    namespace: "webview"
+    description: "New feature enable CHIPS for webview"
+    bug: "359448044"
+}
+
+flag {
     name: "file_system_access"
     is_exported: true
     namespace: "webview"
