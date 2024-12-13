@@ -317,13 +317,9 @@ private class NestedDraggableNode(
                 }
 
                 check(pointersDownCount > 0) { "pointersDownCount is equal to $pointersDownCount" }
-                val wrappedController =
-                    WrappedController(
-                        coroutineScope,
-                        draggable.onDragStarted(down.position, sign, pointersDownCount),
-                    )
+                val controller = draggable.onDragStarted(down.position, sign, pointersDownCount)
                 if (overSlop != 0f) {
-                    onDrag(wrappedController, drag, overSlop, velocityTracker)
+                    onDrag(controller, drag, overSlop, velocityTracker)
                 }
 
                 // If a drag was started, we cancel any other drag started by a nested scrollable.
@@ -336,7 +332,7 @@ private class NestedDraggableNode(
                     try {
                         val onDrag = { change: PointerInputChange ->
                             onDrag(
-                                wrappedController,
+                                controller,
                                 change,
                                 change.positionChange().toFloat(),
                                 velocityTracker,
@@ -349,7 +345,7 @@ private class NestedDraggableNode(
                             Orientation.Vertical -> verticalDrag(drag.id, onDrag)
                         }
                     } catch (t: Throwable) {
-                        wrappedController.ensureOnDragStoppedIsCalled()
+                        onDragStopped(controller, velocity = 0f)
                         throw t
                     }
 
@@ -359,9 +355,9 @@ private class NestedDraggableNode(
                         velocityTracker
                             .calculateVelocity(Velocity(maxVelocity, maxVelocity))
                             .toFloat()
-                    onDragStopped(wrappedController, velocity)
+                    onDragStopped(controller, velocity)
                 } else {
-                    onDragStopped(wrappedController, velocity = 0f)
+                    onDragStopped(controller, velocity = 0f)
                 }
             }
         }
@@ -382,16 +378,14 @@ private class NestedDraggableNode(
         }
     }
 
-    private fun onDragStopped(controller: WrappedController, velocity: Float) {
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            try {
-                flingWithOverscroll(velocity) { velocityFromOverscroll ->
-                    flingWithNestedScroll(velocityFromOverscroll) { velocityFromNestedScroll ->
-                        controller.onDragStopped(velocityFromNestedScroll)
-                    }
+    private fun onDragStopped(controller: NestedDraggable.Controller, velocity: Float) {
+        // We launch in the scope of the dispatcher so that the fling is not cancelled if this node
+        // is removed right after onDragStopped() is called.
+        nestedScrollDispatcher.coroutineScope.launch {
+            flingWithOverscroll(velocity) { velocityFromOverscroll ->
+                flingWithNestedScroll(velocityFromOverscroll) { velocityFromNestedScroll ->
+                    controller.onDragStopped(velocityFromNestedScroll)
                 }
-            } finally {
-                controller.ensureOnDragStoppedIsCalled()
             }
         }
     }

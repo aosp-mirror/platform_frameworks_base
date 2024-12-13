@@ -43,7 +43,8 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.unit.Velocity
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.ceil
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -63,9 +64,10 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     @Test
     fun simpleDrag() {
         val draggable = TestDraggable()
+        val effect = TestOverscrollEffect(orientation) { 0f }
         val touchSlop =
             rule.setContentWithTouchSlop {
-                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation))
+                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation, effect))
             }
 
         assertThat(draggable.onDragStartedCalled).isFalse()
@@ -90,6 +92,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
 
         assertThat(draggable.onDragDelta).isEqualTo(30f)
         assertThat(draggable.onDragStoppedCalled).isFalse()
+        assertThat(effect.applyToFlingDone).isFalse()
 
         rule.onRoot().performTouchInput {
             moveBy((-15f).toOffset())
@@ -98,6 +101,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
 
         assertThat(draggable.onDragDelta).isEqualTo(15f)
         assertThat(draggable.onDragStoppedCalled).isTrue()
+        assertThat(effect.applyToFlingDone).isTrue()
     }
 
     @Test
@@ -151,10 +155,11 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     @Test
     fun onDragStoppedIsCalledWhenDraggableIsUpdatedAndReset() {
         val draggable = TestDraggable()
+        val effect = TestOverscrollEffect(orientation) { 0f }
         var orientation by mutableStateOf(orientation)
         val touchSlop =
             rule.setContentWithTouchSlop {
-                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation))
+                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation, effect))
             }
 
         assertThat(draggable.onDragStartedCalled).isFalse()
@@ -166,6 +171,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
 
         assertThat(draggable.onDragStartedCalled).isTrue()
         assertThat(draggable.onDragStoppedCalled).isFalse()
+        assertThat(effect.applyToFlingDone).isFalse()
 
         orientation =
             when (orientation) {
@@ -174,6 +180,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
             }
         rule.waitForIdle()
         assertThat(draggable.onDragStoppedCalled).isTrue()
+        assertThat(effect.applyToFlingDone).isTrue()
     }
 
     @Test
@@ -211,11 +218,28 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     @Test
     fun onDragStoppedIsCalledWhenDraggableIsRemovedDuringDrag() {
         val draggable = TestDraggable()
+        val postFlingDelay = 10 * 16L
+        val effect =
+            TestOverscrollEffect(
+                orientation,
+                onPostFling = {
+                    // We delay the fling so that we can check that the draggable node methods are
+                    // still called until completion even when the node is removed.
+                    delay(postFlingDelay)
+                    it
+                },
+            ) {
+                0f
+            }
         var composeContent by mutableStateOf(true)
         val touchSlop =
             rule.setContentWithTouchSlop {
-                if (composeContent) {
-                    Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation))
+                // We add an empty nested scroll connection here from which the scope will be used
+                // when dispatching the flings.
+                Box(Modifier.nestedScroll(remember { object : NestedScrollConnection {} })) {
+                    if (composeContent) {
+                        Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation, effect))
+                    }
                 }
             }
 
@@ -228,10 +252,13 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
 
         assertThat(draggable.onDragStartedCalled).isTrue()
         assertThat(draggable.onDragStoppedCalled).isFalse()
+        assertThat(effect.applyToFlingDone).isFalse()
 
         composeContent = false
         rule.waitForIdle()
+        rule.mainClock.advanceTimeBy(postFlingDelay)
         assertThat(draggable.onDragStoppedCalled).isTrue()
+        assertThat(effect.applyToFlingDone).isTrue()
     }
 
     @Test
@@ -267,8 +294,10 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     @Test
     fun onDragStoppedIsCalledWhenDraggableIsRemovedDuringFling() {
         val draggable = TestDraggable()
+        val effect = TestOverscrollEffect(orientation) { 0f }
         var composeContent by mutableStateOf(true)
         var preFlingCalled = false
+        val unblockPrefling = CompletableDeferred<Velocity>()
         rule.setContent {
             if (composeContent) {
                 Box(
@@ -282,12 +311,12 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
                                 object : NestedScrollConnection {
                                     override suspend fun onPreFling(available: Velocity): Velocity {
                                         preFlingCalled = true
-                                        awaitCancellation()
+                                        return unblockPrefling.await()
                                     }
                                 }
                             }
                         )
-                        .nestedDraggable(draggable, orientation)
+                        .nestedDraggable(draggable, orientation, effect)
                 )
             }
         }
@@ -304,11 +333,14 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
 
         assertThat(draggable.onDragStartedCalled).isTrue()
         assertThat(draggable.onDragStoppedCalled).isFalse()
+        assertThat(effect.applyToFlingDone).isFalse()
         assertThat(preFlingCalled).isTrue()
 
         composeContent = false
+        unblockPrefling.complete(Velocity.Zero)
         rule.waitForIdle()
         assertThat(draggable.onDragStoppedCalled).isTrue()
+        assertThat(effect.applyToFlingDone).isTrue()
     }
 
     @Test
