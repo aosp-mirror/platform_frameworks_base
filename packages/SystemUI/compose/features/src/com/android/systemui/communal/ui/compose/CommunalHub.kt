@@ -1352,6 +1352,7 @@ private fun WidgetContent(
     val shrinkWidgetLabel = stringResource(R.string.accessibility_action_label_shrink_widget)
     val expandWidgetLabel = stringResource(R.string.accessibility_action_label_expand_widget)
 
+    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
     val selectedKey by viewModel.selectedKey.collectAsStateWithLifecycle()
     val selectedIndex =
         selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
@@ -1465,7 +1466,8 @@ private fun WidgetContent(
     ) {
         with(widgetSection) {
             Widget(
-                viewModel = viewModel,
+                isFocusable = isFocusable,
+                openWidgetEditor = { viewModel.onOpenWidgetEditor() },
                 model = model,
                 size = size,
                 modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),

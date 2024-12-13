@@ -169,7 +169,6 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.testDispatcher,
             testScope,
             kosmos.testScope.backgroundScope,
-            context.resources,
             kosmos.keyguardTransitionInteractor,
             kosmos.keyguardInteractor,
             mock<KeyguardIndicationController>(),
