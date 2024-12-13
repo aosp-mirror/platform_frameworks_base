@@ -56,8 +56,7 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.modifiers.thenIf
 import kotlin.math.sign
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 /**
@@ -172,11 +171,7 @@ private class NestedDraggableNode(
         }
 
     /** The controller created by the nested scroll logic (and *not* the drag logic). */
-    private var nestedScrollController: WrappedController? = null
-        set(value) {
-            field?.ensureOnDragStoppedIsCalled()
-            field = value
-        }
+    private var nestedScrollController: NestedScrollController? = null
 
     /**
      * The last pointer which was the first down since the last time all pointers were up.
@@ -194,6 +189,7 @@ private class NestedDraggableNode(
 
     override fun onDetach() {
         nestedScrollController?.ensureOnDragStoppedIsCalled()
+        nestedScrollController = null
     }
 
     fun update(
@@ -210,6 +206,7 @@ private class NestedDraggableNode(
         trackDownPositionDelegate?.resetPointerInputHandler()
         detectDragsDelegate?.resetPointerInputHandler()
         nestedScrollController?.ensureOnDragStoppedIsCalled()
+        nestedScrollController = null
 
         if (!enabled && trackDownPositionDelegate != null) {
             check(detectDragsDelegate != null)
@@ -327,6 +324,7 @@ private class NestedDraggableNode(
                 // Note: we cancel the nested drag here *after* starting the new drag so that in the
                 // STL case, the cancelled drag will not change the current scene of the STL.
                 nestedScrollController?.ensureOnDragStoppedIsCalled()
+                nestedScrollController = null
 
                 val isSuccessful =
                     try {
@@ -345,19 +343,17 @@ private class NestedDraggableNode(
                             Orientation.Vertical -> verticalDrag(drag.id, onDrag)
                         }
                     } catch (t: Throwable) {
-                        onDragStopped(controller, velocity = 0f)
+                        onDragStopped(controller, Velocity.Zero)
                         throw t
                     }
 
                 if (isSuccessful) {
                     val maxVelocity = currentValueOf(LocalViewConfiguration).maximumFlingVelocity
                     val velocity =
-                        velocityTracker
-                            .calculateVelocity(Velocity(maxVelocity, maxVelocity))
-                            .toFloat()
+                        velocityTracker.calculateVelocity(Velocity(maxVelocity, maxVelocity))
                     onDragStopped(controller, velocity)
                 } else {
-                    onDragStopped(controller, velocity = 0f)
+                    onDragStopped(controller, Velocity.Zero)
                 }
             }
         }
@@ -371,86 +367,87 @@ private class NestedDraggableNode(
     ) {
         velocityTracker.addPointerInputChange(change)
 
-        scrollWithOverscroll(delta) { deltaFromOverscroll ->
+        scrollWithOverscroll(delta.toOffset()) { deltaFromOverscroll ->
             scrollWithNestedScroll(deltaFromOverscroll) { deltaFromNestedScroll ->
-                controller.onDrag(deltaFromNestedScroll)
+                controller.onDrag(deltaFromNestedScroll.toFloat()).toOffset()
             }
         }
     }
 
-    private fun onDragStopped(controller: NestedDraggable.Controller, velocity: Float) {
+    private fun onDragStopped(controller: NestedDraggable.Controller, velocity: Velocity) {
         // We launch in the scope of the dispatcher so that the fling is not cancelled if this node
         // is removed right after onDragStopped() is called.
         nestedScrollDispatcher.coroutineScope.launch {
             flingWithOverscroll(velocity) { velocityFromOverscroll ->
                 flingWithNestedScroll(velocityFromOverscroll) { velocityFromNestedScroll ->
-                    controller.onDragStopped(velocityFromNestedScroll)
+                    controller.onDragStopped(velocityFromNestedScroll.toFloat()).toVelocity()
                 }
             }
         }
     }
 
-    private fun scrollWithOverscroll(delta: Float, performScroll: (Float) -> Float): Float {
+    private fun scrollWithOverscroll(delta: Offset, performScroll: (Offset) -> Offset): Offset {
         val effect = overscrollEffect
         return if (effect != null) {
-            effect
-                .applyToScroll(delta.toOffset(), source = NestedScrollSource.UserInput) {
-                    performScroll(it.toFloat()).toOffset()
-                }
-                .toFloat()
+            effect.applyToScroll(delta, source = NestedScrollSource.UserInput) { performScroll(it) }
         } else {
             performScroll(delta)
         }
     }
 
-    private fun scrollWithNestedScroll(delta: Float, performScroll: (Float) -> Float): Float {
+    private fun scrollWithNestedScroll(delta: Offset, performScroll: (Offset) -> Offset): Offset {
         val preConsumed =
-            nestedScrollDispatcher
-                .dispatchPreScroll(
-                    available = delta.toOffset(),
-                    source = NestedScrollSource.UserInput,
-                )
-                .toFloat()
+            nestedScrollDispatcher.dispatchPreScroll(
+                available = delta,
+                source = NestedScrollSource.UserInput,
+            )
         val available = delta - preConsumed
         val consumed = performScroll(available)
         val left = available - consumed
         val postConsumed =
-            nestedScrollDispatcher
-                .dispatchPostScroll(
-                    consumed = (preConsumed + consumed).toOffset(),
-                    available = left.toOffset(),
-                    source = NestedScrollSource.UserInput,
-                )
-                .toFloat()
+            nestedScrollDispatcher.dispatchPostScroll(
+                consumed = preConsumed + consumed,
+                available = left,
+                source = NestedScrollSource.UserInput,
+            )
         return consumed + preConsumed + postConsumed
     }
 
     private suspend fun flingWithOverscroll(
-        velocity: Float,
-        performFling: suspend (Float) -> Float,
-    ) {
+        velocity: Velocity,
+        performFling: suspend (Velocity) -> Velocity,
+    ): Velocity {
         val effect = overscrollEffect
-        if (effect != null) {
-            effect.applyToFling(velocity.toVelocity()) { performFling(it.toFloat()).toVelocity() }
+        return flingWithOverscroll(effect, velocity, performFling)
+    }
+
+    private suspend fun flingWithOverscroll(
+        overscrollEffect: OverscrollEffect?,
+        velocity: Velocity,
+        performFling: suspend (Velocity) -> Velocity,
+    ): Velocity {
+        return if (overscrollEffect != null) {
+            overscrollEffect.applyToFling(velocity) { performFling(it) }
+
+            // Effects always consume the whole velocity.
+            velocity
         } else {
             performFling(velocity)
         }
     }
 
     private suspend fun flingWithNestedScroll(
-        velocity: Float,
-        performFling: suspend (Float) -> Float,
-    ): Float {
-        val preConsumed = nestedScrollDispatcher.dispatchPreFling(available = velocity.toVelocity())
-        val available = velocity - preConsumed.toFloat()
+        velocity: Velocity,
+        performFling: suspend (Velocity) -> Velocity,
+    ): Velocity {
+        val preConsumed = nestedScrollDispatcher.dispatchPreFling(available = velocity)
+        val available = velocity - preConsumed
         val consumed = performFling(available)
         val left = available - consumed
-        return nestedScrollDispatcher
-            .dispatchPostFling(
-                consumed = consumed.toVelocity() + preConsumed,
-                available = left.toVelocity(),
-            )
-            .toFloat()
+        return nestedScrollDispatcher.dispatchPostFling(
+            consumed = consumed + preConsumed,
+            available = left,
+        )
     }
 
     /*
@@ -480,8 +477,7 @@ private class NestedDraggableNode(
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         val controller = nestedScrollController ?: return Offset.Zero
-        val consumed = controller.onDrag(available.toFloat())
-        return consumed.toOffset()
+        return scrollWithOverscroll(controller, available)
     }
 
     override fun onPostScroll(
@@ -506,49 +502,43 @@ private class NestedDraggableNode(
             // TODO(b/382665591): Replace this by check(pointersDownCount > 0).
             val pointersDown = pointersDownCount.coerceAtLeast(1)
             nestedScrollController =
-                WrappedController(
-                    coroutineScope,
+                NestedScrollController(
+                    overscrollEffect,
                     draggable.onDragStarted(startedPosition, sign, pointersDown),
                 )
         }
 
         val controller = nestedScrollController ?: return Offset.Zero
-        return controller.onDrag(offset).toOffset()
+        return scrollWithOverscroll(controller, available)
+    }
+
+    private fun scrollWithOverscroll(controller: NestedScrollController, offset: Offset): Offset {
+        return scrollWithOverscroll(offset) {
+            controller.controller.onDrag(it.toFloat()).toOffset()
+        }
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
         val controller = nestedScrollController ?: return Velocity.Zero
         nestedScrollController = null
 
-        val consumed = controller.onDragStopped(available.toFloat())
-        return consumed.toVelocity()
-    }
-}
-
-/**
- * A controller that wraps [delegate] and can be used to ensure that [onDragStopped] is called, but
- * not more than once.
- */
-private class WrappedController(
-    private val coroutineScope: CoroutineScope,
-    private val delegate: NestedDraggable.Controller,
-) : NestedDraggable.Controller by delegate {
-    private var onDragStoppedCalled = false
-
-    override fun onDrag(delta: Float): Float {
-        if (onDragStoppedCalled) return 0f
-        return delegate.onDrag(delta)
+        return nestedScrollDispatcher.coroutineScope
+            .async { controller.flingWithOverscroll(available) }
+            .await()
     }
 
-    override suspend fun onDragStopped(velocity: Float): Float {
-        if (onDragStoppedCalled) return 0f
-        onDragStoppedCalled = true
-        return delegate.onDragStopped(velocity)
-    }
+    private inner class NestedScrollController(
+        private val overscrollEffect: OverscrollEffect?,
+        val controller: NestedDraggable.Controller,
+    ) {
+        fun ensureOnDragStoppedIsCalled() {
+            nestedScrollDispatcher.coroutineScope.launch { flingWithOverscroll(Velocity.Zero) }
+        }
 
-    fun ensureOnDragStoppedIsCalled() {
-        // Start with UNDISPATCHED so that onDragStopped() is always run until its first suspension
-        // point, even if coroutineScope is cancelled.
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) { onDragStopped(velocity = 0f) }
+        suspend fun flingWithOverscroll(velocity: Velocity): Velocity {
+            return flingWithOverscroll(overscrollEffect, velocity) {
+                controller.onDragStopped(it.toFloat()).toVelocity()
+            }
+        }
     }
 }
