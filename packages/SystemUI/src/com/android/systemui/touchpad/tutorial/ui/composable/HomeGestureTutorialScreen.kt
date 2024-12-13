@@ -42,6 +42,8 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     bodyResId = R.string.touchpad_home_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_home_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_home_gesture_success_body,
+                    titleErrorResId = R.string.gesture_error_title,
+                    bodyErrorResId = R.string.touchpad_home_gesture_error_body,
                 ),
             animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_home_edu),
         )

@@ -3932,6 +3932,8 @@
     <string name="touchpad_tutorial_recent_apps_gesture_button">View recent apps</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
+    <!-- Screen title after gesture was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="gesture_error_title">Try again!</string>
     <!-- BACK GESTURE -->
     <!-- Touchpad back gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_action_title">Go back</string>
@@ -3941,6 +3943,8 @@
     <string name="touchpad_back_gesture_success_title">Nice!</string>
     <!-- Text shown to the user after they complete back gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_success_body">You completed the go back gesture.</string>
+    <!-- Text shown to the user after back gesture was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="touchpad_back_gesture_error_body">To go back using your touchpad, swipe left or right using three fingers</string>
     <!-- HOME GESTURE -->
     <!-- Touchpad home gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_action_title">Go home</string>
@@ -3950,6 +3954,8 @@
     <string name="touchpad_home_gesture_success_title">Great job!</string>
     <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_success_body">You completed the go home gesture</string>
+    <!-- Text shown to the user after home gesture was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="touchpad_home_gesture_error_body">Swipe up with three fingers on your touchpad to go to your home screen</string>
     <!-- RECENT APPS GESTURE -->
     <!-- Touchpad recent apps gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_recent_apps_gesture_action_title">View recent apps</string>
@@ -3959,6 +3965,8 @@
     <string name="touchpad_recent_apps_gesture_success_title">Great job!</string>
     <!-- Text shown to the user after they complete recent apps gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_recent_apps_gesture_success_body">You completed the view recent apps gesture.</string>
+    <!-- Text shown to the user after recent gesture was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="touchpad_recent_gesture_error_body">To view recent apps, swipe up and hold using three fingers on your touchpad</string>
 
     <!-- KEYBOARD TUTORIAL-->
     <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
@@ -3969,6 +3977,9 @@
     <string name="tutorial_action_key_success_title">Well done!</string>
     <!-- Text shown to the user after they complete action key tutorial [CHAR LIMIT=NONE] -->
     <string name="tutorial_action_key_success_body">You completed the view all apps gesture</string>
+    <!-- Text shown to the user after action key tutorial was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="touchpad_action_key_error_body">Press the action key on your keyboard to view all of your apps</string>
+
     <!-- Content description for the animation playing during the tutorial. The user can click the animation to pause and unpause playback. [CHAR LIMIT=NONE] -->
     <string name="tutorial_animation_content_description">Tutorial animation, click to pause and resume play.</string>
 

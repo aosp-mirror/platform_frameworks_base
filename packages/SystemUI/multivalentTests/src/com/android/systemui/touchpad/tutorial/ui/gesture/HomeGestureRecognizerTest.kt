@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.testKosmos
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Error
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
@@ -56,9 +57,9 @@ class HomeGestureRecognizerTest : SysuiTestCase() {
     }
 
     @Test
-    fun doesntTriggerGestureFinished_onGestureSpeedTooSlow() {
+    fun triggersError_onGestureSpeedTooSlow() {
         velocityTracker.setVelocity(Velocity(SLOW))
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = NotStarted)
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = Error)
     }
 
     @Test
