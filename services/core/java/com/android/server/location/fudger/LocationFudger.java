@@ -188,8 +188,8 @@ public class LocationFudger {
         // TODO(b/381204398): To ensure a safe rollout, two algorithms co-exist. The first is the
         // new density-based algorithm, while the second is the traditional coarsening algorithm.
         // Once rollout is done, clean up the unused algorithm.
-        if (Flags.densityBasedCoarseLocations() && cacheCopy != null
-                && cacheCopy.hasDefaultValue()) {
+        if (Flags.populationDensityProvider() && Flags.densityBasedCoarseLocations()
+                && cacheCopy != null && cacheCopy.hasDefaultValue()) {
             int level = cacheCopy.getCoarseningLevel(latitude, longitude);
             double[] center = snapToCenterOfS2Cell(latitude, longitude, level);
             latitude = center[S2CellIdUtils.LAT_INDEX];
