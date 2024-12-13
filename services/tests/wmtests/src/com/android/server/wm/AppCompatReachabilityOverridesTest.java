@@ -23,13 +23,9 @@ import static org.mockito.Mockito.spy;
 
 import android.compat.testing.PlatformCompatChangeRule;
 import android.graphics.Rect;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
-
-import com.android.window.flags.Flags;
 
 import junit.framework.Assert;
 
@@ -125,8 +121,7 @@ public class AppCompatReachabilityOverridesTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
-    public void testAllowReachabilityForThinLetterboxWithFlagEnabled() {
+    public void testAllowReachabilityForThinLetterbox_disableForThinLetterboxing() {
         runTestScenario((robot) -> {
             robot.activity().createActivityWithComponent();
 
@@ -134,24 +129,6 @@ public class AppCompatReachabilityOverridesTest extends WindowTestsBase {
             robot.checkAllowVerticalReachabilityForThinLetterbox(/* expected */ false);
             robot.configureIsHorizontalThinLetterboxed(/* isThin */ true);
             robot.checkAllowHorizontalReachabilityForThinLetterbox(/* expected */ false);
-
-            robot.configureIsVerticalThinLetterboxed(/* isThin */ false);
-            robot.checkAllowVerticalReachabilityForThinLetterbox(/* expected */ true);
-            robot.configureIsHorizontalThinLetterboxed(/* isThin */ false);
-            robot.checkAllowHorizontalReachabilityForThinLetterbox(/* expected */ true);
-        });
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_DISABLE_THIN_LETTERBOXING_POLICY)
-    public void testAllowReachabilityForThinLetterboxWithFlagDisabled() {
-        runTestScenario((robot) -> {
-            robot.activity().createActivityWithComponent();
-
-            robot.configureIsVerticalThinLetterboxed(/* isThin */ true);
-            robot.checkAllowVerticalReachabilityForThinLetterbox(/* expected */ true);
-            robot.configureIsHorizontalThinLetterboxed(/* isThin */ true);
-            robot.checkAllowHorizontalReachabilityForThinLetterbox(/* expected */ true);
 
             robot.configureIsVerticalThinLetterboxed(/* isThin */ false);
             robot.checkAllowVerticalReachabilityForThinLetterbox(/* expected */ true);
