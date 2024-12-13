@@ -21,8 +21,11 @@ import static android.Manifest.permission.ADD_MIRROR_DISPLAY;
 import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
+import static android.Manifest.permission.CONFIGURE_WIFI_DISPLAY;
+import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
+import static android.Manifest.permission.MODIFY_HDR_CONVERSION_MODE;
 import static android.Manifest.permission.RESTRICT_DISPLAY_MODES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
@@ -4609,13 +4612,13 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(CONFIGURE_WIFI_DISPLAY)
         @Override // Binder call
         public void connectWifiDisplay(String address) {
+            connectWifiDisplay_enforcePermission();
             if (address == null) {
                 throw new IllegalArgumentException("address must not be null");
             }
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
-                    "Permission required to connect to a wifi display");
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -4640,13 +4643,13 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(CONFIGURE_WIFI_DISPLAY)
         @Override // Binder call
         public void renameWifiDisplay(String address, String alias) {
+            renameWifiDisplay_enforcePermission();
             if (address == null) {
                 throw new IllegalArgumentException("address must not be null");
             }
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
-                    "Permission required to rename to a wifi display");
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -4656,13 +4659,13 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(CONFIGURE_WIFI_DISPLAY)
         @Override // Binder call
         public void forgetWifiDisplay(String address) {
+            forgetWifiDisplay_enforcePermission();
             if (address == null) {
                 throw new IllegalArgumentException("address must not be null");
             }
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.CONFIGURE_WIFI_DISPLAY,
-                    "Permission required to forget to a wifi display");
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -5006,7 +5009,7 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
-        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override
         public BrightnessInfo getBrightnessInfo(int displayId) {
             getBrightnessInfo_enforcePermission();
@@ -5037,7 +5040,7 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
-        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public void setTemporaryBrightness(int displayId, float brightness) {
             setTemporaryBrightness_enforcePermission();
@@ -5052,7 +5055,7 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
-        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public void setBrightness(int displayId, float brightness) {
             setBrightness_enforcePermission();
@@ -5076,12 +5079,11 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public float getBrightness(int displayId) {
+            getBrightness_enforcePermission();
             float brightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
-                    "Permission required to set the display's brightness");
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mSyncRoot) {
@@ -5096,7 +5098,7 @@ public final class DisplayManagerService extends SystemService {
             return brightness;
         }
 
-        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
             setTemporaryAutoBrightnessAdjustment_enforcePermission();
@@ -5171,14 +5173,13 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @EnforcePermission(MODIFY_HDR_CONVERSION_MODE)
         @Override // Binder call
         public void setHdrConversionMode(HdrConversionMode hdrConversionMode) {
+            setHdrConversionMode_enforcePermission();
             if (!mIsHdrOutputControlEnabled) {
                 return;
             }
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.MODIFY_HDR_CONVERSION_MODE,
-                    "Permission required to set the HDR conversion mode.");
             final long token = Binder.clearCallingIdentity();
             try {
                 setHdrConversionModeInternal(hdrConversionMode);
@@ -5342,7 +5343,7 @@ public final class DisplayManagerService extends SystemService {
                     ? ddc.getHdrBrightnessData().highestHdrSdrRatio : 1;
         }
 
-        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
             getDozeBrightnessSensorValueToBrightness_enforcePermission();
@@ -5355,7 +5356,7 @@ public final class DisplayManagerService extends SystemService {
             return ddc.getDozeBrightnessSensorValueToBrightness();
         }
 
-        @EnforcePermission(android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+        @EnforcePermission(CONTROL_DISPLAY_BRIGHTNESS)
         @Override // Binder call
         public float getDefaultDozeBrightness(int displayId) {
             getDefaultDozeBrightness_enforcePermission();
