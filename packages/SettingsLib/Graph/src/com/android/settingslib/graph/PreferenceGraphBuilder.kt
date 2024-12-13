@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -396,7 +397,7 @@ fun PreferenceMetadata.toProto(
                 (!hasAvailable() || available) &&
                 (!hasRestricted() || !restricted) &&
                 metadata is PersistentPreference<*> &&
-                metadata.getReadPermit(context, callingPid, callingUid) == ReadWritePermit.ALLOW
+                metadata.evalReadPermit(context, callingPid, callingUid) == ReadWritePermit.ALLOW
         ) {
             value = preferenceValueProto {
                 when (metadata) {
@@ -425,6 +426,20 @@ fun PreferenceMetadata.toProto(
             }
         }
     }
+}
+
+/** Evaluates the read permit of a persistent preference. */
+fun <T> PersistentPreference<T>.evalReadPermit(
+    context: Context,
+    callingPid: Int,
+    callingUid: Int,
+): Int {
+    for (permission in getReadPermissions(context)) {
+        if (context.checkPermission(permission, callingPid, callingUid) != PERMISSION_GRANTED) {
+            return ReadWritePermit.REQUIRE_APP_PERMISSION
+        }
+    }
+    return getReadPermit(context, callingPid, callingUid)
 }
 
 private fun PreferenceMetadata.getTitleTextProto(context: Context, isRoot: Boolean): TextProto? {
