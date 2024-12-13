@@ -29,15 +29,20 @@ import android.app.job.IJobCallback;
 import android.app.job.JobParameters;
 import android.net.Uri;
 import android.os.Parcel;
-import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
+
+import libcore.junit.util.compat.CoreCompatChangeRule;
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -47,7 +52,10 @@ public class JobParametersTest {
     private static final int TEST_JOB_ID_1 = 123;
     private static final String TEST_NAMESPACE = "TEST_NAMESPACE";
     private static final String TEST_DEBUG_STOP_REASON = "TEST_DEBUG_STOP_REASON";
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public TestRule compatChangeRule = new CoreCompatChangeRule();
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -129,9 +137,10 @@ public class JobParametersTest {
     }
 
     /** Test to verify that the JobParameters Cleaner is disabled */
-    @RequiresFlagsEnabled(FLAG_HANDLE_ABANDONED_JOBS)
     @Test
-    public void testCleanerWithLeakedJobCleanerDisabled_flagHandleAbandonedJobs() {
+    @EnableFlags(FLAG_HANDLE_ABANDONED_JOBS)
+    @DisableCompatChanges({JobParameters.OVERRIDE_HANDLE_ABANDONED_JOBS})
+    public void testCleanerWithLeakedNoJobCleaner_EnableFlagDisableCompatHandleAbandonedJobs() {
         // Inject real JobCallbackCleanup
         JobParameters jobParameters = JobParameters.CREATOR.createFromParcel(mMockParcel);
 
@@ -150,4 +159,31 @@ public class JobParametersTest {
         assertThat(jobParameters.getCleanable()).isNull();
         assertThat(jobParameters.getJobCleanupCallback()).isNull();
     }
+
+    /**
+     * Test to verify that the JobParameters Cleaner is not enabled
+     * when the compat change is enabled and the flag is enabled
+     */
+    @Test
+    @EnableFlags(FLAG_HANDLE_ABANDONED_JOBS)
+    @EnableCompatChanges({JobParameters.OVERRIDE_HANDLE_ABANDONED_JOBS})
+    public void testCleanerWithLeakedNoJobCleaner_EnableFlagEnableCompatHandleAbandonedJobs() {
+        // Inject real JobCallbackCleanup
+        JobParameters jobParameters = JobParameters.CREATOR.createFromParcel(mMockParcel);
+
+        // Enable the cleaner
+        jobParameters.enableCleaner();
+
+        // Verify the cleaner is not enabled
+        assertThat(jobParameters.getCleanable()).isNull();
+        assertThat(jobParameters.getJobCleanupCallback()).isNull();
+
+        // Disable the cleaner
+        jobParameters.disableCleaner();
+
+        // Verify the cleaner is disabled
+        assertThat(jobParameters.getCleanable()).isNull();
+        assertThat(jobParameters.getJobCleanupCallback()).isNull();
+    }
+
 }
