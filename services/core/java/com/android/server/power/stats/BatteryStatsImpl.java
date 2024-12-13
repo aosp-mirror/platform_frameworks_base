@@ -600,13 +600,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private final int mFlags;
         private final Long mDefaultPowerStatsThrottlePeriod;
         private final Map<String, Long> mPowerStatsThrottlePeriods;
-
-        @VisibleForTesting
-        public BatteryStatsConfig() {
-            mFlags = 0;
-            mDefaultPowerStatsThrottlePeriod = 0L;
-            mPowerStatsThrottlePeriods = Map.of();
-        }
+        private final int mMaxHistorySizeBytes;
 
         private BatteryStatsConfig(Builder builder) {
             int flags = 0;
@@ -619,6 +613,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mFlags = flags;
             mDefaultPowerStatsThrottlePeriod = builder.mDefaultPowerStatsThrottlePeriod;
             mPowerStatsThrottlePeriods = builder.mPowerStatsThrottlePeriods;
+            mMaxHistorySizeBytes = builder.mMaxHistorySizeBytes;
         }
 
         /**
@@ -648,18 +643,24 @@ public class BatteryStatsImpl extends BatteryStats {
                     mDefaultPowerStatsThrottlePeriod);
         }
 
+        public int getMaxHistorySizeBytes() {
+            return mMaxHistorySizeBytes;
+        }
+
         /**
          * Builder for BatteryStatsConfig
          */
         public static class Builder {
             private boolean mResetOnUnplugHighBatteryLevel;
             private boolean mResetOnUnplugAfterSignificantCharge;
-            public static final long DEFAULT_POWER_STATS_THROTTLE_PERIOD =
+            private static final long DEFAULT_POWER_STATS_THROTTLE_PERIOD =
                     TimeUnit.HOURS.toMillis(1);
-            public static final long DEFAULT_POWER_STATS_THROTTLE_PERIOD_CPU =
+            private static final long DEFAULT_POWER_STATS_THROTTLE_PERIOD_CPU =
                     TimeUnit.MINUTES.toMillis(1);
+            private static final int DEFAULT_MAX_HISTORY_SIZE = 4 * 1024 * 1024;
             private long mDefaultPowerStatsThrottlePeriod = DEFAULT_POWER_STATS_THROTTLE_PERIOD;
             private final Map<String, Long> mPowerStatsThrottlePeriods = new HashMap<>();
+            private int mMaxHistorySizeBytes = DEFAULT_MAX_HISTORY_SIZE;
 
             public Builder() {
                 mResetOnUnplugHighBatteryLevel = true;
@@ -710,6 +711,15 @@ public class BatteryStatsImpl extends BatteryStats {
              */
             public Builder setDefaultPowerStatsThrottlePeriodMillis(long periodMs) {
                 mDefaultPowerStatsThrottlePeriod = periodMs;
+                return this;
+            }
+
+            /**
+             * Sets the maximum amount of disk space, in bytes, that battery history can
+             * utilize. As this space fills up, the oldest history chunks must be expunged.
+             */
+            public Builder setMaxHistorySizeBytes(int maxHistorySizeBytes) {
+                mMaxHistorySizeBytes = maxHistorySizeBytes;
                 return this;
             }
         }
@@ -11425,7 +11435,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mHistory = new BatteryStatsHistory(null /* historyBuffer */, systemDir,
-                mConstants.MAX_HISTORY_FILES, mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator,
+                mConstants.MAX_HISTORY_SIZE, mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator,
                 mClock, mMonotonicClock, traceDelegate, eventLogger);
 
         mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector);
@@ -11970,9 +11980,8 @@ public class BatteryStatsImpl extends BatteryStats {
         return mNextMaxDailyDeadlineMs;
     }
 
-    @GuardedBy("this")
     public int getHistoryTotalSize() {
-        return mConstants.MAX_HISTORY_BUFFER * mConstants.MAX_HISTORY_FILES;
+        return mHistory.getMaxHistorySize();
     }
 
     public int getHistoryUsedSize() {
@@ -16101,7 +16110,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 = "battery_level_collection_delay_ms";
         public static final String KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS =
                 "procstate_change_collection_delay_ms";
-        public static final String KEY_MAX_HISTORY_FILES = "max_history_files";
+        public static final String KEY_MAX_HISTORY_SIZE = "max_history_size";
         public static final String KEY_MAX_HISTORY_BUFFER_KB = "max_history_buffer_kb";
         public static final String KEY_BATTERY_CHARGED_DELAY_MS =
                 "battery_charged_delay_ms";
@@ -16152,9 +16161,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final long DEFAULT_EXTERNAL_STATS_COLLECTION_RATE_LIMIT_MS = 600_000;
         private static final long DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS = 300_000;
         private static final long DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS = 60_000;
-        private static final int DEFAULT_MAX_HISTORY_FILES = 32;
         private static final int DEFAULT_MAX_HISTORY_BUFFER_KB = 128; /*Kilo Bytes*/
-        private static final int DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE = 64;
         private static final int DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB = 64; /*Kilo Bytes*/
         private static final int DEFAULT_BATTERY_CHARGED_DELAY_MS = 900000; /* 15 min */
         private static final int DEFAULT_BATTERY_CHARGING_ENFORCE_LEVEL = 90;
@@ -16176,7 +16183,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 = DEFAULT_BATTERY_LEVEL_COLLECTION_DELAY_MS;
         public long PROC_STATE_CHANGE_COLLECTION_DELAY_MS =
                 DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS;
-        public int MAX_HISTORY_FILES;
+        public int MAX_HISTORY_SIZE;
         public int MAX_HISTORY_BUFFER; /*Bytes*/
         public int BATTERY_CHARGED_DELAY_MS = DEFAULT_BATTERY_CHARGED_DELAY_MS;
         public int BATTERY_CHARGING_ENFORCE_LEVEL = DEFAULT_BATTERY_CHARGING_ENFORCE_LEVEL;
@@ -16192,12 +16199,11 @@ public class BatteryStatsImpl extends BatteryStats {
         public Constants(Handler handler) {
             super(handler);
             if (isLowRamDevice()) {
-                MAX_HISTORY_FILES = DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE;
                 MAX_HISTORY_BUFFER = DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB * 1024;
             } else {
-                MAX_HISTORY_FILES = DEFAULT_MAX_HISTORY_FILES;
                 MAX_HISTORY_BUFFER = DEFAULT_MAX_HISTORY_BUFFER_KB * 1024;
             }
+            MAX_HISTORY_SIZE = mBatteryStatsConfig.getMaxHistorySizeBytes();
         }
 
         public void startObserving(ContentResolver resolver) {
@@ -16260,13 +16266,23 @@ public class BatteryStatsImpl extends BatteryStats {
                 PROC_STATE_CHANGE_COLLECTION_DELAY_MS = mParser.getLong(
                         KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS,
                         DEFAULT_PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
-                MAX_HISTORY_FILES = mParser.getInt(KEY_MAX_HISTORY_FILES,
-                        isLowRamDevice() ? DEFAULT_MAX_HISTORY_FILES_LOW_RAM_DEVICE
-                                : DEFAULT_MAX_HISTORY_FILES);
                 MAX_HISTORY_BUFFER = mParser.getInt(KEY_MAX_HISTORY_BUFFER_KB,
                         isLowRamDevice() ? DEFAULT_MAX_HISTORY_BUFFER_LOW_RAM_DEVICE_KB
                                 : DEFAULT_MAX_HISTORY_BUFFER_KB)
                         * 1024;
+                int maxHistorySize = mParser.getInt(KEY_MAX_HISTORY_SIZE, -1);
+                if (maxHistorySize == -1) {
+                    // Process the deprecated max_history_files parameter for compatibility
+                    int maxHistoryFiles = mParser.getInt("max_history_files", -1);
+                    if (maxHistoryFiles != -1) {
+                        maxHistorySize = maxHistoryFiles * MAX_HISTORY_BUFFER;
+                    }
+                }
+                if (maxHistorySize == -1) {
+                    maxHistorySize = mBatteryStatsConfig.getMaxHistorySizeBytes();
+                }
+                MAX_HISTORY_SIZE = maxHistorySize;
+
                 final String perUidModemModel = mParser.getString(KEY_PER_UID_MODEM_POWER_MODEL,
                         "");
                 PER_UID_MODEM_MODEL = getPerUidModemModel(perUidModemModel);
@@ -16291,7 +16307,7 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         @VisibleForTesting
         public void onChange() {
-            mHistory.setMaxHistoryFiles(MAX_HISTORY_FILES);
+            mHistory.setMaxHistorySize(MAX_HISTORY_SIZE);
             mHistory.setMaxHistoryBufferSize(MAX_HISTORY_BUFFER);
         }
 
@@ -16354,8 +16370,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(BATTERY_LEVEL_COLLECTION_DELAY_MS);
             pw.print(KEY_PROC_STATE_CHANGE_COLLECTION_DELAY_MS); pw.print("=");
             pw.println(PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
-            pw.print(KEY_MAX_HISTORY_FILES); pw.print("=");
-            pw.println(MAX_HISTORY_FILES);
+            pw.print(KEY_MAX_HISTORY_SIZE); pw.print("=");
+            pw.println(MAX_HISTORY_SIZE);
             pw.print(KEY_MAX_HISTORY_BUFFER_KB); pw.print("=");
             pw.println(MAX_HISTORY_BUFFER/1024);
             pw.print(KEY_BATTERY_CHARGED_DELAY_MS); pw.print("=");
