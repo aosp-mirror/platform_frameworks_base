@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import android.graphics.RectF
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -258,6 +259,8 @@ interface KeyguardRepository {
 
     val notificationStackAbsoluteBottom: StateFlow<Float>
 
+    val wallpaperFocalAreaBounds: StateFlow<RectF>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -329,6 +332,8 @@ interface KeyguardRepository {
      * this value
      */
     fun setNotificationStackAbsoluteBottom(bottom: Float)
+
+    fun setWallpaperFocalAreaBounds(bounds: RectF)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -380,7 +385,6 @@ constructor(
     override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
 
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
-
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
     override val isKeyguardShowing: MutableStateFlow<Boolean> =
@@ -622,6 +626,10 @@ constructor(
     private val _notificationStackAbsoluteBottom = MutableStateFlow(0F)
     override val notificationStackAbsoluteBottom = _notificationStackAbsoluteBottom.asStateFlow()
 
+    private val _wallpaperFocalAreaBounds = MutableStateFlow(RectF(0F, 0F, 0F, 0F))
+    override val wallpaperFocalAreaBounds: StateFlow<RectF> =
+        _wallpaperFocalAreaBounds.asStateFlow()
+
     init {
         val callback =
             object : KeyguardStateController.Callback {
@@ -698,6 +706,10 @@ constructor(
 
     override fun setNotificationStackAbsoluteBottom(bottom: Float) {
         _notificationStackAbsoluteBottom.value = bottom
+    }
+
+    override fun setWallpaperFocalAreaBounds(bounds: RectF) {
+        _wallpaperFocalAreaBounds.value = bounds
     }
 
     private fun dozeMachineStateToModel(state: DozeMachine.State): DozeStateModel {

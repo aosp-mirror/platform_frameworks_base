@@ -28,6 +28,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.PulseExpansionInteractor
+import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
@@ -133,6 +134,7 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val aodBurnInViewModel: AodBurnInViewModel,
     private val shadeInteractor: ShadeInteractor,
+    wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
 ) {
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardTransitionStep
@@ -361,6 +363,8 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = AnimatedValue.NotAnimating(false),
             )
+
+    val shouldSendFocalArea = wallpaperFocalAreaInteractor.shouldSendFocalArea
 
     fun onNotificationContainerBoundsChanged(top: Float, bottom: Float, animate: Boolean = false) {
         keyguardInteractor.setNotificationContainerBounds(

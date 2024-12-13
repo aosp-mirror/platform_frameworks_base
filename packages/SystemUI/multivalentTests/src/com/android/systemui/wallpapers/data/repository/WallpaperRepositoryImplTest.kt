@@ -67,7 +67,6 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
             fakeBroadcastDispatcher,
             userRepository,
             keyguardRepository,
-            keyguardClockRepository,
             wallpaperManager,
             context,
         )
@@ -252,7 +251,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_MAGIC_PORTRAIT_WALLPAPERS)
     fun shouldSendNotificationLayout_setMagicPortraitWallpaper_launchSendLayoutJob() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.shouldSendNotificationLayout)
+            val latest by collectLastValue(underTest.shouldSendFocalArea)
             val magicPortraitWallpaper =
                 mock<WallpaperInfo>().apply {
                     whenever(this.component)
@@ -273,7 +272,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_MAGIC_PORTRAIT_WALLPAPERS)
     fun shouldSendNotificationLayout_setNotMagicPortraitWallpaper_cancelSendLayoutJob() =
         testScope.runTest {
-            val latest by collectLastValue(underTest.shouldSendNotificationLayout)
+            val latest by collectLastValue(underTest.shouldSendFocalArea)
             val magicPortraitWallpaper = MAGIC_PORTRAIT_WP
             whenever(wallpaperManager.getWallpaperInfoForUser(any()))
                 .thenReturn(magicPortraitWallpaper)

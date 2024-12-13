@@ -54,6 +54,7 @@ import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.WallpaperFocalAreaInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -87,6 +88,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
@@ -105,6 +107,7 @@ object KeyguardRootViewBinder {
         screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
         clockInteractor: KeyguardClockInteractor,
+        wallpaperFocalAreaInteractor: WallpaperFocalAreaInteractor,
         clockViewModel: KeyguardClockViewModel,
         interactionJankMonitor: InteractionJankMonitor?,
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
@@ -309,12 +312,15 @@ object KeyguardRootViewBinder {
                                                 .setTag(clockId)
                                         jankMonitor.begin(builder)
                                     }
+
                                     TransitionState.CANCELED ->
                                         jankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
+
                                     TransitionState.FINISHED -> {
                                         keyguardViewMediator?.maybeHandlePendingLock()
                                         jankMonitor.end(CUJ_SCREEN_OFF_SHOW_AOD)
                                     }
+
                                     TransitionState.RUNNING -> Unit
                                 }
                             }
@@ -376,6 +382,21 @@ object KeyguardRootViewBinder {
                 translationY = { childViews[burnInLayerId]?.translationY },
             )
         }
+
+        disposables +=
+            view.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    if (viewModel.shouldSendFocalArea.value) {
+                        launch {
+                            wallpaperFocalAreaInteractor.wallpaperFocalAreaBounds
+                                .filterNotNull()
+                                .collect {
+                                    wallpaperFocalAreaInteractor.setWallpaperFocalAreaBounds(it)
+                                }
+                        }
+                    }
+                }
+            }
 
         disposables +=
             view.onLayoutChanged(
@@ -523,6 +544,7 @@ object KeyguardRootViewBinder {
                         View.INVISIBLE
                     }
             }
+
             else -> {
                 if (isVisible.value) {
                     CrossFadeHelper.fadeIn(this, animatorListener)
