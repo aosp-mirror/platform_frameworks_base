@@ -285,7 +285,7 @@ final class AppCompatUtils {
         info.topActivityLetterboxAppWidth = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxBounds = null;
         info.cameraCompatTaskInfo.freeformCameraCompatMode =
-                CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
+                CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_UNSPECIFIED;
         info.clearTopActivityFlags();
     }
 }

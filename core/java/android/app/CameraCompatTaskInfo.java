@@ -36,36 +36,42 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class CameraCompatTaskInfo implements Parcelable {
     /**
+     * Undefined camera compat mode.
+     */
+    public static final int CAMERA_COMPAT_FREEFORM_UNSPECIFIED = 0;
+
+    /**
      * The value to use when no camera compat treatment should be applied to a windowed task.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_NONE = 0;
+    public static final int CAMERA_COMPAT_FREEFORM_NONE = 1;
 
     /**
      * The value to use when camera compat treatment should be applied to an activity requesting
      * portrait orientation, while a device is in landscape. Applies only to freeform tasks.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE = 1;
+    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE = 2;
 
     /**
      * The value to use when camera compat treatment should be applied to an activity requesting
      * landscape orientation, while a device is in landscape. Applies only to freeform tasks.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE = 2;
+    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE = 3;
 
     /**
      * The value to use when camera compat treatment should be applied to an activity requesting
      * portrait orientation, while a device is in portrait. Applies only to freeform tasks.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT = 3;
+    public static final int CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT = 4;
 
     /**
      * The value to use when camera compat treatment should be applied to an activity requesting
      * landscape orientation, while a device is in portrait. Applies only to freeform tasks.
      */
-    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT = 4;
+    public static final int CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_PORTRAIT = 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "CAMERA_COMPAT_FREEFORM_" }, value = {
+            CAMERA_COMPAT_FREEFORM_UNSPECIFIED,
             CAMERA_COMPAT_FREEFORM_NONE,
             CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE,
             CAMERA_COMPAT_FREEFORM_LANDSCAPE_DEVICE_IN_LANDSCAPE,
@@ -184,6 +190,7 @@ public class CameraCompatTaskInfo implements Parcelable {
     public static String freeformCameraCompatModeToString(
             @FreeformCameraCompatMode int freeformCameraCompatMode) {
         return switch (freeformCameraCompatMode) {
+            case CAMERA_COMPAT_FREEFORM_UNSPECIFIED -> "undefined";
             case CAMERA_COMPAT_FREEFORM_NONE -> "inactive";
             case CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE ->
                     "app-portrait-device-landscape";
