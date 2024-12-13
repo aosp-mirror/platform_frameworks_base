@@ -419,8 +419,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
-                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */,
-                        statsToken);
+                if (visible || mImeShowing) {
+                    // only start the animation if we're either already showing or becoming visible.
+                    // otherwise starting another hide animation causes flickers.
+                    startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */,
+                            statsToken);
+                }
 
                 // In case of a hide, the statsToken should not been send yet (as the animation
                 // is still ongoing). It will be sent at the end of the animation
