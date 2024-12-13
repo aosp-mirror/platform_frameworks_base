@@ -23,6 +23,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition.Companion.MAX_BACKGROUND_BLUR_RADIUS
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,19 +38,19 @@ import kotlinx.coroutines.flow.Flow
 @SysUISingleton
 class AodToPrimaryBouncerTransitionViewModel
 @Inject
-constructor(
-    animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+constructor(animationFlow: KeyguardTransitionAnimationFlow) :
+    DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
                 duration = FromAodTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
                 edge = Edge.create(from = AOD, to = Scenes.Bouncer),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = AOD, to = PRIMARY_BOUNCER),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = AOD, to = PRIMARY_BOUNCER))
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
+
+    override val windowBlurRadius: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(MAX_BACKGROUND_BLUR_RADIUS)
 }
