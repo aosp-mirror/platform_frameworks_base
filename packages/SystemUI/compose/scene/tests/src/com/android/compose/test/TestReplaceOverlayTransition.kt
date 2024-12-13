@@ -68,7 +68,7 @@ fun transition(
 ): TestReplaceOverlayTransition {
     return object :
         TestReplaceOverlayTransition(from, to, replacedTransition),
-        TransitionState.HasOverscrollProperties {
+        TransitionState.DirectionProperties {
         override val effectivelyShownOverlay: OverlayKey
             get() = effectivelyShownOverlay()
 

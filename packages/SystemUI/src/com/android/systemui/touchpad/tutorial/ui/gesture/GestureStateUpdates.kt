@@ -28,7 +28,7 @@ inline fun updateGestureState(
             if (isFinished(gestureState)) {
                 gestureStateChangedCallback(GestureState.Finished)
             } else {
-                gestureStateChangedCallback(GestureState.NotStarted)
+                gestureStateChangedCallback(GestureState.Error)
             }
         }
         is Moving -> {

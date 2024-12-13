@@ -89,6 +89,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.tools.function.Supplier;
 import android.util.MergedConfiguration;
 import android.util.SparseArray;
 import android.view.Display;
@@ -1801,6 +1802,124 @@ public class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             return task;
+        }
+    }
+
+    protected WindowStateBuilder newWindowBuilder(String name, int type) {
+        return new WindowStateBuilder(name, type, mWm, mDisplayContent, mIWindow,
+                this::getTestSession, this::createWindowToken);
+    }
+
+    /**
+     * Builder for creating new window.
+     */
+    protected static class WindowStateBuilder {
+        private final String mName;
+        private final int mType;
+        private final WindowManagerService mWm;
+        private final DisplayContent mDefaultTargetDisplay;
+        private final Supplier<WindowToken, Session> mSessionSupplier;
+        private final WindowTokenCreator mWindowTokenCreator;
+
+        private int mActivityType = ACTIVITY_TYPE_STANDARD;
+        private IWindow mClientWindow;
+        private boolean mOwnerCanAddInternalSystemWindow = false;
+        private int mOwnerId = 0;
+        private WindowState mParent;
+        private DisplayContent mTargetDisplay;
+        private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        private WindowToken mWindowToken;
+
+        WindowStateBuilder(String name, int type, WindowManagerService windowManagerService,
+                DisplayContent dc, IWindow iWindow, Supplier<WindowToken, Session> sessionSupplier,
+                WindowTokenCreator windowTokenCreator) {
+            mName = name;
+            mType = type;
+            mClientWindow = iWindow;
+            mDefaultTargetDisplay = dc;
+            mSessionSupplier = sessionSupplier;
+            mWindowTokenCreator = windowTokenCreator;
+            mWm = windowManagerService;
+        }
+
+        WindowStateBuilder setActivityType(int activityType) {
+            mActivityType = activityType;
+            return this;
+        }
+
+        WindowStateBuilder setClientWindow(IWindow clientWindow) {
+            mClientWindow = clientWindow;
+            return this;
+        }
+
+        WindowStateBuilder setDisplay(DisplayContent displayContent) {
+            mTargetDisplay = displayContent;
+            return this;
+        }
+
+        WindowStateBuilder setOwnerCanAddInternalSystemWindow(
+                boolean ownerCanAddInternalSystemWindow) {
+            mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
+            return this;
+        }
+
+        WindowStateBuilder setOwnerId(int ownerId) {
+            mOwnerId = ownerId;
+            return this;
+        }
+
+        WindowStateBuilder setParent(WindowState parent) {
+            mParent = parent;
+            return this;
+        }
+
+        WindowStateBuilder setWindowToken(WindowToken token) {
+            mWindowToken = token;
+            return this;
+        }
+
+        WindowStateBuilder setWindowingMode(int windowingMode) {
+            mWindowingMode = windowingMode;
+            return this;
+        }
+
+        WindowState build() {
+            SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
+
+            final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(mType);
+            attrs.setTitle(mName);
+            attrs.packageName = "test";
+
+            assertFalse(
+                    "targetDisplay shouldn't be specified together with windowToken, since"
+                            + " windowToken will be derived from targetDisplay.",
+                    mWindowToken != null && mTargetDisplay != null);
+
+            if (mWindowToken == null) {
+                if (mTargetDisplay != null) {
+                    mWindowToken = mWindowTokenCreator.createWindowToken(mTargetDisplay,
+                            mWindowingMode, mActivityType, mType);
+                } else if (mParent != null) {
+                    mWindowToken = mParent.mToken;
+                } else {
+                    // Use default mDisplayContent as window token.
+                    mWindowToken = mWindowTokenCreator.createWindowToken(mDefaultTargetDisplay,
+                            mWindowingMode, mActivityType, mType);
+                }
+            }
+
+            final WindowState w = new WindowState(mWm, mSessionSupplier.get(mWindowToken),
+                    mClientWindow, mWindowToken, mParent, OP_NONE, attrs, VISIBLE, mOwnerId,
+                    UserHandle.getUserId(mOwnerId), mOwnerCanAddInternalSystemWindow);
+            // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
+            // adding it to the token...
+            mWindowToken.addWindow(w);
+            return w;
+        }
+
+        interface WindowTokenCreator {
+            WindowToken createWindowToken(DisplayContent dc, int windowingMode, int activityType,
+                    int type);
         }
     }
 

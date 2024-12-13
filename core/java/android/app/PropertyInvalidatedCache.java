@@ -1356,7 +1356,7 @@ public class PropertyInvalidatedCache<Query, Result> {
             @Nullable QueryHandler<Query, Result> computer) {
         mPropertyName = createPropertyName(args.mModule, args.mApi);
         mCacheName = cacheName;
-        mCacheNullResults = args.mCacheNulls && Flags.picCacheNulls();
+        mCacheNullResults = args.mCacheNulls;
         mNonce = getNonceHandler(mPropertyName);
         mMaxEntries = args.mMaxEntries;
         mCache = new CacheMap<>(args.mIsolateUids, args.mTestMode);

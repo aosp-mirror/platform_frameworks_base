@@ -5782,8 +5782,7 @@ public class Activity extends ContextThemeWrapper
         }
 
         if (!getAttributionSource().getRenouncedPermissions().isEmpty()) {
-            final int permissionCount = permissions.length;
-            for (int i = 0; i < permissionCount; i++) {
+            for (int i = 0; i < permissions.length; i++) {
                 if (getAttributionSource().getRenouncedPermissions().contains(permissions[i])) {
                     throw new IllegalArgumentException("Cannot request renounced permission: "
                             + permissions[i]);
@@ -5791,11 +5790,53 @@ public class Activity extends ContextThemeWrapper
             }
         }
 
-        PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
-                : createDeviceContext(deviceId).getPackageManager();
+        final Context context = getDeviceId() == deviceId ? this : createDeviceContext(deviceId);
+        if (Flags.permissionRequestShortCircuitEnabled()) {
+            int[] permissionsState = getPermissionRequestStates(context, permissions);
+            boolean hasRequestablePermission = false;
+            for (int i = 0; i < permissionsState.length; i++) {
+                if (permissionsState[i] == Context.PERMISSION_REQUEST_STATE_REQUESTABLE) {
+                    hasRequestablePermission = true;
+                    break;
+                }
+            }
+            // If none of the permissions is requestable, finish the request here.
+            if (!hasRequestablePermission) {
+                mHasCurrentPermissionsRequest = true;
+                Log.v(TAG, "No requestable permission in the request.");
+                int[] results = new int[permissionsState.length];
+                for (int i = 0; i < permissionsState.length; i++) {
+                    if (permissionsState[i] == Context.PERMISSION_REQUEST_STATE_GRANTED) {
+                        results[i] = PackageManager.PERMISSION_GRANTED;
+                    } else {
+                        results[i] = PackageManager.PERMISSION_DENIED;
+                    }
+                }
+                // Currently permission request result is passed to the client app asynchronously
+                // in onRequestPermissionsResult, lets keep async behavior here as well.
+                mHandler.post(() -> {
+                    mHasCurrentPermissionsRequest = false;
+                    onRequestPermissionsResult(requestCode, permissions, results, deviceId);
+                });
+                return;
+            }
+        }
+
+        final PackageManager packageManager = context.getPackageManager();
         final Intent intent = packageManager.buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
         mHasCurrentPermissionsRequest = true;
+    }
+
+    @NonNull
+    private int[] getPermissionRequestStates(@NonNull Context deviceContext,
+            @NonNull String[] permissions) {
+        final int size = permissions.length;
+        int[] results = new int[size];
+        for (int i = 0; i < size; i++) {
+            results[i] = deviceContext.getPermissionRequestState(permissions[i]);
+        }
+        return results;
     }
 
     /**

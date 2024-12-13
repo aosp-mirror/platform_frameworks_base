@@ -316,8 +316,11 @@ class MediaControlViewModel(
             isVisibleWhenScrubbing = !shouldHideWhenScrubbing,
             notVisibleValue =
                 if (
-                    (buttonId == R.id.actionPrev && model.semanticActionButtons!!.reservePrev) ||
-                        (buttonId == R.id.actionNext && model.semanticActionButtons!!.reserveNext)
+                    !shouldHideWhenScrubbing &&
+                        ((buttonId == R.id.actionPrev &&
+                            model.semanticActionButtons!!.reservePrev) ||
+                            (buttonId == R.id.actionNext &&
+                                model.semanticActionButtons!!.reserveNext))
                 ) {
                     ConstraintSet.INVISIBLE
                 } else {
@@ -382,7 +385,9 @@ class MediaControlViewModel(
         // so we should only allow scrubbing times to be shown if those action views are present.
         return semanticActions?.let {
             SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch { id: Int ->
-                semanticActions.getActionById(id) != null
+                semanticActions.getActionById(id) != null ||
+                    (id == R.id.actionPrev && semanticActions.reservePrev ||
+                        id == R.id.actionNext && semanticActions.reserveNext)
             }
         } ?: false
     }

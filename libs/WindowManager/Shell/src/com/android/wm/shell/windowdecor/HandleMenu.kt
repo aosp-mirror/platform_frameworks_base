@@ -694,7 +694,7 @@ class HandleMenu(
                 setTextColor(style.textColor)
                 compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
             }
-
+            openByDefaultBtn.isGone = isBrowserApp
             openByDefaultBtn.imageTintList = ColorStateList.valueOf(style.textColor)
         }
 

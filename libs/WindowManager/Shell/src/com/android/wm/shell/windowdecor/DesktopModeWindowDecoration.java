@@ -617,14 +617,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
 
         if (browserLink == null) return null;
-        return AppToWebUtils.getBrowserIntent(browserLink, mContext.getPackageManager());
+        return AppToWebUtils.getBrowserIntent(browserLink, mContext.getPackageManager(),
+                mUserContext.getUserId());
 
     }
 
     @Nullable
     private Intent getAppLink() {
         return mWebUri == null ? null
-                : AppToWebUtils.getAppIntent(mWebUri, mContext.getPackageManager());
+                : AppToWebUtils.getAppIntent(mWebUri, mContext.getPackageManager(),
+                        mUserContext.getUserId());
     }
 
     private boolean isBrowserApp() {
@@ -779,12 +781,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final Point position = new Point(mResult.mCaptionX, 0);
         if (mSplitScreenController.getSplitPosition(mTaskInfo.taskId)
                 == SPLIT_POSITION_BOTTOM_OR_RIGHT
-                && mDisplayController.getDisplayLayout(mTaskInfo.displayId).isLandscape()
         ) {
-            // If this is the right split task, add left stage's width.
-            final Rect leftStageBounds = new Rect();
-            mSplitScreenController.getStageBounds(leftStageBounds, new Rect());
-            position.x += leftStageBounds.width();
+            if (mSplitScreenController.isLeftRightSplit()) {
+                // If this is the right split task, add left stage's width.
+                final Rect leftStageBounds = new Rect();
+                mSplitScreenController.getStageBounds(leftStageBounds, new Rect());
+                position.x += leftStageBounds.width();
+            } else {
+                final Rect bottomStageBounds = new Rect();
+                mSplitScreenController.getRefStageBounds(new Rect(), bottomStageBounds);
+                position.y += bottomStageBounds.top;
+            }
         }
         return position;
     }

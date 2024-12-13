@@ -45,18 +45,33 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Error
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgressAfterError
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
 
 sealed interface TutorialActionState {
     data object NotStarted : TutorialActionState
 
     data class InProgress(
-        val progress: Float = 0f,
-        val startMarker: String? = null,
-        val endMarker: String? = null,
-    ) : TutorialActionState
+        override val progress: Float = 0f,
+        override val startMarker: String? = null,
+        override val endMarker: String? = null,
+    ) : TutorialActionState, Progress
 
     data class Finished(@RawRes val successAnimation: Int) : TutorialActionState
+
+    data object Error : TutorialActionState
+
+    data class InProgressAfterError(val inProgress: InProgress) :
+        TutorialActionState, Progress by inProgress
+}
+
+interface Progress {
+    val progress: Float
+    val startMarker: String?
+    val endMarker: String?
 }
 
 @Composable
@@ -133,10 +148,13 @@ fun TutorialDescription(
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     val (titleTextId, bodyTextId) =
-        if (actionState is Finished) {
-            config.strings.titleSuccessResId to config.strings.bodySuccessResId
-        } else {
-            config.strings.titleResId to config.strings.bodyResId
+        when (actionState) {
+            is Finished -> config.strings.titleSuccessResId to config.strings.bodySuccessResId
+            Error,
+            is InProgressAfterError ->
+                config.strings.titleErrorResId to config.strings.bodyErrorResId
+            is NotStarted,
+            is InProgress -> config.strings.titleResId to config.strings.bodyResId
         }
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Text(

@@ -60,7 +60,7 @@ private constructor(
         // As this object is created by OverscrollBuilderImpl and we retrieve the current
         // OverscrollSpec only when the transition implements HasOverscrollProperties, we can assume
         // that this method was invoked after performing this check.
-        val overscrollProperties = transition as TransitionState.HasOverscrollProperties
+        val overscrollProperties = transition as TransitionState.DirectionProperties
         val overscrollScope =
             cachedOverscrollScope.getFromCacheOrCompute(density = this, overscrollProperties)
 
@@ -77,17 +77,17 @@ private constructor(
 
 /**
  * A helper class to cache a [OverscrollScope] given a [Density] and
- * [TransitionState.HasOverscrollProperties]. This helps avoid recreating a scope every frame
- * whenever an overscroll transition is computed.
+ * [TransitionState.DirectionProperties]. This helps avoid recreating a scope every frame whenever
+ * an overscroll transition is computed.
  */
 private class CachedOverscrollScope {
     private var previousScope: OverscrollScope? = null
     private var previousDensity: Density? = null
-    private var previousOverscrollProperties: TransitionState.HasOverscrollProperties? = null
+    private var previousOverscrollProperties: TransitionState.DirectionProperties? = null
 
     fun getFromCacheOrCompute(
         density: Density,
-        overscrollProperties: TransitionState.HasOverscrollProperties,
+        overscrollProperties: TransitionState.DirectionProperties,
     ): OverscrollScope {
         if (
             previousScope == null ||

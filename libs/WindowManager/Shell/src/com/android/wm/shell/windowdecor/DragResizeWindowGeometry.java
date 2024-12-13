@@ -168,7 +168,10 @@ public final class DragResizeWindowGeometry {
         return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
     }
 
-    static boolean isEdgeResizePermitted(@NonNull MotionEvent e) {
+    /**
+     * Whether resizing a window from the edge is permitted based on the motion event.
+     */
+    public static boolean isEdgeResizePermitted(@NonNull MotionEvent e) {
         if (ENABLE_WINDOWING_EDGE_DRAG_RESIZE.isTrue()) {
             return e.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                     || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE

@@ -679,4 +679,8 @@ applications that come with the platform
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
     </privapp-permissions>
+
+    <privapp-permissions package="com.android.wm.shell">
+        <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
+    </privapp-permissions>
 </permissions>

@@ -54,6 +54,8 @@ sealed interface GestureUiState {
         val progressStartMarker: String,
         val progressEndMarker: String,
     ) : GestureUiState
+
+    data object Error : GestureUiState
 }
 
 fun GestureState.toGestureUiState(
@@ -66,19 +68,31 @@ fun GestureState.toGestureUiState(
         is GestureState.InProgress ->
             GestureUiState.InProgress(this.progress, progressStartMarker, progressEndMarker)
         is GestureState.Finished -> GestureUiState.Finished(successAnimation)
+        GestureState.Error -> GestureUiState.Error
     }
 }
 
-fun GestureUiState.toTutorialActionState(): TutorialActionState {
+fun GestureUiState.toTutorialActionState(previousState: TutorialActionState): TutorialActionState {
     return when (this) {
         NotStarted -> TutorialActionState.NotStarted
-        is GestureUiState.InProgress ->
-            TutorialActionState.InProgress(
-                progress = progress,
-                startMarker = progressStartMarker,
-                endMarker = progressEndMarker,
-            )
+        is GestureUiState.InProgress -> {
+            val inProgress =
+                TutorialActionState.InProgress(
+                    progress = progress,
+                    startMarker = progressStartMarker,
+                    endMarker = progressEndMarker,
+                )
+            if (
+                previousState is TutorialActionState.InProgressAfterError ||
+                    previousState is TutorialActionState.Error
+            ) {
+                return TutorialActionState.InProgressAfterError(inProgress)
+            } else {
+                return inProgress
+            }
+        }
         is Finished -> TutorialActionState.Finished(successAnimation)
+        GestureUiState.Error -> TutorialActionState.Error
     }
 }
 
@@ -102,11 +116,11 @@ fun GestureTutorialScreen(
         easterEggTriggered,
         resetEasterEggFlag = { easterEggTriggered = false },
     ) {
-        ActionTutorialContent(
-            gestureState.toTutorialActionState(),
-            onDoneButtonClicked,
-            screenConfig,
-        )
+        var lastState: TutorialActionState by remember {
+            mutableStateOf(TutorialActionState.NotStarted)
+        }
+        lastState = gestureState.toTutorialActionState(lastState)
+        ActionTutorialContent(lastState, onDoneButtonClicked, screenConfig)
     }
 }
 

@@ -19,6 +19,7 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Error
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
@@ -64,12 +65,12 @@ class ThreeFingerGestureRecognizerTest(
     }
 
     @Test
-    fun doesntTriggerGestureFinished_onGestureDistanceTooShort() {
-        assertStateAfterEvents(events = tooShortGesture, expectedState = NotStarted)
+    fun triggersGestureError_onGestureDistanceTooShort() {
+        assertStateAfterEvents(events = tooShortGesture, expectedState = Error)
     }
 
     @Test
-    fun doesntTriggerGestureFinished_onThreeFingersSwipeInOtherDirections() {
+    fun triggersGestureError_onThreeFingersSwipeInOtherDirections() {
         val allThreeFingerGestures =
             listOf(
                 ThreeFingerGesture.swipeUp(),
@@ -78,7 +79,7 @@ class ThreeFingerGestureRecognizerTest(
                 ThreeFingerGesture.swipeRight(),
             )
         val invalidGestures = allThreeFingerGestures.filter { it.differentFromAnyOf(validGestures) }
-        invalidGestures.forEach { assertStateAfterEvents(events = it, expectedState = NotStarted) }
+        invalidGestures.forEach { assertStateAfterEvents(events = it, expectedState = Error) }
     }
 
     @Test

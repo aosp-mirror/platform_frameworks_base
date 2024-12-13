@@ -193,6 +193,17 @@ class AppCompatCameraPolicy {
     }
 
     // TODO(b/369070416): have policies implement the same interface.
+    static boolean isFreeformLetterboxingForCameraAllowed(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy == null) {
+            return false;
+        }
+        return cameraPolicy.mCameraCompatFreeformPolicy != null
+                        && cameraPolicy.mCameraCompatFreeformPolicy
+                                .isFreeformLetterboxingForCameraAllowed(activity);
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
     static boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord activity) {
         final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
         if (cameraPolicy == null) {

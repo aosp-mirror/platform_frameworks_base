@@ -722,7 +722,7 @@ public interface AndroidPackage {
      * The names of packages to adopt ownership of permissions from, parsed under {@link
      * ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      *
-     * @see R.styleable#AndroidManifestOriginalPackage_name
+     * @see R.styleable#AndroidManifestAdoptPermissions_name
      * @hide
      */
     @NonNull
