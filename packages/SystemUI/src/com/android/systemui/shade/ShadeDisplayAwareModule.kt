@@ -35,6 +35,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.data.repository.MutableShadeDisplaysRepository
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractorImpl
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepositoryImpl
 import com.android.systemui.shade.display.ShadeDisplayPolicyModule
@@ -213,6 +215,25 @@ object ShadeDisplayAwareModule {
     ): MutableShadeDisplaysRepository {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
         return impl
+    }
+
+    @Provides
+    @SysUISingleton
+    fun provideShadeDialogContextInteractor(
+        impl: ShadeDialogContextInteractorImpl
+    ): ShadeDialogContextInteractor = impl
+
+    @Provides
+    @IntoMap
+    @ClassKey(ShadeDialogContextInteractor::class)
+    fun provideShadeDialogContextInteractorCoreStartable(
+        impl: Provider<ShadeDialogContextInteractorImpl>
+    ): CoreStartable {
+        return if (ShadeWindowGoesAround.isEnabled) {
+            impl.get()
+        } else {
+            CoreStartable.NOP
+        }
     }
 
     @Provides
