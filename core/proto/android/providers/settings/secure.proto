@@ -105,6 +105,7 @@ message SecureSettingsProto {
         optional SettingProto accessibility_gesture_targets = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto display_daltonizer_saturation_level = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_key_gesture_targets = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hct_rect_prompt_status = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;

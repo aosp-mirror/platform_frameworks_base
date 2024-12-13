@@ -8950,6 +8950,18 @@ public final class Settings {
                 "high_text_contrast_enabled";
 
         /**
+         * Setting that specifies the status of the High Contrast Text
+         * rectangle refresh's one-time prompt.
+         * 0 = UNKNOWN
+         * 1 = PROMPT_SHOWN
+         * 2 = PROMPT_UNNECESSARY
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_HCT_RECT_PROMPT_STATUS =
+                "accessibility_hct_rect_prompt_status";
+
+        /**
          * The color contrast, float in [-1, 1], 1 being the highest contrast.
          *
          * @hide
