@@ -39,9 +39,6 @@ import android.content.res.Configuration;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -52,7 +49,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -70,11 +66,8 @@ import com.android.wm.shell.transition.Transitions;
 
 import dagger.Lazy;
 
-import java.util.Optional;
-
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -82,24 +75,19 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /**
  * Tests for {@link CompatUIController}.
  *
  * Build/Install/Run:
- *  atest WMShellUnitTests:CompatUIControllerTest
+ * atest WMShellUnitTests:CompatUIControllerTest
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUIControllerTest extends ShellTestCase {
+public class CompatUIControllerTest extends CompatUIShellTestCase {
     private static final int DISPLAY_ID = 0;
     private static final int TASK_ID = 12;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private CompatUIController mController;
     private ShellInit mShellInit;
