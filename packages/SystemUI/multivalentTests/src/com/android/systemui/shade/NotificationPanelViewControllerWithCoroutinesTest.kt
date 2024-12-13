@@ -28,7 +28,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
@@ -214,32 +213,5 @@ class NotificationPanelViewControllerWithCoroutinesTest :
                 )
         }
         advanceUntilIdle()
-    }
-
-    @Test
-    fun onLayoutChange_shadeCollapsed_bottomAreaAlphaIsZero() = runTest {
-        // GIVEN bottomAreaShadeAlpha was updated before
-        mNotificationPanelViewController.maybeAnimateBottomAreaAlpha()
-
-        // WHEN a layout change is triggered with the shade being closed
-        triggerLayoutChange()
-
-        // THEN the bottomAreaAlpha is zero
-        val bottomAreaAlpha by collectLastValue(mFakeKeyguardRepository.bottomAreaAlpha)
-        assertThat(bottomAreaAlpha).isEqualTo(0f)
-    }
-
-    @Test
-    fun onShadeExpanded_bottomAreaAlphaIsFullyOpaque() = runTest {
-        // GIVEN bottomAreaShadeAlpha was updated before
-        mNotificationPanelViewController.maybeAnimateBottomAreaAlpha()
-
-        // WHEN the shade expanded
-        val transitionDistance = mNotificationPanelViewController.maxPanelTransitionDistance
-        mNotificationPanelViewController.expandedHeight = transitionDistance.toFloat()
-
-        // THEN the bottomAreaAlpha is fully opaque
-        val bottomAreaAlpha by collectLastValue(mFakeKeyguardRepository.bottomAreaAlpha)
-        assertThat(bottomAreaAlpha).isEqualTo(1f)
     }
 }

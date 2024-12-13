@@ -56,9 +56,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     override val animateBottomAreaDozingTransitions: StateFlow<Boolean> =
         _animateBottomAreaDozingTransitions
 
-    private val _bottomAreaAlpha = MutableStateFlow(1f)
-    override val bottomAreaAlpha: StateFlow<Float> = _bottomAreaAlpha
-
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: StateFlow<Boolean> = _isKeyguardShowing
 
@@ -157,11 +154,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
-    }
-
-    @Deprecated("Deprecated as part of b/278057014")
-    override fun setBottomAreaAlpha(alpha: Float) {
-        _bottomAreaAlpha.value = alpha
     }
 
     fun setKeyguardShowing(isShowing: Boolean) {

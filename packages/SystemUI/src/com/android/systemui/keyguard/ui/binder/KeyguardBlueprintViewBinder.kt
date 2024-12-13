@@ -24,7 +24,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.customization.R as customR
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
@@ -51,26 +50,11 @@ object KeyguardBlueprintViewBinder {
                         (prevBlueprint, blueprint) ->
                         val config = Config.DEFAULT
                         val transition =
-                            if (
-                                !KeyguardBottomAreaRefactor.isEnabled &&
-                                    prevBlueprint != null &&
-                                    prevBlueprint != blueprint
-                            ) {
-                                BaseBlueprintTransition(clockViewModel)
-                                    .addTransition(
-                                        IntraBlueprintTransition(
-                                            config,
-                                            clockViewModel,
-                                            smartspaceViewModel,
-                                        )
-                                    )
-                            } else {
-                                IntraBlueprintTransition(
-                                    config,
-                                    clockViewModel,
-                                    smartspaceViewModel,
-                                )
-                            }
+                            IntraBlueprintTransition(
+                                config,
+                                clockViewModel,
+                                smartspaceViewModel,
+                            )
 
                         viewModel.runTransition(constraintLayout, transition, config) {
                             // Replace sections from the previous blueprint with the new ones

@@ -50,7 +50,6 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
@@ -143,20 +142,6 @@ abstract class ShadeViewProviderModule {
             notificationShadeWindowView: NotificationShadeWindowView
         ): NotificationPanelView {
             return notificationShadeWindowView.requireViewById(R.id.notification_panel)
-        }
-
-        /**
-         * Constructs a new, unattached [KeyguardBottomAreaView].
-         *
-         * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
-         */
-        @Provides
-        fun providesKeyguardBottomAreaView(
-            npv: NotificationPanelView,
-            @ShadeDisplayAware layoutInflater: LayoutInflater,
-        ): KeyguardBottomAreaView {
-            return layoutInflater.inflate(R.layout.keyguard_bottom_area, npv, false)
-                as KeyguardBottomAreaView
         }
 
         @Provides

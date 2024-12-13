@@ -22,7 +22,6 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.sceneContainer
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -37,7 +36,6 @@ object SceneContainerFlag {
     inline val isEnabled
         get() =
             sceneContainer() && // mainAconfigFlag
-                KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
                 NotificationThrottleHun.isEnabled &&
@@ -51,7 +49,6 @@ object SceneContainerFlag {
     /** The set of secondary flags which must be enabled for scene container to work properly */
     inline fun getSecondaryFlags(): Sequence<FlagToken> =
         sequenceOf(
-            KeyguardBottomAreaRefactor.token,
             KeyguardWmStateRefactor.token,
             MigrateClocksToBlueprint.token,
             NotificationThrottleHun.token,

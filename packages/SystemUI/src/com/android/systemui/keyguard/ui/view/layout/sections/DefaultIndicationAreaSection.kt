@@ -21,7 +21,6 @@ import android.content.Context
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
@@ -43,21 +42,17 @@ constructor(
     private var indicationAreaHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (KeyguardBottomAreaRefactor.isEnabled) {
-            val view = KeyguardIndicationArea(context, null)
-            constraintLayout.addView(view)
-        }
+        val view = KeyguardIndicationArea(context, null)
+        constraintLayout.addView(view)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (KeyguardBottomAreaRefactor.isEnabled) {
-            indicationAreaHandle =
-                KeyguardIndicationAreaBinder.bind(
-                    constraintLayout.requireViewById(R.id.keyguard_indication_area),
-                    keyguardIndicationAreaViewModel,
-                    indicationController,
-                )
-        }
+        indicationAreaHandle =
+            KeyguardIndicationAreaBinder.bind(
+                constraintLayout.requireViewById(R.id.keyguard_indication_area),
+                keyguardIndicationAreaViewModel,
+                indicationController,
+            )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {

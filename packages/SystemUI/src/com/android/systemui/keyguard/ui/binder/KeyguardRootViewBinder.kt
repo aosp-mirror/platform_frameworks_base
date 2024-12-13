@@ -52,7 +52,6 @@ import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -119,35 +118,33 @@ object KeyguardRootViewBinder {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
 
-        if (KeyguardBottomAreaRefactor.isEnabled) {
-            disposables +=
-                view.onTouchListener { _, event ->
-                    var consumed = false
-                    if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
-                        // signifies a primary button click down has reached keyguardrootview
-                        // we need to return true here otherwise an ACTION_UP will never arrive
-                        if (Flags.nonTouchscreenDevicesBypassFalsing()) {
-                            if (
-                                event.action == MotionEvent.ACTION_DOWN &&
-                                    event.buttonState == MotionEvent.BUTTON_PRIMARY &&
-                                    !event.isTouchscreenSource()
-                            ) {
-                                consumed = true
-                            } else if (
-                                event.action == MotionEvent.ACTION_UP &&
-                                    !event.isTouchscreenSource()
-                            ) {
-                                statusBarKeyguardViewManager?.showBouncer(true)
-                                consumed = true
-                            }
+        disposables +=
+            view.onTouchListener { _, event ->
+                var consumed = false
+                if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                    // signifies a primary button click down has reached keyguardrootview
+                    // we need to return true here otherwise an ACTION_UP will never arrive
+                    if (Flags.nonTouchscreenDevicesBypassFalsing()) {
+                        if (
+                            event.action == MotionEvent.ACTION_DOWN &&
+                            event.buttonState == MotionEvent.BUTTON_PRIMARY &&
+                            !event.isTouchscreenSource()
+                        ) {
+                            consumed = true
+                        } else if (
+                            event.action == MotionEvent.ACTION_UP &&
+                            !event.isTouchscreenSource()
+                        ) {
+                            statusBarKeyguardViewManager?.showBouncer(true)
+                            consumed = true
                         }
-                        viewModel.setRootViewLastTapPosition(
-                            Point(event.x.toInt(), event.y.toInt())
-                        )
                     }
-                    consumed
+                    viewModel.setRootViewLastTapPosition(
+                        Point(event.x.toInt(), event.y.toInt())
+                    )
                 }
-        }
+                consumed
+            }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
         val viewState = ViewStateAccessor(alpha = { view.alpha })
@@ -175,10 +172,8 @@ object KeyguardRootViewBinder {
                     launch("$TAG#alpha") {
                         viewModel.alpha(viewState).collect { alpha ->
                             view.alpha = alpha
-                            if (KeyguardBottomAreaRefactor.isEnabled) {
-                                childViews[statusViewId]?.alpha = alpha
-                                childViews[burnInLayerId]?.alpha = alpha
-                            }
+                            childViews[statusViewId]?.alpha = alpha
+                            childViews[burnInLayerId]?.alpha = alpha
                         }
                     }
 

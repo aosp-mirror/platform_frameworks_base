@@ -30,7 +30,6 @@ val Kosmos.shadeLockscreenInteractor by
             backgroundScope = applicationCoroutineScope,
             shadeInteractor = shadeInteractorImpl,
             sceneInteractor = sceneInteractor,
-            lockIconViewController = mock(),
             shadeRepository = shadeRepository,
         )
     }

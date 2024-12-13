@@ -24,7 +24,6 @@ import android.platform.test.flag.junit.FlagsParameterization
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalSceneRepository
@@ -74,7 +73,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-@EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+@EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
