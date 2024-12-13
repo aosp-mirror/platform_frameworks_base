@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
+import static android.service.quickaccesswallet.Flags.launchWalletViaSysuiCallbacks;
 
 import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.internal.R.integer.config_defaultMinEmergencyGestureTapDurationMillis;
@@ -759,7 +760,8 @@ public class GestureLauncherService extends SystemService {
         } else if (launchWallet) {
             Slog.i(TAG, "Power button double tap gesture detected, launching wallet. Interval="
                     + powerTapInterval + "ms");
-            launchWallet = sendGestureTargetActivityPendingIntent();
+            launchWallet = launchWalletViaSysuiCallbacks() ?
+                    handleWalletGesture() : sendGestureTargetActivityPendingIntent();
         } else if (launchEmergencyGesture) {
             Slog.i(TAG, "Emergency gesture detected, launching.");
             launchEmergencyGesture = handleEmergencyGesture();
@@ -873,6 +875,31 @@ public class GestureLauncherService extends SystemService {
             StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
             service.onCameraLaunchGestureDetected(source);
+            return true;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    @VisibleForTesting
+    boolean handleWalletGesture() {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "GestureLauncher:handleWalletGesture");
+        try {
+            boolean userSetupComplete = isUserSetupComplete();
+            if (!userSetupComplete) {
+                if (DBG) {
+                    Slog.d(TAG, "userSetupComplete = false, ignoring wallet gesture.");
+                }
+                return false;
+            }
+            if (DBG) {
+                Slog.d(TAG, "userSetupComplete = true, performing wallet gesture.");
+            }
+
+            StatusBarManagerInternal service = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            service.onWalletLaunchGestureDetected();
             return true;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

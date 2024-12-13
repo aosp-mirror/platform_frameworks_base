@@ -215,6 +215,7 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.volume.VolumeComponent;
+import com.android.systemui.wallet.controller.QuickAccessWalletController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
@@ -373,6 +374,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationSettingsInteractor mNotificationSettingsInteractor;
     @Mock private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     @Mock private StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
+    @Mock private QuickAccessWalletController mQuickAccessWalletController;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
@@ -640,7 +642,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mBrightnessMirrorShowingInteractor,
                 mGlanceableHubContainerController,
                 mEmergencyGestureIntentFactory,
-                mViewCaptureAwareWindowManager
+                mViewCaptureAwareWindowManager,
+                mQuickAccessWalletController
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();

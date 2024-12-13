@@ -419,6 +419,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             }
         }
 
+        @Override
+        public void onWalletLaunchGestureDetected() {
+            IStatusBar bar = mBar;
+            if (bar != null) {
+                try {
+                    bar.onWalletLaunchGestureDetected();
+                } catch (RemoteException e) {
+                }
+            }
+        }
+
         /**
          * Notifies the status bar that a Emergency Action launch gesture has been detected.
          *

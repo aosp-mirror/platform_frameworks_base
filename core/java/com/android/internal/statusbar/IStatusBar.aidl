@@ -124,6 +124,11 @@ oneway interface IStatusBar
     void onCameraLaunchGestureDetected(int source);
 
     /**
+     * Notifies the status bar that a wallet launch gesture has been detected.
+     */
+    void onWalletLaunchGestureDetected();
+
+    /**
      * Notifies the status bar that the Emergency Action launch gesture has been detected.
      *
      * TODO(b/169175022) Update method name and docs when feature name is locked.

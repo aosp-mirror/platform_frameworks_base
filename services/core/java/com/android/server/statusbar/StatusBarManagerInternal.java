@@ -113,6 +113,11 @@ public interface StatusBarManagerInternal {
 
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
+
+    /**
+     * Notifies SysUI that the wallet launch gesture has been detected.
+     */
+    void onWalletLaunchGestureDetected();
     void setDisableFlags(int displayId, int flags, String cause);
     void toggleSplitScreen();
     void appTransitionFinished(int displayId);
