@@ -43,6 +43,7 @@ import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyRegistryManager;
 
+import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IVoidConsumer;
@@ -96,8 +97,8 @@ public final class SatelliteManager {
     private static final ConcurrentHashMap<SatelliteCapabilitiesCallback,
             ISatelliteCapabilitiesCallback>
             sSatelliteCapabilitiesCallbackMap = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<SatelliteSupportedStateCallback,
-            ISatelliteSupportedStateCallback> sSatelliteSupportedStateCallbackMap =
+    private static final ConcurrentHashMap<Consumer<Boolean>,
+            IBooleanConsumer> sSatelliteSupportedStateCallbackMap =
             new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<SatelliteCommunicationAllowedStateCallback,
             ISatelliteCommunicationAllowedStateCallback>
@@ -781,6 +782,28 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String ACTION_SATELLITE_START_NON_EMERGENCY_SESSION =
             "android.telephony.satellite.action.SATELLITE_START_NON_EMERGENCY_SESSION";
+
+    /**
+     * Application level {@link android.content.pm.PackageManager.Property} tag that represents
+     * whether the application supports P2P SMS over carrier roaming satellite which needs manual
+     * trigger to connect to satellite. The messaging applications that supports P2P SMS over
+     * carrier roaming satellite should set value of this property to {@code true}.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.telephony.satellite.PROPERTY_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT"
+     *     android:value="true"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public static final String PROPERTY_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT =
+            "android.telephony.satellite.PROPERTY_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT";
+
     /**
      * Meta-data represents whether the application supports P2P SMS over carrier roaming satellite
      * which needs manual trigger to connect to satellite. The messaging applications that supports
@@ -794,8 +817,6 @@ public final class SatelliteManager {
      * }
      * @hide
      */
-    @SystemApi
-    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     public static final String METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT =
             "android.telephony.METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT";
 
@@ -3303,7 +3324,7 @@ public final class SatelliteManager {
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle the satellite supoprted state changed event.
      *
-     * @return The {@link SatelliteResult} result of the operation.
+     * @return The result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -3313,23 +3334,20 @@ public final class SatelliteManager {
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteResult public int registerForSupportedStateChanged(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull SatelliteSupportedStateCallback callback) {
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                ISatelliteSupportedStateCallback internalCallback =
-                        new ISatelliteSupportedStateCallback.Stub() {
-                            @Override
-                            public void onSatelliteSupportedStateChanged(boolean supported) {
-                                executor.execute(() -> Binder.withCleanCallingIdentity(
-                                        () -> callback.onSatelliteSupportedStateChanged(
-                                                supported)));
-                            }
-                        };
+                IBooleanConsumer internalCallback = new IBooleanConsumer.Stub() {
+                    @Override
+                    public void accept(boolean supported) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> callback.accept(supported)));
+                    }
+                };
                 sSatelliteSupportedStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForSatelliteSupportedStateChanged(
                         internalCallback);
@@ -3348,7 +3366,7 @@ public final class SatelliteManager {
      * If callback was not registered before, the request will be ignored.
      *
      * @param callback The callback that was passed to
-     * {@link #registerForSupportedStateChanged(Executor, SatelliteSupportedStateCallback)}
+     * {@link #registerForSupportedStateChanged(Executor, Consumer)}
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
@@ -3357,10 +3375,9 @@ public final class SatelliteManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
-    public void unregisterForSupportedStateChanged(
-            @NonNull SatelliteSupportedStateCallback callback) {
+    public void unregisterForSupportedStateChanged(@NonNull Consumer<Boolean> callback) {
         Objects.requireNonNull(callback);
-        ISatelliteSupportedStateCallback internalCallback =
+        IBooleanConsumer internalCallback =
                 sSatelliteSupportedStateCallbackMap.remove(callback);
 
         try {

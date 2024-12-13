@@ -74,7 +74,6 @@ import android.telephony.satellite.ISatelliteDatagramCallback;
 import android.telephony.satellite.ISatelliteDisallowedReasonsCallback;
 import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
-import android.telephony.satellite.ISatelliteSupportedStateCallback;
 import android.telephony.satellite.ISatelliteModemStateCallback;
 import android.telephony.satellite.ISelectedNbIotSatelliteSubscriptionCallback;
 import android.telephony.satellite.NtnSignalStrength;
@@ -3425,8 +3424,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteSupportedStateChanged(
-            in ISatelliteSupportedStateCallback callback);
+    int registerForSatelliteSupportedStateChanged(in IBooleanConsumer callback);
 
     /**
      * Unregisters for supported state changed from satellite modem.
@@ -3436,8 +3434,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void unregisterForSatelliteSupportedStateChanged(
-            in ISatelliteSupportedStateCallback callback);
+    void unregisterForSatelliteSupportedStateChanged(in IBooleanConsumer callback);
 
     /**
      * Registers for satellite communication allowed state changed.

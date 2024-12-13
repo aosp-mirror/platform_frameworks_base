@@ -27,11 +27,17 @@ import android.util.IntArray;
 
 import com.android.internal.telephony.flags.Flags;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 /**
+ * This class defines the information that modem will use to decide which satellites it should
+ * attach to and how it should scan for the signal from the chosen satellites.
+ * Moreover, it also provides the customized information {@code mTagIds} to provide the flexibility
+ * for OEMs and vendors to define more info that they need for communicating with satellites like
+ * how modem should control the power to meet the requirement of local authorities.
  * @hide
  */
 @SystemApi
@@ -42,20 +48,20 @@ public final class SystemSelectionSpecifier implements Parcelable {
     @NonNull private String mMccMnc;
 
     /** The frequency bands to scan. Maximum length of the vector is 8. */
-    @NonNull private IntArray mBands;
+    @NonNull private int[] mBands;
 
     /**
      * The radio channels to scan as defined in 3GPP TS 25.101 and 36.101.
      * Maximum length of the vector is 32.
      */
-    @NonNull private IntArray mEarfcns;
+    @NonNull private int[] mEarfcns;
 
     /* The list of satellites configured for the current location */
     @Nullable
-    private SatelliteInfo[] mSatelliteInfos;
+    private List<SatelliteInfo> mSatelliteInfos;
 
     /* The list of tag IDs associated with the current location */
-    @Nullable private IntArray mTagIds;
+    @Nullable private int[] mTagIds;
 
     /**
      * @hide
@@ -64,10 +70,84 @@ public final class SystemSelectionSpecifier implements Parcelable {
             @NonNull IntArray earfcns, @Nullable SatelliteInfo[] satelliteInfos,
             @Nullable IntArray tagIds) {
         mMccMnc = mccmnc;
-        mBands = bands;
-        mEarfcns = earfcns;
-        mSatelliteInfos = satelliteInfos;
-        mTagIds = tagIds;
+        mBands = bands.toArray();
+        mEarfcns = earfcns.toArray();
+        mSatelliteInfos = Arrays.stream(satelliteInfos).toList();
+        mTagIds = tagIds.toArray();
+    }
+
+    /**
+     * @hide
+     */
+    public SystemSelectionSpecifier(Builder builder) {
+        mMccMnc = builder.mMccMnc;
+        mBands = builder.mBands;
+        mEarfcns = builder.mEarfcns;
+        mSatelliteInfos = builder.mSatelliteInfos;
+        mTagIds = builder.mTagIds;
+    }
+
+    /**
+     * Builder class for constructing SystemSelectionSpecifier objects
+     */
+    public static final class Builder {
+        @NonNull private String mMccMnc;
+        @NonNull private int[] mBands;
+        @NonNull private int[] mEarfcns;
+        private List<SatelliteInfo> mSatelliteInfos;
+        @Nullable private int[] mTagIds;
+
+        /** Set network plmn associated with the channel and return the Builder class. */
+        @NonNull
+        public Builder setMccMnc(@NonNull String mccMnc) {
+            this.mMccMnc = mccMnc;
+            return this;
+        }
+
+        /**
+         * Set frequency bands to scan and return the Builder class.
+         * Maximum length of the vector is 8.
+         */
+        @NonNull
+        public Builder setBands(@NonNull int[] bands) {
+            this.mBands = bands;
+            return this;
+        }
+
+        /**
+         * Set radio channels to scan as defined in 3GPP TS 25.101 and 36.101
+         * and returns the Builder class.
+         * Maximum length if the vector is 32.
+         */
+        @NonNull
+        public Builder setEarfcns(@NonNull int[] earfcns) {
+            this.mEarfcns = earfcns;
+            return this;
+        }
+
+        /**
+         * Set list of satellites configured for the current location and return the Builder class.
+         */
+        @NonNull
+        public Builder setSatelliteInfos(@NonNull List<SatelliteInfo> satelliteInfos) {
+            this.mSatelliteInfos = satelliteInfos;
+            return this;
+        }
+
+        /**
+         * Set list of tag IDs associated with the current location and return the Builder class.
+         */
+        @NonNull
+        public Builder setTagIds(@NonNull int[] tagIds) {
+            this.mTagIds = tagIds;
+            return this;
+        }
+
+        /** Return SystemSelectionSpecifier object */
+        @NonNull
+        public SystemSelectionSpecifier build() {
+            return new SystemSelectionSpecifier(this);
+        }
     }
 
     private SystemSelectionSpecifier(Parcel in) {
@@ -84,30 +164,30 @@ public final class SystemSelectionSpecifier implements Parcelable {
         mMccMnc = TextUtils.emptyIfNull(mMccMnc);
         out.writeString8(mMccMnc);
 
-        if (mBands != null && mBands.size() > 0) {
-            out.writeInt(mBands.size());
-            for (int i = 0; i < mBands.size(); i++) {
-                out.writeInt(mBands.get(i));
+        if (mBands != null && mBands.length > 0) {
+            out.writeInt(mBands.length);
+            for (int i = 0; i < mBands.length; i++) {
+                out.writeInt(mBands[i]);
             }
         } else {
             out.writeInt(0);
         }
 
-        if (mEarfcns != null && mEarfcns.size() > 0) {
-            out.writeInt(mEarfcns.size());
-            for (int i = 0; i < mEarfcns.size(); i++) {
-                out.writeInt(mEarfcns.get(i));
+        if (mEarfcns != null && mEarfcns.length > 0) {
+            out.writeInt(mEarfcns.length);
+            for (int i = 0; i < mEarfcns.length; i++) {
+                out.writeInt(mEarfcns[i]);
             }
         } else {
             out.writeInt(0);
         }
 
-        out.writeTypedArray(mSatelliteInfos, flags);
+        out.writeTypedArray(mSatelliteInfos.toArray(new SatelliteInfo[0]), flags);
 
         if (mTagIds != null) {
-            out.writeInt(mTagIds.size());
-            for (int i = 0; i < mTagIds.size(); i++) {
-                out.writeInt(mTagIds.get(i));
+            out.writeInt(mTagIds.length);
+            for (int i = 0; i < mTagIds.length; i++) {
+                out.writeInt(mTagIds[i]);
             }
         } else {
             out.writeInt(0);
@@ -135,9 +215,9 @@ public final class SystemSelectionSpecifier implements Parcelable {
         sb.append(",");
 
         sb.append("bands:");
-        if (mBands != null && mBands.size() > 0) {
-            for (int i = 0; i < mBands.size(); i++) {
-                sb.append(mBands.get(i));
+        if (mBands != null && mBands.length > 0) {
+            for (int i = 0; i < mBands.length; i++) {
+                sb.append(mBands[i]);
                 sb.append(",");
             }
         } else {
@@ -145,9 +225,9 @@ public final class SystemSelectionSpecifier implements Parcelable {
         }
 
         sb.append("earfcs:");
-        if (mEarfcns != null && mEarfcns.size() > 0) {
-            for (int i = 0; i < mEarfcns.size(); i++) {
-                sb.append(mEarfcns.get(i));
+        if (mEarfcns != null && mEarfcns.length > 0) {
+            for (int i = 0; i < mEarfcns.length; i++) {
+                sb.append(mEarfcns[i]);
                 sb.append(",");
             }
         } else {
@@ -155,7 +235,7 @@ public final class SystemSelectionSpecifier implements Parcelable {
         }
 
         sb.append("mSatelliteInfos:");
-        if (mSatelliteInfos != null && mSatelliteInfos.length > 0) {
+        if (mSatelliteInfos != null && mSatelliteInfos.size() > 0) {
             for (SatelliteInfo satelliteInfo : mSatelliteInfos) {
                 sb.append(satelliteInfo);
                 sb.append(",");
@@ -165,9 +245,9 @@ public final class SystemSelectionSpecifier implements Parcelable {
         }
 
         sb.append("mTagIds:");
-        if (mTagIds != null && mTagIds.size() > 0) {
-            for (int i = 0; i < mTagIds.size(); i++) {
-                sb.append(mTagIds.get(i));
+        if (mTagIds != null && mTagIds.length > 0) {
+            for (int i = 0; i < mTagIds.length; i++) {
+                sb.append(mTagIds[i]);
                 sb.append(",");
             }
         } else {
@@ -183,16 +263,16 @@ public final class SystemSelectionSpecifier implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         SystemSelectionSpecifier that = (SystemSelectionSpecifier) o;
         return Objects.equals(mMccMnc, that.mMccMnc)
-                && Objects.equals(mBands, that.mBands)
-                && Objects.equals(mEarfcns, that.mEarfcns)
-                && (mSatelliteInfos == null ? that.mSatelliteInfos == null : Arrays.equals(
-                mSatelliteInfos, that.mSatelliteInfos))
-                && Objects.equals(mTagIds, that.mTagIds);
+                && Arrays.equals(mBands, that.mBands)
+                && Arrays.equals(mEarfcns, that.mEarfcns)
+                && (mSatelliteInfos == null ? that.mSatelliteInfos == null :
+                mSatelliteInfos.equals(that.mSatelliteInfos))
+                && Arrays.equals(mTagIds, that.mTagIds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMccMnc, mBands, mEarfcns);
+        return Objects.hash(mMccMnc, Arrays.hashCode(mBands), Arrays.hashCode(mEarfcns));
     }
 
     /** Return network plmn associated with channel information. */
@@ -203,9 +283,10 @@ public final class SystemSelectionSpecifier implements Parcelable {
     /**
      * Return the frequency bands to scan.
      * Maximum length of the vector is 8.
+     * Refer specification 3GPP TS 36.101 for detailed information on frequency bands.
      */
     @NonNull public int[] getBands() {
-        return mBands.toArray();
+        return mBands;
     }
 
     /**
@@ -213,13 +294,13 @@ public final class SystemSelectionSpecifier implements Parcelable {
      * Maximum length of the vector is 32.
      */
     @NonNull public int[] getEarfcns() {
-        return mEarfcns.toArray();
+        return mEarfcns;
     }
 
     /** Return the list of satellites configured for the current location. */
     @NonNull
     public List<SatelliteInfo> getSatelliteInfos() {
-        return Arrays.stream(mSatelliteInfos).toList();
+        return mSatelliteInfos;
     }
 
     /**
@@ -229,34 +310,36 @@ public final class SystemSelectionSpecifier implements Parcelable {
      */
     @NonNull
     public int[] getTagIds() {
-        return mTagIds.toArray();
+        return mTagIds;
     }
 
     private void readFromParcel(Parcel in) {
         mMccMnc = in.readString();
 
-        mBands = new IntArray();
         int numBands = in.readInt();
+        mBands = new int[numBands];
         if (numBands > 0) {
             for (int i = 0; i < numBands; i++) {
-                mBands.add(in.readInt());
+                mBands[i] = in.readInt();
             }
         }
 
-        mEarfcns = new IntArray();
         int numEarfcns = in.readInt();
+        mEarfcns = new int[numEarfcns];
         if (numEarfcns > 0) {
             for (int i = 0; i < numEarfcns; i++) {
-                mEarfcns.add(in.readInt());
+                mEarfcns[i] = in.readInt();
             }
         }
 
-        mSatelliteInfos = in.createTypedArray(SatelliteInfo.CREATOR);
+        mSatelliteInfos = new ArrayList<>();
+        in.readList(mSatelliteInfos, SatelliteInfo.class.getClassLoader(), SatelliteInfo.class);
 
         int numTagIds = in.readInt();
+        mTagIds = new int[numTagIds];
         if (numTagIds > 0) {
             for (int i = 0; i < numTagIds; i++) {
-                mTagIds.add(in.readInt());
+                mTagIds[i] = in.readInt();
             }
         }
     }

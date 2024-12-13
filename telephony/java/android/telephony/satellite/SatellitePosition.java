@@ -16,6 +16,7 @@
 package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -65,9 +66,9 @@ public final class SatellitePosition implements Parcelable {
      *
      * @param longitudeDegree The longitude of the satellite in degrees.
      * @param altitudeKm  The altitude of the satellite in kilometers.
-     * @hide
      */
-    public SatellitePosition(double longitudeDegree, double altitudeKm) {
+    public SatellitePosition(@FloatRange(from = -180, to = 180) double longitudeDegree,
+            @FloatRange(from = 0.0) double altitudeKm) {
         mLongitudeDegree = longitudeDegree;
         mAltitudeKm = altitudeKm;
     }
@@ -106,6 +107,7 @@ public final class SatellitePosition implements Parcelable {
      *
      * @return The longitude of the satellite.
      */
+    @FloatRange(from = -180, to = 180)
     public double getLongitudeDegrees() {
         return mLongitudeDegree;
     }
@@ -115,6 +117,7 @@ public final class SatellitePosition implements Parcelable {
      *
      * @return The altitude of the satellite.
      */
+    @FloatRange(from = 0.0)
     public double getAltitudeKm() {
         return mAltitudeKm;
     }
