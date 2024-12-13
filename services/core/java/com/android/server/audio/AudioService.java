@@ -11398,7 +11398,7 @@ public class AudioService extends IAudioService.Stub
 
     private AudioDeviceAttributes anonymizeAudioDeviceAttributesUnchecked(
             AudioDeviceAttributes ada) {
-        if (!AudioSystem.isBluetoothDevice(ada.getInternalType())) {
+        if (ada == null || !AudioSystem.isBluetoothDevice(ada.getInternalType())) {
             return ada;
         }
         AudioDeviceAttributes res = new AudioDeviceAttributes(ada);
