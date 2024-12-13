@@ -21,6 +21,7 @@ import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_LANDSCAPE_
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_PORTRAIT;
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_UNSPECIFIED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_DISPLAY_ROTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
@@ -235,7 +236,8 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     boolean isInFreeformCameraCompatMode(@NonNull ActivityRecord activity) {
-        return getCameraCompatMode(activity) != CAMERA_COMPAT_FREEFORM_NONE;
+        return getCameraCompatMode(activity) != CAMERA_COMPAT_FREEFORM_UNSPECIFIED
+                && getCameraCompatMode(activity) != CAMERA_COMPAT_FREEFORM_NONE;
     }
 
     float getCameraCompatAspectRatio(@NonNull ActivityRecord activityRecord) {
