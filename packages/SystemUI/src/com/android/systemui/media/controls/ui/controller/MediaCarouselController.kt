@@ -32,6 +32,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
@@ -207,7 +208,7 @@ constructor(
     val mediaFrame: ViewGroup
 
     @VisibleForTesting
-    lateinit var settingsButton: View
+    lateinit var settingsButton: ImageView
         private set
 
     private val mediaContent: ViewGroup
@@ -650,7 +651,7 @@ constructor(
     private fun inflateSettingsButton() {
         val settings =
             LayoutInflater.from(context)
-                .inflate(R.layout.media_carousel_settings_button, mediaFrame, false) as View
+                .inflate(R.layout.media_carousel_settings_button, mediaFrame, false) as ImageView
         if (this::settingsButton.isInitialized) {
             mediaFrame.removeView(settingsButton)
         }
@@ -1492,6 +1493,17 @@ constructor(
                 this.desiredLocation = desiredLocation
                 this.desiredHostState = it
                 currentlyExpanded = it.expansion > 0
+
+                // Set color of the settings button to material "on primary" color when media is on
+                // communal for aesthetic and accessibility purposes since the background of
+                // Glanceable Hub is a dynamic color.
+                if (desiredLocation == MediaHierarchyManager.LOCATION_COMMUNAL_HUB) {
+                    settingsButton.setColorFilter(
+                        context.getColor(com.android.internal.R.color.materialColorOnPrimary)
+                    )
+                } else {
+                    settingsButton.setColorFilter(context.getColor(R.color.notification_gear_color))
+                }
 
                 val shouldCloseGuts =
                     !currentlyExpanded &&
