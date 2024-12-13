@@ -11561,6 +11561,12 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS) public void release();
   }
 
+  @FlaggedApi("com.android.server.power.optimization.power_monitor_api") public final class PowerMonitorReadings {
+    method @FlaggedApi("android.permission.flags.fine_power_monitor_permission") public int getGranularity();
+    field @FlaggedApi("android.permission.flags.fine_power_monitor_permission") public static final int GRANULARITY_FINE = 1; // 0x1
+    field @FlaggedApi("android.permission.flags.fine_power_monitor_permission") public static final int GRANULARITY_UNSPECIFIED = 0; // 0x0
+  }
+
   @Deprecated public class PowerWhitelistManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToWhitelist(@NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void addToWhitelist(@NonNull java.util.List<java.lang.String>);

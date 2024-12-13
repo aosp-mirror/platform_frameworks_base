@@ -264,6 +264,7 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.BATTERY_PREDICTION"/>
         <permission name="android.permission.BATTERY_STATS"/>
+        <permission name="android.permission.ACCESS_FINE_POWER_MONITORS" />
         <!-- BLUETOOTH_PRIVILEGED is needed for test only -->
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.BIND_APPWIDGET"/>

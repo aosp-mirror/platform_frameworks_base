@@ -18,8 +18,12 @@ package android.os;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -38,6 +42,37 @@ public final class PowerMonitorReadings {
     @NonNull
     private final long[] mTimestampsMs;
 
+    /**
+     * PowerMonitorReadings have the default level of granularity, which may be coarse or fine
+     * as determined by the implementation.
+     * @hide
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_FINE_POWER_MONITOR_PERMISSION)
+    @SystemApi
+    public static final int GRANULARITY_UNSPECIFIED = 0;
+
+    /**
+     * PowerMonitorReadings have a high level of granularity. This level of granularity is
+     * provided to applications that have the
+     * {@link android.Manifest.permission#ACCESS_FINE_POWER_MONITORS} permission.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_FINE_POWER_MONITOR_PERMISSION)
+    @SystemApi
+    public static final int GRANULARITY_FINE = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"GRANULARITY_"}, value = {
+            GRANULARITY_UNSPECIFIED,
+            GRANULARITY_FINE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PowerMonitorGranularity {}
+
+    @PowerMonitorGranularity
+    private final int mGranularity;
+
     private static final Comparator<PowerMonitor> POWER_MONITOR_COMPARATOR =
             Comparator.comparingInt(pm -> pm.index);
 
@@ -46,10 +81,12 @@ public final class PowerMonitorReadings {
      * @hide
      */
     public PowerMonitorReadings(@NonNull PowerMonitor[] powerMonitors,
-            @NonNull long[] energyUws, @NonNull long[] timestampsMs) {
+            @NonNull long[] energyUws, @NonNull long[] timestampsMs,
+            @PowerMonitorGranularity int granularity) {
         mPowerMonitors = powerMonitors;
         mEnergyUws = energyUws;
         mTimestampsMs = timestampsMs;
+        mGranularity = granularity;
     }
 
     /**
@@ -77,6 +114,19 @@ public final class PowerMonitorReadings {
             return mTimestampsMs[offset];
         }
         return 0;
+    }
+
+    /**
+     * Returns the granularity level of the results, which refers to the maximum age of the
+     * power monitor readings, {@link #GRANULARITY_FINE} indicating the highest level
+     * of freshness supported by the service implementation.
+     * @hide
+     */
+    @FlaggedApi(android.permission.flags.Flags.FLAG_FINE_POWER_MONITOR_PERMISSION)
+    @SystemApi
+    @PowerMonitorGranularity
+    public int getGranularity() {
+        return mGranularity;
     }
 
     @Override
