@@ -99,14 +99,14 @@ class PreferenceSetterApiHandler(
 
     override fun hasPermission(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: PreferenceSetterRequest,
-    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
+    ) = permissionChecker.hasPermission(application, callingPid, callingUid, request)
 
     override suspend fun invoke(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: PreferenceSetterRequest,
     ): Int {
@@ -127,7 +127,7 @@ class PreferenceSetterApiHandler(
 
         fun <T> PreferenceMetadata.checkWritePermit(value: T): Int {
             @Suppress("UNCHECKED_CAST") val preference = (this as PersistentPreference<T>)
-            return when (preference.getWritePermit(application, value, myUid, callingUid)) {
+            return when (preference.getWritePermit(application, value, callingPid, callingUid)) {
                 ReadWritePermit.ALLOW -> PreferenceSetterResult.OK
                 ReadWritePermit.DISALLOW -> PreferenceSetterResult.DISALLOW
                 ReadWritePermit.REQUIRE_APP_PERMISSION ->

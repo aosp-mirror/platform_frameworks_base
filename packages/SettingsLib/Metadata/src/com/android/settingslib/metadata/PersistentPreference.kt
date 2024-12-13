@@ -68,34 +68,34 @@ interface PersistentPreference<T> {
         PreferenceScreenRegistry.getKeyValueStore(context, this as PreferenceMetadata)!!
 
     /**
-     * Returns if the external application (identified by [callingUid]) has permission to read
-     * preference value.
+     * Returns if the external application (identified by [callingPid] and [callingUid]) has
+     * permission to read preference value.
      *
      * The underlying implementation does NOT need to check common states like isEnabled,
      * isRestricted or isAvailable.
      */
     @ReadWritePermit
-    fun getReadPermit(context: Context, myUid: Int, callingUid: Int): Int =
+    fun getReadPermit(context: Context, callingPid: Int, callingUid: Int): Int =
         PreferenceScreenRegistry.getReadPermit(
             context,
-            myUid,
+            callingPid,
             callingUid,
             this as PreferenceMetadata,
         )
 
     /**
-     * Returns if the external application (identified by [callingUid]) has permission to write
-     * preference with given [value].
+     * Returns if the external application (identified by [callingPid] and [callingUid]) has
+     * permission to write preference with given [value].
      *
      * The underlying implementation does NOT need to check common states like isEnabled,
      * isRestricted or isAvailable.
      */
     @ReadWritePermit
-    fun getWritePermit(context: Context, value: T?, myUid: Int, callingUid: Int): Int =
+    fun getWritePermit(context: Context, value: T?, callingPid: Int, callingUid: Int): Int =
         PreferenceScreenRegistry.getWritePermit(
             context,
             value,
-            myUid,
+            callingPid,
             callingUid,
             this as PreferenceMetadata,
         )

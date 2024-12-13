@@ -65,7 +65,7 @@ private const val TAG = "PreferenceGraphBuilder"
 class PreferenceGraphBuilder
 private constructor(
     private val context: Context,
-    private val myUid: Int,
+    private val callingPid: Int,
     private val callingUid: Int,
     private val request: GetPreferenceGraphRequest,
 ) {
@@ -81,7 +81,7 @@ private constructor(
         }
     }
 
-    fun build() = builder.build()
+    fun build(): PreferenceGraphProto = builder.build()
 
     /**
      * Adds an activity to the graph.
@@ -268,16 +268,18 @@ private constructor(
         metadata: PreferenceMetadata,
         isRoot: Boolean,
     ) =
-        metadata.toProto(context, myUid, callingUid, screenMetadata, isRoot, request.flags).also {
-            if (metadata is PreferenceScreenMetadata) {
-                @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata)
-            }
-            metadata.intent(context)?.resolveActivity(context.packageManager)?.let {
-                if (it.packageName == context.packageName) {
-                    add(it.className)
+        metadata
+            .toProto(context, callingPid, callingUid, screenMetadata, isRoot, request.flags)
+            .also {
+                if (metadata is PreferenceScreenMetadata) {
+                    @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata)
+                }
+                metadata.intent(context)?.resolveActivity(context.packageManager)?.let {
+                    if (it.packageName == context.packageName) {
+                        add(it.className)
+                    }
                 }
             }
-        }
 
     private suspend fun String?.toActionTarget(extras: Bundle?): ActionTarget? {
         if (this.isNullOrEmpty()) return null
@@ -343,16 +345,16 @@ private constructor(
     companion object {
         suspend fun of(
             context: Context,
-            myUid: Int,
+            callingPid: Int,
             callingUid: Int,
             request: GetPreferenceGraphRequest,
-        ) = PreferenceGraphBuilder(context, myUid, callingUid, request).also { it.init() }
+        ) = PreferenceGraphBuilder(context, callingPid, callingUid, request).also { it.init() }
     }
 }
 
 fun PreferenceMetadata.toProto(
     context: Context,
-    myUid: Int,
+    callingPid: Int,
     callingUid: Int,
     screenMetadata: PreferenceScreenMetadata,
     isRoot: Boolean,
@@ -394,7 +396,7 @@ fun PreferenceMetadata.toProto(
                 (!hasAvailable() || available) &&
                 (!hasRestricted() || !restricted) &&
                 metadata is PersistentPreference<*> &&
-                metadata.getReadPermit(context, myUid, callingUid) == ReadWritePermit.ALLOW
+                metadata.getReadPermit(context, callingPid, callingUid) == ReadWritePermit.ALLOW
         ) {
             value = preferenceValueProto {
                 when (metadata) {

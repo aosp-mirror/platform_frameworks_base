@@ -83,21 +83,21 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
 
     override fun getReadPermit(
         context: Context,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
     ) =
-        readWritePermitProvider?.getReadPermit(context, myUid, callingUid, preference)
+        readWritePermitProvider?.getReadPermit(context, callingPid, callingUid, preference)
             ?: ReadWritePermit.DISALLOW
 
     override fun getWritePermit(
         context: Context,
         value: Any?,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
     ) =
-        readWritePermitProvider?.getWritePermit(context, value, myUid, callingUid, preference)
+        readWritePermitProvider?.getWritePermit(context, value, callingPid, callingUid, preference)
             ?: ReadWritePermit.DISALLOW
 }
 
@@ -120,7 +120,7 @@ interface ReadWritePermitProvider {
     @ReadWritePermit
     fun getReadPermit(
         context: Context,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
     ): Int
@@ -129,7 +129,7 @@ interface ReadWritePermitProvider {
     fun getWritePermit(
         context: Context,
         value: Any?,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
     ): Int
@@ -140,7 +140,7 @@ interface ReadWritePermitProvider {
             object : ReadWritePermitProvider {
                 override fun getReadPermit(
                     context: Context,
-                    myUid: Int,
+                    callingPid: Int,
                     callingUid: Int,
                     preference: PreferenceMetadata,
                 ) = ReadWritePermit.ALLOW
@@ -148,7 +148,7 @@ interface ReadWritePermitProvider {
                 override fun getWritePermit(
                     context: Context,
                     value: Any?,
-                    myUid: Int,
+                    callingPid: Int,
                     callingUid: Int,
                     preference: PreferenceMetadata,
                 ) = ReadWritePermit.ALLOW
