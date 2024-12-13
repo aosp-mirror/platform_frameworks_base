@@ -37,7 +37,6 @@ class BrightnessRangeController {
     private final HdrClamper mHdrClamper;
 
     private final Runnable mModeChangeCallback;
-    private final boolean mUseNbmController;
 
     private final boolean mUseHdrClamper;
 
@@ -62,11 +61,8 @@ class BrightnessRangeController {
         mHdrClamper = hdrClamper;
         mNormalBrightnessModeController = normalBrightnessModeController;
         mUseHdrClamper = flags.isHdrClamperEnabled() && !flags.useNewHdrBrightnessModifier();
-        mUseNbmController = flags.isNbmControllerEnabled();
-        if (mUseNbmController) {
-            mNormalBrightnessModeController.resetNbmData(
-                    displayDeviceConfig.getLuxThrottlingData());
-        }
+        mNormalBrightnessModeController.resetNbmData(
+                displayDeviceConfig.getLuxThrottlingData());
         if (flags.useNewHdrBrightnessModifier()) {
             // HDR boost is handled by HdrBrightnessModifier and should be disabled in HbmController
             mHbmController.disableHdrBoost();
@@ -76,7 +72,6 @@ class BrightnessRangeController {
 
     void dump(PrintWriter pw) {
         pw.println("BrightnessRangeController:");
-        pw.println("  mUseNormalBrightnessController=" + mUseNbmController);
         pw.println("  mUseHdrClamper=" + mUseHdrClamper);
         mHbmController.dump(pw);
         mNormalBrightnessModeController.dump(pw);
@@ -138,9 +133,7 @@ class BrightnessRangeController {
     float getCurrentBrightnessMax() {
         // nbmController might adjust maxBrightness only if device does not support HBM or
         // hbm is currently not allowed
-        if (mUseNbmController
-                && (!mHbmController.deviceSupportsHbm()
-                || !mHbmController.isHbmCurrentlyAllowed())) {
+        if (!mHbmController.deviceSupportsHbm() || !mHbmController.isHbmCurrentlyAllowed()) {
             return Math.min(mHbmController.getCurrentBrightnessMax(),
                     mNormalBrightnessModeController.getCurrentBrightnessMax());
         }
@@ -173,16 +166,12 @@ class BrightnessRangeController {
     }
 
     private void applyChanges(BooleanSupplier nbmChangesFunc, Runnable hbmChangesFunc) {
-        if (mUseNbmController) {
-            boolean nbmTransitionChanged = nbmChangesFunc.getAsBoolean();
-            hbmChangesFunc.run();
-            // if nbm transition changed - trigger callback
-            // HighBrightnessModeController handles sending changes itself
-            if (nbmTransitionChanged) {
-                mModeChangeCallback.run();
-            }
-        } else {
-            hbmChangesFunc.run();
+        boolean nbmTransitionChanged = nbmChangesFunc.getAsBoolean();
+        hbmChangesFunc.run();
+        // if nbm transition changed - trigger callback
+        // HighBrightnessModeController handles sending changes itself
+        if (nbmTransitionChanged) {
+            mModeChangeCallback.run();
         }
     }
 

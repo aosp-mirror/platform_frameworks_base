@@ -97,6 +97,7 @@ public class PipController implements ConfigurationChangeListener,
     private final PipTransitionState mPipTransitionState;
     private final PipTouchHandler mPipTouchHandler;
     private final PipAppOpsListener mPipAppOpsListener;
+    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipImpl mImpl;
     private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
@@ -141,6 +142,7 @@ public class PipController implements ConfigurationChangeListener,
             PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
             PipAppOpsListener pipAppOpsListener,
+            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -157,6 +159,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipTransitionState.addPipTransitionStateChangedListener(this);
         mPipTouchHandler = pipTouchHandler;
         mPipAppOpsListener = pipAppOpsListener;
+        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mImpl = new PipImpl();
 
@@ -183,6 +186,7 @@ public class PipController implements ConfigurationChangeListener,
             PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
             PipAppOpsListener pipAppOpsListener,
+            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -192,7 +196,8 @@ public class PipController implements ConfigurationChangeListener,
         return new PipController(context, shellInit, shellCommandHandler, shellController,
                 displayController, displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                 pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
-                pipTransitionState, pipTouchHandler, pipAppOpsListener, mainExecutor);
+                pipTransitionState, pipTouchHandler, pipAppOpsListener, pipMenuController,
+                mainExecutor);
     }
 
     public PipImpl getPipImpl() {
@@ -329,6 +334,7 @@ public class PipController implements ConfigurationChangeListener,
         }
 
         mPipTouchHandler.updateMinMaxSize(mPipBoundsState.getAspectRatio());
+        mPipMenuController.hideMenu();
 
         if (mPipTransitionState.isInFixedRotation()) {
             // Do not change the bounds when in fixed rotation, but do update the movement bounds

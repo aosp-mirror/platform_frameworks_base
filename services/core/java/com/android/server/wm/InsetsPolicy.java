@@ -258,16 +258,13 @@ class InsetsPolicy {
      * We also need to exclude certain types of insets source for client within specific windowing
      * modes.
      *
-     * @param attrs the LayoutParams of the target
-     * @param windowingMode the windowing mode of the target
-     * @param isAlwaysOnTop is the target always on top
+     * @param target the target on which the policy is applied
      * @param state the input inset state containing all the sources
      * @return The state stripped of the necessary information.
      */
-    InsetsState enforceInsetsPolicyForTarget(WindowManager.LayoutParams attrs,
-            @WindowConfiguration.WindowingMode int windowingMode, boolean isAlwaysOnTop,
-            InsetsState state) {
+    InsetsState enforceInsetsPolicyForTarget(WindowState target, InsetsState state) {
         final InsetsState originalState = state;
+        final WindowManager.LayoutParams attrs = target.getAttrs();
 
         // The caller should not receive the visible insets provided by itself.
         if (attrs.type == TYPE_INPUT_METHOD) {
@@ -316,12 +313,17 @@ class InsetsPolicy {
             }
         }
 
+        final @WindowConfiguration.WindowingMode int windowingMode = target.getWindowingMode();
         if (WindowConfiguration.isFloating(windowingMode)
-                || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && isAlwaysOnTop)) {
+                || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && target.isAlwaysOnTop())) {
             // Keep frames, caption, and IME.
             int types = WindowInsets.Type.captionBar();
             if (windowingMode != WINDOWING_MODE_PINNED) {
-                types |= WindowInsets.Type.ime();
+                if (!Flags.refactorInsetsController() || (mDisplayContent != null
+                        && target == mDisplayContent.getImeInputTarget()
+                        && (WindowInsets.Type.ime() & target.getRequestedVisibleTypes()) != 0)) {
+                    types |= WindowInsets.Type.ime();
+                }
             }
             final InsetsState newState = new InsetsState();
             newState.set(state, types);

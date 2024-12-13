@@ -781,6 +781,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 // cancel any running animator, as it is using stale display layout information
                 animator.cancel();
             }
+            mMenuController.hideMenu();
             onDisplayChangedUncheck(layout, saveRestoreSnapFraction);
         }
     }

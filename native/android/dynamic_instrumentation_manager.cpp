@@ -73,6 +73,7 @@ ADynamicInstrumentationManager_TargetProcess* ADynamicInstrumentationManager_Tar
 
 void ADynamicInstrumentationManager_TargetProcess_destroy(
         const ADynamicInstrumentationManager_TargetProcess* instance) {
+    if (instance == nullptr) return;
     delete instance;
 }
 
@@ -104,6 +105,7 @@ ADynamicInstrumentationManager_MethodDescriptor_create(const char* fullyQualifie
 
 void ADynamicInstrumentationManager_MethodDescriptor_destroy(
         const ADynamicInstrumentationManager_MethodDescriptor* instance) {
+    if (instance == nullptr) return;
     delete instance;
 }
 
@@ -135,6 +137,7 @@ uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOff
 
 void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
         const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* instance) {
+    if (instance == nullptr) return;
     delete instance;
 }
 

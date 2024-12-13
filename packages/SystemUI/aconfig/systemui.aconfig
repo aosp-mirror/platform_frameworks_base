@@ -1871,6 +1871,13 @@ flag {
 }
 
 flag {
+   name: "hub_edit_mode_touch_adjustments"
+   namespace: "systemui"
+   description: "Makes selected widget toggleable in edit mode and modifier buttons mutually exclusive."
+   bug: "383160667"
+}
+
+flag {
    name: "glanceable_hub_direct_edit_mode"
    namespace: "systemui"
    description: "Invokes edit mode directly from long press in glanceable hub"

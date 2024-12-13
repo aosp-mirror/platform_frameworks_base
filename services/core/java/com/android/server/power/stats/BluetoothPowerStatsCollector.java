@@ -15,6 +15,7 @@
  */
 package com.android.server.power.stats;
 
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.UidTraffic;
@@ -41,7 +42,10 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
 
     private static final long BLUETOOTH_ACTIVITY_REQUEST_TIMEOUT = 20000;
 
-    private static final long ENERGY_UNSPECIFIED = -1;
+    interface Observer {
+        void onBluetoothPowerStatsRetrieved(@Nullable BluetoothActivityEnergyInfo info,
+                long elapsedRealtimeMs, long uptimeMs);
+    }
 
     public interface BluetoothStatsRetriever {
         interface Callback {
@@ -65,6 +69,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
     }
 
     private final Injector mInjector;
+    private final Observer mObserver;
 
     private com.android.server.power.stats.format.BluetoothPowerStatsLayout mLayout;
     private boolean mIsInitialized;
@@ -89,13 +94,14 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
 
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
 
-    public BluetoothPowerStatsCollector(Injector injector) {
+    public BluetoothPowerStatsCollector(Injector injector, @Nullable Observer observer) {
         super(injector.getHandler(),  injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH)),
                 injector.getUidResolver(),
                 injector.getClock());
         mInjector = injector;
+        mObserver = observer;
     }
 
     @Override
@@ -146,15 +152,20 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
         Arrays.fill(mDeviceStats, 0);
         mPowerStats.uidStats.clear();
 
-        collectBluetoothActivityInfo();
+        BluetoothActivityEnergyInfo activityInfo = collectBluetoothActivityInfo();
         collectBluetoothScanStats();
 
         mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
+        if (mObserver != null) {
+            mObserver.onBluetoothPowerStatsRetrieved(activityInfo, mClock.elapsedRealtime(),
+                    mClock.uptimeMillis());
+        }
+
         return mPowerStats;
     }
 
-    private void collectBluetoothActivityInfo() {
+    private BluetoothActivityEnergyInfo collectBluetoothActivityInfo() {
         CompletableFuture<BluetoothActivityEnergyInfo> immediateFuture = new CompletableFuture<>();
         boolean success = mBluetoothStatsRetriever.requestControllerActivityEnergyInfo(
                 Runnable::run,
@@ -173,7 +184,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
                 });
 
         if (!success) {
-            return;
+            return null;
         }
 
         BluetoothActivityEnergyInfo activityInfo;
@@ -186,7 +197,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
         }
 
         if (activityInfo == null) {
-            return;
+            return null;
         }
 
         long rxTime = activityInfo.getControllerRxTimeMillis();
@@ -241,6 +252,8 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
                 mLayout.setUidTxBytes(stats, txDelta);
             }
         }
+
+        return activityInfo;
     }
 
     private void collectBluetoothScanStats() {

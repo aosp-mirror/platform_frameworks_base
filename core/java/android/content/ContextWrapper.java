@@ -1012,6 +1012,12 @@ public class ContextWrapper extends Context {
         mBase.enforceCallingOrSelfPermission(permission, message);
     }
 
+    /** @hide */
+    @Override
+    public int getPermissionRequestState(String permission) {
+        return mBase.getPermissionRequestState(permission);
+    }
+
     @Override
     public void grantUriPermission(String toPackage, Uri uri, int modeFlags) {
         mBase.grantUriPermission(toPackage, uri, modeFlags);

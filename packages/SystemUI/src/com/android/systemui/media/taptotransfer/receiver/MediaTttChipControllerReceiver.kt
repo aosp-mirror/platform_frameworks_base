@@ -74,7 +74,7 @@ constructor(
     context: Context,
     logger: MediaTttReceiverLogger,
     viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
-    @Main mainExecutor: DelayableExecutor,
+    @Main private val mainExecutor: DelayableExecutor,
     accessibilityManager: AccessibilityManager,
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
@@ -285,6 +285,14 @@ constructor(
         } else {
             rippleController.collapseRipple(rippleView, onAnimationEnd)
             animateViewTranslationAndFade(iconContainerView, translationYBy, 0f)
+            mainExecutor.executeDelayed(
+                {
+                    if (view.isAttachedToWindow) {
+                        onAnimationEnd.run()
+                    }
+                },
+                ICON_TRANSLATION_ANIM_DURATION,
+            )
         }
     }
 

@@ -19,10 +19,12 @@ package com.android.server.location.contexthub;
 import android.Manifest;
 import android.content.Context;
 import android.hardware.contexthub.EndpointInfo;
+import android.hardware.contexthub.HubEndpoint;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubMessage;
 import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.Message;
+import android.hardware.contexthub.Reason;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
@@ -501,5 +503,36 @@ import java.util.List;
                 message.type,
                 message.content,
                 HubMessage.DeliveryParams.makeBasic().setResponseRequired(isReliable));
+    }
+
+    /**
+     * Converts a byte integer defined by Reason.aidl to HubEndpoint.Reason values exposed to apps.
+     *
+     * @param reason The Reason.aidl value
+     * @return The converted HubEndpoint.Reason value
+     */
+    /* package */
+    static @HubEndpoint.Reason int toAppHubEndpointReason(byte reason) {
+        switch (reason) {
+            case Reason.UNSPECIFIED:
+            case Reason.OUT_OF_MEMORY:
+            case Reason.TIMEOUT:
+                return HubEndpoint.REASON_FAILURE;
+            case Reason.OPEN_ENDPOINT_SESSION_REQUEST_REJECTED:
+                return HubEndpoint.REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED;
+            case Reason.CLOSE_ENDPOINT_SESSION_REQUESTED:
+                return HubEndpoint.REASON_CLOSE_ENDPOINT_SESSION_REQUESTED;
+            case Reason.ENDPOINT_INVALID:
+                return HubEndpoint.REASON_ENDPOINT_INVALID;
+            case Reason.ENDPOINT_GONE:
+            case Reason.ENDPOINT_CRASHED:
+            case Reason.HUB_RESET:
+                return HubEndpoint.REASON_ENDPOINT_STOPPED;
+            case Reason.PERMISSION_DENIED:
+                return HubEndpoint.REASON_PERMISSION_DENIED;
+            default:
+                Log.w(TAG, "toAppHubEndpointReason: invalid reason: " + reason);
+                return HubEndpoint.REASON_FAILURE;
+        }
     }
 }

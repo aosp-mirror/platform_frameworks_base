@@ -261,7 +261,7 @@ class ShadeTestUtilSceneImpl(
     }
 
     private fun setIdleScene(scene: SceneKey) {
-        sceneInteractor.changeScene(scene, "test")
+        sceneInteractor.changeScene(scene, "ShadeTestUtil.setIdleScene")
         val transitionState =
             MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(scene))
         sceneInteractor.setTransitionState(transitionState)
@@ -274,7 +274,7 @@ class ShadeTestUtilSceneImpl(
         progress: Float,
         isInitiatedByUserInput: Boolean = true,
     ) {
-        sceneInteractor.changeScene(from, "test")
+        sceneInteractor.changeScene(from, "ShadeTestUtil.setTransitionProgress")
         val transitionState =
             MutableStateFlow<ObservableTransitionState>(
                 ObservableTransitionState.Transition(

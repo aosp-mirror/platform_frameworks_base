@@ -109,11 +109,6 @@ constructor(
                 }
             }
             launch {
-                viewModel.shouldResetStackTop
-                    .filter { it }
-                    .collectTraced { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
-            }
-            launch {
                 viewModel.shouldCloseGuts
                     .filter { it }
                     .collectTraced { view.closeGutsOnSceneTouch() }
