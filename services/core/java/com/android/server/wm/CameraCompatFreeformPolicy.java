@@ -205,6 +205,16 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         }
     }
 
+    /**
+     * Returns true if letterboxing should be allowed for camera apps, even if otherwise it isn't.
+     *
+     * <p>Camera compat is currently the only use-case of letterboxing for desktop windowing.
+     */
+    boolean isFreeformLetterboxingForCameraAllowed(@NonNull ActivityRecord activity) {
+        // Letterboxing is normally not allowed in desktop windowing.
+        return isCameraRunningAndWindowingModeEligible(activity);
+    }
+
     boolean shouldCameraCompatControlOrientation(@NonNull ActivityRecord activity) {
         return isCameraRunningAndWindowingModeEligible(activity);
     }
