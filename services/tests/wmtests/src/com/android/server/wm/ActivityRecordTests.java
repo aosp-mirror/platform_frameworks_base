@@ -2472,11 +2472,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         assertEquals(0, activity.getChildCount());
 
-        final WindowState win1 = createWindow(null, TYPE_APPLICATION, activity, "win1");
-        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, activity,
-                "startingWin");
-        final WindowState baseWin = createWindow(null, TYPE_BASE_APPLICATION, activity, "baseWin");
-        final WindowState win4 = createWindow(null, TYPE_APPLICATION, activity, "win4");
+        final WindowState win1 = newWindowBuilder("app1", TYPE_APPLICATION).setWindowToken(
+                activity).build();
+        final WindowState startingWin = newWindowBuilder("startingWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(activity).build();
+        final WindowState baseWin = newWindowBuilder("baseWin",
+                TYPE_BASE_APPLICATION).setWindowToken(activity).build();
+        final WindowState win4 = newWindowBuilder("win4", TYPE_APPLICATION).setWindowToken(
+                activity).build();
 
         // Should not contain the windows that were added above.
         assertEquals(4, activity.getChildCount());
@@ -2499,14 +2502,17 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         assertNull(activity.findMainWindow());
 
-        final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "window1");
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, activity, "window11");
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, activity, "window12");
+        final WindowState window1 = newWindowBuilder("window1",
+                TYPE_BASE_APPLICATION).setWindowToken(activity).build();
+        final WindowState window11 = newWindowBuilder("window11", FIRST_SUB_WINDOW).setParent(
+                window1).setWindowToken(activity).build();
+        final WindowState window12 = newWindowBuilder("window12", FIRST_SUB_WINDOW).setParent(
+                window1).setWindowToken(activity).build();
         assertEquals(window1, activity.findMainWindow());
         window1.mAnimatingExit = true;
         assertEquals(window1, activity.findMainWindow());
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION_STARTING, activity,
-                "window2");
+        final WindowState window2 = newWindowBuilder("window2",
+                TYPE_APPLICATION_STARTING).setWindowToken(activity).build();
         assertEquals(window2, activity.findMainWindow());
         activity.removeImmediately();
     }
@@ -2651,8 +2657,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testStuckExitingWindow() {
-        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
-                "closingWindow");
+        final WindowState closingWindow = newWindowBuilder("closingWindow",
+                FIRST_APPLICATION_WINDOW).build();
         closingWindow.mAnimatingExit = true;
         closingWindow.mRemoveOnExit = true;
         closingWindow.mActivityRecord.commitVisibility(
@@ -3313,7 +3319,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenNoImeFocusableInActivity() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         makeWindowVisibleAndDrawn(app, mImeWindow);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
@@ -3341,7 +3347,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
 
         mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
@@ -3385,8 +3391,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testImeInsetsFrozenFlag_noDispatchVisibleInsetsWhenAppNotRequest()
             throws RemoteException {
-        final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
-        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+        final WindowState app1 = newWindowBuilder("app1", TYPE_APPLICATION).build();
+        final WindowState app2 = newWindowBuilder("app2", TYPE_APPLICATION).build();
 
         mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
@@ -3430,7 +3436,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testImeInsetsFrozenFlag_multiWindowActivities() {
         final WindowToken imeToken = createTestWindowToken(TYPE_INPUT_METHOD, mDisplayContent);
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, imeToken, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).setWindowToken(
+                imeToken).build();
         makeWindowVisibleAndDrawn(ime);
 
         // Create a split-screen root task with activity1 and activity 2.
@@ -3451,8 +3458,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity1.mImeInsetsFrozenUntilStartInput = true;
         activity2.mImeInsetsFrozenUntilStartInput = true;
 
-        final WindowState app1 = createWindow(null, TYPE_APPLICATION, activity1, "app1");
-        final WindowState app2 = createWindow(null, TYPE_APPLICATION, activity2, "app2");
+        final WindowState app1 = newWindowBuilder("app1", TYPE_APPLICATION).setWindowToken(
+                activity1).build();
+        final WindowState app2 = newWindowBuilder("app2", TYPE_APPLICATION).setWindowToken(
+                activity2).build();
         makeWindowVisibleAndDrawn(app1, app2);
 
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
@@ -3481,7 +3490,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testInClosingAnimation_visibilityNotCommitted_doNotHideSurface() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         makeWindowVisibleAndDrawn(app);
 
         // Put the activity in close transition.
@@ -3508,7 +3517,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testInClosingAnimation_visibilityCommitted_hideSurface() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         makeWindowVisibleAndDrawn(app);
         app.mActivityRecord.prepareSurfaces();
 
