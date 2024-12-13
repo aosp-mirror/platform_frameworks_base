@@ -9,28 +9,11 @@ package {
 }
 
 filegroup {
-    name: "framework-nfc-non-updatable-sources",
-    path: "java",
-    srcs: [
-        "java/android/nfc/NfcServiceManager.java",
-        "java/android/nfc/cardemulation/ApduServiceInfo.aidl",
-        "java/android/nfc/cardemulation/ApduServiceInfo.java",
-        "java/android/nfc/cardemulation/NfcFServiceInfo.aidl",
-        "java/android/nfc/cardemulation/NfcFServiceInfo.java",
-        "java/android/nfc/cardemulation/AidGroup.aidl",
-        "java/android/nfc/cardemulation/AidGroup.java",
-    ],
-}
-
-filegroup {
     name: "framework-nfc-updatable-sources",
     path: "java",
     srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
-    ],
-    exclude_srcs: [
-        ":framework-nfc-non-updatable-sources",
     ],
 }
 
