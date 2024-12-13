@@ -18,14 +18,21 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.content.Context.INPUT_SERVICE
+import android.hardware.input.AppLaunchData
+import android.hardware.input.AppLaunchData.RoleData
 import android.hardware.input.InputGestureData
+import android.hardware.input.InputGestureData.createKeyTrigger
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_APPLICATION
 import android.hardware.input.fakeInputManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.view.KeyEvent.KEYCODE_A
 import android.view.KeyEvent.KEYCODE_SLASH
+import android.view.KeyEvent.META_ALT_ON
 import android.view.KeyEvent.META_CAPS_LOCK_ON
+import android.view.KeyEvent.META_CTRL_ON
 import android.view.KeyEvent.META_META_ON
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -44,14 +51,15 @@ import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.allCusto
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.customizableInputGestureWithUnknownKeyGestureType
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.expectedShortcutCategoriesWithSimpleShortcutCombination
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.goHomeInputGestureData
+import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.launchCalendarShortcutAddRequest
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts.standardKeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.KeyCombination
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo.Add
-import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo.Delete
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo.SingleShortcutCustomization
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shortcutHelperTestHelper
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.userTracker
@@ -72,7 +80,7 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
 
     private val mockUserContext: Context = mock()
     private val kosmos =
-        testKosmos().also {
+        testKosmos().useUnconfinedTestDispatcher().also {
             it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 
@@ -242,6 +250,32 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
     }
 
     @Test
+    fun buildInputGestureDataForAppLaunchShortcut_keyGestureTypeIsTypeLaunchApp() =
+        testScope.runTest {
+            setApiAppLaunchBookmarks(listOf(simpleInputGestureDataForAppLaunchShortcut()))
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(launchCalendarShortcutAddRequest)
+            repo.updateUserKeyCombination(standardKeyCombination)
+
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+
+            assertThat(inputGestureData?.action?.keyGestureType())
+                .isEqualTo(KEY_GESTURE_TYPE_LAUNCH_APPLICATION)
+        }
+
+    @Test
+    fun buildInputGestureDataForAppLaunchShortcut_appLaunchDataIsAdded() =
+        testScope.runTest {
+            setApiAppLaunchBookmarks(listOf(simpleInputGestureDataForAppLaunchShortcut()))
+            helper.toggle(deviceId = 123)
+            repo.onCustomizationRequested(launchCalendarShortcutAddRequest)
+            repo.updateUserKeyCombination(standardKeyCombination)
+
+            val inputGestureData = repo.buildInputGestureDataForShortcutBeingCustomized()
+            assertThat(inputGestureData?.action?.appLaunchData()).isNotNull()
+        }
+
+    @Test
     @EnableFlags(FLAG_ENABLE_CUSTOMIZABLE_INPUT_GESTURES, FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     fun deleteShortcut_successfullyRetrievesGestureDataAndDeletesShortcut() {
         testScope.runTest {
@@ -304,17 +338,17 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
 
     private suspend fun customizeShortcut(
         customizationRequest: ShortcutCustomizationRequestInfo,
-        keyCombination: KeyCombination? = null
-    ): ShortcutCustomizationRequestResult{
+        keyCombination: KeyCombination? = null,
+    ): ShortcutCustomizationRequestResult {
         repo.onCustomizationRequested(customizationRequest)
         repo.updateUserKeyCombination(keyCombination)
 
         return when (customizationRequest) {
-            is Add -> {
+            is SingleShortcutCustomization.Add -> {
                 repo.confirmAndSetShortcutCurrentlyBeingCustomized()
             }
 
-            is Delete -> {
+            is SingleShortcutCustomization.Delete -> {
                 repo.deleteShortcutCurrentlyBeingCustomized()
             }
 
@@ -351,5 +385,20 @@ class CustomShortcutCategoriesRepositoryTest : SysuiTestCase() {
             repo.resetAllCustomShortcuts()
             assertThat(categories).isEmpty()
         }
+    }
+
+    private fun setApiAppLaunchBookmarks(appLaunchBookmarks: List<InputGestureData>) {
+        whenever(inputManager.appLaunchBookmarks).thenReturn(appLaunchBookmarks)
+    }
+
+    private fun simpleInputGestureDataForAppLaunchShortcut(
+        keyCode: Int = KEYCODE_A,
+        modifiers: Int = META_CTRL_ON or META_ALT_ON,
+        appLaunchData: AppLaunchData = RoleData("Test role"),
+    ): InputGestureData {
+        return InputGestureData.Builder()
+            .setTrigger(createKeyTrigger(keyCode, modifiers))
+            .setAppLaunchData(appLaunchData)
+            .build()
     }
 }
