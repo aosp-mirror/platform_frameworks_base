@@ -408,6 +408,15 @@ public final class DisplayInfo implements Parcelable {
     @Nullable
     public String thermalBrightnessThrottlingDataId;
 
+    /**
+     * Indicates whether the display is eligible for hosting tasks.
+     *
+     * For example, if the display is used for mirroring, this will be {@code false}.
+     *
+     * @hide
+     */
+    public boolean canHostTasks;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -493,7 +502,8 @@ public final class DisplayInfo implements Parcelable {
                 && BrightnessSynchronizer.floatEquals(hdrSdrRatio, other.hdrSdrRatio)
                 && thermalRefreshRateThrottling.contentEquals(other.thermalRefreshRateThrottling)
                 && Objects.equals(
-                thermalBrightnessThrottlingDataId, other.thermalBrightnessThrottlingDataId);
+                thermalBrightnessThrottlingDataId, other.thermalBrightnessThrottlingDataId)
+                && canHostTasks == other.canHostTasks;
     }
 
     @Override
@@ -561,6 +571,7 @@ public final class DisplayInfo implements Parcelable {
         hdrSdrRatio = other.hdrSdrRatio;
         thermalRefreshRateThrottling = other.thermalRefreshRateThrottling;
         thermalBrightnessThrottlingDataId = other.thermalBrightnessThrottlingDataId;
+        canHostTasks = other.canHostTasks;
     }
 
     public void readFromParcel(Parcel source) {
@@ -642,6 +653,7 @@ public final class DisplayInfo implements Parcelable {
         thermalRefreshRateThrottling = source.readSparseArray(null,
                 SurfaceControl.RefreshRateRange.class);
         thermalBrightnessThrottlingDataId = source.readString8();
+        canHostTasks = source.readBoolean();
     }
 
     @Override
@@ -717,6 +729,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(hdrSdrRatio);
         dest.writeSparseArray(thermalRefreshRateThrottling);
         dest.writeString8(thermalBrightnessThrottlingDataId);
+        dest.writeBoolean(canHostTasks);
     }
 
     @Override
@@ -1020,6 +1033,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(thermalRefreshRateThrottling);
         sb.append(", thermalBrightnessThrottlingDataId ");
         sb.append(thermalBrightnessThrottlingDataId);
+        sb.append(", canHostTasks ");
+        sb.append(canHostTasks);
         sb.append("}");
         return sb.toString();
     }

@@ -500,6 +500,11 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mPendingChanges = 0;
         }
 
+        @Override
+        public boolean shouldOnlyMirror() {
+            return mProjection != null || ((mFlags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0);
+        }
+
         public void setSurfaceLocked(Surface surface) {
             if (!mStopped && mSurface != surface) {
                 if (mDisplayState == Display.STATE_ON

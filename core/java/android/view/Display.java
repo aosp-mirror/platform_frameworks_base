@@ -2056,6 +2056,22 @@ public final class Display {
     }
 
     /**
+     * Returns whether the display is eligible for hosting tasks.
+     *
+     * For example, if the display is used for mirroring, this will return {@code false}.
+     *
+     * TODO (b/383666349): Rename this later once there is a better option.
+     *
+     * @hide
+     */
+    public boolean canHostTasks() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mIsValid && mDisplayInfo.canHostTasks;
+        }
+    }
+
+    /**
      * Returns true if the specified UID has access to this display.
      * @hide
      */
