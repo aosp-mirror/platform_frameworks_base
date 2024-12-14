@@ -41,6 +41,16 @@ public class Utils {
     }
 
     /**
+     * Converts an id encoded in a float to the corresponding long id.
+     *
+     * @param value the float if to convert
+     * @return the float id converted to a long id
+     */
+    public static long longIdFromNan(float value) {
+        return ((long) idFromNan(value)) + 0x100000000L;
+    }
+
+    /**
      * convert a long into an ID
      *
      * @param v the long to convert

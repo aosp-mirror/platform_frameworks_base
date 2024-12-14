@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.TouchListener;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
@@ -40,7 +41,8 @@ import java.util.HashMap;
  *
  * <p>This is used to play the RemoteCompose operations on Android.
  */
-class AndroidRemoteContext extends RemoteContext {
+@VisibleForTesting
+public class AndroidRemoteContext extends RemoteContext {
 
     public void useCanvas(Canvas canvas) {
         if (mPaintContext == null) {
@@ -119,6 +121,40 @@ class AndroidRemoteContext extends RemoteContext {
             clearIntegerOverride(id);
         }
         mVarNameHashMap.put(integerName, null);
+    }
+
+    @Override
+    public void setNamedFloatOverride(String floatName, float value) {
+        if (mVarNameHashMap.get(floatName) != null) {
+            int id = mVarNameHashMap.get(floatName).mId;
+            overrideFloat(id, value);
+        }
+    }
+
+    @Override
+    public void clearNamedFloatOverride(String floatName) {
+        if (mVarNameHashMap.get(floatName) != null) {
+            int id = mVarNameHashMap.get(floatName).mId;
+            clearFloatOverride(id);
+        }
+        mVarNameHashMap.put(floatName, null);
+    }
+
+    @Override
+    public void setNamedDataOverride(String dataName, Object value) {
+        if (mVarNameHashMap.get(dataName) != null) {
+            int id = mVarNameHashMap.get(dataName).mId;
+            overrideData(id, value);
+        }
+    }
+
+    @Override
+    public void clearNamedDataOverride(String dataName) {
+        if (mVarNameHashMap.get(dataName) != null) {
+            int id = mVarNameHashMap.get(dataName).mId;
+            clearDataOverride(id);
+        }
+        mVarNameHashMap.put(dataName, null);
     }
 
     /**
@@ -236,12 +272,20 @@ class AndroidRemoteContext extends RemoteContext {
         mRemoteComposeState.overrideInteger(id, value);
     }
 
+    public void overrideData(int id, Object value) {
+        mRemoteComposeState.overrideData(id, value);
+    }
+
     public void clearDataOverride(int id) {
         mRemoteComposeState.clearDataOverride(id);
     }
 
     public void clearIntegerOverride(int id) {
         mRemoteComposeState.clearIntegerOverride(id);
+    }
+
+    public void clearFloatOverride(int id) {
+        mRemoteComposeState.clearFloatOverride(id);
     }
 
     @Override

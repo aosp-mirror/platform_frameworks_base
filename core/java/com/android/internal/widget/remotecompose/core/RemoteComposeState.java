@@ -318,7 +318,8 @@ public class RemoteComposeState implements CollectionsAccess {
     private void updateListeners(int id) {
         ArrayList<VariableSupport> v = mVarListeners.get(id);
         if (v != null && mRemoteContext != null) {
-            for (VariableSupport c : v) {
+            for (int i = 0; i < v.size(); i++) {
+                VariableSupport c = v.get(i);
                 c.markDirty();
             }
         }

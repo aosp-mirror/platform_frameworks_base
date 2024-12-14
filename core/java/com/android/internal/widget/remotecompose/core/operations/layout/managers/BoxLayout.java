@@ -26,7 +26,6 @@ import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
@@ -34,7 +33,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.measure.
 import java.util.List;
 
 /** Simple Box layout implementation */
-public class BoxLayout extends LayoutManager implements ComponentStartOperation {
+public class BoxLayout extends LayoutManager {
 
     public static final int START = 1;
     public static final int CENTER = 2;

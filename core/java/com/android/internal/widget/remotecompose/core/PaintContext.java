@@ -16,6 +16,7 @@
 package com.android.internal.widget.remotecompose.core;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 
@@ -297,4 +298,12 @@ public abstract class PaintContext {
     public boolean isVisualDebug() {
         return mContext.isVisualDebug();
     }
+
+    /**
+     * Returns a String from an id
+     *
+     * @param textID
+     * @return the string if found
+     */
+    public abstract @Nullable String getText(int textID);
 }

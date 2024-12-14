@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Represents a loop of operations */
-public class LoopOperation extends PaintOperation implements VariableSupport {
+public class LoopOperation extends PaintOperation implements Container, VariableSupport {
     private static final int OP_CODE = Operations.LOOP_START;
 
     @NonNull public ArrayList<Operation> mList = new ArrayList<>();

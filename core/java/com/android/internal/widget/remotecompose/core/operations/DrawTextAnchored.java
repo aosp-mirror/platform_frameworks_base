@@ -44,8 +44,11 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
     float mOutPanX;
     float mOutPanY;
 
+    String mLastString;
+
     public static final int ANCHOR_TEXT_RTL = 1;
     public static final int ANCHOR_MONOSPACE_MEASURE = 2;
+    public static final int MEASURE_EVERY_TIME = 4;
 
     public DrawTextAnchored(int textID, float x, float y, float panX, float panY, int flags) {
         mTextID = textID;
@@ -224,7 +227,13 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
                 ((mFlags & ANCHOR_MONOSPACE_MEASURE) != 0)
                         ? PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH
                         : 0;
-        context.getTextBounds(mTextID, 0, -1, flags, mBounds);
+
+        String str = context.getText(mTextID);
+        if (str != mLastString || (mFlags & MEASURE_EVERY_TIME) != 0) {
+            mLastString = str;
+            context.getTextBounds(mTextID, 0, -1, flags, mBounds);
+        }
+
         float x = mOutX + getHorizontalOffset();
         float y = Float.isNaN(mOutPanY) ? mOutY : mOutY + getVerticalOffset();
         context.drawTextRun(mTextID, 0, -1, 0, 1, x, y, (mFlags & ANCHOR_TEXT_RTL) == 1);

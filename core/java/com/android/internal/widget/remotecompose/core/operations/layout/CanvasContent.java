@@ -28,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import java.util.List;
 
 /** Represents the content of a CanvasLayout (i.e. contains the canvas commands) */
-public class CanvasContent extends Component implements ComponentStartOperation {
+public class CanvasContent extends Component {
 
     public CanvasContent(
             int componentId,

@@ -26,11 +26,13 @@ public class AnimatableValue {
     int mId = 0;
     float mValue = 0f;
 
+    boolean mAnimateValueChanges = true;
     boolean mAnimate = false;
     long mAnimateTargetTime = 0;
     float mAnimateDuration = 300f;
     float mTargetRotationX;
     float mStartRotationX;
+    long mLastUpdate = 0L;
 
     int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
     FloatAnimation mMotionEasing;
@@ -39,14 +41,25 @@ public class AnimatableValue {
      * Value to animate
      *
      * @param value value
+     * @param animateValueChanges animate the change of values
      */
-    public AnimatableValue(float value) {
+    public AnimatableValue(float value, boolean animateValueChanges) {
+        mAnimateValueChanges = animateValueChanges;
         if (Utils.isVariable(value)) {
             mId = Utils.idFromNan(value);
             mIsVariable = true;
         } else {
             mValue = value;
         }
+    }
+
+    /**
+     * Value to animate.
+     *
+     * @param value value
+     */
+    public AnimatableValue(float value) {
+        this(value, true);
     }
 
     /**
@@ -69,29 +82,41 @@ public class AnimatableValue {
             return mValue;
         }
         float value = context.getContext().mRemoteComposeState.getFloat(mId);
-
-        if (value != mValue && !mAnimate) {
-            // animate
-            mStartRotationX = mValue;
-            mTargetRotationX = value;
-            mAnimate = true;
-            mAnimateTargetTime = System.currentTimeMillis();
-            mMotionEasing =
-                    new FloatAnimation(
-                            mMotionEasingType, mAnimateDuration / 1000f, null, 0f, Float.NaN);
-            mMotionEasing.setTargetValue(1f);
-        }
-        if (mAnimate) {
-            float elapsed = System.currentTimeMillis() - mAnimateTargetTime;
-            float p = mMotionEasing.get(elapsed / mAnimateDuration);
-            mValue = (1 - p) * mStartRotationX + p * mTargetRotationX;
-            if (p >= 1f) {
-                mAnimate = false;
+        if (value != mValue) {
+            long lastUpdate = System.currentTimeMillis();
+            long interval = lastUpdate - mLastUpdate;
+            if (interval > mAnimateDuration && mLastUpdate != 0L) {
+                mAnimateValueChanges = true;
+            } else {
+                mAnimateValueChanges = false;
             }
-        } else {
-            mValue = mTargetRotationX;
+            mLastUpdate = lastUpdate;
         }
-
+        if (!mAnimateValueChanges) {
+            mValue = value;
+        } else {
+            if (value != mValue && !mAnimate) {
+                // animate
+                mStartRotationX = mValue;
+                mTargetRotationX = value;
+                mAnimate = true;
+                mAnimateTargetTime = System.currentTimeMillis();
+                mMotionEasing =
+                        new FloatAnimation(
+                                mMotionEasingType, mAnimateDuration / 1000f, null, 0f, Float.NaN);
+                mMotionEasing.setTargetValue(1f);
+            }
+            if (mAnimate) {
+                float elapsed = System.currentTimeMillis() - mAnimateTargetTime;
+                float p = mMotionEasing.get(elapsed / mAnimateDuration);
+                mValue = (1 - p) * mStartRotationX + p * mTargetRotationX;
+                if (p >= 1f) {
+                    mAnimate = false;
+                }
+            } else {
+                mValue = mTargetRotationX;
+            }
+        }
         return mValue;
     }
 

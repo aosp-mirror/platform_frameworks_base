@@ -323,7 +323,6 @@ public class AnimateMeasure {
         }
 
         if (mP >= 1f && mVp >= 1f) {
-            mComponent.mAnimateMeasure = null;
             mComponent.mVisibility = mTarget.getVisibility();
         }
     }

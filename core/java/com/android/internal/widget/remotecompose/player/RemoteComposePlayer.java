@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.player;
 
+import static com.android.internal.widget.remotecompose.core.CoreDocument.MAJOR_VERSION;
+import static com.android.internal.widget.remotecompose.core.CoreDocument.MINOR_VERSION;
+
 import android.app.Application;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -32,6 +35,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.remotecompose.accessibility.RemoteComposeTouchHelper;
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -43,8 +47,8 @@ import com.android.internal.widget.remotecompose.player.platform.RemoteComposeCa
 public class RemoteComposePlayer extends FrameLayout {
     private RemoteComposeCanvas mInner;
 
-    private static final int MAX_SUPPORTED_MAJOR_VERSION = 0;
-    private static final int MAX_SUPPORTED_MINOR_VERSION = 1;
+    private static final int MAX_SUPPORTED_MAJOR_VERSION = MAJOR_VERSION;
+    private static final int MAX_SUPPORTED_MINOR_VERSION = MINOR_VERSION;
 
     public RemoteComposePlayer(Context context) {
         super(context);
@@ -257,6 +261,16 @@ public class RemoteComposePlayer extends FrameLayout {
      */
     public int getOpsPerFrame() {
         return mInner.getDocument().mDocument.getOpsPerFrame();
+    }
+
+    /**
+     * Set to use the choreographer
+     *
+     * @param value
+     */
+    @VisibleForTesting
+    public void setUseChoreographer(boolean value) {
+        mInner.setUseChoreographer(value);
     }
 
     /** Id action callback interface */

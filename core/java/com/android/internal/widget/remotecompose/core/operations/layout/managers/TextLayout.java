@@ -29,7 +29,6 @@ import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
@@ -39,8 +38,7 @@ import com.android.internal.widget.remotecompose.core.semantics.AccessibleCompon
 import java.util.List;
 
 /** Text component, referencing a text id */
-public class TextLayout extends LayoutManager
-        implements ComponentStartOperation, VariableSupport, AccessibleComponent {
+public class TextLayout extends LayoutManager implements VariableSupport, AccessibleComponent {
 
     private static final boolean DEBUG = false;
     private int mTextId = -1;

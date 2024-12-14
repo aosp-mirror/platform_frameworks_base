@@ -16,10 +16,12 @@
 package com.android.internal.widget.remotecompose.player.platform;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -44,6 +46,22 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     boolean mHasClickAreas = false;
     Point mActionDownPoint = new Point(0, 0);
     AndroidRemoteContext mARContext = new AndroidRemoteContext();
+    float mDensity = 1f;
+
+    long mLastFrameDelay = 1;
+    float mMaxFrameRate = 60f; // frames per seconds
+    long mMaxFrameDelay = (long) (1000 / mMaxFrameRate);
+
+    private Choreographer mChoreographer;
+    private Choreographer.FrameCallback mFrameCallback =
+            new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    mARContext.currentTime = frameTimeNanos / 1000000;
+                    mARContext.setDebug(mDebug);
+                    postInvalidateOnAnimation();
+                }
+            };
 
     public RemoteComposeCanvas(Context context) {
         super(context);
@@ -85,6 +103,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     public void setDocument(RemoteComposeDocument value) {
         mDocument = value;
         mDocument.initializeContext(mARContext);
+        mARContext.setAnimationEnabled(true);
+        mARContext.setDensity(mDensity);
+        mARContext.setUseChoreographer(true);
         setContentDescription(mDocument.getDocument().getContentDescription());
         updateClickAreas();
         requestLayout();
@@ -93,6 +114,11 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     @Override
     public void onViewAttachedToWindow(View view) {
+        if (mChoreographer == null) {
+            mChoreographer = Choreographer.getInstance();
+            mChoreographer.postFrameCallback(mFrameCallback);
+        }
+        mDensity = getContext().getResources().getDisplayMetrics().density;
         if (mDocument == null) {
             return;
         }
@@ -136,6 +162,10 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     @Override
     public void onViewDetachedFromWindow(View view) {
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(mFrameCallback);
+            mChoreographer = null;
+        }
         removeAllViews();
     }
 
@@ -195,6 +225,34 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         }
     }
 
+    public void setLocalFloat(String name, Float content) {
+        mARContext.setNamedFloatOverride(name, content);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
+    public void clearLocalFloat(String name) {
+        mARContext.clearNamedFloatOverride(name);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
+    public void setLocalBitmap(String name, Bitmap content) {
+        mARContext.setNamedDataOverride(name, content);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
+    public void clearLocalBitmap(String name) {
+        mARContext.clearNamedDataOverride(name);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
     public int hasSensorListeners(int[] ids) {
         int count = 0;
         for (int id = RemoteContext.ID_ACCELERATION_X; id <= RemoteContext.ID_LIGHT; id++) {
@@ -234,6 +292,15 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
      */
     public void checkShaders(CoreDocument.ShaderControl shaderControl) {
         mDocument.getDocument().checkShaders(mARContext, shaderControl);
+    }
+
+    /**
+     * Set to true to use the choreographer
+     *
+     * @param value
+     */
+    public void setUseChoreographer(boolean value) {
+        mARContext.setUseChoreographer(value);
     }
 
     public interface ClickCallbacks {
@@ -414,12 +481,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             return;
         }
         long start = mEvalTime ? System.nanoTime() : 0;
-        mARContext.setAnimationEnabled(true);
-        mARContext.currentTime = System.currentTimeMillis();
-        mARContext.setDebug(mDebug);
-        float density = getContext().getResources().getDisplayMetrics().density;
         mARContext.useCanvas(canvas);
-        mARContext.setDensity(density);
         mARContext.mWidth = getWidth();
         mARContext.mHeight = getHeight();
         mDocument.paint(mARContext, mTheme);
@@ -431,8 +493,19 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                 mTime = System.nanoTime();
             }
         }
-        if (mDocument.needsRepaint() > 0) {
-            invalidate();
+        int nextFrame = mDocument.needsRepaint();
+        if (nextFrame > 0) {
+            mLastFrameDelay = Math.max(mMaxFrameDelay, nextFrame);
+            if (mChoreographer != null) {
+                mChoreographer.postFrameCallbackDelayed(mFrameCallback, mLastFrameDelay);
+            }
+            if (!mARContext.useChoreographer()) {
+                invalidate();
+            }
+        } else {
+            if (mChoreographer != null) {
+                mChoreographer.removeFrameCallback(mFrameCallback);
+            }
         }
         if (mEvalTime) {
             mDuration += System.nanoTime() - start;

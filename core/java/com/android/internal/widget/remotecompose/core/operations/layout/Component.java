@@ -41,7 +41,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 /** Generic Component class */
-public class Component extends PaintOperation implements Measurable, SerializableToString {
+public class Component extends PaintOperation
+        implements Container, Measurable, SerializableToString {
 
     private static final boolean DEBUG = false;
 
@@ -68,9 +69,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     private boolean mNeedsBoundsAnimation = false;
 
-    /**
-     * Mark the component as needing a bounds animation pass
-     */
+    /** Mark the component as needing a bounds animation pass */
     public void markNeedsBoundsAnimation() {
         mNeedsBoundsAnimation = true;
         if (mParent != null && !mParent.mNeedsBoundsAnimation) {
@@ -78,9 +77,7 @@ public class Component extends PaintOperation implements Measurable, Serializabl
         }
     }
 
-    /**
-     * Clear the bounds animation pass flag
-     */
+    /** Clear the bounds animation pass flag */
     public void clearNeedsBoundsAnimation() {
         mNeedsBoundsAnimation = false;
     }
@@ -426,13 +423,13 @@ public class Component extends PaintOperation implements Measurable, Serializabl
 
     /**
      * Animate the bounds of the component as needed
+     *
      * @param context
      */
     public void animatingBounds(@NonNull RemoteContext context) {
         if (mAnimateMeasure != null) {
             mAnimateMeasure.apply(context);
             updateComponentValues(context);
-            markNeedsBoundsAnimation();
         } else {
             clearNeedsBoundsAnimation();
         }
@@ -784,7 +781,13 @@ public class Component extends PaintOperation implements Measurable, Serializabl
     public boolean applyAnimationAsNeeded(@NonNull PaintContext context) {
         if (context.isAnimationEnabled() && mAnimateMeasure != null) {
             mAnimateMeasure.paint(context);
-            context.needsRepaint();
+            if (mAnimateMeasure.isDone()) {
+                mAnimateMeasure = null;
+                clearNeedsBoundsAnimation();
+                needsRepaint();
+            } else {
+                markNeedsBoundsAnimation();
+            }
             return true;
         }
         return false;
