@@ -29,7 +29,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.ArrayList;
 
 public abstract class ListActionsOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent {
+        implements Container, ModifierOperation, DecoratorComponent {
 
     String mOperationName;
     protected float mWidth = 0;
@@ -43,6 +43,7 @@ public abstract class ListActionsOperation extends PaintOperation
 
     public ArrayList<Operation> mList = new ArrayList<>();
 
+    @NonNull
     public ArrayList<Operation> getList() {
         return mList;
     }

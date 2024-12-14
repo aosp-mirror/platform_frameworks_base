@@ -36,7 +36,7 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Represents the root layout component. Entry point to the component tree layout/paint. */
-public class RootLayoutComponent extends Component implements ComponentStartOperation {
+public class RootLayoutComponent extends Component {
     private int mCurrentId = -1;
     private boolean mHasTouchListeners = false;
 

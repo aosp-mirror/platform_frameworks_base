@@ -65,6 +65,8 @@ public abstract class RemoteContext {
     public @Nullable Component mLastComponent;
     public long currentTime = 0L;
 
+    private boolean mUseChoreographer = true;
+
     public float getDensity() {
         return mDensity;
     }
@@ -187,6 +189,40 @@ public abstract class RemoteContext {
     public abstract void clearNamedIntegerOverride(@NonNull String integerName);
 
     /**
+     * Set the value of a named float. This overrides the float in the document
+     *
+     * @param floatName the name of the float to override
+     * @param value Override the default float
+     */
+    public abstract void setNamedFloatOverride(String floatName, float value);
+
+    /**
+     * Allows to clear a named Float.
+     *
+     * <p>If an override exists, we revert back to the default value in the document.
+     *
+     * @param floatName the name of the float to override
+     */
+    public abstract void clearNamedFloatOverride(String floatName);
+
+    /**
+     * Set the value of a named Object. This overrides the Object in the document
+     *
+     * @param dataName the name of the Object to override
+     * @param value Override the default float
+     */
+    public abstract void setNamedDataOverride(String dataName, Object value);
+
+    /**
+     * Allows to clear a named Object.
+     *
+     * <p>If an override exists, we revert back to the default value in the document.
+     *
+     * @param dataName the name of the Object to override
+     */
+    public abstract void clearNamedDataOverride(String dataName);
+
+    /**
      * Support Collections by registering this collection
      *
      * @param id id of the collection
@@ -221,6 +257,24 @@ public abstract class RemoteContext {
         if (mPaintContext != null) {
             mPaintContext.needsRepaint();
         }
+    }
+
+    /**
+     * Returns true if we should use the choreographter
+     *
+     * @return true if we use the choreographer
+     */
+    public boolean useChoreographer() {
+        return mUseChoreographer;
+    }
+
+    /**
+     * Set to true to use the android choreographer
+     *
+     * @param value
+     */
+    public void setUseChoreographer(boolean value) {
+        mUseChoreographer = value;
     }
 
     /**

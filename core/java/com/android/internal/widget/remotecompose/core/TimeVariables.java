@@ -24,7 +24,6 @@ import java.time.ZoneOffset;
 
 /** This generates the standard system variables for time. */
 public class TimeVariables {
-    private static final float BUILD = 0.02f;
 
     /**
      * This class populates all time variables in the system
@@ -59,7 +58,9 @@ public class TimeVariables {
         context.loadFloat(RemoteContext.ID_CALENDAR_MONTH, month);
         context.loadFloat(RemoteContext.ID_DAY_OF_MONTH, month);
         context.loadFloat(RemoteContext.ID_WEEK_DAY, day_week);
-        context.loadFloat(RemoteContext.ID_API_LEVEL, CoreDocument.getDocumentApiLevel() + BUILD);
+        context.loadFloat(
+                RemoteContext.ID_API_LEVEL,
+                CoreDocument.getDocumentApiLevel() + CoreDocument.BUILD);
     }
 
     /**

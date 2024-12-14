@@ -151,21 +151,18 @@ public class FloatExpression extends Operation implements VariableSupport {
         if (Float.isNaN(mLastChange)) {
             mLastChange = t;
         }
-        float lastComputedValue;
         if (mFloatAnimation != null && !Float.isNaN(mLastCalculatedValue)) {
-            float f = mFloatAnimation.get(t - mLastChange);
-            context.loadFloat(mId, f);
-            lastComputedValue = f;
+            float lastComputedValue = mFloatAnimation.get(t - mLastChange);
             if (lastComputedValue != mLastAnimatedValue) {
                 mLastAnimatedValue = lastComputedValue;
+                context.loadFloat(mId, lastComputedValue);
                 context.needsRepaint();
             }
         } else if (mSpring != null) {
-            float f = mSpring.get(t - mLastChange);
-            context.loadFloat(mId, f);
-            lastComputedValue = f;
+            float lastComputedValue = mSpring.get(t - mLastChange);
             if (lastComputedValue != mLastAnimatedValue) {
                 mLastAnimatedValue = lastComputedValue;
+                context.loadFloat(mId, lastComputedValue);
                 context.needsRepaint();
             }
         } else {

@@ -42,7 +42,11 @@ import java.util.List;
 
 /** Represents a click modifier + actions */
 public class ClickModifierOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent, ClickHandler, AccessibleComponent {
+        implements Container,
+                ModifierOperation,
+                DecoratorComponent,
+                ClickHandler,
+                AccessibleComponent {
     private static final int OP_CODE = Operations.MODIFIER_CLICK;
 
     long mAnimateRippleStart = 0;

@@ -135,33 +135,26 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         float measuredWidth = Math.min(maxWidth, computeModifierDefinedWidth(context.getContext()));
         float measuredHeight =
                 Math.min(maxHeight, computeModifierDefinedHeight(context.getContext()));
-        float insetMaxWidth = maxWidth - mPaddingLeft - mPaddingRight;
-        float insetMaxHeight = maxHeight - mPaddingTop - mPaddingBottom;
 
         if (mWidthModifier.isIntrinsicMin()) {
-            maxWidth = intrinsicWidth(context.getContext());
+            maxWidth = intrinsicWidth(context.getContext()) + mPaddingLeft + mPaddingRight;
         }
         if (mHeightModifier.isIntrinsicMin()) {
-            maxHeight = intrinsicHeight(context.getContext());
+            maxHeight = intrinsicHeight(context.getContext()) + mPaddingTop + mPaddingBottom;
         }
+
+        float insetMaxWidth = maxWidth - mPaddingLeft - mPaddingRight;
+        float insetMaxHeight = maxHeight - mPaddingTop - mPaddingBottom;
 
         boolean hasHorizontalWrap = mWidthModifier.isWrap();
         boolean hasVerticalWrap = mHeightModifier.isWrap();
         if (hasHorizontalWrap || hasVerticalWrap) { // TODO: potential npe -- bbade@
             mCachedWrapSize.setWidth(0f);
             mCachedWrapSize.setHeight(0f);
-            float wrapMaxWidth = insetMaxWidth;
-            float wrapMaxHeight = insetMaxHeight;
-            if (hasHorizontalWrap) {
-                wrapMaxWidth = insetMaxWidth - mPaddingLeft - mPaddingRight;
-            }
-            if (hasVerticalWrap) {
-                wrapMaxHeight = insetMaxHeight - mPaddingTop - mPaddingBottom;
-            }
             computeWrapSize(
                     context,
-                    wrapMaxWidth,
-                    wrapMaxHeight,
+                    insetMaxWidth,
+                    insetMaxHeight,
                     mWidthModifier.isWrap(),
                     mHeightModifier.isWrap(),
                     measure,

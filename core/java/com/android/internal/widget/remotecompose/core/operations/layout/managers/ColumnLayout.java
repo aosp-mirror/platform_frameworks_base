@@ -28,7 +28,6 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
@@ -40,7 +39,7 @@ import java.util.List;
 /**
  * Simple Column layout implementation - also supports weight and horizontal/vertical positioning
  */
-public class ColumnLayout extends LayoutManager implements ComponentStartOperation {
+public class ColumnLayout extends LayoutManager {
     public static final int START = 1;
     public static final int CENTER = 2;
     public static final int END = 3;

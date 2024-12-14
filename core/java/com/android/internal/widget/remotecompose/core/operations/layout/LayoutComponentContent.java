@@ -28,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import java.util.List;
 
 /** Represents the content of a LayoutComponent (i.e. the children components) */
-public class LayoutComponentContent extends Component implements ComponentStartOperation {
+public class LayoutComponentContent extends Component {
 
     public LayoutComponentContent(
             int componentId,

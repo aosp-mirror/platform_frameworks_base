@@ -97,10 +97,10 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
     /** Stop at a collection points described in percents of the range */
     public static final int STOP_NOTCHES_PERCENTS = 4;
 
-    /** Stop at a collectiond of point described in abslute cordnates */
+    /** Stop at a collection of point described in absolute cordnates */
     public static final int STOP_NOTCHES_ABSOLUTE = 5;
 
-    /** Jump to the absloute poition of the point */
+    /** Jump to the absolute poition of the point */
     public static final int STOP_ABSOLUTE_POS = 6;
 
     /**
@@ -112,9 +112,9 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
      * @param min the minimum value
      * @param max the maximum value
      * @param touchEffects the type of touch mode
-     * @param velocityId the valocity (not used)
-     * @param stopMode the behavour on touch oup
-     * @param stopSpec the paraameters that affect the touch up behavour
+     * @param velocityId the velocity (not used)
+     * @param stopMode the behaviour on touch oup
+     * @param stopSpec the parameters that affect the touch up behaviour
      * @param easingSpec the easing parameters for coming to a stop
      */
     public TouchExpression(
@@ -249,10 +249,10 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
     }
 
     private float getStopPosition(float pos, float slope) {
-        float target = pos + slope / mMaxAcceleration;
+        float target = pos + slope / 2f;
         if (mWrapMode) {
             pos = wrap(pos);
-            target = pos += +slope / mMaxAcceleration;
+            target = pos += +slope / 2f;
         } else {
             target = Math.max(Math.min(target, mOutMax), mOutMin);
         }
@@ -268,7 +268,6 @@ public class TouchExpression extends Operation implements VariableSupport, Touch
                 int evenSpacing = (int) mOutStopSpec[0];
                 float notchMax = (mOutStopSpec.length > 1) ? mOutStopSpec[1] : mOutMax;
                 float step = (notchMax - min) / evenSpacing;
-
                 float notch = min + step * (int) (0.5f + (target - mOutMin) / step);
                 if (!mWrapMode) {
                     notch = Math.max(Math.min(notch, mOutMax), min);

@@ -31,6 +31,7 @@ import com.android.internal.widget.remotecompose.core.operations.TouchExpression
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ListActionsOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ScrollDelegate;
@@ -212,17 +213,38 @@ public class ScrollModifierOperation extends ListActionsOperation
                 .field(INT, "direction", "");
     }
 
+    private float getMaxScrollPosition(Component component, int direction) {
+        if (component instanceof LayoutComponent) {
+            LayoutComponent layoutComponent = (LayoutComponent) component;
+            int numChildren = layoutComponent.getChildrenComponents().size();
+            if (numChildren > 0) {
+                Component lastChild = layoutComponent.getChildrenComponents().get(numChildren - 1);
+                if (direction == 0) { // VERTICAL
+                    return lastChild.getY();
+                } else {
+                    return lastChild.getX();
+                }
+            }
+        }
+        return 0f;
+    }
+
     @Override
     public void layout(RemoteContext context, Component component, float width, float height) {
         mWidth = width;
         mHeight = height;
-        if (mDirection == 0) { // VERTICAL
-            context.loadFloat(Utils.idFromNan(mMax), mMaxScrollY);
-            context.loadFloat(Utils.idFromNan(mNotchMax), mContentDimension);
-        } else {
-            context.loadFloat(Utils.idFromNan(mMax), mMaxScrollX);
-            context.loadFloat(Utils.idFromNan(mNotchMax), mContentDimension);
+        float max = mMaxScrollY;
+        if (mDirection != 0) { // HORIZONTAL
+            max = mMaxScrollX;
         }
+        if (mTouchExpression != null) {
+            float maxScrollPosition = getMaxScrollPosition(component, mDirection);
+            if (maxScrollPosition > 0) {
+                max = maxScrollPosition;
+            }
+        }
+        context.loadFloat(Utils.idFromNan(mMax), max);
+        context.loadFloat(Utils.idFromNan(mNotchMax), mContentDimension);
     }
 
     @Override

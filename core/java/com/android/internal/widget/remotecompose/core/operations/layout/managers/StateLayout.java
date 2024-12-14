@@ -26,7 +26,6 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
@@ -43,7 +42,7 @@ import java.util.Map;
  * <p>States are defined as child layouts. This layout handles interpolating between the different
  * state in order to provide an automatic transition.
  */
-public class StateLayout extends LayoutManager implements ComponentStartOperation {
+public class StateLayout extends LayoutManager {
 
     public int measuredLayoutIndex = 0;
     public int currentLayoutIndex = 0;

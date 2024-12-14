@@ -75,12 +75,10 @@ import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
+import com.android.internal.widget.remotecompose.core.operations.layout.ContainerEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.LoopEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.OperationsListEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.CanvasLayout;
@@ -730,6 +728,22 @@ public class RemoteComposeBuffer {
             pathId = addPathData(path);
         }
         int textId = addText(text);
+        DrawTextOnPath.apply(mBuffer, textId, pathId, hOffset, vOffset);
+    }
+
+    /**
+     * Draw the text, with origin at (x,y) along the specified path.
+     *
+     * @param textId The text to be drawn
+     * @param path The path the text should follow for its baseline
+     * @param hOffset The distance along the path to add to the text's starting position
+     * @param vOffset The distance above(-) or below(+) the path to position the text
+     */
+    public void addDrawTextOnPath(int textId, Object path, float hOffset, float vOffset) {
+        int pathId = mRemoteComposeState.dataGetId(path);
+        if (pathId == -1) { // never been seen before
+            pathId = addPathData(path);
+        }
         DrawTextOnPath.apply(mBuffer, textId, pathId, hOffset, vOffset);
     }
 
@@ -1646,6 +1660,16 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * This defines the name of the float given the id
+     *
+     * @param id of the float
+     * @param name name of the float
+     */
+    public void setFloatName(int id, String name) {
+        NamedVariable.apply(mBuffer, id, NamedVariable.FLOAT_TYPE, name);
+    }
+
+    /**
      * Returns a usable component id -- either the one passed in parameter if not -1 or a generated
      * one.
      *
@@ -1685,7 +1709,7 @@ public class RemoteComposeBuffer {
 
     /** Add a component end tag */
     public void addComponentEnd() {
-        ComponentEnd.apply(mBuffer);
+        ContainerEnd.apply(mBuffer);
     }
 
     /**
@@ -1718,7 +1742,7 @@ public class RemoteComposeBuffer {
                 new float[] {notches, notchMax},
                 null);
 
-        OperationsListEnd.apply(mBuffer);
+        ContainerEnd.apply(mBuffer);
     }
 
     /**
@@ -1886,7 +1910,7 @@ public class RemoteComposeBuffer {
     }
 
     public void addLoopEnd() {
-        LoopEnd.apply(mBuffer);
+        ContainerEnd.apply(mBuffer);
     }
 
     public void addStateLayout(
