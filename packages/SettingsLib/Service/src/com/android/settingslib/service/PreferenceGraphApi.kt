@@ -33,8 +33,8 @@ internal class PreferenceGraphApi(
 
     override fun hasPermission(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: GetPreferenceGraphRequest,
-    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
+    ) = permissionChecker.hasPermission(application, callingPid, callingUid, request)
 }

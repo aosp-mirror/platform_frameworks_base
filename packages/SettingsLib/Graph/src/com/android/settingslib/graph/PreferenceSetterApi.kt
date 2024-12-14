@@ -17,6 +17,8 @@
 package com.android.settingslib.graph
 
 import android.app.Application
+import android.content.Context
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import androidx.annotation.IntDef
 import com.android.settingslib.graph.proto.PreferenceValueProto
@@ -99,14 +101,14 @@ class PreferenceSetterApiHandler(
 
     override fun hasPermission(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: PreferenceSetterRequest,
-    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
+    ) = permissionChecker.hasPermission(application, callingPid, callingUid, request)
 
     override suspend fun invoke(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: PreferenceSetterRequest,
     ): Int {
@@ -127,7 +129,7 @@ class PreferenceSetterApiHandler(
 
         fun <T> PreferenceMetadata.checkWritePermit(value: T): Int {
             @Suppress("UNCHECKED_CAST") val preference = (this as PersistentPreference<T>)
-            return when (preference.getWritePermit(application, value, myUid, callingUid)) {
+            return when (preference.evalWritePermit(application, value, callingPid, callingUid)) {
                 ReadWritePermit.ALLOW -> PreferenceSetterResult.OK
                 ReadWritePermit.DISALLOW -> PreferenceSetterResult.DISALLOW
                 ReadWritePermit.REQUIRE_APP_PERMISSION ->
@@ -169,6 +171,21 @@ class PreferenceSetterApiHandler(
 
     override val responseCodec: MessageCodec<Int>
         get() = IntMessageCodec
+}
+
+/** Evaluates the write permit of a persistent preference. */
+fun <T> PersistentPreference<T>.evalWritePermit(
+    context: Context,
+    value: T?,
+    callingPid: Int,
+    callingUid: Int,
+): Int {
+    for (permission in getWritePermissions(context)) {
+        if (context.checkPermission(permission, callingPid, callingUid) != PERMISSION_GRANTED) {
+            return ReadWritePermit.REQUIRE_APP_PERMISSION
+        }
+    }
+    return getWritePermit(context, value, callingPid, callingUid)
 }
 
 /** Message codec for [PreferenceSetterRequest]. */

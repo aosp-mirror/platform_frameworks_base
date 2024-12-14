@@ -38,11 +38,11 @@ abstract class GetPreferenceGraphApiHandler(
 
     override suspend fun invoke(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: GetPreferenceGraphRequest,
     ): PreferenceGraphProto {
-        val builder = PreferenceGraphBuilder.of(application, myUid, callingUid, request)
+        val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
         if (request.screenKeys.isEmpty()) {
             for (key in PreferenceScreenRegistry.preferenceScreens.keys) {
                 builder.addPreferenceScreenFromRegistry(key)

@@ -29,6 +29,7 @@ import com.android.settingslib.datastore.KeyValueStore
     ReadWritePermit.REQUIRE_USER_AGREEMENT,
 )
 @Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.TYPE)
 annotation class ReadWritePermit {
     companion object {
         /** Allow to read/write value. */
@@ -67,35 +68,46 @@ interface PersistentPreference<T> {
     fun storage(context: Context): KeyValueStore =
         PreferenceScreenRegistry.getKeyValueStore(context, this as PreferenceMetadata)!!
 
+    /** Returns the required permissions to read preference value. */
+    fun getReadPermissions(context: Context): Array<String> = arrayOf()
+
     /**
-     * Returns if the external application (identified by [callingUid]) has permission to read
-     * preference value.
+     * Returns if the external application (identified by [callingPid] and [callingUid]) is
+     * permitted to read preference value.
      *
      * The underlying implementation does NOT need to check common states like isEnabled,
-     * isRestricted or isAvailable.
+     * isRestricted, isAvailable or permissions in [getReadPermissions]. The framework will do it
+     * behind the scene.
      */
-    @ReadWritePermit
-    fun getReadPermit(context: Context, myUid: Int, callingUid: Int): Int =
+    fun getReadPermit(context: Context, callingPid: Int, callingUid: Int): @ReadWritePermit Int =
         PreferenceScreenRegistry.getReadPermit(
             context,
-            myUid,
+            callingPid,
             callingUid,
             this as PreferenceMetadata,
         )
 
+    /** Returns the required permissions to write preference value. */
+    fun getWritePermissions(context: Context): Array<String> = arrayOf()
+
     /**
-     * Returns if the external application (identified by [callingUid]) has permission to write
-     * preference with given [value].
+     * Returns if the external application (identified by [callingPid] and [callingUid]) is
+     * permitted to write preference with given [value].
      *
      * The underlying implementation does NOT need to check common states like isEnabled,
-     * isRestricted or isAvailable.
+     * isRestricted, isAvailable or permissions in [getWritePermissions]. The framework will do it
+     * behind the scene.
      */
-    @ReadWritePermit
-    fun getWritePermit(context: Context, value: T?, myUid: Int, callingUid: Int): Int =
+    fun getWritePermit(
+        context: Context,
+        value: T?,
+        callingPid: Int,
+        callingUid: Int,
+    ): @ReadWritePermit Int =
         PreferenceScreenRegistry.getWritePermit(
             context,
             value,
-            myUid,
+            callingPid,
             callingUid,
             this as PreferenceMetadata,
         )

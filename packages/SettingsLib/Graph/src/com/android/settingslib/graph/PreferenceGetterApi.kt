@@ -83,14 +83,14 @@ class PreferenceGetterApiHandler(
 
     override fun hasPermission(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: PreferenceGetterRequest,
-    ) = permissionChecker.hasPermission(application, myUid, callingUid, request)
+    ) = permissionChecker.hasPermission(application, callingPid, callingUid, request)
 
     override suspend fun invoke(
         application: Application,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         request: PreferenceGetterRequest,
     ): PreferenceGetterResponse {
@@ -123,7 +123,7 @@ class PreferenceGetterApiHandler(
                     val preferenceProto =
                         metadata.toProto(
                             application,
-                            myUid,
+                            callingPid,
                             callingUid,
                             screenMetadata,
                             metadata.key == screenMetadata.key,

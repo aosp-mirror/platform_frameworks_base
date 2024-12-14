@@ -37,7 +37,8 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     val preferenceScreens: PreferenceScreenMap
         get() = preferenceScreensSupplier.get()
 
-    private var readWritePermitProvider: ReadWritePermitProvider? = null
+    private var readWritePermitProvider: ReadWritePermitProvider =
+        object : ReadWritePermitProvider {}
 
     /** Sets the [KeyValueStoreProvider]. */
     fun setKeyValueStoreProvider(keyValueStoreProvider: KeyValueStoreProvider) {
@@ -77,28 +78,24 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     /**
      * Sets the provider to check read write permit. Read and write requests are denied by default.
      */
-    fun setReadWritePermitProvider(readWritePermitProvider: ReadWritePermitProvider?) {
+    fun setReadWritePermitProvider(readWritePermitProvider: ReadWritePermitProvider) {
         this.readWritePermitProvider = readWritePermitProvider
     }
 
     override fun getReadPermit(
         context: Context,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ) =
-        readWritePermitProvider?.getReadPermit(context, myUid, callingUid, preference)
-            ?: ReadWritePermit.DISALLOW
+    ) = readWritePermitProvider.getReadPermit(context, callingPid, callingUid, preference)
 
     override fun getWritePermit(
         context: Context,
         value: Any?,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ) =
-        readWritePermitProvider?.getWritePermit(context, value, myUid, callingUid, preference)
-            ?: ReadWritePermit.DISALLOW
+    ) = readWritePermitProvider.getWritePermit(context, value, callingPid, callingUid, preference)
 }
 
 /** Provider of [KeyValueStore]. */
@@ -117,41 +114,21 @@ fun interface KeyValueStoreProvider {
 /** Provider of read and write permit. */
 interface ReadWritePermitProvider {
 
-    @ReadWritePermit
+    val defaultReadWritePermit: @ReadWritePermit Int
+        get() = ReadWritePermit.DISALLOW
+
     fun getReadPermit(
         context: Context,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ): Int
+    ): @ReadWritePermit Int = defaultReadWritePermit
 
-    @ReadWritePermit
     fun getWritePermit(
         context: Context,
         value: Any?,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ): Int
-
-    companion object {
-        @JvmField
-        val ALLOW_ALL_READ_WRITE =
-            object : ReadWritePermitProvider {
-                override fun getReadPermit(
-                    context: Context,
-                    myUid: Int,
-                    callingUid: Int,
-                    preference: PreferenceMetadata,
-                ) = ReadWritePermit.ALLOW
-
-                override fun getWritePermit(
-                    context: Context,
-                    value: Any?,
-                    myUid: Int,
-                    callingUid: Int,
-                    preference: PreferenceMetadata,
-                ) = ReadWritePermit.ALLOW
-            }
-    }
+    ): @ReadWritePermit Int = defaultReadWritePermit
 }

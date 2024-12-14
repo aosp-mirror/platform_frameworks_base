@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -65,7 +66,7 @@ private const val TAG = "PreferenceGraphBuilder"
 class PreferenceGraphBuilder
 private constructor(
     private val context: Context,
-    private val myUid: Int,
+    private val callingPid: Int,
     private val callingUid: Int,
     private val request: GetPreferenceGraphRequest,
 ) {
@@ -81,7 +82,7 @@ private constructor(
         }
     }
 
-    fun build() = builder.build()
+    fun build(): PreferenceGraphProto = builder.build()
 
     /**
      * Adds an activity to the graph.
@@ -268,16 +269,18 @@ private constructor(
         metadata: PreferenceMetadata,
         isRoot: Boolean,
     ) =
-        metadata.toProto(context, myUid, callingUid, screenMetadata, isRoot, request.flags).also {
-            if (metadata is PreferenceScreenMetadata) {
-                @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata)
-            }
-            metadata.intent(context)?.resolveActivity(context.packageManager)?.let {
-                if (it.packageName == context.packageName) {
-                    add(it.className)
+        metadata
+            .toProto(context, callingPid, callingUid, screenMetadata, isRoot, request.flags)
+            .also {
+                if (metadata is PreferenceScreenMetadata) {
+                    @Suppress("CheckReturnValue") addPreferenceScreenMetadata(metadata)
+                }
+                metadata.intent(context)?.resolveActivity(context.packageManager)?.let {
+                    if (it.packageName == context.packageName) {
+                        add(it.className)
+                    }
                 }
             }
-        }
 
     private suspend fun String?.toActionTarget(extras: Bundle?): ActionTarget? {
         if (this.isNullOrEmpty()) return null
@@ -343,16 +346,16 @@ private constructor(
     companion object {
         suspend fun of(
             context: Context,
-            myUid: Int,
+            callingPid: Int,
             callingUid: Int,
             request: GetPreferenceGraphRequest,
-        ) = PreferenceGraphBuilder(context, myUid, callingUid, request).also { it.init() }
+        ) = PreferenceGraphBuilder(context, callingPid, callingUid, request).also { it.init() }
     }
 }
 
 fun PreferenceMetadata.toProto(
     context: Context,
-    myUid: Int,
+    callingPid: Int,
     callingUid: Int,
     screenMetadata: PreferenceScreenMetadata,
     isRoot: Boolean,
@@ -394,7 +397,7 @@ fun PreferenceMetadata.toProto(
                 (!hasAvailable() || available) &&
                 (!hasRestricted() || !restricted) &&
                 metadata is PersistentPreference<*> &&
-                metadata.getReadPermit(context, myUid, callingUid) == ReadWritePermit.ALLOW
+                metadata.evalReadPermit(context, callingPid, callingUid) == ReadWritePermit.ALLOW
         ) {
             value = preferenceValueProto {
                 when (metadata) {
@@ -423,6 +426,20 @@ fun PreferenceMetadata.toProto(
             }
         }
     }
+}
+
+/** Evaluates the read permit of a persistent preference. */
+fun <T> PersistentPreference<T>.evalReadPermit(
+    context: Context,
+    callingPid: Int,
+    callingUid: Int,
+): Int {
+    for (permission in getReadPermissions(context)) {
+        if (context.checkPermission(permission, callingPid, callingUid) != PERMISSION_GRANTED) {
+            return ReadWritePermit.REQUIRE_APP_PERMISSION
+        }
+    }
+    return getReadPermit(context, callingPid, callingUid)
 }
 
 private fun PreferenceMetadata.getTitleTextProto(context: Context, isRoot: Boolean): TextProto? {
