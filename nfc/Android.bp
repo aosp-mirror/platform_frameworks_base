@@ -29,6 +29,11 @@ filegroup {
         "java/**/*.java",
         "java/**/*.aidl",
     ],
+    visibility: [
+        "//frameworks/base:__subpackages__",
+        "//packages/apps/Nfc:__subpackages__",
+        "//packages/modules/Nfc:__subpackages__",
+    ],
     exclude_srcs: [
         ":framework-nfc-non-updatable-sources",
     ],
@@ -68,8 +73,7 @@ java_sdk_library {
     ],
     impl_library_visibility: [
         "//frameworks/base:__subpackages__",
-        "//cts/hostsidetests/multidevices/nfc:__subpackages__",
-        "//cts/tests/tests/nfc",
+        "//cts:__subpackages__",
         "//packages/apps/Nfc:__subpackages__",
         "//packages/modules/Nfc:__subpackages__",
     ],
