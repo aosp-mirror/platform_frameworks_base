@@ -20,6 +20,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 
@@ -120,6 +121,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.display.data.repository.DisplayWindowPropertiesRepository;
+import com.android.systemui.display.shared.model.DisplayWindowProperties;
 import com.android.systemui.globalactions.domain.interactor.GlobalActionsInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -127,6 +130,7 @@ import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -148,6 +152,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that may show depending
@@ -193,6 +199,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private static final long TOAST_FADE_TIME = 333;
     // See NotificationManagerService.LONG_DELAY
     private static final int TOAST_VISIBLE_TIME = 3500;
+
+    private static final int DIALOG_WINDOW_TYPE = TYPE_STATUS_BAR_SUB_PANEL;
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
@@ -261,6 +269,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final UserLogoutInteractor mLogoutInteractor;
     private final GlobalActionsInteractor mInteractor;
+    private final Lazy<DisplayWindowPropertiesRepository> mDisplayWindowPropertiesRepositoryLazy;
 
     @VisibleForTesting
     public enum GlobalActionsEvent implements UiEventLogger.UiEventEnum {
@@ -376,7 +385,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             DialogTransitionAnimator dialogTransitionAnimator,
             SelectedUserInteractor selectedUserInteractor,
             UserLogoutInteractor logoutInteractor,
-            GlobalActionsInteractor interactor) {
+            GlobalActionsInteractor interactor,
+            Lazy<DisplayWindowPropertiesRepository> displayWindowPropertiesRepository) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -413,6 +423,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mSelectedUserInteractor = selectedUserInteractor;
         mLogoutInteractor = logoutInteractor;
         mInteractor = interactor;
+        mDisplayWindowPropertiesRepositoryLazy = displayWindowPropertiesRepository;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -473,9 +484,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
      * @param isDeviceProvisioned True if device is provisioned
      * @param expandable          The expandable from which we should animate the dialog when
      *                            showing it
+     * @param displayId           Display that should show the dialog
      */
     public void showOrHideDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
-            @Nullable Expandable expandable) {
+            @Nullable Expandable expandable, int displayId) {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
         if (mDialog != null && mDialog.isShowing()) {
@@ -487,7 +499,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mDialog.dismiss();
             mDialog = null;
         } else {
-            handleShow(expandable);
+            handleShow(expandable, displayId);
         }
     }
 
@@ -507,8 +519,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mHandler.sendEmptyMessage(MESSAGE_DISMISS);
     }
 
-    protected void handleShow(@Nullable Expandable expandable) {
-        mDialog = createDialog();
+    protected void handleShow(@Nullable Expandable expandable, int displayId) {
+        mDialog = createDialog(displayId);
         prepareDialog();
 
         WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
@@ -686,16 +698,44 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mPowerAdapter = new MyPowerOptionsAdapter();
     }
 
+
     /**
      * Create the global actions dialog.
      *
      * @return A new dialog.
      */
     protected ActionsDialogLite createDialog() {
+        return createDialog(mContext.getDisplayId());
+    }
+
+    private Context getContextForDisplay(int displayId) {
+        if (!ShadeWindowGoesAround.isEnabled()) {
+            Log.e(TAG, "Asked for the displayId=" + displayId
+                    + " context but returning default display one as ShadeWindowGoesAround flag "
+                    + "is disabled.");
+            return mContext;
+        }
+        try {
+            DisplayWindowProperties properties = mDisplayWindowPropertiesRepositoryLazy.get().get(
+                    displayId,
+                    DIALOG_WINDOW_TYPE);
+            return properties.getContext();
+        } catch (Exception e) {
+            Log.e(TAG, "Couldn't get context for displayId=" + displayId);
+            return mContext;
+        }
+    }
+    /**
+     * Create the global actions dialog with a specific context.
+     *
+     * @return A new dialog.
+     */
+    protected ActionsDialogLite createDialog(int displayId) {
+        final Context context = getContextForDisplay(displayId);
         initDialogItems();
 
         ActionsDialogLite dialog = new ActionsDialogLite(
-                mContext,
+                context,
                 com.android.systemui.res.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
                 mAdapter,
                 mOverflowAdapter,
@@ -704,7 +744,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mLightBarController,
                 mKeyguardStateController,
                 mNotificationShadeWindowController,
-                mStatusBarWindowControllerStore.getDefaultDisplay(),
+                mStatusBarWindowControllerStore.forDisplay(context.getDisplayId()),
                 this::onRefresh,
                 mKeyguardShowing,
                 mPowerAdapter,
