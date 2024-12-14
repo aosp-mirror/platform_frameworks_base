@@ -19315,6 +19315,7 @@ package android.webkit {
     method @Deprecated public abstract void setUseWebViewBackgroundForOverscrollBackground(boolean);
     method @Deprecated public abstract void setUserAgent(int);
     method public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean);
+    field @FlaggedApi("android.webkit.enable_chips") public static final long ENABLE_CHIPS = 380890146L; // 0x16b3ec22L
     field public static final long ENABLE_SIMPLIFIED_DARK_MODE = 214741472L; // 0xcccb1e0L
     field @FlaggedApi("android.webkit.user_agent_reduction") public static final long ENABLE_USER_AGENT_REDUCTION = 371034303L; // 0x161d88bfL
   }
