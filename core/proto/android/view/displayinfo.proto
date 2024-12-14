@@ -36,4 +36,5 @@ message DisplayInfoProto {
     optional string name = 5;
     optional int32 flags = 6;
     optional DisplayCutoutProto cutout = 7;
+    optional int32 type = 8;
 }

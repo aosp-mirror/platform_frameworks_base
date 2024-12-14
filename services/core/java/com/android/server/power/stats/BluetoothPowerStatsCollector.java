@@ -28,13 +28,12 @@ import android.util.SparseArray;
 
 import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.BluetoothPowerStatsLayout;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.IntSupplier;
 
 public class BluetoothPowerStatsCollector extends PowerStatsCollector {
     private static final String TAG = "BluetoothPowerStatsCollector";
@@ -43,7 +42,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
 
     private static final long ENERGY_UNSPECIFIED = -1;
 
-    interface BluetoothStatsRetriever {
+    public interface BluetoothStatsRetriever {
         interface Callback {
             void onBluetoothScanTime(int uid, long scanTimeMs);
         }
@@ -54,29 +53,25 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
                 BluetoothAdapter.OnBluetoothActivityEnergyInfoCallback callback);
     }
 
-    interface Injector {
+    public interface Injector {
         Handler getHandler();
         Clock getClock();
         PowerStatsUidResolver getUidResolver();
         long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
         PackageManager getPackageManager();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
-        IntSupplier getVoltageSupplier();
         BluetoothStatsRetriever getBluetoothStatsRetriever();
     }
 
     private final Injector mInjector;
 
-    private BluetoothPowerStatsLayout mLayout;
+    private com.android.server.power.stats.format.BluetoothPowerStatsLayout mLayout;
     private boolean mIsInitialized;
     private PowerStats mPowerStats;
     private long[] mDeviceStats;
     private BluetoothStatsRetriever mBluetoothStatsRetriever;
     private ConsumedEnergyRetriever mConsumedEnergyRetriever;
-    private IntSupplier mVoltageSupplier;
-    private int[] mEnergyConsumerIds = new int[0];
-    private long[] mLastConsumedEnergyUws;
-    private int mLastVoltageMv;
+    private ConsumedEnergyHelper mConsumedEnergyHelper;
 
     private long mLastRxTime;
     private long mLastTxTime;
@@ -93,7 +88,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
 
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
 
-    BluetoothPowerStatsCollector(Injector injector) {
+    public BluetoothPowerStatsCollector(Injector injector) {
         super(injector.getHandler(),  injector.getPowerStatsCollectionThrottlePeriod(
                         BatteryConsumer.powerComponentIdToString(
                                 BatteryConsumer.POWER_COMPONENT_BLUETOOTH)),
@@ -122,21 +117,11 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
             return false;
         }
 
-        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
-        mVoltageSupplier = mInjector.getVoltageSupplier();
         mBluetoothStatsRetriever = mInjector.getBluetoothStatsRetriever();
-        mEnergyConsumerIds =
-                mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.BLUETOOTH);
-        mLastConsumedEnergyUws = new long[mEnergyConsumerIds.length];
-        Arrays.fill(mLastConsumedEnergyUws, ENERGY_UNSPECIFIED);
-
-        mLayout = new BluetoothPowerStatsLayout();
-        mLayout.addDeviceBluetoothControllerActivity();
-        mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
-        mLayout.addDeviceSectionUsageDuration();
-        mLayout.addDeviceSectionPowerEstimate();
-        mLayout.addUidTrafficStats();
-        mLayout.addUidSectionPowerEstimate();
+        mConsumedEnergyRetriever = mInjector.getConsumedEnergyRetriever();
+        mConsumedEnergyHelper = new ConsumedEnergyHelper(mConsumedEnergyRetriever,
+                EnergyConsumerType.BLUETOOTH);
+        mLayout = new BluetoothPowerStatsLayout(mConsumedEnergyHelper.getEnergyConsumerCount());
 
         PersistableBundle extras = new PersistableBundle();
         mLayout.toExtras(extras);
@@ -152,7 +137,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
     }
 
     @Override
-    protected PowerStats collectStats() {
+    public PowerStats collectStats() {
         if (!ensureInitialized()) {
             return null;
         }
@@ -162,9 +147,7 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
         collectBluetoothActivityInfo();
         collectBluetoothScanStats();
 
-        if (mEnergyConsumerIds.length != 0) {
-            collectEnergyConsumers();
-        }
+        mConsumedEnergyHelper.collectConsumedEnergy(mPowerStats, mLayout);
 
         return mPowerStats;
     }
@@ -294,34 +277,6 @@ public class BluetoothPowerStatsCollector extends PowerStatsCollector {
         }
 
         mLayout.setDeviceScanTime(mDeviceStats, totalScanTime);
-    }
-
-    private void collectEnergyConsumers() {
-        int voltageMv = mVoltageSupplier.getAsInt();
-        if (voltageMv <= 0) {
-            Slog.wtf(TAG, "Unexpected battery voltage (" + voltageMv
-                    + " mV) when querying energy consumers");
-            return;
-        }
-
-        int averageVoltage = mLastVoltageMv != 0 ? (mLastVoltageMv + voltageMv) / 2 : voltageMv;
-        mLastVoltageMv = voltageMv;
-
-        long[] energyUws = mConsumedEnergyRetriever.getConsumedEnergyUws(mEnergyConsumerIds);
-        if (energyUws == null) {
-            return;
-        }
-
-        for (int i = energyUws.length - 1; i >= 0; i--) {
-            long energyDelta = mLastConsumedEnergyUws[i] != ENERGY_UNSPECIFIED
-                    ? energyUws[i] - mLastConsumedEnergyUws[i] : 0;
-            if (energyDelta < 0) {
-                // Likely, restart of powerstats HAL
-                energyDelta = 0;
-            }
-            mLayout.setConsumedEnergy(mPowerStats.stats, i, uJtoUc(energyDelta, averageVoltage));
-            mLastConsumedEnergyUws[i] = energyUws[i];
-        }
     }
 
     @Override

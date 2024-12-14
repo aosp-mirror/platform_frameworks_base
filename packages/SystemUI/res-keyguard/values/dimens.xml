@@ -175,4 +175,6 @@
     <dimen name="sfps_progress_bar_padding_from_edge">7dp</dimen>
 
     <dimen name="keyguard_presentation_width">410dp</dimen>
+
+    <dimen name="appclips_backlinks_icon_size">24dp</dimen>
 </resources>

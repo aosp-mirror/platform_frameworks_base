@@ -28,11 +28,17 @@ import android.os.Trace;
 
 /**
  * Request to destroy an activity.
+ *
  * @hide
  */
 public class DestroyActivityItem extends ActivityLifecycleItem {
 
-    private boolean mFinished;
+    private final boolean mFinished;
+
+    public DestroyActivityItem(@NonNull IBinder activityToken, boolean finished) {
+        super(activityToken);
+        mFinished = finished;
+    }
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -60,40 +66,16 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         return ON_DESTROY;
     }
 
-    // ObjectPoolItem implementation
-
-    private DestroyActivityItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static DestroyActivityItem obtain(@NonNull IBinder activityToken, boolean finished) {
-        DestroyActivityItem instance = ObjectPool.obtain(DestroyActivityItem.class);
-        if (instance == null) {
-            instance = new DestroyActivityItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mFinished = finished;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mFinished = false;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private DestroyActivityItem(@NonNull Parcel in) {
         super(in);
         mFinished = in.readBoolean();

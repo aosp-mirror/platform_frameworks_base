@@ -19,9 +19,11 @@ package android.view;
 import static org.junit.Assert.assertEquals;
 
 import android.content.res.Configuration;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,6 +35,9 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class DisplayAdjustmentsTests {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder().build();
 
     @Test
     public void testDefaultConstructor_hasEmptyConfiguration() {

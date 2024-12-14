@@ -19,6 +19,7 @@ package com.android.internal.graphics.cam;
 
 import android.annotation.NonNull;
 import android.graphics.Color;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import com.android.internal.graphics.ColorUtils;
 
@@ -45,6 +46,7 @@ import com.android.internal.graphics.ColorUtils;
  * consistent, and reasonably good. It worked." - Fairchild, Color Models and Systems: Handbook of
  * Color Psychology, 2015
  */
+@RavenwoodKeepWholeClass
 public final class CamUtils {
     private CamUtils() {
     }

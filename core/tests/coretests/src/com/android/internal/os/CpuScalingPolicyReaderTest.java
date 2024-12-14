@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.FileUtils;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

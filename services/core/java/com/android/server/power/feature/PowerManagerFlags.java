@@ -16,6 +16,8 @@
 
 package com.android.server.power.feature;
 
+import android.os.Build;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -82,12 +84,21 @@ public class PowerManagerFlags {
                 }
                 return mEnabled;
             }
-            mEnabled = mFlagFunction.get();
+            mEnabled = flagOrSystemProperty(mFlagFunction, mName);
             if (DEBUG) {
                 Slog.d(TAG, mName + ": mEnabled. Flag value = " + mEnabled);
             }
             mEnabledSet = true;
             return mEnabled;
+        }
+
+        private boolean flagOrSystemProperty(Supplier<Boolean> flagFunction, String flagName) {
+            boolean flagValue = flagFunction.get();
+            if (Build.IS_ENG || Build.IS_USERDEBUG) {
+                return SystemProperties.getBoolean("persist.sys." + flagName + "-override",
+                        flagValue);
+            }
+            return flagValue;
         }
 
         @Override

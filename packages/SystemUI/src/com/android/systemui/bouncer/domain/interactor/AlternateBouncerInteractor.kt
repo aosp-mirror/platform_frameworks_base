@@ -16,12 +16,13 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import android.util.Log
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryBiometricsAllowedInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for interacting with the lock-screen alternate bouncer. */
@@ -60,7 +62,8 @@ constructor(
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val systemClock: SystemClock,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val deviceEntryFingerprintAuthInteractor: Lazy<DeviceEntryFingerprintAuthInteractor>,
+    private val deviceEntryBiometricsAllowedInteractor:
+        Lazy<DeviceEntryBiometricsAllowedInteractor>,
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
     keyguardTransitionInteractor: Lazy<KeyguardTransitionInteractor>,
     sceneInteractor: Lazy<SceneInteractor>,
@@ -102,11 +105,7 @@ constructor(
                 if (alternateBouncerSupported) {
                     combine(
                             keyguardTransitionInteractor.get().currentKeyguardState,
-                            if (SceneContainerFlag.isEnabled) {
-                                sceneInteractor.get().currentScene
-                            } else {
-                                flowOf(Scenes.Lockscreen)
-                            },
+                            sceneInteractor.get().currentScene,
                             ::Pair
                         )
                         .flatMapLatest { (currentKeyguardState, transitionState) ->
@@ -118,7 +117,7 @@ constructor(
                                 flowOf(false)
                             } else {
                                 combine(
-                                    deviceEntryFingerprintAuthInteractor
+                                    deviceEntryBiometricsAllowedInteractor
                                         .get()
                                         .isFingerprintAuthCurrentlyAllowed,
                                     keyguardInteractor.get().isKeyguardDismissible,
@@ -140,6 +139,8 @@ constructor(
                     flowOf(false)
                 }
             }
+            .distinctUntilChanged()
+            .onEach { Log.d(TAG, "canShowAlternateBouncer changed to $it") }
             .stateIn(
                 scope = scope,
                 started = WhileSubscribed(),
@@ -220,6 +221,7 @@ constructor(
         return (systemClock.uptimeMillis() - bouncerRepository.lastAlternateBouncerVisibleTime) >
             MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS
     }
+
     /**
      * Should only be called through StatusBarKeyguardViewManager which propagates the source of
      * truth to other concerned controllers. Will hide the alternate bouncer if it's no longer
@@ -236,5 +238,7 @@ constructor(
 
     companion object {
         private const val MIN_VISIBILITY_DURATION_UNTIL_TOUCHES_DISMISS_ALTERNATE_BOUNCER_MS = 200L
+
+        private const val TAG = "AlternateBouncerInteractor"
     }
 }

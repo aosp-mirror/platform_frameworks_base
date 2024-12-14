@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Insets;
 import android.platform.test.annotations.Presubmit;
@@ -102,6 +103,8 @@ public class ImeBackAnimationControllerTest {
             mViewRoot.setOnContentApplyWindowInsetsListener(
                     mock(Window.OnContentApplyWindowInsetsListener.class));
             mBackAnimationController = new ImeBackAnimationController(mViewRoot, mInsetsController);
+            mViewRoot.mContext.getResources().getConfiguration().windowConfiguration
+                    .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FULLSCREEN);
 
             when(mWindowInsetsAnimationController.getHiddenStateInsets()).thenReturn(Insets.NONE);
             when(mWindowInsetsAnimationController.getShownStateInsets()).thenReturn(IME_INSETS);
@@ -156,8 +159,28 @@ public class ImeBackAnimationControllerTest {
         mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, 0.5f, EDGE_LEFT));
         // commit back gesture
         mBackAnimationController.onBackInvoked();
-        // verify that InsetsController#hide is called
-        verify(mInsetsController, times(1)).hide(ime());
+        // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
+        // getInputMethodManager is called from ImeBackAnimationController)
+        verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
+        // verify that ImeBackAnimationController does not take control over IME insets
+        verify(mInsetsController, never()).controlWindowInsetsAnimation(anyInt(), any(), any(),
+                anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testMultiWindowModeNotPlayingAnim() {
+        // setup ViewRoot with WINDOWING_MODE_MULTI_WINDOW
+        mViewRoot.mContext.getResources().getConfiguration().windowConfiguration.setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        // start back gesture
+        mBackAnimationController.onBackStarted(new BackEvent(0f, 0f, 0f, EDGE_LEFT));
+        // progress back gesture
+        mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, 0.5f, EDGE_LEFT));
+        // commit back gesture
+        mBackAnimationController.onBackInvoked();
+        // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
+        // getInputMethodManager is called from ImeBackAnimationController)
+        verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
         // verify that ImeBackAnimationController does not take control over IME insets
         verify(mInsetsController, never()).controlWindowInsetsAnimation(anyInt(), any(), any(),
                 anyBoolean(), anyLong(), any(), anyInt(), anyBoolean());
@@ -231,11 +254,8 @@ public class ImeBackAnimationControllerTest {
         float progress = 0.5f;
         mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, progress, EDGE_LEFT));
         // verify correct ime insets manipulation
-        float interpolatedProgress = BACK_GESTURE.getInterpolation(progress);
-        int expectedInset =
-                (int) (IME_HEIGHT - interpolatedProgress * PEEK_FRACTION * IME_HEIGHT);
         verify(mWindowInsetsAnimationController, times(1)).setInsetsAndAlpha(
-                eq(Insets.of(0, 0, 0, expectedInset)), eq(1f), anyFloat());
+                eq(Insets.of(0, 0, 0, getImeHeight(progress))), eq(1f), anyFloat());
     }
 
     @Test
@@ -245,12 +265,13 @@ public class ImeBackAnimationControllerTest {
             WindowInsetsAnimationControlListener animationControlListener = startBackGesture();
 
             // progress back gesture
-            mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, 0.5f, EDGE_LEFT));
+            float progress = 0.5f;
+            mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, progress, EDGE_LEFT));
 
             // commit back gesture
             mBackAnimationController.onBackInvoked();
 
-            // verify setInsetsAndAlpha never called due onReady delayed
+            // verify setInsetsAndAlpha never called due to onReady delayed
             verify(mWindowInsetsAnimationController, never()).setInsetsAndAlpha(any(), anyInt(),
                     anyFloat());
             verify(mInsetsController, never()).setPredictiveBackImeHideAnimInProgress(eq(true));
@@ -260,7 +281,7 @@ public class ImeBackAnimationControllerTest {
 
             // verify setInsetsAndAlpha immediately called
             verify(mWindowInsetsAnimationController, times(1)).setInsetsAndAlpha(
-                    eq(Insets.of(0, 0, 0, IME_HEIGHT)), eq(1f), anyFloat());
+                    eq(Insets.of(0, 0, 0, getImeHeight(progress))), eq(1f), anyFloat());
             // verify post-commit hide anim has started
             verify(mInsetsController, times(1)).setPredictiveBackImeHideAnimInProgress(eq(true));
         });
@@ -277,9 +298,9 @@ public class ImeBackAnimationControllerTest {
 
             // commit back gesture
             mBackAnimationController.onBackInvoked();
-
-            // verify that InsetsController#hide is called
-            verify(mInsetsController, times(1)).hide(ime());
+            // verify that InputMethodManager#notifyImeHidden is called (which is the case whenever
+            // getInputMethodManager is called from ImeBackAnimationController)
+            verify(mViewRootInsetsControllerHost, times(1)).getInputMethodManager();
         });
     }
 
@@ -295,5 +316,10 @@ public class ImeBackAnimationControllerTest {
                 anyBoolean());
 
         return animationControlListener.getValue();
+    }
+
+    private int getImeHeight(float gestureProgress) {
+        float interpolatedProgress = BACK_GESTURE.getInterpolation(gestureProgress);
+        return (int) (IME_HEIGHT - interpolatedProgress * PEEK_FRACTION * IME_HEIGHT);
     }
 }

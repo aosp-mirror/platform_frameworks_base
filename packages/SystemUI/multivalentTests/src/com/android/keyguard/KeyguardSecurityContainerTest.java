@@ -196,6 +196,28 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUserSwitcherToOneHandedRemovesViews() {
+        // Can happen when a SIM is inserted into a large screen device
+        initMode(MODE_USER_SWITCHER);
+        {
+            View view1 = mKeyguardSecurityContainer.findViewById(
+                    R.id.keyguard_bouncer_user_switcher);
+            View view2 = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_header);
+            assertThat(view1).isNotNull();
+            assertThat(view2).isNotNull();
+        }
+
+        initMode(MODE_ONE_HANDED);
+        {
+            View view1 = mKeyguardSecurityContainer.findViewById(
+                    R.id.keyguard_bouncer_user_switcher);
+            View view2 = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_header);
+            assertThat(view1).isNull();
+            assertThat(view2).isNull();
+        }
+    }
+
+    @Test
     public void updatePosition_movesKeyguard() {
         setupForUpdateKeyguardPosition(/* oneHandedMode= */ true);
         mKeyguardSecurityContainer.updatePositionByTouchX(

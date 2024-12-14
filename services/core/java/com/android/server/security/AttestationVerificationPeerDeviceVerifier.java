@@ -17,6 +17,7 @@
 package com.android.server.security;
 
 import static android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE;
+import static android.security.attestationverification.AttestationVerificationManager.PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS;
 import static android.security.attestationverification.AttestationVerificationManager.PARAM_PUBLIC_KEY;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS;
@@ -174,8 +175,8 @@ class AttestationVerificationPeerDeviceVerifier {
 
         MyDumpData dumpData = new MyDumpData();
 
-        int result =
-                verifyAttestationInternal(localBindingType, requirements, attestation, dumpData);
+        int result = verifyAttestationInternal(localBindingType, requirements, attestation,
+                dumpData);
         dumpData.mResult = result;
         mDumpLogger.logAttempt(dumpData);
         return result;
@@ -222,7 +223,8 @@ class AttestationVerificationPeerDeviceVerifier {
             final var attestationExtension = fromCertificate(leafCertificate);
 
             // Second: verify if the attestation satisfies the "peer device" profile.
-            if (!checkAttestationForPeerDeviceProfile(attestationExtension, dumpData)) {
+            if (!checkAttestationForPeerDeviceProfile(requirements, attestationExtension,
+                    dumpData)) {
                 failed = true;
             }
 
@@ -400,6 +402,7 @@ class AttestationVerificationPeerDeviceVerifier {
     }
 
     private boolean checkAttestationForPeerDeviceProfile(
+            @NonNull Bundle requirements,
             @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
             MyDumpData dumpData) {
         boolean result = true;
@@ -461,30 +464,37 @@ class AttestationVerificationPeerDeviceVerifier {
             result = false;
         }
 
-        // Patch level integer YYYYMM is expected to be within 1 year of today.
-        if (!isValidPatchLevel(attestationAttributes.getKeyOsPatchLevel())) {
+        int maxPatchLevelDiffMonths = requirements.getInt(PARAM_MAX_PATCH_LEVEL_DIFF_MONTHS,
+                MAX_PATCH_AGE_MONTHS);
+
+        // Patch level integer YYYYMM is expected to be within maxPatchLevelDiffMonths of today.
+        if (!isValidPatchLevel(attestationAttributes.getKeyOsPatchLevel(),
+                maxPatchLevelDiffMonths)) {
             debugVerboseLog("OS patch level is not within valid range.");
             result = false;
         } else {
             dumpData.mOsPatchLevelInRange = true;
         }
 
-        // Patch level integer YYYYMMDD is expected to be within 1 year of today.
-        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel())) {
+        // Patch level integer YYYYMMDD is expected to be within maxPatchLevelDiffMonths of today.
+        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel(),
+                maxPatchLevelDiffMonths)) {
             debugVerboseLog("Boot patch level is not within valid range.");
             result = false;
         } else {
             dumpData.mKeyBootPatchLevelInRange = true;
         }
 
-        if (!isValidPatchLevel(attestationAttributes.getKeyVendorPatchLevel())) {
+        if (!isValidPatchLevel(attestationAttributes.getKeyVendorPatchLevel(),
+                maxPatchLevelDiffMonths)) {
             debugVerboseLog("Vendor patch level is not within valid range.");
             result = false;
         } else {
             dumpData.mKeyVendorPatchLevelInRange = true;
         }
 
-        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel())) {
+        if (!isValidPatchLevel(attestationAttributes.getKeyBootPatchLevel(),
+                maxPatchLevelDiffMonths)) {
             debugVerboseLog("Boot patch level is not within valid range.");
             result = false;
         } else {
@@ -525,7 +535,7 @@ class AttestationVerificationPeerDeviceVerifier {
      * is not enough. Therefore, we also confirm the patch level for the remote and local device are
      * similar.
      */
-    private boolean isValidPatchLevel(int patchLevel) {
+    private boolean isValidPatchLevel(int patchLevel, int maxPatchLevelDiffMonths) {
         LocalDate currentDate = mTestSystemDate != null
                 ? mTestSystemDate : LocalDate.now(ZoneId.systemDefault());
 
@@ -543,7 +553,9 @@ class AttestationVerificationPeerDeviceVerifier {
             return false;
         }
 
-        // Check local patch date is not in last year of system clock.
+        // Check local patch date is not in last year of system clock. If the local patch already
+        // has a year's worth of bugs and vulnerabilities, it has no security meanings to check the
+        // remote patch level.
         if (ChronoUnit.MONTHS.between(localPatchDate, currentDate) > MAX_PATCH_AGE_MONTHS) {
             return true;
         }
@@ -559,19 +571,9 @@ class AttestationVerificationPeerDeviceVerifier {
         int patchMonth = Integer.parseInt(remoteDeviceDateStr.substring(4, 6));
         LocalDate remotePatchDate = LocalDate.of(patchYear, patchMonth, 1);
 
-        // Check patch dates are within 1 year of each other
-        boolean IsRemotePatchWithinOneYearOfLocalPatch;
-        if (remotePatchDate.compareTo(localPatchDate) > 0) {
-            IsRemotePatchWithinOneYearOfLocalPatch = ChronoUnit.MONTHS.between(
-                    localPatchDate, remotePatchDate) <= MAX_PATCH_AGE_MONTHS;
-        } else if (remotePatchDate.compareTo(localPatchDate) < 0) {
-            IsRemotePatchWithinOneYearOfLocalPatch = ChronoUnit.MONTHS.between(
-                    remotePatchDate, localPatchDate) <= MAX_PATCH_AGE_MONTHS;
-        } else {
-            IsRemotePatchWithinOneYearOfLocalPatch = true;
-        }
-
-        return IsRemotePatchWithinOneYearOfLocalPatch;
+        // Check patch dates are within the max patch level diff of each other
+        return Math.abs(ChronoUnit.MONTHS.between(localPatchDate, remotePatchDate))
+                <= maxPatchLevelDiffMonths;
     }
 
     /**

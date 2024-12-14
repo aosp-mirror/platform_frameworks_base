@@ -16,9 +16,10 @@
 
 package com.android.wm.shell.desktopmode
 
+import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
 import com.android.wm.shell.protolog.ShellProtoLogGroup
-import com.android.wm.shell.util.KtProtoLog
 
 /** Event logger for logging desktop mode session events */
 class DesktopModeEventLogger {
@@ -27,7 +28,7 @@ class DesktopModeEventLogger {
      * entering desktop mode
      */
     fun logSessionEnter(sessionId: Int, enterReason: EnterReason) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session enter, session: %s reason: %s",
             sessionId,
@@ -47,7 +48,7 @@ class DesktopModeEventLogger {
      * exiting desktop mode
      */
     fun logSessionExit(sessionId: Int, exitReason: ExitReason) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session exit, session: %s reason: %s",
             sessionId,
@@ -67,31 +68,15 @@ class DesktopModeEventLogger {
      * session id [sessionId]
      */
     fun logTaskAdded(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task added, session: %s taskId: %s",
             sessionId,
             taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(
-            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
-            /* task_event */
+        logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED,
-            /* instance_id */
-            taskUpdate.instanceId,
-            /* uid */
-            taskUpdate.uid,
-            /* task_height */
-            taskUpdate.taskHeight,
-            /* task_width */
-            taskUpdate.taskWidth,
-            /* task_x */
-            taskUpdate.taskX,
-            /* task_y */
-            taskUpdate.taskY,
-            /* session_id */
-            sessionId
-        )
+            sessionId, taskUpdate)
     }
 
     /**
@@ -99,31 +84,15 @@ class DesktopModeEventLogger {
      * session id [sessionId]
      */
     fun logTaskRemoved(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task remove, session: %s taskId: %s",
             sessionId,
             taskUpdate.instanceId
         )
-        FrameworkStatsLog.write(
-            DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
-            /* task_event */
+        logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED,
-            /* instance_id */
-            taskUpdate.instanceId,
-            /* uid */
-            taskUpdate.uid,
-            /* task_height */
-            taskUpdate.taskHeight,
-            /* task_width */
-            taskUpdate.taskWidth,
-            /* task_x */
-            taskUpdate.taskX,
-            /* task_y */
-            taskUpdate.taskY,
-            /* session_id */
-            sessionId
-        )
+            sessionId, taskUpdate)
     }
 
     /**
@@ -131,16 +100,22 @@ class DesktopModeEventLogger {
      * having session id [sessionId]
      */
     fun logTaskInfoChanged(sessionId: Int, taskUpdate: TaskUpdate) {
-        KtProtoLog.v(
+        ProtoLog.v(
             ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task info changed, session: %s taskId: %s",
             sessionId,
             taskUpdate.instanceId
         )
+        logTaskUpdate(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            sessionId, taskUpdate)
+    }
+
+    private fun logTaskUpdate(taskEvent: Int, sessionId: Int, taskUpdate: TaskUpdate) {
         FrameworkStatsLog.write(
             DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
             /* task_event */
-            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            taskEvent,
             /* instance_id */
             taskUpdate.instanceId,
             /* uid */
@@ -154,19 +129,81 @@ class DesktopModeEventLogger {
             /* task_y */
             taskUpdate.taskY,
             /* session_id */
-            sessionId
+            sessionId,
+            taskUpdate.minimizeReason?.reason ?: UNSET_MINIMIZE_REASON,
+            taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
+            /* visible_task_count */
+            taskUpdate.visibleTaskCount
         )
     }
 
     companion object {
+        /**
+         * Describes a task position and dimensions.
+         *
+         * @property instanceId instance id of the task
+         * @property uid uid of the app associated with the task
+         * @property taskHeight height of the task in px
+         * @property taskWidth width of the task in px
+         * @property taskX x-coordinate of the top-left corner
+         * @property taskY y-coordinate of the top-left corner
+         * @property minimizeReason the reason the task was minimized
+         * @property unminimizeEvent the reason the task was unminimized
+         *
+         */
         data class TaskUpdate(
             val instanceId: Int,
             val uid: Int,
-            val taskHeight: Int = Int.MIN_VALUE,
-            val taskWidth: Int = Int.MIN_VALUE,
-            val taskX: Int = Int.MIN_VALUE,
-            val taskY: Int = Int.MIN_VALUE,
+            val taskHeight: Int,
+            val taskWidth: Int,
+            val taskX: Int,
+            val taskY: Int,
+            val minimizeReason: MinimizeReason? = null,
+            val unminimizeReason: UnminimizeReason? = null,
+            val visibleTaskCount: Int,
         )
+
+        // Default value used when the task was not minimized.
+        @VisibleForTesting
+        const val UNSET_MINIMIZE_REASON =
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__UNSET_MINIMIZE
+
+        /** The reason a task was minimized. */
+        enum class MinimizeReason (val reason: Int) {
+            TASK_LIMIT(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_TASK_LIMIT
+            ),
+            MINIMIZE_BUTTON( // TODO(b/356843241): use this enum value
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_BUTTON
+            ),
+        }
+
+        // Default value used when the task was not unminimized.
+        @VisibleForTesting
+        const val UNSET_UNMINIMIZE_REASON =
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNSET_UNMINIMIZE
+
+        /** The reason a task was unminimized. */
+        enum class UnminimizeReason (val reason: Int) {
+            UNKNOWN(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_UNKNOWN
+            ),
+            TASKBAR_TAP(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_TASKBAR_TAP
+            ),
+            ALT_TAB(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_ALT_TAB
+            ),
+            TASK_LAUNCH(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_TASK_LAUNCH
+            ),
+        }
 
         /**
          * Enum EnterReason mapped to the EnterReason definition in

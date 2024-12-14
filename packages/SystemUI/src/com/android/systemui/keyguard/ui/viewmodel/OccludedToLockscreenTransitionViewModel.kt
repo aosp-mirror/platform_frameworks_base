@@ -110,5 +110,11 @@ constructor(
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)
 
-    override val deviceEntryParentViewAlpha: Flow<Float> = lockscreenAlpha
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            startTime = 233.milliseconds,
+            duration = 250.milliseconds,
+            onStep = { it },
+            onCancel = { 1f },
+        )
 }

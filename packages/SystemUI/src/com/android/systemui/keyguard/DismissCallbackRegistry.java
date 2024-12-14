@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard;
 
+import android.util.Log;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -33,6 +34,7 @@ public class DismissCallbackRegistry {
 
     private final ArrayList<DismissCallbackWrapper> mDismissCallbacks = new ArrayList<>();
     private final Executor mUiBgExecutor;
+    private final static String TAG = "DismissCallbackRegistry";
 
     @Inject
     public DismissCallbackRegistry(@UiBackground Executor uiBgExecutor) {
@@ -40,10 +42,12 @@ public class DismissCallbackRegistry {
     }
 
     public void addCallback(IKeyguardDismissCallback callback) {
+        Log.d(TAG, "Adding callback: " + callback);
         mDismissCallbacks.add(new DismissCallbackWrapper(callback));
     }
 
     public void notifyDismissCancelled() {
+        Log.d(TAG, "notifyDismissCancelled(" + mDismissCallbacks.size() + ")");
         for (int i = mDismissCallbacks.size() - 1; i >= 0; i--) {
             DismissCallbackWrapper callback = mDismissCallbacks.get(i);
             mUiBgExecutor.execute(callback::notifyDismissCancelled);
@@ -52,6 +56,7 @@ public class DismissCallbackRegistry {
     }
 
     public void notifyDismissSucceeded() {
+        Log.d(TAG, "notifyDismissSucceeded(" + mDismissCallbacks.size() + ")");
         for (int i = mDismissCallbacks.size() - 1; i >= 0; i--) {
             DismissCallbackWrapper callback = mDismissCallbacks.get(i);
             mUiBgExecutor.execute(callback::notifyDismissSucceeded);

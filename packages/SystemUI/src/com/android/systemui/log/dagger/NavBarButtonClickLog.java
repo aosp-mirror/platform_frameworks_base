@@ -20,13 +20,14 @@ package com.android.systemui.log.dagger;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.systemui.log.LogBuffer;
+import com.android.systemui.navigationbar.views.NavigationBar;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Qualifier;
 
-/** A {@link LogBuffer} for {@link com.android.systemui.navigationbar.NavigationBar}. */
+/** A {@link LogBuffer} for {@link NavigationBar}. */
 @Qualifier
 @Documented
 @Retention(RUNTIME)

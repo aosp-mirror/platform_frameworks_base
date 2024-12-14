@@ -19,14 +19,12 @@ package com.android.server.webkit;
 import static android.webkit.Flags.updateServiceV2;
 
 import android.app.ActivityManager;
-import android.app.AppGlobals;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.UserInfo;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.RemoteException;
@@ -67,25 +65,19 @@ public class SystemImpl implements SystemInterface {
     private static final String TAG_SIGNATURE = "signature";
     private static final String TAG_FALLBACK = "isFallback";
     private static final String PIN_GROUP = "webview";
+
+    private final Context mContext;
     private final WebViewProviderInfo[] mWebViewProviderPackages;
 
-    // Initialization-on-demand holder idiom for getting the WebView provider packages once and
-    // for all in a thread-safe manner.
-    private static class LazyHolder {
-        private static final SystemImpl INSTANCE = new SystemImpl();
-    }
+    SystemImpl(Context context) {
+        mContext = context;
 
-    public static SystemImpl getInstance() {
-        return LazyHolder.INSTANCE;
-    }
-
-    private SystemImpl() {
         int numFallbackPackages = 0;
         int numAvailableByDefaultPackages = 0;
         XmlResourceParser parser = null;
         List<WebViewProviderInfo> webViewProviders = new ArrayList<WebViewProviderInfo>();
         try {
-            parser = AppGlobals.getInitialApplication().getResources().getXml(
+            parser = mContext.getResources().getXml(
                     com.android.internal.R.xml.config_webview_packages);
             XmlUtils.beginDocument(parser, TAG_START);
             while(true) {
@@ -154,7 +146,7 @@ public class SystemImpl implements SystemInterface {
     }
 
     public long getFactoryPackageVersion(String packageName) throws NameNotFoundException {
-        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+        PackageManager pm = mContext.getPackageManager();
         return pm.getPackageInfo(packageName, PackageManager.MATCH_FACTORY_ONLY)
                 .getLongVersionCode();
     }
@@ -184,14 +176,14 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public String getUserChosenWebViewProvider(Context context) {
-        return Settings.Global.getString(context.getContentResolver(),
+    public String getUserChosenWebViewProvider() {
+        return Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.WEBVIEW_PROVIDER);
     }
 
     @Override
-    public void updateUserSetting(Context context, String newProviderName) {
-        Settings.Global.putString(context.getContentResolver(),
+    public void updateUserSetting(String newProviderName) {
+        Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.WEBVIEW_PROVIDER,
                 newProviderName == null ? "" : newProviderName);
     }
@@ -207,77 +199,76 @@ public class SystemImpl implements SystemInterface {
     }
 
     @Override
-    public void enablePackageForAllUsers(Context context, String packageName, boolean enable) {
-        UserManager userManager = (UserManager)context.getSystemService(Context.USER_SERVICE);
-        for(UserInfo userInfo : userManager.getUsers()) {
-            enablePackageForUser(packageName, enable, userInfo.id);
+    public void enablePackageForAllUsers(String packageName, boolean enable) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        for (UserHandle user : userManager.getUserHandles(false)) {
+            enablePackageForUser(packageName, enable, user);
         }
     }
 
-    private void enablePackageForUser(String packageName, boolean enable, int userId) {
+    private void enablePackageForUser(String packageName, boolean enable, UserHandle user) {
+        Context contextAsUser = mContext.createContextAsUser(user, 0);
+        PackageManager pm = contextAsUser.getPackageManager();
         try {
-            AppGlobals.getPackageManager().setApplicationEnabledSetting(
+            pm.setApplicationEnabledSetting(
                     packageName,
                     enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0,
-                    userId, null);
-        } catch (RemoteException | IllegalArgumentException e) {
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+        } catch (IllegalArgumentException e) {
             Log.w(TAG, "Tried to " + (enable ? "enable " : "disable ") + packageName
-                    + " for user " + userId + ": " + e);
+                    + " for user " + user + ": " + e);
         }
     }
 
     @Override
-    public void installExistingPackageForAllUsers(Context context, String packageName) {
-        UserManager userManager = context.getSystemService(UserManager.class);
-        for (UserInfo userInfo : userManager.getUsers()) {
-            installPackageForUser(packageName, userInfo.id);
+    public void installExistingPackageForAllUsers(String packageName) {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        for (UserHandle user : userManager.getUserHandles(false)) {
+            installPackageForUser(packageName, user);
         }
     }
 
-    private void installPackageForUser(String packageName, int userId) {
-        final Context context = AppGlobals.getInitialApplication();
-        final Context contextAsUser = context.createContextAsUser(UserHandle.of(userId), 0);
-        final PackageInstaller installer = contextAsUser.getPackageManager().getPackageInstaller();
+    private void installPackageForUser(String packageName, UserHandle user) {
+        Context contextAsUser = mContext.createContextAsUser(user, 0);
+        PackageInstaller installer = contextAsUser.getPackageManager().getPackageInstaller();
         installer.installExistingPackage(packageName, PackageManager.INSTALL_REASON_UNKNOWN, null);
     }
 
     @Override
     public boolean systemIsDebuggable() {
-        return Build.IS_DEBUGGABLE;
+        return Build.isDebuggable();
     }
 
     @Override
     public PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException {
-        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+        PackageManager pm = mContext.getPackageManager();
         return pm.getPackageInfo(configInfo.packageName, PACKAGE_FLAGS);
     }
 
     @Override
-    public List<UserPackage> getPackageInfoForProviderAllUsers(Context context,
-            WebViewProviderInfo configInfo) {
-        return UserPackage.getPackageInfosAllUsers(context, configInfo.packageName, PACKAGE_FLAGS);
+    public List<UserPackage> getPackageInfoForProviderAllUsers(WebViewProviderInfo configInfo) {
+        return UserPackage.getPackageInfosAllUsers(mContext, configInfo.packageName, PACKAGE_FLAGS);
     }
 
     @Override
-    public int getMultiProcessSetting(Context context) {
+    public int getMultiProcessSetting() {
         if (updateServiceV2()) {
             throw new IllegalStateException(
                     "getMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
         }
         return Settings.Global.getInt(
-                context.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, 0);
+                mContext.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, 0);
     }
 
     @Override
-    public void setMultiProcessSetting(Context context, int value) {
+    public void setMultiProcessSetting(int value) {
         if (updateServiceV2()) {
             throw new IllegalStateException(
                     "setMultiProcessSetting shouldn't be called if update_service_v2 flag is set.");
         }
         Settings.Global.putInt(
-                context.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, value);
+                mContext.getContentResolver(), Settings.Global.WEBVIEW_MULTIPROCESS, value);
     }
 
     @Override
@@ -335,5 +326,5 @@ public class SystemImpl implements SystemInterface {
     // flags declaring we want extra info from the package manager for webview providers
     private final static int PACKAGE_FLAGS = PackageManager.GET_META_DATA
             | PackageManager.GET_SIGNATURES | PackageManager.GET_SHARED_LIBRARY_FILES
-            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING | PackageManager.MATCH_ANY_USER;
+            | PackageManager.MATCH_ANY_USER;
 }

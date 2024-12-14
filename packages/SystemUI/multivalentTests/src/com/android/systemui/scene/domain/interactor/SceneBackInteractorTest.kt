@@ -28,6 +28,9 @@ import com.android.systemui.authentication.domain.interactor.authenticationInter
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.model.asIterable
+import com.android.systemui.scene.data.model.sceneStackOf
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -172,12 +175,32 @@ class SceneBackInteractorTest : SysuiTestCase() {
             )
         }
 
+    @Test
+    @EnableSceneContainer
+    fun updateBackStack() =
+        testScope.runTest {
+            underTest.onSceneChange(from = Scenes.Lockscreen, to = Scenes.Shade)
+            underTest.onSceneChange(from = Scenes.Shade, to = Scenes.QuickSettings)
+            underTest.onSceneChange(from = Scenes.QuickSettings, to = Scenes.Bouncer)
+            assertThat(underTest.backStack.value.asIterable().toList())
+                .isEqualTo(listOf(Scenes.QuickSettings, Scenes.Shade, Scenes.Lockscreen))
+
+            underTest.updateBackStack { stack ->
+                // Reverse the stack, just to see if it can be done:
+                sceneStackOf(*stack.asIterable().reversed().toTypedArray())
+            }
+
+            assertThat(underTest.backStack.value.asIterable().toList())
+                .isEqualTo(listOf(Scenes.Lockscreen, Scenes.Shade, Scenes.QuickSettings))
+        }
+
     private suspend fun TestScope.assertRoute(vararg route: RouteNode) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
         val backScene by collectLastValue(underTest.backScene)
 
         route.forEachIndexed { index, node ->
             sceneInteractor.changeScene(node.changeSceneTo, "")
+            runCurrent()
             assertWithMessage("node at index $index currentScene mismatch")
                 .that(currentScene)
                 .isEqualTo(node.changeSceneTo)

@@ -477,6 +477,12 @@ constructor(
         smallClockFrame?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
     }
 
+    fun setFallbackWeatherData(data: WeatherData) {
+        if (weatherData != null) return
+        weatherData = data
+        clock?.run { events.onWeatherDataChanged(data) }
+    }
+
     /**
      * Sets this clock as showing in a secondary display.
      *

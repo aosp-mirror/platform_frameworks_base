@@ -18,7 +18,6 @@ package android.view.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toSet;
-import static android.view.contentcapture.flags.Flags.runOnBackgroundThreadEnabled;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -602,26 +601,16 @@ public final class ContentCaptureManager {
     public ContentCaptureSession getMainContentCaptureSession() {
         synchronized (mLock) {
             if (mMainSession == null) {
-                mMainSession = prepareMainSession();
-                if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
-            }
-            return mMainSession;
-        }
-    }
-
-    @NonNull
-    @GuardedBy("mLock")
-    private ContentCaptureSession prepareMainSession() {
-        if (runOnBackgroundThreadEnabled()) {
-            return new MainContentCaptureSessionV2(
+                mMainSession = new MainContentCaptureSession(
                     mContext,
                     this,
                     prepareUiHandler(),
                     prepareContentCaptureHandler(),
                     mService
-            );
-        } else {
-            return new MainContentCaptureSession(mContext, this, prepareUiHandler(), mService);
+                );
+                if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
+            }
+            return mMainSession;
         }
     }
 

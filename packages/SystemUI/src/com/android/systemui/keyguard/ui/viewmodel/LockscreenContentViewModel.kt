@@ -19,79 +19,96 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.res.Resources
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
-import javax.inject.Inject
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-@SysUISingleton
 class LockscreenContentViewModel
-@Inject
+@AssistedInject
 constructor(
     clockInteractor: KeyguardClockInteractor,
     private val interactor: KeyguardBlueprintInteractor,
     private val authController: AuthController,
-    val longPress: KeyguardLongPressViewModel,
-    val shadeInteractor: ShadeInteractor,
-    @Application private val applicationScope: CoroutineScope,
-    unfoldTransitionInteractor: UnfoldTransitionInteractor,
-) {
+    val touchHandling: KeyguardTouchHandlingViewModel,
+    private val shadeInteractor: ShadeInteractor,
+    private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
+    private val occlusionInteractor: SceneContainerOcclusionInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
+) : ExclusiveActivatable() {
     @VisibleForTesting val clockSize = clockInteractor.clockSize
 
     val isUdfpsVisible: Boolean
         get() = authController.isUdfpsSupported
 
-    val shouldUseSplitNotificationShade: StateFlow<Boolean> =
-        shadeInteractor.shadeMode
-            .map { it == ShadeMode.Split }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+    val isShadeLayoutWide: StateFlow<Boolean> = shadeInteractor.isShadeLayoutWide
 
-    val areNotificationsVisible: StateFlow<Boolean> =
-        combine(
-                clockSize,
-                shouldUseSplitNotificationShade,
-            ) { clockSize, shouldUseSplitNotificationShade ->
-                clockSize == ClockSize.SMALL || shouldUseSplitNotificationShade
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
-
+    private val _unfoldTranslations = MutableStateFlow(UnfoldTranslations())
     /** Amount of horizontal translation that should be applied to elements in the scene. */
-    val unfoldTranslations: StateFlow<UnfoldTranslations> =
-        combine(
-                unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = true),
-                unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false),
-            ) { start, end ->
-                UnfoldTranslations(
-                    start = start,
-                    end = end,
-                )
+    val unfoldTranslations: StateFlow<UnfoldTranslations> = _unfoldTranslations.asStateFlow()
+
+    private val _isContentVisible = MutableStateFlow(true)
+    /** Whether the content of the scene UI should be shown. */
+    val isContentVisible: StateFlow<Boolean> = _isContentVisible.asStateFlow()
+
+    /** @see DeviceEntryInteractor.isBypassEnabled */
+    val isBypassEnabled: StateFlow<Boolean>
+        get() = deviceEntryInteractor.isBypassEnabled
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                combine(
+                        unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = true),
+                        unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false),
+                    ) { start, end ->
+                        UnfoldTranslations(
+                            start = start,
+                            end = end,
+                        )
+                    }
+                    .collect { _unfoldTranslations.value = it }
             }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = UnfoldTranslations(),
-            )
+
+            launch {
+                occlusionInteractor.isOccludingActivityShown
+                    .map { !it }
+                    .collect { _isContentVisible.value = it }
+            }
+
+            awaitCancellation()
+        }
+    }
+
+    /** Returns a flow that indicates whether lockscreen notifications should be rendered. */
+    fun areNotificationsVisible(): Flow<Boolean> {
+        return combine(
+            clockSize,
+            shadeInteractor.isShadeLayoutWide,
+        ) { clockSize, isShadeLayoutWide ->
+            clockSize == ClockSize.SMALL || isShadeLayoutWide
+        }
+    }
 
     fun getSmartSpacePaddingTop(resources: Resources): Int {
         return if (clockSize.value == ClockSize.LARGE) {
@@ -128,4 +145,9 @@ constructor(
          */
         val end: Float = 0f,
     )
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): LockscreenContentViewModel
+    }
 }

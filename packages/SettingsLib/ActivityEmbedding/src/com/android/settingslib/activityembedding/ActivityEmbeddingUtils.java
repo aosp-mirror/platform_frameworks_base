@@ -20,12 +20,10 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
-import androidx.core.os.BuildCompat;
 import androidx.window.embedding.ActivityEmbeddingController;
-
-import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * An util class collecting all common methods for the embedding activity features.
@@ -70,7 +68,7 @@ public final class ActivityEmbeddingUtils {
      * enabled (unsupported devices).
      */
     private static ComponentName getEmbeddingActivityComponent(Context context) {
-        if (!BuildCompatUtils.isAtLeastSV2()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) {
             return null;
         }
         final Intent intent = new Intent(ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY);
@@ -95,7 +93,7 @@ public final class ActivityEmbeddingUtils {
      *                          Settings app
      */
     public static boolean shouldHideNavigateUpButton(Activity activity, boolean isSecondLayerPage) {
-        if (!BuildCompat.isAtLeastT()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return false;
         }
 

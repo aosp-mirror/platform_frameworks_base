@@ -102,11 +102,9 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            Counter.logIncrementWithUid(
-                    "virtual_devices.value_virtual_camera_created_count",
-                    attributionSource.getUid());
-        }
+        Counter.logIncrementWithUid(
+                "virtual_devices.value_virtual_camera_created_count",
+                attributionSource.getUid());
     }
 
     /**

@@ -20,9 +20,9 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
-import android.hardware.biometrics.fingerprint.AcquiredInfoAndVendorCode;
-import android.hardware.biometrics.fingerprint.EnrollmentProgressStep;
-import android.hardware.biometrics.fingerprint.NextEnrollment;
+import android.hardware.biometrics.fingerprint.virtualhal.AcquiredInfoAndVendorCode;
+import android.hardware.biometrics.fingerprint.virtualhal.EnrollmentProgressStep;
+import android.hardware.biometrics.fingerprint.virtualhal.NextEnrollment;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
@@ -292,5 +292,12 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
                 }
             }
         });
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
+    @Override
+    public int getSensorId() {
+        super.getSensorId_enforcePermission();
+        return mSensorId;
     }
 }

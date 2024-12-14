@@ -16,10 +16,11 @@
 package com.android.keyguard
 
 import android.content.BroadcastReceiver
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -76,7 +77,7 @@ import org.mockito.junit.MockitoJUnit
 import com.android.systemui.Flags as AConfigFlags
 import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ClockEventControllerTest : SysuiTestCase() {
 
@@ -263,9 +264,9 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun keyguardCallback_visibilityChanged_clockDozeCalled() =
         runBlocking(IMMEDIATE) {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
             verify(keyguardUpdateMonitor).registerCallback(capture(captor))
 

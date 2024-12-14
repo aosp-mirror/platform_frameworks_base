@@ -62,6 +62,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
+import android.media.RingtoneManager;
+import android.media.Utils;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Build;
@@ -69,6 +71,7 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
@@ -93,6 +96,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 @SmallTest
@@ -141,6 +147,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         when(mMockContext.getSystemService(eq(Vibrator.class))).thenReturn(mVibrator);
         when(mVibrator.areVibrationFeaturesSupported(any())).thenReturn(true);
+        when(mVibrator.getInfo()).thenReturn(VibratorInfo.EMPTY_VIBRATOR_INFO);
         final Resources res = mContext.getResources();
         when(mMockContext.getResources()).thenReturn(res);
         when(mMockContext.getPackageManager()).thenReturn(mPm);
@@ -508,6 +515,51 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         assertNull(record.getVibration());
+    }
+
+    @Test
+    @EnableFlags(com.android.server.notification.Flags.FLAG_NOTIFICATION_VIBRATION_IN_SOUND_URI)
+    public void testVibration_customVibrationForSound_withoutVibrationUri() {
+        // prepare testing data
+        Uri backupDefaultUri = RingtoneManager.getActualDefaultRingtoneUri(mMockContext,
+                RingtoneManager.TYPE_NOTIFICATION);
+        RingtoneManager.setActualDefaultRingtoneUri(mMockContext, RingtoneManager.TYPE_NOTIFICATION,
+                Settings.System.DEFAULT_NOTIFICATION_URI);
+        defaultChannel.enableVibration(true);
+        defaultChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI, CUSTOM_ATTRIBUTES);
+        StatusBarNotification sbn = getNotification(
+                /* channelVibrationPattern= */ null,
+                /* channelVibrationEffect= */ null,
+                /* insistent= */ false);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        try {
+            assertEquals(
+                    new VibratorHelper(mMockContext).createDefaultVibration(false),
+                    record.getVibration());
+        } finally {
+            // restore the data
+            RingtoneManager.setActualDefaultRingtoneUri(mMockContext,
+                    RingtoneManager.TYPE_NOTIFICATION,
+                    backupDefaultUri);
+        }
+    }
+
+    @Test
+    @EnableFlags(com.android.server.notification.Flags.FLAG_NOTIFICATION_VIBRATION_IN_SOUND_URI)
+    public void testVibration_customVibrationForSound_withVibrationUri() throws IOException {
+        defaultChannel.enableVibration(true);
+        VibrationInfo vibration = getTestingVibration(mVibrator);
+        Uri uriWithVibration = getVibrationUriAppended(
+                Settings.System.DEFAULT_NOTIFICATION_URI, vibration.mUri);
+        defaultChannel.setSound(uriWithVibration, CUSTOM_ATTRIBUTES);
+        StatusBarNotification sbn = getNotification(
+                /* channelVibrationPattern= */ null,
+                /* channelVibrationEffect= */ null,
+                /* insistent= */ false);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        assertEquals(vibration.mVibrationEffect, record.getVibration());
     }
 
     @Test
@@ -1593,5 +1645,40 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.updateNotificationChannel(update);
 
         assertThat(record.getAudioAttributes().getUsage()).isEqualTo(USAGE_ALARM);
+    }
+
+    static class VibrationInfo {
+        public VibrationEffect mVibrationEffect;
+        public Uri mUri;
+        VibrationInfo(VibrationEffect vibrationEffect, Uri uri) {
+            mVibrationEffect = vibrationEffect;
+            mUri = uri;
+        }
+    }
+
+    private static VibrationInfo getTestingVibration(Vibrator vibrator) throws IOException {
+        File tempVibrationFile = File.createTempFile("test_vibration_file", ".xml");
+        FileWriter writer = new FileWriter(tempVibrationFile);
+        writer.write("<vibration-effect>\n"
+                + "    <waveform-effect>\n"
+                + "        <!-- PRIMING -->\n"
+                + "        <waveform-entry durationMs=\"0\" amplitude=\"0\"/>\n"
+                + "        <waveform-entry durationMs=\"12\" amplitude=\"255\"/>\n"
+                + "        <waveform-entry durationMs=\"250\" amplitude=\"0\"/>\n"
+                + "        <waveform-entry durationMs=\"12\" amplitude=\"255\"/>\n"
+                + "        <waveform-entry durationMs=\"500\" amplitude=\"0\"/>\n"
+                + "    </waveform-effect>\n"
+                + "</vibration-effect>"); // Your test XML content
+        writer.close();
+        Uri vibrationUri = Uri.parse(tempVibrationFile.toURI().toString());
+
+        VibrationEffect vibrationEffect = Utils.parseVibrationEffect(vibrator, vibrationUri);
+        return new VibrationInfo(vibrationEffect, vibrationUri);
+    }
+
+    private static Uri getVibrationUriAppended(Uri audioUri, Uri vibrationUri) {
+        Uri.Builder builder = audioUri.buildUpon();
+        builder.appendQueryParameter(Utils.VIBRATION_URI_PARAM, vibrationUri.toString());
+        return builder.build();
     }
 }

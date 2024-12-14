@@ -51,14 +51,18 @@ import com.android.settingslib.media.BluetoothMediaDevice;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.kosmos.Kosmos;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractor;
+import com.android.systemui.volume.panel.domain.interactor.VolumePanelGlobalStateInteractorKosmosKt;
 
 import com.google.common.base.Strings;
 
@@ -80,6 +84,8 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
     private static final String BROADCAST_NAME_TEST = "Broadcast_name_test";
     private static final String BROADCAST_CODE_TEST = "112233";
     private static final String BROADCAST_CODE_UPDATE_TEST = "11223344";
+
+    private final Kosmos mKosmos = SysuiTestCaseExtKt.testKosmos(this);
 
     // Mock
     private final MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
@@ -113,7 +119,7 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
     private UserTracker mUserTracker = mock(UserTracker.class);
 
     private MediaOutputBroadcastDialog mMediaOutputBroadcastDialog;
-    private MediaOutputController mMediaOutputController;
+    private MediaSwitchingController mMediaSwitchingController;
 
     @Before
     public void setUp() {
@@ -123,9 +129,12 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         when(mLocalBluetoothLeBroadcast.getProgramInfo()).thenReturn(BROADCAST_NAME_TEST);
         when(mLocalBluetoothLeBroadcast.getBroadcastCode()).thenReturn(
                 BROADCAST_CODE_TEST.getBytes(StandardCharsets.UTF_8));
+        VolumePanelGlobalStateInteractor volumePanelGlobalStateInteractor =
+                VolumePanelGlobalStateInteractorKosmosKt.getVolumePanelGlobalStateInteractor(
+                        mKosmos);
 
-        mMediaOutputController =
-                new MediaOutputController(
+        mMediaSwitchingController =
+                new MediaSwitchingController(
                         mContext,
                         TEST_PACKAGE,
                         mContext.getUser(),
@@ -140,10 +149,12 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
                         mPowerExemptionManager,
                         mKeyguardManager,
                         mFlags,
+                        volumePanelGlobalStateInteractor,
                         mUserTracker);
-        mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputBroadcastDialog = new MediaOutputBroadcastDialog(mContext, false,
-                mBroadcastSender, mMediaOutputController);
+        mMediaSwitchingController.mLocalMediaManager = mLocalMediaManager;
+        mMediaOutputBroadcastDialog =
+                new MediaOutputBroadcastDialog(
+                        mContext, false, mBroadcastSender, mMediaSwitchingController);
         mMediaOutputBroadcastDialog.show();
     }
 

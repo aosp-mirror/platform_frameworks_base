@@ -18,11 +18,15 @@ package com.android.server.location.contexthub;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.chre.flags.Flags;
 import android.hardware.location.NanoAppMessage;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,6 +36,8 @@ import java.util.Arrays;
 @Presubmit
 public class ContextHubEventLoggerTest {
     private static final ContextHubEventLogger sInstance = ContextHubEventLogger.getInstance();
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testLogNanoappLoad() {
@@ -46,10 +52,10 @@ public class ContextHubEventLoggerTest {
         sInstance.clear();
         sInstance.logNanoappLoad(-1, 42, -34, 100, false);
         sInstance.logNanoappLoad(0, 123, 321, 001, true);
-        String sInstanceDump = sInstance.toString();
+        String instanceDump = sInstance.toString();
         for (String eventString: eventStrings) {
             assertThat(eventString.length() > 0).isTrue();
-            assertThat(sInstanceDump.contains(eventString)).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
         }
     }
 
@@ -66,10 +72,10 @@ public class ContextHubEventLoggerTest {
         sInstance.clear();
         sInstance.logNanoappUnload(-1, 47, false);
         sInstance.logNanoappUnload(1, 0xFFFFFFFF, true);
-        String sInstanceDump = sInstance.toString();
+        String instanceDump = sInstance.toString();
         for (String eventString: eventStrings) {
             assertThat(eventString.length() > 0).isTrue();
-            assertThat(sInstanceDump.contains(eventString)).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
         }
     }
 
@@ -90,10 +96,10 @@ public class ContextHubEventLoggerTest {
         sInstance.clear();
         sInstance.logMessageFromNanoapp(-123, message1, false);
         sInstance.logMessageFromNanoapp(321, message2, true);
-        String sInstanceDump = sInstance.toString();
+        String instanceDump = sInstance.toString();
         for (String eventString: eventStrings) {
             assertThat(eventString.length() > 0).isTrue();
-            assertThat(sInstanceDump.contains(eventString)).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
         }
     }
 
@@ -114,10 +120,54 @@ public class ContextHubEventLoggerTest {
         sInstance.clear();
         sInstance.logMessageToNanoapp(888, message1, true);
         sInstance.logMessageToNanoapp(999, message2, false);
-        String sInstanceDump = sInstance.toString();
+        String instanceDump = sInstance.toString();
         for (String eventString: eventStrings) {
             assertThat(eventString.length() > 0).isTrue();
-            assertThat(sInstanceDump.contains(eventString)).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
+        }
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_RELIABLE_MESSAGE,
+                  Flags.FLAG_RELIABLE_MESSAGE_IMPLEMENTATION})
+    public void testLogReliableMessageToNanoappStatus() {
+        NanoAppMessage message1 = NanoAppMessage.createMessageToNanoApp(1, 0,
+                new byte[] {0x00, 0x11, 0x22, 0x33});
+        NanoAppMessage message2 = NanoAppMessage.createMessageToNanoApp(0, 1,
+                new byte[] {(byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF});
+        message1.setIsReliable(true);
+        message2.setIsReliable(true);
+        message1.setMessageSequenceNumber(0);
+        message2.setMessageSequenceNumber(1);
+
+        ContextHubEventLogger.NanoappMessageEvent[] events =
+                new ContextHubEventLogger.NanoappMessageEvent[] {
+                    new ContextHubEventLogger.NanoappMessageEvent(23, 888, message1, true),
+                    new ContextHubEventLogger.NanoappMessageEvent(34, 999, message2, false)
+                };
+        String[] eventStrings = generateEventDumpStrings(events);
+
+        // log events and test sInstance.toString() contains event details
+        sInstance.clear();
+        sInstance.logMessageToNanoapp(888, message1, true);
+        sInstance.logMessageToNanoapp(999, message2, false);
+        String instanceDump = sInstance.toString();
+        for (String eventString: eventStrings) {
+            assertThat(eventString.length() > 0).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
+        }
+
+        // set the error codes for the events and verify
+        sInstance.logReliableMessageToNanoappStatus(0, (byte) 0x02);
+        sInstance.logReliableMessageToNanoappStatus(1, (byte) 0x03);
+        events[0].setErrorCode((byte) 0x02);
+        events[1].setErrorCode((byte) 0x03);
+        eventStrings = generateEventDumpStrings(events);
+
+        instanceDump = sInstance.toString();
+        for (String eventString: eventStrings) {
+            assertThat(eventString.length() > 0).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
         }
     }
 
@@ -134,10 +184,10 @@ public class ContextHubEventLoggerTest {
         sInstance.clear();
         sInstance.logContextHubRestart(1);
         sInstance.logContextHubRestart(2);
-        String sInstanceDump = sInstance.toString();
+        String instanceDump = sInstance.toString();
         for (String eventString: eventStrings) {
             assertThat(eventString.length() > 0).isTrue();
-            assertThat(sInstanceDump.contains(eventString)).isTrue();
+            assertThat(instanceDump.contains(eventString)).isTrue();
         }
     }
 

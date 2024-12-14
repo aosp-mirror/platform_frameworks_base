@@ -19,25 +19,31 @@ package com.android.systemui.navigationbar;
 import static android.app.StatusBarManager.WINDOW_NAVIGATION_BAR;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.DEFAULT;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON;
 import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.shared.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.inputmethodservice.InputMethodService;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,24 +62,30 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
-import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.accessibility.AccessibilityGestureTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shared.Flags;
+import com.android.systemui.shared.rotation.RotationPolicyUtil;
+import com.android.systemui.shared.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -102,12 +114,14 @@ public final class NavBarHelper implements
         AccessibilityManager.AccessibilityServicesStateChangeListener,
         AccessibilityButtonModeObserver.ModeChangedListener,
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
+        AccessibilityGestureTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable, CommandQueue.Callbacks, ConfigurationController.ConfigurationListener {
     private static final String TAG = NavBarHelper.class.getSimpleName();
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Executor mMainExecutor;
+    private final Handler mBgHandler;
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -116,6 +130,7 @@ public final class NavBarHelper implements
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
+    private final AccessibilityGestureTargetsObserver mAccessibilityGestureTargetsObserver;
     private final List<NavbarTaskbarStateUpdater> mStateListeners = new ArrayList<>();
     private final Context mContext;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -160,13 +175,15 @@ public final class NavBarHelper implements
 
     // Listens for changes to display rotation
     private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
+        @WorkerThread
         @Override
         public void onRotationChanged(final int rotation) {
             // We need this to be scheduled as early as possible to beat the redrawing of
             // window in response to the orientation change.
+            @Nullable Boolean isRotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
             mHandler.postAtFrontOfQueue(() -> {
                 mRotationWatcherRotation = rotation;
-                dispatchRotationChanged(rotation);
+                dispatchRotationChanged(rotation, isRotationLocked);
             });
         }
     };
@@ -180,6 +197,7 @@ public final class NavBarHelper implements
     public NavBarHelper(Context context, AccessibilityManager accessibilityManager,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
+            AccessibilityGestureTargetsObserver accessibilityGestureTargetsObserver,
             SystemActions systemActions,
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
@@ -194,7 +212,8 @@ public final class NavBarHelper implements
             ConfigurationController configurationController,
             DumpManager dumpManager,
             CommandQueue commandQueue,
-            @Main Executor mainExecutor) {
+            @Main Executor mainExecutor,
+            @Background Handler bgHandler) {
         // b/319489709: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             Log.wtf(TAG, "Unexpected initialization for non-primary user", new Throwable());
@@ -211,10 +230,12 @@ public final class NavBarHelper implements
         mSystemActions = systemActions;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
+        mAccessibilityGestureTargetsObserver = accessibilityGestureTargetsObserver;
         mWm = wm;
         mDefaultDisplayId = displayTracker.getDefaultDisplayId();
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
         mMainExecutor = mainExecutor;
+        mBgHandler = bgHandler;
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
@@ -239,6 +260,7 @@ public final class NavBarHelper implements
         mAccessibilityManager.addAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver.addListener(this);
         mAccessibilityButtonTargetsObserver.addListener(this);
+        mAccessibilityGestureTargetsObserver.addListener(this);
 
         // Setup assistant listener
         mContentResolver.registerContentObserver(
@@ -281,6 +303,7 @@ public final class NavBarHelper implements
         mAccessibilityManager.removeAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver.removeListener(this);
         mAccessibilityButtonTargetsObserver.removeListener(this);
+        mAccessibilityGestureTargetsObserver.removeListener(this);
 
         // Clean up assistant listeners
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
@@ -322,7 +345,13 @@ public final class NavBarHelper implements
             listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
         }
         listener.updateWallpaperVisibility(mWallpaperVisible, mDefaultDisplayId);
-        listener.updateRotationWatcherState(mRotationWatcherRotation);
+
+        mBgHandler.post(() -> {
+            Boolean isRotationLocked = RotationPolicyUtil.isRotationLocked(mContext);
+            mMainExecutor.execute(
+                    () -> listener.updateRotationWatcherState(
+                            mRotationWatcherRotation, isRotationLocked));
+        });
     }
 
     /**
@@ -364,8 +393,31 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void onAccessibilityGestureTargetsChanged(String targets) {
+        updateA11yState();
+    }
+
+    @Override
     public void onConfigChanged(Configuration newConfig) {
         mEdgeBackGestureHandler.onConfigurationChanged(newConfig);
+    }
+
+    private int getNumOfA11yShortcutTargetsForNavSystem() {
+        final int buttonMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
+        final int shortcutType;
+        if (!android.provider.Flags.a11yStandaloneGestureEnabled()) {
+            shortcutType = buttonMode
+                    != ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU ? SOFTWARE : DEFAULT;
+            // If accessibility button is floating menu mode, there are no clickable targets.
+        } else {
+            if (mNavBarMode == NAV_BAR_MODE_GESTURAL) {
+                shortcutType = GESTURE;
+            } else {
+                shortcutType = buttonMode == ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR
+                        ? SOFTWARE : DEFAULT;
+            }
+        }
+        return mAccessibilityManager.getAccessibilityShortcutTargets(shortcutType).size();
     }
 
     /**
@@ -373,34 +425,18 @@ public final class NavBarHelper implements
      * used for {@link Secure#ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} and
      * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
-    private void updateA11yState() {
+    @VisibleForTesting
+    void updateA11yState() {
         final long prevState = mA11yButtonState;
         final boolean clickable;
         final boolean longClickable;
-        if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
-                == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
-            // If accessibility button is floating menu mode, click and long click state should be
-            // disabled.
-            clickable = false;
-            longClickable = false;
-            mA11yButtonState = 0;
-        } else {
-            // AccessibilityManagerService resolves services for the current user since the local
-            // AccessibilityManager is created from a Context with the INTERACT_ACROSS_USERS
-            // permission
-            final List<String> a11yButtonTargets =
-                    mAccessibilityManager.getAccessibilityShortcutTargets(
-                            ShortcutConstants.UserShortcutType.SOFTWARE);
-            final int requestingServices = a11yButtonTargets.size();
-
-            clickable = requestingServices >= 1;
-
-            // `longClickable` is used to determine whether to pop up the accessibility chooser
-            // dialog or not, and it’s also only for multiple services.
-            longClickable = requestingServices >= 2;
-            mA11yButtonState = (clickable ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
-                    | (longClickable ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
-        }
+        int clickableServices = getNumOfA11yShortcutTargetsForNavSystem();
+        clickable = clickableServices >= 1;
+        // `longClickable` is used to determine whether to pop up the accessibility chooser
+        // dialog or not, and it’s also only for multiple services.
+        longClickable = clickableServices >= 2;
+        mA11yButtonState = (clickable ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
+                | (longClickable ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
 
         // Update the system actions if the state has changed
         if (prevState != mA11yButtonState) {
@@ -466,9 +502,11 @@ public final class NavBarHelper implements
                 Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED, gestureDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
 
+        boolean supportsSwipeGesture = QuickStepContract.isGesturalMode(mNavBarMode)
+                || (QuickStepContract.isLegacyMode(mNavBarMode) && Flags.threeButtonCornerSwipe());
         mAssistantAvailable = assistantAvailableForUser
                 && mAssistantTouchGestureEnabled
-                && QuickStepContract.isGesturalMode(mNavBarMode);
+                && supportsSwipeGesture;
         dispatchAssistantEventUpdate(mAssistantAvailable, mLongPressHomeEnabled);
     }
 
@@ -501,7 +539,7 @@ public final class NavBarHelper implements
      * @return Whether the IME is shown on top of the screen given the {@code vis} flag of
      * {@link InputMethodService} and the keyguard states.
      */
-    public boolean isImeShown(int vis) {
+    public boolean isImeShown(@ImeWindowVisibility int vis) {
         View shadeWindowView =  mNotificationShadeWindowController.getWindowRootView();
         boolean isKeyguardShowing = mKeyguardStateController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
@@ -526,9 +564,9 @@ public final class NavBarHelper implements
         }
     }
 
-    private void dispatchRotationChanged(int rotation) {
+    private void dispatchRotationChanged(int rotation, @Nullable Boolean isRotationLocked) {
         for (NavbarTaskbarStateUpdater listener : mStateListeners) {
-            listener.updateRotationWatcherState(rotation);
+            listener.updateRotationWatcherState(rotation, isRotationLocked);
         }
     }
 
@@ -544,7 +582,7 @@ public final class NavBarHelper implements
         void updateAccessibilityServicesState();
         void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
         default void updateWallpaperVisibility(boolean visible, int displayId) {}
-        default void updateRotationWatcherState(int rotation) {}
+        default void updateRotationWatcherState(int rotation, @Nullable Boolean isRotationLocked) {}
     }
 
     /** Data class to help Taskbar/Navbar initiate state correctly when switching between the two.*/
@@ -558,7 +596,7 @@ public final class NavBarHelper implements
         }
     }
 
-    static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
+    public static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
         final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
         if (isTransient) {
             return MODE_SEMI_TRANSPARENT;

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.DpSize
@@ -38,10 +39,8 @@ import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
-import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
@@ -50,10 +49,9 @@ class BottomAreaSection
 @Inject
 constructor(
     private val viewModel: KeyguardQuickAffordancesCombinedViewModel,
-    private val falsingManager: FalsingManager,
-    private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val indicationAreaViewModel: KeyguardIndicationAreaViewModel,
+    private val keyguardQuickAffordanceViewBinder: KeyguardQuickAffordanceViewBinder,
 ) {
     /**
      * Renders a single lockscreen shortcut.
@@ -68,7 +66,7 @@ constructor(
         applyPadding: Boolean,
         modifier: Modifier = Modifier,
     ) {
-        MovableElement(
+        Element(
             key = if (isStart) StartButtonElementKey else EndButtonElementKey,
             modifier = modifier,
         ) {
@@ -77,9 +75,8 @@ constructor(
                     viewId = if (isStart) R.id.start_button else R.id.end_button,
                     viewModel = if (isStart) viewModel.startButton else viewModel.endButton,
                     transitionAlpha = viewModel.transitionAlpha,
-                    falsingManager = falsingManager,
-                    vibratorHelper = vibratorHelper,
                     indicationController = indicationController,
+                    binder = keyguardQuickAffordanceViewBinder,
                     modifier =
                         if (applyPadding) {
                             Modifier.shortcutPadding()
@@ -95,9 +92,9 @@ constructor(
     fun SceneScope.IndicationArea(
         modifier: Modifier = Modifier,
     ) {
-        MovableElement(
+        Element(
             key = IndicationAreaElementKey,
-            modifier = modifier.shortcutPadding(),
+            modifier = modifier.indicationAreaPadding(),
         ) {
             content {
                 IndicationArea(
@@ -121,9 +118,8 @@ constructor(
         @IdRes viewId: Int,
         viewModel: Flow<KeyguardQuickAffordanceViewModel>,
         transitionAlpha: Flow<Float>,
-        falsingManager: FalsingManager,
-        vibratorHelper: VibratorHelper,
         indicationController: KeyguardIndicationController,
+        binder: KeyguardQuickAffordanceViewBinder,
         modifier: Modifier = Modifier,
     ) {
         val (binding, setBinding) = mutableStateOf<KeyguardQuickAffordanceViewBinder.Binding?>(null)
@@ -155,12 +151,10 @@ constructor(
                     }
 
                 setBinding(
-                    KeyguardQuickAffordanceViewBinder.bind(
+                    binder.bind(
                         view,
                         viewModel,
                         transitionAlpha,
-                        falsingManager,
-                        vibratorHelper,
                     ) {
                         indicationController.showTransientIndication(it)
                     }
@@ -183,7 +177,7 @@ constructor(
         indicationController: KeyguardIndicationController,
         modifier: Modifier = Modifier,
     ) {
-        val (disposable, setDisposable) = mutableStateOf<DisposableHandle?>(null)
+        val (disposable, setDisposable) = remember { mutableStateOf<DisposableHandle?>(null) }
 
         AndroidView(
             factory = { context ->
@@ -208,6 +202,11 @@ constructor(
                 horizontal = dimensionResource(R.dimen.keyguard_affordance_horizontal_offset)
             )
             .padding(bottom = dimensionResource(R.dimen.keyguard_affordance_vertical_offset))
+    }
+
+    @Composable
+    private fun Modifier.indicationAreaPadding(): Modifier {
+        return this.padding(bottom = dimensionResource(R.dimen.keyguard_indication_margin_bottom))
     }
 }
 

@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
@@ -47,6 +48,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationTarget;
@@ -61,7 +63,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
@@ -83,11 +85,6 @@ class BackNavigationController {
 
     private AnimationHandler mAnimationHandler;
 
-    /**
-     * The transition who match the back navigation targets,
-     * release animation after this transition finish.
-     */
-    private Transition mWaitTransitionFinish;
     private final ArrayList<WindowContainer> mTmpOpenApps = new ArrayList<>();
     private final ArrayList<WindowContainer> mTmpCloseApps = new ArrayList<>();
 
@@ -143,7 +140,7 @@ class BackNavigationController {
 
         BackNavigationInfo.Builder infoBuilder = new BackNavigationInfo.Builder();
         synchronized (wmService.mGlobalLock) {
-            if (isMonitoringTransition()) {
+            if (isMonitoringFinishTransition()) {
                 Slog.w(TAG, "Previous animation hasn't finish, status: " + mAnimationHandler);
                 // Don't start any animation for it.
                 return null;
@@ -166,15 +163,14 @@ class BackNavigationController {
                 return null;
             }
 
-            // Move focus to the top embedded window if possible
-            if (mWindowManagerService.moveFocusToAdjacentEmbeddedWindow(window)) {
-                window = wmService.getFocusedWindowLocked();
-                if (window == null) {
-                    Slog.e(TAG, "New focused window is null, returning null.");
-                    return null;
-                }
+            // Updating the window to the most recently used one among the embedded windows
+            // that are displayed adjacently, unless the IME is visible.
+            // When the IME is visible, the IME is displayed on top of embedded activities.
+            // In that case, the back event should still be delivered to focused activity in
+            // order to dismiss the IME.
+            if (!window.getDisplayContent().getImeContainer().isVisible()) {
+                window = mWindowManagerService.getMostRecentUsedEmbeddedWindowForBack(window);
             }
-
             if (!window.isDrawn()) {
                 ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                         "Focused window didn't have a valid surface drawn.");
@@ -209,6 +205,9 @@ class BackNavigationController {
             ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
                             + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
                     currentTask, currentActivity, callbackInfo, window);
+
+            // Clear the pointer down outside focus if any.
+            mWindowManagerService.clearPointerDownOutsideFocusRunnable();
 
             // If we don't need to set up the animation, we return early. This is the case when
             // - We have an application callback.
@@ -274,8 +273,9 @@ class BackNavigationController {
                                     customAppTransition.mBackgroundColor);
                         }
                     }
-                    infoBuilder.setLetterboxColor(currentActivity.mLetterboxUiController
-                            .getLetterboxBackgroundColor().toArgb());
+                    infoBuilder.setLetterboxColor(currentActivity.mAppCompatController
+                            .getAppCompatLetterboxOverrides()
+                                .getLetterboxBackgroundColor().toArgb());
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivities.get(0).getTask();
                     backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
@@ -283,8 +283,10 @@ class BackNavigationController {
                     // keyguard locked and activities are unable to show when locked.
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 }
-            } else if (currentTask.mAtmService.getLockTaskController().isTaskLocked(currentTask)) {
+            } else if (currentTask.mAtmService.getLockTaskController().isTaskLocked(currentTask)
+                    || currentTask.getWindowConfiguration().tasksAreFloating()) {
                 // Do not predict if current task is in task locked.
+                // Also, it is unable to play cross task animation for floating task.
                 backType = BackNavigationInfo.TYPE_CALLBACK;
             } else {
                 // Check back-to-home or cross-task
@@ -306,6 +308,7 @@ class BackNavigationController {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 } else if (prevTask.isActivityTypeHome()) {
                     removedWindowContainer = currentTask;
+                    prevTask = prevTask.getRootTask();
                     backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
                     final ActivityRecord ar = prevTask.getTopNonFinishingActivity();
                     mShowWallpaper = ar != null && ar.hasWallpaper();
@@ -336,13 +339,12 @@ class BackNavigationController {
                     removedWindowContainer,
                     BackNavigationInfo.typeToString(backType));
 
-            // For now, we only animate when going home, cross task or cross-activity.
             boolean prepareAnimation =
                     (backType == BackNavigationInfo.TYPE_RETURN_TO_HOME
                                     || backType == BackNavigationInfo.TYPE_CROSS_TASK
                                     || backType == BackNavigationInfo.TYPE_CROSS_ACTIVITY
                                     || backType == BackNavigationInfo.TYPE_DIALOG_CLOSE)
-                            && adapter != null;
+                            && (adapter != null && adapter.isAnimatable(backType));
 
             if (prepareAnimation) {
                 final AnimationHandler.ScheduleAnimationBuilder builder =
@@ -357,8 +359,7 @@ class BackNavigationController {
                                 removedWindowContainer);
                 mBackAnimationInProgress = builder != null;
                 if (mBackAnimationInProgress) {
-                    if (removedWindowContainer.hasCommittedReparentToAnimationLeash()
-                            || removedWindowContainer.mTransitionController.inTransition()
+                    if (removedWindowContainer.mTransitionController.inTransition()
                             || mWindowManagerService.mSyncEngine.hasPendingSyncSets()) {
                         ProtoLog.w(WM_DEBUG_BACK_PREVIEW,
                                 "Pending back animation due to another animation is running");
@@ -367,7 +368,7 @@ class BackNavigationController {
                         // client process to prevent the unexpected relayout when handling the back
                         // animation.
                         for (int i = prevActivities.size() - 1; i >= 0; --i) {
-                            prevActivities.get(i).setDeferHidingClient(true);
+                            prevActivities.get(i).setDeferHidingClient();
                         }
                     } else {
                         scheduleAnimation(builder);
@@ -561,21 +562,33 @@ class BackNavigationController {
         return !prevActivities.isEmpty();
     }
 
-    boolean isMonitoringTransition() {
+    boolean isMonitoringFinishTransition() {
         return mAnimationHandler.mComposed || mNavigationMonitor.isMonitorForRemote();
+    }
+
+    boolean isMonitoringPrepareTransition(Transition transition) {
+        return mAnimationHandler.mComposed
+                && mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition == transition;
     }
 
     private void scheduleAnimation(@NonNull AnimationHandler.ScheduleAnimationBuilder builder) {
         mPendingAnimation = builder.build();
-        mWindowManagerService.mWindowPlacerLocked.requestTraversal();
-        if (mShowWallpaper) {
-            mWindowManagerService.getDefaultDisplayContentLocked().mWallpaperController
-                    .adjustWallpaperWindows();
+        if (mAnimationHandler.mOpenAnimAdaptor != null
+                && mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition != null) {
+            startAnimation();
+        } else {
+            mWindowManagerService.mWindowPlacerLocked.requestTraversal();
+            if (mShowWallpaper) {
+                mWindowManagerService.getDefaultDisplayContentLocked().mWallpaperController
+                        .adjustWallpaperWindows();
+            }
         }
     }
 
     private boolean isWaitBackTransition() {
-        return mAnimationHandler.mComposed && mAnimationHandler.mWaitTransition;
+        // Ignore mWaitTransition while flag is enabled.
+        return mAnimationHandler.mComposed && (Flags.migratePredictiveBackTransition()
+                || mAnimationHandler.mWaitTransition);
     }
 
     boolean isKeyguardOccluded(WindowState focusWindow) {
@@ -625,7 +638,7 @@ class BackNavigationController {
      */
     boolean removeIfContainsBackAnimationTargets(ArraySet<ActivityRecord> openApps,
             ArraySet<ActivityRecord> closeApps) {
-        if (!isMonitoringTransition()) {
+        if (!isMonitoringFinishTransition()) {
             return false;
         }
         mTmpCloseApps.addAll(closeApps);
@@ -651,7 +664,6 @@ class BackNavigationController {
                 final ActivityRecord ar = openApps.valueAt(i);
                 if (mAnimationHandler.isTarget(ar, true /* open */)) {
                     openApps.removeAt(i);
-                    mAnimationHandler.markStartingSurfaceMatch(null /* reparentTransaction */);
                 }
             }
             for (int i = closeApps.size() - 1; i >= 0; --i) {
@@ -669,6 +681,12 @@ class BackNavigationController {
         mAnimationHandler.markWindowHasDrawn(openActivity);
     }
 
+    boolean isStartingSurfaceShown(ActivityRecord openActivity) {
+        if (!Flags.migratePredictiveBackTransition()) {
+            return false;
+        }
+        return mAnimationHandler.isStartingSurfaceDrawn(openActivity);
+    }
     @VisibleForTesting
     class NavigationMonitor {
         // The window which triggering the back navigation.
@@ -750,10 +768,52 @@ class BackNavigationController {
             if (isMonitorForRemote()) {
                 mObserver.sendResult(null /* result */);
             }
-            if (isMonitorAnimationOrTransition()) {
+            if (isMonitorAnimationOrTransition() && canCancelAnimations()) {
                 clearBackAnimations(true /* cancel */);
             }
             cancelPendingAnimation();
+        }
+    }
+
+    void onAppVisibilityChanged(@NonNull ActivityRecord ar, boolean visible) {
+        if (!mAnimationHandler.mComposed) {
+            return;
+        }
+
+        final boolean openingTransition = mAnimationHandler.mOpenAnimAdaptor
+                .mPreparedOpenTransition != null;
+        // Detect if another transition is collecting during predictive back animation.
+        if (openingTransition && !visible && mAnimationHandler.isTarget(ar, false /* open */)
+                && ar.mTransitionController.isCollecting(ar)) {
+            final TransitionController controller = ar.mTransitionController;
+            boolean collectTask = false;
+            ActivityRecord changedActivity = null;
+            for (int i = mAnimationHandler.mOpenActivities.length - 1; i >= 0; --i) {
+                final ActivityRecord next = mAnimationHandler.mOpenActivities[i];
+                if (next.mLaunchTaskBehind) {
+                    // collect previous activity, so shell side can handle the transition.
+                    controller.collect(next);
+                    collectTask = true;
+                    restoreLaunchBehind(next, true /* cancel */, false /* finishTransition */);
+                    changedActivity = next;
+                }
+            }
+            if (collectTask && mAnimationHandler.mOpenAnimAdaptor.mAdaptors[0].mSwitchType
+                    == AnimationHandler.TASK_SWITCH) {
+                final Task topTask = mAnimationHandler.mOpenAnimAdaptor.mAdaptors[0].getTopTask();
+                if (topTask != null) {
+                    WindowContainer parent = mAnimationHandler.mOpenActivities[0].getParent();
+                    while (parent != topTask && parent.isDescendantOf(topTask)) {
+                        controller.collect(parent);
+                        parent = parent.getParent();
+                    }
+                    controller.collect(topTask);
+                }
+            }
+            if (changedActivity != null) {
+                changedActivity.getDisplayContent().ensureActivitiesVisible(null /* starting */,
+                        true /* notifyClients */);
+            }
         }
     }
 
@@ -766,8 +826,20 @@ class BackNavigationController {
      * open or close list.
      */
     void onTransactionReady(Transition transition, ArrayList<Transition.ChangeInfo> targets,
-            SurfaceControl.Transaction startTransaction) {
-        if (!isMonitoringTransition() || targets.isEmpty()) {
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction) {
+        if (isMonitoringPrepareTransition(transition)) {
+            // Flag target matches and prepare to remove windowless surface.
+            mAnimationHandler.markStartingSurfaceMatch(startTransaction);
+            return;
+        }
+        if (targets.isEmpty()) {
+            return;
+        }
+        final boolean migratePredictToTransition = Flags.migratePredictiveBackTransition();
+        if (migratePredictToTransition && !mAnimationHandler.mComposed) {
+            return;
+        } else if (!isMonitoringFinishTransition()) {
             return;
         }
         if (mAnimationHandler.hasTargetDetached()) {
@@ -791,51 +863,69 @@ class BackNavigationController {
                 mTmpCloseApps.add(wc);
             }
         }
-        final boolean matchAnimationTargets = isWaitBackTransition()
+        final boolean matchAnimationTargets;
+        if (migratePredictToTransition) {
+            matchAnimationTargets =
+                    mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
+        } else {
+            matchAnimationTargets = isWaitBackTransition()
                 && (transition.mType == TRANSIT_CLOSE || transition.mType == TRANSIT_TO_BACK)
                 && mAnimationHandler.containsBackAnimationTargets(mTmpOpenApps, mTmpCloseApps);
+        }
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "onTransactionReady, opening: %s, closing: %s, animating: %s, match: %b",
                 mTmpOpenApps, mTmpCloseApps, mAnimationHandler, matchAnimationTargets);
-        if (!matchAnimationTargets) {
+        // Don't cancel transition, let transition handler to handle it
+        if (!matchAnimationTargets && !migratePredictToTransition) {
             mNavigationMonitor.onTransitionReadyWhileNavigate(mTmpOpenApps, mTmpCloseApps);
         } else {
-            if (mWaitTransitionFinish != null) {
+            if (mAnimationHandler.mPrepareCloseTransition != null) {
                 Slog.e(TAG, "Gesture animation is applied on another transition?");
+                return;
             }
-            mWaitTransitionFinish = transition;
-            // Flag target matches to defer remove the splash screen.
-            for (int i = mTmpOpenApps.size() - 1; i >= 0; --i) {
-                final WindowContainer wc = mTmpOpenApps.get(i);
-                if (mAnimationHandler.isTarget(wc, true /* open */)) {
-                    mAnimationHandler.markStartingSurfaceMatch(startTransaction);
-                    break;
-                }
+            mAnimationHandler.mPrepareCloseTransition = transition;
+            if (!migratePredictToTransition) {
+                // Because the target will reparent to transition root, so it cannot be controlled
+                // by animation leash. Hide the close target when transition starts.
+                startTransaction.hide(mAnimationHandler.mCloseAdaptor.mTarget.getSurfaceControl());
             }
+            // Flag target matches and prepare to remove windowless surface.
+            mAnimationHandler.markStartingSurfaceMatch(startTransaction);
             // release animation leash
             if (mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction != null) {
-                startTransaction.merge(mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction);
+                finishTransaction.merge(mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction);
                 mAnimationHandler.mOpenAnimAdaptor.mCloseTransaction = null;
             }
-            // Because the target will reparent to transition root, so it cannot be controlled by
-            // animation leash. Hide the close target when transition starts.
-            startTransaction.hide(mAnimationHandler.mCloseAdaptor.mTarget.getSurfaceControl());
         }
         mTmpOpenApps.clear();
         mTmpCloseApps.clear();
     }
 
     boolean isMonitorTransitionTarget(WindowContainer wc) {
-        if (!isWaitBackTransition() || mWaitTransitionFinish == null) {
-            return false;
+        if (Flags.migratePredictiveBackTransition()) {
+            if (!mAnimationHandler.mComposed) {
+                return false;
+            }
+            if (mAnimationHandler.mSwitchType == AnimationHandler.TASK_SWITCH
+                    && wc.asActivityRecord() != null
+                    || (mAnimationHandler.mSwitchType == AnimationHandler.ACTIVITY_SWITCH
+                    && wc.asTask() != null)) {
+                return false;
+            }
+            return (mAnimationHandler.isTarget(wc, true /* open */)
+                    || mAnimationHandler.isTarget(wc, false /* open */));
+        } else if ((isWaitBackTransition() && mAnimationHandler.mPrepareCloseTransition != null)
+                || (mAnimationHandler.mOpenAnimAdaptor != null
+                && mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition != null)) {
+            return mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
         }
-        return mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
+        return false;
     }
 
     boolean shouldPauseTouch(WindowContainer wc) {
         // Once the close transition is ready, it means the onBackInvoked callback has invoked, and
         // app is ready to trigger next transition, no matter what it will be.
-        return mAnimationHandler.mComposed && mWaitTransitionFinish == null
+        return mAnimationHandler.mComposed && mAnimationHandler.mPrepareCloseTransition == null
                 && mAnimationHandler.isTarget(wc, wc.isVisibleRequested() /* open */);
     }
 
@@ -846,7 +936,6 @@ class BackNavigationController {
     void clearBackAnimations(boolean cancel) {
         mAnimationHandler.clearBackAnimateTarget(cancel);
         mNavigationMonitor.stopMonitorTransition();
-        mWaitTransitionFinish = null;
     }
 
     /**
@@ -857,7 +946,13 @@ class BackNavigationController {
     */
     void onTransitionFinish(ArrayList<Transition.ChangeInfo> targets,
             @NonNull Transition finishedTransition) {
-        if (finishedTransition == mWaitTransitionFinish) {
+        if (isMonitoringPrepareTransition(finishedTransition)) {
+            if (mAnimationHandler.mPrepareCloseTransition == null) {
+                clearBackAnimations(true /* cancel */);
+            }
+            return;
+        }
+        if (finishedTransition == mAnimationHandler.mPrepareCloseTransition) {
             clearBackAnimations(false /* cancel */);
         }
         if (!mBackAnimationInProgress || mPendingAnimationBuilder == null) {
@@ -937,13 +1032,13 @@ class BackNavigationController {
         // the opening target like starting window do.
         private boolean mStartingSurfaceTargetMatch;
         private ActivityRecord[] mOpenActivities;
+        Transition mPrepareCloseTransition;
 
         AnimationHandler(WindowManagerService wms) {
             mWindowManagerService = wms;
             final Context context = wms.mContext;
             mShowWindowlessSurface = context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_predictShowStartingSurface)
-                    && Flags.activitySnapshotByDefault();
+                    com.android.internal.R.bool.config_predictShowStartingSurface);
         }
         private static final int UNKNOWN = 0;
         private static final int TASK_SWITCH = 1;
@@ -977,10 +1072,18 @@ class BackNavigationController {
             return close.asWindowState() != null;
         }
 
-        private void initiate(@NonNull WindowContainer close, @NonNull WindowContainer[] open,
+        private void initiate(ScheduleAnimationBuilder builder,
                 @NonNull ActivityRecord[] openingActivities)  {
+            WindowContainer close = builder.mCloseTarget;
+            WindowContainer[] open = builder.mOpenTargets;
             if (isActivitySwitch(close, open)) {
                 mSwitchType = ACTIVITY_SWITCH;
+                if (Flags.migratePredictiveBackTransition()) {
+                    final Pair<WindowContainer, WindowContainer[]> replaced =
+                            promoteToTFIfNeeded(close, open);
+                    close = replaced.first;
+                    open = replaced.second;
+                }
             } else if (isTaskSwitch(close, open)) {
                 mSwitchType = TASK_SWITCH;
             } else if (isDialogClose(close)) {
@@ -990,9 +1093,17 @@ class BackNavigationController {
                 return;
             }
 
-            mCloseAdaptor = createAdaptor(close, false, mSwitchType);
+            final Transition prepareTransition = builder.prepareTransitionIfNeeded(
+                    openingActivities);
+            final SurfaceControl.Transaction st = openingActivities[0].getSyncTransaction();
+            final SurfaceControl.Transaction ct = prepareTransition != null
+                    ? st : close.getPendingTransaction();
+            mCloseAdaptor = createAdaptor(close, false, mSwitchType, ct);
             if (mCloseAdaptor.mAnimationTarget == null) {
                 Slog.w(TAG, "composeNewAnimations fail, skip");
+                if (prepareTransition != null) {
+                    prepareTransition.abort();
+                }
                 clearBackAnimateTarget(true /* cancel */);
                 return;
             }
@@ -1009,28 +1120,63 @@ class BackNavigationController {
                             next.getWindowConfiguration().getRotation());
                 }
             }
-            mOpenAnimAdaptor = new BackWindowAnimationAdaptorWrapper(true, mSwitchType, open);
+            mOpenAnimAdaptor = new BackWindowAnimationAdaptorWrapper(
+                    true, mSwitchType, st, open);
             if (!mOpenAnimAdaptor.isValid()) {
                 Slog.w(TAG, "compose animations fail, skip");
+                if (prepareTransition != null) {
+                    prepareTransition.abort();
+                }
                 clearBackAnimateTarget(true /* cancel */);
                 return;
             }
+            mOpenAnimAdaptor.mPreparedOpenTransition = prepareTransition;
             mOpenActivities = openingActivities;
         }
 
-        private boolean composeAnimations(@NonNull WindowContainer close,
-                @NonNull WindowContainer[] open, @NonNull ActivityRecord[] openingActivities) {
+        private Pair<WindowContainer, WindowContainer[]> promoteToTFIfNeeded(
+                WindowContainer close, WindowContainer[] open) {
+            WindowContainer replaceClose = close;
+            TaskFragment closeTF = close.asActivityRecord().getTaskFragment();
+            if (closeTF != null && !closeTF.isEmbedded()) {
+                closeTF = null;
+            }
+            final WindowContainer[] replaceOpen = new WindowContainer[open.length];
+            if (open.length >= 2) { // Promote to TaskFragment
+                for (int i = open.length - 1; i >= 0; --i) {
+                    replaceOpen[i] = open[i].asActivityRecord().getTaskFragment();
+                    replaceClose = closeTF != null ? closeTF : close;
+                }
+            } else {
+                TaskFragment openTF = open[0].asActivityRecord().getTaskFragment();
+                if (openTF != null && !openTF.isEmbedded()) {
+                    openTF = null;
+                }
+                if (closeTF != openTF) {
+                    replaceOpen[0] = openTF != null ? openTF : open[0];
+                    replaceClose = closeTF != null ? closeTF : close;
+                } else {
+                    replaceOpen[0] = open[0];
+                }
+            }
+            return new Pair<>(replaceClose, replaceOpen);
+        }
+
+        private boolean composeAnimations(@NonNull ScheduleAnimationBuilder builder,
+                @NonNull ActivityRecord[] openingActivities) {
             if (mComposed || mWaitTransition) {
                 Slog.e(TAG, "Previous animation is running " + this);
                 return false;
             }
             clearBackAnimateTarget(true /* cancel */);
-            if (close == null || open == null || open.length == 0 || open.length > 2) {
+            final WindowContainer[] open = builder.mOpenTargets;
+            if (builder.mCloseTarget == null || open == null || open.length == 0
+                    || open.length > 2) {
                 Slog.e(TAG, "reset animation with null target close: "
-                        + close + " open: " + Arrays.toString(open));
+                        + builder.mCloseTarget + " open: " + Arrays.toString(open));
                 return false;
             }
-            initiate(close, open, openingActivities);
+            initiate(builder, openingActivities);
             if (mSwitchType == UNKNOWN) {
                 return false;
             }
@@ -1079,7 +1225,8 @@ class BackNavigationController {
         }
 
         void markWindowHasDrawn(ActivityRecord activity) {
-            if (!mComposed || mWaitTransition) {
+            if (!mComposed || mWaitTransition
+                    || mOpenAnimAdaptor.mRequestedStartingSurfaceId == INVALID_TASK_ID) {
                 return;
             }
             boolean allWindowDrawn = true;
@@ -1090,9 +1237,24 @@ class BackNavigationController {
                 }
                 allWindowDrawn &= next.mAppWindowDrawn;
             }
+            // Do not remove until transition ready.
+            if (!activity.isVisible()) {
+                return;
+            }
             if (allWindowDrawn) {
                 mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
             }
+        }
+
+        boolean isStartingSurfaceDrawn(ActivityRecord activity) {
+            // Check whether we create windowless surface to prepare open transition
+            if (!mComposed || mOpenAnimAdaptor.mPreparedOpenTransition == null) {
+                return false;
+            }
+            if (isTarget(activity, true /* open */)) {
+                return mOpenAnimAdaptor.mStartingSurface != null;
+            }
+            return false;
         }
 
         private static boolean isAnimateTarget(@NonNull WindowContainer window,
@@ -1108,7 +1270,9 @@ class BackNavigationController {
                         && window.hasChild(animationTarget));
             } else if (switchType == ACTIVITY_SWITCH) {
                 return window == animationTarget
-                        || (window.asTaskFragment() != null && window.hasChild(animationTarget));
+                        || (window.asTaskFragment() != null && window.hasChild(animationTarget))
+                        || (animationTarget.asTaskFragment() != null
+                        && animationTarget.hasChild(window));
             }
             return false;
         }
@@ -1121,8 +1285,14 @@ class BackNavigationController {
                         resetActivity.mDisplayContent
                                 .continueUpdateOrientationForDiffOrienLaunchingApp();
                     }
+                    final Transition finishTransition =
+                            resetActivity.mTransitionController.mFinishingTransition;
+                    final boolean inFinishTransition = finishTransition != null
+                            && (mPrepareCloseTransition == finishTransition
+                            || (mOpenAnimAdaptor != null
+                            && mOpenAnimAdaptor.mPreparedOpenTransition == finishTransition));
                     if (resetActivity.mLaunchTaskBehind) {
-                        restoreLaunchBehind(resetActivity, cancel);
+                        restoreLaunchBehind(resetActivity, cancel, inFinishTransition);
                     }
                 }
             }
@@ -1136,12 +1306,33 @@ class BackNavigationController {
             }
         }
 
-        void markStartingSurfaceMatch(SurfaceControl.Transaction reparentTransaction) {
+        void markStartingSurfaceMatch(SurfaceControl.Transaction startTransaction) {
             if (mStartingSurfaceTargetMatch) {
                 return;
             }
             mStartingSurfaceTargetMatch = true;
-            mOpenAnimAdaptor.reparentWindowlessSurfaceToTarget(reparentTransaction);
+
+            if (mOpenAnimAdaptor.mRequestedStartingSurfaceId == INVALID_TASK_ID) {
+                return;
+            }
+            boolean allWindowDrawn = true;
+            for (int i = mOpenAnimAdaptor.mAdaptors.length - 1; i >= 0; --i) {
+                final BackWindowAnimationAdaptor next = mOpenAnimAdaptor.mAdaptors[i];
+                allWindowDrawn &= next.mAppWindowDrawn;
+            }
+            if (!allWindowDrawn) {
+                return;
+            }
+            final SurfaceControl startingSurface = mOpenAnimAdaptor.mStartingSurface;
+            if (startingSurface != null && startingSurface.isValid()) {
+                startTransaction.addTransactionCommittedListener(Runnable::run, () -> {
+                    synchronized (mWindowManagerService.mGlobalLock) {
+                        if (mOpenAnimAdaptor != null) {
+                            mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
+                        }
+                    }
+                });
+            }
         }
 
         void clearBackAnimateTarget(boolean cancel) {
@@ -1149,6 +1340,7 @@ class BackNavigationController {
                 mComposed = false;
                 finishPresentAnimations(cancel);
             }
+            mPrepareCloseTransition = null;
             mWaitTransition = false;
             mStartingSurfaceTargetMatch = false;
             mSwitchType = UNKNOWN;
@@ -1209,10 +1401,10 @@ class BackNavigationController {
         }
 
         @NonNull private static BackWindowAnimationAdaptor createAdaptor(
-                @NonNull WindowContainer target, boolean isOpen, int switchType) {
+                @NonNull WindowContainer target, boolean isOpen, int switchType,
+                SurfaceControl.Transaction st) {
             final BackWindowAnimationAdaptor adaptor =
                     new BackWindowAnimationAdaptor(target, isOpen, switchType);
-            final SurfaceControl.Transaction pt = target.getPendingTransaction();
             // Workaround to show TaskFragment which can be hide in Transitions and won't show
             // during isAnimating.
             if (isOpen && target.asActivityRecord() != null) {
@@ -1220,10 +1412,10 @@ class BackNavigationController {
                 if (fragment != null) {
                     // Ensure task fragment surface has updated, in case configuration has changed.
                     fragment.updateOrganizedTaskFragmentSurface();
-                    pt.show(fragment.mSurfaceControl);
+                    st.show(fragment.mSurfaceControl);
                 }
             }
-            target.startAnimation(pt, adaptor, false /* hidden */, ANIMATION_TYPE_PREDICT_BACK);
+            target.startAnimation(st, adaptor, false /* hidden */, ANIMATION_TYPE_PREDICT_BACK);
             return adaptor;
         }
 
@@ -1238,13 +1430,16 @@ class BackNavigationController {
             // requested one during animating.
             private int mRequestedStartingSurfaceId = INVALID_TASK_ID;
             private SurfaceControl mStartingSurface;
+
+            private Transition mPreparedOpenTransition;
+
             BackWindowAnimationAdaptorWrapper(boolean isOpen, int switchType,
-                    @NonNull WindowContainer... targets) {
+                    SurfaceControl.Transaction st, @NonNull WindowContainer... targets) {
                 mAdaptors = new BackWindowAnimationAdaptor[targets.length];
                 for (int i = targets.length - 1; i >= 0; --i) {
-                    mAdaptors[i] = createAdaptor(targets[i], isOpen, switchType);
+                    mAdaptors[i] = createAdaptor(targets[i], isOpen, switchType, st);
                 }
-                mRemoteAnimationTarget = targets.length > 1 ? createWrapTarget()
+                mRemoteAnimationTarget = targets.length > 1 ? createWrapTarget(st)
                         : mAdaptors[0].mAnimationTarget;
             }
 
@@ -1266,9 +1461,11 @@ class BackNavigationController {
                     mCloseTransaction.apply();
                     mCloseTransaction = null;
                 }
+
+                mPreparedOpenTransition = null;
             }
 
-            private RemoteAnimationTarget createWrapTarget() {
+            private RemoteAnimationTarget createWrapTarget(SurfaceControl.Transaction st) {
                 // Special handle for opening two activities together.
                 // If we animate both activities separately, the animation area and rounded corner
                 // would also being handled separately. To make them seem like "open" together, wrap
@@ -1278,8 +1475,7 @@ class BackNavigationController {
                     unionBounds.union(mAdaptors[i].mAnimationTarget.localBounds);
                 }
                 final WindowContainer wc = mAdaptors[0].mTarget;
-                final Task task = wc.asActivityRecord() != null
-                        ? wc.asActivityRecord().getTask() : wc.asTask();
+                final Task task = mAdaptors[0].getTopTask();
                 final RemoteAnimationTarget represent = mAdaptors[0].mAnimationTarget;
                 final SurfaceControl leashSurface = new SurfaceControl.Builder()
                         .setName("cross-animation-leash")
@@ -1291,12 +1487,11 @@ class BackNavigationController {
                         .build();
                 mCloseTransaction = new SurfaceControl.Transaction();
                 mCloseTransaction.reparent(leashSurface, null);
-                final SurfaceControl.Transaction pt = wc.getPendingTransaction();
-                pt.setLayer(leashSurface, wc.getParent().getLastLayer());
+                st.setLayer(leashSurface, wc.getLastLayer());
                 for (int i = mAdaptors.length - 1; i >= 0; --i) {
                     BackWindowAnimationAdaptor adaptor = mAdaptors[i];
-                    pt.reparent(adaptor.mAnimationTarget.leash, leashSurface);
-                    pt.setPosition(adaptor.mAnimationTarget.leash,
+                    st.reparent(adaptor.mAnimationTarget.leash, leashSurface);
+                    st.setPosition(adaptor.mAnimationTarget.leash,
                             adaptor.mAnimationTarget.localBounds.left,
                             adaptor.mAnimationTarget.localBounds.top);
                     // For adjacent activity embedded, reparent Activity to TaskFragment when
@@ -1322,26 +1517,35 @@ class BackNavigationController {
                 }
                 final WindowContainer mainOpen = mAdaptors[0].mTarget;
                 final int switchType = mAdaptors[0].mSwitchType;
-                final Task openTask = switchType == TASK_SWITCH
-                        ? mainOpen.asTask() : switchType == ACTIVITY_SWITCH
-                        ? mainOpen.asActivityRecord().getTask() : null;
+                final Task openTask = mAdaptors[0].getTopTask();
                 if (openTask == null) {
                     return;
                 }
-                final ActivityRecord mainActivity = switchType == ACTIVITY_SWITCH
-                        ? mainOpen.asActivityRecord()
-                        : openTask.getTopNonFinishingActivity();
+                ActivityRecord mainActivity = null;
+                if (switchType == ACTIVITY_SWITCH) {
+                    mainActivity = mainOpen.asActivityRecord();
+                    if (mainActivity == null && mainOpen.asTaskFragment() != null) {
+                        mainActivity = mainOpen.asTaskFragment().getTopNonFinishingActivity();
+                    }
+                }
+                if (mainActivity == null) {
+                    mainActivity = openTask.getTopNonFinishingActivity();
+                }
                 if (mainActivity == null) {
                     return;
                 }
                 // If there is only one adaptor, attach the windowless window to top activity,
                 // because fixed rotation only applies on activity.
-                // Note that embedded activity won't use fixed rotation.
-                final Configuration openConfig = mAdaptors.length == 1
+                // Note that embedded activity won't use fixed rotation. Also, there is only one
+                // animation target for closing task.
+                final boolean chooseActivity = mAdaptors.length == 1
+                        && (switchType == ACTIVITY_SWITCH || mainActivity.mDisplayContent
+                                .isFixedRotationLaunchingApp(mainActivity));
+                final Configuration openConfig = chooseActivity
                         ? mainActivity.getConfiguration() : openTask.getConfiguration();
                 mRequestedStartingSurfaceId = openTask.mAtmService.mTaskOrganizerController
                         .addWindowlessStartingSurface(openTask, mainActivity,
-                                mAdaptors.length == 1 ? mainActivity.getSurfaceControl()
+                                chooseActivity ? mainActivity.getSurfaceControl()
                                         : mRemoteAnimationTarget.leash, snapshot, openConfig,
                             new IWindowlessStartingSurfaceCallback.Stub() {
                             // Once the starting surface has been created in shell, it will call
@@ -1358,32 +1562,14 @@ class BackNavigationController {
                                     synchronized (openTask.mWmService.mGlobalLock) {
                                         if (mRequestedStartingSurfaceId != INVALID_TASK_ID) {
                                             mStartingSurface = sc;
+                                            openTask.mWmService.mWindowPlacerLocked
+                                                    .requestTraversal();
+                                        } else {
+                                            sc.release();
                                         }
                                     }
                                 }
                             });
-            }
-
-            // When back gesture has triggered and transition target matches navigation target,
-            // reparent the starting surface to the opening target as it's starting window.
-            void reparentWindowlessSurfaceToTarget(SurfaceControl.Transaction reparentTransaction) {
-                if (mRequestedStartingSurfaceId == INVALID_TASK_ID) {
-                    return;
-                }
-                // If open target matches, reparent to open activity or task
-                if (mStartingSurface != null && mStartingSurface.isValid()) {
-                    SurfaceControl.Transaction transaction = reparentTransaction != null
-                            ? reparentTransaction : mAdaptors[0].mTarget.getPendingTransaction();
-                    if (mAdaptors.length != 1) {
-                        // More than one opening window, reparent starting surface to leaf task.
-                        final WindowContainer wc = mAdaptors[0].mTarget;
-                        final Task task = wc.asActivityRecord() != null
-                                ? wc.asActivityRecord().getTask() : wc.asTask();
-                        transaction.reparent(mStartingSurface, task != null
-                                        ? task.getSurfaceControl()
-                                        : mAdaptors[0].mTarget.getSurfaceControl());
-                    }
-                }
             }
 
             /**
@@ -1421,6 +1607,22 @@ class BackNavigationController {
                 mTarget = target;
                 mIsOpen = isOpen;
                 mSwitchType = switchType;
+            }
+
+            Task getTopTask() {
+                final Task asTask = mTarget.asTask();
+                if (asTask != null) {
+                    return asTask;
+                }
+                final ActivityRecord ar = mTarget.asActivityRecord();
+                if (ar != null) {
+                    return ar.getTask();
+                }
+                final TaskFragment tf = mTarget.asTaskFragment();
+                if (tf != null) {
+                    return tf.getTask();
+                }
+                return null;
             }
 
             @Override
@@ -1552,6 +1754,7 @@ class BackNavigationController {
             WindowContainer mCloseTarget;
             WindowContainer[] mOpenTargets;
             boolean mIsLaunchBehind;
+            TaskSnapshot mSnapshot;
 
             ScheduleAnimationBuilder(int type, BackAnimationAdapter adapter,
                     NavigationMonitor monitor) {
@@ -1585,6 +1788,13 @@ class BackNavigationController {
                 return wc == mCloseTarget || mCloseTarget.hasChild(wc) || wc.hasChild(mCloseTarget);
             }
 
+            private Transition prepareTransitionIfNeeded(ActivityRecord[] visibleOpenActivities) {
+                if (mSnapshot == null) {
+                    return setLaunchBehind(visibleOpenActivities);
+                }
+                return null;
+            }
+
             /**
              * Apply preview strategy on the opening target
              *
@@ -1594,18 +1804,16 @@ class BackNavigationController {
             private void applyPreviewStrategy(
                     @NonNull BackWindowAnimationAdaptorWrapper openAnimationAdaptor,
                     @NonNull ActivityRecord[] visibleOpenActivities) {
-                boolean needsLaunchBehind = true;
                 if (isSupportWindowlessSurface() && mShowWindowlessSurface && !mIsLaunchBehind) {
-                    final WindowContainer mainOpen = openAnimationAdaptor.mAdaptors[0].mTarget;
-                    final TaskSnapshot snapshot = getSnapshot(mainOpen, visibleOpenActivities);
-                    openAnimationAdaptor.createStartingSurface(snapshot);
-                    // set LaunchBehind if we are creating splash screen surface.
-                    needsLaunchBehind = snapshot == null
-                            && openAnimationAdaptor.mRequestedStartingSurfaceId != INVALID_TASK_ID;
-                }
-                if (needsLaunchBehind) {
+                    boolean activitiesAreDrawn = false;
                     for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
-                        setLaunchBehind(visibleOpenActivities[i]);
+                        // If the activity hasn't stopped, it's window should remain drawn.
+                        activitiesAreDrawn |= visibleOpenActivities[i].firstWindowDrawn;
+                    }
+                    // Don't create starting surface if previous activities haven't stopped or
+                    // the snapshot does not exist.
+                    if (mSnapshot != null || !activitiesAreDrawn) {
+                        openAnimationAdaptor.createStartingSurface(mSnapshot);
                     }
                 }
                 // Force update mLastSurfaceShowing for opening activity and its task.
@@ -1628,7 +1836,11 @@ class BackNavigationController {
                     return null;
                 }
 
-                if (!composeAnimations(mCloseTarget, mOpenTargets, openingActivities)) {
+                if (!shouldLaunchBehind && mShowWindowlessSurface) {
+                    mSnapshot = getSnapshot(mOpenTargets[0], openingActivities);
+                }
+
+                if (!composeAnimations(this, openingActivities)) {
                     return null;
                 }
                 mCloseTarget.mTransitionController.mSnapshotController
@@ -1644,8 +1856,10 @@ class BackNavigationController {
                             mNavigationMonitor.cancelBackNavigating("cancelAnimation");
                             mBackAnimationAdapter.getRunner().onAnimationCancelled();
                         } else {
-                            mBackAnimationAdapter.getRunner().onAnimationStart(
-                                    targets, null, null, callback);
+                            mBackAnimationAdapter.getRunner().onAnimationStart(targets,
+                                    mOpenAnimAdaptor.mPreparedOpenTransition != null
+                                            ? mOpenAnimAdaptor.mPreparedOpenTransition.getToken()
+                                            : null, callback);
                         }
                     } catch (RemoteException e) {
                         e.printStackTrace();
@@ -1662,13 +1876,22 @@ class BackNavigationController {
                                 // animation was canceled
                                 return;
                             }
-                            if (!triggerBack) {
-                                clearBackAnimateTarget(true /* cancel */);
+                            if (Flags.migratePredictiveBackTransition()) {
+                                if (mOpenAnimAdaptor == null
+                                        || mOpenAnimAdaptor.mPreparedOpenTransition == null) {
+                                    // no open nor close transition, this is window animation
+                                    if (!triggerBack) {
+                                        clearBackAnimateTarget(true /* cancel */);
+                                    }
+                                }
                             } else {
-                                mWaitTransition = true;
+                                if (!triggerBack) {
+                                    clearBackAnimateTarget(true /* cancel */);
+                                } else {
+                                    mWaitTransition = true;
+                                }
                             }
                         }
-                        // TODO Add timeout monitor if transition didn't happen
                     }
                 };
             }
@@ -1725,28 +1948,108 @@ class BackNavigationController {
         return openActivities;
     }
 
-    private static void setLaunchBehind(@NonNull ActivityRecord activity) {
-        if (!activity.isVisibleRequested()) {
-            // The transition could commit the visibility and in the finishing state, that could
-            // skip commitVisibility call in setVisibility cause the activity won't visible here.
-            // Call it again to make sure the activity could be visible while handling the pending
-            // animation.
-            // Do not performLayout during prepare animation, because it could cause focus window
-            // change. Let that happen after the BackNavigationInfo has returned to shell.
-            activity.commitVisibility(true, false /* performLayout */);
-            activity.mTransitionController.mSnapshotController
-                    .mActivitySnapshotController.addOnBackPressedActivity(activity);
+    boolean restoreBackNavigation() {
+        if (!mAnimationHandler.mComposed) {
+            return false;
         }
-        activity.mLaunchTaskBehind = true;
-
-        ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                "Setting Activity.mLauncherTaskBehind to true. Activity=%s", activity);
-        activity.mTaskSupervisor.mStoppingActivities.remove(activity);
-        activity.getDisplayContent().ensureActivitiesVisible(null /* starting */,
-                true /* notifyClients */);
+        ActivityRecord[] penActivities = mAnimationHandler.mOpenActivities;
+        boolean changed = false;
+        if (penActivities != null) {
+            for (int i = penActivities.length - 1; i >= 0; --i) {
+                ActivityRecord resetActivity = penActivities[i];
+                if (resetActivity.mLaunchTaskBehind) {
+                    resetActivity.mTransitionController.collect(resetActivity);
+                    restoreLaunchBehind(resetActivity, true, false);
+                    changed = true;
+                }
+            }
+        }
+        return changed;
     }
 
-    private static void restoreLaunchBehind(@NonNull ActivityRecord activity, boolean cancel) {
+    boolean restoreBackNavigationSetTransitionReady(Transition transition) {
+        if (!mAnimationHandler.mComposed) {
+            return false;
+        }
+        ActivityRecord[] penActivities = mAnimationHandler.mOpenActivities;
+        if (penActivities != null) {
+            for (int i = penActivities.length - 1; i >= 0; --i) {
+                ActivityRecord resetActivity = penActivities[i];
+                if (transition.isInTransition(resetActivity)) {
+                    transition.setReady(resetActivity.getDisplayContent(), true);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Transition setLaunchBehind(@NonNull ActivityRecord[] activities) {
+        final boolean migrateBackTransition = Flags.migratePredictiveBackTransition();
+        final ArrayList<ActivityRecord> affects = new ArrayList<>();
+        for (int i = activities.length - 1; i >= 0; --i) {
+            final ActivityRecord activity = activities[i];
+            if (activity.mLaunchTaskBehind || activity.isVisibleRequested()) {
+                continue;
+            }
+            affects.add(activity);
+        }
+        if (affects.isEmpty()) {
+            return null;
+        }
+
+        final TransitionController tc = activities[0].mTransitionController;
+        final Transition prepareOpen = migrateBackTransition && !tc.isCollecting()
+                ? tc.createTransition(TRANSIT_PREPARE_BACK_NAVIGATION) : null;
+
+        DisplayContent commonDisplay = null;
+        for (int i = affects.size() - 1; i >= 0; --i) {
+            final ActivityRecord activity = affects.get(i);
+            if (!migrateBackTransition && !activity.isVisibleRequested()) {
+                // The transition could commit the visibility and in the finishing state, that could
+                // skip commitVisibility call in setVisibility cause the activity won't visible
+                // here.
+                // Call it again to make sure the activity could be visible while handling the
+                // pending animation.
+                // Do not performLayout during prepare animation, because it could cause focus
+                // window change. Let that happen after the BackNavigationInfo has returned to
+                // shell.
+                activity.commitVisibility(true, false /* performLayout */);
+            }
+            activity.mTransitionController.mSnapshotController
+                    .mActivitySnapshotController.addOnBackPressedActivity(activity);
+            activity.mLaunchTaskBehind = true;
+
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                    "Setting Activity.mLauncherTaskBehind to true. Activity=%s", activity);
+            activity.mTaskSupervisor.mStoppingActivities.remove(activity);
+
+            if (!migrateBackTransition) {
+                commonDisplay = activity.getDisplayContent();
+            } else if (activity.shouldBeVisible()) {
+                activity.ensureActivityConfiguration(true /* ignoreVisibility */);
+                activity.makeVisibleIfNeeded(null /* starting */, true /* notifyToClient */);
+            }
+        }
+        if (commonDisplay != null) {
+            commonDisplay.ensureActivitiesVisible(null /* starting */, true /* notifyClients */);
+        }
+        if (prepareOpen != null) {
+            if (prepareOpen.hasChanges()) {
+                tc.requestStartTransition(prepareOpen,
+                        null /*startTask */, null /* remoteTransition */,
+                        null /* displayChange */);
+                prepareOpen.setReady(affects.get(0), true);
+                return prepareOpen;
+            } else {
+                prepareOpen.abort();
+            }
+        }
+        return null;
+    }
+
+    private static void restoreLaunchBehind(@NonNull ActivityRecord activity, boolean cancel,
+            boolean finishTransition) {
         if (!activity.isAttached()) {
             // The activity was detached from hierarchy.
             return;
@@ -1756,9 +2059,18 @@ class BackNavigationController {
                 "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
                 activity);
         if (cancel) {
-            // Restore the launch-behind state
-            // TODO b/347168362 Change status directly during collecting for a transition.
-            activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
+            final boolean migrateBackTransition = Flags.migratePredictiveBackTransition();
+            // could be visible if transition is canceled due to top activity is finishing.
+            if (migrateBackTransition) {
+                if (finishTransition && !activity.shouldBeVisible()) {
+                    activity.commitVisibility(false /* visible */, false /* performLayout */,
+                            true /* fromTransition */);
+                }
+            } else {
+                // Restore the launch-behind state
+                // TODO b/347168362 Change status directly during collecting for a transition.
+                activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
+            }
             // Ignore all change
             activity.mTransitionController.mSnapshotController
                     .mActivitySnapshotController.clearOnBackPressedActivities();
@@ -1778,11 +2090,22 @@ class BackNavigationController {
         }
     }
 
+    /** If the open transition is playing, wait for transition to clear the animation */
+    private boolean canCancelAnimations() {
+        if (!Flags.migratePredictiveBackTransition()) {
+            return true;
+        }
+        return mAnimationHandler.mOpenAnimAdaptor == null
+                || mAnimationHandler.mOpenAnimAdaptor.mPreparedOpenTransition == null;
+    }
+
     void startAnimation() {
         if (!mBackAnimationInProgress) {
             // gesture is already finished, do not start animation
             if (mPendingAnimation != null) {
-                clearBackAnimations(true /* cancel */);
+                if (canCancelAnimations()) {
+                    clearBackAnimations(true /* cancel */);
+                }
                 mPendingAnimation = null;
             }
             return;
@@ -1820,12 +2143,7 @@ class BackNavigationController {
                         && ah.mSwitchType != AnimationHandler.ACTIVITY_SWITCH)) {
                     return;
                 }
-                for (int i = mAnimationHandler.mOpenActivities.length - 1; i >= 0; --i) {
-                    final ActivityRecord preDrawActivity = mAnimationHandler.mOpenActivities[i];
-                    if (!preDrawActivity.mLaunchTaskBehind) {
-                        setLaunchBehind(preDrawActivity);
-                    }
-                }
+                setLaunchBehind(mAnimationHandler.mOpenActivities);
             }
         }
     }
@@ -1838,16 +2156,21 @@ class BackNavigationController {
             snapshot = task.mRootWindowContainer.mWindowManager.mTaskSnapshotController.getSnapshot(
                     task.mTaskId, task.mUserId, false /* restoreFromDisk */,
                     false /* isLowResolution */);
-        } else if (w.asActivityRecord() != null) {
-            final ActivityRecord ar = w.asActivityRecord();
-            snapshot = ar.mWmService.mSnapshotController.mActivitySnapshotController
-                    .getSnapshot(visibleOpenActivities);
+        } else {
+            ActivityRecord ar = w.asActivityRecord();
+            if (ar == null && w.asTaskFragment() != null) {
+                ar = w.asTaskFragment().getTopNonFinishingActivity();
+            }
+            if (ar != null) {
+                snapshot = ar.mWmService.mSnapshotController.mActivitySnapshotController
+                        .getSnapshot(visibleOpenActivities);
+            }
         }
 
         return isSnapshotCompatible(snapshot, visibleOpenActivities) ? snapshot : null;
     }
 
-    static boolean isSnapshotCompatible(@NonNull TaskSnapshot snapshot,
+    static boolean isSnapshotCompatible(@Nullable TaskSnapshot snapshot,
             @NonNull ActivityRecord[] visibleOpenActivities) {
         if (snapshot == null) {
             return false;
@@ -1856,6 +2179,12 @@ class BackNavigationController {
         for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
             final ActivityRecord ar = visibleOpenActivities[i];
             if (!ar.isSnapshotOrientationCompatible(snapshot)) {
+                return false;
+            }
+            final int appNightMode = ar.getConfiguration().uiMode
+                    & Configuration.UI_MODE_NIGHT_MASK;
+            final int snapshotNightMode = snapshot.getUiMode() & Configuration.UI_MODE_NIGHT_MASK;
+            if (appNightMode != snapshotNightMode) {
                 return false;
             }
             oneComponentMatch |= ar.isSnapshotComponentCompatible(snapshot);

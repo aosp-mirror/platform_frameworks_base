@@ -106,7 +106,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private static final long FOCUS_ANIMATION_CROSSFADE_DURATION = 50;
     private static final long FOCUS_ANIMATION_FADE_IN_DELAY = 33;
     private static final long FOCUS_ANIMATION_FADE_IN_DURATION = 83;
-    private static final float FOCUS_ANIMATION_MIN_SCALE = 0.5f;
+    public static final float FOCUS_ANIMATION_MIN_SCALE = 0.5f;
     private static final long DEFOCUS_ANIMATION_FADE_OUT_DELAY = 120;
     private static final long DEFOCUS_ANIMATION_CROSSFADE_DELAY = 180;
 
@@ -115,7 +115,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private final SendButtonTextWatcher mTextWatcher;
     private final TextView.OnEditorActionListener mEditorActionHandler;
     private final ArrayList<Runnable> mOnSendListeners = new ArrayList<>();
-    private final ArrayList<Consumer<Boolean>> mOnVisibilityChangedListeners = new ArrayList<>();
+    private Consumer<Boolean> mOnVisibilityChangedListener = null;
     private final ArrayList<OnFocusChangeListener> mEditTextFocusChangeListeners =
             new ArrayList<>();
 
@@ -733,24 +733,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
      * {@link #getVisibility()} would return {@link View#VISIBLE}, and {@code false} it would return
      * any other value.
      */
-    public void addOnVisibilityChangedListener(Consumer<Boolean> listener) {
-        mOnVisibilityChangedListeners.add(listener);
-    }
-
-    /**
-     * Unregister a listener previously registered via
-     * {@link #addOnVisibilityChangedListener(Consumer)}.
-     */
-    public void removeOnVisibilityChangedListener(Consumer<Boolean> listener) {
-        mOnVisibilityChangedListeners.remove(listener);
+    public void setOnVisibilityChangedListener(Consumer<Boolean> listener) {
+        mOnVisibilityChangedListener = listener;
     }
 
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (changedView == this) {
-            for (Consumer<Boolean> listener : new ArrayList<>(mOnVisibilityChangedListeners)) {
-                listener.accept(visibility == VISIBLE);
+            final Consumer<Boolean> visibilityChangedListener = mOnVisibilityChangedListener;
+            if (visibilityChangedListener != null) {
+                visibilityChangedListener.accept(visibility == VISIBLE);
             }
             // Hide soft-keyboard when the input view became invisible
             // (i.e. The notification shade collapsed by pressing the home key)

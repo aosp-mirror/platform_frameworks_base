@@ -37,6 +37,7 @@ java_sdk_library {
         ],
     },
     lint: {
+        baseline_filename: "lint-baseline.xml",
         warning_checks: [
             "FlaggedApi",
         ],

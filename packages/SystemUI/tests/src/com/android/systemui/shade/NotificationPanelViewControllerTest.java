@@ -18,7 +18,6 @@ package com.android.systemui.shade;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
-import static com.android.systemui.Flags.FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPENING;
@@ -49,23 +48,23 @@ import android.graphics.Point;
 import android.os.PowerManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.DejankUtils;
+import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
@@ -80,7 +79,7 @@ import org.mockito.InOrder;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationPanelViewControllerTest extends NotificationPanelViewControllerBaseTest {
 
@@ -93,6 +92,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
      * When the Back gesture starts (progress 0%), the scrim will stay at 100% scale (1.0f).
      */
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testBackGesture_min_scrimAtMaxScale() {
         mNotificationPanelViewController.onBackProgressed(0.0f);
         verify(mScrimController).applyBackScaling(1.0f);
@@ -102,6 +102,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
      * When the Back gesture is at max (progress 100%), the scrim will be scaled to its minimum.
      */
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testBackGesture_max_scrimAtMinScale() {
         mNotificationPanelViewController.onBackProgressed(1.0f);
         verify(mScrimController).applyBackScaling(
@@ -109,6 +110,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onNotificationHeightChangeWhileOnKeyguardWillComputeMaxKeyguardNotifications() {
         mStatusBarStateController.setState(KEYGUARD);
         ArgumentCaptor<OnHeightChangedListener> captor =
@@ -125,6 +127,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onNotificationHeightChangeWhileInShadeWillNotComputeMaxKeyguardNotifications() {
         mStatusBarStateController.setState(SHADE);
         ArgumentCaptor<OnHeightChangedListener> captor =
@@ -141,6 +144,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void computeMaxKeyguardNotifications_lockscreenToShade_returnsExistingMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0.5f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
@@ -151,6 +155,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void computeMaxKeyguardNotifications_noTransition_updatesMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
@@ -197,6 +202,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getVerticalSpaceForLockscreenShelf_useLockIconBottomPadding_returnsShelfHeight() {
         enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
@@ -214,6 +220,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getVerticalSpaceForLockscreenShelf_useIndicationBottomPadding_returnsZero() {
         enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
@@ -231,6 +238,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getVerticalSpaceForLockscreenShelf_useAmbientBottomPadding_returnsZero() {
         enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
@@ -248,6 +256,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getVerticalSpaceForLockscreenShelf_useLockIconPadding_returnsLessThanShelfHeight() {
         enableSplitShade(/* enabled= */ false);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
@@ -265,6 +274,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getVerticalSpaceForLockscreenShelf_splitShade() {
         enableSplitShade(/* enabled= */ true);
         setBottomPadding(/* stackScrollLayoutBottom= */ 100,
@@ -282,6 +292,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSetPanelScrimMinFractionWhenHeadsUpIsDragged() {
         mNotificationPanelViewController.setHeadsUpDraggingStartingHeight(
                 mNotificationPanelViewController.getMaxPanelHeight() / 2);
@@ -289,6 +300,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSetDozing_notifiesNsslAndStateController() {
         mNotificationPanelViewController.setDozing(true /* dozing */, false /* animate */);
         verify(mNotificationStackScrollLayoutController).setDozing(eq(true), eq(false));
@@ -296,6 +308,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testOnDozeAmountChanged_positionClockAndNotificationsUsesUdfpsLocation() {
         // GIVEN UDFPS is enrolled and we're on the keyguard
         final Point udfpsLocationCenter = new Point(0, 100);
@@ -333,12 +346,14 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSetExpandedHeight() {
         mNotificationPanelViewController.setExpandedHeight(200);
         assertThat((int) mNotificationPanelViewController.getExpandedHeight()).isEqualTo(200);
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testOnTouchEvent_expansionCanBeBlocked() {
         onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
         onTouchEvent(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 200f, 0));
@@ -351,6 +366,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void test_pulsing_onTouchEvent_noTracking() {
         // GIVEN device is pulsing
         mNotificationPanelViewController.setPulsing(true);
@@ -368,6 +384,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void alternateBouncerVisible_onTouchEvent_notHandled() {
         mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         // GIVEN alternate bouncer is visible
@@ -386,6 +403,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void test_onTouchEvent_startTracking() {
         // GIVEN device is NOT pulsing
         mNotificationPanelViewController.setPulsing(false);
@@ -403,9 +421,8 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onInterceptTouchEvent_nsslMigrationOff_userActivity() {
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
-
         mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
                 0 /* metaState */));
@@ -414,9 +431,8 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onInterceptTouchEvent_nsslMigrationOn_userActivity_not_called() {
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
-
         mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
                 0 /* metaState */));
@@ -425,6 +441,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
         mFalsingManager.setIsClassifierEnabled(true);
         mFalsingManager.setIsFalseTouch(false);
@@ -461,6 +478,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testA11y_initializeNode() {
         AccessibilityNodeInfo nodeInfo = new AccessibilityNodeInfo();
         mAccessibilityDelegate.onInitializeAccessibilityNodeInfo(mView, nodeInfo);
@@ -474,6 +492,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testA11y_scrollForward() {
         mAccessibilityDelegate.performAccessibilityAction(
                 mView,
@@ -484,6 +503,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testA11y_scrollUp() {
         mAccessibilityDelegate.performAccessibilityAction(
                 mView,
@@ -494,6 +514,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testKeyguardStatusViewInSplitShade_changesConstraintsDependingOnNotifications() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -512,6 +533,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_splitShade_dozing_alwaysDozingOn_isCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -524,6 +546,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_splitShade_dozing_alwaysDozingOff_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -536,6 +559,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_splitShade_notDozing_alwaysDozingOn_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -548,6 +572,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_splitShade_pulsing_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -561,6 +586,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_splitShade_notPulsing_isNotCentered() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -574,6 +600,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_singleShade_isCentered() {
         enableSplitShade(/* enabled= */ false);
         // The conditions below would make the clock NOT be centered on split shade.
@@ -588,6 +615,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenNot() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -603,6 +631,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_willPlayDelayedDoze_notifiesKeyguardMediaController() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(true);
@@ -615,6 +644,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenStillCenteredIfNoNotifs() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         when(mActiveNotificationsInteractor.getAreAnyNotificationsPresentValue()).thenReturn(false);
@@ -630,6 +660,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onKeyguardStatusViewHeightChange_animatesNextTopPaddingChangeForNSSL() {
         ArgumentCaptor<View.OnLayoutChangeListener> captor =
                 ArgumentCaptor.forClass(View.OnLayoutChangeListener.class);
@@ -647,6 +678,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testCanCollapsePanelOnTouch_trueForKeyGuard() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -654,6 +686,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testCanCollapsePanelOnTouch_trueWhenScrolledToBottom() {
         mStatusBarStateController.setState(SHADE);
         when(mNotificationStackScrollLayoutController.isScrolledToBottom()).thenReturn(true);
@@ -662,6 +695,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testCanCollapsePanelOnTouch_trueWhenInSettings() {
         mStatusBarStateController.setState(SHADE);
         when(mQsController.getExpanded()).thenReturn(true);
@@ -670,38 +704,13 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testCanCollapsePanelOnTouch_falseInDualPaneShade() {
         mStatusBarStateController.setState(SHADE);
         enableSplitShade(/* enabled= */ true);
         when(mQsController.getExpanded()).thenReturn(true);
 
         assertThat(mNotificationPanelViewController.canCollapsePanelOnTouch()).isFalse();
-    }
-
-    @Test
-    @EnableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
-    public void testCanBeCollapsed_expandedInKeyguard() {
-        mStatusBarStateController.setState(KEYGUARD);
-        mNotificationPanelViewController.setExpandedFraction(1f);
-
-        assertThat(mNotificationPanelViewController.canBeCollapsed()).isFalse();
-    }
-
-    @Test
-    @EnableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
-    public void testCanBeCollapsed_expandedInShade() {
-        mStatusBarStateController.setState(SHADE);
-        mNotificationPanelViewController.setExpandedFraction(1f);
-        assertThat(mNotificationPanelViewController.canBeCollapsed()).isTrue();
-    }
-
-    @Test
-    @DisableFlags(FLAG_SHADE_COLLAPSE_ACTIVITY_LAUNCH_FIX)
-    public void testCanBeCollapsed_expandedInKeyguard_flagDisabled() {
-        mStatusBarStateController.setState(KEYGUARD);
-        mNotificationPanelViewController.setExpandedFraction(1f);
-
-        assertThat(mNotificationPanelViewController.canBeCollapsed()).isTrue();
     }
 
     @Test
@@ -722,6 +731,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testCancelSwipeWhileLocked_notifiesKeyguardState() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -734,6 +744,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSwipe_exactlyToTarget_notifiesNssl() {
         // No over-expansion
         mNotificationPanelViewController.setOverExpansion(0f);
@@ -749,6 +760,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testRotatingToSplitShadeWithQsExpanded_transitionsToShadeLocked() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mQsController.getExpanded()).thenReturn(true);
@@ -759,6 +771,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testUnlockedSplitShadeTransitioningToKeyguard_closesQS() {
         enableSplitShade(true);
         mStatusBarStateController.setState(SHADE);
@@ -768,6 +781,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testLockedSplitShadeTransitioningToKeyguard_closesQS() {
         enableSplitShade(true);
         mStatusBarStateController.setState(SHADE_LOCKED);
@@ -777,6 +791,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSwitchesToCorrectClockInSinglePaneShade() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -792,6 +807,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSwitchesToCorrectClockInSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -812,6 +828,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testHasNotifications_switchesToLargeClockWhenEnteringSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
@@ -823,6 +840,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testNoNotifications_switchesToLargeClockWhenEnteringSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
@@ -834,6 +852,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testHasNotifications_switchesToSmallClockWhenExitingSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -847,6 +866,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testNoNotifications_switchesToLargeClockWhenExitingSplitShade() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -860,6 +880,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void clockSize_mediaShowing_inSplitShade_onAod_isLarge() {
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         mStatusBarStateController.setState(KEYGUARD);
@@ -875,6 +896,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void clockSize_mediaShowing_inSplitShade_screenOff_notAod_isSmall() {
         when(mDozeParameters.getAlwaysOn()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
@@ -890,6 +912,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onQsSetExpansionHeightCalled_qsFullyExpandedOnKeyguard_showNSSL() {
         // GIVEN
         mStatusBarStateController.setState(KEYGUARD);
@@ -910,6 +933,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onQsSetExpansionHeightCalled_qsFullyExpandedOnKeyguard_hideNSSL() {
         // GIVEN
         mStatusBarStateController.setState(KEYGUARD);
@@ -931,6 +955,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testSwitchesToBigClockInSplitShadeOnAodAnimateDisabled() {
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
@@ -946,6 +971,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void switchesToBigClockInSplitShadeOn_landFlagOn_ForceSmallClock() {
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
@@ -965,6 +991,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void switchesToBigClockInSplitShadeOn_landFlagOff_DontForceSmallClock() {
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(false);
         mStatusBarStateController.setState(KEYGUARD);
@@ -984,6 +1011,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testDisplaysSmallClockOnLockscreenInSplitShadeWhenMediaIsPlaying() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
@@ -1005,6 +1033,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testFoldToAodAnimationCleansupInAnimationEnd() {
         ArgumentCaptor<Animator.AnimatorListener> animCaptor =
                 ArgumentCaptor.forClass(Animator.AnimatorListener.class);
@@ -1024,6 +1053,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testExpandWithQsMethodIsUsingLockscreenTransitionController() {
         enableSplitShade(/* enabled= */ true);
         mStatusBarStateController.setState(KEYGUARD);
@@ -1035,6 +1065,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void setKeyguardStatusBarAlpha_setsAlphaOnKeyguardStatusBarController() {
         float statusBarAlpha = 0.5f;
 
@@ -1044,6 +1075,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testQsToBeImmediatelyExpandedWhenOpeningPanelInSplitShade() {
         enableSplitShade(/* enabled= */ true);
         mShadeExpansionStateManager.updateState(STATE_OPEN);
@@ -1057,6 +1089,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testQsNotToBeImmediatelyExpandedWhenGoingFromUnlockedToLocked() {
         enableSplitShade(/* enabled= */ true);
         mShadeExpansionStateManager.updateState(STATE_CLOSED);
@@ -1069,6 +1102,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testQsImmediateResetsWhenPanelOpensOrCloses() {
         mShadeExpansionStateManager.updateState(STATE_OPEN);
         mShadeExpansionStateManager.updateState(STATE_CLOSED);
@@ -1076,6 +1110,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testQsExpansionChangedToDefaultWhenRotatingFromOrToSplitShade() {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
 
@@ -1092,6 +1127,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void testPanelClosedWhenClosingQsInSplitShade() {
         mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
                 /* expanded= */ true, /* tracking= */ false);
@@ -1105,6 +1141,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getMaxPanelTransitionDistance_expanding_inSplitShade_returnsSplitShadeFullTransitionDistance() {
         enableSplitShade(true);
         mNotificationPanelViewController.expandToQs();
@@ -1115,6 +1152,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void isExpandingOrCollapsing_returnsTrue_whenQsLockscreenDragInProgress() {
         when(mQsController.getLockscreenShadeDragProgress()).thenReturn(0.5f);
         assertThat(mNotificationPanelViewController.isExpandingOrCollapsing()).isTrue();
@@ -1122,6 +1160,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getMaxPanelTransitionDistance_inSplitShade_withHeadsUp_returnsBiggerValue() {
         enableSplitShade(true);
         mNotificationPanelViewController.expandToQs();
@@ -1138,6 +1177,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getMaxPanelTransitionDistance_expandingSplitShade_keyguard_returnsNonSplitShadeValue() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(true);
@@ -1149,6 +1189,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getMaxPanelTransitionDistance_expanding_notSplitShade_returnsNonSplitShadeValue() {
         enableSplitShade(false);
         mNotificationPanelViewController.expandToQs();
@@ -1159,6 +1200,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onLayoutChange_fullWidth_updatesQSWithFullWithTrue() {
         setIsFullWidth(true);
 
@@ -1166,6 +1208,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onLayoutChange_notFullWidth_updatesQSWithFullWithFalse() {
         setIsFullWidth(false);
 
@@ -1173,6 +1216,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onLayoutChange_qsNotSet_doesNotCrash() {
         mQuickSettingsController.setQs(null);
 
@@ -1180,6 +1224,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onEmptySpaceClicked_notDozingAndOnKeyguard_requestsFaceAuth() {
         StatusBarStateController.StateListener statusBarStateListener =
                 mNotificationPanelViewController.getStatusBarStateListener();
@@ -1194,8 +1239,8 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void nsslFlagEnabled_allowOnlyExternalTouches() {
-        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
@@ -1206,6 +1251,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onSplitShadeChanged_duringShadeExpansion_resetsOverScrollState() {
         // There was a bug where there was left-over overscroll state after going from split shade
         // to single shade.
@@ -1227,6 +1273,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onSplitShadeChanged_alwaysResetsOverScrollState() {
         enableSplitShade(true);
         enableSplitShade(false);
@@ -1244,6 +1291,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
      * to ensure scrollY can be correctly set to be 0
      */
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onShadeFlingClosingEnd_mAmbientStateSetClose_thenOnExpansionStopped() {
         // Given: Shade is expanded
         mNotificationPanelViewController.notifyExpandingFinished();
@@ -1264,6 +1312,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onShadeFlingEnd_mExpandImmediateShouldBeReset() {
         mNotificationPanelViewController.onFlingEnd(false);
 
@@ -1271,6 +1320,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void inUnlockedSplitShade_transitioningMaxTransitionDistance_makesShadeFullyExpanded() {
         mStatusBarStateController.setState(SHADE);
         enableSplitShade(true);
@@ -1280,6 +1330,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeFullyExpanded_inShadeState() {
         mStatusBarStateController.setState(SHADE);
 
@@ -1292,6 +1343,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeFullyExpanded_onKeyguard() {
         mStatusBarStateController.setState(KEYGUARD);
 
@@ -1301,12 +1353,14 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeFullyExpanded_onShadeLocked() {
         mStatusBarStateController.setState(SHADE_LOCKED);
         assertThat(mNotificationPanelViewController.isShadeFullyExpanded()).isTrue();
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeExpanded_whenHasHeight() {
         int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
         mNotificationPanelViewController.setExpandedHeight(transitionDistance);
@@ -1314,25 +1368,28 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeExpanded_whenInstantExpanding() {
         mNotificationPanelViewController.expand(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
     }
 
     @Test
-    @DisableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    @DisableSceneContainer
     public void shadeExpanded_whenHunIsPresent() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeExpanded_whenUnlockedOffscreenAnimationRunning() {
         when(mUnlockedScreenOffAnimationController.isAnimationPlaying()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeExpanded_whenInputFocusTransferStarted() {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
 
@@ -1342,6 +1399,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void shadeNotExpanded_whenInputFocusTransferStartedButPanelsDisabled() {
         when(mCommandQueue.panelsEnabled()).thenReturn(false);
 
@@ -1351,6 +1409,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void cancelInputFocusTransfer_shadeCollapsed() {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         mNotificationPanelViewController.startInputFocusTransfer();
@@ -1361,6 +1420,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void finishInputFocusTransfer_shadeFlingingOpen() {
         when(mCommandQueue.panelsEnabled()).thenReturn(true);
         mNotificationPanelViewController.startInputFocusTransfer();
@@ -1371,6 +1431,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getFalsingThreshold_deviceNotInteractive_isQsThreshold() {
         PowerInteractor.Companion.setAsleepForTest(
                 mPowerInteractor, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
@@ -1380,6 +1441,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getFalsingThreshold_lastWakeNotDueToTouch_isQsThreshold() {
         PowerInteractor.Companion.setAwakeForTest(
                 mPowerInteractor, PowerManager.WAKE_REASON_POWER_BUTTON);
@@ -1389,6 +1451,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void getFalsingThreshold_lastWakeDueToTouch_greaterThanQsThreshold() {
         PowerInteractor.Companion.setAwakeForTest(mPowerInteractor, PowerManager.WAKE_REASON_TAP);
         when(mQsController.getFalsingThreshold()).thenReturn(14);

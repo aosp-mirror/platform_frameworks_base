@@ -1,0 +1,8 @@
+package: "android.app"
+container: "system"
+flag {
+  name: "remove_next_wallpaper_component"
+  namespace: "systemui"
+  description: "Remove deprecated field WallpaperData#nextWallpaperComponent. Only effective after rebooting."
+  bug: "365991991"
+}

@@ -280,9 +280,12 @@ class CustomTileRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun isActiveFollowsPackageManagerAdapter() =
+    fun isActiveFollowsPackageManagerAdapter_user0() =
         with(kosmos) {
             testScope.runTest {
+                packageManagerAdapterFacade.setExclusiveForUser(0)
+
+                underTest.updateWithDefaults(UserHandle.of(0), TEST_DEFAULTS_1, true)
                 packageManagerAdapterFacade.setIsActive(false)
                 assertThat(underTest.isTileActive()).isFalse()
 
@@ -295,11 +298,72 @@ class CustomTileRepositoryTest : SysuiTestCase() {
     fun isToggleableFollowsPackageManagerAdapter() =
         with(kosmos) {
             testScope.runTest {
+                underTest.updateWithDefaults(UserHandle.of(0), TEST_DEFAULTS_1, true)
                 packageManagerAdapterFacade.setIsToggleable(false)
                 assertThat(underTest.isTileToggleable()).isFalse()
 
                 packageManagerAdapterFacade.setIsToggleable(true)
                 assertThat(underTest.isTileToggleable()).isTrue()
+            }
+        }
+
+    @Test
+    fun isActiveFollowsPackageManagerAdapter_user10_withAdapterForUser10() =
+        with(kosmos) {
+            testScope.runTest {
+                packageManagerAdapterFacade.setExclusiveForUser(10)
+
+                underTest.updateWithDefaults(UserHandle.of(10), TEST_DEFAULTS_1, true)
+                packageManagerAdapterFacade.setIsActive(false)
+                assertThat(underTest.isTileActive()).isFalse()
+
+                packageManagerAdapterFacade.setIsActive(true)
+                assertThat(underTest.isTileActive()).isTrue()
+            }
+        }
+
+    @Test
+    fun isToggleableFollowsPackageManagerAdapter_user10_withAdapterForUser10() =
+        with(kosmos) {
+            testScope.runTest {
+                packageManagerAdapterFacade.setExclusiveForUser(10)
+
+                underTest.updateWithDefaults(UserHandle.of(10), TEST_DEFAULTS_1, true)
+                packageManagerAdapterFacade.setIsToggleable(false)
+                assertThat(underTest.isTileToggleable()).isFalse()
+
+                packageManagerAdapterFacade.setIsToggleable(true)
+                assertThat(underTest.isTileToggleable()).isTrue()
+            }
+        }
+
+    @Test
+    fun isActiveDoesntFollowPackageManagerAdapter_user10() =
+        with(kosmos) {
+            testScope.runTest {
+                packageManagerAdapterFacade.setExclusiveForUser(0)
+
+                underTest.updateWithDefaults(UserHandle.of(10), TEST_DEFAULTS_1, true)
+                packageManagerAdapterFacade.setIsActive(false)
+                assertThat(underTest.isTileActive()).isFalse()
+
+                packageManagerAdapterFacade.setIsActive(true)
+                assertThat(underTest.isTileActive()).isFalse()
+            }
+        }
+
+    @Test
+    fun isToggleableDoesntFollowPackageManagerAdapter_user10() =
+        with(kosmos) {
+            testScope.runTest {
+                packageManagerAdapterFacade.setExclusiveForUser(0)
+
+                underTest.updateWithDefaults(UserHandle.of(10), TEST_DEFAULTS_1, true)
+                packageManagerAdapterFacade.setIsToggleable(false)
+                assertThat(underTest.isTileToggleable()).isFalse()
+
+                packageManagerAdapterFacade.setIsToggleable(true)
+                assertThat(underTest.isTileToggleable()).isFalse()
             }
         }
 

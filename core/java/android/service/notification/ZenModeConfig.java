@@ -25,6 +25,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.service.notification.SystemZenRules.PACKAGE_ANDROID;
 import static android.service.notification.ZenAdapters.peopleTypeToPrioritySenders;
 import static android.service.notification.ZenAdapters.prioritySendersToPeopleType;
 import static android.service.notification.ZenAdapters.zenPolicyConversationSendersToNotificationPolicy;
@@ -74,8 +75,9 @@ import android.util.PluralsMessageFormatter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -112,76 +114,96 @@ public class ZenModeConfig implements Parcelable {
     private static final String TAG = "ZenModeConfig";
 
     /**
-     * The {@link ZenModeConfig} is being updated because of an unknown reason.
+     * The {@link ZenModeConfig} is updated because of an unknown reason.
      */
-    public static final int UPDATE_ORIGIN_UNKNOWN = 0;
+    public static final int ORIGIN_UNKNOWN = 0;
 
     /**
-     * The {@link ZenModeConfig} is being updated because of system initialization (i.e. load from
+     * The {@link ZenModeConfig} is updated because of system initialization (i.e. load from
      * storage, on device boot).
      */
-    public static final int UPDATE_ORIGIN_INIT = 1;
+    public static final int ORIGIN_INIT = 1;
 
-    /** The {@link ZenModeConfig} is being updated (replaced) because of a user switch or unlock. */
-    public static final int UPDATE_ORIGIN_INIT_USER = 2;
+    /** The {@link ZenModeConfig} is updated (replaced) because of a user switch or unlock. */
+    public static final int ORIGIN_INIT_USER = 2;
 
-    /** The {@link ZenModeConfig} is being updated because of a user action, for example:
+    /**
+     * The {@link ZenModeConfig} is updated because of a <em>user action</em> performed from a
+     * system surface, such as:
      * <ul>
-     *     <li>{@link NotificationManager#setAutomaticZenRuleState} with a
-     *     {@link Condition#source} equal to {@link Condition#SOURCE_USER_ACTION}.</li>
-     *     <li>Adding, updating, or removing a rule from Settings.</li>
-     *     <li>Directly activating or deactivating/snoozing a rule through some UI affordance (e.g.
-     *     Quick Settings).</li>
+     *     <li>Adding, updating, or removing a rule from Settings.
+     *     <li>Activating or deactivating a rule through the System (e.g. from Settings/Modes).
+     *     <li>Activating or deactivating a rule through SystemUi (e.g. with Quick Settings).
      * </ul>
+     *
+     * <p>This does <em>not</em> include user actions from apps ({@link #ORIGIN_USER_IN_APP} nor
+     * non-user actions from the system ({@link #ORIGIN_SYSTEM}).
      */
-    public static final int UPDATE_ORIGIN_USER = 3;
+    public static final int ORIGIN_USER_IN_SYSTEMUI = 3;
 
     /**
-     * The {@link ZenModeConfig} is being "independently" updated by an app, and not as a result of
-     * a user's action inside that app (for example, activating an {@link AutomaticZenRule} based on
-     * a previously set schedule).
+     * The {@link ZenModeConfig} is updated by an app, but (probably) not as a result of a user
+     * action (for example, activating an {@link AutomaticZenRule} based on a previously set
+     * schedule).
+     *
+     * <p>Note that {@code ORIGIN_APP} is the only option for all public APIs except
+     * {@link NotificationManager#setAutomaticZenRuleState} -- apps cannot claim to be adding or
+     * updating a rule on behalf of the user.
      */
-    public static final int UPDATE_ORIGIN_APP = 4;
+    public static final int ORIGIN_APP = 4;
 
     /**
-     * The {@link ZenModeConfig} is being updated by the System or SystemUI. Note that this only
-     * includes cases where the call is coming from the System/SystemUI but the change is not due to
-     * a user action (e.g. automatically activating a schedule-based rule). If the change is a
-     * result of a user action (e.g. activating a rule by tapping on its QS tile) then
-     * {@link #UPDATE_ORIGIN_USER} is used instead.
+     * The {@link ZenModeConfig} is updated by the System (or SystemUI). This only includes cases
+     * where the call is coming from the System/SystemUI but the change is not due to a user action
+     * (e.g. automatically activating a schedule-based rule, or some service toggling Do Not
+     * Disturb). See {@link #ORIGIN_USER_IN_SYSTEMUI}.
      */
-    public static final int UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI = 5;
+    public static final int ORIGIN_SYSTEM = 5;
 
     /**
      * The {@link ZenModeConfig} is being updated (replaced) because the user's DND configuration
      * is being restored from a backup.
      */
-    public static final int UPDATE_ORIGIN_RESTORE_BACKUP = 6;
+    public static final int ORIGIN_RESTORE_BACKUP = 6;
 
-    @IntDef(prefix = { "UPDATE_ORIGIN_" }, value = {
-            UPDATE_ORIGIN_UNKNOWN,
-            UPDATE_ORIGIN_INIT,
-            UPDATE_ORIGIN_INIT_USER,
-            UPDATE_ORIGIN_USER,
-            UPDATE_ORIGIN_APP,
-            UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
-            UPDATE_ORIGIN_RESTORE_BACKUP
+    /**
+     * The {@link ZenModeConfig} is updated from an app, and the app reports it's the result
+     * of a user action (e.g. tapping a button in the Wellbeing App to start Bedtime Mode).
+     * Corresponds to {@link NotificationManager#setAutomaticZenRuleState} with a
+     * {@link Condition#source} equal to {@link Condition#SOURCE_USER_ACTION}.</li>
+     */
+    public static final int ORIGIN_USER_IN_APP = 7;
+
+    @IntDef(prefix = { "ORIGIN_" }, value = {
+            ORIGIN_UNKNOWN,
+            ORIGIN_INIT,
+            ORIGIN_INIT_USER,
+            ORIGIN_USER_IN_SYSTEMUI,
+            ORIGIN_APP,
+            ORIGIN_SYSTEM,
+            ORIGIN_RESTORE_BACKUP,
+            ORIGIN_USER_IN_APP
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ConfigChangeOrigin {}
+    public @interface ConfigOrigin {}
+
+    /**
+     * Prefix for the ids of implicit Zen rules. Implicit rules are those created automatically
+     * on behalf of apps that call {@link NotificationManager#setNotificationPolicy} or
+     * {@link NotificationManager#setInterruptionFilter}.
+     */
+    private static final String IMPLICIT_RULE_ID_PREFIX = "implicit_"; // + pkg_name
 
     public static final int SOURCE_ANYONE = Policy.PRIORITY_SENDERS_ANY;
     public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;
     public static final int SOURCE_STAR = Policy.PRIORITY_SENDERS_STARRED;
-    public static final int MAX_SOURCE = SOURCE_STAR;
+    private static final int MAX_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_CALLS_SOURCE = SOURCE_STAR;
 
     public static final String MANUAL_RULE_ID = "MANUAL_RULE";
-    public static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
+    public static final String EVENTS_OBSOLETE_RULE_ID = "EVENTS_DEFAULT_RULE";
     public static final String EVERY_NIGHT_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
-    public static final List<String> DEFAULT_RULE_IDS = Arrays.asList(EVERY_NIGHT_DEFAULT_RULE_ID,
-            EVENTS_DEFAULT_RULE_ID);
 
     public static final int[] ALL_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
             Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY };
@@ -211,13 +233,17 @@ public class ZenModeConfig implements Parcelable {
             SUPPRESSED_EFFECT_SCREEN_OFF | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                     | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT;
 
+    private static final int LEGACY_SUPPRESSED_EFFECTS =
+            Policy.SUPPRESSED_EFFECT_SCREEN_ON | Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
+
     // ZenModeConfig XML versions distinguishing key changes.
     public static final int XML_VERSION_ZEN_UPGRADE = 8;
     public static final int XML_VERSION_MODES_API = 11;
+    public static final int XML_VERSION_MODES_UI = 12;
 
-    // TODO: b/310620812 - Update XML_VERSION and update default_zen_config.xml accordingly when
-    //       modes_api is inlined.
-    private static final int XML_VERSION = 10;
+    // TODO: b/310620812, b/344831624 - Update XML_VERSION and update default_zen_config.xml
+    //  accordingly when modes_api / modes_ui are inlined.
+    private static final int XML_VERSION_PRE_MODES = 10;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -262,15 +288,12 @@ public class ZenModeConfig implements Parcelable {
     private static final String CONDITION_ATT_SOURCE = "source";
     private static final String CONDITION_ATT_FLAGS = "flags";
 
-    private static final String ZEN_POLICY_TAG = "zen_policy";
-
     private static final String MANUAL_TAG = "manual";
     private static final String AUTOMATIC_TAG = "automatic";
     private static final String AUTOMATIC_DELETED_TAG = "deleted";
 
     private static final String RULE_ATT_ID = "ruleId";
     private static final String RULE_ATT_ENABLED = "enabled";
-    private static final String RULE_ATT_SNOOZING = "snoozing";
     private static final String RULE_ATT_NAME = "name";
     private static final String RULE_ATT_PKG = "pkg";
     private static final String RULE_ATT_COMPONENT = "component";
@@ -286,6 +309,9 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_ICON = "rule_icon";
     private static final String RULE_ATT_TRIGGER_DESC = "triggerDesc";
     private static final String RULE_ATT_DELETION_INSTANT = "deletionInstant";
+    private static final String RULE_ATT_DISABLED_ORIGIN = "disabledOrigin";
+    private static final String RULE_ATT_LEGACY_SUPPRESSED_EFFECTS = "legacySuppressedEffects";
+    private static final String RULE_ATT_CONDITION_OVERRIDE = "conditionOverride";
 
     private static final String DEVICE_EFFECT_DISPLAY_GRAYSCALE = "zdeDisplayGrayscale";
     private static final String DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY =
@@ -396,20 +422,9 @@ public class ZenModeConfig implements Parcelable {
         return policy;
     }
 
+    @FlaggedApi(Flags.FLAG_MODES_UI)
     public static ZenModeConfig getDefaultConfig() {
         ZenModeConfig config = new ZenModeConfig();
-
-        EventInfo eventInfo = new EventInfo();
-        eventInfo.reply = REPLY_YES_OR_MAYBE;
-        ZenRule events = new ZenRule();
-        events.id = EVENTS_DEFAULT_RULE_ID;
-        events.conditionId = toEventConditionId(eventInfo);
-        events.component = ComponentName.unflattenFromString(
-                "android/com.android.server.notification.EventConditionProvider");
-        events.enabled = false;
-        events.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        events.pkg = "android";
-        config.automaticRules.put(EVENTS_DEFAULT_RULE_ID, events);
 
         ScheduleInfo scheduleInfo = new ScheduleInfo();
         scheduleInfo.days = new int[] {1, 2, 3, 4, 5, 6, 7};
@@ -429,6 +444,13 @@ public class ZenModeConfig implements Parcelable {
         return config;
     }
 
+    // TODO: b/368247671 - Can be made a constant again when modes_ui is inlined
+    public static List<String> getDefaultRuleIds() {
+        return Flags.modesUi()
+            ? List.of(EVERY_NIGHT_DEFAULT_RULE_ID)
+            : List.of(EVERY_NIGHT_DEFAULT_RULE_ID, EVENTS_OBSOLETE_RULE_ID);
+    }
+
     void ensureManualZenRule() {
         if (manualRule == null) {
             final ZenRule newRule = new ZenRule();
@@ -437,7 +459,7 @@ public class ZenModeConfig implements Parcelable {
             newRule.conditionId = Uri.EMPTY;
             newRule.allowManualInvocation = true;
             newRule.zenPolicy = getDefaultZenPolicy();
-            newRule.pkg = "android";
+            newRule.pkg = PACKAGE_ANDROID;
             manualRule = newRule;
         }
     }
@@ -926,7 +948,13 @@ public class ZenModeConfig implements Parcelable {
     }
 
     public static int getCurrentXmlVersion() {
-        return Flags.modesApi() ? XML_VERSION_MODES_API : XML_VERSION;
+        if (Flags.modesUi()) {
+            return XML_VERSION_MODES_UI;
+        } else if (Flags.modesApi()) {
+            return XML_VERSION_MODES_API;
+        } else {
+            return XML_VERSION_PRE_MODES;
+        }
     }
 
     public static ZenModeConfig readXml(TypedXmlPullParser parser)
@@ -940,15 +968,9 @@ public class ZenModeConfig implements Parcelable {
         rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
         boolean readSuppressedEffects = false;
         boolean readManualRule = false;
+        boolean readManualRuleWithoutPolicy = false;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             tag = parser.getName();
-            if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
-                if (Flags.modesUi() && !readManualRule) {
-                    // migrate from fields on config into manual rule
-                    rt.manualRule.zenPolicy = rt.toZenPolicy();
-                }
-                return rt;
-            }
             if (type == XmlPullParser.START_TAG) {
                 if (ALLOW_TAG.equals(tag)) {
                     rt.allowCalls = safeBoolean(parser, ALLOW_ATT_CALLS,
@@ -1018,14 +1040,20 @@ public class ZenModeConfig implements Parcelable {
                             DEFAULT_SUPPRESSED_VISUAL_EFFECTS);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
-                    if (rt.manualRule != null) {
-                        readManualRule = true;
+                    // manualRule.enabled can never be false, but it was broken in some builds.
+                    rt.manualRule.enabled = true;
+                    // Manual rule may be present prior to modes_ui if it were on, but in that
+                    // case it would not have a set policy, so make note of the need to set
+                    // it up later.
+                    readManualRule = true;
+                    if (rt.manualRule.zenPolicy == null) {
+                        readManualRuleWithoutPolicy = true;
                     }
                 } else if (AUTOMATIC_TAG.equals(tag)
                         || (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag))) {
                     final String id = parser.getAttributeValue(null, RULE_ATT_ID);
-                    final ZenRule automaticRule = readRuleXml(parser);
-                    if (id != null && automaticRule != null) {
+                    if (id != null) {
+                        final ZenRule automaticRule = readRuleXml(parser);
                         automaticRule.id = id;
                         if (Flags.modesApi() && AUTOMATIC_DELETED_TAG.equals(tag)) {
                             String deletedRuleKey = deletedRuleKey(automaticRule);
@@ -1040,6 +1068,23 @@ public class ZenModeConfig implements Parcelable {
                     rt.areChannelsBypassingDnd = safeBoolean(parser,
                             STATE_ATT_CHANNELS_BYPASSING_DND, DEFAULT_CHANNELS_BYPASSING_DND);
                 }
+            }
+            if (type == XmlPullParser.END_TAG && ZEN_TAG.equals(tag)) {
+                if (Flags.modesUi() && (!readManualRule || readManualRuleWithoutPolicy)) {
+                    // migrate from fields on config into manual rule
+                    rt.manualRule.zenPolicy = rt.toZenPolicy();
+                    if (readManualRuleWithoutPolicy) {
+                        // indicates that the xml represents a pre-modes_ui XML with an enabled
+                        // manual rule; set rule active, and fill in other fields as would be done
+                        // in ensureManualZenRule() and setManualZenMode().
+                        rt.manualRule.pkg = PACKAGE_ANDROID;
+                        rt.manualRule.type = AutomaticZenRule.TYPE_OTHER;
+                        rt.manualRule.condition = new Condition(
+                                rt.manualRule.conditionId != null ? rt.manualRule.conditionId
+                                        : Uri.EMPTY, "", Condition.STATE_TRUE);
+                    }
+                }
+                return rt;
             }
         }
         throw new IllegalStateException("Failed to reach END_DOCUMENT");
@@ -1096,7 +1141,7 @@ public class ZenModeConfig implements Parcelable {
 
         if (manualRule != null) {
             out.startTag(null, MANUAL_TAG);
-            writeRuleXml(manualRule, out);
+            writeRuleXml(manualRule, out, forBackup);
             out.endTag(null, MANUAL_TAG);
         }
         final int N = automaticRules.size();
@@ -1105,7 +1150,7 @@ public class ZenModeConfig implements Parcelable {
             final ZenRule automaticRule = automaticRules.valueAt(i);
             out.startTag(null, AUTOMATIC_TAG);
             out.attribute(null, RULE_ATT_ID, id);
-            writeRuleXml(automaticRule, out);
+            writeRuleXml(automaticRule, out, forBackup);
             out.endTag(null, AUTOMATIC_TAG);
         }
         if (Flags.modesApi() && !forBackup) {
@@ -1113,7 +1158,7 @@ public class ZenModeConfig implements Parcelable {
                 final ZenRule deletedRule = deletedRules.valueAt(i);
                 out.startTag(null, AUTOMATIC_DELETED_TAG);
                 out.attribute(null, RULE_ATT_ID, deletedRule.id);
-                writeRuleXml(deletedRule, out);
+                writeRuleXml(deletedRule, out, forBackup);
                 out.endTag(null, AUTOMATIC_DELETED_TAG);
             }
         }
@@ -1125,16 +1170,13 @@ public class ZenModeConfig implements Parcelable {
         out.endTag(null, ZEN_TAG);
     }
 
+    @NonNull
     public static ZenRule readRuleXml(TypedXmlPullParser parser) {
         final ZenRule rt = new ZenRule();
         rt.enabled = safeBoolean(parser, RULE_ATT_ENABLED, true);
         rt.name = parser.getAttributeValue(null, RULE_ATT_NAME);
         final String zen = parser.getAttributeValue(null, RULE_ATT_ZEN);
-        rt.zenMode = tryParseZenMode(zen, -1);
-        if (rt.zenMode == -1) {
-            Slog.w(TAG, "Bad zen mode in rule xml:" + zen);
-            return null;
-        }
+        rt.zenMode = tryParseZenMode(zen, ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         rt.conditionId = safeUri(parser, RULE_ATT_CONDITION_ID);
         rt.component = safeComponentName(parser, RULE_ATT_COMPONENT);
         rt.configurationActivity = safeComponentName(parser, RULE_ATT_CONFIG_ACTIVITY);
@@ -1170,11 +1212,20 @@ public class ZenModeConfig implements Parcelable {
             if (deletionInstant != null) {
                 rt.deletionInstant = Instant.ofEpochMilli(deletionInstant);
             }
+            if (Flags.modesUi()) {
+                rt.disabledOrigin = safeInt(parser, RULE_ATT_DISABLED_ORIGIN,
+                        ORIGIN_UNKNOWN);
+                rt.legacySuppressedEffects = safeInt(parser,
+                        RULE_ATT_LEGACY_SUPPRESSED_EFFECTS, 0);
+                rt.conditionOverride = safeInt(parser, RULE_ATT_CONDITION_OVERRIDE,
+                        ZenRule.OVERRIDE_NONE);
+            }
         }
         return rt;
     }
 
-    public static void writeRuleXml(ZenRule rule, TypedXmlSerializer out) throws IOException {
+    public static void writeRuleXml(ZenRule rule, TypedXmlSerializer out, boolean forBackup)
+            throws IOException {
         out.attributeBoolean(null, RULE_ATT_ENABLED, rule.enabled);
         if (rule.name != null) {
             out.attribute(null, RULE_ATT_NAME, rule.name);
@@ -1223,6 +1274,14 @@ public class ZenModeConfig implements Parcelable {
             if (rule.deletionInstant != null) {
                 out.attributeLong(null, RULE_ATT_DELETION_INSTANT,
                         rule.deletionInstant.toEpochMilli());
+            }
+            if (Flags.modesUi()) {
+                out.attributeInt(null, RULE_ATT_DISABLED_ORIGIN, rule.disabledOrigin);
+                out.attributeInt(null, RULE_ATT_LEGACY_SUPPRESSED_EFFECTS,
+                        rule.legacySuppressedEffects);
+                if (rule.conditionOverride == ZenRule.OVERRIDE_ACTIVATE && !forBackup) {
+                    out.attributeInt(null, RULE_ATT_CONDITION_OVERRIDE, rule.conditionOverride);
+                }
             }
         }
     }
@@ -1898,6 +1957,13 @@ public class ZenModeConfig implements Parcelable {
                             ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST))) {
                 suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
             }
+
+            // Restore legacy suppressed effects (obsolete fields which are not in ZenPolicy).
+            // These are deprecated and have no effect on behavior, however apps should get them
+            // back if provided to setNotificationPolicy() earlier.
+            suppressedVisualEffects &= ~LEGACY_SUPPRESSED_EFFECTS;
+            suppressedVisualEffects |=
+                    (LEGACY_SUPPRESSED_EFFECTS & manualRule.legacySuppressedEffects);
         } else {
             if (isAllowConversations()) {
                 priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
@@ -1991,6 +2057,8 @@ public class ZenModeConfig implements Parcelable {
         if (policy == null) return;
         if (Flags.modesUi()) {
             manualRule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
+            manualRule.legacySuppressedEffects =
+                    LEGACY_SUPPRESSED_EFFECTS & policy.suppressedVisualEffects;
         } else {
             setAllowAlarms((policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0);
             allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
@@ -2373,7 +2441,7 @@ public class ZenModeConfig implements Parcelable {
 
         public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
         public String calName;  // CalendarContract.Calendars.DISPLAY_NAME, or null for any
-        public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
+        @Nullable public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
         public int reply;
 
         @Override
@@ -2405,7 +2473,44 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    // ==== Built-in system condition: custom manual ====
+
+    public static final String CUSTOM_MANUAL_PATH = "custom_manual";
+    private static final Uri CUSTOM_MANUAL_CONDITION_ID =
+            new Uri.Builder().scheme(Condition.SCHEME)
+                    .authority(SYSTEM_AUTHORITY)
+                    .appendPath(CUSTOM_MANUAL_PATH)
+                    .build();
+
+    /** Returns the condition id used for manual (not automatically triggered) custom rules. */
+    public static Uri toCustomManualConditionId() {
+        return CUSTOM_MANUAL_CONDITION_ID;
+    }
+
+    /**
+     * Returns whether the supplied {@link Uri} corresponds to the condition id used for manual (not
+     * automatically triggered) custom rules.
+     */
+    public static boolean isValidCustomManualConditionId(Uri conditionId) {
+        return CUSTOM_MANUAL_CONDITION_ID.equals(conditionId);
+    }
+
+    /** Returns the {@link ComponentName} of the custom manual condition provider. */
+    public static ComponentName getCustomManualConditionProvider() {
+        return new ComponentName(SYSTEM_AUTHORITY, "CustomManualConditionProvider");
+    }
+
     // ==== End built-in system conditions ====
+
+    /** Generate the rule id for the implicit rule for the specified package. */
+    public static String implicitRuleId(String forPackage) {
+        return IMPLICIT_RULE_ID_PREFIX + forPackage;
+    }
+
+    /** Returns whether the rule id corresponds to an implicit rule. */
+    public static boolean isImplicitRuleId(@NonNull String ruleId) {
+        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
+    }
 
     private static int[] tryParseHourAndMinute(String value) {
         if (TextUtils.isEmpty(value)) return null;
@@ -2451,14 +2556,38 @@ public class ZenModeConfig implements Parcelable {
         if (!Flags.modesUi()) {
             return manualRule != null;
         }
-        return manualRule != null && manualRule.isAutomaticActive();
+        return manualRule != null && manualRule.isActive();
     }
 
     public static class ZenRule implements Parcelable {
+
+        /** No manual override. Rule owner can decide its state. */
+        public static final int OVERRIDE_NONE = 0;
+        /**
+         * User has manually activated a mode. This will temporarily overrule the rule owner's
+         * decision to deactivate it (see {@link #reconsiderConditionOverride}).
+         */
+        public static final int OVERRIDE_ACTIVATE = 1;
+        /**
+         * User has manually deactivated an active mode, or setting ZEN_MODE_OFF (for the few apps
+         * still allowed to do that) snoozed the mode. This will temporarily overrule the rule
+         * owner's decision to activate it (see {@link #reconsiderConditionOverride}).
+         */
+        public static final int OVERRIDE_DEACTIVATE = 2;
+
+        @IntDef(prefix = { "OVERRIDE" }, value = {
+                OVERRIDE_NONE,
+                OVERRIDE_ACTIVATE,
+                OVERRIDE_DEACTIVATE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ConditionOverride {}
+
         @UnsupportedAppUsage
         public boolean enabled;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public boolean snoozing;         // user manually disabled this instance
+        @Deprecated
+        public boolean snoozing; // user manually disabled this instance. Obsolete with MODES_UI
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String name;              // required for automatic
         @UnsupportedAppUsage
@@ -2481,12 +2610,31 @@ public class ZenModeConfig implements Parcelable {
         @AutomaticZenRule.Type
         public int type = AutomaticZenRule.TYPE_UNKNOWN;
         public String triggerDescription;
-        public String iconResName;
+        @Nullable public String iconResName;
         public boolean allowManualInvocation;
         @AutomaticZenRule.ModifiableField public int userModifiedFields;
         @ZenPolicy.ModifiableField public int zenPolicyUserModifiedFields;
         @ZenDeviceEffects.ModifiableField public int zenDeviceEffectsUserModifiedFields;
         @Nullable public Instant deletionInstant; // Only set on deleted rules.
+        @FlaggedApi(Flags.FLAG_MODES_UI)
+        @ConfigOrigin
+        public int disabledOrigin = ORIGIN_UNKNOWN;
+        // The obsolete suppressed effects in NM.Policy (SCREEN_ON, SCREEN_OFF) cannot be put in a
+        // ZenPolicy, so we store them here, only for the manual rule.
+        @FlaggedApi(Flags.FLAG_MODES_UI)
+        int legacySuppressedEffects;
+        /**
+         * Signals a user's action to (temporarily or permanently) activate or deactivate this
+         * rule, overruling the condition set by the owner.
+         *
+         * <p>An {@link #OVERRIDE_ACTIVATE} is stored to disk, since we want it to survive reboots
+         * (but it's not included in B&R), while an {@link #OVERRIDE_DEACTIVATE} is not (meaning
+         * that snoozed rules may reactivate on reboot). It might be reset by certain owner-provided
+         * state transitions as well.
+         */
+        @FlaggedApi(Flags.FLAG_MODES_UI)
+        @ConditionOverride
+        int conditionOverride = OVERRIDE_NONE;
 
         public ZenRule() { }
 
@@ -2524,6 +2672,11 @@ public class ZenModeConfig implements Parcelable {
                 zenDeviceEffectsUserModifiedFields = source.readInt();
                 if (source.readInt() == 1) {
                     deletionInstant = Instant.ofEpochMilli(source.readLong());
+                }
+                if (Flags.modesUi()) {
+                    disabledOrigin = source.readInt();
+                    legacySuppressedEffects = source.readInt();
+                    conditionOverride = source.readInt();
                 }
             }
         }
@@ -2599,6 +2752,11 @@ public class ZenModeConfig implements Parcelable {
                 } else {
                     dest.writeInt(0);
                 }
+                if (Flags.modesUi()) {
+                    dest.writeInt(disabledOrigin);
+                    dest.writeInt(legacySuppressedEffects);
+                    dest.writeInt(conditionOverride);
+                }
             }
         }
 
@@ -2608,9 +2766,16 @@ public class ZenModeConfig implements Parcelable {
                     .append("id=").append(id)
                     .append(",state=").append(condition == null ? "STATE_FALSE"
                             : Condition.stateToString(condition.state))
-                    .append(",enabled=").append(String.valueOf(enabled).toUpperCase())
-                    .append(",snoozing=").append(snoozing)
-                    .append(",name=").append(name)
+                    .append(",enabled=").append(String.valueOf(enabled).toUpperCase());
+
+            if (Flags.modesUi()) {
+                sb.append(",conditionOverride=")
+                        .append(conditionOverrideToString(conditionOverride));
+            } else {
+                sb.append(",snoozing=").append(snoozing);
+            }
+
+            sb.append(",name=").append(name)
                     .append(",zenMode=").append(Global.zenModeToString(zenMode))
                     .append(",conditionId=").append(conditionId)
                     .append(",pkg=").append(pkg)
@@ -2644,9 +2809,22 @@ public class ZenModeConfig implements Parcelable {
                 if (deletionInstant != null) {
                     sb.append(",deletionInstant=").append(deletionInstant);
                 }
+                if (Flags.modesUi()) {
+                    sb.append(",disabledOrigin=").append(disabledOrigin);
+                    sb.append(",legacySuppressedEffects=").append(legacySuppressedEffects);
+                }
             }
 
             return sb.append(']').toString();
+        }
+
+        private static String conditionOverrideToString(@ConditionOverride int value) {
+            return switch(value) {
+                case OVERRIDE_ACTIVATE -> "OVERRIDE_ACTIVATE";
+                case OVERRIDE_DEACTIVATE -> "OVERRIDE_DEACTIVATE";
+                case OVERRIDE_NONE -> "OVERRIDE_NONE";
+                default -> "UNKNOWN";
+            };
         }
 
         /** @hide */
@@ -2659,7 +2837,11 @@ public class ZenModeConfig implements Parcelable {
             proto.write(ZenRuleProto.CREATION_TIME_MS, creationTime);
             proto.write(ZenRuleProto.ENABLED, enabled);
             proto.write(ZenRuleProto.ENABLER, enabler);
-            proto.write(ZenRuleProto.IS_SNOOZING, snoozing);
+            if (Flags.modesApi() && Flags.modesUi()) {
+                proto.write(ZenRuleProto.IS_SNOOZING, conditionOverride == OVERRIDE_DEACTIVATE);
+            } else {
+                proto.write(ZenRuleProto.IS_SNOOZING, snoozing);
+            }
             proto.write(ZenRuleProto.ZEN_MODE, zenMode);
             if (conditionId != null) {
                 proto.write(ZenRuleProto.CONDITION_ID, conditionId.toString());
@@ -2697,7 +2879,7 @@ public class ZenModeConfig implements Parcelable {
                     && other.modified == modified;
 
             if (Flags.modesApi()) {
-                return finalEquals
+                finalEquals = finalEquals
                         && Objects.equals(other.zenDeviceEffects, zenDeviceEffects)
                         && other.allowManualInvocation == allowManualInvocation
                         && Objects.equals(other.iconResName, iconResName)
@@ -2708,6 +2890,13 @@ public class ZenModeConfig implements Parcelable {
                         && other.zenDeviceEffectsUserModifiedFields
                             == zenDeviceEffectsUserModifiedFields
                         && Objects.equals(other.deletionInstant, deletionInstant);
+
+                if (Flags.modesUi()) {
+                    finalEquals = finalEquals
+                            && other.disabledOrigin == disabledOrigin
+                            && other.legacySuppressedEffects == legacySuppressedEffects
+                            && other.conditionOverride == conditionOverride;
+                }
             }
 
             return finalEquals;
@@ -2716,11 +2905,22 @@ public class ZenModeConfig implements Parcelable {
         @Override
         public int hashCode() {
             if (Flags.modesApi()) {
-                return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
-                        component, configurationActivity, pkg, id, enabler, zenPolicy,
-                        zenDeviceEffects, modified, allowManualInvocation, iconResName,
-                        triggerDescription, type, userModifiedFields, zenPolicyUserModifiedFields,
-                        zenDeviceEffectsUserModifiedFields, deletionInstant);
+                if (Flags.modesUi()) {
+                    return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                            component, configurationActivity, pkg, id, enabler, zenPolicy,
+                            zenDeviceEffects, modified, allowManualInvocation, iconResName,
+                            triggerDescription, type, userModifiedFields,
+                            zenPolicyUserModifiedFields, zenDeviceEffectsUserModifiedFields,
+                            deletionInstant, disabledOrigin, legacySuppressedEffects,
+                            conditionOverride);
+                } else {
+                    return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
+                            component, configurationActivity, pkg, id, enabler, zenPolicy,
+                            zenDeviceEffects, modified, allowManualInvocation, iconResName,
+                            triggerDescription, type, userModifiedFields,
+                            zenPolicyUserModifiedFields, zenDeviceEffectsUserModifiedFields,
+                            deletionInstant);
+                }
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
@@ -2738,8 +2938,73 @@ public class ZenModeConfig implements Parcelable {
             }
         }
 
-        public boolean isAutomaticActive() {
-            return enabled && !snoozing && getPkg() != null && isTrueOrUnknown();
+        public boolean isActive() {
+            if (Flags.modesApi() && Flags.modesUi()) {
+                if (!enabled || getPkg() == null) {
+                    return false;
+                } else if (conditionOverride == OVERRIDE_ACTIVATE) {
+                    return true;
+                } else if (conditionOverride == OVERRIDE_DEACTIVATE) {
+                    return false;
+                } else {
+                    return isTrueOrUnknown();
+                }
+            } else {
+                return enabled && !snoozing && getPkg() != null && isTrueOrUnknown();
+            }
+        }
+
+        @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+        @ConditionOverride
+        public int getConditionOverride() {
+            if (Flags.modesApi() && Flags.modesUi()) {
+                return conditionOverride;
+            } else {
+                return snoozing ? OVERRIDE_DEACTIVATE : OVERRIDE_NONE;
+            }
+        }
+
+        public void setConditionOverride(@ConditionOverride int value) {
+            if (Flags.modesApi() && Flags.modesUi()) {
+                conditionOverride = value;
+            } else {
+                if (value == OVERRIDE_ACTIVATE) {
+                    Slog.wtf(TAG, "Shouldn't set OVERRIDE_ACTIVATE if MODES_UI is off");
+                } else if (value == OVERRIDE_DEACTIVATE) {
+                    snoozing = true;
+                } else if (value == OVERRIDE_NONE) {
+                    snoozing = false;
+                }
+            }
+        }
+
+        public void resetConditionOverride() {
+            setConditionOverride(OVERRIDE_NONE);
+        }
+
+        /**
+         * Possibly remove the override, depending on the rule owner's intended state.
+         *
+         * <p>This allows rule owners to "take over" manually-provided state with their smartness,
+         * but only once both agree.
+         *
+         * <p>For example, a manually activated rule wins over rule owner's opinion that it should
+         * be off, until the owner says it should be on, at which point it will turn off (without
+         * manual intervention) when the rule owner says it should be off. And symmetrically for
+         * manual deactivation (which used to be called "snoozing").
+         */
+        public void reconsiderConditionOverride() {
+            if (Flags.modesApi() && Flags.modesUi()) {
+                if (conditionOverride == OVERRIDE_ACTIVATE && isTrueOrUnknown()) {
+                    resetConditionOverride();
+                } else if (conditionOverride == OVERRIDE_DEACTIVATE && !isTrueOrUnknown()) {
+                    resetConditionOverride();
+                }
+            } else {
+                if (snoozing && !isTrueOrUnknown()) {
+                    snoozing = false;
+                }
+            }
         }
 
         public String getPkg() {
@@ -2883,7 +3148,7 @@ public class ZenModeConfig implements Parcelable {
         long latestEndTime = -1;
 
         // DND turned on by manual rule
-        if (config.manualRule != null) {
+        if (config.isManualActive()) {
             final Uri id = config.manualRule.conditionId;
             if (config.manualRule.enabler != null) {
                 // app triggered manual rule
@@ -2892,7 +3157,7 @@ public class ZenModeConfig implements Parcelable {
                     secondaryText = appName;
                 }
             } else {
-                if (id == null) {
+                if (id == null || Uri.EMPTY.equals(id)) {
                     // Do not disturb manually triggered to remain on forever until turned off
                     if (describeForeverCondition) {
                         return context.getString(R.string.zen_mode_forever);
@@ -2913,7 +3178,7 @@ public class ZenModeConfig implements Parcelable {
 
         // DND turned on by an automatic rule
         for (ZenRule automaticRule : config.automaticRules.values()) {
-            if (automaticRule.isAutomaticActive()) {
+            if (automaticRule.isActive()) {
                 if (isValidEventConditionId(automaticRule.conditionId)
                         || isValidScheduleConditionId(automaticRule.conditionId)) {
                     // set text if automatic rule end time is the latest active rule end time

@@ -16,6 +16,8 @@
 
 package android.app.servertransaction;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
@@ -33,16 +35,47 @@ import java.util.Objects;
 
 /**
  * Message to deliver window insets control change info.
+ *
  * @hide
  */
 public class WindowStateInsetsControlChangeItem extends WindowStateTransactionItem {
 
     private static final String TAG = "WindowStateInsetsControlChangeItem";
 
-    private InsetsState mInsetsState;
+    @NonNull
+    private final InsetsState mInsetsState;
+
+    @NonNull
+    private final InsetsSourceControl.Array mActiveControls;
+
+    public WindowStateInsetsControlChangeItem(@NonNull IWindow window,
+            @NonNull InsetsState insetsState, @NonNull InsetsSourceControl.Array activeControls) {
+        this(window, insetsState, activeControls, true /* copyActiveControls */);
+    }
 
     @VisibleForTesting
-    public InsetsSourceControl.Array mActiveControls;
+    public WindowStateInsetsControlChangeItem(@NonNull IWindow window,
+            @NonNull InsetsState insetsState,
+            @NonNull InsetsSourceControl.Array activeControls, boolean copyActiveControls) {
+        super(window);
+        mInsetsState = new InsetsState(insetsState, true /* copySources */);
+        if (copyActiveControls) {
+            mActiveControls = copy(requireNonNull(activeControls));
+        } else {
+            mActiveControls = requireNonNull(activeControls);
+        }
+    }
+
+    @NonNull
+    private static InsetsSourceControl.Array copy(@NonNull InsetsSourceControl.Array controls) {
+        final InsetsSourceControl.Array copiedControls = new InsetsSourceControl.Array(
+                controls, true /* copyControls */);
+        // This source control is an extra copy if the client is not local. By setting
+        // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
+        // SurfaceControl.writeToParcel.
+        copiedControls.setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
+        return copiedControls;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull IWindow window,
@@ -61,38 +94,6 @@ public class WindowStateInsetsControlChangeItem extends WindowStateTransactionIt
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
-    // ObjectPoolItem implementation
-
-    private WindowStateInsetsControlChangeItem() {}
-
-    /** Obtains an instance initialized with provided params. */
-    public static WindowStateInsetsControlChangeItem obtain(@NonNull IWindow window,
-            @NonNull InsetsState insetsState, @NonNull InsetsSourceControl.Array activeControls) {
-        WindowStateInsetsControlChangeItem instance =
-                ObjectPool.obtain(WindowStateInsetsControlChangeItem.class);
-        if (instance == null) {
-            instance = new WindowStateInsetsControlChangeItem();
-        }
-        instance.setWindow(window);
-        instance.mInsetsState = new InsetsState(insetsState, true /* copySources */);
-        instance.mActiveControls = new InsetsSourceControl.Array(
-                activeControls, true /* copyControls */);
-        // This source control is an extra copy if the client is not local. By setting
-        // PARCELABLE_WRITE_RETURN_VALUE, the leash will be released at the end of
-        // SurfaceControl.writeToParcel.
-        instance.mActiveControls.setParcelableFlags(PARCELABLE_WRITE_RETURN_VALUE);
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mInsetsState = null;
-        mActiveControls = null;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
     /** Writes to Parcel. */
@@ -106,9 +107,8 @@ public class WindowStateInsetsControlChangeItem extends WindowStateTransactionIt
     /** Reads from Parcel. */
     private WindowStateInsetsControlChangeItem(@NonNull Parcel in) {
         super(in);
-        mInsetsState = in.readTypedObject(InsetsState.CREATOR);
-        mActiveControls = in.readTypedObject(InsetsSourceControl.Array.CREATOR);
-
+        mInsetsState = requireNonNull(in.readTypedObject(InsetsState.CREATOR));
+        mActiveControls = requireNonNull(in.readTypedObject(InsetsSourceControl.Array.CREATOR));
     }
 
     public static final @NonNull Creator<WindowStateInsetsControlChangeItem> CREATOR =

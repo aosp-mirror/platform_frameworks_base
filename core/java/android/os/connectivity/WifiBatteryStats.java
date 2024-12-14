@@ -19,9 +19,11 @@ import static android.os.BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,6 +36,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class WifiBatteryStats implements Parcelable {
     private final long mLoggingDurationMillis;
     private final long mKernelActiveTimeMillis;
@@ -150,7 +153,13 @@ public final class WifiBatteryStats implements Parcelable {
                 mMonitoredRailChargeConsumedMaMillis);
     }
 
-    /** @hide **/
+    /**
+     * This constructor should only be used in tests.
+     * @hide
+     */
+    @FlaggedApi(
+            com.android.server.power.optimization.Flags.FLAG_STREAMLINED_CONNECTIVITY_BATTERY_STATS)
+    @TestApi
     public WifiBatteryStats(long loggingDurationMillis, long kernelActiveTimeMillis,
             long numPacketsTx, long numBytesTx, long numPacketsRx, long numBytesRx,
             long sleepTimeMillis, long scanTimeMillis, long idleTimeMillis, long rxTimeMillis,

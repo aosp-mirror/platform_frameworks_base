@@ -39,6 +39,7 @@ import android.view.WindowManagerGlobal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A controller to manage the autofill requests for the {@link Activity}.
@@ -71,6 +72,7 @@ public final class AutofillClientController implements AutofillManager.AutofillC
     private AutofillPopupWindow mAutofillPopupWindow;
     private boolean mAutoFillResetNeeded;
     private boolean mAutoFillIgnoreFirstResumePause;
+    private Boolean mRelayoutFix;
 
     /**
      * AutofillClientController constructor.
@@ -84,6 +86,25 @@ public final class AutofillClientController implements AutofillManager.AutofillC
             mAutofillManager = mActivity.getSystemService(AutofillManager.class);
         }
         return mAutofillManager;
+    }
+
+    /**
+     * Whether to apply relayout fixes.
+     *
+     * @hide
+     */
+    public boolean isRelayoutFixEnabled() {
+        AutofillManager autofillManager = getAutofillManager();
+        if (autofillManager == null) {
+            if (Helper.sDebug) {
+                Log.d(TAG, "isRelayoutFixEnabled() : getAutofillManager() == null");
+            }
+            return false;
+        }
+        if (mRelayoutFix == null) {
+            mRelayoutFix = autofillManager.isRelayoutFixEnabled();
+        }
+        return mRelayoutFix;
     }
 
     // ------------------ Called for Activity events ------------------
@@ -119,7 +140,54 @@ public final class AutofillClientController implements AutofillManager.AutofillC
      * Called when the {@link Activity#onResume()} is called.
      */
     public void onActivityResumed() {
+        if (Helper.sVerbose) {
+            Log.v(TAG, "onActivityResumed()");
+        }
+        if (isRelayoutFixEnabled()) {
+            // Do nothing here. We'll handle it in onActivityPostResumed()
+            return;
+        }
+        if (Helper.sVerbose) {
+            Log.v(TAG, "onActivityResumed(): Relayout fix not enabled");
+        }
+        forResume();
+    }
+
+    /**
+     * Called when the {@link Activity#onPostResume()} is called.
+     */
+    public void onActivityPostResumed() {
+        if (Helper.sVerbose) {
+            Log.v(TAG, "onActivityPostResumed()");
+        }
+        if (!isRelayoutFixEnabled()) {
+            return;
+        }
+        if (Helper.sVerbose) {
+            Log.v(TAG, "onActivityPostResumed(): Relayout fix enabled");
+        }
+        forResume();
+    }
+
+    /**
+     * Code to execute when an app has resumed (or is about to resume)
+     */
+    private void forResume() {
         enableAutofillCompatibilityIfNeeded();
+        boolean relayoutFix = isRelayoutFixEnabled();
+        if (relayoutFix) {
+            if (getAutofillManager().shouldRetryFill()) {
+                if (Helper.sVerbose) {
+                    Log.v(TAG, "forResume(): Autofill potential relayout. Retrying fill.");
+                }
+                getAutofillManager().attemptRefill();
+            } else {
+                if (Helper.sVerbose) {
+                    Log.v(TAG, "forResume(): Not attempting refill.");
+                }
+            }
+        }
+
         if (mAutoFillResetNeeded) {
             if (!mAutoFillIgnoreFirstResumePause) {
                 View focus = mActivity.getCurrentFocus();
@@ -131,7 +199,16 @@ public final class AutofillClientController implements AutofillManager.AutofillC
                     // ViewRootImpl.performTraversals() changes window visibility to VISIBLE.
                     // So we cannot call View.notifyEnterOrExited() which will do nothing
                     // when View.isVisibleToUser() is false.
-                    getAutofillManager().notifyViewEntered(focus);
+                    if (relayoutFix && getAutofillManager().isAuthenticationPending()) {
+                        if (Helper.sVerbose) {
+                            Log.v(TAG, "forResume(): ignoring focus due to auth pending");
+                        }
+                    } else {
+                        if (Helper.sVerbose) {
+                            Log.v(TAG, "forResume(): notifyViewEntered");
+                        }
+                        getAutofillManager().notifyViewEntered(focus);
+                    }
                 }
             }
         }
@@ -427,6 +504,22 @@ public final class AutofillClientController implements AutofillManager.AutofillC
     }
 
     @Override
+    public List<View> autofillClientFindAutofillableViewsByTraversal() {
+        final ArrayList<View> views = new ArrayList<>();
+        final ArrayList<ViewRootImpl> roots =
+                WindowManagerGlobal.getInstance().getRootViews(mActivity.getActivityToken());
+
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+
+            if (rootView != null) {
+                rootView.findAutofillableViewsByTraversal(views);
+            }
+        }
+        return views;
+    }
+
+    @Override
     public boolean autofillClientIsFillUiShowing() {
         return mAutofillPopupWindow != null && mAutofillPopupWindow.isShowing();
     }
@@ -495,5 +588,10 @@ public final class AutofillClientController implements AutofillManager.AutofillC
         } catch (IntentSender.SendIntentException e) {
             Log.e(TAG, "authenticate() failed for intent:" + intent, e);
         }
+    }
+
+    @Override
+    public boolean isActivityResumed() {
+        return mActivity.isResumed();
     }
 }

@@ -23,9 +23,13 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.Flags
 import com.android.systemui.Gefingerpoken
+import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.flags.Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.ui.view.WindowRootView
@@ -34,6 +38,7 @@ import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -67,28 +72,23 @@ private constructor(
     private val viewUtil: ViewUtil,
     private val configurationController: ConfigurationController,
     private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
+    private val darkIconDispatcher: DarkIconDispatcher,
+    private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
 ) : ViewController<PhoneStatusBarView>(view) {
 
-    private lateinit var statusContainer: View
+    private lateinit var battery: BatteryMeterView
+    private lateinit var clock: Clock
+    private lateinit var startSideContainer: View
+    private lateinit var endSideContainer: View
 
-    private val configurationListener =
-        object : ConfigurationController.ConfigurationListener {
-            override fun onDensityOrFontScaleChanged() {
-                mView.onDensityOrFontScaleChanged()
-            }
-        }
-
-    override fun onViewAttached() {
-        statusContainer = mView.requireViewById(R.id.system_icons)
-        statusContainer.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer)
-        )
-        statusContainer.setOnTouchListener(object : View.OnTouchListener {
+    private val iconsOnTouchListener =
+        object : View.OnTouchListener {
             override fun onTouch(v: View, event: MotionEvent): Boolean {
-                // We want to handle only mouse events here to avoid stealing finger touches from
-                // status bar which expands shade when swiped down on. We're using onTouchListener
-                // instead of onClickListener as the later will lead to isClickable being set to
-                // true and hence ALL touches always being intercepted. See [View.OnTouchEvent]
+                // We want to handle only mouse events here to avoid stealing finger touches
+                // from status bar which expands shade when swiped down on. See b/326097469.
+                // We're using onTouchListener instead of onClickListener as the later will lead
+                // to isClickable being set to true and hence ALL touches always being
+                // intercepted. See [View.OnTouchEvent]
                 if (event.source == InputDevice.SOURCE_MOUSE) {
                     if (event.action == MotionEvent.ACTION_UP) {
                         v.performClick()
@@ -98,7 +98,20 @@ private constructor(
                 }
                 return false
             }
-        })
+        }
+
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onDensityOrFontScaleChanged() {
+                clock.onDensityOrFontScaleChanged()
+            }
+        }
+
+    override fun onViewAttached() {
+        clock = mView.requireViewById(R.id.clock)
+        battery = mView.requireViewById(R.id.battery)
+        addDarkReceivers()
+        addCursorSupportToIconContainers()
 
         progressProvider?.setReadyToHandleTransition(true)
         configurationController.addCallback(configurationListener)
@@ -129,15 +142,39 @@ private constructor(
         }
     }
 
-    override fun onViewDetached() {
-        statusContainer.setOnHoverListener(null)
+    private fun addCursorSupportToIconContainers() {
+        endSideContainer = mView.requireViewById(R.id.system_icons)
+        endSideContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createDarkAwareListener(endSideContainer)
+        )
+        endSideContainer.setOnTouchListener(iconsOnTouchListener)
+
+        startSideContainer = mView.requireViewById(R.id.status_bar_start_side_content)
+        startSideContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createDarkAwareListener(startSideContainer)
+        )
+        startSideContainer.setOnTouchListener(iconsOnTouchListener)
+    }
+
+    @VisibleForTesting
+    public override fun onViewDetached() {
+        removeDarkReceivers()
+        startSideContainer.setOnHoverListener(null)
+        endSideContainer.setOnHoverListener(null)
         progressProvider?.setReadyToHandleTransition(false)
         moveFromCenterAnimationController?.onViewDetached()
         configurationController.removeCallback(configurationListener)
     }
 
     init {
+        // These should likely be done in `onInit`, not `init`.
         mView.setTouchEventHandler(PhoneStatusBarViewTouchHandler())
+        mView.setHasCornerCutoutFetcher {
+            statusBarContentInsetsProvider.currentRotationHasCornerCutout()
+        }
+        mView.setInsetsFetcher {
+            statusBarContentInsetsProvider.getStatusBarContentInsetsForCurrentRotation()
+        }
         mView.init(userChipViewModel)
     }
 
@@ -178,10 +215,24 @@ private constructor(
         }
     }
 
+    private fun addDarkReceivers() {
+        darkIconDispatcher.addDarkReceiver(battery)
+        darkIconDispatcher.addDarkReceiver(clock)
+    }
+
+    private fun removeDarkReceivers() {
+        darkIconDispatcher.removeDarkReceiver(battery)
+        darkIconDispatcher.removeDarkReceiver(clock)
+    }
+
     inner class PhoneStatusBarViewTouchHandler : Gefingerpoken {
         override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-            onTouch(event)
-            return false
+            return if (Flags.statusBarSwipeOverChip()) {
+                shadeViewController.handleExternalInterceptTouch(event)
+            } else {
+                onTouch(event)
+                false
+            }
         }
 
         override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -277,10 +328,12 @@ private constructor(
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
         private val statusOverlayHoverListenerFactory: StatusOverlayHoverListenerFactory,
+        private val darkIconDispatcher: DarkIconDispatcher,
+        private val statusBarContentInsetsProvider: StatusBarContentInsetsProvider,
     ) {
         fun create(view: PhoneStatusBarView): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
-                if (featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)) {
+                if (featureFlags.isEnabled(ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)) {
                     unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController()
                 } else {
                     null
@@ -301,6 +354,8 @@ private constructor(
                 viewUtil,
                 configurationController,
                 statusOverlayHoverListenerFactory,
+                darkIconDispatcher,
+                statusBarContentInsetsProvider,
             )
         }
     }

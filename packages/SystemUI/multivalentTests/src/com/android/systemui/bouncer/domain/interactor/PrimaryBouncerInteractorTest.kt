@@ -160,6 +160,12 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testShowReturnsFalseWhenDelegateIsNotSet() {
+        whenever(bouncerView.delegate).thenReturn(null)
+        assertThat(underTest.show(true)).isEqualTo(false)
+    }
+
+    @Test
     fun testShow_isResumed() {
         whenever(repository.primaryBouncerShow.value).thenReturn(true)
         whenever(keyguardSecurityModel.getSecurityMode(anyInt()))

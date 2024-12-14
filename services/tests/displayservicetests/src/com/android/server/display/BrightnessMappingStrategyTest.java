@@ -693,6 +693,21 @@ public class BrightnessMappingStrategyTest {
     }
 
     @Test
+    public void testGetPreset() {
+        int preset = Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM;
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_FOR_ALS, preset);
+        setUpResources();
+        DisplayDeviceConfig ddc = new DdcBuilder()
+                .setAutoBrightnessLevels(AUTO_BRIGHTNESS_MODE_DEFAULT, preset, DISPLAY_LEVELS)
+                .setAutoBrightnessLevelsLux(AUTO_BRIGHTNESS_MODE_DEFAULT, preset, LUX_LEVELS)
+                .build();
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(mContext, ddc,
+                AUTO_BRIGHTNESS_MODE_DEFAULT, /* displayWhiteBalanceController= */ null);
+        assertEquals(preset, strategy.getPreset());
+    }
+
+    @Test
     public void testAutoBrightnessModeAndPreset() {
         int mode = AUTO_BRIGHTNESS_MODE_DOZE;
         int preset = Settings.System.SCREEN_BRIGHTNESS_AUTOMATIC_DIM;

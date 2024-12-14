@@ -17,14 +17,21 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 /** Encapsulates any state relevant to trust agents and trust grants. */
 @SysUISingleton
-class TrustInteractor @Inject constructor(repository: TrustRepository) {
+class TrustInteractor
+@Inject
+constructor(
+    @Application private val applicationScope: CoroutineScope,
+    private val repository: TrustRepository,
+) {
     /**
      * Whether the current user has a trust agent enabled. This is true if the user has at least one
      * trust agent enabled in settings.
@@ -39,5 +46,10 @@ class TrustInteractor @Inject constructor(repository: TrustRepository) {
     val isTrustAgentCurrentlyAllowed: StateFlow<Boolean> = repository.isCurrentUserTrustManaged
 
     /** Whether the current user is trusted by any of the enabled trust agents. */
-    val isTrusted: Flow<Boolean> = repository.isCurrentUserTrusted
+    val isTrusted: StateFlow<Boolean> = repository.isCurrentUserTrusted
+
+    /** Reports a keyguard visibility change. */
+    fun reportKeyguardShowingChanged() {
+        applicationScope.launch { repository.reportKeyguardShowingChanged() }
+    }
 }

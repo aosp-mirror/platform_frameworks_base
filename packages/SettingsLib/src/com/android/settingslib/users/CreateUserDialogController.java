@@ -181,14 +181,14 @@ public class CreateUserDialogController {
      * admin status.
      */
     public Dialog createDialog(Activity activity,
-            ActivityStarter activityStarter, boolean isMultipleAdminEnabled,
+            @NonNull ActivityStarter activityStarter, boolean canCreateAdminUser,
             NewUserData successCallback, Runnable cancelCallback) {
         mActivity = activity;
         mCustomDialogHelper = new CustomDialogHelper(activity);
         mSuccessCallback = successCallback;
         mCancelCallback = cancelCallback;
         mActivityStarter = activityStarter;
-        addCustomViews(isMultipleAdminEnabled);
+        addCustomViews(canCreateAdminUser);
         mUserCreationDialog = mCustomDialogHelper.getDialog();
         updateLayout();
         mUserCreationDialog.setOnDismissListener(view -> finish());
@@ -197,19 +197,19 @@ public class CreateUserDialogController {
         return mUserCreationDialog;
     }
 
-    private void addCustomViews(boolean isMultipleAdminEnabled) {
+    private void addCustomViews(boolean canCreateAdminUser) {
         addGrantAdminView();
         addUserInfoEditView();
         mCustomDialogHelper.setPositiveButton(R.string.next, view -> {
             mCurrentState++;
-            if (mCurrentState == GRANT_ADMIN_DIALOG && !isMultipleAdminEnabled) {
+            if (mCurrentState == GRANT_ADMIN_DIALOG && !canCreateAdminUser) {
                 mCurrentState++;
             }
             updateLayout();
         });
         mCustomDialogHelper.setNegativeButton(R.string.back, view -> {
             mCurrentState--;
-            if (mCurrentState == GRANT_ADMIN_DIALOG && !isMultipleAdminEnabled) {
+            if (mCurrentState == GRANT_ADMIN_DIALOG && !canCreateAdminUser) {
                 mCurrentState--;
             }
             updateLayout();

@@ -27,53 +27,65 @@ import java.util.concurrent.TimeUnit;
  *
  * @hide
  */
-/* package */ abstract class ContextHubServiceTransaction {
+abstract class ContextHubServiceTransaction {
     private final int mTransactionId;
+
     @ContextHubTransaction.Type
     private final int mTransactionType;
 
-    /** The ID of the nanoapp this transaction is targeted for, null if not applicable. */
-    private final Long mNanoAppId;
+    private final long mNanoAppId;
 
-    /**
-     * The host package associated with this transaction.
-     */
     private final String mPackage;
 
-    /**
-     * The message sequence number associated with this transaction, null if not applicable.
-     */
-    private final Integer mMessageSequenceNumber;
+    private final int mMessageSequenceNumber;
 
-    /**
-     * true if the transaction has already completed, false otherwise
-     */
+    private long mNextRetryTime;
+
+    private long mTimeoutTime;
+
+    /** The number of times the transaction has been started (start function called). */
+    private int mNumCompletedStartCalls;
+
+    private final short mHostEndpointId;
+
     private boolean mIsComplete = false;
 
-    /* package */ ContextHubServiceTransaction(int id, int type, String packageName) {
+    ContextHubServiceTransaction(int id, int type, String packageName) {
         mTransactionId = id;
         mTransactionType = type;
-        mNanoAppId = null;
+        mNanoAppId = Long.MAX_VALUE;
         mPackage = packageName;
-        mMessageSequenceNumber = null;
+        mMessageSequenceNumber = Integer.MAX_VALUE;
+        mNextRetryTime = Long.MAX_VALUE;
+        mTimeoutTime = Long.MAX_VALUE;
+        mNumCompletedStartCalls = 0;
+        mHostEndpointId = Short.MAX_VALUE;
     }
 
-    /* package */ ContextHubServiceTransaction(int id, int type, long nanoAppId,
+    ContextHubServiceTransaction(int id, int type, long nanoAppId,
             String packageName) {
         mTransactionId = id;
         mTransactionType = type;
         mNanoAppId = nanoAppId;
         mPackage = packageName;
-        mMessageSequenceNumber = null;
+        mMessageSequenceNumber = Integer.MAX_VALUE;
+        mNextRetryTime = Long.MAX_VALUE;
+        mTimeoutTime = Long.MAX_VALUE;
+        mNumCompletedStartCalls = 0;
+        mHostEndpointId = Short.MAX_VALUE;
     }
 
-    /* package */ ContextHubServiceTransaction(int id, int type, String packageName,
-            int messageSequenceNumber) {
+    ContextHubServiceTransaction(int id, int type, String packageName,
+            int messageSequenceNumber, short hostEndpointId) {
         mTransactionId = id;
         mTransactionType = type;
-        mNanoAppId = null;
+        mNanoAppId = Long.MAX_VALUE;
         mPackage = packageName;
         mMessageSequenceNumber = messageSequenceNumber;
+        mNextRetryTime = Long.MAX_VALUE;
+        mTimeoutTime = Long.MAX_VALUE;
+        mNumCompletedStartCalls = 0;
+        mHostEndpointId = hostEndpointId;
     }
 
     /**
@@ -95,7 +107,7 @@ import java.util.concurrent.TimeUnit;
      *
      * @param result the result of the transaction
      */
-    /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+    void onTransactionComplete(@ContextHubTransaction.Result int result) {
     }
 
     /**
@@ -106,31 +118,37 @@ import java.util.concurrent.TimeUnit;
      * @param result           the result of the query
      * @param nanoAppStateList the list of nanoapps given by the query response
      */
-    /* package */ void onQueryResponse(
+    void onQueryResponse(
             @ContextHubTransaction.Result int result, List<NanoAppState> nanoAppStateList) {
     }
 
-    /**
-     * @return the ID of this transaction
-     */
-    /* package */ int getTransactionId() {
+    int getTransactionId() {
         return mTransactionId;
     }
 
-    /**
-     * @return the type of this transaction
-     * @see ContextHubTransaction.Type
-     */
     @ContextHubTransaction.Type
-    /* package */ int getTransactionType() {
+    int getTransactionType() {
         return mTransactionType;
     }
 
-    /**
-     * @return the message sequence number of this transaction
-     */
-    Integer getMessageSequenceNumber() {
+    int getMessageSequenceNumber() {
         return mMessageSequenceNumber;
+    }
+
+    long getNextRetryTime() {
+        return mNextRetryTime;
+    }
+
+    long getTimeoutTime() {
+        return mTimeoutTime;
+    }
+
+    int getNumCompletedStartCalls() {
+        return mNumCompletedStartCalls;
+    }
+
+    short getHostEndpointId() {
+        return mHostEndpointId;
     }
 
     /**
@@ -138,12 +156,13 @@ import java.util.concurrent.TimeUnit;
      *
      * @return the timeout of this transaction in the specified time unit
      */
-    /* package */ long getTimeout(TimeUnit unit) {
+    long getTimeout(TimeUnit unit) {
         switch (mTransactionType) {
             case ContextHubTransaction.TYPE_LOAD_NANOAPP:
                 return unit.convert(30L, TimeUnit.SECONDS);
             case ContextHubTransaction.TYPE_RELIABLE_MESSAGE:
-                return unit.convert(1000L, TimeUnit.MILLISECONDS);
+                return unit.convert(ContextHubTransactionManager.RELIABLE_MESSAGE_TIMEOUT.toNanos(),
+                        TimeUnit.NANOSECONDS);
             case ContextHubTransaction.TYPE_UNLOAD_NANOAPP:
             case ContextHubTransaction.TYPE_ENABLE_NANOAPP:
             case ContextHubTransaction.TYPE_DISABLE_NANOAPP:
@@ -159,14 +178,23 @@ import java.util.concurrent.TimeUnit;
      *
      * Should only be called as a result of a response from a Context Hub callback
      */
-    /* package */ void setComplete() {
+    void setComplete() {
         mIsComplete = true;
     }
 
-    /**
-     * @return true if the transaction has already completed, false otherwise
-     */
-    /* package */ boolean isComplete() {
+    void setNextRetryTime(long nextRetryTime) {
+        mNextRetryTime = nextRetryTime;
+    }
+
+    void setTimeoutTime(long timeoutTime) {
+        mTimeoutTime = timeoutTime;
+    }
+
+    void setNumCompletedStartCalls(int numCompletedStartCalls) {
+        mNumCompletedStartCalls = numCompletedStartCalls;
+    }
+
+    boolean isComplete() {
         return mIsComplete;
     }
 
@@ -176,18 +204,29 @@ import java.util.concurrent.TimeUnit;
         out.append(ContextHubTransaction.typeToString(mTransactionType,
                 /* upperCase= */ true));
         out.append(" (");
-        if (mNanoAppId != null) {
+        if (mNanoAppId != Long.MAX_VALUE) {
             out.append("appId = 0x");
             out.append(Long.toHexString(mNanoAppId));
             out.append(", ");
         }
         out.append("package = ");
         out.append(mPackage);
-        if (mMessageSequenceNumber != null) {
+        if (mMessageSequenceNumber != Integer.MAX_VALUE) {
             out.append(", messageSequenceNumber = ");
             out.append(mMessageSequenceNumber);
         }
+        if (mTransactionType == ContextHubTransaction.TYPE_RELIABLE_MESSAGE) {
+            out.append(", nextRetryTime = ");
+            out.append(mNextRetryTime);
+            out.append(", timeoutTime = ");
+            out.append(mTimeoutTime);
+            out.append(", numCompletedStartCalls = ");
+            out.append(mNumCompletedStartCalls);
+            out.append(", hostEndpointId = ");
+            out.append(mHostEndpointId);
+        }
         out.append(")");
+
         return out.toString();
     }
 }

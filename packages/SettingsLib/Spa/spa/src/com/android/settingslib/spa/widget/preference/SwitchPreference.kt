@@ -117,7 +117,7 @@ internal fun InternalSwitchPreference(
     val indication = LocalIndication.current
     val onChangeWithLog = wrapOnSwitchWithLog(onCheckedChange)
     val interactionSource = remember { MutableInteractionSource() }
-    val modifier = remember(checked, changeable) {
+    val modifier =
         if (checked != null && onChangeWithLog != null) {
             Modifier.toggleable(
                 value = checked,
@@ -128,7 +128,6 @@ internal fun InternalSwitchPreference(
                 onValueChange = onChangeWithLog,
             )
         } else Modifier
-    }
     BasePreference(
         title = title,
         summary = summary,

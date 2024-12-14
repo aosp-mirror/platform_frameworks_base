@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.testTransition
-import com.android.compose.animation.scene.transition
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

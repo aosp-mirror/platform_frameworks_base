@@ -22,15 +22,41 @@ import com.android.systemui.statusbar.notification.data.repository.HeadsUpReposi
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 val Kosmos.headsUpNotificationRepository by Fixture { FakeHeadsUpNotificationRepository() }
 
 class FakeHeadsUpNotificationRepository : HeadsUpRepository {
     override val isHeadsUpAnimatingAway: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val topHeadsUpRow: Flow<HeadsUpRowRepository?> = MutableStateFlow(null)
-    override val activeHeadsUpRows: MutableStateFlow<Set<HeadsUpRowRepository>> =
-        MutableStateFlow(emptySet())
+
+    val orderedHeadsUpRows = MutableStateFlow(emptyList<HeadsUpRowRepository>())
+    override val topHeadsUpRow: Flow<HeadsUpRowRepository?> =
+        orderedHeadsUpRows.map { it.firstOrNull() }.distinctUntilChanged()
+    override val activeHeadsUpRows: Flow<Set<HeadsUpRowRepository>> =
+        orderedHeadsUpRows.map { it.toSet() }.distinctUntilChanged()
+
     override fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
         isHeadsUpAnimatingAway.value = animatingAway
+    }
+
+    override fun snooze() {
+        // do nothing
+    }
+
+    override fun unpinAll(userUnPinned: Boolean) {
+        // do nothing
+    }
+
+    override fun releaseAfterExpansion() {
+        // do nothing
+    }
+
+    fun setNotifications(notifications: List<HeadsUpRowRepository>) {
+        this.orderedHeadsUpRows.value = notifications.toList()
+    }
+
+    fun setNotifications(vararg notifications: HeadsUpRowRepository) {
+        this.orderedHeadsUpRows.value = notifications.toList()
     }
 }

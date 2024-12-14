@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade;
 
+import static android.platform.test.flag.junit.FlagsParameterization.progressionOf;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_DOWN;
@@ -23,45 +24,67 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.MotionEvent.BUTTON_SECONDARY;
 import static android.view.MotionEvent.BUTTON_STYLUS_PRIMARY;
 
+import static com.android.systemui.Flags.FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Rect;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 import java.util.List;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class QuickSettingsControllerImplTest extends QuickSettingsControllerImplBaseTest {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return progressionOf(FLAG_QS_UI_REFACTOR_COMPOSE_FRAGMENT);
+    }
+
+    public QuickSettingsControllerImplTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Test
     public void testCloseQsSideEffects() {
         enableSplitShade(true);
         mQsController.setExpandImmediate(true);
-        mQsController.setExpanded(true);
+        mQsController.setExpansionHeight(800);
         mQsController.closeQs();
 
         assertThat(mQsController.getExpanded()).isEqualTo(false);
@@ -225,6 +248,61 @@ public class QuickSettingsControllerImplTest extends QuickSettingsControllerImpl
         mFragmentListener.onFragmentViewCreated(QS.TAG, mQSFragment);
 
         verify(mQSFragment).setIsNotificationPanelFullWidth(true);
+    }
+
+    @Test
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
+    public void onQsFragmentAttached_qsComposeFragmentDisabled_setHeaderInNSSL() {
+        mFragmentListener.onFragmentViewCreated(QS.TAG, mQSFragment);
+
+        verify(mNotificationStackScrollLayoutController)
+                .setQsHeader((ViewGroup) mQSFragment.getHeader());
+        verify(mNotificationStackScrollLayoutController, never()).setQsHeaderBoundsProvider(any());
+    }
+
+    @Test
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    public void onQsFragmentAttached_qsComposeFragmentEnabled_setQsHeaderBoundsProviderInNSSL() {
+        mFragmentListener.onFragmentViewCreated(QS.TAG, mQSFragment);
+
+        verify(mNotificationStackScrollLayoutController, never())
+                .setQsHeader((ViewGroup) mQSFragment.getHeader());
+        ArgumentCaptor<QSHeaderBoundsProvider> argumentCaptor =
+                ArgumentCaptor.forClass(QSHeaderBoundsProvider.class);
+
+        verify(mNotificationStackScrollLayoutController)
+                .setQsHeaderBoundsProvider(argumentCaptor.capture());
+
+        argumentCaptor.getValue().getLeftProvider().invoke();
+        argumentCaptor.getValue().getHeightProvider().invoke();
+        argumentCaptor.getValue().getBoundsOnScreenProvider().invoke(new Rect());
+        InOrder inOrderVerifier = inOrder(mQSFragment);
+
+        inOrderVerifier.verify(mQSFragment).getHeaderLeft();
+        inOrderVerifier.verify(mQSFragment).getHeaderHeight();
+        inOrderVerifier.verify(mQSFragment).getHeaderBoundsOnScreen(new Rect());
+    }
+
+    @Test
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
+    public void onQSFragmentDetached_qsComposeFragmentFlagDisabled_setViewToNullInNSSL() {
+        mFragmentListener.onFragmentViewCreated(QS.TAG, mQSFragment);
+
+        mFragmentListener.onFragmentViewDestroyed(QS.TAG, mQSFragment);
+
+        verify(mNotificationStackScrollLayoutController).setQsHeader(null);
+        verify(mNotificationStackScrollLayoutController, never()).setQsHeaderBoundsProvider(null);
+    }
+
+    @Test
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    public void onQSFragmentDetached_qsComposeFragmentFlagEnabled_setBoundsProviderToNullInNSSL() {
+        mFragmentListener.onFragmentViewCreated(QS.TAG, mQSFragment);
+
+        mFragmentListener.onFragmentViewDestroyed(QS.TAG, mQSFragment);
+
+        verify(mNotificationStackScrollLayoutController, never()).setQsHeader(null);
+        verify(mNotificationStackScrollLayoutController).setQsHeaderBoundsProvider(null);
     }
 
     @Test

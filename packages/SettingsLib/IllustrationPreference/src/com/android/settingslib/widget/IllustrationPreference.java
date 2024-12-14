@@ -16,6 +16,8 @@
 
 package com.android.settingslib.widget;
 
+import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -33,6 +35,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.annotation.StringRes;
 import androidx.preference.Preference;
@@ -122,6 +125,8 @@ public class IllustrationPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
+        final FrameLayout illustrationFrame = (FrameLayout) holder.findViewById(
+                R.id.illustration_frame);
         final ImageView backgroundView =
                 (ImageView) holder.findViewById(R.id.background_view);
         final FrameLayout middleGroundLayout =
@@ -130,15 +135,15 @@ public class IllustrationPreference extends Preference {
                 (LottieAnimationView) holder.findViewById(R.id.lottie_view);
         if (illustrationView != null && !TextUtils.isEmpty(mContentDescription)) {
             illustrationView.setContentDescription(mContentDescription);
-            illustrationView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+            illustrationView.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            final View illustrationContainer = (View) illustrationFrame.getParent();
+            illustrationContainer.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
         // To solve the problem of non-compliant illustrations, we set the frame height
         // to 300dp and set the length of the short side of the screen to
         // the width of the frame.
         final int screenWidth = getContext().getResources().getDisplayMetrics().widthPixels;
         final int screenHeight = getContext().getResources().getDisplayMetrics().heightPixels;
-        final FrameLayout illustrationFrame = (FrameLayout) holder.findViewById(
-                R.id.illustration_frame);
         final LayoutParams lp = (LayoutParams) illustrationFrame.getLayoutParams();
         lp.width = screenWidth < screenHeight ? screenWidth : screenHeight;
         illustrationFrame.setLayoutParams(lp);
@@ -236,6 +241,14 @@ public class IllustrationPreference extends Preference {
      */
     public void setContentDescription(@StringRes int contentDescriptionResId) {
         setContentDescription(getContext().getText(contentDescriptionResId));
+    }
+
+    /**
+     * Gets the content description set by {@link #setContentDescription}.
+     */
+    @Nullable
+    public CharSequence getContentDescription() {
+        return mContentDescription;
     }
 
     /**

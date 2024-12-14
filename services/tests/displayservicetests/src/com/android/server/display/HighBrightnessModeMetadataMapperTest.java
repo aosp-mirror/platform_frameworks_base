@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.android.server.display.config.HighBrightnessModeData;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,7 +41,7 @@ public class HighBrightnessModeMetadataMapperTest {
     private DisplayDeviceConfig mDdcMock;
 
     @Mock
-    private DisplayDeviceConfig.HighBrightnessModeData mHbmDataMock;
+    private HighBrightnessModeData mHbmDataMock;
 
     private HighBrightnessModeMetadataMapper mHighBrightnessModeMetadataMapper;
 

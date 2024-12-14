@@ -21,14 +21,14 @@ import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
@@ -36,10 +36,10 @@ import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsPro
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,12 +50,16 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileIconsInteractorTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var underTest: MobileIconsInteractor
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var connectionsRepository: FakeMobileConnectionsRepository
@@ -69,15 +73,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private val tableLogBuffer =
-        TableLogBuffer(
-            8,
-            "MobileIconsInteractorTest",
-            FakeSystemClock(),
-            mock(),
-            testDispatcher,
-            testScope.backgroundScope,
-        )
+    private val tableLogBuffer = logcatTableLogBuffer(kosmos, "MobileIconsInteractorTest")
 
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
@@ -894,13 +890,11 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.isDeviceInEmergencyCallsOnlyMode)
 
-            connectionsRepository.deviceServiceState.value =
-                ServiceStateModel(isEmergencyOnly = true)
+            connectionsRepository.isDeviceEmergencyCallCapable.value = true
 
             assertThat(latest).isTrue()
 
-            connectionsRepository.deviceServiceState.value =
-                ServiceStateModel(isEmergencyOnly = false)
+            connectionsRepository.isDeviceEmergencyCallCapable.value = false
 
             assertThat(latest).isFalse()
         }

@@ -25,16 +25,15 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.os.SystemClock;
+import android.database.DefaultDatabaseErrorHandler;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.test.AndroidTestCase;
-import android.util.Log;
+import android.util.Printer;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,12 +45,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -404,5 +404,259 @@ public class SQLiteDatabaseTest {
             mDatabase.endTransaction();
         }
         assertFalse(allowed);
+    }
+
+    /** Dumpsys information about a single database. */
+
+    /**
+     * Collect and parse dumpsys output.  This is not a full parser.  It is only enough to support
+     * the unit tests.
+     */
+    private static class Dumpsys {
+        // Regular expressions for parsing the output.  Reportedly, regular expressions are
+        // expensive, so these are created only if a dumpsys object is created.
+        private static final Object sLock = new Object();
+        static Pattern mPool;
+        static Pattern mConnection;
+        static Pattern mEntry;
+        static Pattern mSingleWord;
+        static Pattern mNone;
+
+        // The raw strings read from dumpsys.  Once loaded, this list never changes.
+        final ArrayList<String> mRaw = new ArrayList<>();
+
+        // Parsed dumpsys.  This contains only the bits that are being tested.
+        static class Connection {
+            ArrayList<String> mRecent = new ArrayList<>();
+            ArrayList<String> mLong = new ArrayList<>();
+        }
+        static class Database {
+            String mPath;
+            ArrayList<Connection> mConnection = new ArrayList<>();
+        }
+        ArrayList<Database> mDatabase;
+        ArrayList<String> mConcurrent;
+
+        Dumpsys() {
+            SQLiteDebug.dump(
+                new Printer() { public void println(String x) { mRaw.add(x); } },
+                new String[0]);
+            parse();
+        }
+
+        /** Parse the raw text. Return true if no errors were detected. */
+        boolean parse() {
+            initialize();
+
+            // Reset the parsed information.  This method may be called repeatedly.
+            mDatabase = new ArrayList<>();
+            mConcurrent = new ArrayList<>();
+
+            Database current = null;
+            Connection connection = null;
+            Matcher matcher;
+            for (int i = 0; i < mRaw.size(); i++) {
+                final String line = mRaw.get(i);
+                matcher = mPool.matcher(line);
+                if (matcher.lookingAt()) {
+                    current = new Database();
+                    mDatabase.add(current);
+                    current.mPath = matcher.group(1);
+                    continue;
+                }
+                matcher = mConnection.matcher(line);
+                if (matcher.lookingAt()) {
+                    connection = new Connection();
+                    current.mConnection.add(connection);
+                    continue;
+                }
+
+                if (line.contains("Most recently executed operations")) {
+                    i += readTable(connection.mRecent, i, mEntry);
+                    continue;
+                }
+
+                if (line.contains("Operations exceeding 2000ms")) {
+                    i += readTable(connection.mLong, i, mEntry);
+                    continue;
+                }
+                if (line.contains("Concurrently opened database files")) {
+                    i += readTable(mConcurrent, i, mSingleWord);
+                    continue;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Read a series of lines following a header.  Return the number of lines read.  The input
+         * line number is the number of the header.
+         */
+        private int readTable(List<String> s, int header, Pattern p) {
+            // Special case: if the first line is "<none>" then there are no more lines to the
+            // table.
+            if (lookingAt(header+1, mNone)) return 1;
+
+            int i;
+            for (i = header + 1; i < mRaw.size() && lookingAt(i, p); i++) {
+                s.add(mRaw.get(i).trim());
+            }
+            return i - header;
+        }
+
+        /** Return true if the n'th raw line matches the pattern. */
+        boolean lookingAt(int n, Pattern p) {
+            return p.matcher(mRaw.get(n)).lookingAt();
+        }
+
+        /** Compile the regular expressions the first time. */
+        private static void initialize() {
+            synchronized (sLock) {
+                if (mPool != null) return;
+                mPool = Pattern.compile("Connection pool for (\\S+):");
+                mConnection = Pattern.compile("\\s+Connection #(\\d+):");
+                mEntry = Pattern.compile("\\s+(\\d+): ");
+                mSingleWord = Pattern.compile("  (\\S+)$");
+                mNone = Pattern.compile("\\s+<none>$");
+            }
+        }
+    }
+
+    @Test
+    public void testDumpsys() throws Exception {
+        Dumpsys dumpsys = new Dumpsys();
+
+        assertEquals(1, dumpsys.mDatabase.size());
+        // Note: cannot test mConcurrent because that attribute is not hermitic with respect to
+        // the tests.
+
+        Dumpsys.Database db = dumpsys.mDatabase.get(0);
+
+        // Work with normalized paths.
+        String wantPath = mDatabaseFile.toPath().toRealPath().toString();
+        String realPath = new File(db.mPath).toPath().toRealPath().toString();
+        assertEquals(wantPath, realPath);
+
+        assertEquals(1, db.mConnection.size());
+    }
+
+    // Create and open the database, allowing or disallowing double-quoted strings.
+    private void createDatabase(boolean noDoubleQuotedStrs) throws Exception {
+        // The open-flags that do not change in this test.
+        int flags = SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.OPEN_READWRITE;
+
+        // The flag to be tested.
+        int flagUnderTest = SQLiteDatabase.NO_DOUBLE_QUOTED_STRS;
+
+        if (noDoubleQuotedStrs) {
+            flags |= flagUnderTest;
+        } else {
+            flags &= ~flagUnderTest;
+        }
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile.getPath(), null, flags, null);
+    }
+
+    /**
+     * This test verifies that the NO_DOUBLE_QUOTED_STRS flag works as expected when opening a
+     * database.  This does not test that the flag is initialized as expected from the system
+     * properties.
+     */
+    @Test
+    public void testNoDoubleQuotedStrings() throws Exception {
+        closeAndDeleteDatabase();
+        createDatabase(/* noDoubleQuotedStrs */ false);
+
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (t text);");
+            // Insert a value in double-quotes.  This is invalid but accepted.
+            mDatabase.execSQL("INSERT INTO t1 (t) VALUES (\"foo\")");
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        closeAndDeleteDatabase();
+        createDatabase(/* noDoubleQuotedStrs */ true);
+
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (t text);");
+            try {
+                // Insert a value in double-quotes.  This is invalid and must throw.
+                mDatabase.execSQL("INSERT INTO t1 (t) VALUES (\"foo\")");
+                fail("expected an exception");
+            } catch (SQLiteException e) {
+                assertTrue(e.toString().contains("no such column"));
+            }
+        } finally {
+            mDatabase.endTransaction();
+        }
+        closeAndDeleteDatabase();
+    }
+
+    @Test
+    public void testCloseCorruptionReport() throws Exception {
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t2 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (2, 20)");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (3, 30)");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Start a transaction and announce that the DB is corrupted.
+        DefaultDatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
+
+        // Do not bother with endTransaction; the database will have been closed in the corruption
+        // handler.
+        mDatabase.beginTransaction();
+        try {
+            errorHandler.onCorruption(mDatabase);
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (4, 40)");
+            fail("expected an exception");
+        } catch (IllegalStateException e) {
+            final Throwable cause = e.getCause();
+            assertNotNull(cause);
+            boolean found = false;
+            for (StackTraceElement s : cause.getStackTrace()) {
+                if (s.getMethodName().contains("onCorruption")) {
+                    found = true;
+                }
+            }
+            assertTrue(found);
+        }
+    }
+
+    @Test
+    public void testCloseReport() throws Exception {
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t2 (i int, j int);");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (2, 20)");
+            mDatabase.execSQL("INSERT INTO t2 (i, j) VALUES (3, 30)");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        mDatabase.close();
+        try {
+            // Do not bother with endTransaction; the database has already been close.
+            mDatabase.beginTransaction();
+            fail("expected an exception");
+        } catch (IllegalStateException e) {
+            assertTrue(e.toString().contains("attempt to re-open an already-closed object"));
+            final Throwable cause = e.getCause();
+            assertNotNull(cause);
+            boolean found = false;
+            for (StackTraceElement s : cause.getStackTrace()) {
+                if (s.getMethodName().contains("testCloseReport")) {
+                    found = true;
+                }
+            }
+            assertTrue(found);
+        }
     }
 }

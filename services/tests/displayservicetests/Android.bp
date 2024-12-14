@@ -22,6 +22,7 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "compatibility-device-util-axt",
         "flag-junit",
         "frameworks-base-testutils",
         "junit",
@@ -46,6 +47,10 @@ android_test {
     test_suites: [
         "device-tests",
         "automotive-tests",
+    ],
+
+    data: [
+        ":DisplayManagerTestApp",
     ],
 
     certificate: "platform",

@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot
 
 import android.media.MediaPlayer
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.mock
@@ -29,11 +30,13 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class ScreenshotSoundControllerTest : SysuiTestCase() {
 
     private val soundProvider = mock<ScreenshotSoundProvider>()

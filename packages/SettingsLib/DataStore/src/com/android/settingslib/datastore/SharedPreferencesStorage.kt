@@ -40,8 +40,9 @@ private fun defaultVerbose() = Build.TYPE == "eng"
  * Note that existing entries in the SharedPreferences will NOT be deleted before restore.
  *
  * @param context Context to get SharedPreferences
- * @param name Name of the SharedPreferences
- * @param mode Operating mode, see [Context.getSharedPreferences]
+ * @param name Name of the backup restore storage
+ * @param sharedPreferences SharedPreferences object
+ * @param filePath shared preferences file path relative to data dir
  * @param verbose Verbose logging on key/value pairs during backup/restore. Enable for dev only!
  * @param filter Filter of key/value pairs for backup and restore.
  */
@@ -50,12 +51,14 @@ open class SharedPreferencesStorage
 constructor(
     context: Context,
     override val name: String,
-    @get:VisibleForTesting internal val sharedPreferences: SharedPreferences,
+    override val sharedPreferences: SharedPreferences,
+    filePath: String = getSharedPreferencesFilePath(context, name),
     private val codec: BackupCodec? = null,
     private val verbose: Boolean = defaultVerbose(),
     private val filter: (String, Any?) -> Boolean = { _, _ -> true },
 ) :
-    BackupRestoreFileStorage(context, context.getSharedPreferencesFilePath(name)),
+    BackupRestoreFileStorage(context, filePath),
+    SharedPreferencesKeyValueStore,
     KeyedObservable<String> by KeyedDataObservable() {
 
     @JvmOverloads
@@ -66,7 +69,15 @@ constructor(
         codec: BackupCodec? = null,
         verbose: Boolean = defaultVerbose(),
         filter: (String, Any?) -> Boolean = { _, _ -> true },
-    ) : this(context, name, context.getSharedPreferences(name, mode), codec, verbose, filter)
+    ) : this(
+        context,
+        name,
+        context.getSharedPreferences(name, mode),
+        getSharedPreferencesFilePath(context, name),
+        codec,
+        verbose,
+        filter,
+    )
 
     /** Name of the intermediate SharedPreferences. */
     @VisibleForTesting
@@ -191,7 +202,7 @@ constructor(
                 else -> {
                     Log.e(
                         LOG_TAG,
-                        "[$name] $operation $key=$value, unknown type: ${value?.javaClass}"
+                        "[$name] $operation $key=$value, unknown type: ${value?.javaClass}",
                     )
                 }
             }
@@ -200,14 +211,31 @@ constructor(
     }
 
     companion object {
-        private fun Context.getSharedPreferencesFilePath(name: String): String {
-            val file = getSharedPreferencesFile(name)
-            return file.relativeTo(dataDirCompat).toString()
+        /** Returns the storage object of default [SharedPreferences]. */
+        @JvmStatic
+        fun getDefault(context: Context, name: String): SharedPreferencesStorage {
+            val prefName = getDefaultSharedPreferencesName(context)
+            return SharedPreferencesStorage(
+                context,
+                name,
+                context.getSharedPreferences(prefName, Context.MODE_PRIVATE),
+                getSharedPreferencesFilePath(context, prefName),
+            )
+        }
+
+        /** Returns the name of default [SharedPreferences]. */
+        @JvmStatic
+        fun getDefaultSharedPreferencesName(context: Context) = context.packageName + "_preferences"
+
+        /** Returns the shared preferences file path relative to data dir. */
+        @JvmStatic
+        fun getSharedPreferencesFilePath(context: Context, name: String): String {
+            val file = context.getSharedPreferencesFile(name)
+            return file.relativeTo(context.dataDirCompat).toString()
         }
 
         /** Returns the absolute path of shared preferences file. */
-        @JvmStatic
-        fun Context.getSharedPreferencesFile(name: String): File {
+        private fun Context.getSharedPreferencesFile(name: String): File {
             // ContextImpl.getSharedPreferencesPath is private
             return File(getSharedPreferencesDir(), "$name.xml")
         }

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 import android.annotation.SuppressLint
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -29,8 +28,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableLogBuffer
@@ -41,18 +38,14 @@ import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.CARRIER_MERGED_INVALID_SUB_ID_REASON
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_ENABLED
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Inactive.toHotspotDeviceType
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Unavailable.toHotspotDeviceType
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
-import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX
-import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN
-import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE
 import com.android.wifitrackerlib.WifiPickerTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -75,7 +68,6 @@ import kotlinx.coroutines.flow.stateIn
 class WifiRepositoryImpl
 @Inject
 constructor(
-    featureFlags: FeatureFlags,
     @Application private val scope: CoroutineScope,
     @Main private val mainExecutor: Executor,
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -89,8 +81,6 @@ constructor(
         LifecycleRegistry(this).also {
             mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
         }
-
-    private val isInstantTetherEnabled = featureFlags.isEnabled(Flags.INSTANT_TETHER)
 
     private var wifiPickerTracker: WifiPickerTracker? = null
 
@@ -109,16 +99,11 @@ constructor(
                             val connectedEntry = wifiPickerTracker.mergedOrPrimaryConnection
                             logOnWifiEntriesChanged(connectedEntry)
 
+                            val activeNetworks = wifiPickerTracker?.activeWifiEntries ?: emptyList()
                             val secondaryNetworks =
-                                if (featureFlags.isEnabled(Flags.WIFI_SECONDARY_NETWORKS)) {
-                                    val activeNetworks =
-                                        wifiPickerTracker?.activeWifiEntries ?: emptyList()
-                                    activeNetworks
-                                        .filter { it != connectedEntry && !it.isPrimaryNetwork }
-                                        .map { it.toWifiNetworkModel() }
-                                } else {
-                                    emptyList()
-                                }
+                                activeNetworks
+                                    .filter { it != connectedEntry && !it.isPrimaryNetwork }
+                                    .map { it.toWifiNetworkModel() }
 
                             // [WifiPickerTracker.connectedWifiEntry] will return the same instance
                             // but with updated internals. For example, when its validation status
@@ -130,7 +115,8 @@ constructor(
                             // into our internal model immediately. [toWifiNetworkModel] always
                             // returns a new instance, so the flow is guaranteed to emit.
                             send(
-                                newPrimaryNetwork = connectedEntry?.toPrimaryWifiNetworkModel()
+                                newPrimaryNetwork =
+                                    connectedEntry?.toPrimaryWifiNetworkModel()
                                         ?: WIFI_NETWORK_DEFAULT,
                                 newSecondaryNetworks = secondaryNetworks,
                                 newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
@@ -255,48 +241,40 @@ constructor(
     }
 
     private fun MergedCarrierEntry.convertCarrierMergedToModel(): WifiNetworkModel {
-        return if (this.subscriptionId == INVALID_SUBSCRIPTION_ID) {
-            WifiNetworkModel.Invalid(CARRIER_MERGED_INVALID_SUB_ID_REASON)
-        } else {
-            WifiNetworkModel.CarrierMerged(
-                networkId = NETWORK_ID,
-                subscriptionId = this.subscriptionId,
-                level = this.level,
-                // WifiManager APIs to calculate the signal level start from 0, so
-                // maxSignalLevel + 1 represents the total level buckets count.
-                numberOfLevels = wifiManager.maxSignalLevel + 1,
-            )
-        }
+        // WifiEntry instance values aren't guaranteed to be stable between method calls
+        // because
+        // WifiPickerTracker is continuously updating the same object. Save the level in a
+        // local
+        // variable so that checking the level validity here guarantees that the level will
+        // still be
+        // valid when we create the `WifiNetworkModel.Active` instance later. Otherwise, the
+        // level
+        // could be valid here but become invalid later, and `WifiNetworkModel.Active` will
+        // throw
+        // an exception. See b/362384551.
+
+        return WifiNetworkModel.CarrierMerged.of(
+            subscriptionId = this.subscriptionId,
+            level = this.level,
+            // WifiManager APIs to calculate the signal level start from 0, so
+            // maxSignalLevel + 1 represents the total level buckets count.
+            numberOfLevels = wifiManager.maxSignalLevel + 1,
+        )
     }
 
     private fun WifiEntry.convertNormalToModel(): WifiNetworkModel {
-        if (this.level == WIFI_LEVEL_UNREACHABLE || this.level !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX) {
-            // If our level means the network is unreachable or the level is otherwise invalid, we
-            // don't have an active network.
-            return WifiNetworkModel.Inactive
-        }
-
         val hotspotDeviceType =
-            if (isInstantTetherEnabled && this is HotspotNetworkEntry) {
+            if (this is HotspotNetworkEntry) {
                 this.deviceType.toHotspotDeviceType()
             } else {
                 WifiNetworkModel.HotspotDeviceType.NONE
             }
 
-        return WifiNetworkModel.Active(
-            networkId = NETWORK_ID,
+        return WifiNetworkModel.Active.of(
             isValidated = this.hasInternetAccess(),
             level = this.level,
             ssid = this.title,
             hotspotDeviceType = hotspotDeviceType,
-            // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
-            // typical wifi networks *and* passpoint/OSU APs. So, the AP-specific values can
-            // always be false/null in this repository.
-            // TODO(b/292534484): Remove these fields from the wifi network model once this
-            //  repository is fully enabled.
-            isPasspointAccessPoint = false,
-            isOnlineSignUpForPasspointAccessPoint = false,
-            passpointProviderFriendlyName = null,
         )
     }
 
@@ -408,7 +386,6 @@ constructor(
     class Factory
     @Inject
     constructor(
-        private val featureFlags: FeatureFlags,
         @Application private val scope: CoroutineScope,
         @Main private val mainExecutor: Executor,
         @Background private val bgDispatcher: CoroutineDispatcher,
@@ -418,7 +395,6 @@ constructor(
     ) {
         fun create(wifiManager: WifiManager): WifiRepositoryImpl {
             return WifiRepositoryImpl(
-                featureFlags,
                 scope,
                 mainExecutor,
                 bgDispatcher,
@@ -432,26 +408,12 @@ constructor(
 
     companion object {
         // Start out with no known wifi network.
-        @VisibleForTesting val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
+        @VisibleForTesting val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive()
 
         private const val WIFI_STATE_DEFAULT = WifiManager.WIFI_STATE_DISABLED
 
         val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
 
         private const val TAG = "WifiTrackerLibInputLog"
-
-        /**
-         * [WifiNetworkModel.Active.networkId] is only used at the repository layer. It's used by
-         * [WifiRepositoryImpl], which tracks the ID in order to correctly apply the framework
-         * callbacks within the repository.
-         *
-         * Since this class does not need to manually apply framework callbacks and since the
-         * network ID is not used beyond the repository, it's safe to use an invalid ID in this
-         * repository.
-         *
-         * The [WifiNetworkModel.Active.networkId] field should be deleted once we've fully migrated
-         * to [WifiRepositoryImpl].
-         */
-        private const val NETWORK_ID = -1
     }
 }

@@ -18,12 +18,12 @@ package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isSpecified
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the translation of an element to another element. */
 internal class AnchoredTranslate(
@@ -32,44 +32,38 @@ internal class AnchoredTranslate(
 ) : PropertyTransformation<Offset> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: SceneKey,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: Offset,
     ): Offset {
-        fun throwException(scene: SceneKey?): Nothing {
+        fun throwException(content: ContentKey?): Nothing {
             throwMissingAnchorException(
                 transformation = "AnchoredTranslate",
                 anchor = anchor,
-                scene = scene,
+                content = content,
             )
         }
 
-        val anchor = layoutImpl.elements[anchor] ?: throwException(scene = null)
-        fun anchorOffsetIn(scene: SceneKey): Offset? {
-            return anchor.sceneStates[scene]?.targetOffset?.takeIf { it.isSpecified }
+        val anchor = layoutImpl.elements[anchor] ?: throwException(content = null)
+        fun anchorOffsetIn(content: ContentKey): Offset? {
+            return anchor.stateByContent[content]?.targetOffset?.takeIf { it.isSpecified }
         }
 
         // [element] will move the same amount as [anchor] does.
         // TODO(b/290184746): Also support anchors that are not shared but translated because of
         // other transformations, like an edge translation.
         val anchorFromOffset =
-            anchorOffsetIn(transition.fromScene) ?: throwException(transition.fromScene)
+            anchorOffsetIn(transition.fromContent) ?: throwException(transition.fromContent)
         val anchorToOffset =
-            anchorOffsetIn(transition.toScene) ?: throwException(transition.toScene)
+            anchorOffsetIn(transition.toContent) ?: throwException(transition.toContent)
         val offset = anchorToOffset - anchorFromOffset
 
-        return if (scene == transition.toScene) {
-            Offset(
-                value.x - offset.x,
-                value.y - offset.y,
-            )
+        return if (content == transition.toContent) {
+            Offset(value.x - offset.x, value.y - offset.y)
         } else {
-            Offset(
-                value.x + offset.x,
-                value.y + offset.y,
-            )
+            Offset(value.x + offset.x, value.y + offset.y)
         }
     }
 }
@@ -77,11 +71,11 @@ internal class AnchoredTranslate(
 internal fun throwMissingAnchorException(
     transformation: String,
     anchor: ElementKey,
-    scene: SceneKey?,
+    content: ContentKey?,
 ): Nothing {
     error(
         """
-        Anchor ${anchor.debugName} does not have a target state in scene ${scene?.debugName}.
+        Anchor ${anchor.debugName} does not have a target state in content ${content?.debugName}.
         This either means that it was not composed at all during the transition or that it was
         composed too late, for instance during layout/subcomposition. To avoid flickers in
         $transformation, you should make sure that the composition and layout of anchor is *not*

@@ -80,6 +80,50 @@ object NotificationSectionHeadersModule {
             .build()
 
     @Provides
+    @NewsHeader
+    @SysUISingleton
+    @JvmStatic fun providesNewsHeaderSubcomponent(
+        builder: Provider<SectionHeaderControllerSubcomponent.Builder>
+    ) = builder.get()
+        .nodeLabel("news header")
+        .headerText(com.android.internal.R.string.news_notification_channel_label)
+        .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
+        .build()
+
+    @Provides
+    @SocialHeader
+    @SysUISingleton
+    @JvmStatic fun providesSocialHeaderSubcomponent(
+        builder: Provider<SectionHeaderControllerSubcomponent.Builder>
+    ) = builder.get()
+        .nodeLabel("social header")
+        .headerText(com.android.internal.R.string.social_notification_channel_label)
+        .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
+        .build()
+
+    @Provides
+    @RecsHeader
+    @SysUISingleton
+    @JvmStatic fun providesRecsHeaderSubcomponent(
+        builder: Provider<SectionHeaderControllerSubcomponent.Builder>
+    ) = builder.get()
+        .nodeLabel("recs header")
+        .headerText(com.android.internal.R.string.recs_notification_channel_label)
+        .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
+        .build()
+
+    @Provides
+    @PromoHeader
+    @SysUISingleton
+    @JvmStatic fun providesPromoHeaderSubcomponent(
+        builder: Provider<SectionHeaderControllerSubcomponent.Builder>
+    ) = builder.get()
+        .nodeLabel("promo header")
+        .headerText(com.android.internal.R.string.promotional_notification_channel_label)
+        .clickIntentAction(Settings.ACTION_NOTIFICATION_SETTINGS)
+        .build()
+
+    @Provides
     @SilentHeader
     @JvmStatic fun providesSilentHeaderNodeController(
         @SilentHeader subcomponent: SectionHeaderControllerSubcomponent
@@ -125,6 +169,54 @@ object NotificationSectionHeadersModule {
     @IncomingHeader
     @JvmStatic fun providesIncomingHeaderController(
         @IncomingHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.headerController
+
+    @Provides
+    @NewsHeader
+    @JvmStatic fun providesNewsHeaderNodeController(
+        @NewsHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.nodeController
+
+    @Provides
+    @NewsHeader
+    @JvmStatic fun providesNewsHeaderController(
+        @NewsHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.headerController
+
+    @Provides
+    @SocialHeader
+    @JvmStatic fun providesSocialHeaderNodeController(
+        @SocialHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.nodeController
+
+    @Provides
+    @SocialHeader
+    @JvmStatic fun providesSocialHeaderController(
+        @SocialHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.headerController
+
+    @Provides
+    @RecsHeader
+    @JvmStatic fun providesRecsHeaderNodeController(
+        @RecsHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.nodeController
+
+    @Provides
+    @RecsHeader
+    @JvmStatic fun providesRecsHeaderController(
+        @RecsHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.headerController
+
+    @Provides
+    @PromoHeader
+    @JvmStatic fun providesPromoHeaderNodeController(
+        @PromoHeader subcomponent: SectionHeaderControllerSubcomponent
+    ) = subcomponent.nodeController
+
+    @Provides
+    @PromoHeader
+    @JvmStatic fun providesPromoHeaderController(
+        @PromoHeader subcomponent: SectionHeaderControllerSubcomponent
     ) = subcomponent.headerController
 }
 
@@ -183,3 +275,19 @@ annotation class HeaderClickAction
 @Scope
 @Retention(AnnotationRetention.BINARY)
 annotation class SectionHeaderScope
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NewsHeader
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SocialHeader
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RecsHeader
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PromoHeader

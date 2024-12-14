@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @hide
@@ -294,24 +295,38 @@ public class ContextHubInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        String retVal = "";
-        retVal += "ID/handle : " + mId;
-        retVal += ", Name : " + mName;
-        retVal += "\n\tVendor : " + mVendor;
-        retVal += ", Toolchain : " + mToolchain;
-        retVal += ", Toolchain version: 0x" + Integer.toHexString(mToolchainVersion);
-        retVal += "\n\tPlatformVersion : 0x" + Integer.toHexString(mPlatformVersion);
-        retVal += ", SwVersion : "
-                + Byte.toUnsignedInt(mChreApiMajorVersion) + "." + Byte.toUnsignedInt(
-                mChreApiMinorVersion) + "." + Short.toUnsignedInt(mChrePatchVersion);
-        retVal += ", CHRE platform ID: 0x" + Long.toHexString(mChrePlatformId);
-        retVal += "\n\tPeakMips : " + mPeakMips;
-        retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
-        retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
-        retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
-        retVal += ", SupportsReliableMessage : " + mSupportsReliableMessages;
-
-        return retVal;
+        StringBuilder out = new StringBuilder();
+        out.append("ID/handle : ");
+        out.append(mId);
+        out.append(", Name : ");
+        out.append(mName);
+        out.append("\n\tVendor : ");
+        out.append(mVendor);
+        out.append(", Toolchain : ");
+        out.append(mToolchain);
+        out.append(", Toolchain version: 0x");
+        out.append(Integer.toHexString(mToolchainVersion));
+        out.append("\n\tPlatformVersion : 0x");
+        out.append(Integer.toHexString(mPlatformVersion));
+        out.append(", SwVersion : ");
+        out.append(Byte.toUnsignedInt(mChreApiMajorVersion));
+        out.append(".");
+        out.append(Byte.toUnsignedInt(mChreApiMinorVersion));
+        out.append(".");
+        out.append(Short.toUnsignedInt(mChrePatchVersion));
+        out.append(", CHRE platform ID: 0x");
+        out.append(Long.toHexString(mChrePlatformId));
+        out.append("\n\tPeakMips : ");
+        out.append(mPeakMips);
+        out.append(", StoppedPowerDraw : ");
+        out.append(mStoppedPowerDrawMw);
+        out.append(" mW, PeakPowerDraw : ");
+        out.append(mPeakPowerDrawMw);
+        out.append(" mW, MaxPacketLength : ");
+        out.append(mMaxPacketLengthBytes);
+        out.append(" Bytes, SupportsReliableMessages : ");
+        out.append(mSupportsReliableMessages);
+        return out.toString();
     }
 
     /**
@@ -368,6 +383,20 @@ public class ContextHubInfo implements Parcelable {
         }
 
         return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if (!Flags.fixApiCheck()) {
+            return super.hashCode();
+        }
+
+        return Objects.hash(mId, mName, mVendor, mToolchain, mToolchainVersion,
+                getStaticSwVersion(), mChrePlatformId, mPeakMips,
+                mStoppedPowerDrawMw, mSleepPowerDrawMw, mPeakPowerDrawMw,
+                mMaxPacketLengthBytes, mSupportsReliableMessages,
+                Arrays.hashCode(mSupportedSensors),
+                Arrays.hashCode(mMemoryRegions));
     }
 
     private ContextHubInfo(Parcel in) {

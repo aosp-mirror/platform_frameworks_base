@@ -17,10 +17,11 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.biometrics.authController
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.unfold.domain.interactor.unfoldTransitionInteractor
 
@@ -30,9 +31,10 @@ val Kosmos.lockscreenContentViewModel by
             clockInteractor = keyguardClockInteractor,
             interactor = keyguardBlueprintInteractor,
             authController = authController,
-            longPress = keyguardLongPressViewModel,
+            touchHandling = keyguardTouchHandlingViewModel,
             shadeInteractor = shadeInteractor,
-            applicationScope = applicationCoroutineScope,
             unfoldTransitionInteractor = unfoldTransitionInteractor,
+            occlusionInteractor = sceneContainerOcclusionInteractor,
+            deviceEntryInteractor = deviceEntryInteractor,
         )
     }

@@ -20,6 +20,8 @@ import android.annotation.AnyThread;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.inputmethodservice.InputMethodService.ImeWindowVisibility;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -106,14 +108,10 @@ public final class InputMethodPrivilegedOperations {
      *
      * @param vis visibility flags
      * @param backDisposition disposition flags
-     * @see android.inputmethodservice.InputMethodService#IME_ACTIVE
-     * @see android.inputmethodservice.InputMethodService#IME_VISIBLE
-     * @see android.inputmethodservice.InputMethodService#IME_INVISIBLE
-     * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_DEFAULT
-     * @see android.inputmethodservice.InputMethodService#BACK_DISPOSITION_ADJUST_NOTHING
      */
     @AnyThread
-    public void setImeWindowStatusAsync(int vis, int backDisposition) {
+    public void setImeWindowStatusAsync(@ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
@@ -372,6 +370,22 @@ public final class InputMethodPrivilegedOperations {
             final AndroidFuture<Boolean> future = new AndroidFuture<>();
             ops.shouldOfferSwitchingToNextInputMethod(future);
             return CompletableFutureUtil.getResult(future);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Calls {@link IInputMethodPrivilegedOperations#onImeSwitchButtonClickFromClient(int)}
+     */
+    @AnyThread
+    public void onImeSwitchButtonClickFromClient(int displayId) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.onImeSwitchButtonClickFromClient(displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

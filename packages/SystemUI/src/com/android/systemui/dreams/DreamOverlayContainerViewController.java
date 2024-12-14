@@ -21,8 +21,6 @@ import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
-import static com.android.systemui.Flags.communalHub;
-import static com.android.systemui.Flags.glanceableHubGestureHandle;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
@@ -53,6 +51,7 @@ import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
@@ -60,6 +59,7 @@ import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.DisposableHandle;
 import kotlinx.coroutines.flow.FlowKt;
 
 import java.util.Arrays;
@@ -186,12 +186,13 @@ public class DreamOverlayContainerViewController extends
                 }
             };
 
+    private DisposableHandle mFlowHandle;
+
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
-            @Named(DreamOverlayModule.HUB_GESTURE_INDICATOR_VIEW) View hubGestureIndicatorView,
             AmbientStatusBarViewController statusBarViewController,
             LowLightTransitionCoordinator lowLightTransitionCoordinator,
             TouchInsetManager.TouchInsetSession touchInsetSession,
@@ -229,12 +230,6 @@ public class DreamOverlayContainerViewController extends
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
                 R.dimen.dream_overlay_y_offset);
-
-        if (communalHub() && glanceableHubGestureHandle()) {
-            // TODO(b/339667383): remove this temporary swipe gesture handle
-            hubGestureIndicatorView.setVisibility(View.VISIBLE);
-        }
-
         final View view = mComplicationHostViewController.getView();
 
         mDreamOverlayContentView.addView(view,
@@ -260,6 +255,17 @@ public class DreamOverlayContainerViewController extends
     }
 
     @Override
+    public void destroy() {
+        mStateController.removeCallback(mDreamOverlayStateCallback);
+        mStatusBarViewController.destroy();
+        mComplicationHostViewController.destroy();
+        mDreamOverlayAnimationsController.destroy();
+        mLowLightTransitionCoordinator.setLowLightEnterListener(null);
+
+        super.destroy();
+    }
+
+    @Override
     protected void onViewAttached() {
         mWakingUpFromSwipe = false;
         mJitterStartTimeMillis = System.currentTimeMillis();
@@ -271,16 +277,22 @@ public class DreamOverlayContainerViewController extends
         emptyRegion.recycle();
 
         if (dreamHandlesBeingObscured()) {
-            collectFlow(
+            mFlowHandle = collectFlow(
                     mView,
                     FlowKt.distinctUntilChanged(combineFlows(
-                            mKeyguardTransitionInteractor.isFinishedInStateWhere(
-                                    KeyguardState::isBouncerState),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    Scenes.Bouncer, KeyguardState.PRIMARY_BOUNCER),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    KeyguardState.ALTERNATE_BOUNCER),
                             mShadeInteractor.isAnyExpanded(),
                             mCommunalInteractor.isCommunalShowing(),
-                            (anyBouncerShowing, shadeExpanded, communalShowing) -> {
-                                mAnyBouncerShowing = anyBouncerShowing;
-                                return anyBouncerShowing || shadeExpanded || communalShowing;
+                            (primaryBouncerShowing,
+                                    alternateBouncerShowing,
+                                    shadeExpanded,
+                                    communalShowing) -> {
+                                mAnyBouncerShowing = primaryBouncerShowing
+                                        || alternateBouncerShowing;
+                                return mAnyBouncerShowing || shadeExpanded || communalShowing;
                             })),
                     mDreamManager::setDreamIsObscured,
                     mBackgroundDispatcher);
@@ -297,6 +309,10 @@ public class DreamOverlayContainerViewController extends
 
     @Override
     protected void onViewDetached() {
+        if (mFlowHandle != null) {
+            mFlowHandle.dispose();
+            mFlowHandle = null;
+        }
         mHandler.removeCallbacksAndMessages(null);
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
         mBouncerlessScrimController.removeCallback(mBouncerlessExpansionCallback);
@@ -365,16 +381,17 @@ public class DreamOverlayContainerViewController extends
     }
 
     /**
-     * Handle the dream waking up and run any necessary animations.
+     * Handle the dream waking up.
      */
-    public void wakeUp() {
+    public void onWakeUp() {
+        // TODO(b/361872929): clean up this bool as it doesn't do anything anymore
         // When swiping causes wakeup, do not run any animations as the dream should exit as soon
         // as possible.
         if (mWakingUpFromSwipe) {
             return;
         }
 
-        mDreamOverlayAnimationsController.wakeUp();
+        mDreamOverlayAnimationsController.onWakeUp();
     }
 
     @Override

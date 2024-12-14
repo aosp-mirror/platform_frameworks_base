@@ -23,9 +23,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -33,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -116,6 +120,7 @@ public class PackageWatchdogTest {
     private ConnectivityModuleConnector mConnectivityModuleConnector;
     @Mock
     private PackageManager mMockPackageManager;
+    @Mock Intent mMockIntent;
     // Mock only sysprop apis
     private PackageWatchdog.BootThreshold mSpyBootThreshold;
     @Captor
@@ -1669,6 +1674,19 @@ public class PackageWatchdogTest {
                 PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS);
     }
 
+    /**
+     * Tests device config changes are propagated correctly.
+     */
+    @Test
+    public void testRegisterShutdownBroadcastReceiver() {
+        PackageWatchdog watchdog = createWatchdog();
+        doReturn(mMockIntent).when(mSpyContext)
+                .registerReceiverForAllUsers(any(), any(), any(), any());
+
+        watchdog.registerShutdownBroadcastReceiver();
+        verify(mSpyContext).registerReceiverForAllUsers(any(), any(), eq(null), eq(null));
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
@@ -1849,7 +1867,7 @@ public class PackageWatchdogTest {
             return true;
         }
 
-        public String getName() {
+        public String getUniqueIdentifier() {
             return mName;
         }
 

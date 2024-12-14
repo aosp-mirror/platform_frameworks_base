@@ -37,6 +37,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.media.permission.INativePermissionController;
+import com.android.media.permission.PermissionEnum;
 import com.android.media.permission.UidPackageState;
 import com.android.server.pm.pkg.PackageState;
 
@@ -350,6 +351,56 @@ public final class AudioServerPermissionProviderTest {
             verify(mMockPc).populatePermissionState(eq((byte) i), aryEq(new int[] {}));
         }
         verify(mMockPc, times(MONITORED_PERMS.length)).populatePermissionState(anyByte(), any());
+    }
+
+    @Test
+    public void testSpecialHotwordPermissions() throws Exception {
+        BiPredicate<Integer, String> customPermPred = mock(BiPredicate.class);
+        var initPackageListData =
+                List.of(mMockPackageStateOne_10000_one, mMockPackageStateTwo_10001_two);
+        // expected state
+        // PERM[CAPTURE_AUDIO_HOTWORD]: [10000]
+        // PERM[CAPTURE_AUDIO_OUTPUT]: [10001]
+        // PERM[RECORD_AUDIO]: [10001]
+        // PERM[...]: []
+        when(customPermPred.test(
+                        eq(10000), eq(MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_HOTWORD])))
+                .thenReturn(true);
+        when(customPermPred.test(
+                        eq(10001), eq(MONITORED_PERMS[PermissionEnum.CAPTURE_AUDIO_OUTPUT])))
+                .thenReturn(true);
+        when(customPermPred.test(eq(10001), eq(MONITORED_PERMS[PermissionEnum.RECORD_AUDIO])))
+                .thenReturn(true);
+        mPermissionProvider =
+                new AudioServerPermissionProvider(
+                        initPackageListData, customPermPred, () -> new int[] {0});
+        int HDS_UID = 99001;
+        mPermissionProvider.onServiceStart(mMockPc);
+        clearInvocations(mMockPc);
+        mPermissionProvider.setIsolatedServiceUid(HDS_UID, 10000);
+        verify(mMockPc)
+                .populatePermissionState(
+                        eq((byte) PermissionEnum.CAPTURE_AUDIO_HOTWORD),
+                        aryEq(new int[] {10000, HDS_UID}));
+        verify(mMockPc)
+                .populatePermissionState(
+                        eq((byte) PermissionEnum.CAPTURE_AUDIO_OUTPUT),
+                        aryEq(new int[] {10001, HDS_UID}));
+        verify(mMockPc)
+                .populatePermissionState(
+                        eq((byte) PermissionEnum.RECORD_AUDIO), aryEq(new int[] {10001, HDS_UID}));
+
+        clearInvocations(mMockPc);
+        mPermissionProvider.clearIsolatedServiceUid(HDS_UID);
+        verify(mMockPc)
+                .populatePermissionState(
+                        eq((byte) PermissionEnum.CAPTURE_AUDIO_HOTWORD), aryEq(new int[] {10000}));
+        verify(mMockPc)
+                .populatePermissionState(
+                        eq((byte) PermissionEnum.CAPTURE_AUDIO_OUTPUT), aryEq(new int[] {10001}));
+        verify(mMockPc)
+                .populatePermissionState(
+                        eq((byte) PermissionEnum.RECORD_AUDIO), aryEq(new int[] {10001}));
     }
 
     @Test

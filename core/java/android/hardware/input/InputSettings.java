@@ -17,13 +17,18 @@
 package android.hardware.input;
 
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
 import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
+import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
+import static com.android.input.flags.Flags.keyboardRepeatKeys;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -37,6 +42,7 @@ import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.sysprop.InputProperties;
+import android.view.ViewConfiguration;
 
 /**
  * InputSettings encapsulates reading and writing settings related to input
@@ -86,6 +92,30 @@ public class InputSettings {
      * @hide
      */
     public static final int DEFAULT_STYLUS_POINTER_ICON_ENABLED = 1;
+
+    /**
+     * The minimum allowed repeat keys timeout before starting key repeats.
+     * @hide
+     */
+    public static final int MIN_KEY_REPEAT_TIMEOUT_MILLIS = 150;
+
+    /**
+     * The maximum allowed repeat keys timeout before starting key repeats.
+     * @hide
+     */
+    public static final int MAX_KEY_REPEAT_TIMEOUT_MILLIS = 2000;
+
+    /**
+     * The minimum allowed repeat keys delay between successive key repeats.
+     * @hide
+     */
+    public static final int MIN_KEY_REPEAT_DELAY_MILLIS = 20;
+
+    /**
+     * The maximum allowed repeat keys delay between successive key repeats.
+     * @hide
+     */
+    public static final int MAX_KEY_REPEAT_DELAY_MILLIS = 2000;
 
     private InputSettings() {
     }
@@ -321,6 +351,48 @@ public class InputSettings {
      */
     public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
         return touchpadTapDragging();
+    }
+
+    /**
+     * Returns true if the feature flag for touchpad visualizer is enabled.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadVisualizerFeatureFlagEnabled() {
+        return touchpadVisualizer();
+    }
+
+    /**
+     * Returns true if the touchpad visualizer is allowed to appear.
+     *
+     * @param context The application context.
+     * @return Whether it is allowed to show touchpad visualizer or not.
+     *
+     * @hide
+     */
+    public static boolean useTouchpadVisualizer(@NonNull Context context) {
+        if (!isTouchpadVisualizerFeatureFlagEnabled()) {
+            return false;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_VISUALIZER, 0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets the touchpad visualizer behaviour.
+     *
+     * @param context The application context.
+     * @param enabled Will enable touchpad visualizer if true, disable it if false
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadVisualizer(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadVisualizerFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_VISUALIZER, enabled ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -662,4 +734,263 @@ public class InputSettings {
                 UserHandle.USER_CURRENT);
     }
 
+    /**
+     * Whether Accessibility mouse keys feature flag is enabled.
+     *
+     * <p>
+     * ‘Mouse keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to use the keys on the keyboard to control the mouse pointer and
+     * other perform other mouse functionality.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityMouseKeysFeatureFlagEnabled() {
+        return keyboardA11yMouseKeys();
+    }
+
+    /**
+     * Whether Accessibility mouse keys is enabled.
+     *
+     * <p>
+     * ‘Mouse keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to use the keys on the keyboard to control the mouse pointer and
+     * other perform other mouse functionality.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_MOUSE_KEYS)
+    public static boolean isAccessibilityMouseKeysEnabled(@NonNull Context context) {
+        if (!isAccessibilityMouseKeysFeatureFlagEnabled()) {
+            return false;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Set Accessibility mouse keys feature enabled/disabled.
+     *
+     *  <p>
+     * ‘Mouse keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to use the keys on the keyboard to control the mouse pointer and
+     * other perform other mouse functionality.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_MOUSE_KEYS)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilityMouseKeysEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isAccessibilityMouseKeysFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MOUSE_KEYS_ENABLED, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether "Repeat keys" feature flag is enabled.
+     *
+     * <p>
+     * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isRepeatKeysFeatureFlagEnabled() {
+        return keyboardRepeatKeys();
+    }
+
+    /**
+     * Whether "Repeat keys" feature is enabled.
+     * Repeat keys is ON by default.
+     * The repeat keys timeout and delay would have the default values in the default ON case.
+     *
+     * <p>
+     * 'Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    public static boolean isRepeatKeysEnabled(@NonNull Context context) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return true;
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Get repeat keys timeout duration in milliseconds.
+     * The default key repeat timeout is {@link ViewConfiguration#DEFAULT_KEY_REPEAT_TIMEOUT_MS}.
+     *
+     * @param context The application context
+     * @return The time duration for which a key should be pressed after
+     *         which the pressed key will be repeated. The timeout must be between
+     *         {@link #MIN_KEY_REPEAT_TIMEOUT_MILLIS} and
+     *         {@link #MAX_KEY_REPEAT_TIMEOUT_MILLIS}
+     *
+     * <p>
+     * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    public static int getRepeatKeysTimeout(@NonNull Context context) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return ViewConfiguration.getKeyRepeatTimeout();
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, ViewConfiguration.getKeyRepeatTimeout(),
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Get repeat keys delay rate in milliseconds.
+     * The default key repeat delay is {@link ViewConfiguration#DEFAULT_KEY_REPEAT_DELAY_MS}.
+     *
+     * @param context The application context
+     * @return Time duration between successive key repeats when a key is
+     *         pressed down. The delay duration must be between
+     *         {@link #MIN_KEY_REPEAT_DELAY_MILLIS} and
+     *         {@link #MAX_KEY_REPEAT_DELAY_MILLIS}
+     *
+     * <p>
+     * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    public static int getRepeatKeysDelay(@NonNull Context context) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return ViewConfiguration.getKeyRepeatDelay();
+        }
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set repeat keys feature enabled/disabled.
+     *
+     * <p>
+     * 'Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setRepeatKeysEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isRepeatKeysFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_ENABLED, enabled ? 1 : 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set repeat keys timeout duration in milliseconds.
+     *
+     * @param timeoutTimeMillis time duration for which a key should be pressed after which the
+     *                          pressed key will be repeated. The timeout must be between
+     *                          {@link #MIN_KEY_REPEAT_TIMEOUT_MILLIS} and
+     *                          {@link #MAX_KEY_REPEAT_TIMEOUT_MILLIS}
+     *
+     *  <p>
+     * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     *  between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setRepeatKeysTimeout(@NonNull Context context,
+            int timeoutTimeMillis) {
+        if (!isRepeatKeysFeatureFlagEnabled()
+                && !isRepeatKeysEnabled(context)) {
+            return;
+        }
+        if (timeoutTimeMillis < MIN_KEY_REPEAT_TIMEOUT_MILLIS
+                || timeoutTimeMillis > MAX_KEY_REPEAT_TIMEOUT_MILLIS) {
+            throw new IllegalArgumentException(
+                    "Provided repeat keys timeout should be in range ("
+                            + MIN_KEY_REPEAT_TIMEOUT_MILLIS + ","
+                            + MAX_KEY_REPEAT_TIMEOUT_MILLIS + ")");
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, timeoutTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set repeat key delay duration in milliseconds.
+     *
+     * @param delayTimeMillis Time duration between successive key repeats when a key is
+     *                        pressed down. The delay duration must be between
+     *                        {@link #MIN_KEY_REPEAT_DELAY_MILLIS} and
+     *                        {@link #MAX_KEY_REPEAT_DELAY_MILLIS}
+     * <p>
+     * ‘Repeat keys’ is a feature which allows users to generate key repeats when a particular
+     * key on the physical keyboard is held down. This feature allows the user
+     * to configure the timeout before the key repeats begin as well as the delay
+     * between successive key repeats.
+     * </p>
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_REPEAT_KEYS)
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setRepeatKeysDelay(@NonNull Context context,
+            int delayTimeMillis) {
+        if (!isRepeatKeysFeatureFlagEnabled()
+                && !isRepeatKeysEnabled(context)) {
+            return;
+        }
+        if (delayTimeMillis < MIN_KEY_REPEAT_DELAY_MILLIS
+                || delayTimeMillis > MAX_KEY_REPEAT_DELAY_MILLIS) {
+            throw new IllegalArgumentException(
+                    "Provided repeat keys delay should be in range ("
+                            + MIN_KEY_REPEAT_DELAY_MILLIS + ","
+                            + MAX_KEY_REPEAT_DELAY_MILLIS + ")");
+        }
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.KEY_REPEAT_DELAY_MS, delayTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
 }

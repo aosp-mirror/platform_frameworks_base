@@ -106,7 +106,8 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     @Override
     @MainThread
     public void onManagedProfileRemoved() {
-        mHost.removeTile(getTileSpec());
+        // No OP as this may race with the user change in CurrentTilesInteractor.
+        // If the tile needs to be removed, AutoAdd (or AutoTileManager) will take care of that.
     }
 
     @Override

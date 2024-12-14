@@ -17,11 +17,10 @@
 package com.android.server.power;
 
 import static com.android.server.power.ShutdownThread.DEFAULT_SHUTDOWN_VIBRATE_MS;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,7 +41,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Tests for {@link com.android.server.power.ShutdownThread}
@@ -88,6 +86,7 @@ public class ShutdownThreadTest {
     @Mock private VibratorInfo mVibratorInfoMock;
 
     private String mDefaultShutdownVibrationFilePath;
+    private boolean mShutdownVibrationDisabled;
     private long mLastSleepDurationMs;
 
     private ShutdownThread mShutdownThread;
@@ -168,6 +167,17 @@ public class ShutdownThreadTest {
                 .vibrate(any(VibrationEffect.class), any(VibrationAttributes.class));
     }
 
+    @Test
+    public void testVibrationDisabled() throws Exception {
+        setShutdownVibrationFileContent(CLICK_VIB_SERIALIZATION);
+        mShutdownVibrationDisabled = true;
+
+        mShutdownThread.playShutdownVibration(mContextMock);
+
+        verify(mVibratorMock, never())
+                .vibrate(any(VibrationEffect.class), any(VibrationAttributes.class));
+    }
+
     private void assertShutdownVibration(VibrationEffect effect, long vibrationSleepDuration)
             throws Exception {
         verify(mVibratorMock).vibrate(
@@ -213,6 +223,11 @@ public class ShutdownThreadTest {
         @Override
         public void sleep(long durationMs) {
             mLastSleepDurationMs = durationMs;
+        }
+
+        @Override
+        public boolean isShutdownVibrationDisabled(Context context) {
+            return mShutdownVibrationDisabled;
         }
     }
 }

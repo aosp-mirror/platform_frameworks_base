@@ -27,6 +27,10 @@ constexpr const static char* kFrameworkPath = "/system/framework/framework-res.a
 constexpr const static uint32_t kStyleId = 0x01030237u;  // android:style/Theme.Material.Light
 constexpr const static uint32_t kAttrId = 0x01010030u;   // android:attr/colorForeground
 
+constexpr const static uint32_t kStyle2Id = 0x01030224u;  // android:style/Theme.Material
+constexpr const static uint32_t kStyle3Id = 0x0103024du;  // android:style/Widget.Material
+constexpr const static uint32_t kStyle4Id = 0x0103028eu;  // android:style/Widget.Material.Light
+
 static void BM_ThemeApplyStyleFramework(benchmark::State& state) {
   auto apk = ApkAssets::Load(kFrameworkPath);
   if (apk == nullptr) {
@@ -60,6 +64,32 @@ static void BM_ThemeApplyStyleFrameworkOld(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_ThemeApplyStyleFrameworkOld);
+
+static void BM_ThemeRebaseFramework(benchmark::State& state) {
+  auto apk = ApkAssets::Load(kFrameworkPath);
+  if (apk == nullptr) {
+    state.SkipWithError("Failed to load assets");
+    return;
+  }
+
+  AssetManager2 assets;
+  assets.SetApkAssets({apk});
+
+  // Create two arrays of styles to switch between back and forth.
+  const uint32_t styles1[] = {kStyle2Id, kStyleId, kStyle3Id};
+  const uint8_t force1[std::size(styles1)] = {false, true, false};
+  const uint32_t styles2[] = {kStyleId, kStyle2Id, kStyle4Id, kStyle3Id};
+  const uint8_t force2[std::size(styles2)] = {false, true, true, false};
+  const auto theme = assets.NewTheme();
+  // Initialize the theme to make the first iteration the same as the rest.
+  theme->Rebase(&assets, styles1, force1, std::size(force1));
+
+  while (state.KeepRunning()) {
+    theme->Rebase(&assets, styles2, force2, std::size(force2));
+    theme->Rebase(&assets, styles1, force1, std::size(force1));
+  }
+}
+BENCHMARK(BM_ThemeRebaseFramework);
 
 static void BM_ThemeGetAttribute(benchmark::State& state) {
   auto apk = ApkAssets::Load(kFrameworkPath);

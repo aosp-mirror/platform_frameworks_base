@@ -642,7 +642,7 @@ class NotificationContentViewTest : SysuiTestCase() {
 
         return spy(NotificationContentView(mContext, /* attrs= */ null))
             .apply {
-                initialize(mPeopleNotificationIdentifier, mock(), mock(), mock(), mock())
+                initialize(mPeopleNotificationIdentifier, mock(), mock(), mock(), mock(), mock())
                 setContainingNotification(row)
                 setHeights(
                     /* smallHeight= */ contractedHeight,

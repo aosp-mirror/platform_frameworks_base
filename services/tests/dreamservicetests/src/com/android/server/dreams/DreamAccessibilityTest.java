@@ -19,10 +19,12 @@ package com.android.server.dreams;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -43,9 +45,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -73,7 +72,8 @@ public class DreamAccessibilityTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDreamAccessibility = new DreamAccessibility(mContext, mView);
+        Runnable mDismissCallback = () -> {};
+        mDreamAccessibility = new DreamAccessibility(mContext, mView, mDismissCallback);
 
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getString(R.string.dream_accessibility_action_click))
@@ -84,80 +84,55 @@ public class DreamAccessibilityTest {
      */
     @Test
     public void testConfigureAccessibilityActions() {
-        when(mAccessibilityNodeInfo.getActionList()).thenReturn(new ArrayList<>());
+        when(mView.getAccessibilityDelegate()).thenReturn(null);
 
-        mDreamAccessibility.updateAccessibilityConfiguration(false);
+        mDreamAccessibility.updateAccessibilityConfiguration();
 
         verify(mView).setAccessibilityDelegate(mAccessibilityDelegateArgumentCaptor.capture());
-        View.AccessibilityDelegate capturedDelegate =
-                mAccessibilityDelegateArgumentCaptor.getValue();
+        View.AccessibilityDelegate capturedDelegate = mAccessibilityDelegateArgumentCaptor
+                .getValue();
 
         capturedDelegate.onInitializeAccessibilityNodeInfo(mView, mAccessibilityNodeInfo);
 
         verify(mAccessibilityNodeInfo).addAction(argThat(action ->
-                action.getId() == AccessibilityNodeInfo.ACTION_CLICK
+                action.getId() == AccessibilityNodeInfo.ACTION_DISMISS
                         && TextUtils.equals(action.getLabel(), CUSTOM_ACTION)));
     }
 
     /**
-     * Test to verify the configuration of accessibility actions within a view delegate,
-     * specifically checking the removal of an existing click action and addition
-     * of a new custom action.
+     * Test to verify no accessibility configuration is added if one exist.
      */
     @Test
-    public void testConfigureAccessibilityActions_RemovesExistingClickAction() {
-        AccessibilityNodeInfo.AccessibilityAction existingAction =
-                new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK,
-                        EXISTING_ACTION);
-        when(mAccessibilityNodeInfo.getActionList())
-                .thenReturn(Collections.singletonList(existingAction));
+    public void testNotAddingDuplicateAccessibilityConfiguration() {
+        View.AccessibilityDelegate existingDelegate = mock(View.AccessibilityDelegate.class);
+        when(mView.getAccessibilityDelegate()).thenReturn(existingDelegate);
 
-        mDreamAccessibility.updateAccessibilityConfiguration(false);
+        mDreamAccessibility.updateAccessibilityConfiguration();
 
-        verify(mView).setAccessibilityDelegate(mAccessibilityDelegateArgumentCaptor.capture());
-        View.AccessibilityDelegate capturedDelegate =
-                mAccessibilityDelegateArgumentCaptor.getValue();
-
-        capturedDelegate.onInitializeAccessibilityNodeInfo(mView, mAccessibilityNodeInfo);
-
-        verify(mAccessibilityNodeInfo).removeAction(existingAction);
-        verify(mAccessibilityNodeInfo).addAction(argThat(action ->
-                action.getId() == AccessibilityNodeInfo.ACTION_CLICK
-                        && TextUtils.equals(action.getLabel(), CUSTOM_ACTION)));
-
-    }
-
-    /**
-     * Test to verify the removal of a custom accessibility action within a view delegate.
-     */
-    @Test
-    public void testRemoveCustomAccessibilityAction() {
-
-        AccessibilityNodeInfo.AccessibilityAction existingAction =
-                new AccessibilityNodeInfo.AccessibilityAction(AccessibilityNodeInfo.ACTION_CLICK,
-                        EXISTING_ACTION);
-        when(mAccessibilityNodeInfo.getActionList())
-                .thenReturn(Collections.singletonList(existingAction));
-
-        mDreamAccessibility.updateAccessibilityConfiguration(false);
-        verify(mView).setAccessibilityDelegate(mAccessibilityDelegateArgumentCaptor.capture());
-        View.AccessibilityDelegate capturedDelegate =
-                mAccessibilityDelegateArgumentCaptor.getValue();
-        when(mView.getAccessibilityDelegate()).thenReturn(capturedDelegate);
-        clearInvocations(mView);
-
-        mDreamAccessibility.updateAccessibilityConfiguration(true);
-        verify(mView).setAccessibilityDelegate(null);
-    }
-
-    /**
-     * Test to verify the removal of custom accessibility action is not called if delegate is not
-     * set by the dreamService.
-     */
-    @Test
-    public void testRemoveCustomAccessibility_DoesNotRemoveDelegateNotSetByDreamAccessibility() {
-        mDreamAccessibility.updateAccessibilityConfiguration(true);
         verify(mView, never()).setAccessibilityDelegate(any());
     }
+
+    /**
+     * Test to verify dismiss callback is called
+     */
+    @Test
+    public void testPerformAccessibilityAction() {
+        Runnable mockDismissCallback = mock(Runnable.class);
+        DreamAccessibility dreamAccessibility = new DreamAccessibility(mContext,
+                mView, mockDismissCallback);
+
+        dreamAccessibility.updateAccessibilityConfiguration();
+
+        verify(mView).setAccessibilityDelegate(mAccessibilityDelegateArgumentCaptor.capture());
+        View.AccessibilityDelegate capturedDelegate = mAccessibilityDelegateArgumentCaptor
+                .getValue();
+
+        boolean result = capturedDelegate.performAccessibilityAction(mView,
+                AccessibilityNodeInfo.ACTION_DISMISS, null);
+
+        assertTrue(result);
+        verify(mockDismissCallback).run();
+    }
+
 }
 

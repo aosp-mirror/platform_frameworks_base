@@ -19,11 +19,8 @@
 package com.android.credentialmanager.ui.screens.single.password
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.components.PasswordRow
@@ -67,7 +64,6 @@ fun SinglePasswordScreen(
             )
         },
         columnState = columnState,
-        modifier = Modifier.padding(horizontal = 10.dp)
     ) {
         item {
             Column {

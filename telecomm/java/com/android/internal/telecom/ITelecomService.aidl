@@ -376,7 +376,8 @@ interface ITelecomService {
      */
     void requestLogMark(in String message);
 
-    void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);
+    void setTestPhoneAcctSuggestionComponent(String flattenedComponentName,
+        in UserHandle userHandle);
 
     void setTestDefaultCallScreeningApp(String packageName);
 

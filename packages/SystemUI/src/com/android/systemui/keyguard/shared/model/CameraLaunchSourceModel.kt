@@ -15,14 +15,8 @@
  */
 package com.android.systemui.keyguard.shared.model
 
-/** Camera launch sources */
-enum class CameraLaunchSourceModel {
-    /** Device is wiggled */
-    WIGGLE,
-    /** Power button has been double tapped */
-    POWER_DOUBLE_TAP,
-    /** Device has been lifted */
-    LIFT_TRIGGER,
-    /** Quick affordance button has been pressed */
-    QUICK_AFFORDANCE,
-}
+/** Camera launch source, with type and time detected */
+data class CameraLaunchSourceModel(
+    val type: CameraLaunchType = CameraLaunchType.IGNORE,
+    val detectedTime: Long = System.currentTimeMillis(),
+)

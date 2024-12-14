@@ -198,7 +198,8 @@ constructor(
 
     fun logServiceProvidersUpdatedBroadcast(intent: Intent) {
         val showSpn = intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_SPN, false)
-        val spn = intent.getStringExtra(TelephonyManager.EXTRA_DATA_SPN)
+        val spn = intent.getStringExtra(TelephonyManager.EXTRA_SPN)
+        val dataSpn = intent.getStringExtra(TelephonyManager.EXTRA_DATA_SPN)
         val showPlmn = intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_PLMN, false)
         val plmn = intent.getStringExtra(TelephonyManager.EXTRA_PLMN)
 
@@ -208,12 +209,13 @@ constructor(
             {
                 bool1 = showSpn
                 str1 = spn
+                str2 = dataSpn
                 bool2 = showPlmn
-                str2 = plmn
+                str3 = plmn
             },
             {
                 "Intent: ACTION_SERVICE_PROVIDERS_UPDATED." +
-                    " showSpn=$bool1 spn=$str1 showPlmn=$bool2 plmn=$str2"
+                    " showSpn=$bool1 spn=$str1 dataSpn=$str2 showPlmn=$bool2 plmn=$str3"
             }
         )
     }

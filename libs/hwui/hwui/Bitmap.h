@@ -25,6 +25,7 @@
 #include <cutils/compiler.h>
 #include <utils/StrongPointer.h>
 
+#include <mutex>
 #include <optional>
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
@@ -227,6 +228,13 @@ private:
     } mPixelStorage;
 
     sk_sp<SkImage> mImage;  // Cache is used only for HW Bitmaps with Skia pipeline.
+
+    // for tracing total number and memory usage of bitmaps
+    static std::mutex mLock;
+    static size_t mTotalBitmapBytes;
+    static size_t mTotalBitmapCount;
+    void traceBitmapCreate();
+    void traceBitmapDelete();
 };
 
 }  // namespace android

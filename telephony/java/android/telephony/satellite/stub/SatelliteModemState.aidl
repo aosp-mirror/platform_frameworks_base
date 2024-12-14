@@ -22,7 +22,7 @@ package android.telephony.satellite.stub;
 @Backing(type="int")
 enum SatelliteModemState {
     /**
-     * Satellite modem is in idle state.
+     * Satellite Idle state during which modem will scan for TN networks.
      */
     SATELLITE_MODEM_STATE_IDLE = 0,
     /**
@@ -46,13 +46,13 @@ enum SatelliteModemState {
      */
     SATELLITE_MODEM_STATE_UNAVAILABLE = 5,
     /**
-     * The satellite modem is powered on but the device is not registered to a satellite cell.
+     * The satellite modem is powered on but the device is out of service.
      */
-    SATELLITE_MODEM_STATE_NOT_CONNECTED = 6,
+    SATELLITE_MODEM_STATE_OUT_OF_SERVICE = 6,
     /**
-     * The satellite modem is powered on and the device is registered to a satellite cell.
+     * The satellite modem is powered on and the device is registered and in service.
      */
-    SATELLITE_MODEM_STATE_CONNECTED = 7,
+    SATELLITE_MODEM_STATE_IN_SERVICE = 7,
     /**
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.

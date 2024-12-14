@@ -33,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.os.Process;
 import android.util.ArraySet;
@@ -40,12 +41,14 @@ import android.view.Display;
 import android.window.DisplayWindowPolicyController;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Tests for the {@link DisplayWindowPolicyController} class.
@@ -224,7 +227,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         assertEquals(result, START_ABORTED);
     }
 
-    private class TestDisplayWindowPolicyController extends DisplayWindowPolicyController {
+    private static class TestDisplayWindowPolicyController extends DisplayWindowPolicyController {
 
         public ComponentName DISALLOWED_ACTIVITY =
                 new ComponentName("fake.package", "DisallowedActivity");
@@ -236,7 +239,8 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         @Override
         public boolean canActivityBeLaunched(@NonNull ActivityInfo activity, Intent intent,
                 @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-                boolean isNewTask) {
+                boolean isNewTask, boolean isResultExpected,
+                @Nullable Supplier<IntentSender> intentSender) {
             return canContainActivity(activity, windowingMode, launchingFromDisplayId, isNewTask);
         }
 

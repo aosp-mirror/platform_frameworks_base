@@ -18,7 +18,7 @@
 #define CACHEMANAGER_H
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
-#include <GrDirectContext.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
 #endif
 #include <SkSurface.h>
 #include <utils/String8.h>

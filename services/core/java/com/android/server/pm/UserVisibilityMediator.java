@@ -572,18 +572,18 @@ public final class UserVisibilityMediator implements Dumpable {
                 return false;
             }
 
-            // First check if the user started on display
+            // First check if the user is assigned to a display
             int userAssignedToDisplay = getUserStartedOnDisplay(displayId);
             if (userAssignedToDisplay != USER_NULL) {
                 Slogf.w(TAG, "assignUserToExtraDisplay(%d, %d): failed because display was assigned"
                         + " to user %d on start", userId, displayId, userAssignedToDisplay);
                 return false;
             }
-            // Then if was assigned extra
-            userAssignedToDisplay = mExtraDisplaysAssignedToUsers.get(userId, USER_NULL);
+            // Then if the display was assigned before
+            userAssignedToDisplay = mExtraDisplaysAssignedToUsers.get(displayId, USER_NULL);
             if (userAssignedToDisplay != USER_NULL) {
                 Slogf.w(TAG, "assignUserToExtraDisplay(%d, %d): failed because user %d was already "
-                        + "assigned that extra display", userId, displayId, userAssignedToDisplay);
+                        + "assigned to extra display", userId, displayId, userAssignedToDisplay);
                 return false;
             }
             if (DBG) {
@@ -918,9 +918,15 @@ public final class UserVisibilityMediator implements Dumpable {
                 if (!isStartedVisibleProfileLocked(userId)) {
                     return userId;
                 } else if (DBG) {
-                    Slogf.d(TAG, "getUserAssignedToDisplay(%d): skipping user %d because it's "
-                            + "a profile", displayId, userId);
+                    Slogf.d(TAG,
+                            "getUserAssignedToDisplay(%d): skipping user %d because it's a profile",
+                            displayId, userId);
                 }
+            }
+            int userAssignedToExtraDisplay = mExtraDisplaysAssignedToUsers.get(displayId,
+                    USER_NULL);
+            if (userAssignedToExtraDisplay != USER_NULL) {
+                return userAssignedToExtraDisplay;
             }
         }
         if (!returnCurrentUserByDefault) {

@@ -27,7 +27,6 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
@@ -191,11 +190,7 @@ constructor(
     }
 
     private fun calculateLargeShadeHeaderHeight(): Int {
-        return if (centralizedStatusBarHeightFix()) {
-            largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
-        } else {
-            resources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height)
-        }
+        return largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
     }
 
     private fun calculateShadeHeaderHeight(): Int {

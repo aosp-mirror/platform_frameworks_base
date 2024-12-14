@@ -40,6 +40,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
@@ -68,6 +69,8 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -76,13 +79,13 @@ import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
+import com.android.systemui.media.controls.shared.model.MediaNotificationAction
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.binder.SeekBarObserver
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.monet.ColorScheme
@@ -139,6 +142,7 @@ private const val APP_NAME = "APP_NAME"
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableSceneContainer
 public class MediaControlPanelTest : SysuiTestCase() {
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
@@ -210,6 +214,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
+    @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
+
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
     private lateinit var smartspaceData: SmartspaceMediaData
@@ -229,9 +235,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recProgressBar1: SeekBar
     @Mock private lateinit var recProgressBar2: SeekBar
     @Mock private lateinit var recProgressBar3: SeekBar
-    private var shouldShowBroadcastButton: Boolean = false
     @Mock private lateinit var globalSettings: GlobalSettings
-    @Mock private lateinit var mediaFlags: MediaFlags
+
+    private val intent =
+        Intent().apply {
+            putExtras(Bundle().also { it.putString(KEY_SMARTSPACE_APP_NAME, REC_APP_NAME) })
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+    private val pendingIntent =
+        PendingIntent.getActivity(
+            mContext,
+            0,
+            intent.setPackage(mContext.packageName),
+            PendingIntent.FLAG_MUTABLE
+        )
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -250,7 +267,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
             .thenReturn(applicationInfo)
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
-        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
 
         player =
             object :
@@ -270,10 +286,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     logger,
                     keyguardStateController,
                     activityIntentHelper,
+                    communalSceneInteractor,
                     lockscreenUserManager,
                     broadcastDialogController,
                     globalSettings,
-                    mediaFlags,
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -987,14 +1003,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindNotificationActions() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
         val actions =
             listOf(
-                MediaAction(icon, Runnable {}, "previous", bg),
-                MediaAction(icon, Runnable {}, "play", bg),
-                MediaAction(icon, null, "next", bg),
-                MediaAction(icon, null, "custom 0", bg),
-                MediaAction(icon, Runnable {}, "custom 1", bg)
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "previous"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "play"),
+                MediaNotificationAction(true, actionIntent = null, icon, "next"),
+                MediaNotificationAction(true, actionIntent = null, icon, "custom 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "custom 1")
             )
         val state =
             mediaData.copy(
@@ -1682,11 +1697,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom2Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1701,11 +1716,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom3Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1720,11 +1735,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom4Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1771,8 +1786,41 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 
+    @EnableFlags(Flags.FLAG_MEDIA_LOCKSCREEN_LAUNCH_ANIMATION)
     @Test
-    fun tapContentView_showOverLockscreen_openActivity() {
+    fun tapContentView_showOverLockscreen_openActivity_withOriginAnimation() {
+        // WHEN we are on lockscreen and this activity can show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN it sends the PendingIntent without dismissing keyguard first,
+        // and does not use the Intent directly (see b/271845008)
+        captor.value.onClick(viewHolder.player)
+        verify(activityStarter)
+            .startPendingIntentMaybeDismissingKeyguard(
+                eq(pendingIntent),
+                eq(true),
+                eq(null),
+                any(),
+                eq(null),
+                eq(null),
+                eq(null),
+            )
+        verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
+    }
+
+    @DisableFlags(Flags.FLAG_MEDIA_LOCKSCREEN_LAUNCH_ANIMATION)
+    @Test
+    fun tapContentView_showOverLockscreen_openActivity_withoutOriginAnimation() {
         // WHEN we are on lockscreen and this activity can show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
         whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)

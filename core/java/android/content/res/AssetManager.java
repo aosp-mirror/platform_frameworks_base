@@ -16,8 +16,8 @@
 
 package android.content.res;
 
-import static android.content.res.Resources.ID_NULL;
 import static android.app.ResourcesManager.ApkKey;
+import static android.content.res.Resources.ID_NULL;
 
 import android.annotation.AnyRes;
 import android.annotation.ArrayRes;
@@ -34,6 +34,9 @@ import android.content.res.Configuration.NativeConfig;
 import android.content.res.loader.ResourcesLoader;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -43,6 +46,7 @@ import android.util.TypedValue;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
@@ -66,11 +70,14 @@ import java.util.Objects;
  * files that have been bundled with the application as a simple stream of
  * bytes.
  */
+@RavenwoodKeepWholeClass
 public final class AssetManager implements AutoCloseable {
     private static final String TAG = "AssetManager";
     private static final boolean DEBUG_REFS = false;
 
-    private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
+    private static final String FRAMEWORK_APK_PATH = getFrameworkApkPath();
+    private static final String FRAMEWORK_APK_PATH_DEVICE = "/system/framework/framework-res.apk";
+    private static final String FRAMEWORK_APK_PATH_RAVENWOOD = "ravenwood-data/framework-res.apk";
 
     private static final Object sSync = new Object();
 
@@ -147,6 +154,7 @@ public final class AssetManager implements AutoCloseable {
             return this;
         }
 
+        @RavenwoodThrow(blockedBy = ResourcesLoader.class)
         public Builder addLoader(ResourcesLoader loader) {
             mLoaders.add(loader);
             return this;
@@ -206,6 +214,16 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @RavenwoodReplace
+    private static String getFrameworkApkPath() {
+        return FRAMEWORK_APK_PATH_DEVICE;
+    }
+
+    private static String getFrameworkApkPath$ravenwood() {
+        return RavenwoodEnvironment.getInstance().getRavenwoodRuntimePath()
+                + FRAMEWORK_APK_PATH_RAVENWOOD;
+    }
+
     /**
      * Create a new AssetManager containing only the basic system assets.
      * Applications will not generally use this method, instead retrieving the
@@ -260,7 +278,9 @@ public final class AssetManager implements AutoCloseable {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
             apkAssets.add(ApkAssets.loadFromPath(frameworkPath, ApkAssets.PROPERTY_SYSTEM));
 
+            // TODO(Ravenwood): overlay support?
             final String[] systemIdmapPaths =
+                    RavenwoodEnvironment.getInstance().isRunningOnRavenwood() ? new String[0] :
                     OverlayConfig.getZygoteInstance().createImmutableFrameworkIdmapsInZygote();
             for (String idmapPath : systemIdmapPaths) {
                 apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, ApkAssets.PROPERTY_SYSTEM));
@@ -351,6 +371,7 @@ public final class AssetManager implements AutoCloseable {
      * Changes the {@link ResourcesLoader ResourcesLoaders} used in this AssetManager.
      * @hide
      */
+    @RavenwoodThrow(blockedBy = ResourcesLoader.class)
     void setLoaders(@NonNull List<ResourcesLoader> newLoaders) {
         Objects.requireNonNull(newLoaders, "newLoaders");
 
@@ -489,7 +510,6 @@ public final class AssetManager implements AutoCloseable {
 
         synchronized (this) {
             ensureOpenLocked();
-            final int count = mApkAssets.length;
 
             // See if we already have some of the apkKeys loaded.
             final int originalAssetsCount = mApkAssets.length;
@@ -579,6 +599,7 @@ public final class AssetManager implements AutoCloseable {
 
     /** @hide */
     @NonNull
+    @RavenwoodThrow(blockedBy = ResourcesLoader.class)
     public List<ResourcesLoader> getLoaders() {
         return mLoaders == null ? Collections.emptyList() : Arrays.asList(mLoaders);
     }
@@ -1217,6 +1238,7 @@ public final class AssetManager implements AutoCloseable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @RavenwoodReplace
     void applyStyle(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
             @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
             long outIndicesAddress) {
@@ -1800,4 +1822,37 @@ public final class AssetManager implements AutoCloseable {
      */
     @UnsupportedAppUsage
     public static native int getGlobalAssetManagerCount();
+
+    // Ravenwood Workarounds
+
+    /**
+     * ART has explicit support for allocating pinned (non-movable) array objects.
+     * On Ravenwood we allocate regular arrays and use critical array access in
+     * JNI as a best effort to reduce memory copying.
+     * TODO(b/359983716): Remove when Ravenwood switch to ART
+     */
+    void applyStyle$ravenwood(long themePtr, @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
+            @Nullable XmlBlock.Parser parser, @NonNull int[] inAttrs, long outValuesAddress,
+            long outIndicesAddress) {
+        Objects.requireNonNull(inAttrs, "inAttrs");
+        var runtime = RavenwoodEnvironment.getInstance();
+        final int[] outValues = runtime.fromAddress(outValuesAddress);
+        final int[] outIndices = runtime.fromAddress(outIndicesAddress);
+        synchronized (this) {
+            // Need to synchronize on AssetManager because we will be accessing
+            // the native implementation of AssetManager.
+            ensureValidLocked();
+            nativeApplyStyleWithArray(mObject, themePtr, defStyleAttr, defStyleRes,
+                    parser != null ? parser.mParseState : 0, inAttrs, outValues,
+                    outIndices);
+        }
+    }
+
+    /**
+     * A variant of nativeApplyStyle(), accepting java arrays instead of raw pointers.
+     * TODO(b/359983716): Remove when Ravenwood switch to ART
+     */
+    private static native void nativeApplyStyleWithArray(long ptr, long themePtr,
+            @AttrRes int defStyleAttr, @StyleRes int defStyleRes,
+            long xmlParserPtr, @NonNull int[] inAttrs, int[] outData, int[] outIndices);
 }

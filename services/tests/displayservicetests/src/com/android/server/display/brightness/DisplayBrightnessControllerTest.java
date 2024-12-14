@@ -545,17 +545,18 @@ public final class DisplayBrightnessControllerTest {
         DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
         Handler handler = mock(Handler.class);
         BrightnessMappingStrategy brightnessMappingStrategy = mock(BrightnessMappingStrategy.class);
-        boolean isEnabled = true;
+        boolean isDisplayEnabled = true;
         int leadDisplayId = 2;
 
         mDisplayBrightnessController.setUpAutoBrightness(automaticBrightnessController,
-                sensorManager, displayDeviceConfig, handler, brightnessMappingStrategy, isEnabled,
-                leadDisplayId);
+                sensorManager, displayDeviceConfig, handler, brightnessMappingStrategy,
+                isDisplayEnabled, leadDisplayId);
         assertEquals(automaticBrightnessController,
                 mDisplayBrightnessController.mAutomaticBrightnessController);
         verify(automaticBrightnessStrategy).setAutomaticBrightnessController(
                 automaticBrightnessController);
         verify(autoBrightnessFallbackStrategy).setupAutoBrightnessFallbackSensor(sensorManager,
-                displayDeviceConfig, handler, brightnessMappingStrategy, isEnabled, leadDisplayId);
+                displayDeviceConfig, handler, brightnessMappingStrategy, isDisplayEnabled,
+                leadDisplayId);
     }
 }

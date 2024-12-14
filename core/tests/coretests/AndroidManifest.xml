@@ -19,6 +19,8 @@
           package="com.android.frameworks.coretests"
           android:sharedUserId="com.android.uid.test">
 
+    <attribution android:tag="testAttribution" android:label="@string/testAttributionLabel" />
+
     <permission android:name="com.android.frameworks.coretests.permission.TEST_GRANTED"
         android:protectionLevel="normal"
             android:label="@string/permlab_testGranted"
@@ -41,6 +43,7 @@
     <uses-permission android:name="android.permission.ACCESS_FPS_COUNTER" />
     <uses-permission android:name="android.permission.DOWNLOAD_CACHE_NON_PURGEABLE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -167,6 +170,9 @@
     <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
 
+    <!-- AppOpsLoggingTest permissions -->
+    <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
+
     <application
         android:theme="@style/Theme"
         android:supportsRtl="true"
@@ -256,6 +262,17 @@
 
         <activity android:name="android.widget.AbsListViewActivity"
                 android:label="AbsListViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.ChronometerActivity"
+                android:label="ChronometerActivity"
                 android:screenOrientation="portrait"
                 android:exported="true"
                 android:theme="@android:style/Theme.Material.Light">
@@ -1643,25 +1660,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.widget.TextViewContextMenuActivity"
-                  android:screenOrientation="locked"
-                  android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
-            </intent-filter>
-        </activity>
-
         <activity android:name="android.animation.AnimatorSetActivity"
                   android:screenOrientation="locked"
-                  android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name="android.content.res.ResourceCacheActivity"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

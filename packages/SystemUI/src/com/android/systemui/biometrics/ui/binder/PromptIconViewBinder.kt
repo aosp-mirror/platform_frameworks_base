@@ -17,24 +17,19 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.graphics.drawable.AnimatedVectorDrawable
+import android.content.res.Resources
 import android.util.Log
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieOnCompositionLoadedListener
-import com.airbnb.lottie.LottieListener
 import com.android.settingslib.widget.LottieColorUtils
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.util.kotlin.Quad
+import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -43,119 +38,16 @@ private const val TAG = "PromptIconViewBinder"
 
 /** Sub-binder for [BiometricPromptLayout.iconView]. */
 object PromptIconViewBinder {
-    /**
-     * Binds [BiometricPromptLayout.iconView] and [BiometricPromptLayout.biometric_icon_overlay] to
-     * [PromptIconViewModel].
-     */
+    /** Binds [BiometricPromptLayout.iconView] to [PromptIconViewModel]. */
     @JvmStatic
     fun bind(
         iconView: LottieAnimationView,
-        iconOverlayView: LottieAnimationView,
-        iconViewLayoutParamSizeOverride: Pair<Int, Int>?,
         promptViewModel: PromptViewModel
     ) {
         val viewModel = promptViewModel.iconViewModel
         iconView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.onConfigurationChanged(iconView.context.resources.configuration)
-                if (iconViewLayoutParamSizeOverride != null) {
-                    iconView.layoutParams.width = iconViewLayoutParamSizeOverride.first
-                    iconView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-
-                    iconOverlayView.layoutParams.width = iconViewLayoutParamSizeOverride.first
-                    iconOverlayView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-                }
-
-                var faceIcon: AnimatedVectorDrawable? = null
-
-                fun updateXmlIconAsset(
-                    iconAsset: Int,
-                    shouldAnimateIconView: Boolean,
-                    activeAuthType: AuthType
-                ) {
-                    faceIcon?.stop()
-                    faceIcon = iconView.context.getDrawable(iconAsset) as AnimatedVectorDrawable
-                    faceIcon?.apply {
-                        iconView.setIconFailureListener(iconAsset, activeAuthType)
-                        iconView.setImageDrawable(this)
-                        if (shouldAnimateIconView) {
-                            forceAnimationOnUI()
-                            start()
-                        }
-                    }
-                }
-
-                fun updateJsonIconAsset(
-                    iconAsset: Int,
-                    shouldAnimateIconView: Boolean,
-                    activeAuthType: AuthType
-                ) {
-                    iconView.setIconFailureListener(iconAsset, activeAuthType)
-                    iconView.setAnimation(iconAsset)
-                    iconView.frame = 0
-
-                    if (shouldAnimateIconView) {
-                        iconView.playAnimation()
-                    }
-                }
-
-                if (!constraintBp()) {
-                    launch {
-                        var lottieOnCompositionLoadedListener: LottieOnCompositionLoadedListener? =
-                            null
-
-                        combine(viewModel.activeAuthType, viewModel.iconSize, ::Pair).collect {
-                            (activeAuthType, iconSize) ->
-                            // Every time after bp shows, [isIconViewLoaded] is set to false in
-                            // [BiometricViewSizeBinder]. Then when biometric prompt view is redrew
-                            // (when size or activeAuthType changes), we need to update
-                            // [isIconViewLoaded] here to keep it correct.
-                            when (activeAuthType) {
-                                AuthType.Fingerprint,
-                                AuthType.Coex -> {
-                                    /**
-                                     * View is only set visible in BiometricViewSizeBinder once
-                                     * PromptSize is determined that accounts for iconView size, to
-                                     * prevent prompt resizing being visible to the user.
-                                     *
-                                     * TODO(b/288175072): May be able to remove this once constraint
-                                     *   layout is implemented
-                                     */
-                                    if (lottieOnCompositionLoadedListener != null) {
-                                        iconView.removeLottieOnCompositionLoadedListener(
-                                            lottieOnCompositionLoadedListener!!
-                                        )
-                                    }
-                                    lottieOnCompositionLoadedListener =
-                                        LottieOnCompositionLoadedListener {
-                                            promptViewModel.setIsIconViewLoaded(true)
-                                        }
-                                    iconView.addLottieOnCompositionLoadedListener(
-                                        lottieOnCompositionLoadedListener!!
-                                    )
-                                }
-                                AuthType.Face -> {
-                                    /**
-                                     * Set to true by default since face icon is a drawable, which
-                                     * doesn't have a LottieOnCompositionLoadedListener equivalent.
-                                     *
-                                     * TODO(b/318569643): To be updated once face assets are updated
-                                     *   from drawables
-                                     */
-                                    promptViewModel.setIsIconViewLoaded(true)
-                                }
-                            }
-
-                            if (iconViewLayoutParamSizeOverride == null) {
-                                iconView.layoutParams.width = iconSize.first
-                                iconView.layoutParams.height = iconSize.second
-
-                                iconOverlayView.layoutParams.width = iconSize.first
-                                iconOverlayView.layoutParams.height = iconSize.second
-                            }
-                        }
-                    }
-                }
 
                 launch {
                     viewModel.iconAsset
@@ -163,98 +55,34 @@ object PromptIconViewBinder {
                             combine(
                                 viewModel.activeAuthType,
                                 viewModel.shouldAnimateIconView,
+                                viewModel.shouldLoopIconView,
                                 viewModel.showingError,
-                                ::Triple
+                                ::Quad
                             ),
-                            ::toQuad
+                            ::toQuint
                         )
-                        .collect { (iconAsset, activeAuthType, shouldAnimateIconView, showingError)
-                            ->
+                        .collect {
+                            (
+                                iconAsset,
+                                activeAuthType,
+                                shouldAnimateIconView,
+                                shouldLoopIconView,
+                                showingError) ->
                             if (iconAsset != -1) {
-                                when (activeAuthType) {
-                                    AuthType.Fingerprint,
-                                    AuthType.Coex -> {
-                                        // TODO(b/318569643): Until assets unified to one type, this
-                                        // check
-                                        //  is needed in face-auth-error-triggered implicit ->
-                                        // explicit
-                                        //  coex auth transition, in case iconAsset updates to
-                                        //  face_dialog_dark_to_error (XML) after activeAuthType
-                                        // updates
-                                        //  from AuthType.Face (which expects XML)
-                                        //  to AuthType.Coex (which expects JSON)
-                                        if (iconAsset == R.drawable.face_dialog_dark_to_error) {
-                                            updateXmlIconAsset(
-                                                iconAsset,
-                                                shouldAnimateIconView,
-                                                activeAuthType
-                                            )
-                                        } else {
-                                            updateJsonIconAsset(
-                                                iconAsset,
-                                                shouldAnimateIconView,
-                                                activeAuthType
-                                            )
-                                        }
-                                    }
-                                    AuthType.Face -> {
-                                        // TODO(b/318569643): Consolidate logic once all face auth
-                                        // assets are migrated from drawable to json
-                                        if (iconAsset == R.raw.face_dialog_authenticating) {
-                                            updateJsonIconAsset(
-                                                iconAsset,
-                                                shouldAnimateIconView,
-                                                activeAuthType
-                                            )
-                                        } else {
-                                            updateXmlIconAsset(
-                                                iconAsset,
-                                                shouldAnimateIconView,
-                                                activeAuthType
-                                            )
-                                        }
-                                    }
-                                }
-                                LottieColorUtils.applyDynamicColors(iconView.context, iconView)
+                                iconView.updateAsset(
+                                    "iconAsset",
+                                    iconAsset,
+                                    shouldAnimateIconView,
+                                    shouldLoopIconView,
+                                    activeAuthType
+                                )
                                 viewModel.setPreviousIconWasError(showingError)
                             }
                         }
                 }
 
                 launch {
-                    viewModel.iconOverlayAsset
-                        .sample(
-                            combine(
-                                viewModel.shouldAnimateIconOverlay,
-                                viewModel.showingError,
-                                ::Pair
-                            ),
-                            ::toTriple
-                        )
-                        .collect { (iconOverlayAsset, shouldAnimateIconOverlay, showingError) ->
-                            if (iconOverlayAsset != -1) {
-                                iconOverlayView.setIconOverlayFailureListener(iconOverlayAsset)
-                                iconOverlayView.setAnimation(iconOverlayAsset)
-                                iconOverlayView.frame = 0
-                                LottieColorUtils.applyDynamicColors(
-                                    iconOverlayView.context,
-                                    iconOverlayView
-                                )
-
-                                if (shouldAnimateIconOverlay) {
-                                    iconOverlayView.playAnimation()
-                                }
-                                viewModel.setPreviousIconOverlayWasError(showingError)
-                            }
-                        }
-                }
-
-                launch {
-                    viewModel.shouldFlipIconView.collect { shouldFlipIconView ->
-                        if (shouldFlipIconView) {
-                            iconView.rotation = 180f
-                        }
-                    }
+                    viewModel.iconViewRotation.collect { rotation -> iconView.rotation = rotation }
                 }
 
                 launch {
@@ -269,94 +97,84 @@ object PromptIconViewBinder {
     }
 }
 
-private val assetIdToString: Map<Int, String> =
-    mapOf(
-        // UDFPS assets
-        R.raw.fingerprint_dialogue_error_to_fingerprint_lottie to
-            "fingerprint_dialogue_error_to_fingerprint_lottie",
-        R.raw.fingerprint_dialogue_error_to_success_lottie to
-            "fingerprint_dialogue_error_to_success_lottie",
-        R.raw.fingerprint_dialogue_fingerprint_to_error_lottie to
-            "fingerprint_dialogue_fingerprint_to_error_lottie",
-        R.raw.fingerprint_dialogue_fingerprint_to_success_lottie to
-            "fingerprint_dialogue_fingerprint_to_success_lottie",
-        // SFPS assets
-        R.raw.biometricprompt_fingerprint_to_error_landscape to
-            "biometricprompt_fingerprint_to_error_landscape",
-        R.raw.biometricprompt_folded_base_bottomright to "biometricprompt_folded_base_bottomright",
-        R.raw.biometricprompt_folded_base_default to "biometricprompt_folded_base_default",
-        R.raw.biometricprompt_folded_base_topleft to "biometricprompt_folded_base_topleft",
-        R.raw.biometricprompt_landscape_base to "biometricprompt_landscape_base",
-        R.raw.biometricprompt_portrait_base_bottomright to
-            "biometricprompt_portrait_base_bottomright",
-        R.raw.biometricprompt_portrait_base_topleft to "biometricprompt_portrait_base_topleft",
-        R.raw.biometricprompt_symbol_error_to_fingerprint_landscape to
-            "biometricprompt_symbol_error_to_fingerprint_landscape",
-        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright to
-            "biometricprompt_symbol_error_to_fingerprint_portrait_bottomright",
-        R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft to
-            "biometricprompt_symbol_error_to_fingerprint_portrait_topleft",
-        R.raw.biometricprompt_symbol_error_to_success_landscape to
-            "biometricprompt_symbol_error_to_success_landscape",
-        R.raw.biometricprompt_symbol_error_to_success_portrait_bottomright to
-            "biometricprompt_symbol_error_to_success_portrait_bottomright",
-        R.raw.biometricprompt_symbol_error_to_success_portrait_topleft to
-            "biometricprompt_symbol_error_to_success_portrait_topleft",
-        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright to
-            "biometricprompt_symbol_fingerprint_to_error_portrait_bottomright",
-        R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft to
-            "biometricprompt_symbol_fingerprint_to_error_portrait_topleft",
-        R.raw.biometricprompt_symbol_fingerprint_to_success_landscape to
-            "biometricprompt_symbol_fingerprint_to_success_landscape",
-        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright to
-            "biometricprompt_symbol_fingerprint_to_success_portrait_bottomright",
-        R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft to
-            "biometricprompt_symbol_fingerprint_to_success_portrait_topleft",
-        // Face assets
-        R.drawable.face_dialog_wink_from_dark to "face_dialog_wink_from_dark",
-        R.drawable.face_dialog_dark_to_checkmark to "face_dialog_dark_to_checkmark",
-        R.drawable.face_dialog_dark_to_error to "face_dialog_dark_to_error",
-        R.drawable.face_dialog_error_to_idle to "face_dialog_error_to_idle",
-        R.drawable.face_dialog_idle_static to "face_dialog_idle_static",
-        R.raw.face_dialog_authenticating to "face_dialog_authenticating",
-        // Co-ex assets
-        R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie to
-            "fingerprint_dialogue_unlocked_to_checkmark_success_lottie",
-        R.raw.fingerprint_dialogue_error_to_unlock_lottie to
-            "fingerprint_dialogue_error_to_unlock_lottie",
-        R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie to
-            "fingerprint_dialogue_fingerprint_to_unlock_lottie",
-    )
-
-private fun getAssetNameFromId(id: Int): String {
-    return assetIdToString.getOrDefault(id, "Asset $id not found")
+fun LottieAnimationView.updateAsset(
+    type: String,
+    asset: Int,
+    shouldAnimateIconView: Boolean,
+    shouldLoopIconView: Boolean,
+    activeAuthType: AuthType
+) {
+    setFailureListener(type, asset, activeAuthType)
+    pauseAnimation()
+    setAnimation(asset)
+    if (animatingFromSfpsAuthenticating(asset)) {
+        // Skipping to error / success / unlock segment of animation
+        setMinFrame(158)
+    } else {
+        frame = 0
+    }
+    if (shouldAnimateIconView) {
+        loop(shouldLoopIconView)
+        playAnimation()
+    }
+    LottieColorUtils.applyDynamicColors(context, this)
 }
 
-private fun LottieAnimationView.setIconFailureListener(iconAsset: Int, activeAuthType: AuthType) {
-    setFailureListener(
-        LottieListener<Throwable> { result: Throwable? ->
-            Log.d(
-                TAG,
-                "Collecting iconAsset | " +
-                    "activeAuthType = $activeAuthType | " +
-                    "Invalid resource id: $iconAsset, " +
-                    "name ${getAssetNameFromId(iconAsset)}",
-                result
-            )
-        }
-    )
-}
+private fun animatingFromSfpsAuthenticating(asset: Int): Boolean =
+    asset in sfpsFpToErrorAssets || asset in sfpsFpToUnlockAssets || asset in sfpsFpToSuccessAssets
 
-private fun LottieAnimationView.setIconOverlayFailureListener(iconOverlayAsset: Int) {
-    setFailureListener(
-        LottieListener<Throwable> { result: Throwable? ->
-            Log.d(
-                TAG,
-                "Collecting iconOverlayAsset | " +
-                    "Invalid resource id: $iconOverlayAsset, " +
-                    "name ${getAssetNameFromId(iconOverlayAsset)}",
-                result
-            )
-        }
+private val sfpsFpToErrorAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_error,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_270,
     )
+
+private val sfpsFpToUnlockAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_270,
+    )
+
+private val sfpsFpToSuccessAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_success,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_270,
+    )
+
+private fun LottieAnimationView.setFailureListener(type: String, asset: Int, authType: AuthType) {
+    val assetName =
+        try {
+            context.resources.getResourceEntryName(asset)
+        } catch (e: Resources.NotFoundException) {
+            "Asset $asset not found"
+        }
+
+    setFailureListener { result: Throwable? ->
+        Log.d(
+            TAG,
+            "Collecting $type | " +
+                "activeAuthType = $authType | " +
+                "Invalid resource id: $asset, " +
+                "name $assetName",
+            result
+        )
+    }
 }

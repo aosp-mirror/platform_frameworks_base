@@ -44,7 +44,7 @@ constructor(
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<ReduceBrightColorsTileModel> {
         return reduceBrightColorsController
             .isEnabled()
@@ -52,5 +52,6 @@ constructor(
             .map { ReduceBrightColorsTileModel(it) }
             .flowOn(bgCoroutineContext)
     }
+
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(isAvailable)
 }

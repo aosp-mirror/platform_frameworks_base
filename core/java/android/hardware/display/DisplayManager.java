@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.HdrCapabilities.HdrType;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -47,6 +48,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserManager;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -95,6 +97,8 @@ public final class DisplayManager {
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final WeakDisplayCache mDisplayCache = new WeakDisplayCache();
+
+    private int mDisplayIdToMirror = INVALID_DISPLAY;
 
     /**
      * Broadcast receiver that indicates when the Wifi display status changes.
@@ -395,7 +399,7 @@ public final class DisplayManager {
      * the display is removed.
      *
      * Public virtual displays without this flag will move their content to main display
-     * stack once they're removed. Private vistual displays will always destroy their
+     * stack once they're removed. Private virtual displays will always destroy their
      * content on removal even without this flag.
      *
      * @see #createVirtualDisplay
@@ -1086,6 +1090,7 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
+        builder.setDisplayIdToMirror(getDisplayIdToMirror());
         return createVirtualDisplay(builder.build(), handler, callback);
     }
 
@@ -1163,6 +1168,7 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
+        builder.setDisplayIdToMirror(getDisplayIdToMirror());
         return createVirtualDisplay(projection, builder.build(), callback, handler);
     }
 
@@ -1666,6 +1672,56 @@ public final class DisplayManager {
             throw new IllegalArgumentException("requestDisplayModes: modesIds can't be empty");
         }
         mGlobal.requestDisplayModes(displayId, modeIds);
+    }
+
+    /**
+     * Gets the mapping between the doze brightness sensor values and brightness values. The doze
+     * brightness sensor is a light sensor used to determine the brightness while the device is
+     * dozing. Light sensor values are typically integers in the rage of 0-4. The returned values
+     * are between {@link PowerManager#BRIGHTNESS_MIN} and {@link PowerManager#BRIGHTNESS_MAX}, or
+     * -1 meaning that the current brightness should be kept.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The ID of the display
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+        return mGlobal.getDozeBrightnessSensorValueToBrightness(displayId);
+    }
+
+    /**
+     * Gets the default doze brightness.
+     * The returned values are between {@link PowerManager#BRIGHTNESS_MIN} and
+     * {@link PowerManager#BRIGHTNESS_MAX}.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS}
+     * permission.
+     * </p>
+     *
+     * @param displayId The ID of the display
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getDefaultDozeBrightness(int displayId) {
+        return mGlobal.getDefaultDozeBrightness(displayId);
+    }
+
+    private int getDisplayIdToMirror() {
+        if (mDisplayIdToMirror == INVALID_DISPLAY) {
+            final UserManager userManager = mContext.getSystemService(UserManager.class);
+            mDisplayIdToMirror = userManager.isVisibleBackgroundUsersSupported()
+                    ? userManager.getMainDisplayIdAssignedToUser()
+                    : DEFAULT_DISPLAY;
+        }
+        return mDisplayIdToMirror;
     }
 
     /**

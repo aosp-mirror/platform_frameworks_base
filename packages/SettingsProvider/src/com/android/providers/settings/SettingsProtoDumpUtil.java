@@ -2831,6 +2831,9 @@ class SettingsProtoDumpUtil {
                 Settings.System.SHOW_KEY_PRESSES,
                 SystemSettingsProto.DevOptions.SHOW_KEY_PRESSES);
         dumpSetting(s, p,
+                Settings.System.TOUCHPAD_VISUALIZER,
+                SystemSettingsProto.DevOptions.TOUCHPAD_VISUALIZER);
+        dumpSetting(s, p,
                 Settings.System.POINTER_LOCATION,
                 SystemSettingsProto.DevOptions.POINTER_LOCATION);
         dumpSetting(s, p,
@@ -2915,6 +2918,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.POINTER_FILL_STYLE,
                 SystemSettingsProto.Pointer.POINTER_FILL_STYLE);
+        dumpSetting(s, p,
+                Settings.System.POINTER_STROKE_STYLE,
+                SystemSettingsProto.Pointer.POINTER_STROKE_STYLE);
         dumpSetting(s, p,
                 Settings.System.POINTER_SCALE,
                 SystemSettingsProto.Pointer.POINTER_SCALE);

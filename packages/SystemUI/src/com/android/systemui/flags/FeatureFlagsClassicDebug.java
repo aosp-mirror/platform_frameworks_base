@@ -17,6 +17,7 @@
 package com.android.systemui.flags;
 
 import static com.android.systemui.Flags.exampleFlag;
+import static com.android.systemui.Flags.classicFlagsMultiUser;
 import static com.android.systemui.Flags.sysuiTeamfood;
 import static com.android.systemui.flags.FlagManager.ACTION_GET_FLAGS;
 import static com.android.systemui.flags.FlagManager.ACTION_SET_FLAG;
@@ -41,6 +42,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import java.io.PrintWriter;
@@ -125,9 +127,14 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
             @Main Resources resources,
             ServerFlagReader serverFlagReader,
             @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags,
-            Restarter restarter) {
+            Restarter restarter,
+            UserContextProvider userContextProvider) {
         mFlagManager = flagManager;
-        mContext = context;
+        if (classicFlagsMultiUser()) {
+            mContext = userContextProvider.createCurrentUserContext(context);
+        } else {
+            mContext = context;
+        }
         mGlobalSettings = globalSettings;
         mResources = resources;
         mSystemProperties = systemProperties;

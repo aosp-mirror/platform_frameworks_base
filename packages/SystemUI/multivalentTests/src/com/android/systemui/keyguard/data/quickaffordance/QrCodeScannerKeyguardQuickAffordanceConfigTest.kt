@@ -77,8 +77,8 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-        fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() =
-            runTest(UnconfinedTestDispatcher()) {
+    fun affordance_scannerActivityChanged_deliversModelWithUpdatedIntent() =
+        runTest(UnconfinedTestDispatcher()) {
             whenever(controller.isEnabledForLockScreenButton).thenReturn(true)
             var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
             val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)

@@ -205,7 +205,7 @@ public class TestDreamEnvironment {
 
         @Override
         public DreamOverlayConnectionHandler createOverlayConnection(
-                ComponentName overlayComponent) {
+                ComponentName overlayComponent, Runnable onDisconnected) {
             return mDreamOverlayConnectionHandler;
         }
 
@@ -385,7 +385,8 @@ public class TestDreamEnvironment {
             final ArgumentCaptor<IDreamOverlayCallback> overlayCallbackCaptor =
                     ArgumentCaptor.forClass(IDreamOverlayCallback.class);
             verify(mDreamOverlayClient, description("dream client not informed of dream start"))
-                    .startDream(any(), overlayCallbackCaptor.capture(), any(), anyBoolean());
+                    .startDream(any(), overlayCallbackCaptor.capture(), any(), anyBoolean(),
+                            anyBoolean());
 
             mDreamOverlayCallback = overlayCallbackCaptor.getValue();
         }
@@ -398,8 +399,12 @@ public class TestDreamEnvironment {
         mService.dispatchKeyEvent(event);
     }
 
-    private void wakeDream() throws RemoteException {
+    private void wakeDream() {
         mService.wakeUp();
+    }
+
+    void comeToFront() throws RemoteException {
+        mDreamServiceWrapper.comeToFront();
     }
 
     /**

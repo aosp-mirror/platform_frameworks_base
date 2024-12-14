@@ -16,98 +16,108 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags as AConfigFlags
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
+import com.android.systemui.communal.domain.interactor.communalSceneInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.keyguardBottomAreaInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardIndicationAreaViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
-    @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
-    @Mock private lateinit var shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel
-
-    @Mock private lateinit var burnInInteractor: BurnInInteractor
-    private val burnInFlow = MutableStateFlow(BurnInModel())
-
-    private lateinit var bottomAreaInteractor: KeyguardBottomAreaInteractor
+    private val bottomAreaInteractor = kosmos.keyguardBottomAreaInteractor
     private lateinit var underTest: KeyguardIndicationAreaViewModel
-    private lateinit var repository: FakeKeyguardRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val communalSceneRepository = kosmos.fakeCommunalSceneRepository
 
     private val startButtonFlow =
-        MutableStateFlow<KeyguardQuickAffordanceViewModel>(
+        MutableStateFlow(
             KeyguardQuickAffordanceViewModel(
                 slotId = KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()
             )
         )
     private val endButtonFlow =
-        MutableStateFlow<KeyguardQuickAffordanceViewModel>(
+        MutableStateFlow(
             KeyguardQuickAffordanceViewModel(
                 slotId = KeyguardQuickAffordancePosition.BOTTOM_END.toSlotId()
             )
         )
-    private val alphaFlow = MutableStateFlow<Float>(1f)
+    private val alphaFlow = MutableStateFlow(1f)
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-
-        whenever(burnInHelperWrapper.burnInOffset(anyInt(), any()))
-            .thenReturn(RETURNED_BURN_IN_OFFSET)
-        whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
-
-        val withDeps = KeyguardInteractorFactory.create()
-        val keyguardInteractor = withDeps.keyguardInteractor
-        repository = withDeps.repository
-
-        val bottomAreaViewModel: KeyguardBottomAreaViewModel = mock()
-        whenever(bottomAreaViewModel.startButton).thenReturn(startButtonFlow)
-        whenever(bottomAreaViewModel.endButton).thenReturn(endButtonFlow)
-        whenever(bottomAreaViewModel.alpha).thenReturn(alphaFlow)
-        bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository)
+        val bottomAreaViewModel =
+            mock<KeyguardBottomAreaViewModel> {
+                on { startButton } doReturn startButtonFlow
+                on { endButton } doReturn endButtonFlow
+                on { alpha } doReturn alphaFlow
+            }
+        val burnInInteractor =
+            mock<BurnInInteractor> {
+                on { burnIn(anyInt(), anyInt()) } doReturn flowOf(BurnInModel())
+            }
+        val burnInHelperWrapper =
+            mock<BurnInHelperWrapper> {
+                on { burnInOffset(anyInt(), any()) } doReturn RETURNED_BURN_IN_OFFSET
+            }
+        val shortcutsCombinedViewModel =
+            mock<KeyguardQuickAffordancesCombinedViewModel> {
+                on { startButton } doReturn startButtonFlow
+                on { endButton } doReturn endButtonFlow
+            }
         underTest =
             KeyguardIndicationAreaViewModel(
-                keyguardInteractor = keyguardInteractor,
+                keyguardInteractor = kosmos.keyguardInteractor,
                 bottomAreaInteractor = bottomAreaInteractor,
                 keyguardBottomAreaViewModel = bottomAreaViewModel,
                 burnInHelperWrapper = burnInHelperWrapper,
                 burnInInteractor = burnInInteractor,
                 shortcutsCombinedViewModel = shortcutsCombinedViewModel,
-                configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
+                configurationInteractor = kosmos.configurationInteractor,
                 keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
-                backgroundCoroutineContext = kosmos.testDispatcher,
+                backgroundDispatcher = kosmos.testDispatcher,
+                communalSceneInteractor = kosmos.communalSceneInteractor,
                 mainDispatcher = kosmos.testDispatcher
             )
     }
@@ -115,77 +125,120 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
     @Test
     fun alpha() =
         testScope.runTest {
-            val value = collectLastValue(underTest.alpha)
+            val alpha by collectLastValue(underTest.alpha)
 
-            assertThat(value()).isEqualTo(1f)
+            assertThat(alpha).isEqualTo(1f)
             alphaFlow.value = 0.1f
-            assertThat(value()).isEqualTo(0.1f)
+            assertThat(alpha).isEqualTo(0.1f)
             alphaFlow.value = 0.5f
-            assertThat(value()).isEqualTo(0.5f)
+            assertThat(alpha).isEqualTo(0.5f)
             alphaFlow.value = 0.2f
-            assertThat(value()).isEqualTo(0.2f)
+            assertThat(alpha).isEqualTo(0.2f)
             alphaFlow.value = 0f
-            assertThat(value()).isEqualTo(0f)
+            assertThat(alpha).isEqualTo(0f)
         }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
     fun isIndicationAreaPadded() =
         testScope.runTest {
-            repository.setKeyguardShowing(true)
-            val value = collectLastValue(underTest.isIndicationAreaPadded)
+            keyguardRepository.setKeyguardShowing(true)
+            val isIndicationAreaPadded by collectLastValue(underTest.isIndicationAreaPadded)
 
-            assertThat(value()).isFalse()
+            assertThat(isIndicationAreaPadded).isFalse()
             startButtonFlow.value = startButtonFlow.value.copy(isVisible = true)
-            assertThat(value()).isTrue()
+            assertThat(isIndicationAreaPadded).isTrue()
             endButtonFlow.value = endButtonFlow.value.copy(isVisible = true)
-            assertThat(value()).isTrue()
+            assertThat(isIndicationAreaPadded).isTrue()
             startButtonFlow.value = startButtonFlow.value.copy(isVisible = false)
-            assertThat(value()).isTrue()
+            assertThat(isIndicationAreaPadded).isTrue()
             endButtonFlow.value = endButtonFlow.value.copy(isVisible = false)
-            assertThat(value()).isFalse()
+            assertThat(isIndicationAreaPadded).isFalse()
         }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
     fun indicationAreaTranslationX() =
         testScope.runTest {
-            val value = collectLastValue(underTest.indicationAreaTranslationX)
+            val translationX by collectLastValue(underTest.indicationAreaTranslationX)
 
-            assertThat(value()).isEqualTo(0f)
+            assertThat(translationX).isEqualTo(0f)
             bottomAreaInteractor.setClockPosition(100, 100)
-            assertThat(value()).isEqualTo(100f)
+            assertThat(translationX).isEqualTo(100f)
             bottomAreaInteractor.setClockPosition(200, 100)
-            assertThat(value()).isEqualTo(200f)
+            assertThat(translationX).isEqualTo(200f)
             bottomAreaInteractor.setClockPosition(200, 200)
-            assertThat(value()).isEqualTo(200f)
+            assertThat(translationX).isEqualTo(200f)
             bottomAreaInteractor.setClockPosition(300, 100)
-            assertThat(value()).isEqualTo(300f)
+            assertThat(translationX).isEqualTo(300f)
         }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun indicationAreaTranslationY() =
         testScope.runTest {
-            val value =
+            val translationY by
                 collectLastValue(underTest.indicationAreaTranslationY(DEFAULT_BURN_IN_OFFSET))
 
             // Negative 0 - apparently there's a difference in floating point arithmetic - FML
-            assertThat(value()).isEqualTo(-0f)
+            assertThat(translationY).isEqualTo(-0f)
             val expected1 = setDozeAmountAndCalculateExpectedTranslationY(0.1f)
-            assertThat(value()).isEqualTo(expected1)
+            assertThat(translationY).isEqualTo(expected1)
             val expected2 = setDozeAmountAndCalculateExpectedTranslationY(0.2f)
-            assertThat(value()).isEqualTo(expected2)
+            assertThat(translationY).isEqualTo(expected2)
             val expected3 = setDozeAmountAndCalculateExpectedTranslationY(0.5f)
-            assertThat(value()).isEqualTo(expected3)
+            assertThat(translationY).isEqualTo(expected3)
             val expected4 = setDozeAmountAndCalculateExpectedTranslationY(1f)
-            assertThat(value()).isEqualTo(expected4)
+            assertThat(translationY).isEqualTo(expected4)
+        }
+
+    @Test
+    fun visibilityWhenCommunalNotShowing() =
+        testScope.runTest {
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            val visible by collectLastValue(underTest.visible)
+
+            assertThat(visible).isTrue()
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            assertThat(visible).isFalse()
+        }
+
+    @Test
+    fun visibilityWhenCommunalShowing() =
+        testScope.runTest {
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            communalSceneRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
+            )
+
+            val visible by collectLastValue(underTest.visible)
+
+            assertThat(visible).isTrue()
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            assertThat(visible).isTrue()
+
+            communalSceneRepository.setTransitionState(
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Blank))
+            )
+            assertThat(visible).isFalse()
         }
 
     private fun setDozeAmountAndCalculateExpectedTranslationY(dozeAmount: Float): Float {
-        repository.setDozeAmount(dozeAmount)
+        keyguardRepository.setDozeAmount(dozeAmount)
         return dozeAmount * (RETURNED_BURN_IN_OFFSET - DEFAULT_BURN_IN_OFFSET)
     }
 
     companion object {
         private const val DEFAULT_BURN_IN_OFFSET = 5
         private const val RETURNED_BURN_IN_OFFSET = 3
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(
+                FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
+                FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+            )
+        }
     }
 }

@@ -29,6 +29,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -36,6 +38,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 import com.android.server.UiServiceTestCase;
+import com.android.server.pm.PackageManagerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -122,6 +125,50 @@ public class TimeToLiveHelperTest extends UiServiceTestCase {
         verify(mAm).setExactAndAllowWhileIdle(anyInt(), eq(3L), captorNewSet.capture());
         assertThat(captorSet.getValue().getIntent().getStringExtra(EXTRA_KEY))
                 .isEqualTo(first.getKey());
+    }
+
+    @Test
+    public void testTimeoutExpires_notifAlreadyCanceled() {
+        NotificationRecord r = getRecord("testTimeoutExpires", 1);
+
+        mHelper.scheduleTimeoutLocked(r, 1);
+        mHelper.cancelScheduledTimeoutLocked(r);
+
+        Intent intent = new Intent("com.android.server.notification.TimeToLiveHelper")
+                .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
+                .setData(new Uri.Builder()
+                        .scheme("timeout")
+                        .appendPath(r.getKey())
+                        .build())
+                .putExtra(EXTRA_KEY, r.getKey())
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        mHelper.mNotificationTimeoutReceiver.onReceive(mContext, intent);
+
+        assertThat(mHelper.mKeys).isEmpty();
+    }
+
+    @Test
+    public void testTimeoutExpires_laterNotifAlreadyCanceled() {
+        NotificationRecord r = getRecord("testTimeoutExpires", 1);
+        NotificationRecord r2 = getRecord("testTimeoutExpires", 2);
+
+        mHelper.scheduleTimeoutLocked(r, 1);
+        mHelper.scheduleTimeoutLocked(r2, 2);
+        mHelper.cancelScheduledTimeoutLocked(r2);
+
+        Intent intent = new Intent("com.android.server.notification.TimeToLiveHelper")
+                .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
+                .setData(new Uri.Builder()
+                        .scheme("timeout")
+                        .appendPath(r2.getKey())
+                        .build())
+                .putExtra(EXTRA_KEY, r2.getKey())
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+        mHelper.mNotificationTimeoutReceiver.onReceive(mContext, intent);
+
+        assertThat(mHelper.mKeys).isEmpty();
     }
 
     @Test

@@ -30,6 +30,8 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.GradientDrawable;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.util.Log;
 import android.view.AttachedSurfaceControl;
@@ -49,6 +51,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 import com.android.systemui.util.leak.RotationUtils;
@@ -56,7 +60,7 @@ import com.android.systemui.util.leak.RotationUtils;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-class FullscreenMagnificationController implements ComponentCallbacks {
+public class FullscreenMagnificationController implements ComponentCallbacks {
 
     private static final String TAG = "FullscreenMagnificationController";
     private final Context mContext;
@@ -70,6 +74,7 @@ class FullscreenMagnificationController implements ComponentCallbacks {
     private SurfaceControl.Transaction mTransaction;
     private View mFullscreenBorder = null;
     private int mBorderOffset;
+    private int mBorderStoke;
     private final int mDisplayId;
     private static final Region sEmptyRegion = new Region();
     private ValueAnimator mShowHideBorderAnimator;
@@ -86,16 +91,20 @@ class FullscreenMagnificationController implements ComponentCallbacks {
         }
     };
     private final long mLongAnimationTimeMs;
+    private final DisplayManager mDisplayManager;
+    private final DisplayManager.DisplayListener mDisplayListener;
+    private String mCurrentDisplayUniqueId;
 
-    FullscreenMagnificationController(
+    public FullscreenMagnificationController(
             @UiContext Context context,
             @Main Handler handler,
             @Main Executor executor,
+            DisplayManager displayManager,
             AccessibilityManager accessibilityManager,
             WindowManager windowManager,
             IWindowManager iWindowManager,
             Supplier<SurfaceControlViewHost> scvhSupplier) {
-        this(context, handler, executor, accessibilityManager,
+        this(context, handler, executor, displayManager, accessibilityManager,
                 windowManager, iWindowManager, scvhSupplier,
                 new SurfaceControl.Transaction(), null);
     }
@@ -105,6 +114,7 @@ class FullscreenMagnificationController implements ComponentCallbacks {
             @UiContext Context context,
             @Main Handler handler,
             @Main Executor executor,
+            DisplayManager displayManager,
             AccessibilityManager accessibilityManager,
             WindowManager windowManager,
             IWindowManager iWindowManager,
@@ -120,10 +130,7 @@ class FullscreenMagnificationController implements ComponentCallbacks {
         mWindowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
         mTransaction = transaction;
         mScvhSupplier = scvhSupplier;
-        mBorderOffset = mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnifier_border_width_fullscreen_with_offset)
-                - mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnifier_border_width_fullscreen);
+        updateDimensions();
         mDisplayId = mContext.getDisplayId();
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mLongAnimationTimeMs = mContext.getResources().getInteger(
@@ -140,6 +147,31 @@ class FullscreenMagnificationController implements ComponentCallbacks {
                 }
             }
         });
+        mCurrentDisplayUniqueId = mContext.getDisplayNoVerify().getUniqueId();
+        mDisplayManager = displayManager;
+        mDisplayListener = new DisplayManager.DisplayListener() {
+            @Override
+            public void onDisplayAdded(int displayId) {
+                // Do nothing
+            }
+
+            @Override
+            public void onDisplayRemoved(int displayId) {
+                // Do nothing
+            }
+
+            @Override
+            public void onDisplayChanged(int displayId) {
+                final String uniqueId = mContext.getDisplayNoVerify().getUniqueId();
+                if (uniqueId.equals(mCurrentDisplayUniqueId)) {
+                    // Same unique ID means the physical display doesn't change. Early return.
+                    return;
+                }
+
+                mCurrentDisplayUniqueId = uniqueId;
+                applyCornerRadiusToBorder();
+            }
+        };
     }
 
     private ValueAnimator createNullTargetObjectAnimator() {
@@ -157,7 +189,7 @@ class FullscreenMagnificationController implements ComponentCallbacks {
      * there is an activation change.
      */
     @UiThread
-    void onFullscreenMagnificationActivationChanged(boolean activated) {
+    public void onFullscreenMagnificationActivationChanged(boolean activated) {
         final boolean changed = (mFullscreenMagnificationActivated != activated);
         if (changed) {
             mFullscreenMagnificationActivated = activated;
@@ -180,10 +212,15 @@ class FullscreenMagnificationController implements ComponentCallbacks {
         }
         mContext.unregisterComponentCallbacks(this);
 
+
         mShowHideBorderAnimator.reverse();
     }
 
     private void cleanUpBorder() {
+        if (Flags.updateCornerRadiusOnDisplayChanged()) {
+            mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        }
+
         if (mSurfaceControlViewHost != null) {
             mSurfaceControlViewHost.release();
             mSurfaceControlViewHost = null;
@@ -226,6 +263,9 @@ class FullscreenMagnificationController implements ComponentCallbacks {
             } catch (Exception e) {
                 Log.w(TAG, "Failed to register rotation watcher", e);
             }
+            if (Flags.updateCornerRadiusOnDisplayChanged()) {
+                mHandler.post(this::applyCornerRadiusToBorder);
+            }
         }
 
         mTransaction
@@ -247,6 +287,9 @@ class FullscreenMagnificationController implements ComponentCallbacks {
 
         mAccessibilityManager.attachAccessibilityOverlayToDisplay(
                 mDisplayId, mBorderSurfaceControl);
+        if (Flags.updateCornerRadiusOnDisplayChanged()) {
+            mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
+        }
 
         applyTouchableRegion();
     }
@@ -304,6 +347,11 @@ class FullscreenMagnificationController implements ComponentCallbacks {
             final int newWidth = mWindowBounds.width() + 2 * mBorderOffset;
             final int newHeight = mWindowBounds.height() + 2 * mBorderOffset;
             mSurfaceControlViewHost.relayout(newWidth, newHeight);
+            if (Flags.updateCornerRadiusOnDisplayChanged()) {
+                // Recenter the border
+                mTransaction.setPosition(
+                        mBorderSurfaceControl, -mBorderOffset, -mBorderOffset).apply();
+            }
         }
 
         // Rotating from Landscape to ReverseLandscape will not trigger the config changes in
@@ -352,6 +400,26 @@ class FullscreenMagnificationController implements ComponentCallbacks {
                 R.dimen.magnifier_border_width_fullscreen_with_offset)
                 - mContext.getResources().getDimensionPixelSize(
                         R.dimen.magnifier_border_width_fullscreen);
+        mBorderStoke = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnifier_border_width_fullscreen_with_offset);
+    }
+
+    private void applyCornerRadiusToBorder() {
+        if (!isActivated()) {
+            return;
+        }
+        if (!(mFullscreenBorder.getBackground() instanceof GradientDrawable)) {
+            // Wear doesn't use the same magnification border background. So early return here.
+            return;
+        }
+
+        float cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
+        GradientDrawable backgroundDrawable = (GradientDrawable) mFullscreenBorder.getBackground();
+        backgroundDrawable.setStroke(
+                mBorderStoke,
+                mContext.getResources().getColor(
+                        R.color.magnification_border_color, mContext.getTheme()));
+        backgroundDrawable.setCornerRadius(cornerRadius);
     }
 
     @Override

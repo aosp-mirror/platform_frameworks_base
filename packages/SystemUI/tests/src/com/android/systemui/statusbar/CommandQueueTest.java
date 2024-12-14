@@ -15,8 +15,9 @@
 package com.android.systemui.statusbar;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_ADJUST_NOTHING;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
-import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
+import static android.inputmethodservice.InputMethodService.IME_ACTIVE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
@@ -42,6 +43,7 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.accessibility.Flags;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.LetterboxDetails;
@@ -54,8 +56,10 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class CommandQueueTest extends SysuiTestCase {
 
     private static final LetterboxDetails[] TEST_LETTERBOX_DETAILS = new LetterboxDetails[] {
@@ -192,10 +196,11 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, IME_ACTIVE,
+                BACK_DISPOSITION_ADJUST_NOTHING, true);
         waitForIdleSync();
-        verify(mCallbacks).setImeWindowStatus(
-                eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
+        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(IME_ACTIVE),
+                eq(BACK_DISPOSITION_ADJUST_NOTHING), eq(true));
     }
 
     @Test
@@ -203,12 +208,13 @@ public class CommandQueueTest extends SysuiTestCase {
         // First show in default display to update the "last updated ime display"
         testShowImeButton();
 
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, IME_ACTIVE,
+                BACK_DISPOSITION_ADJUST_NOTHING, true);
         waitForIdleSync();
-        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(null), eq(IME_INVISIBLE),
+        verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(0) /* vis */,
                 eq(BACK_DISPOSITION_DEFAULT), eq(false));
-        verify(mCallbacks).setImeWindowStatus(
-                eq(SECONDARY_DISPLAY), eq(null), eq(1), eq(2), eq(true));
+        verify(mCallbacks).setImeWindowStatus(eq(SECONDARY_DISPLAY), eq(IME_ACTIVE),
+                eq(BACK_DISPOSITION_ADJUST_NOTHING), eq(true));
     }
 
     @Test

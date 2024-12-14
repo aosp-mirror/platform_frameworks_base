@@ -116,7 +116,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
 
             // Authentication results in calling startDismissKeyguardTransition.
-            kosmos.keyguardTransitionInteractor.startDismissKeyguardTransition()
+            kosmos.keyguardDismissTransitionInteractor.startDismissKeyguardTransition()
             runCurrent()
 
             assertThat(transitionRepository)
@@ -173,6 +173,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun transitionToGone_whenOpeningGlanceableHubEditMode() =
         testScope.runTest {
             kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
