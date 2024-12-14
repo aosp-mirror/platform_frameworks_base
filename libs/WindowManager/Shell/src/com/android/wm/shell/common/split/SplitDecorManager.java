@@ -227,10 +227,37 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mInstantaneousBounds.setEmpty();
     }
 
-    /** Showing resizing hint. */
+    /**
+     * Called on every frame when an app is getting resized, and controls the showing & hiding of
+     * the app veil. IMPORTANT: There is one SplitDecorManager for each task, so if two tasks are
+     * getting resized simultaneously, this method is called in parallel on the other
+     * SplitDecorManager too. In general, we want to hide the app behind a veil when:
+     *   a) the app is stretching past its original bounds (because app content layout doesn't
+     *      update mid-stretch).
+     *   b) the app is resizing down from fullscreen (because there is no parallax effect that
+     *      makes every app look good in this scenario).
+     * In the world of flexible split, where apps can go offscreen, there is an exception to this:
+     *   - We do NOT hide the app when it is going offscreen, even though it is technically
+     *     getting larger and would qualify for condition (a). Instead, we use parallax to give
+     *     the illusion that the app is getting pushed offscreen by the divider.
+     *
+     * @param resizingTask The task that is getting resized.
+     * @param newBounds The bounds that that we are updating this surface to. This can be an
+     *                  instantaneous bounds, just for a frame, during a drag or animation.
+     * @param sideBounds The bounds of the OPPOSITE task in the split layout. This is used just for
+     *                   reference/calculation, the surface of the other app won't be set here.
+     * @param displayBounds The bounds of the entire display.
+     * @param t The transaction on which these changes will be bundled.
+     * @param offsetX The x-translation applied to the task surface for parallax. Will be used to
+     *                position the task screenshot and/or icon veil.
+     * @param offsetY The x-translation applied to the task surface for parallax. Will be used to
+     *                position the task screenshot and/or icon veil.
+     * @param immediately {@code true} if the veil should transition in/out instantly, with no
+     *                                animation.
+     */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
-            Rect sideBounds, SurfaceControl.Transaction t, int offsetX, int offsetY,
-            boolean immediately) {
+            Rect sideBounds, Rect displayBounds, SurfaceControl.Transaction t, int offsetX,
+            int offsetY, boolean immediately) {
         if (mVeilIconView == null) {
             return;
         }
@@ -252,7 +279,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
         final boolean isStretchingPastOriginalBounds =
                 newBounds.width() > mOldMainBounds.width()
                         || newBounds.height() > mOldMainBounds.height();
-        final boolean showVeil = isResizingDownFromFullscreen || isStretchingPastOriginalBounds;
+        final boolean isFullyOnscreen = displayBounds.contains(newBounds);
+        boolean showVeil = isFullyOnscreen
+                && (isResizingDownFromFullscreen || isStretchingPastOriginalBounds);
+
         final boolean update = showVeil != mShown;
         if (update && mFadeAnimator != null && mFadeAnimator.isRunning()) {
             // If we need to animate and animator still running, cancel it before we ensure both

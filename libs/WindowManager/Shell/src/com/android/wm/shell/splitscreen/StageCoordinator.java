@@ -35,7 +35,9 @@ import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.wm.shell.Flags.enableFlexibleSplit;
+import static com.android.wm.shell.Flags.enableFlexibleTwoAppSplit;
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
+import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_FLEX;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
@@ -127,7 +129,6 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.policy.FoldLockSettingsObserver;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
-import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -2006,7 +2007,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // If all stages are filled, create new SplitBounds and update Recents.
             if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
                 int currentSnapPosition = mSplitLayout.calculateCurrentSnapPosition();
-                if (Flags.enableFlexibleTwoAppSplit()) {
+                if (enableFlexibleTwoAppSplit()) {
                     // Split screen can be laid out in such a way that some of the apps are
                     // offscreen. For the purposes of passing SplitBounds up to launcher (for use in
                     // thumbnails etc.), we crop the bounds down to the screen size.
@@ -2063,10 +2064,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRootTaskLeash = leash;
 
         if (mSplitLayout == null) {
+            int parallaxType = enableFlexibleTwoAppSplit() ? PARALLAX_FLEX : PARALLAX_ALIGN_CENTER;
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
                     mRootTaskInfo.configuration, this, mParentContainerCallbacks,
-                    mDisplayController, mDisplayImeController, mTaskOrganizer,
-                    PARALLAX_ALIGN_CENTER /* parallaxType */, mSplitState, mMainHandler);
+                    mDisplayController, mDisplayImeController, mTaskOrganizer, parallaxType,
+                    mSplitState, mMainHandler);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
 
@@ -2406,6 +2408,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         updateSurfaceBounds(layout, t, shouldUseParallaxEffect);
         getMainStageBounds(mTempRect1);
         getSideStageBounds(mTempRect2);
+        Rect displayBounds = mSplitLayout.getRootBounds();
+
         if (enableFlexibleSplit()) {
             StageTaskListener ltStage =
                     mStageOrderOperator.getStageForLegacyPosition(SPLIT_POSITION_TOP_OR_LEFT,
@@ -2413,12 +2417,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             StageTaskListener brStage =
                     mStageOrderOperator.getStageForLegacyPosition(SPLIT_POSITION_BOTTOM_OR_RIGHT,
                             false /*checkAllStagesIfNotActive*/);
-            ltStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY, mShowDecorImmediately);
-            brStage.onResizing(mTempRect2, mTempRect1, t, offsetX, offsetY, mShowDecorImmediately);
-        } else {
-            mMainStage.onResizing(mTempRect1, mTempRect2, t, offsetX, offsetY,
+            ltStage.onResizing(mTempRect1, mTempRect2, displayBounds, t, offsetX, offsetY,
                     mShowDecorImmediately);
-            mSideStage.onResizing(mTempRect2, mTempRect1, t, offsetX, offsetY,
+            brStage.onResizing(mTempRect2, mTempRect1, displayBounds, t, offsetX, offsetY,
+                    mShowDecorImmediately);
+        } else {
+            mMainStage.onResizing(mTempRect1, mTempRect2, displayBounds, t, offsetX, offsetY,
+                    mShowDecorImmediately);
+            mSideStage.onResizing(mTempRect2, mTempRect1, displayBounds, t, offsetX, offsetY,
                     mShowDecorImmediately);
         }
         t.apply();
@@ -2465,7 +2471,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.populateTouchZones();
         }, mainDecor, sideDecor, decorManagers);
 
-        if (Flags.enableFlexibleTwoAppSplit()) {
+        if (enableFlexibleTwoAppSplit()) {
             switch (layout.calculateCurrentSnapPosition()) {
                 case SNAP_TO_2_10_90 -> grantFocusToPosition(false /* leftOrTop */);
                 case SNAP_TO_2_90_10 -> grantFocusToPosition(true /* leftOrTop */);
