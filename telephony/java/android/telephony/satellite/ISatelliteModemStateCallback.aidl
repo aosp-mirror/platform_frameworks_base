@@ -27,4 +27,19 @@ oneway interface ISatelliteModemStateCallback {
      * @param state The current satellite modem state.
      */
     void onSatelliteModemStateChanged(in int state);
+
+    /**
+     * Indicates that the satellite emergency mode has changed.
+     *
+     * @param isEmergency True means satellite enabled for emergency mode, false otherwise.
+     */
+    void onEmergencyModeChanged(in boolean isEmergency);
+
+    /**
+     * Indicates that the satellite registration failed with following failure code
+     *
+     * @param causeCode the primary failure cause code of the procedure.
+     *                  For LTE (EMM), cause codes are TS 24.301 Sec 9.9.3.9
+     */
+    void onRegistrationFailure(in int causeCode);
 }

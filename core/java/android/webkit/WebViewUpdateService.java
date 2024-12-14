@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.RemoteException;
@@ -34,11 +35,11 @@ public final class WebViewUpdateService {
      */
     public static WebViewProviderInfo[] getAllWebViewPackages() {
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getAllWebViewPackages();
+            } else {
                 return new WebViewProviderInfo[0];
             }
-            return manager.getAllWebViewPackages();
         } else {
             IWebViewUpdateService service = getUpdateService();
             if (service == null) {
@@ -54,14 +55,18 @@ public final class WebViewUpdateService {
 
     /**
      * Fetch all packages that could potentially implement WebView and are currently valid.
+     *
+     * <p>Note that this will be filtered by the caller's package visibility; callers should
+     * have QUERY_ALL_PACKAGES permission to ensure that the list is complete.
      */
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
     public static WebViewProviderInfo[] getValidWebViewPackages() {
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getValidWebViewPackages();
+            } else {
                 return new WebViewProviderInfo[0];
             }
-            return manager.getValidWebViewPackages();
         } else {
             IWebViewUpdateService service = getUpdateService();
             if (service == null) {
@@ -80,11 +85,11 @@ public final class WebViewUpdateService {
      */
     public static String getCurrentWebViewPackageName() {
         if (Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager == null) {
+            if (WebViewFactory.isWebViewSupported()) {
+                return WebViewUpdateManager.getInstance().getCurrentWebViewPackageName();
+            } else {
                 return null;
             }
-            return manager.getCurrentWebViewPackageName();
         } else {
             IWebViewUpdateService service = getUpdateService();
             if (service == null) {

@@ -35,7 +35,7 @@ constructor(
     private val broadcastSender: BroadcastSender,
     private val uiEventLogger: UiEventLogger,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val mediaOutputControllerFactory: MediaOutputController.Factory,
+    private val mediaSwitchingControllerFactory: MediaSwitchingController.Factory,
 ) {
     companion object {
         const val INTERACTION_JANK_TAG = "media_output"
@@ -98,7 +98,7 @@ constructor(
         createAndShow(
             packageName = null,
             aboveStatusBar = false,
-            dialogTransitionAnimatorController = null,
+            dialogTransitionAnimatorController = controller,
             includePlaybackAndAppMetadata = false,
             userHandle = null,
         )
@@ -118,7 +118,7 @@ constructor(
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
-        val controller = mediaOutputControllerFactory.create(packageName, userHandle, token)
+        val controller = mediaSwitchingControllerFactory.create(packageName, userHandle, token)
 
         val mediaOutputDialog =
             MediaOutputDialog(

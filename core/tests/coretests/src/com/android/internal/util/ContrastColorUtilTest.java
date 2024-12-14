@@ -33,8 +33,8 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.TextAppearanceSpan;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 

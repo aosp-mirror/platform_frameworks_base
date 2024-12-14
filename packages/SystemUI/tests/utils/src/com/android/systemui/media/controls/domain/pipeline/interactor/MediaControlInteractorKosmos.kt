@@ -16,12 +16,12 @@
 
 package com.android.systemui.media.controls.domain.pipeline.interactor
 
-import android.content.applicationContext
 import com.android.systemui.activityIntentHelper
 import com.android.systemui.bluetooth.mockBroadcastDialogController
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.mediaDataProcessor
+import com.android.systemui.media.controls.shared.mediaLogger
 import com.android.systemui.media.controls.util.mediaInstanceId
 import com.android.systemui.media.mediaOutputDialogManager
 import com.android.systemui.plugins.activityStarter
@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.policy.keyguardStateController
 val Kosmos.mediaControlInteractor by
     Kosmos.Fixture {
         MediaControlInteractor(
-            applicationContext = applicationContext,
             instanceId = mediaInstanceId,
             repository = mediaFilterRepository,
             mediaDataProcessor = mediaDataProcessor,
@@ -41,5 +40,6 @@ val Kosmos.mediaControlInteractor by
             lockscreenUserManager = notificationLockscreenUserManager,
             mediaOutputDialogManager = mediaOutputDialogManager,
             broadcastDialogController = mockBroadcastDialogController,
+            mediaLogger = mediaLogger,
         )
     }

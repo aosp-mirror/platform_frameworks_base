@@ -470,7 +470,7 @@ public class LocalMediaManagerTest {
         when(cachedManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
         when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(cachedDevice.isConnected()).thenReturn(false);
-        when(cachedDevice.getConnectableProfiles()).thenReturn(profiles);
+        when(cachedDevice.getUiAccessibleProfiles()).thenReturn(profiles);
         when(cachedDevice.getDevice()).thenReturn(bluetoothDevice);
         when(cachedDevice.getAddress()).thenReturn(TEST_ADDRESS);
         when(mA2dpProfile.getActiveDevice()).thenReturn(bluetoothDevice);

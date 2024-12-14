@@ -29,16 +29,29 @@ import android.os.Trace;
 
 /**
  * Request to move an activity to paused state.
+ *
  * @hide
  */
 public class PauseActivityItem extends ActivityLifecycleItem {
 
-    private static final String TAG = "PauseActivityItem";
+    private final boolean mFinished;
+    private final boolean mUserLeaving;
+    private final boolean mDontReport;
+    private final boolean mAutoEnteringPip;
 
-    private boolean mFinished;
-    private boolean mUserLeaving;
-    private boolean mDontReport;
-    private boolean mAutoEnteringPip;
+    public PauseActivityItem(@NonNull IBinder activityToken) {
+        this(activityToken, false /* finished */, false /* userLeaving */,
+                true /* dontReport */, false /* autoEnteringPip*/);
+    }
+
+    public PauseActivityItem(@NonNull IBinder activityToken, boolean finished,
+            boolean userLeaving, boolean dontReport, boolean autoEnteringPip) {
+        super(activityToken);
+        mFinished = finished;
+        mUserLeaving = userLeaving;
+        mDontReport = dontReport;
+        mAutoEnteringPip = autoEnteringPip;
+    }
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
@@ -64,47 +77,9 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         ActivityClient.getInstance().activityPaused(getActivityToken());
     }
 
-    // ObjectPoolItem implementation
-
-    private PauseActivityItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static PauseActivityItem obtain(@NonNull IBinder activityToken, boolean finished,
-            boolean userLeaving, boolean dontReport, boolean autoEnteringPip) {
-        PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
-        if (instance == null) {
-            instance = new PauseActivityItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mFinished = finished;
-        instance.mUserLeaving = userLeaving;
-        instance.mDontReport = dontReport;
-        instance.mAutoEnteringPip = autoEnteringPip;
-
-        return instance;
-    }
-
-    /** Obtain an instance initialized with default params. */
-    @NonNull
-    public static PauseActivityItem obtain(@NonNull IBinder activityToken) {
-        return obtain(activityToken, false /* finished */, false /* userLeaving */,
-                true /* dontReport */, false /* autoEnteringPip*/);
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mFinished = false;
-        mUserLeaving = false;
-        mDontReport = false;
-        mAutoEnteringPip = false;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -114,7 +89,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         dest.writeBoolean(mAutoEnteringPip);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private PauseActivityItem(@NonNull Parcel in) {
         super(in);
         mFinished = in.readBoolean();

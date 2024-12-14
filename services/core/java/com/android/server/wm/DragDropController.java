@@ -217,12 +217,17 @@ class DragDropController {
                     mDragState.mToken = dragToken;
                     mDragState.mDisplayContent = displayContent;
                     mDragState.mData = data;
+                    mDragState.mCallingTaskIdToHide = shouldMoveCallingTaskToBack(callingWin,
+                            flags);
+                    if (DEBUG_DRAG) {
+                        Slog.d(TAG_WM, "Calling task to hide=" + mDragState.mCallingTaskIdToHide);
+                    }
 
                     if ((flags & View.DRAG_FLAG_ACCESSIBILITY_ACTION) == 0) {
                         final Display display = displayContent.getDisplay();
                         touchFocusTransferredFuture = mCallback.get().registerInputChannel(
                                 mDragState, display, mService.mInputManager,
-                                callingWin.mInputChannel);
+                                callingWin.mInputChannelToken);
                     } else {
                         // Skip surface logic for a drag triggered by an AccessibilityAction
                         mDragState.broadcastDragStartedLocked(touchX, touchY);
@@ -361,6 +366,23 @@ class DragDropController {
         } finally {
             mCallback.get().postReportDropResult();
         }
+    }
+
+    /**
+     * If the calling window's task should be hidden for the duration of the drag, this returns the
+     * task id of the task (or -1 otherwise).
+     */
+    private int shouldMoveCallingTaskToBack(WindowState callingWin, int flags) {
+        if ((flags & View.DRAG_FLAG_HIDE_CALLING_TASK_ON_DRAG_START) == 0) {
+            // Not requested by the app
+            return -1;
+        }
+        final ActivityRecord callingActivity = callingWin.getActivityRecord();
+        if (callingActivity == null || callingActivity.getTask() == null) {
+            // Not an activity
+            return -1;
+        }
+        return callingActivity.getTask().mTaskId;
     }
 
     /**

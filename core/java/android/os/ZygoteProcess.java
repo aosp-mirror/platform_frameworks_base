@@ -1116,7 +1116,6 @@ public class ZygoteProcess {
     /**
      * Instructs the zygote to pre-load the application code for the given Application.
      * Only the app zygote supports this function.
-     * TODO preloadPackageForAbi() can probably be removed and the callers an use this instead.
      */
     public boolean preloadApp(ApplicationInfo appInfo, String abi)
             throws ZygoteStartFailedEx, IOException {
@@ -1150,39 +1149,6 @@ public class ZygoteProcess {
                 state.mZygoteSessionSocket.setSoTimeout(previousSocketTimeout);
             }
             return ret == 0;
-        }
-    }
-
-    /**
-     * Instructs the zygote to pre-load the classes and native libraries at the given paths
-     * for the specified abi. Not all zygotes support this function.
-     */
-    public boolean preloadPackageForAbi(
-            String packagePath, String libsPath, String libFileName, String cacheKey, String abi)
-            throws ZygoteStartFailedEx, IOException {
-        synchronized (mLock) {
-            ZygoteState state = openZygoteSocketIfNeeded(abi);
-            state.mZygoteOutputWriter.write("5");
-            state.mZygoteOutputWriter.newLine();
-
-            state.mZygoteOutputWriter.write("--preload-package");
-            state.mZygoteOutputWriter.newLine();
-
-            state.mZygoteOutputWriter.write(packagePath);
-            state.mZygoteOutputWriter.newLine();
-
-            state.mZygoteOutputWriter.write(libsPath);
-            state.mZygoteOutputWriter.newLine();
-
-            state.mZygoteOutputWriter.write(libFileName);
-            state.mZygoteOutputWriter.newLine();
-
-            state.mZygoteOutputWriter.write(cacheKey);
-            state.mZygoteOutputWriter.newLine();
-
-            state.mZygoteOutputWriter.flush();
-
-            return (state.mZygoteInputStream.readInt() == 0);
         }
     }
 

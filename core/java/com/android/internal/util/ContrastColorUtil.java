@@ -31,6 +31,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.VectorDrawable;
+import android.text.NoCopySpan;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
@@ -188,6 +189,10 @@ public class ContrastColorUtil {
             Object[] spans = ss.getSpans(0, ss.length(), Object.class);
             SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
             for (Object span : spans) {
+                if (span instanceof NoCopySpan) {
+                    // These spans can contain external references and should not be copied.
+                    continue;
+                }
                 Object resultSpan = span;
                 if (resultSpan instanceof CharacterStyle) {
                     resultSpan = ((CharacterStyle) span).getUnderlying();
@@ -254,6 +259,10 @@ public class ContrastColorUtil {
             Object[] spans = ss.getSpans(0, ss.length(), Object.class);
             SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
             for (Object span : spans) {
+                if (span instanceof NoCopySpan) {
+                    // These spans can contain external references and should not be copied.
+                    continue;
+                }
                 Object resultSpan = span;
                 if (resultSpan instanceof CharacterStyle) {
                     resultSpan = ((CharacterStyle) span).getUnderlying();
@@ -300,6 +309,10 @@ public class ContrastColorUtil {
             Object[] spans = ss.getSpans(0, ss.length(), Object.class);
             SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
             for (Object span : spans) {
+                if (span instanceof NoCopySpan) {
+                    // These spans can contain external references and should not be copied.
+                    continue;
+                }
                 Object resultSpan = span;
                 int spanStart = ss.getSpanStart(span);
                 int spanEnd = ss.getSpanEnd(span);

@@ -109,8 +109,9 @@ final class AttributedOp {
                 uidState, flags);
 
         mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                parent.packageName, tag, uidState, flags, accessTime,
-                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE);
+                parent.packageName, persistentDeviceId, tag, uidState, flags, accessTime,
+                AppOpsManager.ATTRIBUTION_FLAGS_NONE, AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE,
+                DiscreteRegistry.ACCESS_TYPE_NOTE_OP);
     }
 
     /**
@@ -253,8 +254,8 @@ final class AttributedOp {
 
         if (isStarted) {
             mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                    parent.packageName, tag, uidState, flags, startTime, attributionFlags,
-                    attributionChainId);
+                    parent.packageName, persistentDeviceId, tag, uidState, flags, startTime,
+                    attributionFlags, attributionChainId, DiscreteRegistry.ACCESS_TYPE_START_OP);
         }
     }
 
@@ -290,12 +291,17 @@ final class AttributedOp {
      * stopping in the HistoricalRegistry, but does not delete it.
      *
      * @param triggeredByUidStateChange If {@code true}, then this method operates as usual, except
-     * that {@link AppOpsService#mActiveWatchers} will not be notified. This is currently only
-     * used in {@link #onUidStateChanged(int)}, for the purpose of restarting (i.e.,
-     * finishing then immediately starting again in the new uid state) the AttributedOp. In this
-     * case, the caller is responsible for guaranteeing that either the AttributedOp is started
-     * again or all {@link AppOpsService#mActiveWatchers} are notified that the AttributedOp is
-     * finished.
+     *                                  that {@link AppOpsService#mActiveWatchers} will not be
+     *                                  notified. This is currently only
+     *                                  used in {@link #onUidStateChanged(int)}, for the purpose of
+     *                                  restarting (i.e.,
+     *                                  finishing then immediately starting again in the new uid
+     *                                  state) the AttributedOp. In this
+     *                                  case, the caller is responsible for guaranteeing that either
+     *                                  the AttributedOp is started
+     *                                  again or all {@link AppOpsService#mActiveWatchers} are
+     *                                  notified that the AttributedOp is
+     *                                  finished.
      */
     @SuppressWarnings("GuardedBy") // Lock is held on mAppOpsService
     private void finishOrPause(@NonNull IBinder clientId, boolean triggeredByUidStateChange,
@@ -333,9 +339,11 @@ final class AttributedOp {
                     finishedEvent);
 
             mAppOpsService.mHistoricalRegistry.increaseOpAccessDuration(parent.op, parent.uid,
-                    parent.packageName, tag, event.getUidState(),
+                    parent.packageName, persistentDeviceId, tag, event.getUidState(),
                     event.getFlags(), finishedEvent.getNoteTime(), finishedEvent.getDuration(),
-                    event.getAttributionFlags(), event.getAttributionChainId());
+                    event.getAttributionFlags(), event.getAttributionChainId(),
+                    isPausing ? DiscreteRegistry.ACCESS_TYPE_PAUSE_OP
+                            : DiscreteRegistry.ACCESS_TYPE_FINISH_OP);
 
             if (!isPausing) {
                 mAppOpsService.mInProgressStartOpEventPool.release(event);
@@ -441,8 +449,9 @@ final class AttributedOp {
             event.setStartElapsedTime(SystemClock.elapsedRealtime());
             event.setStartTime(startTime);
             mAppOpsService.mHistoricalRegistry.incrementOpAccessedCount(parent.op, parent.uid,
-                    parent.packageName, tag, event.getUidState(), event.getFlags(), startTime,
-                    event.getAttributionFlags(), event.getAttributionChainId());
+                    parent.packageName, persistentDeviceId, tag, event.getUidState(),
+                    event.getFlags(), startTime, event.getAttributionFlags(),
+                    event.getAttributionChainId(), DiscreteRegistry.ACCESS_TYPE_RESUME_OP);
             if (shouldSendActive) {
                 mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                         parent.packageName, tag, event.getVirtualDeviceId(), true,
@@ -863,12 +872,12 @@ final class AttributedOp {
         }
 
         InProgressStartOpEvent acquire(long startTime, long elapsedTime, @NonNull IBinder clientId,
-                @Nullable String attributionTag, int virtualDeviceId,  @NonNull Runnable onDeath,
+                @Nullable String attributionTag, int virtualDeviceId, @NonNull Runnable onDeath,
                 int proxyUid, @Nullable String proxyPackageName,
                 @Nullable String proxyAttributionTag, @Nullable String proxyDeviceId,
-                @AppOpsManager.UidState int uidState,
-                @AppOpsManager.OpFlags int flags, @AppOpsManager.AttributionFlags
-                int attributionFlags, int attributionChainId) throws RemoteException {
+                @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
+                @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId)
+                throws RemoteException {
 
             InProgressStartOpEvent recycled = acquire();
 

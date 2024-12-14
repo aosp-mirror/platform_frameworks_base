@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Alihkan ke atas sebelah kanan"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Alihkan ke bawah sebelah kiri"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Alihkan ke bawah sebelah kanan"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"kembangkan menu"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"kuncupkan menu"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Alih ke kiri"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Alih ke kanan"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"kembangkan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"kuncupkan <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Tetapan <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ketepikan gelembung"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Alihkan kepada skrin penuh"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Jangan jadikan perbualan dalam bentuk gelembung"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Bersembang menggunakan gelembung"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Perbualan baharu muncul sebagai ikon terapung atau gelembung. Ketik untuk membuka gelembung. Seret untuk mengalihkan gelembung tersebut."</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Minimumkan"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Tutup"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Kembali"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Pemegang"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Pengendalian apl"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Ikon Apl"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Skrin penuh"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Mod Desktop"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"Terapung"</string>
     <string name="select_text" msgid="5139083974039906583">"Pilih"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Tangkapan skrin"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Buka dalam penyemak imbas"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"Tetingkap Baharu"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"Urus Tetingkap"</string>
     <string name="close_text" msgid="4986518933445178928">"Tutup"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Tutup Menu"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"Buka Menu"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Buka Menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimumkan Skrin"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Tangkap Skrin"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Apl ini tidak boleh diubah saiz"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maksimumkan"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Autojajar ke kiri"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Autojajar ke kanan"</string>
 </resources>

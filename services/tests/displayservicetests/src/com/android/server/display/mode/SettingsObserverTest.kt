@@ -29,6 +29,7 @@ import com.android.internal.util.test.FakeSettingsProvider
 import com.android.server.display.DisplayDeviceConfig
 import com.android.server.display.config.RefreshRateData
 import com.android.server.display.config.SupportedModeData
+import com.android.server.display.config.createRefreshRateData
 import com.android.server.display.feature.DisplayManagerFlags
 import com.android.server.display.mode.DisplayModeDirector.DisplayDeviceConfigProvider
 import com.android.server.display.mode.SupportedRefreshRatesVote.RefreshRates
@@ -102,7 +103,7 @@ class SettingsObserverTest {
     }
 
     @Test
-    fun `test low power mode`(@TestParameter testCase: LowPowerTestCase) {
+    fun testLowPowerMode(@TestParameter testCase: LowPowerTestCase) {
         whenever(mockFlags.isVsyncLowPowerVoteEnabled).thenReturn(testCase.vsyncLowPowerVoteEnabled)
         whenever(spyContext.contentResolver)
                 .thenReturn(settingsProviderRule.mockContentResolver(null))
@@ -150,7 +151,7 @@ class SettingsObserverTest {
     }
 
     @Test
-    fun `test settings refresh rates`(@TestParameter testCase: SettingsRefreshRateTestCase) {
+    fun testSettingsRefreshRates(@TestParameter testCase: SettingsRefreshRateTestCase) {
         whenever(mockFlags.isPeakRefreshRatePhysicalLimitEnabled)
                 .thenReturn(testCase.peakRefreshRatePhysicalLimitEnabled)
 

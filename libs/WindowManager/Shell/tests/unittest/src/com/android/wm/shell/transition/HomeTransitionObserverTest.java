@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
@@ -38,6 +39,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.TransitionMode;
@@ -46,17 +51,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.shared.IHomeTransitionListener;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -70,6 +77,8 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class HomeTransitionObserverTest extends ShellTestCase {
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     private final ShellTaskOrganizer mOrganizer = mock(ShellTaskOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);
     private final Context mContext =
@@ -187,6 +196,7 @@ public class HomeTransitionObserverTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
     public void testHomeActivityWithBackGestureNotifiesHomeIsVisible() throws RemoteException {
         TransitionInfo info = mock(TransitionInfo.class);
         TransitionInfo.Change change = mock(TransitionInfo.Change.class);
@@ -202,6 +212,35 @@ public class HomeTransitionObserverTest extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class));
 
+        verify(mListener, times(1)).onHomeVisibilityChanged(true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
+    public void testHomeActivityWithBackGestureNotifiesHomeIsVisibleAfterClose()
+            throws RemoteException {
+        TransitionInfo info = mock(TransitionInfo.class);
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
+        when(change.getTaskInfo()).thenReturn(taskInfo);
+        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
+        when(info.getType()).thenReturn(TRANSIT_PREPARE_BACK_NAVIGATION);
+
+        when(change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)).thenReturn(true);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_OPEN, true);
+
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+        verify(mListener, times(0)).onHomeVisibilityChanged(anyBoolean());
+
+        when(info.getType()).thenReturn(TRANSIT_TO_BACK);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_CHANGE, true);
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
         verify(mListener, times(1)).onHomeVisibilityChanged(true);
     }
 

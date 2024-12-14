@@ -27,6 +27,8 @@
 #include <cutils/compiler.h>
 #include <log/log.h>
 #include <minikin/Layout.h>
+
+#include "FeatureFlags.h"
 #include "MinikinSkia.h"
 #include "Paint.h"
 #include "Typeface.h"
@@ -71,27 +73,42 @@ public:
     static void forFontRun(const minikin::Layout& layout, Paint* paint, F& f) {
         float saveSkewX = paint->getSkFont().getSkewX();
         bool savefakeBold = paint->getSkFont().isEmbolden();
-        const minikin::MinikinFont* curFont = nullptr;
-        size_t start = 0;
-        size_t nGlyphs = layout.nGlyphs();
-        for (size_t i = 0; i < nGlyphs; i++) {
-            const minikin::MinikinFont* nextFont = layout.typeface(i).get();
-            if (i > 0 && nextFont != curFont) {
+        if (text_feature::typeface_redesign()) {
+            for (uint32_t runIdx = 0; runIdx < layout.getFontRunCount(); ++runIdx) {
+                uint32_t start = layout.getFontRunStart(runIdx);
+                uint32_t end = layout.getFontRunEnd(runIdx);
+                const minikin::FakedFont& fakedFont = layout.getFontRunFont(runIdx);
+
+                std::shared_ptr<minikin::MinikinFont> font = fakedFont.typeface();
                 SkFont* skfont = &paint->getSkFont();
-                MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
-                f(start, i);
+                MinikinFontSkia::populateSkFont(skfont, font.get(), fakedFont.fakery);
+                f(start, end);
                 skfont->setSkewX(saveSkewX);
                 skfont->setEmbolden(savefakeBold);
-                start = i;
             }
-            curFont = nextFont;
-        }
-        if (nGlyphs > start) {
-            SkFont* skfont = &paint->getSkFont();
-            MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
-            f(start, nGlyphs);
-            skfont->setSkewX(saveSkewX);
-            skfont->setEmbolden(savefakeBold);
+        } else {
+            const minikin::MinikinFont* curFont = nullptr;
+            size_t start = 0;
+            size_t nGlyphs = layout.nGlyphs();
+            for (size_t i = 0; i < nGlyphs; i++) {
+                const minikin::MinikinFont* nextFont = layout.typeface(i).get();
+                if (i > 0 && nextFont != curFont) {
+                    SkFont* skfont = &paint->getSkFont();
+                    MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
+                    f(start, i);
+                    skfont->setSkewX(saveSkewX);
+                    skfont->setEmbolden(savefakeBold);
+                    start = i;
+                }
+                curFont = nextFont;
+            }
+            if (nGlyphs > start) {
+                SkFont* skfont = &paint->getSkFont();
+                MinikinFontSkia::populateSkFont(skfont, curFont, layout.getFakery(start));
+                f(start, nGlyphs);
+                skfont->setSkewX(saveSkewX);
+                skfont->setEmbolden(savefakeBold);
+            }
         }
     }
 };

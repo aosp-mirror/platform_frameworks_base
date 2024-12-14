@@ -232,8 +232,14 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         if (imeWindow != null && imeWindow.isVisible()) {
             final Rect bounds = imeWindow.getParentFrame();
             bounds.offsetTo(0, 0);
-            imeBuffer = ScreenCapture.captureLayersExcluding(imeWindow.getSurfaceControl(),
-                    bounds, 1.0f, pixelFormat, null);
+            ScreenCapture.LayerCaptureArgs captureArgs = new ScreenCapture.LayerCaptureArgs.Builder(
+                    imeWindow.getSurfaceControl())
+                    .setSourceCrop(bounds)
+                    .setFrameScale(1.0f)
+                    .setPixelFormat(pixelFormat)
+                    .setCaptureSecureLayers(true)
+                    .build();
+            imeBuffer = ScreenCapture.captureLayers(captureArgs);
         }
         return imeBuffer;
     }
@@ -258,11 +264,6 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
     @Override
     ActivityRecord getTopActivity(Task source) {
         return source.getTopMostActivity();
-    }
-
-    @Override
-    ActivityRecord getTopFullscreenActivity(Task source) {
-        return source.getTopFullscreenActivity();
     }
 
     @Override

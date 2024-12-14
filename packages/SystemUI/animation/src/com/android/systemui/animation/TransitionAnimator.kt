@@ -28,6 +28,7 @@ import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Interpolator
+import android.window.WindowAnimationState
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators.LINEAR
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
@@ -56,12 +57,12 @@ class TransitionAnimator(
             timings: Timings,
             linearProgress: Float,
             delay: Long,
-            duration: Long
+            duration: Long,
         ): Float {
             return MathUtils.constrain(
                 (linearProgress * timings.totalDuration - delay) / duration,
                 0.0f,
-                1.0f
+                1.0f,
             )
         }
 
@@ -71,6 +72,18 @@ class TransitionAnimator(
                     "disabled"
             }
         }
+
+        internal fun WindowAnimationState.toTransitionState() =
+            State().also {
+                bounds?.let { b ->
+                    it.top = b.top.roundToInt()
+                    it.left = b.left.roundToInt()
+                    it.bottom = b.bottom.roundToInt()
+                    it.right = b.right.roundToInt()
+                }
+                it.bottomCornerRadius = (bottomLeftRadius + bottomRightRadius) / 2
+                it.topCornerRadius = (topLeftRadius + topRightRadius) / 2
+            }
     }
 
     private val transitionContainerLocation = IntArray(2)
@@ -117,6 +130,15 @@ class TransitionAnimator(
             get() = null
 
         /**
+         * Window state for the animation. If [isLaunching], it would correspond to the end state
+         * otherwise the start state.
+         *
+         * If null, the state is inferred from the window targets
+         */
+        val windowAnimatorState: WindowAnimationState?
+            get() = null
+
+        /**
          * Return the [State] of the view that will be animated. We will animate from this state to
          * the final window state.
          *
@@ -151,7 +173,7 @@ class TransitionAnimator(
         var left: Int = 0,
         var right: Int = 0,
         var topCornerRadius: Float = 0f,
-        var bottomCornerRadius: Float = 0f
+        var bottomCornerRadius: Float = 0f,
     ) {
         private val startTop = top
 
@@ -197,7 +219,7 @@ class TransitionAnimator(
         val contentAfterFadeInDelay: Long,
 
         /** The duration of the expanded content fade in. */
-        val contentAfterFadeInDuration: Long
+        val contentAfterFadeInDuration: Long,
     )
 
     /** The interpolators used by this animator. */
@@ -215,7 +237,7 @@ class TransitionAnimator(
         val contentBeforeFadeOutInterpolator: Interpolator,
 
         /** The interpolator used when fading in the expanded content. */
-        val contentAfterFadeInInterpolator: Interpolator
+        val contentAfterFadeInInterpolator: Interpolator,
     )
 
     /**
@@ -254,7 +276,7 @@ class TransitionAnimator(
                 endState,
                 windowBackgroundLayer,
                 fadeWindowBackgroundLayer,
-                drawHole
+                drawHole,
             )
         animator.start()
 
@@ -271,7 +293,7 @@ class TransitionAnimator(
         endState: State,
         windowBackgroundLayer: GradientDrawable,
         fadeWindowBackgroundLayer: Boolean = true,
-        drawHole: Boolean = false
+        drawHole: Boolean = false,
     ): ValueAnimator {
         val state = controller.createAnimatorState()
 
@@ -357,13 +379,26 @@ class TransitionAnimator(
                         Log.d(TAG, "Animation ended")
                     }
 
-                    // TODO(b/330672236): Post this to the main thread instead so that it does not
-                    // flicker with Flexiglass enabled.
-                    controller.onTransitionAnimationEnd(isExpandingFullyAbove)
-                    transitionContainerOverlay.remove(windowBackgroundLayer)
+                    // onAnimationEnd is called at the end of the animation, on a Choreographer
+                    // animation tick. During dialog launches, the following calls will move the
+                    // animated content from the dialog overlay back to its original position, and
+                    // this change must be reflected in the next frame given that we then sync the
+                    // next frame of both the content and dialog ViewRoots. During SysUI activity
+                    // launches, we will instantly collapse the shade at the end of the transition.
+                    // However, if those are rendered by Compose, whose compositions are also
+                    // scheduled on a Choreographer frame, any state change made *right now* won't
+                    // be reflected in the next frame given that a Choreographer frame can't
+                    // schedule another and have it happen in the same frame. So we post the
+                    // forwarded calls to [Controller.onLaunchAnimationEnd] in the main executor,
+                    // leaving this Choreographer frame, ensuring that any state change applied by
+                    // onTransitionAnimationEnd() will be reflected in the same frame.
+                    mainExecutor.execute {
+                        controller.onTransitionAnimationEnd(isExpandingFullyAbove)
+                        transitionContainerOverlay.remove(windowBackgroundLayer)
 
-                    if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
-                        openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+                        if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
+                            openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+                        }
                     }
                 }
             }
@@ -399,14 +434,14 @@ class TransitionAnimator(
                         timings,
                         linearProgress,
                         timings.contentBeforeFadeOutDelay,
-                        timings.contentBeforeFadeOutDuration
+                        timings.contentBeforeFadeOutDuration,
                     ) < 1
                 } else {
                     getProgress(
                         timings,
                         linearProgress,
                         timings.contentAfterFadeInDelay,
-                        timings.contentAfterFadeInDuration
+                        timings.contentAfterFadeInDuration,
                     ) > 0
                 }
 
@@ -427,7 +462,7 @@ class TransitionAnimator(
                 ViewRootSync.synchronizeNextDraw(
                     transitionContainer,
                     openingWindowSyncView,
-                    then = {}
+                    then = {},
                 )
             } else if (
                 !controller.isLaunching &&
@@ -446,7 +481,7 @@ class TransitionAnimator(
                 ViewRootSync.synchronizeNextDraw(
                     openingWindowSyncView,
                     transitionContainer,
-                    then = {}
+                    then = {},
                 )
             }
 
@@ -464,7 +499,7 @@ class TransitionAnimator(
                 container,
                 fadeWindowBackgroundLayer,
                 drawHole,
-                controller.isLaunching
+                controller.isLaunching,
             )
             controller.onTransitionAnimationProgress(state, progress, linearProgress)
         }
@@ -488,7 +523,7 @@ class TransitionAnimator(
         transitionContainer: View,
         fadeWindowBackgroundLayer: Boolean,
         drawHole: Boolean,
-        isLaunching: Boolean
+        isLaunching: Boolean,
     ) {
         // Update position.
         transitionContainer.getLocationOnScreen(transitionContainerLocation)
@@ -496,7 +531,7 @@ class TransitionAnimator(
             state.left - transitionContainerLocation[0],
             state.top - transitionContainerLocation[1],
             state.right - transitionContainerLocation[0],
-            state.bottom - transitionContainerLocation[1]
+            state.bottom - transitionContainerLocation[1],
         )
 
         // Update radius.
@@ -517,7 +552,7 @@ class TransitionAnimator(
                 timings,
                 linearProgress,
                 timings.contentBeforeFadeOutDelay,
-                timings.contentBeforeFadeOutDuration
+                timings.contentBeforeFadeOutDuration,
             )
 
         if (isLaunching) {
@@ -531,7 +566,7 @@ class TransitionAnimator(
                         timings,
                         linearProgress,
                         timings.contentAfterFadeInDelay,
-                        timings.contentAfterFadeInDuration
+                        timings.contentAfterFadeInDuration,
                     )
                 val alpha =
                     1 -
@@ -561,7 +596,7 @@ class TransitionAnimator(
                         timings,
                         linearProgress,
                         timings.contentAfterFadeInDelay,
-                        timings.contentAfterFadeInDuration
+                        timings.contentAfterFadeInDuration,
                     )
                 val alpha =
                     1 -

@@ -54,16 +54,9 @@ import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
-import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.app.admin.flags.Flags.onboardingConsentlessBugreports;
-import static android.app.admin.flags.Flags.FLAG_IS_MTE_POLICY_ENFORCED;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -2989,7 +2982,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int STATUS_HEADLESS_ONLY_SYSTEM_USER = 17;
 
     /**
@@ -4238,7 +4230,6 @@ public class DevicePolicyManager {
      *
      * @return whether MTE is currently enabled on the device.
      */
-    @FlaggedApi(FLAG_IS_MTE_POLICY_ENFORCED)
     public static boolean isMtePolicyEnforced() {
         return Zygote.nativeSupportsMemoryTagging();
     }
@@ -4334,11 +4325,13 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CONTENT_PROTECTION, conditional = true)
     @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
+    @UserHandleAware
     public @ContentProtectionPolicy int getContentProtectionPolicy(@Nullable ComponentName admin) {
         throwIfParentInstance("getContentProtectionPolicy");
         if (mService != null) {
             try {
-                return mService.getContentProtectionPolicy(admin, mContext.getPackageName());
+                return mService.getContentProtectionPolicy(admin, mContext.getPackageName(),
+                        myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8668,6 +8661,7 @@ public class DevicePolicyManager {
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
+    @SupportsCoexistence
     public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
         if (mService != null) {
             try {
@@ -9202,6 +9196,14 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
+    public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
+        setActiveAdmin(policyReceiver, refreshing, myUserId());
+    }
+
+    /**
+     * @hide
+     */
     @TestApi
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(allOf = {
@@ -9210,21 +9212,45 @@ public class DevicePolicyManager {
     })
     public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing,
             int userHandle) {
-        if (mService != null) {
-            try {
-                mService.setActiveAdmin(policyReceiver, refreshing, userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
+        setActiveAdminInternal(policyReceiver, refreshing, userHandle, null);
     }
 
     /**
      * @hide
      */
-    @UnsupportedAppUsage
-    public void setActiveAdmin(@NonNull ComponentName policyReceiver, boolean refreshing) {
-        setActiveAdmin(policyReceiver, refreshing, myUserId());
+    @TestApi
+    @RequiresPermission(allOf = {
+            MANAGE_DEVICE_ADMINS,
+            INTERACT_ACROSS_USERS_FULL
+    })
+    @FlaggedApi(Flags.FLAG_PROVISIONING_CONTEXT_PARAMETER)
+    public void setActiveAdmin(
+            @NonNull ComponentName policyReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
+        setActiveAdminInternal(policyReceiver, refreshing, userHandle, provisioningContext);
+    }
+
+    private void setActiveAdminInternal(
+            @NonNull ComponentName policyReceiver,
+            boolean refreshing,
+            int userHandle,
+            @Nullable String provisioningContext
+    ) {
+        if (mService != null) {
+            try {
+                mService.setActiveAdmin(
+                        policyReceiver,
+                        refreshing,
+                        userHandle,
+                        provisioningContext
+                );
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -9678,7 +9704,7 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 final int myUserId = myUserId();
-                mService.setActiveAdmin(admin, false, myUserId);
+                mService.setActiveAdmin(admin, false, myUserId, null);
                 return mService.setProfileOwner(admin, myUserId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
@@ -10221,6 +10247,7 @@ public class DevicePolicyManager {
      * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_TASK, conditional = true)
+    @SupportsCoexistence
     public void clearPackagePersistentPreferredActivities(@Nullable ComponentName admin,
             String packageName) {
         throwIfParentInstance("clearPackagePersistentPreferredActivities");
@@ -10448,10 +10475,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("setApplicationRestrictions");
-        }
-
         if (mService != null) {
             try {
                 mService.setApplicationRestrictions(admin, mContext.getPackageName(), packageName,
@@ -11856,9 +11879,6 @@ public class DevicePolicyManager {
     @WorkerThread
     public @NonNull Bundle getApplicationRestrictions(
             @Nullable ComponentName admin, String packageName) {
-        if (!Flags.dmrhSetAppRestrictions()) {
-            throwIfParentInstance("getApplicationRestrictions");
-        }
 
         if (mService != null) {
             try {
@@ -11919,12 +11939,41 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
      * has not been granted the permission to set the given user restriction.
      */
+    @SupportsCoexistence
     public void addUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
                 mService.setUserRestriction(
                         admin, mContext.getPackageName(), key, true, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Adds a user restriction on {@code targetUser}, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity  The service entity that adds the restriction. A user restriction set by
+     *                       a service entity can only be cleared by the same entity. This can be
+     *                       just the calling package name, or any string of the caller's choice
+     *                       can be used.
+     * @param key  The key of the restriction.
+     * @param targetUser  The user to add the restriction on.
+     * @throws SecurityException if the caller is not a system service
+     *
+     * @hide
+     */
+    public void addUserRestriction(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key, @UserIdInt int targetUser) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionForUser(
+                        systemEntity, key, /* enable= */ true, targetUser);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11939,7 +11988,7 @@ public class DevicePolicyManager {
      * <p>For a given user, a restriction will be set if it was applied globally or locally by any
      * admin.
      *
-     * <p> The calling device admin must be a profile owner, device owner or or a holder of any
+     * <p> The calling device admin must be a profile owner, device owner or a holder of any
      * permission that is associated with a user restriction; if it is not, a security
      * exception will be thrown.
      *
@@ -11972,6 +12021,7 @@ public class DevicePolicyManager {
      * @throws IllegalStateException if caller is not targeting Android
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
      */
+    @SupportsCoexistence
     public void addUserRestrictionGlobally(@NonNull @UserManager.UserRestrictionKey String key) {
         throwIfParentInstance("addUserRestrictionGlobally");
         if (mService != null) {
@@ -12027,12 +12077,41 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner  and if the
      *  caller has not been granted the permission to set the given user restriction.
      */
+    @SupportsCoexistence
     public void clearUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
                 mService.setUserRestriction(
                         admin, mContext.getPackageName(), key, false, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Clears a user restriction from {@code targetUser}, specified by the {@code key}.
+     *
+     * <p>Called by a system service only, meaning that the caller's UID must be equal to
+     * {@link Process#SYSTEM_UID}.
+     *
+     * @param systemEntity  The system entity that clears the restriction. A user restriction
+     *                         set by a system entity can only be cleared by the same entity. This
+     *                         can be just the calling package name, or any string of the caller's
+     *                         choice can be used.
+     * @param key  The key of the restriction.
+     * @param targetUser  The user to clear the restriction from.
+     * @throws SecurityException if the caller is not a system service
+     *
+     * @hide
+     */
+    public void clearUserRestriction(@NonNull String systemEntity,
+            @NonNull @UserManager.UserRestrictionKey String key, @UserIdInt int targetUser) {
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionForUser(
+                        systemEntity, key, /* enable= */ false, targetUser);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -12235,6 +12314,7 @@ public class DevicePolicyManager {
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    @SupportsCoexistence
     public boolean setApplicationHidden(@Nullable ComponentName admin, String packageName,
             boolean hidden) {
         if (mService != null) {
@@ -12415,6 +12495,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT, conditional = true)
+    @SupportsCoexistence
     public void setAccountManagementDisabled(@Nullable ComponentName admin, String accountType,
             boolean disabled) {
         if (mService != null) {
@@ -12498,10 +12579,24 @@ public class DevicePolicyManager {
      **/
     @SystemApi
     public void setSecondaryLockscreenEnabled(@NonNull ComponentName admin, boolean enabled) {
+        setSecondaryLockscreenEnabled(admin, enabled, null);
+    }
+
+    /**
+     * Called by the system supervision app to set whether a secondary lockscreen needs to be shown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin.
+     * @param enabled Whether or not the lockscreen needs to be shown.
+     * @param options A {@link PersistableBundle} to supply options to the lock screen.
+     * @hide
+     */
+    public void setSecondaryLockscreenEnabled(@Nullable ComponentName admin, boolean enabled,
+            @Nullable PersistableBundle options) {
         throwIfParentInstance("setSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                mService.setSecondaryLockscreenEnabled(admin, enabled);
+                mService.setSecondaryLockscreenEnabled(admin, enabled, options);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -14147,21 +14242,11 @@ public class DevicePolicyManager {
      */
     public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
-        try {
-            if (Flags.dmrhSetAppRestrictions()) {
-                UserManager um = mContext.getSystemService(UserManager.class);
-                if (!um.isManagedProfile()) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            } else {
-                if (!mService.isManagedProfile(admin)) {
-                    throw new SecurityException("The current user does not have a parent profile.");
-                }
-            }
-            return new DevicePolicyManager(mContext, mService, true);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        UserManager um = mContext.getSystemService(UserManager.class);
+        if (!um.isManagedProfile()) {
+            throw new SecurityException("The current user does not have a parent profile.");
         }
+        return new DevicePolicyManager(mContext, mService, true);
     }
 
     /**
@@ -14209,6 +14294,7 @@ public class DevicePolicyManager {
      * @see #retrieveSecurityLogs
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_SECURITY_LOGGING, conditional = true)
+    @SupportsCoexistence
     public void setSecurityLoggingEnabled(@Nullable ComponentName admin, boolean enabled) {
         throwIfParentInstance("setSecurityLoggingEnabled");
         try {
@@ -14245,7 +14331,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void setAuditLogEnabled(boolean enabled) {
         throwIfParentInstance("setAuditLogEnabled");
@@ -14262,7 +14347,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public boolean isAuditLogEnabled() {
         throwIfParentInstance("isAuditLogEnabled");
@@ -14284,7 +14368,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void setAuditLogEventCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -14311,7 +14394,6 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void clearAuditLogEventCallback() {
         throwIfParentInstance("clearAuditLogEventCallback");
@@ -17118,6 +17200,7 @@ public class DevicePolicyManager {
      * if USB data signaling fails to be enabled/disabled.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING, conditional = true)
+    @SupportsCoexistence
     public void setUsbDataSignalingEnabled(boolean enabled) {
         throwIfParentInstance("setUsbDataSignalingEnabled");
         if (mService != null) {
@@ -17659,7 +17742,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller is not authorized to call this method.
      * @return ids of all managed subscriptions currently downloaded by an admin on the device.
      */
-    @FlaggedApi(FLAG_ESIM_MANAGEMENT_ENABLED)
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS)
     @NonNull
     public Set<Integer> getSubscriptionIds() {
@@ -17684,7 +17766,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public void setMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17704,7 +17785,6 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED)
     public int getMaxPolicyStorageLimit() {
         if (mService != null) {
             try {
@@ -17728,7 +17808,6 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     public void forceSetMaxPolicyStorageLimit(int storageLimit) {
         if (mService != null) {
             try {
@@ -17746,7 +17825,6 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_STORAGE_LIMIT)
-    @FlaggedApi(FLAG_DEVICE_POLICY_SIZE_TRACKING_INTERNAL_BUG_FIX_ENABLED)
     public int getPolicySizeForAdmin(@NonNull EnforcingAdmin admin) {
         if (mService != null) {
             try {
@@ -17765,13 +17843,9 @@ public class DevicePolicyManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED)
     @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     @DeviceAdminInfo.HeadlessDeviceOwnerMode
     public int getHeadlessDeviceOwnerMode() {
-        if (!Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
-            return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-        }
         if (mService != null) {
             try {
                 return mService.getHeadlessDeviceOwnerMode(mContext.getPackageName());

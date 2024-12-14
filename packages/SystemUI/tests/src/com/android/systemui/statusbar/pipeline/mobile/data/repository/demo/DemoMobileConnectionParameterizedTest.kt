@@ -23,16 +23,16 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.tableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -46,8 +46,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameters
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /**
  * Parameterized test for all of the common values of [FakeNetworkEventModel]. This test simply
@@ -56,21 +56,13 @@ import org.junit.runners.Parameterized.Parameters
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 internal class DemoMobileConnectionParameterizedTest(private val testCase: TestCase) :
     SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-
-    private val logFactory =
-        TableLogBufferFactory(
-            mock(),
-            FakeSystemClock(),
-            mock(),
-            testDispatcher,
-            testScope.backgroundScope,
-        )
 
     private val fakeNetworkEventFlow = MutableStateFlow<FakeNetworkEventModel?>(null)
     private val fakeWifiEventFlow = MutableStateFlow<FakeWifiEventModel?>(null)
@@ -98,7 +90,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
                 wifiDataSource = mockWifiDataSource,
                 scope = testScope.backgroundScope,
                 context = context,
-                logFactory = logFactory,
+                logFactory = kosmos.tableLogBufferFactory,
             )
 
         connectionsRepo.startProcessingCommands()

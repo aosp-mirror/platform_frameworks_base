@@ -104,6 +104,7 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.DiskInfo;
@@ -222,6 +223,9 @@ class StorageManagerService extends IStorageManager.Stub
 
     /** Extended timeout for the system server watchdog for vold#partition operation. */
     private static final int PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS = 3 * 60 * 1000;
+
+    private static final Pattern OBB_FILE_PATH = Pattern.compile(
+            "(?i)(^/storage/[^/]+/(?:([0-9]+)/)?Android/obb/)([^/]+)/([^/]+\\.obb)");
 
     @GuardedBy("mLock")
     private final Set<Integer> mFuseMountedUser = new ArraySet<>();
@@ -1180,6 +1184,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void onUserUnlocking(int userId) {
         Slog.d(TAG, "onUserUnlocking " + userId);
+        Trace.instant(Trace.TRACE_TAG_SYSTEM_SERVER, "SMS.onUserUnlocking: " + userId);
 
         if (userId != UserHandle.USER_SYSTEM) {
             // Check if this user shares media with another user
@@ -1466,6 +1471,8 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onVolumeCreated(String volId, int type, String diskId, String partGuid,
                 int userId) {
+            Trace.instant(Trace.TRACE_TAG_SYSTEM_SERVER,
+                    "SMS.onVolumeCreated: " + volId + ", " + userId);
             synchronized (mLock) {
                 final DiskInfo disk = mDisks.get(diskId);
                 final VolumeInfo vol = new VolumeInfo(volId, type, disk, partGuid);
@@ -2352,6 +2359,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void mount(VolumeInfo vol) {
         try {
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "SMS.mount: " + vol.id);
             // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
             extendWatchdogTimeout("#mount might be slow");
@@ -2363,6 +2371,8 @@ class StorageManagerService extends IStorageManager.Stub
                     vol.internalPath = internalPath;
                     ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
                     try {
+                        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                                "SMS.startFuseFileSystem: " + vol.id);
                         mStorageSessionController.onVolumeMount(pfd, vol);
                         return true;
                     } catch (ExternalStorageServiceException e) {
@@ -2375,6 +2385,7 @@ class StorageManagerService extends IStorageManager.Stub
                                 TimeUnit.SECONDS.toMillis(nextResetSeconds));
                         return false;
                     } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                         try {
                             pfd.close();
                         } catch (Exception e) {
@@ -2386,6 +2397,8 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.i(TAG, "Mounted volume " + vol);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
     }
 
@@ -3135,7 +3148,9 @@ class StorageManagerService extends IStorageManager.Stub
         Objects.requireNonNull(rawPath, "rawPath cannot be null");
         Objects.requireNonNull(canonicalPath, "canonicalPath cannot be null");
         Objects.requireNonNull(token, "token cannot be null");
-        Objects.requireNonNull(obbInfo, "obbIfno cannot be null");
+        Objects.requireNonNull(obbInfo, "obbInfo cannot be null");
+
+        validateObbInfo(obbInfo, rawPath);
 
         final int callingUid = Binder.getCallingUid();
         final ObbState obbState = new ObbState(rawPath, canonicalPath,
@@ -3145,6 +3160,34 @@ class StorageManagerService extends IStorageManager.Stub
 
         if (DEBUG_OBB)
             Slog.i(TAG, "Send to OBB handler: " + action.toString());
+    }
+
+    private void validateObbInfo(ObbInfo obbInfo, String rawPath) {
+        String obbFilePath;
+        try {
+            obbFilePath = new File(rawPath).getCanonicalPath();
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to resolve path" + rawPath + " : " + ex);
+        }
+
+        Matcher matcher = OBB_FILE_PATH.matcher(obbFilePath);
+
+        if (matcher.matches()) {
+            int userId = UserHandle.getUserId(Binder.getCallingUid());
+            String pathUserId = matcher.group(2);
+            String pathPackageName = matcher.group(3);
+            if ((pathUserId != null && Integer.parseInt(pathUserId) != userId)
+                    || (pathUserId == null && userId != mCurrentUserId)) {
+                throw new SecurityException(
+                        "Path " + obbFilePath + "does not correspond to calling userId " + userId);
+            }
+            if (obbInfo != null && !obbInfo.packageName.equals(pathPackageName)) {
+                throw new SecurityException("Path " + obbFilePath
+                        + " does not contain package name " + pathPackageName);
+            }
+        } else {
+            throw new SecurityException("Invalid path to Obb file : " + obbFilePath);
+        }
     }
 
     @Override
@@ -3518,7 +3561,8 @@ class StorageManagerService extends IStorageManager.Stub
         // of the calling App
         final long token = Binder.clearCallingIdentity();
         try {
-            Context targetAppContext = mContext.createPackageContext(packageName, 0);
+            Context targetAppContext = mContext.createPackageContextAsUser(packageName,
+                    /* flags= */ 0, UserHandle.of(UserHandle.getUserId(originalUid)));
             Intent intent = new Intent(Intent.ACTION_DEFAULT);
             intent.setClassName(packageName,
                     appInfo.manageSpaceActivityName);

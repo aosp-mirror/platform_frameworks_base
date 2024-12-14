@@ -18,6 +18,7 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "androidx.test.rules",
+        "flag-junit",
         "mockito-target-minus-junit4",
         "truth",
         "testng",

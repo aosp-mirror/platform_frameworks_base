@@ -113,7 +113,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
             assertThat(actual)
                 .isEqualTo(
                     AudioSharingButtonState.Visible(
-                        R.string.quick_settings_bluetooth_audio_sharing_button_sharing
+                        R.string.quick_settings_bluetooth_audio_sharing_button_sharing,
+                        isActive = true
                     )
                 )
         }
@@ -163,7 +164,8 @@ class AudioSharingInteractorTest : SysuiTestCase() {
             assertThat(actual)
                 .isEqualTo(
                     AudioSharingButtonState.Visible(
-                        R.string.quick_settings_bluetooth_audio_sharing_button
+                        R.string.quick_settings_bluetooth_audio_sharing_button,
+                        isActive = false
                     )
                 )
         }

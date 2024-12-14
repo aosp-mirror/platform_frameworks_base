@@ -17,11 +17,12 @@
 package com.android.settingslib.satellite
 
 import android.content.Context
-import android.content.Intent
-import android.os.OutcomeReceiver
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.telephony.satellite.SatelliteManager
-import android.telephony.satellite.SatelliteManager.SatelliteException
+import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_ENABLING_SATELLITE
+import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_OFF
+import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_MODEM_ERROR
+import android.telephony.satellite.SatelliteModemStateCallback
 import android.util.AndroidRuntimeException
 import androidx.test.core.app.ApplicationProvider
 import com.android.internal.telephony.flags.Flags
@@ -67,26 +68,19 @@ class SatelliteDialogUtilsTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     fun mayStartSatelliteWarningDialog_satelliteIsOn_showWarningDialog() = runBlocking {
-        `when`(
-                satelliteManager.requestIsEnabled(
-                        any(), any<OutcomeReceiver<Boolean, SatelliteManager.SatelliteException>>()
-                )
-        )
+        `when`(satelliteManager.registerForModemStateChanged(any(), any()))
                 .thenAnswer { invocation ->
-                    val receiver = invocation
-                            .getArgument<
-                                    OutcomeReceiver<Boolean, SatelliteManager.SatelliteException>>(
-                                    1
-                            )
-                    receiver.onResult(true)
+                    val callback = invocation
+                            .getArgument<SatelliteModemStateCallback>(1)
+                    callback.onSatelliteModemStateChanged(SATELLITE_MODEM_STATE_ENABLING_SATELLITE)
                     null
                 }
 
         try {
             SatelliteDialogUtils.mayStartSatelliteWarningDialog(
                     context, coroutineScope, TYPE_IS_WIFI, allowClick = {
-                        assertTrue(it)
-                })
+                assertTrue(it)
+            })
         } catch (e: AndroidRuntimeException) {
             // Catch exception of starting activity .
         }
@@ -95,68 +89,61 @@ class SatelliteDialogUtilsTest {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     fun mayStartSatelliteWarningDialog_satelliteIsOff_notShowWarningDialog() = runBlocking {
-        `when`(
-                satelliteManager.requestIsEnabled(
-                        any(), any<OutcomeReceiver<Boolean, SatelliteManager.SatelliteException>>()
-                )
-        )
+        `when`(satelliteManager.registerForModemStateChanged(any(), any()))
                 .thenAnswer { invocation ->
-                    val receiver = invocation
-                            .getArgument<
-                                    OutcomeReceiver<Boolean, SatelliteManager.SatelliteException>>(
-                                    1
-                            )
-                    receiver.onResult(false)
+                    val callback = invocation
+                            .getArgument<SatelliteModemStateCallback>(1)
+                    callback.onSatelliteModemStateChanged(SATELLITE_MODEM_STATE_OFF)
                     null
                 }
 
 
         SatelliteDialogUtils.mayStartSatelliteWarningDialog(
-            context, coroutineScope, TYPE_IS_WIFI, allowClick = {
-                assertFalse(it)
-            })
+                context, coroutineScope, TYPE_IS_WIFI, allowClick = {
+            assertFalse(it)
+        })
 
-        verify(context, Times(0)).startActivity(any<Intent>())
+        verify(context, Times(0)).startActivity(any())
     }
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     fun mayStartSatelliteWarningDialog_noSatelliteManager_notShowWarningDialog() = runBlocking {
-        `when`(context.getSystemService(SatelliteManager::class.java))
-                .thenReturn(null)
+        `when`(context.getSystemService(SatelliteManager::class.java)).thenReturn(null)
 
         SatelliteDialogUtils.mayStartSatelliteWarningDialog(
-            context, coroutineScope, TYPE_IS_WIFI, allowClick = {
-                assertFalse(it)
-            })
+                context, coroutineScope, TYPE_IS_WIFI, allowClick = {
+            assertFalse(it)
+        })
 
-        verify(context, Times(0)).startActivity(any<Intent>())
+        verify(context, Times(0)).startActivity(any())
     }
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     fun mayStartSatelliteWarningDialog_satelliteErrorResult_notShowWarningDialog() = runBlocking {
-        `when`(
-                satelliteManager.requestIsEnabled(
-                        any(), any<OutcomeReceiver<Boolean, SatelliteManager.SatelliteException>>()
-                )
-        )
-                .thenAnswer { invocation ->
-                    val receiver = invocation
-                            .getArgument<
-                                    OutcomeReceiver<Boolean, SatelliteManager.SatelliteException>>(
-                                    1
-                            )
-                    receiver.onError(SatelliteException(SatelliteManager.SATELLITE_RESULT_ERROR))
-                    null
-                }
-
+        `when`(satelliteManager.registerForModemStateChanged(any(), any()))
+                .thenReturn(SATELLITE_RESULT_MODEM_ERROR)
 
         SatelliteDialogUtils.mayStartSatelliteWarningDialog(
-            context, coroutineScope, TYPE_IS_WIFI, allowClick = {
-                assertFalse(it)
-            })
+                context, coroutineScope, TYPE_IS_WIFI, allowClick = {
+            assertFalse(it)
+        })
 
-        verify(context, Times(0)).startActivity(any<Intent>())
+        verify(context, Times(0)).startActivity(any())
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun mayStartSatelliteWarningDialog_phoneCrash_notShowWarningDialog() = runBlocking {
+        `when`(satelliteManager.registerForModemStateChanged(any(), any()))
+                .thenThrow(IllegalStateException("Telephony is null!!!"))
+
+        SatelliteDialogUtils.mayStartSatelliteWarningDialog(
+                context, coroutineScope, TYPE_IS_WIFI, allowClick = {
+            assertFalse(it)
+        })
+
+        verify(context, Times(0)).startActivity(any())
     }
 }

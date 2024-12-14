@@ -55,6 +55,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
 import static org.junit.Assert.assertEquals;
@@ -141,8 +142,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /** Common base class for window manager unit test classes. */
-class WindowTestsBase extends SystemServiceTestsBase {
-    final Context mContext = getInstrumentation().getTargetContext();
+public class WindowTestsBase extends SystemServiceTestsBase {
+    protected final Context mContext = getInstrumentation().getTargetContext();
 
     // Default package name
     static final String DEFAULT_COMPONENT_PACKAGE_NAME = "com.foo";
@@ -262,34 +263,34 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Ensure letterbox aspect ratio is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}, is set
         // on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(0);
+        mAtm.mWindowManager.mAppCompatConfiguration.setFixedOrientationLetterboxAspectRatio(0);
         // Ensure letterbox horizontal position multiplier is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
+        mAtm.mWindowManager.mAppCompatConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
         // Ensure letterbox vertical position multiplier is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.0f);
+        mAtm.mWindowManager.mAppCompatConfiguration.setLetterboxVerticalPositionMultiplier(0.0f);
         // Ensure letterbox horizontal reachability treatment isn't overridden on any device target.
         // {@link com.android.internal.R.bool.config_letterboxIsHorizontalReachabilityEnabled},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(false);
+        mAtm.mWindowManager.mAppCompatConfiguration.setIsHorizontalReachabilityEnabled(false);
         // Ensure letterbox vertical reachability treatment isn't overridden on any device target.
         // {@link com.android.internal.R.bool.config_letterboxIsVerticalReachabilityEnabled},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(false);
+        mAtm.mWindowManager.mAppCompatConfiguration.setIsVerticalReachabilityEnabled(false);
         // Ensure aspect ratio for unresizable apps isn't overridden on any device target.
         // {@link com.android.internal.R.bool
         // .config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled}, may be set on some
         // device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration
+        mAtm.mWindowManager.mAppCompatConfiguration
                 .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(false);
         // Ensure aspect ratio for al apps isn't overridden on any device target.
         // {@link com.android.internal.R.bool
         // .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled}, may be set on
         // some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration
+        mAtm.mWindowManager.mAppCompatConfiguration
                 .setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(false);
 
         // Setup WallpaperController crop utils with a simple center-align strategy
@@ -331,7 +332,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     private void checkDeviceSpecificOverridesNotApplied() {
         // Check global overrides
         if (!sGlobalOverridesChecked) {
-            assertEquals(0, mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
+            assertEquals(0, mWm.mAppCompatConfiguration.getFixedOrientationLetterboxAspectRatio(),
                     0 /* delta */);
             sGlobalOverridesChecked = true;
         }
@@ -693,6 +694,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    static void makeWindowVisibleAndNotDrawn(WindowState... windows) {
+        makeWindowVisible(windows);
+        for (WindowState win : windows) {
+            win.mWinAnimator.mDrawState = DRAW_PENDING;
+        }
+    }
+
     static void makeLastConfigReportedToClient(WindowState w, boolean visible) {
         w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
                 new MergedConfiguration(), new ActivityWindowInfo(), true /* useLatestConfig */,
@@ -924,7 +932,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mSystemServicesTestRule.addProcess("pkgName", "procName",
                     WindowManagerService.MY_PID, WindowManagerService.MY_UID);
         }
-        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer);
+        mAtm.mTaskFragmentOrganizerController.registerOrganizer(organizer, isSystemOrganizer,
+                new Bundle());
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
@@ -2122,7 +2131,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit);
+            mController.finishTransition(ActionChain.testFinish(mLastTransit));
         }
     }
 }

@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.SurfaceControl.METADATA_OWNER_PID;
+import static android.view.SurfaceControl.METADATA_OWNER_UID;
+import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -44,6 +48,7 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
+import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 
@@ -52,6 +57,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Trace;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
@@ -61,9 +67,8 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
-import com.android.window.flags.Flags;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -95,12 +100,13 @@ class WindowStateAnimator {
     final Session mSession;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
-    final boolean mIsWallpaper;
     private final WallpaperController mWallpaperControllerLocked;
 
     boolean mAnimationIsEntrance;
 
-    WindowSurfaceController mSurfaceController;
+    SurfaceControl mSurfaceControl;
+    private boolean mSurfaceShown;
+    private String mTitle;
 
     float mShownAlpha = 0;
     float mAlpha = 0;
@@ -164,7 +170,6 @@ class WindowStateAnimator {
         mWin = win;
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
-        mIsWallpaper = win.mIsWallpaper;
         mWallpaperControllerLocked = win.getDisplayContent().mWallpaperController;
     }
 
@@ -198,14 +203,30 @@ class WindowStateAnimator {
     }
 
     void hide(SurfaceControl.Transaction transaction, String reason) {
-        if (!mLastHidden) {
-            //dump();
-            mLastHidden = true;
-
-            if (mSurfaceController != null) {
-                mSurfaceController.hide(transaction, reason);
-            }
+        if (mLastHidden) {
+            return;
         }
+        mLastHidden = true;
+        if (mSurfaceControl == null || !mSurfaceShown) {
+            return;
+        }
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE HIDE ( %s ): %s", reason, mTitle);
+
+        setShown(false);
+        transaction.hide(mSurfaceControl);
+        if (mWin.mIsWallpaper) {
+            final DisplayContent dc = mWin.getDisplayContent();
+            EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
+                    dc.mDisplayId, 0 /* request hidden */,
+                    String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
+        }
+    }
+
+    private void setShown(boolean surfaceShown) {
+        mSurfaceShown = surfaceShown;
+        mService.updateNonSystemOverlayWindowsVisibilityIfNeeded(mWin, surfaceShown);
+        mWin.onSurfaceShownChanged(surfaceShown);
+        mSession.onWindowSurfaceVisibilityChanged(mWin, mSurfaceShown);
     }
 
     boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
@@ -221,7 +242,7 @@ class WindowStateAnimator {
         if (mDrawState == DRAW_PENDING) {
             ProtoLog.v(WM_DEBUG_DRAW,
                     "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING %s in %s", mWin,
-                    mSurfaceController);
+                    mSurfaceControl);
             if (startingWindow) {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Draw state now committed in %s", mWin);
             }
@@ -248,7 +269,7 @@ class WindowStateAnimator {
             return false;
         }
         ProtoLog.i(WM_DEBUG_ANIM, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW %s",
-                mSurfaceController);
+                mSurfaceControl);
         mDrawState = READY_TO_SHOW;
         boolean result = false;
         final ActivityRecord activity = mWin.mActivityRecord;
@@ -271,11 +292,11 @@ class WindowStateAnimator {
         }
     }
 
-    WindowSurfaceController createSurfaceLocked() {
+    SurfaceControl createSurfaceLocked() {
         final WindowState w = mWin;
 
-        if (mSurfaceController != null) {
-            return mSurfaceController;
+        if (mSurfaceControl != null) {
+            return mSurfaceControl;
         }
 
         w.setHasSurface(false);
@@ -300,8 +321,7 @@ class WindowStateAnimator {
         }
 
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG, "Creating surface in session "
-                    + mSession.mSurfaceSession + " window " + this
+            Slog.v(TAG, "Creating surface " + this
                     + " format=" + attrs.format + " flags=" + flags);
         }
 
@@ -312,10 +332,22 @@ class WindowStateAnimator {
             final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
             final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
 
-            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
-                    flags, this, attrs.type);
+            mTitle = attrs.getTitle().toString();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
+            mSurfaceControl = mWin.makeSurface()
+                    .setParent(mWin.mSurfaceControl)
+                    .setName(mTitle)
+                    .setFormat(format)
+                    .setFlags(flags)
+                    .setMetadata(METADATA_WINDOW_TYPE, attrs.type)
+                    .setMetadata(METADATA_OWNER_UID, mSession.mUid)
+                    .setMetadata(METADATA_OWNER_PID, mSession.mPid)
+                    .setCallsite("WindowSurfaceController")
+                    .setBLASTLayer().build();
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+
             if (!setScPropertiesInClient()) {
-                mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
+                setColorSpaceAgnosticLocked(
                         (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
             }
 
@@ -325,9 +357,8 @@ class WindowStateAnimator {
             w.mInputWindowHandle.forceChange();
 
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                        "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x / %s",
-                        mSurfaceController, mSession.mSurfaceSession, mSession.mPid, attrs.format,
-                        flags, this);
+                    "  CREATE SURFACE %s: pid=%d format=%d flags=0x%x / %s",
+                    mSurfaceControl, mSession.mPid, attrs.format, flags, this);
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "OutOfResourcesException creating surface");
             mService.mRoot.reclaimSomeSurfaceMemory(this, "create", true);
@@ -340,7 +371,7 @@ class WindowStateAnimator {
         }
 
         if (DEBUG) {
-            Slog.v(TAG, "Got surface: " + mSurfaceController
+            Slog.v(TAG, "Got surface: " + mSurfaceControl
                     + ", set left=" + w.getFrame().left + " top=" + w.getFrame().top);
         }
 
@@ -353,15 +384,19 @@ class WindowStateAnimator {
         mLastHidden = true;
 
         if (DEBUG) Slog.v(TAG, "Created surface " + this);
-        return mSurfaceController;
+        return mSurfaceControl;
     }
 
     boolean hasSurface() {
-        return mSurfaceController != null && mSurfaceController.hasSurface();
+        return mSurfaceControl != null;
+    }
+
+    void getSurfaceControl(SurfaceControl outSurfaceControl) {
+        outSurfaceControl.copyFrom(mSurfaceControl, "WindowStateAnimator.getSurfaceControl");
     }
 
     void destroySurfaceLocked(SurfaceControl.Transaction t) {
-        if (mSurfaceController == null) {
+        if (mSurfaceControl == null) {
             return;
         }
 
@@ -370,12 +405,12 @@ class WindowStateAnimator {
         try {
             if (DEBUG_VISIBILITY) {
                 logWithStack(TAG, "Window " + this + " destroying surface "
-                        + mSurfaceController + ", session " + mSession);
+                        + mSurfaceControl + ", session " + mSession);
             }
             ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
                     mWin, new RuntimeException().fillInStackTrace());
             destroySurface(t);
-            if (Flags.ensureWallpaperInTransitions()) {
+            if (mService.mFlags.mEnsureWallpaperInTransitions) {
                 if (mWallpaperControllerLocked.isWallpaperTarget(mWin)) {
                     mWin.requestUpdateWallpaperIfNeeded();
                 }
@@ -384,23 +419,13 @@ class WindowStateAnimator {
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window " + this
-                    + " surface " + mSurfaceController + " session " + mSession + ": "
+                    + " surface " + mSurfaceControl + " session " + mSession + ": "
                     + e.toString());
         }
-
-        // Whether the surface was preserved (and copied to mPendingDestroySurface) or not, it
-        // needs to be cleared to match the WindowState.mHasSurface state. It is also necessary
-        // so it can be recreated successfully in mPendingDestroySurface case.
-        mWin.setHasSurface(false);
-        if (mSurfaceController != null) {
-            mSurfaceController.setShown(false);
-        }
-        mSurfaceController = null;
-        mDrawState = NO_SURFACE;
     }
 
     void computeShownFrameLocked() {
-        if (mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
+        if (mWin.mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
             return;
         } else if (mWin.isDragResizeChanged()) {
             // This window is awaiting a relayout because user just started (or ended)
@@ -436,7 +461,7 @@ class WindowStateAnimator {
 
         if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
-            if (!w.mIsWallpaper || !Flags.ensureWallpaperInTransitions()) {
+            if (!w.mIsWallpaper || !mService.mFlags.mEnsureWallpaperInTransitions) {
                 mWallpaperControllerLocked.hideWallpapers(w);
             }
 
@@ -454,14 +479,13 @@ class WindowStateAnimator {
             mLastAlpha = mShownAlpha;
             ProtoLog.i(WM_SHOW_TRANSACTIONS,
                     "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
-                    mSurfaceController, mShownAlpha, w.mHScale, w.mVScale, w);
+                    mSurfaceControl, mShownAlpha, w.mHScale, w.mVScale, w);
 
-            boolean prepared =
-                mSurfaceController.prepareToShowInTransaction(t, mShownAlpha);
+            t.setAlpha(mSurfaceControl, mShownAlpha);
 
-            if (prepared && mDrawState == HAS_DRAWN) {
+            if (mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
-                    mSurfaceController.showRobustly(t);
+                    showRobustly(t);
                     mLastHidden = false;
                     final DisplayContent displayContent = w.getDisplayContent();
                     if (!displayContent.getLastHasContent()) {
@@ -494,18 +518,38 @@ class WindowStateAnimator {
         }
     }
 
-    void setOpaqueLocked(boolean isOpaque) {
-        if (mSurfaceController == null) {
+    private void showRobustly(SurfaceControl.Transaction t) {
+        if (mSurfaceShown) {
             return;
         }
-        mSurfaceController.setOpaque(isOpaque);
+
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SHOW (performLayout): %s", mTitle);
+        if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this + " during relayout");
+        setShown(true);
+        t.show(mSurfaceControl);
+        if (mWin.mIsWallpaper) {
+            final DisplayContent dc = mWin.mDisplayContent;
+            EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
+                    dc.mDisplayId, 1 /* request shown */,
+                    String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
+        }
+    }
+
+    void setOpaqueLocked(boolean isOpaque) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isOpaque=%b: %s", isOpaque, mTitle);
+        mWin.getPendingTransaction().setOpaque(mSurfaceControl, isOpaque);
+        mService.scheduleAnimationLocked();
     }
 
     void setColorSpaceAgnosticLocked(boolean agnostic) {
-        if (mSurfaceController == null) {
+        if (mSurfaceControl == null) {
             return;
         }
-        mSurfaceController.setColorSpaceAgnostic(mWin.getPendingTransaction(), agnostic);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isColorSpaceAgnostic=%b: %s", agnostic, mTitle);
+        mWin.getPendingTransaction().setColorSpaceAgnostic(mSurfaceControl, agnostic);
     }
 
     void applyEnterAnimationLocked() {
@@ -521,7 +565,7 @@ class WindowStateAnimator {
         // should be controlled by ActivityRecord in general. Wallpaper is also excluded because
         // WallpaperController should handle it. Also skip play enter animation for the window
         // below starting window.
-        if (mAttrType != TYPE_BASE_APPLICATION && !mIsWallpaper
+        if (mAttrType != TYPE_BASE_APPLICATION && !mWin.mIsWallpaper
                 && !(mWin.mActivityRecord != null && mWin.mActivityRecord.hasStartingWindow())) {
             applyAnimationLocked(transit, true);
         }
@@ -614,8 +658,10 @@ class WindowStateAnimator {
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        if (mSurfaceController != null) {
-            mSurfaceController.dumpDebug(proto, SURFACE);
+        if (mSurfaceControl != null) {
+            final long dumpToken = proto.start(SURFACE);
+            proto.write(SHOWN, mSurfaceShown);
+            proto.end(dumpToken);
         }
         proto.write(DRAW_STATE, mDrawState);
         mSystemDecorRect.dumpDebug(proto, SYSTEM_DECOR_RECT);
@@ -626,8 +672,11 @@ class WindowStateAnimator {
         if (mAnimationIsEntrance) {
             pw.print(prefix); pw.print(" mAnimationIsEntrance="); pw.print(mAnimationIsEntrance);
         }
-        if (mSurfaceController != null) {
-            mSurfaceController.dump(pw, prefix, dumpAll);
+        if (mSurfaceControl != null) {
+            if (dumpAll) {
+                pw.print(prefix); pw.print("mSurface="); pw.println(mSurfaceControl);
+            }
+            pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
         }
         if (dumpAll) {
             pw.print(prefix); pw.print("mDrawState="); pw.print(drawStateToString());
@@ -659,31 +708,24 @@ class WindowStateAnimator {
     }
 
     boolean getShown() {
-        if (mSurfaceController != null) {
-            return mSurfaceController.getShown();
-        }
-        return false;
+        return mSurfaceControl != null && mSurfaceShown;
     }
 
     void destroySurface(SurfaceControl.Transaction t) {
-        try {
-            if (mSurfaceController != null) {
-                mSurfaceController.destroy(t);
-            }
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Exception thrown when destroying surface " + this
-                    + " surface " + mSurfaceController + " session " + mSession + ": " + e);
-        } finally {
-            mWin.setHasSurface(false);
-            mSurfaceController = null;
-            mDrawState = NO_SURFACE;
+        if (mSurfaceControl == null) {
+            return;
         }
-    }
-
-    SurfaceControl getSurfaceControl() {
-        if (!hasSurface()) {
-            return null;
+        ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
+                "Destroying surface %s called by %s", this, Debug.getCallers(8));
+        if (mWin.mIsWallpaper && !mWin.mWindowRemovalAllowed && !mWin.mRemoveOnExit) {
+            // The wallpaper surface should have the same lifetime as its window.
+            Slog.e(TAG, "Unexpected removing wallpaper surface of " + mWin
+                    + " by " + Debug.getCallers(8));
         }
-        return mSurfaceController.mSurfaceControl;
+        t.remove(mSurfaceControl);
+        setShown(false);
+        mSurfaceControl = null;
+        mWin.setHasSurface(false);
+        mDrawState = NO_SURFACE;
     }
 }

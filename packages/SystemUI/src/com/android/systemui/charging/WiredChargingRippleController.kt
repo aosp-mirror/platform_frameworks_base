@@ -23,19 +23,20 @@ import android.os.SystemProperties
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.Utils
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.surfaceeffects.ripple.RippleView
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.surfaceeffects.ripple.RippleView
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -57,6 +58,7 @@ class WiredChargingRippleController @Inject constructor(
     featureFlags: FeatureFlags,
     private val context: Context,
     private val windowManager: WindowManager,
+    private val viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
     private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger
 ) {
@@ -161,12 +163,12 @@ class WiredChargingRippleController @Inject constructor(
             override fun onViewAttachedToWindow(view: View) {
                 layoutRipple()
                 rippleView.startRipple(Runnable {
-                    windowManager.removeView(rippleView)
+                    viewCaptureAwareWindowManager.removeView(rippleView)
                 })
                 rippleView.removeOnAttachStateChangeListener(this)
             }
         })
-        windowManager.addView(rippleView, windowLayoutParams)
+        viewCaptureAwareWindowManager.addView(rippleView, windowLayoutParams)
         uiEventLogger.log(WiredChargingRippleEvent.CHARGING_RIPPLE_PLAYED)
     }
 

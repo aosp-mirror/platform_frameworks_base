@@ -27,6 +27,7 @@ val Kosmos.keyguardEnabledInteractor by
             applicationCoroutineScope,
             keyguardRepository,
             biometricSettingsRepository,
-            keyguardTransitionInteractor,
+            keyguardDismissTransitionInteractor,
+            internalTransitionInteractor = internalKeyguardTransitionInteractor,
         )
     }

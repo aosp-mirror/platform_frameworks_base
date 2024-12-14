@@ -24,15 +24,18 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 var Kosmos.aodBurnInViewModel by Fixture {
     AodBurnInViewModel(
+        applicationScope = applicationCoroutineScope,
         burnInInteractor = burnInInteractor,
         configurationInteractor = configurationInteractor,
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
+        lockscreenToAodTransitionViewModel = lockscreenToAodTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         keyguardClockViewModel = keyguardClockViewModel,

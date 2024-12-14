@@ -27,10 +27,12 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_D
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.server.display.ExternalDisplayPolicy.ENABLE_ON_CONNECT;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
+import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.createSensorData;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -63,12 +65,12 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
-import android.companion.virtual.flags.Flags;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -106,6 +108,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -115,6 +118,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.test.mock.MockContentResolver;
 import android.util.SparseArray;
+import android.util.Spline;
 import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -139,8 +143,10 @@ import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.DeviceStateListener;
 import com.android.server.display.DisplayManagerService.SyncRoot;
+import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.layout.Layout;
 import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
@@ -190,8 +196,8 @@ public class DisplayManagerServiceTest {
     private static final String VIRTUAL_DISPLAY_NAME = "Test Virtual Display";
     private static final String PACKAGE_NAME = "com.android.frameworks.displayservicetests";
     private static final long STANDARD_DISPLAY_EVENTS = DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                    | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
+            | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+            | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED;
     private static final long STANDARD_AND_CONNECTION_DISPLAY_EVENTS =
             STANDARD_DISPLAY_EVENTS | DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED;
 
@@ -233,6 +239,8 @@ public class DisplayManagerServiceTest {
 
     private UserManager mUserManager;
 
+    private int[] mAllowedHdrOutputTypes;
+
     private final DisplayManagerService.Injector mShortMockedInjector =
             new DisplayManagerService.Injector() {
                 @Override
@@ -251,11 +259,12 @@ public class DisplayManagerServiceTest {
                             displayAdapterListener, flags,
                             mMockedDisplayNotificationManager,
                             new LocalDisplayAdapter.Injector() {
-                        @Override
-                        public LocalDisplayAdapter.SurfaceControlProxy getSurfaceControlProxy() {
-                            return mSurfaceControlProxy;
-                        }
-                    });
+                                @Override
+                                public LocalDisplayAdapter.SurfaceControlProxy
+                                        getSurfaceControlProxy() {
+                                    return mSurfaceControlProxy;
+                                }
+                            });
                 }
 
                 @Override
@@ -315,7 +324,7 @@ public class DisplayManagerServiceTest {
 
         @Override
         int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
-                int[] autoHdrTypes) {
+                int[] allowedHdrOutputTypes) {
             mHdrConversionMode = conversionMode;
             mPreferredHdrOutputType = preferredHdrOutputType;
             return Display.HdrCapabilities.HDR_TYPE_INVALID;
@@ -358,6 +367,7 @@ public class DisplayManagerServiceTest {
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
     @Mock DisplayManagerInternal mMockDisplayManagerInternal;
+    @Mock ActivityManagerInternal mMockActivityManagerInternal;
     @Mock DisplayAdapter mMockDisplayAdapter;
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
@@ -373,7 +383,6 @@ public class DisplayManagerServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
-        mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
 
         mLocalServiceKeeperRule.overrideLocalService(
                 InputManagerInternal.class, mMockInputManagerInternal);
@@ -389,6 +398,8 @@ public class DisplayManagerServiceTest {
                 PackageManagerInternal.class, mMockPackageManagerInternal);
         mLocalServiceKeeperRule.overrideLocalService(
                 DisplayManagerInternal.class, mMockDisplayManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                ActivityManagerInternal.class, mMockActivityManagerInternal);
         Display display = mock(Display.class);
         when(display.getDisplayAdjustments()).thenReturn(new DisplayAdjustments());
         when(display.getBrightnessInfo()).thenReturn(mock(BrightnessInfo.class));
@@ -1288,41 +1299,9 @@ public class DisplayManagerServiceTest {
                         .setUniqueId("uniqueId --- mirror display");
         assertThrows(SecurityException.class, () -> {
             localService.createVirtualDisplay(
-                            builder.build(),
-                            mMockAppToken /* callback */,
-                            null /* virtualDeviceToken */,
-                            mock(DisplayWindowPolicyController.class),
-                            PACKAGE_NAME);
-        });
-    }
-
-    /**
-     * Tests that it's not allowed to create an auto-mirror virtual display when display mirroring
-     * is not supported in a virtual device.
-     */
-    @Test
-    public void createAutoMirrorDisplay_virtualDeviceDoesntSupportMirroring_throwsException()
-            throws Exception {
-        mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
-        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
-        DisplayManagerInternal localService = displayManager.new LocalService();
-        registerDefaultDisplays(displayManager);
-        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
-        when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT)).thenReturn(
-                PackageManager.PERMISSION_DENIED);
-        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
-        when(virtualDevice.getDeviceId()).thenReturn(1);
-        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
-
-        final VirtualDisplayConfig.Builder builder =
-                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
-                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
-                        .setUniqueId("uniqueId --- mirror display");
-        assertThrows(SecurityException.class, () -> {
-            localService.createVirtualDisplay(
                     builder.build(),
                     mMockAppToken /* callback */,
-                    virtualDevice /* virtualDeviceToken */,
+                    null /* virtualDeviceToken */,
                     mock(DisplayWindowPolicyController.class),
                     PACKAGE_NAME);
         });
@@ -1334,7 +1313,6 @@ public class DisplayManagerServiceTest {
      */
     @Test
     public void createAutoMirrorVirtualDisplay_addsDisplayToDefaultDisplayGroup() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         registerDefaultDisplays(displayManager);
@@ -1367,7 +1345,6 @@ public class DisplayManagerServiceTest {
      */
     @Test
     public void createAutoMirrorVirtualDisplay_mirrorsDefaultDisplay() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         registerDefaultDisplays(displayManager);
@@ -1399,7 +1376,6 @@ public class DisplayManagerServiceTest {
      */
     @Test
     public void createOwnContentOnlyVirtualDisplay_doesNotMirrorAnyDisplay() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         registerDefaultDisplays(displayManager);
@@ -1435,7 +1411,6 @@ public class DisplayManagerServiceTest {
      */
     @Test
     public void createAutoMirrorVirtualDisplay_flagAlwaysUnlockedNotSet() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         registerDefaultDisplays(displayManager);
@@ -1462,7 +1437,7 @@ public class DisplayManagerServiceTest {
 
         // The virtual display should not have FLAG_ALWAYS_UNLOCKED set.
         assertEquals(0, (displayManager.getDisplayDeviceInfoInternal(displayId).flags
-                        & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED));
+                & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED));
     }
 
     /**
@@ -1471,7 +1446,6 @@ public class DisplayManagerServiceTest {
      */
     @Test
     public void createAutoMirrorVirtualDisplay_flagPresentationNotSet() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
         registerDefaultDisplays(displayManager);
@@ -1496,7 +1470,7 @@ public class DisplayManagerServiceTest {
 
         // The virtual display should not have FLAG_PRESENTATION set.
         assertEquals(0, (displayManager.getDisplayDeviceInfoInternal(displayId).flags
-                        & DisplayDeviceInfo.FLAG_PRESENTATION));
+                & DisplayDeviceInfo.FLAG_PRESENTATION));
     }
 
     @Test
@@ -2118,6 +2092,31 @@ public class DisplayManagerServiceTest {
     }
 
     /**
+     * Tests that the DisplayInfo is updated correctly with a render frame rate even if it not
+     * a divisor of the peak refresh rate.
+     */
+    @Test
+    public void testDisplayInfoRenderFrameRateNonPeakDivisor() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager,
+                new float[]{120f}, new float[]{240f});
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        DisplayInfo displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(120f, displayInfo.getRefreshRate(), 0.01f);
+
+        updateRenderFrameRate(displayManager, displayDevice, 80f);
+        displayInfo = displayManagerBinderService.getDisplayInfo(displayId);
+        assertEquals(80f, displayInfo.getRefreshRate(), 0.01f);
+    }
+
+    /**
      * Tests that the mode reflects the render frame rate is in compat mode
      */
     @Test
@@ -2363,6 +2362,7 @@ public class DisplayManagerServiceTest {
                 HdrConversionMode.HDR_CONVERSION_FORCE,
                 Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION);
         displayManager.setHdrConversionModeInternal(mode);
+
         assertEquals(mode, displayManager.getHdrConversionModeSettingInternal());
         assertEquals(mode.getConversionMode(), mHdrConversionMode);
         assertEquals(mode.getPreferredHdrOutputType(), mPreferredHdrOutputType);
@@ -2407,6 +2407,86 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
+    public void testSetAreUserDisabledHdrTypesAllowed_withFalse_whenHdrDisabled_stripsHdrType() {
+        DisplayManagerService displayManager = new DisplayManagerService(
+                mContext, new BasicInjector() {
+                    @Override
+                    int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+                            int[] allowedTypes) {
+                        mAllowedHdrOutputTypes = allowedTypes;
+                        return Display.HdrCapabilities.HDR_TYPE_INVALID;
+                    }
+
+                    // Overriding this method to capture the allowed HDR type
+                    @Override
+                    int[] getSupportedHdrOutputTypes() {
+                        return new int[]{Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION};
+                    }
+                });
+
+        // Setup: no HDR types disabled, userDisabledTypes allowed, system conversion
+        displayManager.setUserDisabledHdrTypesInternal(new int [0]);
+        displayManager.setAreUserDisabledHdrTypesAllowedInternal(true);
+        displayManager.setHdrConversionModeInternal(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+
+        assertEquals(1, mAllowedHdrOutputTypes.length);
+        assertTrue(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION == mAllowedHdrOutputTypes[0]);
+
+        // Action: disable Dolby Vision, set userDisabledTypes not allowed
+        displayManager.setUserDisabledHdrTypesInternal(
+                new int [] {Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION});
+        displayManager.setAreUserDisabledHdrTypesAllowedInternal(false);
+
+        assertEquals(0, mAllowedHdrOutputTypes.length);
+    }
+
+    @Test
+    public void testGetEnabledHdrTypesLocked_whenTypesDisabled_stripsDisabledTypes() {
+        DisplayManagerService displayManager = new DisplayManagerService(
+                mContext, new BasicInjector() {
+                    @Override
+                    int[] getSupportedHdrOutputTypes() {
+                        return new int[]{Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION};
+                    }
+                });
+
+        displayManager.setUserDisabledHdrTypesInternal(new int [0]);
+        displayManager.setAreUserDisabledHdrTypesAllowedInternal(true);
+        int [] enabledHdrOutputTypes = displayManager.getEnabledHdrOutputTypes();
+        assertEquals(1, enabledHdrOutputTypes.length);
+        assertTrue(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION == enabledHdrOutputTypes[0]);
+
+        displayManager.setAreUserDisabledHdrTypesAllowedInternal(false);
+        enabledHdrOutputTypes = displayManager.getEnabledHdrOutputTypes();
+        assertEquals(1, enabledHdrOutputTypes.length);
+        assertTrue(Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION == enabledHdrOutputTypes[0]);
+
+        displayManager.setUserDisabledHdrTypesInternal(
+                new int [] {Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION});
+        enabledHdrOutputTypes = displayManager.getEnabledHdrOutputTypes();
+        assertEquals(0, enabledHdrOutputTypes.length);
+    }
+
+    @Test
+    public void testSetHdrConversionModeInternal_isForceSdrIsUpdated() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        FakeDisplayDevice displayDevice =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
+        LogicalDisplay logicalDisplay =
+                logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+
+        displayManager.setHdrConversionModeInternal(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, HDR_TYPE_INVALID));
+        assertTrue(logicalDisplay.getDisplayInfoLocked().isForceSdr);
+
+        displayManager.setHdrConversionModeInternal(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+        assertFalse(logicalDisplay.getDisplayInfoLocked().isForceSdr);
+    }
+
+    @Test
     public void testReturnsRefreshRateForDisplayAndSensor_proximitySensorSet() {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -2423,7 +2503,7 @@ public class DisplayManagerServiceTest {
         String testSensorType = "testType";
         Sensor testSensor = TestUtils.createSensor(testSensorType, testSensorName);
 
-        SensorData sensorData = new SensorData(testSensorType, testSensorName,
+        SensorData sensorData = createSensorData(testSensorType, testSensorName,
                 /* minRefreshRate= */ 10f, /* maxRefreshRate= */ 100f);
 
         when(mMockDisplayDeviceConfig.getProximitySensor()).thenReturn(sensorData);
@@ -2584,18 +2664,19 @@ public class DisplayManagerServiceTest {
 
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+        displayManager.setDisplayState(display.getDisplayIdLocked(), Display.STATE_ON);
 
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_ON);
 
-        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(), false))
-                .isTrue();
+        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(),
+                Display.STATE_OFF)).isTrue();
 
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_OFF);
 
-        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(), true))
-                .isTrue();
+        assertThat(displayManager.requestDisplayPower(display.getDisplayIdLocked(),
+                Display.STATE_UNKNOWN)).isTrue();
 
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_ON);
@@ -2621,8 +2702,10 @@ public class DisplayManagerServiceTest {
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState)
                 .isEqualTo(Display.STATE_ON);
 
-        assertThrows(SecurityException.class, () -> bs.requestDisplayPower(displayId, true));
-        assertThrows(SecurityException.class, () -> bs.requestDisplayPower(displayId, false));
+        assertThrows(SecurityException.class,
+                () -> bs.requestDisplayPower(displayId, Display.STATE_UNKNOWN));
+        assertThrows(SecurityException.class,
+                () -> bs.requestDisplayPower(displayId, Display.STATE_OFF));
     }
 
     @Test
@@ -3059,6 +3142,74 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
+    public void testBrightnessUpdates() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        registerDefaultDisplays(displayManager);
+        initDisplayPowerController(localService);
+
+        final float invalidBrightness = -0.3f;
+        final float brightnessOff = -1.0f;
+        final float minimumBrightness = 0.0f;
+        final float validBrightness = 0.5f;
+
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+        // set and check valid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, validBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(validBrightness,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // set and check invalid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, invalidBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(PowerManager.BRIGHTNESS_MIN,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // reset and check valid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, validBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(validBrightness,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // set and check brightness off
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightnessOff);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(PowerManager.BRIGHTNESS_MIN,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // reset and check valid brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, validBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(validBrightness,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+
+        // set and check minimum brightness
+        waitForIdleHandler(mPowerHandler);
+        displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, minimumBrightness);
+        waitForIdleHandler(mPowerHandler);
+        assertEquals(PowerManager.BRIGHTNESS_MIN,
+                displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
+                FLOAT_TOLERANCE);
+    }
+
+    @Test
     public void testResolutionChangeGetsBackedUp() throws Exception {
         when(mMockFlags.isResolutionBackupRestoreEnabled()).thenReturn(true);
         DisplayManagerService displayManager =
@@ -3136,6 +3287,84 @@ public class DisplayManagerServiceTest {
                 (filter) -> Intent.ACTION_SETTING_RESTORED.equals(filter.getAction(0));
         verify(mContext, times(0)).registerReceiver(any(BroadcastReceiver.class),
                 argThat(matchesFilter));
+    }
+
+    @Test
+    public void testHighestHdrSdrRatio() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager, new float[]{60f});
+        displayDevice.mDisplayDeviceConfig = mMockDisplayDeviceConfig;
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        float highestRatio = 9.5f;
+        HdrBrightnessData hdrData = new HdrBrightnessData(Collections.emptyMap(),
+                /* brightnessIncreaseDebounceMillis= */ 0, /* screenBrightnessRampIncrease= */ 0,
+                /* brightnessDecreaseDebounceMillis= */ 0, /* screenBrightnessRampDecrease= */ 0,
+                /* hbmTransitionPoint= */ 0, /* minimumHdrPercentOfScreenForNbm= */ 0,
+                /* minimumHdrPercentOfScreenForHbm= */ 0, /* allowInLowPowerMode= */ false,
+                mock(Spline.class), highestRatio);
+        when(mMockDisplayDeviceConfig.getHdrBrightnessData()).thenReturn(hdrData);
+
+        assertEquals(highestRatio, displayManagerBinderService.getHighestHdrSdrRatio(displayId),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testHighestHdrSdrRatio_HdrDataNull() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager, new float[]{60f});
+        displayDevice.mDisplayDeviceConfig = mMockDisplayDeviceConfig;
+        int displayId = getDisplayIdForDisplayDevice(displayManager, displayManagerBinderService,
+                displayDevice);
+        when(mMockDisplayDeviceConfig.getHdrBrightnessData()).thenReturn(null);
+
+        assertEquals(1, displayManagerBinderService.getHighestHdrSdrRatio(displayId),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testOnDisplayChanged_HbmMetadataNull() {
+        DisplayPowerController dpc = mock(DisplayPowerController.class);
+        DisplayManagerService.Injector injector = new BasicInjector() {
+            @Override
+            DisplayPowerController getDisplayPowerController(Context context,
+                    DisplayPowerController.Injector injector,
+                    DisplayManagerInternal.DisplayPowerCallbacks callbacks, Handler handler,
+                    SensorManager sensorManager, DisplayBlanker blanker,
+                    LogicalDisplay logicalDisplay, BrightnessTracker brightnessTracker,
+                    BrightnessSetting brightnessSetting, Runnable onBrightnessChangeRunnable,
+                    HighBrightnessModeMetadata hbmMetadata, boolean bootCompleted,
+                    DisplayManagerFlags flags) {
+                return dpc;
+            }
+        };
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, injector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        // Add the FakeDisplayDevice
+        FakeDisplayDevice displayDevice = new FakeDisplayDevice();
+        DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
+        displayDeviceInfo.state = Display.STATE_ON;
+        displayDevice.setDisplayDeviceInfo(displayDeviceInfo);
+        displayManager.getDisplayDeviceRepository()
+                .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+        initDisplayPowerController(localService);
+
+        // Simulate DisplayDevice change
+        DisplayDeviceInfo displayDeviceInfo2 = new DisplayDeviceInfo();
+        displayDeviceInfo2.copyFrom(displayDeviceInfo);
+        displayDeviceInfo2.state = Display.STATE_DOZE;
+        updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo2);
+
+        verify(dpc).onDisplayChanged(/* hbmMetadata= */ null, Layout.NO_LEAD_DISPLAY);
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {
@@ -3361,7 +3590,7 @@ public class DisplayManagerServiceTest {
     }
 
     private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
-                                                      Display.Mode[] modes) {
+            Display.Mode[] modes) {
         FakeDisplayDevice displayDevice = new FakeDisplayDevice();
         DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
         displayDeviceInfo.supportedModes = modes;
@@ -3383,13 +3612,26 @@ public class DisplayManagerServiceTest {
     }
 
     private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
-
                                                       float[] refreshRates) {
         return createFakeDisplayDevice(displayManager, refreshRates, Display.TYPE_UNKNOWN);
     }
 
     private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
                                                       float[] refreshRates,
+                                                      float[] vsyncRates) {
+        return createFakeDisplayDevice(displayManager, refreshRates, vsyncRates,
+                Display.TYPE_UNKNOWN);
+    }
+
+    private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
+            float[] refreshRates,
+            int displayType) {
+        return createFakeDisplayDevice(displayManager, refreshRates, refreshRates, displayType);
+    }
+
+    private FakeDisplayDevice createFakeDisplayDevice(DisplayManagerService displayManager,
+                                                      float[] refreshRates,
+                                                      float[] vsyncRates,
                                                       int displayType) {
         FakeDisplayDevice displayDevice = new FakeDisplayDevice();
         DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
@@ -3398,7 +3640,8 @@ public class DisplayManagerServiceTest {
         displayDeviceInfo.supportedModes = new Display.Mode[refreshRates.length];
         for (int i = 0; i < refreshRates.length; i++) {
             displayDeviceInfo.supportedModes[i] =
-                    new Display.Mode(i + 1, width, height, refreshRates[i]);
+                    new Display.Mode(i + 1, width, height, refreshRates[i], vsyncRates[i],
+                            new float[0], new int[0]);
         }
         displayDeviceInfo.modeId = 1;
         displayDeviceInfo.type = displayType;
@@ -3603,9 +3846,9 @@ public class DisplayManagerServiceTest {
         public void setUserPreferredDisplayModeLocked(Display.Mode preferredMode) {
             for (Display.Mode mode : mDisplayDeviceInfo.supportedModes) {
                 if (mode.matchesIfValid(
-                          preferredMode.getPhysicalWidth(),
-                          preferredMode.getPhysicalHeight(),
-                          preferredMode.getRefreshRate())) {
+                        preferredMode.getPhysicalWidth(),
+                        preferredMode.getPhysicalHeight(),
+                        preferredMode.getRefreshRate())) {
                     mPreferredMode = mode;
                     break;
                 }

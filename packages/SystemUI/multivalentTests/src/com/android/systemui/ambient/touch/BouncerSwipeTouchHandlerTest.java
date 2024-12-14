@@ -18,9 +18,12 @@ package com.android.systemui.ambient.touch;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -43,13 +46,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.ScrimController;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
-import com.android.systemui.settings.FakeUserTracker;
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -65,12 +70,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
 import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@DisableFlags(Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
+    private KosmosJavaAdapter mKosmos;
     @Mock
     CentralSurfaces mCentralSurfaces;
 
@@ -110,15 +116,19 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     UiEventLogger mUiEventLogger;
 
     @Mock
-    LockPatternUtils mLockPatternUtils;
+    ActivityStarter mActivityStarter;
 
     @Mock
     Region mRegion;
 
+    @Mock
+    CommunalViewModel mCommunalViewModel;
+
+    @Mock
+    KeyguardInteractor mKeyguardInteractor;
+
     @Captor
     ArgumentCaptor<Rect> mRectCaptor;
-
-    FakeUserTracker mUserTracker;
 
     private static final float TOUCH_REGION = .3f;
     private static final int SCREEN_WIDTH_PX = 1024;
@@ -134,30 +144,30 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mKosmos = new KosmosJavaAdapter(this);
         MockitoAnnotations.initMocks(this);
-        mUserTracker = new FakeUserTracker();
         mTouchHandler = new BouncerSwipeTouchHandler(
+                mKosmos.getTestScope(),
                 mScrimManager,
                 Optional.of(mCentralSurfaces),
                 mNotificationShadeWindowController,
                 mValueAnimatorCreator,
                 mVelocityTrackerFactory,
-                mLockPatternUtils,
-                mUserTracker,
+                mCommunalViewModel,
                 mFlingAnimationUtils,
                 mFlingAnimationUtilsClosing,
                 TOUCH_REGION,
                 MIN_BOUNCER_HEIGHT,
-                mUiEventLogger);
+                mUiEventLogger,
+                mActivityStarter,
+                mKeyguardInteractor);
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
         when(mTouchSession.getBounds()).thenReturn(SCREEN_BOUNDS);
-        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(true);
-
-        mUserTracker.set(Collections.singletonList(CURRENT_USER_INFO), 0);
+        when(mKeyguardInteractor.isKeyguardDismissible()).thenReturn(MutableStateFlow(false));
     }
 
     /**
@@ -194,7 +204,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                         1,
                         2)).isTrue();
     }
-
 
     /**
      * Ensures expansion only happens when touch down happens in valid part of the screen.
@@ -376,7 +385,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      */
     @Test
     public void testSwipeUp_keyguardNotSecure_doesNotExpand() {
-        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(false);
+        when(mKeyguardInteractor.isKeyguardDismissible()).thenReturn(MutableStateFlow(true));
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
@@ -397,7 +406,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 .isTrue();
         // We should not expand since the keyguard is not secure
         verify(mScrimController, never()).expand(any());
-        // Since we are swiping up, we should wake from dreams.
+
+        // Since we are swiping up, we should dismiss the keyguard and wake from dreams.
+        ArgumentCaptor<Runnable> dismissKeyguardRunnable = ArgumentCaptor.forClass(Runnable.class);
+        verify(mActivityStarter).executeRunnableDismissingKeyguard(
+                dismissKeyguardRunnable.capture(), isNull(), eq(true), eq(true), eq(false));
+        dismissKeyguardRunnable.getValue().run();
         verify(mCentralSurfaces).awakenDreams();
     }
 
@@ -406,7 +420,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      */
     @Test
     public void testSwipeDown_keyguardNotSecure_doesNotExpand() {
-        when(mLockPatternUtils.isSecure(CURRENT_USER_INFO.id)).thenReturn(false);
+        when(mKeyguardInteractor.isKeyguardDismissible()).thenReturn(MutableStateFlow(true));
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);

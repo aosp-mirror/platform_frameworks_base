@@ -20,7 +20,6 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE
 import android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL
 import android.app.admin.devicePolicyManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
@@ -29,7 +28,6 @@ import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.flags.Flags.FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
@@ -66,6 +64,38 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
         setKeyguardFeaturesDisabled(SECONDARY_USER, KEYGUARD_DISABLE_FEATURES_NONE)
         setKeyguardFeaturesDisabled(WORK_PROFILE, KEYGUARD_DISABLE_FEATURES_NONE)
         underTest = kosmos.communalSettingsRepository
+    }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_bothEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
+        assertThat(underTest.getFlagEnabled()).isTrue()
+    }
+
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_bothDisabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @DisableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyClassicFlagEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
+    }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB)
+    @Test
+    fun getFlagEnabled_onlyTrunkFlagEnabled() {
+        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+
+        assertThat(underTest.getFlagEnabled()).isFalse()
     }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
@@ -183,47 +213,11 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
                 )
         }
 
-    @EnableFlags(FLAG_COMMUNAL_HUB)
-    @Test
-    fun hubShowsWidgetCategoriesSetByUser() =
-        testScope.runTest {
-            kosmos.fakeSettings.putIntForUser(
-                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
-                AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
-                PRIMARY_USER.id
-            )
-            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
-            assertThat(setting?.categories)
-                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-        }
-
-    @EnableFlags(FLAG_COMMUNAL_HUB)
-    @DisableFlags(FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT)
-    @Test
-    fun hubShowsKeyguardWidgetsByDefault() =
-        testScope.runTest {
-            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
-            assertThat(setting?.categories)
-                .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
-        }
-
-    @EnableFlags(FLAG_COMMUNAL_HUB, FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT)
-    @Test
-    fun hubShowsAllWidgetsByDefaultWhenFlagEnabled() =
-        testScope.runTest {
-            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
-            assertThat(setting?.categories)
-                .isEqualTo(
-                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD +
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
-                )
-        }
-
     @Test
     fun backgroundType_defaultValue() =
         testScope.runTest {
             val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))
-            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.DEFAULT)
+            assertThat(backgroundType).isEqualTo(CommunalBackgroundType.ANIMATED)
         }
 
     @Test

@@ -19,6 +19,7 @@ package com.android.systemui.qs;
 import android.database.ContentObserver;
 import android.os.Handler;
 
+import com.android.systemui.Flags;
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SettingsProxy;
@@ -74,10 +75,20 @@ public abstract class SettingObserver extends ContentObserver implements Listena
         mListening = listening;
         if (listening) {
             mObservedValue = getValueFromProvider();
-            mSettingsProxy.registerContentObserverSync(
-                    mSettingsProxy.getUriFor(mSettingName), false, this);
+            if (Flags.qsRegisterSettingObserverOnBgThread()) {
+                mSettingsProxy.registerContentObserverAsync(
+                        mSettingsProxy.getUriFor(mSettingName), false, this,
+                        () -> mObservedValue = getValueFromProvider());
+            } else {
+                mSettingsProxy.registerContentObserverSync(
+                        mSettingsProxy.getUriFor(mSettingName), false, this);
+            }
         } else {
-            mSettingsProxy.unregisterContentObserverSync(this);
+            if (Flags.qsRegisterSettingObserverOnBgThread()) {
+                mSettingsProxy.unregisterContentObserverAsync(this);
+            } else {
+                mSettingsProxy.unregisterContentObserverSync(this);
+            }
             mObservedValue = mDefaultValue;
         }
     }

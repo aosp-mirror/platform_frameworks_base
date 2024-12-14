@@ -129,6 +129,10 @@ public final class Message implements Parcelable {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public long when;
 
+    /** @hide */
+    @SuppressWarnings("unused")
+    public long mInsertSeq;
+
     /*package*/ Bundle data;
 
     @UnsupportedAppUsage

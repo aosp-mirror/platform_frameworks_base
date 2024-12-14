@@ -28,10 +28,7 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -39,7 +36,6 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.ImeTracker;
@@ -51,7 +47,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -75,9 +70,9 @@ public class InsetsSourceConsumerTest {
 
     private SurfaceSession mSession = new SurfaceSession();
     private SurfaceControl mLeash;
-    @Mock Transaction mMockTransaction;
     private InsetsSource mSpyInsetsSource;
     private boolean mRemoveSurfaceCalled = false;
+    private boolean mSurfaceParamsApplied = false;
     private InsetsController mController;
     private InsetsState mState;
     private ViewRootImpl mViewRoot;
@@ -102,9 +97,14 @@ public class InsetsSourceConsumerTest {
             mSpyInsetsSource = Mockito.spy(new InsetsSource(ID_STATUS_BAR, statusBars()));
             mState.addSource(mSpyInsetsSource);
 
-            mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot));
-            mConsumer = new InsetsSourceConsumer(ID_STATUS_BAR, statusBars(), mState,
-                    () -> mMockTransaction, mController) {
+            mController = new InsetsController(new ViewRootInsetsControllerHost(mViewRoot)) {
+                @Override
+                public void applySurfaceParams(
+                        final SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
+                    mSurfaceParamsApplied = true;
+                }
+            };
+            mConsumer = new InsetsSourceConsumer(ID_STATUS_BAR, statusBars(), mState, mController) {
                 @Override
                 public void removeSurface() {
                     super.removeSurface();
@@ -148,8 +148,7 @@ public class InsetsSourceConsumerTest {
         InsetsState state = new InsetsState();
         InsetsController controller = new InsetsController(new ViewRootInsetsControllerHost(
                 mViewRoot));
-        InsetsSourceConsumer consumer = new InsetsSourceConsumer(
-                ID_IME, ime(), state, null, controller);
+        InsetsSourceConsumer consumer = new InsetsSourceConsumer(ID_IME, ime(), state, controller);
 
         InsetsSource source = new InsetsSource(ID_IME, ime());
         source.setFrame(0, 1, 2, 3);
@@ -182,9 +181,9 @@ public class InsetsSourceConsumerTest {
     public void testRestore() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mConsumer.setControl(null, new int[1], new int[1]);
-            reset(mMockTransaction);
+            mSurfaceParamsApplied = false;
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, statusBars());
-            verifyZeroInteractions(mMockTransaction);
+            assertFalse(mSurfaceParamsApplied);
             int[] hideTypes = new int[1];
             mConsumer.setControl(
                     new InsetsSourceControl(ID_STATUS_BAR, statusBars(), mLeash,
@@ -200,8 +199,9 @@ public class InsetsSourceConsumerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, statusBars());
             mConsumer.setControl(null, new int[1], new int[1]);
-            reset(mMockTransaction);
-            verifyZeroInteractions(mMockTransaction);
+            mLeash = new SurfaceControl.Builder(mSession)
+                    .setName("testSurface")
+                    .build();
             mRemoveSurfaceCalled = false;
             int[] hideTypes = new int[1];
             mConsumer.setControl(
@@ -221,8 +221,7 @@ public class InsetsSourceConsumerTest {
             ViewRootInsetsControllerHost host = new ViewRootInsetsControllerHost(mViewRoot);
             InsetsController insetsController = new InsetsController(host, (ic, id, type) -> {
                 if (type == ime()) {
-                    return new InsetsSourceConsumer(ID_IME, ime(), state,
-                            () -> mMockTransaction, ic) {
+                    return new InsetsSourceConsumer(ID_IME, ime(), state, ic) {
                         @Override
                         public int requestShow(boolean fromController,
                                 ImeTracker.Token statsToken) {
@@ -230,14 +229,14 @@ public class InsetsSourceConsumerTest {
                         }
                     };
                 }
-                return new InsetsSourceConsumer(id, type, ic.getState(), Transaction::new, ic);
+                return new InsetsSourceConsumer(id, type, ic.getState(), ic);
             }, host.getHandler());
             InsetsSourceConsumer imeConsumer = insetsController.getSourceConsumer(ID_IME, ime());
 
             // Initial IME insets source control with its leash.
             imeConsumer.setControl(new InsetsSourceControl(ID_IME, ime(), mLeash,
                     false /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
-            reset(mMockTransaction);
+            mSurfaceParamsApplied = false;
 
             // Verify when the app requests controlling show IME animation, the IME leash
             // visibility won't be updated when the consumer received the same leash in setControl.
@@ -246,7 +245,7 @@ public class InsetsSourceConsumerTest {
             assertEquals(ANIMATION_TYPE_USER, insetsController.getAnimationType(ime()));
             imeConsumer.setControl(new InsetsSourceControl(ID_IME, ime(), mLeash,
                     true /* initialVisible */, new Point(), Insets.NONE), new int[1], new int[1]);
-            verify(mMockTransaction, never()).show(mLeash);
+            assertFalse(mSurfaceParamsApplied);
         });
     }
 }

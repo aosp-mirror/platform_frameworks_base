@@ -35,6 +35,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 
 @MediumTest
 public class AnimatorSetCallsTest {
@@ -445,6 +447,43 @@ public class AnimatorSetCallsTest {
 
         // Make sure that the UI thread hasn't been destroyed by a stack overflow...
         mActivity.runOnUiThread(() -> {});
+    }
+
+    @Test
+    public void startAfterSeek() throws Throwable {
+        ArrayList<Float> values = new ArrayList<>();
+        AtomicReference<CountDownLatch> drawLatch = new AtomicReference<>(new CountDownLatch(1));
+
+        mActivity.runOnUiThread(() -> {
+            mAnimator.setDuration(300);
+            mAnimator.setInterpolator(null);
+            View view = (View) mAnimator.getTarget();
+            view.getViewTreeObserver().addOnDrawListener(() -> {
+                values.add(view.getTranslationX());
+                drawLatch.get().countDown();
+            });
+            mSet1.setCurrentPlayTime(150);
+        });
+
+        assertTrue(drawLatch.get().await(1, TimeUnit.SECONDS));
+        drawLatch.set(new CountDownLatch(1));
+
+        mActivity.runOnUiThread(() -> {
+            assertEquals(1, values.size());
+            assertEquals(50f, values.get(0), 0.01f);
+            mSet1.start();
+        });
+
+        assertTrue(drawLatch.get().await(1, TimeUnit.SECONDS));
+
+        mActivity.runOnUiThread(() -> {
+            assertTrue(values.size() >= 2);
+            float lastValue = values.get(0);
+            for (int i = 1; i < values.size(); i++) {
+                assertTrue(values.get(i) >= lastValue);
+                lastValue = values.get(i);
+            }
+        });
     }
 
     private void waitForOnUiThread(PollingCheck.PollingCheckCondition condition) {

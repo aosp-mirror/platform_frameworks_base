@@ -23,8 +23,8 @@ import static org.junit.Assert.assertTrue;
 import android.database.sqlite.SQLiteException;
 import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;

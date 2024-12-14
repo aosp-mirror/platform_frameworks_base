@@ -32,8 +32,8 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.common.LogLevel;
-import com.android.internal.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -585,7 +585,6 @@ public class SurfaceAnimator {
             ANIMATION_TYPE_APP_TRANSITION,
             ANIMATION_TYPE_SCREEN_ROTATION,
             ANIMATION_TYPE_DIMMER,
-            ANIMATION_TYPE_RECENTS,
             ANIMATION_TYPE_WINDOW_ANIMATION,
             ANIMATION_TYPE_INSETS_CONTROL,
             ANIMATION_TYPE_TOKEN_TRANSFORM,
@@ -604,7 +603,6 @@ public class SurfaceAnimator {
             case ANIMATION_TYPE_APP_TRANSITION: return "app_transition";
             case ANIMATION_TYPE_SCREEN_ROTATION: return "screen_rotation";
             case ANIMATION_TYPE_DIMMER: return "dimmer";
-            case ANIMATION_TYPE_RECENTS: return "recents_animation";
             case ANIMATION_TYPE_WINDOW_ANIMATION: return "window_animation";
             case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
             case ANIMATION_TYPE_TOKEN_TRANSFORM: return "token_transform";

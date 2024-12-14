@@ -31,9 +31,9 @@ import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.window.flags.Flags;
 

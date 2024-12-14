@@ -72,6 +72,8 @@ public final class ShortcutConstants {
             UserShortcutType.TRIPLETAP,
             UserShortcutType.TWOFINGER_DOUBLETAP,
             UserShortcutType.QUICK_SETTINGS,
+            UserShortcutType.GESTURE,
+            UserShortcutType.ALL
     })
     public @interface UserShortcutType {
         int DEFAULT = 0;
@@ -81,7 +83,9 @@ public final class ShortcutConstants {
         int TRIPLETAP = 1 << 2;
         int TWOFINGER_DOUBLETAP = 1 << 3;
         int QUICK_SETTINGS = 1 << 4;
+        int GESTURE = 1 << 5;
         // LINT.ThenChange(:shortcut_type_array)
+        int ALL = SOFTWARE | HARDWARE | TRIPLETAP | TWOFINGER_DOUBLETAP | QUICK_SETTINGS | GESTURE;
     }
 
     /**
@@ -95,6 +99,7 @@ public final class ShortcutConstants {
             UserShortcutType.TRIPLETAP,
             UserShortcutType.TWOFINGER_DOUBLETAP,
             UserShortcutType.QUICK_SETTINGS,
+            UserShortcutType.GESTURE
             // LINT.ThenChange(:shortcut_type_intdef)
     };
 

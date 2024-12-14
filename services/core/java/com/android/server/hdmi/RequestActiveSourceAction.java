@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.util.Slog;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Feature action that sends <Request Active Source> message and waits for <Active Source> on TV
@@ -39,6 +40,10 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
     // Number of retries <Request Active Source> is sent if no device answers this message.
     private static final int MAX_SEND_RETRY_COUNT = 1;
 
+    // Timeout to wait for the LauncherX API call to be completed.
+    @VisibleForTesting
+    protected static final int TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS = 10000;
+
     private int mSendRetryCount = 0;
 
 
@@ -55,7 +60,7 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
         // We wait for default timeout to allow the message triggered by the LauncherX API call to
         // be sent by the TV and another default timeout in case the message has to be answered
         // (e.g. TV sent a <Set Stream Path> or <Routing Change>).
-        addTimer(mState, HdmiConfig.TIMEOUT_MS * 2);
+        addTimer(mState, TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
         return true;
     }
 

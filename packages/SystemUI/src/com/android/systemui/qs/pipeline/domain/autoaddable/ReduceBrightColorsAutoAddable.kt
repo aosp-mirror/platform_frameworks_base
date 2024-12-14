@@ -38,10 +38,11 @@ class ReduceBrightColorsAutoAddable
 @Inject
 constructor(
     controller: ReduceBrightColorsController,
-    @Named(RBC_AVAILABLE) private val available: Boolean,
+    @Named(RBC_AVAILABLE) private var available: Boolean,
 ) :
     CallbackControllerAutoAddable<
-        ReduceBrightColorsController.Listener, ReduceBrightColorsController
+        ReduceBrightColorsController.Listener,
+        ReduceBrightColorsController,
     >(controller) {
 
     override val spec: TileSpec
@@ -50,7 +51,7 @@ constructor(
     override fun ProducerScope<AutoAddSignal>.getCallback(): ReduceBrightColorsController.Listener {
         return object : ReduceBrightColorsController.Listener {
             override fun onActivated(activated: Boolean) {
-                if (activated) {
+                if (activated && available) {
                     sendAdd()
                 }
             }

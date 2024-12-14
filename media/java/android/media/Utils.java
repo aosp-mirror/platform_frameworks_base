@@ -20,12 +20,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.vibrator.persistence.ParsedVibration;
+import android.os.vibrator.persistence.VibrationXmlParser;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.Pair;
@@ -36,7 +41,11 @@ import android.util.Size;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,6 +63,8 @@ import java.util.concurrent.Executor;
  */
 public class Utils {
     private static final String TAG = "Utils";
+
+    public static final String VIBRATION_URI_PARAM = "vibration_uri";
 
     /**
      * Sorts distinct (non-intersecting) range array in ascending order.
@@ -687,5 +698,79 @@ public class Utils {
             return address;
         }
         return anonymizeBluetoothAddress(address);
+    }
+
+    /**
+     * Whether the device supports ringtone vibration settings.
+     *
+     * @param context the {@link Context}
+     * @return {@code true} if the device supports ringtone vibration
+     */
+    public static boolean isRingtoneVibrationSettingsSupported(Context context) {
+        final Resources res = context.getResources();
+        return res != null && res.getBoolean(
+                com.android.internal.R.bool.config_ringtoneVibrationSettingsSupported);
+    }
+
+    /**
+     * Whether the given ringtone Uri has vibration Uri parameter
+     *
+     * @param ringtoneUri the ringtone Uri
+     * @return {@code true} if the Uri has vibration parameter
+     */
+    public static boolean hasVibration(Uri ringtoneUri) {
+        final String vibrationUriString = ringtoneUri.getQueryParameter(VIBRATION_URI_PARAM);
+        return vibrationUriString != null;
+    }
+
+    /**
+     * Gets the vibration Uri from given ringtone Uri
+     *
+     * @param ringtoneUri the ringtone Uri
+     * @return parsed {@link Uri} of vibration parameter, {@code null} if the vibration parameter
+     * is not found.
+     */
+    public static Uri getVibrationUri(Uri ringtoneUri) {
+        final String vibrationUriString = ringtoneUri.getQueryParameter(VIBRATION_URI_PARAM);
+        if (vibrationUriString == null) {
+            return null;
+        }
+        return Uri.parse(vibrationUriString);
+    }
+
+    /**
+     * Returns the parsed {@link VibrationEffect} from given vibration Uri.
+     *
+     * @param vibrator the vibrator to resolve the vibration file
+     * @param vibrationUri the vibration file Uri to represent a vibration
+     */
+    @SuppressWarnings("FlaggedApi") // VibrationXmlParser is available internally as hidden APIs.
+    public static VibrationEffect parseVibrationEffect(Vibrator vibrator, Uri vibrationUri) {
+        if (vibrationUri == null) {
+            Log.w(TAG, "The vibration Uri is null.");
+            return null;
+        }
+        String filePath = vibrationUri.getPath();
+        if (filePath == null) {
+            Log.w(TAG, "The file path is null.");
+            return null;
+        }
+        File vibrationFile = new File(filePath);
+        if (vibrationFile.exists() && vibrationFile.canRead()) {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(vibrationFile);
+                ParsedVibration parsedVibration =
+                        VibrationXmlParser.parseDocument(
+                                new InputStreamReader(fileInputStream, StandardCharsets.UTF_8));
+                return parsedVibration.resolve(vibrator);
+            } catch (IOException e) {
+                Log.e(TAG, "FileNotFoundException" + e);
+            }
+        } else {
+            // File not found or cannot be read
+            Log.w(TAG, "File exists:" + vibrationFile.exists()
+                    + ", canRead:" + vibrationFile.canRead());
+        }
+        return null;
     }
 }

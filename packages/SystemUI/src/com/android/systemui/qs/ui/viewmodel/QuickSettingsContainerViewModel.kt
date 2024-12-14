@@ -19,6 +19,7 @@ package com.android.systemui.qs.ui.viewmodel
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 import javax.inject.Inject
 
@@ -29,4 +30,5 @@ constructor(
     val brightnessSliderViewModel: BrightnessSliderViewModel,
     val tileGridViewModel: TileGridViewModel,
     val editModeViewModel: EditModeViewModel,
+    val quickQuickSettingsViewModel: QuickQuickSettingsViewModel,
 )

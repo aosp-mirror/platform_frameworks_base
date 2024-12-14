@@ -20,7 +20,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.ColorInt
-import android.annotation.IdRes
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.content.res.ColorStateList
@@ -28,6 +27,7 @@ import android.content.res.Resources
 import android.graphics.Paint
 import android.graphics.PixelFormat
 import android.graphics.PointF
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -37,18 +37,21 @@ import android.graphics.drawable.shapes.RoundRectShape
 import android.util.StateSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_HOVER_ENTER
+import android.view.MotionEvent.ACTION_HOVER_EXIT
+import android.view.MotionEvent.ACTION_HOVER_MOVE
+import android.view.MotionEvent.ACTION_OUTSIDE
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.SurfaceControlViewHost
 import android.view.View
-import android.view.View.OnClickListener
-import android.view.View.OnGenericMotionListener
-import android.view.View.OnTouchListener
 import android.view.View.SCALE_Y
 import android.view.View.TRANSLATION_Y
 import android.view.View.TRANSLATION_Z
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import android.widget.TextView
 import android.window.TaskConstants
@@ -57,16 +60,16 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.animation.addListener
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
-import com.android.wm.shell.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE
+import com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_12
 import com.android.wm.shell.windowdecor.common.OPACITY_40
 import com.android.wm.shell.windowdecor.common.withAlpha
 import java.util.function.Supplier
-
 
 /**
  *  Menu that appears when user long clicks the maximize button. Gives the user the option to
@@ -77,9 +80,6 @@ class MaximizeMenu(
         private val rootTdaOrganizer: RootTaskDisplayAreaOrganizer,
         private val displayController: DisplayController,
         private val taskInfo: RunningTaskInfo,
-        private val onClickListener: OnClickListener,
-        private val onGenericMotionListener: OnGenericMotionListener,
-        private val onTouchListener: OnTouchListener,
         private val decorWindowContext: Context,
         private val menuPosition: PointF,
         private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() }
@@ -102,22 +102,52 @@ class MaximizeMenu(
     }
 
     /** Creates and shows the maximize window. */
-    fun show() {
+    fun show(
+        onMaximizeOrRestoreClickListener: () -> Unit,
+        onLeftSnapClickListener: () -> Unit,
+        onRightSnapClickListener: () -> Unit,
+        onHoverListener: (Boolean) -> Unit,
+        onOutsideTouchListener: () -> Unit,
+    ) {
         if (maximizeMenu != null) return
-        createMaximizeMenu()
-        maximizeMenuView?.animateOpenMenu()
+        createMaximizeMenu(
+            onMaximizeClickListener = onMaximizeOrRestoreClickListener,
+            onLeftSnapClickListener = onLeftSnapClickListener,
+            onRightSnapClickListener = onRightSnapClickListener,
+            onHoverListener = onHoverListener,
+            onOutsideTouchListener = onOutsideTouchListener
+        )
+        maximizeMenuView?.let { view ->
+            view.animateOpenMenu(onEnd = {
+                view.requestAccessibilityFocus()
+            })
+        }
     }
 
     /** Closes the maximize window and releases its view. */
-    fun close() {
-        maximizeMenuView?.cancelAnimation()
-        maximizeMenu?.releaseView()
+    fun close(onEnd: () -> Unit) {
+        val view = maximizeMenuView
+        val menu = maximizeMenu
+        if (view == null) {
+            menu?.releaseView()
+        } else {
+            view.animateCloseMenu(onEnd = {
+                menu?.releaseView()
+                onEnd.invoke()
+            })
+        }
         maximizeMenu = null
         maximizeMenuView = null
     }
 
     /** Create a maximize menu that is attached to the display area. */
-    private fun createMaximizeMenu() {
+    private fun createMaximizeMenu(
+        onMaximizeClickListener: () -> Unit,
+        onLeftSnapClickListener: () -> Unit,
+        onRightSnapClickListener: () -> Unit,
+        onHoverListener: (Boolean) -> Unit,
+        onOutsideTouchListener: () -> Unit
+    ) {
         val t = transactionSupplier.get()
         val builder = SurfaceControl.Builder()
         rootTdaOrganizer.attachToDisplayArea(taskInfo.displayId, builder)
@@ -129,7 +159,9 @@ class MaximizeMenu(
                 menuWidth,
                 menuHeight,
                 WindowManager.LayoutParams.TYPE_APPLICATION,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSPARENT
         )
         lp.title = "Maximize Menu for Task=" + taskInfo.taskId
@@ -146,11 +178,13 @@ class MaximizeMenu(
             context = decorWindowContext,
             menuHeight = menuHeight,
             menuPadding = menuPadding,
-            onClickListener = onClickListener,
-            onTouchListener = onTouchListener,
-            onGenericMotionListener = onGenericMotionListener,
         ).also { menuView ->
             menuView.bind(taskInfo)
+            menuView.onMaximizeClickListener = onMaximizeClickListener
+            menuView.onLeftSnapClickListener = onLeftSnapClickListener
+            menuView.onRightSnapClickListener = onRightSnapClickListener
+            menuView.onMenuHoverListener = onHoverListener
+            menuView.onOutsideTouchListener = onOutsideTouchListener
             viewHost.setView(menuView.rootView, lp)
         }
 
@@ -198,56 +232,6 @@ class MaximizeMenu(
     }
 
     /**
-     * Called when a [MotionEvent.ACTION_HOVER_ENTER] is triggered on any of the menu's views.
-     *
-     * TODO(b/346440693): this is only needed for the left/right snap options that don't support
-     *  selector states to manage its hover state. Look into whether that can be added to avoid
-     *  manually tracking hover enter/exit motion events. Also because those button colors/states
-     *  aren't updating correctly for pressed, focused and selected states.
-     *  See also [onMaximizeMenuHoverMove] and [onMaximizeMenuHoverExit].
-     */
-    fun onMaximizeMenuHoverEnter(viewId: Int, ev: MotionEvent) {
-        setSnapButtonsColorOnHover(viewId, ev)
-    }
-
-    /** Called when a [MotionEvent.ACTION_HOVER_MOVE] is triggered on any of the menu's views. */
-    fun onMaximizeMenuHoverMove(viewId: Int, ev: MotionEvent) {
-        setSnapButtonsColorOnHover(viewId, ev)
-    }
-
-    /** Called when a [MotionEvent.ACTION_HOVER_EXIT] is triggered on any of the menu's views. */
-    fun onMaximizeMenuHoverExit(id: Int, ev: MotionEvent) {
-        val snapOptionsWidth = maximizeMenuView?.snapOptionsWidth ?: return
-        val snapOptionsHeight = maximizeMenuView?.snapOptionsHeight ?: return
-        val inSnapMenuBounds = ev.x >= 0 && ev.x <= snapOptionsWidth &&
-                ev.y >= 0 && ev.y <= snapOptionsHeight
-
-        if (id == R.id.maximize_menu_snap_menu_layout && !inSnapMenuBounds) {
-            // After exiting the snap menu layout area, checks to see that user is not still
-            // hovering within the snap menu layout bounds which would indicate that the user is
-            // hovering over a snap button within the snap menu layout rather than having exited.
-            maximizeMenuView?.updateSplitSnapSelection(MaximizeMenuView.SnapToHalfSelection.NONE)
-        }
-    }
-
-    private fun setSnapButtonsColorOnHover(viewId: Int, ev: MotionEvent) {
-        val snapOptionsWidth = maximizeMenuView?.snapOptionsWidth ?: return
-        val snapMenuCenter = snapOptionsWidth / 2
-        when {
-            viewId == R.id.maximize_menu_snap_left_button ||
-                    (viewId == R.id.maximize_menu_snap_menu_layout && ev.x <= snapMenuCenter) -> {
-                        maximizeMenuView
-                            ?.updateSplitSnapSelection(MaximizeMenuView.SnapToHalfSelection.LEFT)
-            }
-            viewId == R.id.maximize_menu_snap_right_button ||
-                    (viewId == R.id.maximize_menu_snap_menu_layout && ev.x > snapMenuCenter) -> {
-                        maximizeMenuView
-                            ?.updateSplitSnapSelection(MaximizeMenuView.SnapToHalfSelection.RIGHT)
-                    }
-        }
-    }
-
-    /**
      * The view within the Maximize Menu, presents maximize, restore and snap-to-side options for
      * resizing a Task.
      */
@@ -255,12 +239,11 @@ class MaximizeMenu(
         context: Context,
         private val menuHeight: Int,
         private val menuPadding: Int,
-        onClickListener: OnClickListener,
-        onTouchListener: OnTouchListener,
-        onGenericMotionListener: OnGenericMotionListener,
     ) {
-        val rootView: View = LayoutInflater.from(context)
-            .inflate(R.layout.desktop_mode_window_decor_maximize_menu, null /* root */)
+        val rootView = LayoutInflater.from(context)
+            .inflate(R.layout.desktop_mode_window_decor_maximize_menu, null /* root */) as ViewGroup
+        private val container = requireViewById(R.id.container)
+        private val overlay = requireViewById(R.id.maximize_menu_overlay)
         private val maximizeText =
             requireViewById(R.id.maximize_menu_maximize_window_text) as TextView
         private val maximizeButton =
@@ -285,30 +268,72 @@ class MaximizeMenu(
         private val fillRadius = context.resources
             .getDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_buttons_fill_radius)
 
-        private val openMenuAnimatorSet = AnimatorSet()
+        private val hoverTempRect = Rect()
+        private var menuAnimatorSet: AnimatorSet? = null
         private lateinit var taskInfo: RunningTaskInfo
         private lateinit var style: MenuStyle
 
-        /** The width of the snap menu option view, including both left and right snaps. */
-        val snapOptionsWidth: Int
-            get() = snapButtonsLayout.width
-        /** The height of the snap menu option view, including both left and right snaps .*/
-        val snapOptionsHeight: Int
-            get() = snapButtonsLayout.height
+        /** Invoked when the maximize or restore option is clicked. */
+        var onMaximizeClickListener: (() -> Unit)? = null
+        /** Invoked when the left snap option is clicked. */
+        var onLeftSnapClickListener: (() -> Unit)? = null
+        /** Invoked when the right snap option is clicked. */
+        var onRightSnapClickListener: (() -> Unit)? = null
+        /** Invoked whenever the hover state of the menu changes. */
+        var onMenuHoverListener: ((Boolean) -> Unit)? = null
+        /** Invoked whenever a click occurs outside the menu */
+        var onOutsideTouchListener: (() -> Unit)? = null
 
         init {
-            // TODO(b/346441962): encapsulate menu hover enter/exit logic inside this class and
-            //  expose only what  is actually relevant to outside classes so that specific checks
-            //  against resource IDs aren't needed outside this class.
-            rootView.setOnGenericMotionListener(onGenericMotionListener)
-            rootView.setOnTouchListener(onTouchListener)
-            maximizeButton.setOnClickListener(onClickListener)
-            maximizeButton.setOnGenericMotionListener(onGenericMotionListener)
-            snapRightButton.setOnClickListener(onClickListener)
-            snapRightButton.setOnGenericMotionListener(onGenericMotionListener)
-            snapLeftButton.setOnClickListener(onClickListener)
-            snapLeftButton.setOnGenericMotionListener(onGenericMotionListener)
-            snapButtonsLayout.setOnGenericMotionListener(onGenericMotionListener)
+            overlay.setOnHoverListener { _, event ->
+                // The overlay covers the entire menu, so it's a convenient way to monitor whether
+                // the menu is hovered as a whole or not.
+                when (event.action) {
+                    ACTION_HOVER_ENTER -> onMenuHoverListener?.invoke(true)
+                    ACTION_HOVER_EXIT -> onMenuHoverListener?.invoke(false)
+                }
+
+                // Also check if the hover falls within the snap options layout, to manually
+                // set the left/right state based on the event's position.
+                // TODO(b/346440693): this manual hover tracking is needed for left/right snap
+                //  because its view/background(s) don't support selector states. Look into whether
+                //  that can be added to avoid manual tracking. Also because these button
+                //  colors/state logic is only being applied on hover events, but there's pressed,
+                //  focused and selected states that should be responsive too.
+                val snapLayoutBoundsRelToOverlay = hoverTempRect.also { rect ->
+                    snapButtonsLayout.getDrawingRect(rect)
+                    rootView.offsetDescendantRectToMyCoords(snapButtonsLayout, rect)
+                }
+                if (event.action == ACTION_HOVER_ENTER || event.action == ACTION_HOVER_MOVE) {
+                    if (snapLayoutBoundsRelToOverlay.contains(event.x.toInt(), event.y.toInt())) {
+                        // Hover is inside the snap layout, anything left of center is the left
+                        // snap, and anything right of center is right snap.
+                        val layoutCenter = snapLayoutBoundsRelToOverlay.centerX()
+                        if (event.x < layoutCenter) {
+                            updateSplitSnapSelection(SnapToHalfSelection.LEFT)
+                        } else {
+                            updateSplitSnapSelection(SnapToHalfSelection.RIGHT)
+                        }
+                    } else {
+                        // Any other hover is outside the snap layout, so neither is selected.
+                        updateSplitSnapSelection(SnapToHalfSelection.NONE)
+                    }
+                }
+
+                // Don't consume the event to allow child views to receive the event too.
+                return@setOnHoverListener false
+            }
+
+            maximizeButton.setOnClickListener { onMaximizeClickListener?.invoke() }
+            snapRightButton.setOnClickListener { onRightSnapClickListener?.invoke() }
+            snapLeftButton.setOnClickListener { onLeftSnapClickListener?.invoke() }
+            rootView.setOnTouchListener { _, event ->
+                if (event.actionMasked == ACTION_OUTSIDE) {
+                    onOutsideTouchListener?.invoke()
+                    return@setOnTouchListener false
+                }
+                true
+            }
 
             // To prevent aliasing.
             maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
@@ -332,18 +357,19 @@ class MaximizeMenu(
         }
 
         /** Animate the opening of the menu */
-        fun animateOpenMenu() {
+        fun animateOpenMenu(onEnd: () -> Unit) {
             maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-            openMenuAnimatorSet.playTogether(
+            menuAnimatorSet = AnimatorSet()
+            menuAnimatorSet?.playTogether(
                 ObjectAnimator.ofFloat(rootView, SCALE_Y, STARTING_MENU_HEIGHT_SCALE, 1f)
                     .apply {
-                        duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                        duration = OPEN_MENU_HEIGHT_ANIMATION_DURATION_MS
                         interpolator = EMPHASIZED_DECELERATE
                     },
                 ValueAnimator.ofFloat(STARTING_MENU_HEIGHT_SCALE, 1f)
                     .apply {
-                        duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                        duration = OPEN_MENU_HEIGHT_ANIMATION_DURATION_MS
                         interpolator = EMPHASIZED_DECELERATE
                         addUpdateListener {
                             // Animate padding so that controls stay pinned to the bottom of
@@ -351,12 +377,12 @@ class MaximizeMenu(
                             val value = animatedValue as Float
                             val topPadding = menuPadding -
                                     ((1 - value) * menuHeight).toInt()
-                            rootView.setPadding(menuPadding, topPadding,
+                            container.setPadding(menuPadding, topPadding,
                                 menuPadding, menuPadding)
                         }
                     },
                 ValueAnimator.ofFloat(1 / STARTING_MENU_HEIGHT_SCALE, 1f).apply {
-                    duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                    duration = OPEN_MENU_HEIGHT_ANIMATION_DURATION_MS
                     interpolator = EMPHASIZED_DECELERATE
                     addUpdateListener {
                         // Scale up the children of the maximize menu so that the menu
@@ -370,7 +396,7 @@ class MaximizeMenu(
                 },
                 ObjectAnimator.ofFloat(rootView, TRANSLATION_Y,
                     (STARTING_MENU_HEIGHT_SCALE - 1) * menuHeight, 0f).apply {
-                    duration = MENU_HEIGHT_ANIMATION_DURATION_MS
+                    duration = OPEN_MENU_HEIGHT_ANIMATION_DURATION_MS
                     interpolator = EMPHASIZED_DECELERATE
                 },
                 ObjectAnimator.ofInt(rootView.background, "alpha",
@@ -380,7 +406,7 @@ class MaximizeMenu(
                 ValueAnimator.ofFloat(0f, 1f)
                     .apply {
                         duration = ALPHA_ANIMATION_DURATION_MS
-                        startDelay = CONTROLS_ALPHA_ANIMATION_DELAY_MS
+                        startDelay = CONTROLS_ALPHA_OPEN_MENU_ANIMATION_DELAY_MS
                         addUpdateListener {
                             val value = animatedValue as Float
                             maximizeButton.alpha = value
@@ -392,25 +418,109 @@ class MaximizeMenu(
                 ObjectAnimator.ofFloat(rootView, TRANSLATION_Z, MENU_Z_TRANSLATION)
                     .apply {
                         duration = ELEVATION_ANIMATION_DURATION_MS
-                        startDelay = CONTROLS_ALPHA_ANIMATION_DELAY_MS
+                        startDelay = CONTROLS_ALPHA_OPEN_MENU_ANIMATION_DELAY_MS
                     }
             )
-            openMenuAnimatorSet.addListener(
+            menuAnimatorSet?.addListener(
                 onEnd = {
                     maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                     maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    onEnd.invoke()
                 }
             )
-            openMenuAnimatorSet.start()
+            menuAnimatorSet?.start()
         }
 
-        /** Cancel the open menu animation. */
-        fun cancelAnimation() {
-            openMenuAnimatorSet.cancel()
+        /** Animate the closing of the menu */
+        fun animateCloseMenu(onEnd: (() -> Unit)) {
+            maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            cancelAnimation()
+            menuAnimatorSet = AnimatorSet()
+            menuAnimatorSet?.playTogether(
+                    ObjectAnimator.ofFloat(rootView, SCALE_Y, 1f, STARTING_MENU_HEIGHT_SCALE)
+                            .apply {
+                                duration = CLOSE_MENU_HEIGHT_ANIMATION_DURATION_MS
+                                interpolator = FAST_OUT_LINEAR_IN
+                            },
+                    ValueAnimator.ofFloat(1f, STARTING_MENU_HEIGHT_SCALE)
+                            .apply {
+                                duration = CLOSE_MENU_HEIGHT_ANIMATION_DURATION_MS
+                                interpolator = FAST_OUT_LINEAR_IN
+                                addUpdateListener {
+                                    // Animate padding so that controls stay pinned to the bottom of
+                                    // the menu.
+                                    val value = animatedValue as Float
+                                    val topPadding = menuPadding -
+                                            ((1 - value) * menuHeight).toInt()
+                                    container.setPadding(menuPadding, topPadding,
+                                            menuPadding, menuPadding)
+                                }
+                            },
+                    ValueAnimator.ofFloat(1f, 1 / STARTING_MENU_HEIGHT_SCALE).apply {
+                        duration = CLOSE_MENU_HEIGHT_ANIMATION_DURATION_MS
+                        interpolator = FAST_OUT_LINEAR_IN
+                        addUpdateListener {
+                            // Scale up the children of the maximize menu so that the menu
+                            // scale is cancelled out and only the background is scaled.
+                            val value = animatedValue as Float
+                            maximizeButton.scaleY = value
+                            snapButtonsLayout.scaleY = value
+                            maximizeText.scaleY = value
+                            snapWindowText.scaleY = value
+                        }
+                    },
+                    ObjectAnimator.ofFloat(rootView, TRANSLATION_Y,
+                            0f, (STARTING_MENU_HEIGHT_SCALE - 1) * menuHeight).apply {
+                        duration = CLOSE_MENU_HEIGHT_ANIMATION_DURATION_MS
+                        interpolator = FAST_OUT_LINEAR_IN
+                    },
+                    ObjectAnimator.ofInt(rootView.background, "alpha",
+                            MAX_DRAWABLE_ALPHA_VALUE, 0).apply {
+                        startDelay = CONTAINER_ALPHA_CLOSE_MENU_ANIMATION_DELAY_MS
+                        duration = ALPHA_ANIMATION_DURATION_MS
+                    },
+                    ValueAnimator.ofFloat(1f, 0f)
+                            .apply {
+                                duration = ALPHA_ANIMATION_DURATION_MS
+                                addUpdateListener {
+                                    val value = animatedValue as Float
+                                    maximizeButton.alpha = value
+                                    snapButtonsLayout.alpha = value
+                                    maximizeText.alpha = value
+                                    snapWindowText.alpha = value
+                                }
+                            },
+                    ObjectAnimator.ofFloat(rootView, TRANSLATION_Z, MENU_Z_TRANSLATION, 0f)
+                            .apply {
+                                duration = ELEVATION_ANIMATION_DURATION_MS
+                            }
+            )
+            menuAnimatorSet?.addListener(
+                    onEnd = {
+                        maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                        onEnd?.invoke()
+                    }
+            )
+            menuAnimatorSet?.start()
+        }
+
+        /** Request that the accessibility service focus on the menu. */
+        fun requestAccessibilityFocus() {
+            // Focus the first button in the menu by default.
+            maximizeButton.post {
+                maximizeButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
+            }
+        }
+
+        /** Cancel the menu animation. */
+        private fun cancelAnimation() {
+            menuAnimatorSet?.cancel()
         }
 
         /** Update the view state to a new snap to half selection. */
-        fun updateSplitSnapSelection(selection: SnapToHalfSelection) {
+        private fun updateSplitSnapSelection(selection: SnapToHalfSelection) {
             when (selection) {
                 SnapToHalfSelection.NONE -> deactivateSnapOptions()
                 SnapToHalfSelection.LEFT -> activateSnapOption(activateLeft = true)
@@ -634,17 +744,47 @@ class MaximizeMenu(
         private const val ALPHA_ANIMATION_DURATION_MS = 50L
         private const val MAX_DRAWABLE_ALPHA_VALUE = 255
         private const val STARTING_MENU_HEIGHT_SCALE = 0.8f
-        private const val MENU_HEIGHT_ANIMATION_DURATION_MS = 300L
+        private const val OPEN_MENU_HEIGHT_ANIMATION_DURATION_MS = 300L
+        private const val CLOSE_MENU_HEIGHT_ANIMATION_DURATION_MS = 200L
         private const val ELEVATION_ANIMATION_DURATION_MS = 50L
-        private const val CONTROLS_ALPHA_ANIMATION_DELAY_MS = 33L
+        private const val CONTROLS_ALPHA_OPEN_MENU_ANIMATION_DELAY_MS = 33L
+        private const val CONTAINER_ALPHA_CLOSE_MENU_ANIMATION_DELAY_MS = 33L
         private const val MENU_Z_TRANSLATION = 1f
-        fun isMaximizeMenuView(@IdRes viewId: Int): Boolean {
-            return viewId == R.id.maximize_menu ||
-                    viewId == R.id.maximize_menu_maximize_button ||
-                    viewId == R.id.maximize_menu_snap_left_button ||
-                    viewId == R.id.maximize_menu_snap_right_button ||
-                    viewId == R.id.maximize_menu_snap_menu_layout ||
-                    viewId == R.id.maximize_menu_snap_menu_layout
-        }
+    }
+}
+
+/** A factory interface to create a [MaximizeMenu]. */
+interface MaximizeMenuFactory {
+    fun create(
+        syncQueue: SyncTransactionQueue,
+        rootTdaOrganizer: RootTaskDisplayAreaOrganizer,
+        displayController: DisplayController,
+        taskInfo: RunningTaskInfo,
+        decorWindowContext: Context,
+        menuPosition: PointF,
+        transactionSupplier: Supplier<Transaction>
+    ): MaximizeMenu
+}
+
+/** A [MaximizeMenuFactory] implementation that creates a [MaximizeMenu].  */
+object DefaultMaximizeMenuFactory : MaximizeMenuFactory {
+    override fun create(
+        syncQueue: SyncTransactionQueue,
+        rootTdaOrganizer: RootTaskDisplayAreaOrganizer,
+        displayController: DisplayController,
+        taskInfo: RunningTaskInfo,
+        decorWindowContext: Context,
+        menuPosition: PointF,
+        transactionSupplier: Supplier<Transaction>
+    ): MaximizeMenu {
+        return MaximizeMenu(
+            syncQueue,
+            rootTdaOrganizer,
+            displayController,
+            taskInfo,
+            decorWindowContext,
+            menuPosition,
+            transactionSupplier
+        )
     }
 }

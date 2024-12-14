@@ -174,15 +174,24 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         IndentingPrintWriter ipw = asIndenting(pw);
         ipw.println("BatteryController state:");
         ipw.increaseIndent();
-        ipw.print("mHasReceivedBattery="); ipw.println(mHasReceivedBattery);
-        ipw.print("mLevel="); ipw.println(mLevel);
-        ipw.print("mPluggedIn="); ipw.println(mPluggedIn);
-        ipw.print("mCharging="); ipw.println(mCharging);
-        ipw.print("mCharged="); ipw.println(mCharged);
-        ipw.print("mIsBatteryDefender="); ipw.println(mIsBatteryDefender);
-        ipw.print("mIsIncompatibleCharging="); ipw.println(mIsIncompatibleCharging);
-        ipw.print("mPowerSave="); ipw.println(mPowerSave);
-        ipw.print("mStateUnknown="); ipw.println(mStateUnknown);
+        ipw.print("mHasReceivedBattery=");
+        ipw.println(mHasReceivedBattery);
+        ipw.print("mLevel=");
+        ipw.println(mLevel);
+        ipw.print("mPluggedIn=");
+        ipw.println(mPluggedIn);
+        ipw.print("mCharging=");
+        ipw.println(mCharging);
+        ipw.print("mCharged=");
+        ipw.println(mCharged);
+        ipw.print("mIsBatteryDefender=");
+        ipw.println(mIsBatteryDefender);
+        ipw.print("mIsIncompatibleCharging=");
+        ipw.println(mIsIncompatibleCharging);
+        ipw.print("mPowerSave=");
+        ipw.println(mPowerSave);
+        ipw.print("mStateUnknown=");
+        ipw.println(mStateUnknown);
         ipw.println("Callbacks:------------------");
         // Since the above lines are already indented, we need to indent twice for the callbacks.
         ipw.increaseIndent();
@@ -250,6 +259,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mLevel = (int) (100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
+            int previousPluggedChargingSource = mPluggedChargingSource;
             mPluggedChargingSource = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
             mPluggedIn = mPluggedChargingSource != 0;
             final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
@@ -271,12 +281,14 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             }
 
             int chargingStatus = intent.getIntExtra(EXTRA_CHARGING_STATUS, CHARGING_POLICY_DEFAULT);
-            boolean isBatteryDefender = chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+            boolean isBatteryDefender = isBatteryDefenderMode(chargingStatus);
             if (isBatteryDefender != mIsBatteryDefender) {
                 mIsBatteryDefender = isBatteryDefender;
                 fireIsBatteryDefenderChanged();
             }
-
+            if (mPluggedChargingSource != previousPluggedChargingSource) {
+                updatePowerSave();
+            }
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
             updatePowerSave();
@@ -356,8 +368,21 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         return mPluggedChargingSource == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 
-    public boolean isBatteryDefender() {
+    /**
+     * This method is used for tests only. Returns whether the device is in battery defender
+     * mode.
+     */
+    @VisibleForTesting
+    protected boolean isBatteryDefender() {
         return mIsBatteryDefender;
+    }
+
+    /**
+     * Checks whether the device is in battery defender mode based on the current charging
+     * status. This method can be overridden to have a different definition for its subclasses.
+     */
+    protected boolean isBatteryDefenderMode(int chargingStatus) {
+        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
     }
 
     /**

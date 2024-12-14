@@ -1,6 +1,6 @@
 package com.android.systemui.shade.transition
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
@@ -30,7 +30,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ScrimShadeTransitionControllerTest : SysuiTestCase() {
 

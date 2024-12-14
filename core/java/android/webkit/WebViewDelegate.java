@@ -137,9 +137,13 @@ public final class WebViewDelegate {
      */
     @Deprecated
     public void detachDrawGlFunctor(View containerView, long nativeDrawGLFunctor) {
-        ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
-        if (nativeDrawGLFunctor != 0 && viewRootImpl != null) {
-            viewRootImpl.detachFunctor(nativeDrawGLFunctor);
+        if (Flags.mainlineApis()) {
+            throw new UnsupportedOperationException();
+        } else {
+            ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
+            if (nativeDrawGLFunctor != 0 && viewRootImpl != null) {
+                viewRootImpl.detachFunctor(nativeDrawGLFunctor);
+            }
         }
     }
 

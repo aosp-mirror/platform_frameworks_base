@@ -15,6 +15,7 @@
  */
 package com.android.systemui.dreams
 
+import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Intent
 import android.os.RemoteException
@@ -34,10 +35,14 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.app.viewcapture.ViewCapture
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
+import com.android.app.viewcapture.ViewCaptureFactory
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
@@ -50,6 +55,7 @@ import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
@@ -57,13 +63,14 @@ import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.gesture.domain.gestureInteractor
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
+import com.android.systemui.navigationbar.gestural.domain.TaskInfo
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher
 import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -79,8 +86,18 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.isNull
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.firstValue
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -106,8 +123,6 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock lateinit var mComplicationComponentFactory: ComplicationComponent.Factory
 
-    @Mock lateinit var mComplicationComponent: ComplicationComponent
-
     @Mock lateinit var mComplicationHostViewController: ComplicationHostViewController
 
     @Mock lateinit var mComplicationVisibilityController: ComplicationLayoutEngine
@@ -116,19 +131,11 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     lateinit var mDreamComplicationComponentFactory:
         com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
 
-    @Mock
-    lateinit var mDreamComplicationComponent:
-        com.android.systemui.dreams.complication.dagger.ComplicationComponent
-
     @Mock lateinit var mHideComplicationTouchHandler: HideComplicationTouchHandler
 
     @Mock lateinit var mDreamOverlayComponentFactory: DreamOverlayComponent.Factory
 
-    @Mock lateinit var mDreamOverlayComponent: DreamOverlayComponent
-
     @Mock lateinit var mAmbientTouchComponentFactory: AmbientTouchComponent.Factory
-
-    @Mock lateinit var mAmbientTouchComponent: AmbientTouchComponent
 
     @Mock lateinit var mDreamOverlayContainerView: DreamOverlayContainerView
 
@@ -154,11 +161,89 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock lateinit var mDreamOverlayCallbackController: DreamOverlayCallbackController
 
+    @Mock lateinit var mLazyViewCapture: Lazy<ViewCapture>
+
+    private lateinit var mViewCaptureAwareWindowManager: ViewCaptureAwareWindowManager
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var communalRepository: FakeCommunalSceneRepository
+    private var viewCaptureSpy = spy(ViewCaptureFactory.getInstance(context))
+    private lateinit var gestureInteractor: GestureInteractor
+    private lateinit var environmentComponents: EnvironmentComponents
 
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
     private lateinit var mService: DreamOverlayService
+
+    private class EnvironmentComponents(
+        val dreamsComplicationComponent:
+            com.android.systemui.dreams.complication.dagger.ComplicationComponent,
+        val dreamOverlayComponent: DreamOverlayComponent,
+        val complicationComponent: ComplicationComponent,
+        val ambientTouchComponent: AmbientTouchComponent,
+    ) {
+        fun clearInvocations() {
+            clearInvocations(
+                dreamsComplicationComponent,
+                dreamOverlayComponent,
+                complicationComponent,
+                ambientTouchComponent
+            )
+        }
+
+        fun verifyNoMoreInteractions() {
+            Mockito.verifyNoMoreInteractions(
+                dreamsComplicationComponent,
+                dreamOverlayComponent,
+                complicationComponent,
+                ambientTouchComponent
+            )
+        }
+    }
+
+    private fun setupComponentFactories(
+        dreamComplicationComponentFactory:
+            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory,
+        dreamOverlayComponentFactory: DreamOverlayComponent.Factory,
+        complicationComponentFactory: ComplicationComponent.Factory,
+        ambientTouchComponentFactory: AmbientTouchComponent.Factory
+    ): EnvironmentComponents {
+        val dreamOverlayComponent = mock<DreamOverlayComponent>()
+        whenever(dreamOverlayComponent.getDreamOverlayContainerViewController())
+            .thenReturn(mDreamOverlayContainerViewController)
+
+        val complicationComponent = mock<ComplicationComponent>()
+        whenever(complicationComponent.getComplicationHostViewController())
+            .thenReturn(mComplicationHostViewController)
+        whenever(mLifecycleOwner.registry).thenReturn(lifecycleRegistry)
+
+        mCommunalInteractor = Mockito.spy(kosmos.communalInteractor)
+
+        whenever(complicationComponentFactory.create(any(), any(), any(), any()))
+            .thenReturn(complicationComponent)
+        whenever(complicationComponent.getVisibilityController())
+            .thenReturn(mComplicationVisibilityController)
+
+        val dreamComplicationComponent =
+            mock<com.android.systemui.dreams.complication.dagger.ComplicationComponent>()
+        whenever(dreamComplicationComponent.getHideComplicationTouchHandler())
+            .thenReturn(mHideComplicationTouchHandler)
+        whenever(dreamComplicationComponentFactory.create(any(), any()))
+            .thenReturn(dreamComplicationComponent)
+
+        whenever(dreamOverlayComponentFactory.create(any(), any(), any()))
+            .thenReturn(dreamOverlayComponent)
+
+        val ambientTouchComponent = mock<AmbientTouchComponent>()
+        whenever(ambientTouchComponentFactory.create(any(), any(), any()))
+            .thenReturn(ambientTouchComponent)
+        whenever(ambientTouchComponent.getTouchMonitor()).thenReturn(mTouchMonitor)
+
+        return EnvironmentComponents(
+            dreamComplicationComponent,
+            dreamOverlayComponent,
+            complicationComponent,
+            ambientTouchComponent
+        )
+    }
 
     @Before
     fun setup() {
@@ -167,38 +252,33 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         lifecycleRegistry = FakeLifecycleRegistry(mLifecycleOwner)
         bouncerRepository = kosmos.fakeKeyguardBouncerRepository
         communalRepository = kosmos.fakeCommunalSceneRepository
+        gestureInteractor = spy(kosmos.gestureInteractor)
 
-        whenever(mDreamOverlayComponent.getDreamOverlayContainerViewController())
-            .thenReturn(mDreamOverlayContainerViewController)
-        whenever(mComplicationComponent.getComplicationHostViewController())
-            .thenReturn(mComplicationHostViewController)
-        whenever(mLifecycleOwner.registry).thenReturn(lifecycleRegistry)
+        environmentComponents =
+            setupComponentFactories(
+                mDreamComplicationComponentFactory,
+                mDreamOverlayComponentFactory,
+                mComplicationComponentFactory,
+                mAmbientTouchComponentFactory
+            )
 
-        mCommunalInteractor = Mockito.spy(kosmos.communalInteractor)
-
-        whenever(mComplicationComponentFactory.create(any(), any(), any(), any()))
-            .thenReturn(mComplicationComponent)
-        whenever(mComplicationComponent.getVisibilityController())
-            .thenReturn(mComplicationVisibilityController)
-        whenever(mDreamComplicationComponent.getHideComplicationTouchHandler())
-            .thenReturn(mHideComplicationTouchHandler)
-        whenever(mDreamComplicationComponentFactory.create(any(), any()))
-            .thenReturn(mDreamComplicationComponent)
-        whenever(mDreamOverlayComponentFactory.create(any(), any(), any()))
-            .thenReturn(mDreamOverlayComponent)
-        whenever(mAmbientTouchComponentFactory.create(any(), any()))
-            .thenReturn(mAmbientTouchComponent)
-        whenever(mAmbientTouchComponent.getTouchMonitor()).thenReturn(mTouchMonitor)
         whenever(mDreamOverlayContainerViewController.containerView)
             .thenReturn(mDreamOverlayContainerView)
         whenever(mScrimManager.getCurrentController()).thenReturn(mScrimController)
+        whenever(mLazyViewCapture.value).thenReturn(viewCaptureSpy)
         mWindowParams = WindowManager.LayoutParams()
+        mViewCaptureAwareWindowManager =
+            ViewCaptureAwareWindowManager(
+                mWindowManager,
+                mLazyViewCapture,
+                isViewCaptureEnabled = false
+            )
         mService =
             DreamOverlayService(
                 mContext,
                 mLifecycleOwner,
                 mMainExecutor,
-                mWindowManager,
+                mViewCaptureAwareWindowManager,
                 mComplicationComponentFactory,
                 mDreamComplicationComponentFactory,
                 mDreamOverlayComponentFactory,
@@ -214,6 +294,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 HOME_CONTROL_PANEL_DREAM_COMPONENT,
                 mDreamOverlayCallbackController,
                 kosmos.keyguardInteractor,
+                gestureInteractor,
                 WINDOW_NAME
             )
     }
@@ -241,6 +322,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -258,6 +340,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -277,6 +360,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -299,6 +383,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -317,6 +402,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -332,10 +418,52 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
         assertThat(mService.shouldShowComplications()).isTrue()
+    }
+
+    @Test
+    fun testDeferredResetRespondsToAnimationEnd() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            true /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        whenever(mStateController.areExitAnimationsRunning()).thenReturn(true)
+        clearInvocations(mStateController, mTouchMonitor)
+
+        // Starting a dream will cause it to end first.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            true /*shouldShowComplication*/
+        )
+
+        mMainExecutor.runAllReady()
+
+        verifyZeroInteractions(mTouchMonitor)
+
+        val captor = ArgumentCaptor.forClass(DreamOverlayStateController.Callback::class.java)
+        verify(mStateController).addCallback(captor.capture())
+
+        whenever(mStateController.areExitAnimationsRunning()).thenReturn(false)
+
+        captor.firstValue.onStateChanged()
+
+        // Should only be called once since it should be null during the second reset.
+        verify(mTouchMonitor).destroy()
     }
 
     @Test
@@ -347,6 +475,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             LOW_LIGHT_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -363,6 +492,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             HOME_CONTROL_PANEL_DREAM_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -379,6 +509,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             LOW_LIGHT_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -413,6 +544,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         // Immediately end the dream.
@@ -444,6 +576,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -463,6 +596,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             LOW_LIGHT_COMPONENT.flattenToString(),
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -514,6 +648,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -537,6 +672,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -547,9 +683,8 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Assert that the overlay is not showing complications.
         assertThat(mService.shouldShowComplications()).isFalse()
-        Mockito.clearInvocations(mDreamOverlayComponent)
-        Mockito.clearInvocations(mAmbientTouchComponent)
-        Mockito.clearInvocations(mWindowManager)
+        environmentComponents.clearInvocations()
+        clearInvocations(mWindowManager)
 
         // New dream starting with dream complications showing. Note that when a new dream is
         // binding to the dream overlay service, it receives the same instance of IBinder as the
@@ -558,6 +693,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -571,8 +707,14 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Verify that new instances of overlay container view controller and overlay touch monitor
         // are created.
-        verify(mDreamOverlayComponent).getDreamOverlayContainerViewController()
-        verify(mAmbientTouchComponent).getTouchMonitor()
+        verify(environmentComponents.dreamOverlayComponent).getDreamOverlayContainerViewController()
+        verify(environmentComponents.ambientTouchComponent).getTouchMonitor()
+
+        // Verify DreamOverlayContainerViewController is destroyed.
+        verify(mDreamOverlayContainerViewController).destroy()
+
+        // DreamOverlay callback receives onWakeUp.
+        verify(mDreamOverlayCallbackController).onWakeUp()
     }
 
     @Test
@@ -584,18 +726,19 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
         mService.onWakeUp()
-        verify(mDreamOverlayContainerViewController).wakeUp()
+        verify(mDreamOverlayContainerViewController).onWakeUp()
         verify(mDreamOverlayCallbackController).onWakeUp()
     }
 
     @Test
     fun testWakeUpBeforeStartDoesNothing() {
         mService.onWakeUp()
-        verify(mDreamOverlayContainerViewController, Mockito.never()).wakeUp()
+        verify(mDreamOverlayContainerViewController, Mockito.never()).onWakeUp()
     }
 
     @Test
@@ -607,6 +750,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -623,7 +767,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
     @kotlin.Throws(RemoteException::class)
     fun testTransitionToGlanceableHub() =
         testScope.runTest {
@@ -632,6 +776,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mWindowParams,
                 mDreamOverlayCallback,
                 DREAM_COMPONENT,
+                false /*isPreview*/,
                 false /*shouldShowComplication*/
             )
             mMainExecutor.runAllReady()
@@ -643,11 +788,12 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             runCurrent()
             verify(mDreamOverlayCallback).onRedirectWake(true)
             client.onWakeRequested()
-            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), isNull())
+            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), any(), isNull())
+            verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
         }
 
     @Test
-    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT, FLAG_COMMUNAL_HUB)
     @Throws(RemoteException::class)
     fun testRedirectExit() =
         testScope.runTest {
@@ -656,6 +802,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mWindowParams,
                 mDreamOverlayCallback,
                 DREAM_COMPONENT,
+                false /*isPreview*/,
                 false /*shouldShowComplication*/
             )
             // Set communal available, verify that overlay callback is informed.
@@ -684,6 +831,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -704,6 +852,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -723,6 +872,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -746,6 +896,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -776,8 +927,10 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
+        testScope.runCurrent()
         mMainExecutor.runAllReady()
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
     }
@@ -791,6 +944,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -814,6 +968,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -845,6 +1000,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -876,6 +1032,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -911,6 +1068,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             mWindowParams,
             mDreamOverlayCallback,
             DREAM_COMPONENT,
+            false /*isPreview*/,
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
@@ -934,6 +1092,152 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Lifecycle state goes back to RESUMED.
         assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    @Test
+    fun testDreamActivityGesturesBlockedWhenDreaming() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        val matcherCaptor = argumentCaptor<TaskMatcher>()
+        verify(gestureInteractor)
+            .addGestureBlockedMatcher(matcherCaptor.capture(), eq(GestureInteractor.Scope.Global))
+        val matcher = matcherCaptor.firstValue
+
+        val dreamTaskInfo = TaskInfo(mock<ComponentName>(), WindowConfiguration.ACTIVITY_TYPE_DREAM)
+        assertThat(matcher.matches(dreamTaskInfo)).isTrue()
+
+        client.endDream()
+        mMainExecutor.runAllReady()
+
+        verify(gestureInteractor)
+            .removeGestureBlockedMatcher(eq(matcher), eq(GestureInteractor.Scope.Global))
+    }
+
+    @Test
+    fun testDreamActivityGesturesNotBlockedWhenPreview() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            true /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        verify(gestureInteractor, never())
+            .addGestureBlockedMatcher(any(), eq(GestureInteractor.Scope.Global))
+    }
+
+    @Test
+    fun testDreamActivityGesturesNotBlockedWhenNotificationShadeShowing() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        val matcherCaptor = argumentCaptor<TaskMatcher>()
+        verify(gestureInteractor)
+            .addGestureBlockedMatcher(matcherCaptor.capture(), eq(GestureInteractor.Scope.Global))
+        val matcher = matcherCaptor.firstValue
+
+        val dreamTaskInfo = TaskInfo(mock<ComponentName>(), WindowConfiguration.ACTIVITY_TYPE_DREAM)
+        assertThat(matcher.matches(dreamTaskInfo)).isTrue()
+
+        val callbackCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture())
+
+        // Notification shade opens.
+        callbackCaptor.value.onShadeExpandedChanged(true)
+        mMainExecutor.runAllReady()
+
+        verify(gestureInteractor)
+            .removeGestureBlockedMatcher(eq(matcher), eq(GestureInteractor.Scope.Global))
+    }
+
+    @Test
+    fun testDreamActivityGesturesNotBlockedDreamEndedBeforeKeyguardStateChanged() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        val matcherCaptor = argumentCaptor<TaskMatcher>()
+        verify(gestureInteractor)
+            .addGestureBlockedMatcher(matcherCaptor.capture(), eq(GestureInteractor.Scope.Global))
+        val matcher = matcherCaptor.firstValue
+
+        val dreamTaskInfo = TaskInfo(mock<ComponentName>(), WindowConfiguration.ACTIVITY_TYPE_DREAM)
+        assertThat(matcher.matches(dreamTaskInfo)).isTrue()
+
+        client.endDream()
+        mMainExecutor.runAllReady()
+        clearInvocations(gestureInteractor)
+
+        val callbackCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture())
+
+        // Notification shade opens.
+        callbackCaptor.value.onShadeExpandedChanged(true)
+        mMainExecutor.runAllReady()
+
+        verify(gestureInteractor)
+            .removeGestureBlockedMatcher(eq(matcher), eq(GestureInteractor.Scope.Global))
+    }
+
+    @Test
+    fun testComponentsRecreatedBetweenDreams() {
+        clearInvocations(
+            mDreamComplicationComponentFactory,
+            mDreamOverlayComponentFactory,
+            mComplicationComponentFactory,
+            mAmbientTouchComponentFactory
+        )
+
+        mService.onEndDream()
+
+        setupComponentFactories(
+            mDreamComplicationComponentFactory,
+            mDreamOverlayComponentFactory,
+            mComplicationComponentFactory,
+            mAmbientTouchComponentFactory
+        )
+
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*isPreview*/,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        environmentComponents.verifyNoMoreInteractions()
     }
 
     internal class FakeLifecycleRegistry(provider: LifecycleOwner) : LifecycleRegistry(provider) {

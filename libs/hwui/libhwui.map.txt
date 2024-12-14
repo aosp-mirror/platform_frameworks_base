@@ -13,6 +13,7 @@ LIBHWUI { # platform-only /* HWUI isn't current a module, so all of these are st
     ABitmapConfig_getFormatFromConfig;
     ABitmapConfig_getConfigFromFormat;
     ABitmap_compress;
+    ABitmap_compressWithGainmap;
     ABitmap_getHardwareBuffer;
     ACanvas_isSupportedPixelFormat;
     ACanvas_getNativeHandleFromJava;

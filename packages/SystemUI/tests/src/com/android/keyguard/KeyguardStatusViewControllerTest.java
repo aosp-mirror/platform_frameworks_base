@@ -140,14 +140,6 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     }
 
     @Test
-    public void correctlyDump() {
-        mController.onInit();
-        verify(mDumpManager).registerDumpable(eq(mController.getInstanceName()), eq(mController));
-        mController.onDestroy();
-        verify(mDumpManager, times(1)).unregisterDumpable(eq(mController.getInstanceName()));
-    }
-
-    @Test
     public void onInit_addsOnLayoutChangeListenerToClockSwitch() {
         when(mKeyguardStatusView.findViewById(R.id.status_view_media_container)).thenReturn(
                 mMediaHostContainer);

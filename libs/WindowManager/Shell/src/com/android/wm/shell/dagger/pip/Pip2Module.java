@@ -42,9 +42,11 @@ import com.android.wm.shell.pip2.phone.PhonePipMenuController;
 import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipMotionHelper;
 import com.android.wm.shell.pip2.phone.PipScheduler;
+import com.android.wm.shell.pip2.phone.PipTaskListener;
 import com.android.wm.shell.pip2.phone.PipTouchHandler;
 import com.android.wm.shell.pip2.phone.PipTransition;
 import com.android.wm.shell.pip2.phone.PipTransitionState;
+import com.android.wm.shell.pip2.phone.PipUiStateChangeController;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -72,11 +74,23 @@ public abstract class Pip2Module {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             Optional<PipController> pipController,
             PipTouchHandler pipTouchHandler,
+            PipTaskListener pipTaskListener,
             @NonNull PipScheduler pipScheduler,
-            @NonNull PipTransitionState pipStackListenerController) {
+            @NonNull PipTransitionState pipStackListenerController,
+            @NonNull PipUiStateChangeController pipUiStateChangeController) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
-                pipBoundsState, null, pipBoundsAlgorithm, pipScheduler,
-                pipStackListenerController);
+                pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
+                pipScheduler, pipStackListenerController, pipUiStateChangeController);
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<PipController.PipImpl> providePip2(Optional<PipController> pipController) {
+        if (pipController.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.ofNullable(pipController.get().getPipImpl());
+        }
     }
 
     @WMSingleton
@@ -94,6 +108,7 @@ public abstract class Pip2Module {
             TaskStackListenerImpl taskStackListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
+            PipTouchHandler pipTouchHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         if (!PipUtils.isPip2ExperimentEnabled()) {
             return Optional.empty();
@@ -102,7 +117,7 @@ public abstract class Pip2Module {
                     context, shellInit, shellCommandHandler, shellController, displayController,
                     displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                     pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
-                    pipTransitionState, mainExecutor));
+                    pipTransitionState, pipTouchHandler, mainExecutor));
         }
     }
 
@@ -110,9 +125,11 @@ public abstract class Pip2Module {
     @Provides
     static PipScheduler providePipScheduler(Context context,
             PipBoundsState pipBoundsState,
+            PhonePipMenuController pipMenuController,
             @ShellMainThread ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
-        return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState);
+        return new PipScheduler(context, pipBoundsState, pipMenuController,
+                mainExecutor, pipTransitionState);
     }
 
     @WMSingleton
@@ -169,5 +186,25 @@ public abstract class Pip2Module {
     @Provides
     static PipTransitionState providePipTransitionState(@ShellMainThread Handler handler) {
         return new PipTransitionState(handler);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipUiStateChangeController providePipUiStateChangeController(
+            PipTransitionState pipTransitionState) {
+        return new PipUiStateChangeController(pipTransitionState);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipTaskListener providePipTaskListener(Context context,
+            ShellTaskOrganizer shellTaskOrganizer,
+            PipTransitionState pipTransitionState,
+            PipScheduler pipScheduler,
+            PipBoundsState pipBoundsState,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipTaskListener(context, shellTaskOrganizer, pipTransitionState,
+                pipScheduler, pipBoundsState, pipBoundsAlgorithm, mainExecutor);
     }
 }

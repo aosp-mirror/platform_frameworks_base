@@ -18,34 +18,42 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import android.util.TypedValue
+import android.view.View
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.res.R
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the pattern bouncer UI. */
-class PatternBouncerViewModel(
+class PatternBouncerViewModel
+@AssistedInject
+constructor(
     private val applicationContext: Context,
-    viewModelScope: CoroutineScope,
     interactor: BouncerInteractor,
-    isInputEnabled: StateFlow<Boolean>,
-    private val onIntentionalUserInput: () -> Unit,
+    @Assisted bouncerHapticPlayer: BouncerHapticPlayer,
+    @Assisted isInputEnabled: StateFlow<Boolean>,
+    @Assisted private val onIntentionalUserInput: () -> Unit,
 ) :
     AuthMethodBouncerViewModel(
-        viewModelScope = viewModelScope,
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PatternBouncerViewModel",
+        bouncerHapticPlayer = bouncerHapticPlayer,
     ) {
 
     /** The number of columns in the dot grid. */
@@ -54,17 +62,10 @@ class PatternBouncerViewModel(
     /** The number of rows in the dot grid. */
     val rowCount = 3
 
-    private val _selectedDots = MutableStateFlow<LinkedHashSet<PatternDotViewModel>>(linkedSetOf())
-
+    private val selectedDotSet = MutableStateFlow<LinkedHashSet<PatternDotViewModel>>(linkedSetOf())
+    private val selectedDotList = MutableStateFlow(selectedDotSet.value.toList())
     /** The dots that were selected by the user, in the order of selection. */
-    val selectedDots: StateFlow<List<PatternDotViewModel>> =
-        _selectedDots
-            .map { it.toList() }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = emptyList(),
-            )
+    val selectedDots: StateFlow<List<PatternDotViewModel>> = selectedDotList.asStateFlow()
 
     private val _currentDot = MutableStateFlow<PatternDotViewModel?>(null)
 
@@ -82,6 +83,16 @@ class PatternBouncerViewModel(
     override val authenticationMethod = AuthenticationMethodModel.Pattern
 
     override val lockoutMessageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch { super.onActivated() }
+            launch {
+                selectedDotSet.map { it.toList() }.collect { selectedDotList.value = it.toList() }
+            }
+            awaitCancellation()
+        }
+    }
 
     /** Notifies that the user has started a drag gesture across the dot grid. */
     fun onDragStart() {
@@ -120,7 +131,7 @@ class PatternBouncerViewModel(
         }
 
         val hitDot = dots.value.firstOrNull { dot -> dot.x == dotColumn && dot.y == dotRow }
-        if (hitDot != null && !_selectedDots.value.contains(hitDot)) {
+        if (hitDot != null && !selectedDotSet.value.contains(hitDot)) {
             val skippedOverDots =
                 currentDot.value?.let { previousDot ->
                     buildList {
@@ -145,12 +156,11 @@ class PatternBouncerViewModel(
                                 )
                         }
                     }
-                }
-                    ?: emptyList()
+                } ?: emptyList()
 
-            _selectedDots.value =
+            selectedDotSet.value =
                 linkedSetOf<PatternDotViewModel>().apply {
-                    addAll(_selectedDots.value)
+                    addAll(selectedDotSet.value)
                     addAll(skippedOverDots)
                     add(hitDot)
                 }
@@ -173,24 +183,17 @@ class PatternBouncerViewModel(
     override fun clearInput() {
         _dots.value = defaultDots()
         _currentDot.value = null
-        _selectedDots.value = linkedSetOf()
+        selectedDotSet.value = linkedSetOf()
     }
 
     override fun getInput(): List<Any> {
-        return _selectedDots.value.map(PatternDotViewModel::toCoordinate)
+        return selectedDotSet.value.map(PatternDotViewModel::toCoordinate)
     }
 
     private fun defaultDots(): List<PatternDotViewModel> {
         return buildList {
             (0 until columnCount).forEach { x ->
-                (0 until rowCount).forEach { y ->
-                    add(
-                        PatternDotViewModel(
-                            x = x,
-                            y = y,
-                        )
-                    )
-                }
+                (0 until rowCount).forEach { y -> add(PatternDotViewModel(x = x, y = y)) }
             }
         }
     }
@@ -200,9 +203,20 @@ class PatternBouncerViewModel(
         applicationContext.resources.getValue(
             com.android.internal.R.dimen.lock_pattern_dot_hit_factor,
             outValue,
-            true
+            true,
         )
         max(min(outValue.float, 1f), MIN_DOT_HIT_FACTOR)
+    }
+
+    fun performDotFeedback(view: View?) = bouncerHapticPlayer?.playPatternDotFeedback(view)
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            bouncerHapticPlayer: BouncerHapticPlayer,
+            isInputEnabled: StateFlow<Boolean>,
+            onIntentionalUserInput: () -> Unit,
+        ): PatternBouncerViewModel
     }
 
     companion object {
@@ -216,7 +230,7 @@ class PatternBouncerViewModel(
  */
 private fun PatternDotViewModel.isOnLineSegment(
     first: PatternDotViewModel,
-    second: PatternDotViewModel
+    second: PatternDotViewModel,
 ): Boolean {
     val anotherPoint = this
     // No need to consider any points outside the bounds of two end points
@@ -238,14 +252,8 @@ private fun Int.isBetween(a: Int, b: Int): Boolean {
     return (this in a..b) || (this in b..a)
 }
 
-data class PatternDotViewModel(
-    val x: Int,
-    val y: Int,
-) {
+data class PatternDotViewModel(val x: Int, val y: Int) {
     fun toCoordinate(): AuthenticationPatternCoordinate {
-        return AuthenticationPatternCoordinate(
-            x = x,
-            y = y,
-        )
+        return AuthenticationPatternCoordinate(x = x, y = y)
     }
 }

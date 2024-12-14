@@ -172,7 +172,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
-    static final boolean DEBUG_REBOOT = true;
+    static final boolean DEBUG_REBOOT = Build.IS_DEBUGGABLE;
 
     @VisibleForTesting
     static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
@@ -588,7 +588,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     void handleOnDefaultLauncherChanged(int userId) {
         if (DEBUG) {
-            Slog.v(TAG, "Default launcher changed for user: " + userId);
+            Slog.v(TAG, "Default launcher changed for userId=" + userId);
         }
 
         // Default launcher is removed or changed, revoke all URI permissions.
@@ -712,7 +712,7 @@ public class ShortcutService extends IShortcutService.Stub {
     /** lifecycle event */
     void handleUnlockUser(int userId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "handleUnlockUser: user=" + userId);
+            Slog.d(TAG, "handleUnlockUser: userId=" + userId);
         }
         synchronized (mUnlockedUsers) {
             mUnlockedUsers.put(userId, true);
@@ -739,7 +739,7 @@ public class ShortcutService extends IShortcutService.Stub {
     /** lifecycle event */
     void handleStopUser(int userId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "handleStopUser: user=" + userId);
+            Slog.d(TAG, "handleStopUser: userId=" + userId);
         }
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "shortcutHandleStopUser");
         synchronized (mServiceLock) {
@@ -755,7 +755,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mServiceLock")
     private void unloadUserLocked(int userId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "unloadUserLocked: user=" + userId);
+            Slog.d(TAG, "unloadUserLocked: userId=" + userId);
         }
         // Cancel any ongoing background tasks.
         getUserShortcutsLocked(userId).cancelAllInFlightTasks();
@@ -1221,7 +1221,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void scheduleSaveInner(@UserIdInt int userId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Scheduling to save for " + userId);
+            Slog.d(TAG, "Scheduling to save for userId=" + userId);
         }
         synchronized (mServiceLock) {
             if (!mDirtyUserIds.contains(userId)) {
@@ -1333,7 +1333,7 @@ public class ShortcutService extends IShortcutService.Stub {
     // Requires mServiceLock held, but "Locked" prefix would look weird so we just say "L".
     void throwIfUserLockedL(@UserIdInt int userId) {
         if (!isUserUnlockedL(userId)) {
-            throw new IllegalStateException("User " + userId + " is locked or not running");
+            throw new IllegalStateException("User (with userId=" + userId + ") is locked or not running");
         }
     }
 
@@ -1720,7 +1720,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         // Otherwise, make sure the arguments are valid.
         if (UserHandle.getUserId(callingUid) != userId) {
-            throw new SecurityException("Invalid user-ID");
+            throw new SecurityException("Invalid userId");
         }
     }
 
@@ -1735,7 +1735,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
         // Otherwise, make sure the arguments are valid.
         if (UserHandle.getUserId(callingUid) != userId) {
-            throw new SecurityException("Invalid user-ID");
+            throw new SecurityException("Invalid userId");
         }
         if (injectGetPackageUid(packageName, userId) != callingUid) {
             throw new SecurityException("Calling package name mismatch");
@@ -1755,7 +1755,7 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         final int callingUid = injectBinderCallingUid();
         if (UserHandle.getUserId(callingUid) != si.getUserId()) {
-            throw new SecurityException("User-ID in shortcut doesn't match the caller");
+            throw new SecurityException("UserId in shortcut doesn't match the caller");
         }
     }
 
@@ -1822,7 +1822,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final int userId = sp.getPackageUserId();
         if (DEBUG) {
             Slog.d(TAG, String.format(
-                    "Shortcut changes: package=%s, user=%d", packageName, userId));
+                    "Shortcut changes: package=%s, userId=%d", packageName, userId));
         }
         injectPostToHandlerDebounced(sp, notifyListenerRunnable(packageName, userId));
         notifyShortcutChangeCallbacks(packageName, userId, changedShortcuts, removedShortcuts);
@@ -1832,7 +1832,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private void notifyListeners(@NonNull final String packageName, @UserIdInt final int userId) {
         if (DEBUG) {
             Slog.d(TAG, String.format(
-                    "Shortcut changes: package=%s, user=%d", packageName, userId));
+                    "Shortcut changes: package=%s, userId=%d", packageName, userId));
         }
         injectPostToHandler(notifyListenerRunnable(packageName, userId));
     }
@@ -2591,7 +2591,8 @@ public class ShortcutService extends IShortcutService.Stub {
             final List<ShortcutManager.ShareShortcutInfo> shortcutInfoList = new ArrayList<>();
             final ShortcutUser user = getUserShortcutsLocked(userId);
             user.forAllPackages(p -> shortcutInfoList.addAll(
-                    p.getMatchingShareTargets(filter, pkg)));
+                    p.getMatchingShareTargets(filter, pkg,
+                            mUserManagerInternal.getProfileParentId(userId))));
             return new ParceledListSlice<>(shortcutInfoList);
         }
     }
@@ -2623,7 +2624,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             final List<ShortcutManager.ShareShortcutInfo> matchedTargets =
                     getPackageShortcutsLocked(packageName, userId)
-                            .getMatchingShareTargets(filter);
+                            .getMatchingShareTargets(filter,
+                                    mUserManagerInternal.getProfileParentId(callingUserId));
             final int matchedSize = matchedTargets.size();
             for (int i = 0; i < matchedSize; i++) {
                 if (matchedTargets.get(i).getShortcutInfo().getId().equals(shortcutId)) {
@@ -2736,14 +2738,14 @@ public class ShortcutService extends IShortcutService.Stub {
     void resetThrottlingInner(@UserIdInt int userId) {
         synchronized (mServiceLock) {
             if (!isUserUnlockedL(userId)) {
-                Log.w(TAG, "User " + userId + " is locked or not running");
+                Log.w(TAG, "User (with userId=" + userId + ") is locked or not running");
                 return;
             }
 
             getUserShortcutsLocked(userId).resetThrottling();
         }
         scheduleSaveUser(userId);
-        Slog.i(TAG, "ShortcutManager: throttling counter reset for user " + userId);
+        Slog.i(TAG, "ShortcutManager: throttling counter reset for userId=" + userId);
     }
 
     void resetAllThrottlingInner() {
@@ -2755,7 +2757,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public void onApplicationActive(String packageName, int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "onApplicationActive: package=" + packageName + "  userid=" + userId);
+            Slog.d(TAG, "onApplicationActive: package=" + packageName + "  userId=" + userId);
         }
         enforceResetThrottlingPermission();
         synchronized (mServiceLock) {
@@ -2822,7 +2824,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             if (defaultLauncher != null) {
                 if (DEBUG) {
-                    Slog.v(TAG, "Detected launcher: " + defaultLauncher + " user: " + userId);
+                    Slog.v(TAG, "Detected launcher: " + defaultLauncher + " userId=" + userId);
                 }
                 return defaultLauncher.equals(packageName);
             } else {
@@ -2875,11 +2877,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (defaultLauncher != null) {
                     if (DEBUG) {
                         Slog.v(TAG, "Default launcher from RoleManager: " + defaultLauncher
-                                + " user: " + userId);
+                                + " userId=" + userId);
                     }
                     user.setCachedLauncher(defaultLauncher);
                 } else {
-                    Slog.e(TAG, "Default launcher not found." + " user: " + userId);
+                    Slog.e(TAG, "Default launcher not found." + " userId=" + userId);
                 }
 
                 return defaultLauncher;
@@ -2974,7 +2976,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 int queryFlags, int userId, int callingPid, int callingUid) {
             if (DEBUG_REBOOT) {
                 Slog.d(TAG, "Getting shortcuts for launcher= " + callingPackage
-                        + "user=" + userId + " pkg=" + packageName);
+                        + "userId=" + userId + " pkg=" + packageName);
             }
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
 
@@ -3443,6 +3445,14 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public void removeShortcutChangeCallback(
+                @NonNull LauncherApps.ShortcutChangeCallback callback) {
+            synchronized (mServiceLock) {
+                mShortcutChangeCallbacks.remove(Objects.requireNonNull(callback));
+            }
+        }
+
+        @Override
         public int getShortcutIconResId(int launcherUserId, @NonNull String callingPackage,
                 @NonNull String packageName, @NonNull String shortcutId, int userId) {
             Objects.requireNonNull(callingPackage, "callingPackage");
@@ -3785,7 +3795,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (!isUserUnlockedL(userId)) {
                         if (DEBUG) {
                             Slog.d(TAG, "Ignoring package broadcast " + action
-                                    + " for locked/stopped user " + userId);
+                                    + " for locked/stopped userId=" + userId);
                         }
                         return;
                     }
@@ -3806,10 +3816,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 switch (action) {
                     case Intent.ACTION_PACKAGE_ADDED:
                         if (replacing) {
-                            Slog.d(TAG, "replacing package: " + packageName + " userId" + userId);
+                            Slog.d(TAG, "replacing package: " + packageName + " userId=" + userId);
                             handlePackageUpdateFinished(packageName, userId);
                         } else {
-                            Slog.d(TAG, "adding package: " + packageName + " userId" + userId);
+                            Slog.d(TAG, "adding package: " + packageName + " userId=" + userId);
                             handlePackageAdded(packageName, userId);
                         }
                         break;
@@ -3817,21 +3827,21 @@ public class ShortcutService extends IShortcutService.Stub {
                         if (!replacing || (replacing && archival)) {
                             if (!replacing) {
                                 Slog.d(TAG, "removing package: "
-                                        + packageName + " userId" + userId);
+                                        + packageName + " userId=" + userId);
                             } else if (archival) {
                                 Slog.d(TAG, "archiving package: "
-                                        + packageName + " userId" + userId);
+                                        + packageName + " userId=" + userId);
                             }
                             handlePackageRemoved(packageName, userId);
                         }
                         break;
                     case Intent.ACTION_PACKAGE_CHANGED:
-                        Slog.d(TAG, "changing package: " + packageName + " userId" + userId);
+                        Slog.d(TAG, "changing package: " + packageName + " userId=" + userId);
                         handlePackageChanged(packageName, userId);
                         break;
                     case Intent.ACTION_PACKAGE_DATA_CLEARED:
                         Slog.d(TAG, "clearing data for package: "
-                                + packageName + " userId" + userId);
+                                + packageName + " userId=" + userId);
                         handlePackageDataCleared(packageName, userId);
                         break;
                 }
@@ -3894,7 +3904,7 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (!isPackageInstalled(spi.getPackageName(), spi.getPackageUserId())) {
                         if (DEBUG) {
                             Slog.d(TAG, "Uninstalled: " + spi.getPackageName()
-                                    + " user " + spi.getPackageUserId());
+                                    + " userId=" + spi.getPackageUserId());
                         }
                         gonePackages.add(
                                 UserPackage.of(spi.getPackageUserId(), spi.getPackageName()));
@@ -3919,7 +3929,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mServiceLock")
     private void rescanUpdatedPackagesLocked(@UserIdInt int userId, long lastScanTime) {
         if (DEBUG_REBOOT) {
-            Slog.d(TAG, "rescan updated package user=" + userId + " last scanned=" + lastScanTime);
+            Slog.d(TAG, "rescan updated package userId=" + userId + " last scanned=" + lastScanTime);
         }
         final ShortcutUser user = getUserShortcutsLocked(userId);
 
@@ -3945,7 +3955,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void handlePackageAdded(String packageName, @UserIdInt int userId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, String.format("handlePackageAdded: %s user=%d", packageName, userId));
+            Slog.d(TAG, String.format("handlePackageAdded: %s userId=%d", packageName, userId));
         }
         synchronized (mServiceLock) {
             final ShortcutUser user = getUserShortcutsLocked(userId);
@@ -3957,7 +3967,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, String.format("handlePackageUpdateFinished: %s user=%d",
+            Slog.d(TAG, String.format("handlePackageUpdateFinished: %s userId=%d",
                     packageName, userId));
         }
         synchronized (mServiceLock) {
@@ -3973,7 +3983,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void handlePackageRemoved(String packageName, @UserIdInt int packageUserId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, String.format("handlePackageRemoved: %s user=%d", packageName,
+            Slog.d(TAG, String.format("handlePackageRemoved: %s userId=%d", packageName,
                     packageUserId));
         }
         cleanUpPackageForAllLoadedUsers(packageName, packageUserId, /* appStillExists = */ false);
@@ -3983,7 +3993,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void handlePackageDataCleared(String packageName, int packageUserId) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, String.format("handlePackageDataCleared: %s user=%d", packageName,
+            Slog.d(TAG, String.format("handlePackageDataCleared: %s userId=%d", packageName,
                     packageUserId));
         }
         cleanUpPackageForAllLoadedUsers(packageName, packageUserId, /* appStillExists = */ true);
@@ -3998,7 +4008,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, String.format("handlePackageChanged: %s user=%d", packageName,
+            Slog.d(TAG, String.format("handlePackageChanged: %s userId=%d", packageName,
                     packageUserId));
         }
 
@@ -4185,7 +4195,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime, boolean afterOta,
             Consumer<ApplicationInfo> callback) {
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime
+            Slog.d(TAG, "forUpdatedPackages for userId=" + userId + ", lastScanTime=" + lastScanTime
                     + " afterOta=" + afterOta);
         }
         final List<PackageInfo> list = getInstalledPackages(userId);
@@ -4294,7 +4304,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return mContext.createContextAsUser(UserHandle.of(userId), /* flags */ 0)
                     .getPackageManager().getResourcesForApplication(packageName);
         } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Resources of package " + packageName + " for user " + userId
+            Slog.e(TAG, "Resources of package " + packageName + " for userId=" + userId
                     + " not found");
             return null;
         } finally {
@@ -4482,8 +4492,9 @@ public class ShortcutService extends IShortcutService.Stub {
             ActivityOptions options = ActivityOptions.makeBasic()
                     .setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
+            intentSender.sendIntent(mContext, 0 /* code */, extras,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }
@@ -4503,17 +4514,17 @@ public class ShortcutService extends IShortcutService.Stub {
     public byte[] getBackupPayload(@UserIdInt int userId) {
         enforceSystem();
         if (DEBUG) {
-            Slog.d(TAG, "Backing up user " + userId);
+            Slog.d(TAG, "Backing up user with userId=" + userId);
         }
         synchronized (mServiceLock) {
             if (!isUserUnlockedL(userId)) {
-                wtf("Can't backup: user " + userId + " is locked or not running");
+                wtf("Can't backup: userId=" + userId + " is locked or not running");
                 return null;
             }
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
             if (user == null) {
-                wtf("Can't backup: user not found: id=" + userId);
+                wtf("Can't backup: user not found: userId=" + userId);
                 return null;
             }
 
@@ -4553,11 +4564,11 @@ public class ShortcutService extends IShortcutService.Stub {
     public void applyRestore(byte[] payload, @UserIdInt int userId) {
         enforceSystem();
         if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Restoring user " + userId);
+            Slog.d(TAG, "Restoring user with userId=" + userId);
         }
         synchronized (mServiceLock) {
             if (!isUserUnlockedL(userId)) {
-                wtf("Can't restore: user " + userId + " is locked or not running");
+                wtf("Can't restore: user (with userId=" + userId + ") is locked or not running");
                 return;
             }
             // Note we print the file timestamps in dumpsys too, but also printing the timestamp
@@ -4980,7 +4991,7 @@ public class ShortcutService extends IShortcutService.Stub {
                             mUserId = UserHandle.parseUserArg(getNextArgRequired());
                             if (!isUserUnlockedL(mUserId)) {
                                 throw new CommandException(
-                                        "User " + mUserId + " is not running or locked");
+                                        "User (with userId=" + mUserId + ") is not running or locked");
                             }
                             break;
                         }
@@ -5085,7 +5096,7 @@ public class ShortcutService extends IShortcutService.Stub {
             synchronized (mServiceLock) {
                 parseOptionsLocked(/* takeUser =*/ true);
 
-                Slog.i(TAG, "cmd: handleResetThrottling: user=" + mUserId);
+                Slog.i(TAG, "cmd: handleResetThrottling: userId=" + mUserId);
 
                 resetThrottlingInner(mUserId);
             }
@@ -5127,7 +5138,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 final String defaultLauncher = getDefaultLauncher(mUserId);
                 if (defaultLauncher == null) {
                     throw new CommandException(
-                            "Failed to get the default launcher for user " + mUserId);
+                            "Failed to get the default launcher for userId=" + mUserId);
                 }
 
                 // Get the class name of the component from PM to keep the old behaviour.
@@ -5148,7 +5159,7 @@ public class ShortcutService extends IShortcutService.Stub {
             synchronized (mServiceLock) {
                 parseOptionsLocked(/* takeUser =*/ true);
 
-                Slog.i(TAG, "cmd: handleUnloadUser: user=" + mUserId);
+                Slog.i(TAG, "cmd: handleUnloadUser: userId=" + mUserId);
 
                 ShortcutService.this.handleStopUser(mUserId);
             }
@@ -5159,7 +5170,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 parseOptionsLocked(/* takeUser =*/ true);
                 final String packageName = getNextArgRequired();
 
-                Slog.i(TAG, "cmd: handleClearShortcuts: user" + mUserId + ", " + packageName);
+                Slog.i(TAG, "cmd: handleClearShortcuts: userId=" + mUserId + ", " + packageName);
 
                 ShortcutService.this.cleanUpPackageForAllLoadedUsers(packageName, mUserId,
                         /* appStillExists = */ true);
@@ -5171,7 +5182,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 parseOptionsLocked(/* takeUser =*/ true);
                 final String packageName = getNextArgRequired();
 
-                Slog.i(TAG, "cmd: handleGetShortcuts: user=" + mUserId + ", flags="
+                Slog.i(TAG, "cmd: handleGetShortcuts: userId=" + mUserId + ", flags="
                         + mShortcutMatchFlags + ", package=" + packageName);
 
                 final ShortcutUser user = ShortcutService.this.getUserShortcutsLocked(mUserId);

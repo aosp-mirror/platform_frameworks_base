@@ -65,10 +65,15 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Déplacer en haut à droite"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Déplacer en bas à gauche"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Déplacer en bas à droite"</string>
+    <string name="bubble_accessibility_action_expand_menu" msgid="8637233525952938845">"développer le menu"</string>
+    <string name="bubble_accessibility_action_collapse_menu" msgid="2975310870146231463">"réduire le menu"</string>
+    <string name="bubble_accessibility_action_move_bar_left" msgid="4803535120353716759">"Déplacer vers la gauche"</string>
+    <string name="bubble_accessibility_action_move_bar_right" msgid="7686542531917510421">"Déplacer vers la droite"</string>
     <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"Développer <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"Réduire <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Paramètres <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Fermer la bulle"</string>
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Passer en plein écran"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne pas afficher la conversation dans une bulle"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatter en utilisant des bulles"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes ou de bulles. Appuyez sur la bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
@@ -107,7 +112,7 @@
     <string name="minimize_button_text" msgid="271592547935841753">"Réduire"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Fermer"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Retour"</string>
-    <string name="handle_text" msgid="1766582106752184456">"Poignée"</string>
+    <string name="handle_text" msgid="4419667835599523257">"Poignée de l\'appli"</string>
     <string name="app_icon_text" msgid="2823268023931811747">"Icône d\'application"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Plein écran"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Mode ordinateur"</string>
@@ -116,9 +121,16 @@
     <string name="float_button_text" msgid="9221657008391364581">"Flottante"</string>
     <string name="select_text" msgid="5139083974039906583">"Sélectionner"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Capture d\'écran"</string>
+    <string name="open_in_browser_text" msgid="9181692926376072904">"Ouvrir dans un navigateur"</string>
+    <string name="new_window_text" msgid="6318648868380652280">"Nouvelle fenêtre"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"Gérer les fenêtres"</string>
     <string name="close_text" msgid="4986518933445178928">"Fermer"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Fermer le menu"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"Ouvrir le menu"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Ouvrir le menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Mettre en plein écran"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Fractionner l\'écran"</string>
+    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"Impossible de redimensionner cette appli"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Agrandir"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Ancrer à gauche"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Ancrer à droite"</string>
 </resources>

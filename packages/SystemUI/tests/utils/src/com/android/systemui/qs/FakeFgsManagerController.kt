@@ -27,6 +27,9 @@ class FakeFgsManagerController(
     numRunningPackages: Int = 0,
 ) : FgsManagerController {
 
+    var initialized = false
+        private set
+
     override var numRunningPackages = numRunningPackages
         set(value) {
             if (value != field) {
@@ -53,7 +56,9 @@ class FakeFgsManagerController(
         dialogDismissedListeners.forEach { it.onDialogDismissed() }
     }
 
-    override fun init() {}
+    override fun init() {
+        initialized = true
+    }
 
     override fun showDialog(expandable: Expandable?) {}
 

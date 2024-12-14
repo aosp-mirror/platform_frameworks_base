@@ -140,6 +140,41 @@ class PackageInstallerMonitorTest : SysuiTestCase() {
         }
 
     @Test
+    fun installSessions_ignoreNullPackageNameSessions() =
+        testScope.runTest {
+            val nullPackageSession =
+                SessionInfo().apply {
+                    sessionId = 1
+                    appPackageName = null
+                    appIcon = icon1
+                }
+            val wellFormedSession =
+                SessionInfo().apply {
+                    sessionId = 2
+                    appPackageName = "pkg_name"
+                    appIcon = icon2
+                }
+
+            defaultSessions = listOf(nullPackageSession, wellFormedSession)
+
+            whenever(packageInstaller.allSessions).thenReturn(defaultSessions)
+            whenever(packageInstaller.getSessionInfo(1)).thenReturn(nullPackageSession)
+            whenever(packageInstaller.getSessionInfo(2)).thenReturn(wellFormedSession)
+
+            val packageInstallerMonitor =
+                PackageInstallerMonitor(
+                    handler,
+                    kosmos.applicationCoroutineScope,
+                    logcatLogBuffer("PackageInstallerRepositoryImplTest"),
+                    packageInstaller,
+                )
+
+            val sessions by
+                testScope.collectLastValue(packageInstallerMonitor.installSessionsForPrimaryUser)
+            assertThat(sessions?.size).isEqualTo(1)
+        }
+
+    @Test
     fun installSessions_newSessionsAreAdded() =
         testScope.runTest {
             val installSessions by collectLastValue(underTest.installSessionsForPrimaryUser)
@@ -177,7 +212,7 @@ class PackageInstallerMonitorTest : SysuiTestCase() {
                 }
 
             // Session 1 finished successfully
-            callback.onFinished(1, /* success = */ true)
+            callback.onFinished(1, /* success= */ true)
             runCurrent()
 
             // Verify flow updated with session 1 removed

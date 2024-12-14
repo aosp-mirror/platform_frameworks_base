@@ -43,10 +43,11 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -68,7 +69,12 @@ constructor(
     mobileConnectionsRepository: MobileConnectionsRepository,
 ) {
     val subId: StateFlow<Int> = repository.subscriptionId
-    val isAnySimSecure: Flow<Boolean> = mobileConnectionsRepository.isAnySimSecure
+    val isAnySimSecure: StateFlow<Boolean> =
+        mobileConnectionsRepository.isAnySimSecure.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = mobileConnectionsRepository.getIsAnySimSecure(),
+        )
     val isLockedEsim: StateFlow<Boolean?> = repository.isLockedEsim
     val errorDialogMessage: StateFlow<String?> = repository.errorDialogMessage
 

@@ -460,7 +460,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
             event.startTracking();
             return true;
         }
@@ -479,7 +479,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return true;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_BACK
+        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking() && !event.isCanceled()) {
             if (mPrintPreviewController != null && mPrintPreviewController.isOptionsOpened()
                     && !hasErrors()) {

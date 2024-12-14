@@ -864,7 +864,8 @@ public class BatterySaverStateMachine {
                     buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
                             R.string.dynamic_mode_notification_title,
                             R.string.dynamic_mode_notification_summary,
-                            Settings.ACTION_BATTERY_SAVER_SETTINGS, 0L),
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS, 0L,
+                            R.drawable.ic_settings),
                     UserHandle.ALL);
         });
     }
@@ -889,7 +890,8 @@ public class BatterySaverStateMachine {
                             R.string.dynamic_mode_notification_summary_v2,
                             Settings.ACTION_BATTERY_SAVER_SETTINGS,
                             0L /* timeoutMs */,
-                            highlightBundle),
+                            highlightBundle,
+                            R.drawable.ic_qs_battery_saver),
                     UserHandle.ALL);
         });
     }
@@ -911,7 +913,8 @@ public class BatterySaverStateMachine {
                             R.string.battery_saver_off_notification_title,
                             R.string.battery_saver_charged_notification_summary,
                             Settings.ACTION_BATTERY_SAVER_SETTINGS,
-                            STICKY_DISABLED_NOTIFY_TIMEOUT_MS),
+                            STICKY_DISABLED_NOTIFY_TIMEOUT_MS,
+                            R.drawable.ic_settings),
                     UserHandle.ALL);
         });
     }
@@ -926,7 +929,7 @@ public class BatterySaverStateMachine {
     }
 
     private Notification buildNotification(@NonNull String channelId, @StringRes int titleId,
-            @StringRes int summaryId, @NonNull String intentAction, long timeoutMs) {
+            @StringRes int summaryId, @NonNull String intentAction, long timeoutMs, int iconResId) {
         Resources res = mContext.getResources();
         Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -937,7 +940,7 @@ public class BatterySaverStateMachine {
         final String summary = res.getString(summaryId);
 
         return new Notification.Builder(mContext, channelId)
-                .setSmallIcon(R.drawable.ic_battery)
+                .setSmallIcon(iconResId)
                 .setContentTitle(title)
                 .setContentText(summary)
                 .setContentIntent(batterySaverIntent)
@@ -950,7 +953,7 @@ public class BatterySaverStateMachine {
 
     private Notification buildNotificationV2(@NonNull String channelId, @StringRes int titleId,
             @StringRes int summaryId, @NonNull String intentAction, long timeoutMs,
-            @NonNull Bundle highlightBundle) {
+            @NonNull Bundle highlightBundle, int iconResId) {
         Resources res = mContext.getResources();
         Intent intent = new Intent(intentAction)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -963,7 +966,7 @@ public class BatterySaverStateMachine {
         final String summary = res.getString(summaryId);
 
         return new Notification.Builder(mContext, channelId)
-                .setSmallIcon(R.drawable.ic_battery)
+                .setSmallIcon(iconResId)
                 .setContentTitle(title)
                 .setContentText(summary)
                 .setContentIntent(batterySaverIntent)

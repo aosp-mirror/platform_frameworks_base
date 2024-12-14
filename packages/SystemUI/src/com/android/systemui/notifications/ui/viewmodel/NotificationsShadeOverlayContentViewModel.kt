@@ -1,0 +1,50 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.notifications.ui.viewmodel
+
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+
+/**
+ * Models UI state used to render the content of the notifications shade overlay.
+ *
+ * Different from [NotificationsShadeOverlayActionsViewModel], which only models user actions that
+ * can be performed to navigate to other scenes.
+ */
+class NotificationsShadeOverlayContentViewModel
+@AssistedInject
+constructor(
+    val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
+    val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
+    private val sceneInteractor: SceneInteractor,
+) {
+    fun onScrimClicked() {
+        sceneInteractor.hideOverlay(
+            overlay = Overlays.NotificationsShade,
+            loggingReason = "Shade scrim clicked",
+        )
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(): NotificationsShadeOverlayContentViewModel
+    }
+}

@@ -32,4 +32,5 @@ interface ISharedConnectivityCallback {
     oneway void onKnownNetworkConnectionStatusChanged(in KnownNetworkConnectionStatus status);
     oneway void onSharedConnectivitySettingsChanged(in SharedConnectivitySettingsState state);
     oneway void onServiceConnected();
+    oneway void onServiceDisconnected();
 }

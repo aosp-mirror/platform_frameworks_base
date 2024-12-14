@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.util.ArraySet;
+import android.util.Size;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -193,8 +194,8 @@ public class DisplayController {
 
 
     /** Called when a display rotate requested. */
-    public void onDisplayRotateRequested(WindowContainerTransaction wct, int displayId,
-            int fromRotation, int toRotation) {
+    public void onDisplayChangeRequested(WindowContainerTransaction wct, int displayId,
+            Rect startAbsBounds, Rect endAbsBounds, int fromRotation, int toRotation) {
         synchronized (mDisplays) {
             final DisplayRecord dr = mDisplays.get(displayId);
             if (dr == null) {
@@ -203,7 +204,16 @@ public class DisplayController {
             }
 
             if (dr.mDisplayLayout != null) {
-                dr.mDisplayLayout.rotateTo(dr.mContext.getResources(), toRotation);
+                if (endAbsBounds != null) {
+                    // If there is a change in the display dimensions update the layout as well;
+                    // note that endAbsBounds should ignore any potential rotation changes, so
+                    // we still need to rotate the layout after if needed.
+                    dr.mDisplayLayout.resizeTo(dr.mContext.getResources(),
+                            new Size(endAbsBounds.width(), endAbsBounds.height()));
+                }
+                if (fromRotation != toRotation) {
+                    dr.mDisplayLayout.rotateTo(dr.mContext.getResources(), toRotation);
+                }
             }
 
             mChangeController.dispatchOnDisplayChange(

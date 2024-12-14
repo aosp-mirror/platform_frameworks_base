@@ -21,8 +21,6 @@ import com.android.asllib.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
-
 /** ThirdPartyVerification representation. */
 public class ThirdPartyVerification implements AslMarshallable {
 
@@ -33,19 +31,17 @@ public class ThirdPartyVerification implements AslMarshallable {
     }
 
     /** Creates an on-device DOM element from the {@link ThirdPartyVerification}. */
-    @Override
-    public List<Element> toOdDomElements(Document doc) {
+    public Element toOdDomElement(Document doc) {
         Element ele =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_THIRD_PARTY_VERIFICATION);
         ele.appendChild(XmlUtils.createOdStringEle(doc, XmlUtils.OD_NAME_URL, mUrl));
-        return XmlUtils.listOf(ele);
+        return ele;
     }
 
     /** Creates the human-readable DOM elements from the AslMarshallable Java Object. */
-    @Override
-    public List<Element> toHrDomElements(Document doc) {
+    public Element toHrDomElement(Document doc) {
         Element ele = doc.createElement(XmlUtils.HR_TAG_THIRD_PARTY_VERIFICATION);
         ele.setAttribute(XmlUtils.HR_ATTR_URL, mUrl);
-        return XmlUtils.listOf(ele);
+        return ele;
     }
 }

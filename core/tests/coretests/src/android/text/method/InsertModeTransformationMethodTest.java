@@ -20,6 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -27,11 +31,13 @@ import android.text.style.ReplacementSpan;
 import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
+import com.android.text.flags.Flags;
 
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,6 +47,9 @@ import org.junit.runner.RunWith;
 public class InsertModeTransformationMethodTest {
     private static View sView;
     private static final String TEXT = "abc def";
+
+    @Rule
+    public CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @BeforeClass
     public static void setupClass() {
@@ -77,11 +86,13 @@ public class InsertModeTransformationMethodTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
     public void transformedText_charAt_editing() {
         transformedText_charAt_editing(false, "\n\n");
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
     public void transformedText_charAt_singleLine_editing() {
         transformedText_charAt_editing(true, "\uFFFD");
     }
@@ -130,6 +141,64 @@ public class InsertModeTransformationMethodTest {
         // the index 3.
         text.replace(1, 5, "bc de");
         assertCharSequence(transformedText, "abc de" + placeholder + "f");
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_charAt_editing_stickyHighlightRange() {
+        transformedText_charAt_editing_stickyHighlightRange(false, "\n\n");
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_charAt_singleLine_editing_stickyHighlightRange() {
+        transformedText_charAt_editing_stickyHighlightRange(true, "\uFFFD");
+    }
+
+    private void transformedText_charAt_editing_stickyHighlightRange(boolean singleLine,
+            String placeholder) {
+        final SpannableStringBuilder text = new SpannableStringBuilder(TEXT);
+        final InsertModeTransformationMethod transformationMethod =
+                new InsertModeTransformationMethod(3, singleLine, null);
+        final CharSequence transformedText = transformationMethod.getTransformation(text, sView);
+        // TransformationMethod is set on the original text as a TextWatcher in the TextView.
+        text.setSpan(transformationMethod, 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        assertCharSequence(transformedText,  "abc" + placeholder + " def");
+
+        // original text is "abcxx def" after insertion.
+        text.insert(3, "xx");
+        assertCharSequence(transformedText, "abcxx" + placeholder + " def");
+
+        // original text is "abcxx vvdef" after insertion.
+        text.insert(6, "vv");
+        assertCharSequence(transformedText, "abcxx" + placeholder + " vvdef");
+
+        // original text is "abc vvdef" after deletion.
+        text.delete(3, 5);
+        assertCharSequence(transformedText, "abc" + placeholder + " vvdef");
+
+        // original text is "abc def" after deletion.
+        text.delete(4, 6);
+        assertCharSequence(transformedText, "abc" + placeholder + " def");
+
+        // original text is "abdef" after deletion.
+        // deletion range covers the placeholder's insertion point. It'll try to stay the same,
+        // which is still at index 3.
+        text.delete(2, 4);
+        assertCharSequence(transformedText, "abd" + placeholder + "ef");
+
+        // original text is "axxdef" after replace.
+        // this time the replaced range is ahead of the placeholder's insertion point. It updates to
+        // index 4.
+        text.replace(1, 2, "xx");
+        assertCharSequence(transformedText, "axxd" + placeholder + "ef");
+
+        // original text is "ax" after replace.
+        // the deleted range covers the placeholder's insertion point. It tries to stay at index 4.
+        // However, 4 out of bounds now. So placeholder is inserted at the end of the string.
+        text.delete(2, 6);
+        assertCharSequence(transformedText, "ax" + placeholder);
     }
 
     @Test
@@ -698,7 +767,7 @@ public class InsertModeTransformationMethodTest {
     }
 
     @Test
-    public void transformedText_getHighlightStartAndEnd_insertion_singleLine() {
+    public void transformedText_getHighlightStartAndEnd_singleLine_insertion() {
         transformedText_getHighlightStartAndEnd_insertion(true, "\uFDDD");
     }
 
@@ -752,16 +821,18 @@ public class InsertModeTransformationMethodTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
     public void transformedText_getHighlightStartAndEnd_deletion() {
         transformedText_getHighlightStartAndEnd_deletion(false, "\n\n");
     }
 
     @Test
-    public void transformedText_getHighlightStartAndEnd_insertion_deletion() {
+    @RequiresFlagsDisabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_getHighlightStartAndEnd_singleLine_deletion() {
         transformedText_getHighlightStartAndEnd_deletion(true, "\uFDDD");
     }
 
-    public void transformedText_getHighlightStartAndEnd_deletion(boolean singleLine,
+    private void transformedText_getHighlightStartAndEnd_deletion(boolean singleLine,
             String placeholder) {
         final SpannableStringBuilder text = new SpannableStringBuilder(TEXT);
         final InsertModeTransformationMethod transformationMethod =
@@ -817,14 +888,93 @@ public class InsertModeTransformationMethodTest {
         assertThat(transformedText.getHighlightEnd()).isEqualTo(1 + placeholder.length());
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_getHighlightStartAndEnd_deletion_stickyHighlightRange() {
+        transformedText_getHighlightStartAndEnd_deletion_stickyHighlightRange(false, "\n\n");
+    }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_getHighlightStartAndEnd_singleLine_deletion_stickyHighlightRange() {
+        transformedText_getHighlightStartAndEnd_deletion_stickyHighlightRange(true, "\uFDDD");
+    }
+
+    private void transformedText_getHighlightStartAndEnd_deletion_stickyHighlightRange(
+            boolean singleLine, String placeholder) {
+        final SpannableStringBuilder text = new SpannableStringBuilder(TEXT);
+        final InsertModeTransformationMethod transformationMethod =
+                new InsertModeTransformationMethod(3, singleLine, null);
+        final InsertModeTransformationMethod.TransformedText transformedText =
+                (InsertModeTransformationMethod.TransformedText) transformationMethod
+                        .getTransformation(text, sView);
+        // TransformationMethod is set on the original text as a TextWatcher in the TextView.
+        text.setSpan(transformationMethod, 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        // note: the placeholder text is also highlighted.
+        assertThat(transformedText.getHighlightStart()).isEqualTo(3);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(3 + placeholder.length());
+
+        // original text is "abcxxxxxx def" after insertion.
+        // the placeholder is now inserted at index 9.
+        // the highlight start is still 3.
+        // the highlight end now is 9 + placeholder.length().
+        text.insert(3, "xxxxxx");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(3);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(9 + placeholder.length());
+
+        // original text is "abxxxxxx def" after deletion.
+        // the placeholder is now inserted at index 6.
+        // the highlight start is 2, since the deletion happens before the highlight range.
+        // the highlight end now is 8 + placeholder.length().
+        text.delete(2, 3);
+        assertThat(transformedText.getHighlightStart()).isEqualTo(2);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(8 + placeholder.length());
+
+        // original text is "abxxx def" after deletion.
+        // the placeholder is now inserted at index 5.
+        // the highlight start is still 2, since the deletion happens in the highlight range.
+        // the highlight end now is 5 + placeholder.length().
+        text.delete(2, 5);
+        assertThat(transformedText.getHighlightStart()).isEqualTo(2);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(5 + placeholder.length());
+
+        // original text is "abxxx d" after deletion.
+        // the placeholder is now inserted at index 5.
+        // the highlight start is still 2, since the deletion happens after the highlight range.
+        // the highlight end now is still 5 + placeholder.length().
+        text.delete(7, 9);
+        assertThat(transformedText.getHighlightStart()).isEqualTo(2);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(5 + placeholder.length());
+
+        // original text is "axx d" after deletion.
+        // the placeholder is now inserted at index 3.
+        // the highlight start is at 2, since the deletion range covers the start.
+        // the highlight end is 3 + placeholder.length().
+        text.delete(1, 3);
+        assertThat(transformedText.getHighlightStart()).isEqualTo(2);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(3 + placeholder.length());
+
+        // original text is "ax" after deletion.
+        // the placeholder is now inserted at index 2.
+        // the highlight start is at 2.
+        // the highlight end is 2 + placeholder.length(). It wants to stay at 3, but it'll be out
+        // of bounds, so it'll be 2 instead.
+        text.delete(2, 5);
+        assertThat(transformedText.getHighlightStart()).isEqualTo(2);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(2 + placeholder.length());
+    }
+
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
     public void transformedText_getHighlightStartAndEnd_replace() {
         transformedText_getHighlightStartAndEnd_replace(false, "\n\n");
     }
 
     @Test
-    public void transformedText_getHighlightStartAndEnd_insertion__replace() {
+    @RequiresFlagsDisabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_getHighlightStartAndEnd_singleLine_replace() {
         transformedText_getHighlightStartAndEnd_replace(true, "\uFDDD");
     }
 
@@ -907,6 +1057,99 @@ public class InsertModeTransformationMethodTest {
         text.replace(1, 8, "xx");
         assertThat(transformedText.getHighlightStart()).isEqualTo(1);
         assertThat(transformedText.getHighlightEnd()).isEqualTo(3 + placeholder.length());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_getHighlightStartAndEnd_replace_stickyHighlightRange() {
+        transformedText_getHighlightStartAndEnd_replace_stickyHighlightRange(false, "\n\n");
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INSERT_MODE_HIGHLIGHT_RANGE)
+    public void transformedText_getHighlightStartAndEnd_singleLine_replace_stickyHighlightRange() {
+        transformedText_getHighlightStartAndEnd_replace_stickyHighlightRange(true, "\uFDDD");
+    }
+
+    private void transformedText_getHighlightStartAndEnd_replace_stickyHighlightRange(
+            boolean singleLine, String placeholder) {
+        final SpannableStringBuilder text = new SpannableStringBuilder(TEXT);
+        final InsertModeTransformationMethod transformationMethod =
+                new InsertModeTransformationMethod(3, singleLine, null);
+        final InsertModeTransformationMethod.TransformedText transformedText =
+                (InsertModeTransformationMethod.TransformedText) transformationMethod
+                        .getTransformation(text, sView);
+        // TransformationMethod is set on the original text as a TextWatcher in the TextView.
+        text.setSpan(transformationMethod, 0, text.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        // note: the placeholder text is also highlighted.
+        assertThat(transformedText.getHighlightStart()).isEqualTo(3);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(3 + placeholder.length());
+
+        // original text is "abcxxxxxx def" after insertion.
+        // the placeholder is now inserted at index 9.
+        // the highlight start is still 3.
+        // the highlight end now is 9 + placeholder.length().
+        text.insert(3, "xxxxxx");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(3);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(9 + placeholder.length());
+
+        // original text is "abvvxxxxxx def" after replace.
+        // the replacement happens before the highlight range; highlight range is offset by 1
+        // the placeholder is now inserted at index 10,
+        // the highlight start is 4.
+        // the highlight end is 10 + placeholder.length().
+        text.replace(2, 3, "vv");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(4);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(10 + placeholder.length());
+
+        // original text is "abvvxxx def" after replace.
+        // the replacement happens in the highlight range; highlight end is offset by -3
+        // the placeholder is now inserted at index 7,
+        // the highlight start is still 4.
+        // the highlight end is 7 + placeholder.length().
+        text.replace(5, 9, "x");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(4);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(7 + placeholder.length());
+
+        // original text is "abvvxxxvvv" after replace.
+        // the replacement happens after the highlight range; highlight is not changed
+        // the placeholder is now inserted at index 7,
+        // the highlight start is still 4.
+        // the highlight end is 7 + placeholder.length().
+        text.replace(7, 11, "vvv");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(4);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(7 + placeholder.length());
+
+        // original text is "abxxxxvvv" after replace.
+        // the replacement covers the highlight start; highlight start stays the same;
+        // highlight end is offset by -1
+        // the placeholder is now inserted at index 6,
+        // the highlight start is 4.
+        // the highlight end is 6 + placeholder.length().
+        text.replace(2, 5, "xx");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(4);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(6 + placeholder.length());
+
+        // original text is "abxxxxxvv" after replace.
+        // the replacement covers the highlight end; highlight end stays the same;
+        // highlight start stays the same
+        // the placeholder is now inserted at index 6,
+        // the highlight start is 2.
+        // the highlight end is 6 + placeholder.length().
+        text.replace(5, 7, "xx");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(4);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(6 + placeholder.length());
+
+        // original text is "axxv" after replace.
+        // the replacement covers the highlight range; highlight start stays the same.
+        // highlight end shrink to the text length.
+        // the placeholder is now inserted at index 3,
+        // the highlight start is 2.
+        // the highlight end is 4 + placeholder.length().
+        text.replace(1, 8, "xx");
+        assertThat(transformedText.getHighlightStart()).isEqualTo(4);
+        assertThat(transformedText.getHighlightEnd()).isEqualTo(4 + placeholder.length());
     }
 
     private static  <T> void assertNextSpanTransition(Spanned spanned, int[] transitions,

@@ -17,5 +17,7 @@
 package com.android.systemui.haptics
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.VibratorHelper
 
-var Kosmos.vibratorHelper by Kosmos.Fixture { FakeVibratorHelper() }
+var Kosmos.vibratorHelper: VibratorHelper by Kosmos.Fixture { fakeVibratorHelper }
+val Kosmos.fakeVibratorHelper by Kosmos.Fixture { FakeVibratorHelper() }

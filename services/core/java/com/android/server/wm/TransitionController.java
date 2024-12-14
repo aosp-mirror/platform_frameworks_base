@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
@@ -42,6 +41,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.WindowManager;
 import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
@@ -52,8 +52,8 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogGroup;
-import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
 import com.android.window.flags.Flags;
 
@@ -326,7 +326,6 @@ class TransitionController {
         mCollectingTransition.startCollecting(timeoutMs);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
                 mCollectingTransition);
-        dispatchLegacyAppTransitionPending();
     }
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player,
@@ -409,6 +408,10 @@ class TransitionController {
      */
     @Nullable
     Transition getCollectingTransition() {
+        if (mCollectingTransition != null && !mCollectingTransition.isCollecting()) {
+            Slog.wtfStack(TAG, "Collecting Transition (#" + mCollectingTransition.getSyncId()
+                    + ") is not collecting. state=" + mCollectingTransition.getState());
+        }
         return mCollectingTransition;
     }
 
@@ -877,10 +880,10 @@ class TransitionController {
     }
 
     /** @see Transition#setOverrideAnimation */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options, ActivityRecord r,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setOverrideAnimation(options, startCallback, finishCallback);
+        mCollectingTransition.setOverrideAnimation(options, r, startCallback, finishCallback);
     }
 
     void setNoAnimation(WindowContainer wc) {
@@ -918,7 +921,12 @@ class TransitionController {
     }
 
     /** @see Transition#finishTransition */
-    void finishTransition(Transition record) {
+    void finishTransition(@NonNull ActionChain chain) {
+        if (!chain.isFinishing()) {
+            throw new IllegalStateException("Can't finish on a non-finishing transition "
+                    + chain.mTransition);
+        }
+        final Transition record = chain.mTransition;
         // It is usually a no-op but make sure that the metric consumer is removed.
         mTransitionMetricsReporter.reportAnimationStart(record.getToken(), 0 /* startTime */);
         // It is a no-op if the transition did not change the display.
@@ -934,7 +942,7 @@ class TransitionController {
             mTrackCount = 0;
         }
         updateRunningRemoteAnimation(record, false /* isPlaying */);
-        record.finishTransition();
+        record.finishTransition(chain);
         for (int i = mAnimatingExitWindows.size() - 1; i >= 0; i--) {
             final WindowState w = mAnimatingExitWindows.get(i);
             if (w.mAnimatingExit && w.mHasSurface && !w.inTransition()) {
@@ -1311,23 +1319,6 @@ class TransitionController {
     void setTransientLaunch(@NonNull ActivityRecord activity, @Nullable Task restoreBelowTask) {
         if (mCollectingTransition == null) return;
         mCollectingTransition.setTransientLaunch(activity, restoreBelowTask);
-
-        // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
-        // Also interpret HOME transient launch as recents
-        if (activity.isActivityTypeHomeOrRecents()) {
-            mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
-            // When starting recents animation, we assume the recents activity is behind the app
-            // task and should not affect system bar appearance,
-            // until WMS#setRecentsAppBehindSystemBars be called from launcher when passing
-            // the gesture threshold.
-            activity.getTask().setCanAffectSystemUiFlags(false);
-        }
-    }
-
-    /** @see Transition#setCanPipOnFinish */
-    void setCanPipOnFinish(boolean canPipOnFinish) {
-        if (mCollectingTransition == null) return;
-        mCollectingTransition.setCanPipOnFinish(canPipOnFinish);
     }
 
     void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
@@ -1347,31 +1338,56 @@ class TransitionController {
         mLegacyListeners.remove(listener);
     }
 
-    void dispatchLegacyAppTransitionPending() {
+    private static boolean shouldDispatchLegacyListener(
+            WindowManagerInternal.AppTransitionListener listener, int displayId) {
+        // INVALID_DISPLAY means that it is a global listener.
+        return listener.mTargetDisplayId == Display.INVALID_DISPLAY
+                || listener.mTargetDisplayId == displayId;
+    }
+
+    void dispatchLegacyAppTransitionPending(int displayId) {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            mLegacyListeners.get(i).onAppTransitionPendingLocked();
+            final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
+            if (shouldDispatchLegacyListener(listener, displayId)) {
+                listener.onAppTransitionPendingLocked();
+            }
         }
     }
 
-    void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
+    void dispatchLegacyAppTransitionStarting(DisplayContent[] participantDisplays,
+            long statusBarTransitionDelay) {
+        final long now = SystemClock.uptimeMillis();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            // TODO(shell-transitions): handle (un)occlude transition.
-            mLegacyListeners.get(i).onAppTransitionStartingLocked(
-                    SystemClock.uptimeMillis() + statusBarTransitionDelay,
-                    AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
+            final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
+            for (int j = 0; j < participantDisplays.length; ++j) {
+                final int displayId = participantDisplays[j].mDisplayId;
+                if (shouldDispatchLegacyListener(listener, displayId)) {
+                    listener.onAppTransitionStartingLocked(
+                            now + statusBarTransitionDelay,
+                            AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
+                }
+            }
         }
     }
 
     void dispatchLegacyAppTransitionFinished(ActivityRecord ar) {
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            mLegacyListeners.get(i).onAppTransitionFinishedLocked(ar.token);
+            final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
+            if (shouldDispatchLegacyListener(listener, ar.getDisplayId())) {
+                listener.onAppTransitionFinishedLocked(ar.token);
+            }
         }
     }
 
-    void dispatchLegacyAppTransitionCancelled() {
-        for (int i = 0; i < mLegacyListeners.size(); ++i) {
-            mLegacyListeners.get(i).onAppTransitionCancelledLocked(
-                    false /* keyguardGoingAwayCancelled */);
+    void dispatchLegacyAppTransitionCancelled(ArrayList<DisplayContent> targetDisplays) {
+        for (int i = 0; i < targetDisplays.size(); ++i) {
+            final int displayId = targetDisplays.get(i).mDisplayId;
+            for (int j = 0; j < mLegacyListeners.size(); ++j) {
+                final var listener = mLegacyListeners.get(j);
+                if (shouldDispatchLegacyListener(listener, displayId)) {
+                    listener.onAppTransitionCancelledLocked(false /* keyguardGoingAwayCancelled */);
+                }
+            }
         }
     }
 
@@ -1435,7 +1451,7 @@ class TransitionController {
      *
      * WARNING: ONLY use this if the transition absolutely cannot be deferred!
      */
-    @NonNull
+    @Nullable
     Transition createAndStartCollecting(int type) {
         if (mTransitionPlayers.isEmpty()) {
             return null;

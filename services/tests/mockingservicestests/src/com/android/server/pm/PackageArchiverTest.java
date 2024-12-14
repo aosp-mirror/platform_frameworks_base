@@ -266,8 +266,8 @@ public class PackageArchiverTest {
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any(),
-                any(), any());
+        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(),
+                (Bundle) any(), any(), any());
         Intent value = intentCaptor.getValue();
         assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
         assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(
@@ -336,8 +336,8 @@ public class PackageArchiverTest {
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any(),
-                any(), any());
+        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(),
+                (Bundle) any(), any(), any());
         Intent value = intentCaptor.getValue();
         assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
         assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(

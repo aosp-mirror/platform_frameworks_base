@@ -34,14 +34,16 @@ import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.CTRL
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.META
 import com.android.systemui.keyboard.stickykeys.shared.model.ModifierKey.SHIFT
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.fakeSettings
 import com.android.systemui.util.settings.repository.UserAwareSecureSettingsRepositoryImpl
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -57,29 +59,28 @@ import org.mockito.Mockito.verifyZeroInteractions
 @RunWith(AndroidJUnit4::class)
 class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
 
-    private val dispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(dispatcher)
+    private val kosmos = testKosmos()
+    private val dispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
     private lateinit var viewModel: StickyKeysIndicatorViewModel
     private val inputManager = mock<InputManager>()
     private val keyboardRepository = FakeKeyboardRepository()
-    private val secureSettings = FakeSettings()
+    private val secureSettings = kosmos.fakeSettings
     private val userRepository = Kosmos().fakeUserRepository
     private val captor =
         ArgumentCaptor.forClass(InputManager.StickyModifierStateListener::class.java)
 
     @Before
     fun setup() {
-        val settingsRepository = UserAwareSecureSettingsRepositoryImpl(
-            secureSettings,
-            userRepository,
-            dispatcher
-        )
-        val stickyKeysRepository = StickyKeysRepositoryImpl(
-            inputManager,
-            dispatcher,
-            settingsRepository,
-            mock<StickyKeysLogger>()
-        )
+        val settingsRepository =
+            UserAwareSecureSettingsRepositoryImpl(secureSettings, userRepository, dispatcher)
+        val stickyKeysRepository =
+            StickyKeysRepositoryImpl(
+                inputManager,
+                dispatcher,
+                settingsRepository,
+                mock<StickyKeysLogger>()
+            )
         setStickyKeySetting(enabled = false)
         viewModel =
             StickyKeysIndicatorViewModel(
@@ -182,16 +183,16 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
             setStickyKeysActive()
 
-            setStickyKeys(mapOf(
-                ALT to false,
-                META to false,
-                SHIFT to false))
+            setStickyKeys(mapOf(ALT to false, META to false, SHIFT to false))
 
-            assertThat(stickyKeys).isEqualTo(mapOf(
-                ALT to Locked(false),
-                META to Locked(false),
-                SHIFT to Locked(false),
-            ))
+            assertThat(stickyKeys)
+                .isEqualTo(
+                    mapOf(
+                        ALT to Locked(false),
+                        META to Locked(false),
+                        SHIFT to Locked(false),
+                    )
+                )
         }
     }
 
@@ -201,9 +202,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
             setStickyKeysActive()
 
-            setStickyKeys(mapOf(
-                ALT to false,
-                ALT to true))
+            setStickyKeys(mapOf(ALT to false, ALT to true))
 
             assertThat(stickyKeys).isEqualTo(mapOf(ALT to Locked(true)))
         }
@@ -215,17 +214,23 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
             val stickyKeys by collectLastValue(viewModel.indicatorContent)
             setStickyKeysActive()
 
-            setStickyKeys(mapOf(
-                META to false,
-                SHIFT to false, // shift is sticky but not locked
-                CTRL to false))
+            setStickyKeys(
+                mapOf(
+                    META to false,
+                    SHIFT to false, // shift is sticky but not locked
+                    CTRL to false
+                )
+            )
             val previousShiftIndex = stickyKeys?.toList()?.indexOf(SHIFT to Locked(false))
 
-            setStickyKeys(mapOf(
-                SHIFT to false,
-                SHIFT to true, // shift is now locked
-                META to false,
-                CTRL to false))
+            setStickyKeys(
+                mapOf(
+                    SHIFT to false,
+                    SHIFT to true, // shift is now locked
+                    META to false,
+                    CTRL to false
+                )
+            )
             assertThat(stickyKeys?.toList()?.indexOf(SHIFT to Locked(true)))
                 .isEqualTo(previousShiftIndex)
         }
@@ -247,17 +252,27 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
         StickyModifierState() {
 
         private fun isOn(key: ModifierKey) = keys.any { it.key == key && !it.value }
+
         private fun isLocked(key: ModifierKey) = keys.any { it.key == key && it.value }
 
         override fun isAltGrModifierLocked() = isLocked(ALT_GR)
+
         override fun isAltGrModifierOn() = isOn(ALT_GR)
+
         override fun isAltModifierLocked() = isLocked(ALT)
+
         override fun isAltModifierOn() = isOn(ALT)
+
         override fun isCtrlModifierLocked() = isLocked(CTRL)
+
         override fun isCtrlModifierOn() = isOn(CTRL)
+
         override fun isMetaModifierLocked() = isLocked(META)
+
         override fun isMetaModifierOn() = isOn(META)
+
         override fun isShiftModifierLocked() = isLocked(SHIFT)
+
         override fun isShiftModifierOn() = isOn(SHIFT)
     }
 }

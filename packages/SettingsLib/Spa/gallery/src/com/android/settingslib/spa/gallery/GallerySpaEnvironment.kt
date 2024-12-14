@@ -22,7 +22,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
-import com.android.settingslib.spa.gallery.card.CardPageProvider
+import com.android.settingslib.spa.gallery.banner.BannerPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.dialog.NavDialogProvider
@@ -42,12 +42,15 @@ import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.scaffold.NonScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.preference.IntroPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ListPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.TopIntroPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.ZeroStatePreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SuwScaffoldPageProvider
@@ -55,7 +58,6 @@ import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
 import com.android.settingslib.spa.gallery.scaffold.ScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
-import com.android.settingslib.spa.slice.SpaSliceBroadcastReceiver
 
 /**
  * Enum to define all SPP name here.
@@ -83,6 +85,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 MainSwitchPreferencePageProvider,
                 ListPreferencePageProvider,
                 TwoTargetSwitchPreferencePageProvider,
+                ZeroStatePreferencePageProvider,
                 ArgumentPageProvider,
                 SliderPageProvider,
                 SpinnerPageProvider,
@@ -108,8 +111,10 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 SettingsTextFieldPasswordPageProvider,
                 SearchScaffoldPageProvider,
                 SuwScaffoldPageProvider,
-                CardPageProvider,
+                BannerPageProvider,
                 CopyablePageProvider,
+                IntroPreferencePageProvider,
+                TopIntroPreferencePageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),
@@ -120,9 +125,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
     override val logger = DebugLogger()
 
     override val browseActivityClass = GalleryMainActivity::class.java
-    override val sliceBroadcastReceiverClass = SpaSliceBroadcastReceiver::class.java
 
     // For debugging
     override val searchProviderAuthorities = "com.android.spa.gallery.search.provider"
-    override val sliceProviderAuthorities = "com.android.spa.gallery.slice.provider"
 }

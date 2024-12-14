@@ -55,7 +55,6 @@ public class OffloadBrightnessStrategy implements DisplayBrightnessStrategy {
         brightnessReason.setReason(BrightnessReason.REASON_OFFLOAD);
         return new DisplayBrightnessState.Builder()
                 .setBrightness(offloadBrightness)
-                .setSdrBrightness(offloadBrightness)
                 .setBrightnessReason(brightnessReason)
                 .setDisplayBrightnessStrategyName(getName())
                 .setIsSlowChange(false)

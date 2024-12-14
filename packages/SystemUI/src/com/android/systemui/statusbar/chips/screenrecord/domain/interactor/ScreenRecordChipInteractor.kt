@@ -18,10 +18,13 @@ package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.MediaProjectionRepository
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.ScreenRecordRepository
+import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +42,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val screenRecordRepository: ScreenRecordRepository,
     private val mediaProjectionRepository: MediaProjectionRepository,
+    @StatusBarChipsLog private val logger: LogBuffer,
 ) {
     val screenRecordState: StateFlow<ScreenRecordChipModel> =
         // ScreenRecordRepository has the main "is the screen being recorded?" state, and
@@ -49,10 +53,19 @@ constructor(
                 mediaProjectionRepository.mediaProjectionState,
             ) { screenRecordState, mediaProjectionState ->
                 when (screenRecordState) {
-                    is ScreenRecordModel.DoingNothing -> ScreenRecordChipModel.DoingNothing
-                    // TODO(b/332662551): Implement the 3-2-1 countdown chip.
-                    is ScreenRecordModel.Starting ->
+                    is ScreenRecordModel.DoingNothing -> {
+                        logger.log(TAG, LogLevel.INFO, {}, { "State: DoingNothing" })
+                        ScreenRecordChipModel.DoingNothing
+                    }
+                    is ScreenRecordModel.Starting -> {
+                        logger.log(
+                            TAG,
+                            LogLevel.INFO,
+                            { long1 = screenRecordState.millisUntilStarted },
+                            { "State: Starting($long1)" }
+                        )
                         ScreenRecordChipModel.Starting(screenRecordState.millisUntilStarted)
+                    }
                     is ScreenRecordModel.Recording -> {
                         val recordedTask =
                             if (
@@ -62,6 +75,12 @@ constructor(
                             } else {
                                 null
                             }
+                        logger.log(
+                            TAG,
+                            LogLevel.INFO,
+                            { str1 = recordedTask?.baseIntent?.component?.packageName },
+                            { "State: Recording(taskPackage=$str1)" }
+                        )
                         ScreenRecordChipModel.Recording(recordedTask)
                     }
                 }
@@ -71,5 +90,9 @@ constructor(
     /** Stops the recording. */
     fun stopRecording() {
         scope.launch { screenRecordRepository.stopRecording() }
+    }
+
+    companion object {
+        private const val TAG = "ScreenRecord"
     }
 }

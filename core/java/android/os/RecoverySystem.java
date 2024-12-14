@@ -18,6 +18,7 @@ package android.os;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1170,11 +1171,27 @@ public class RecoverySystem {
         return removedSubsCount.get() == subscriptionInfos.size();
     }
 
-    /** {@hide} */
-    public static void rebootPromptAndWipeUserData(Context context, String reason)
+    /**
+     * Reboot into recovery and prompt for wiping the device.
+     *
+     * This is used as last resort in case the device is not recoverable using
+     * other recovery steps. This first checks if fs-checkpoint is available, in
+     * which case we commit the checkpoint, otherwise it performs the reboot in
+     * recovery mode and shows user prompt for wiping the device.
+     *
+     * @param context      the context to use.
+     * @param reason       the reason to wipe.
+     *
+     * @throws IOException if something goes wrong.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECOVERY)
+    @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
+    public static void rebootPromptAndWipeUserData(@NonNull Context context, @NonNull String reason)
             throws IOException {
         boolean checkpointing = false;
-        boolean needReboot = false;
         IVold vold = null;
         try {
             vold = IVold.Stub.asInterface(ServiceManager.checkService("vold"));

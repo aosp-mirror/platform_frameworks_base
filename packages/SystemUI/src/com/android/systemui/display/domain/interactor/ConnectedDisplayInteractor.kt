@@ -17,7 +17,6 @@
 package com.android.systemui.display.domain.interactor
 
 import android.companion.virtual.VirtualDeviceManager
-import android.companion.virtual.flags.Flags
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -85,7 +84,7 @@ interface ConnectedDisplayInteractor {
 class ConnectedDisplayInteractorImpl
 @Inject
 constructor(
-    private val virtualDeviceManager: VirtualDeviceManager,
+    private val virtualDeviceManager: VirtualDeviceManager?,
     keyguardRepository: KeyguardRepository,
     displayRepository: DisplayRepository,
     deviceStateRepository: DeviceStateRepository,
@@ -155,7 +154,7 @@ constructor(
     }
 
     private fun isVirtualDeviceOwnedMirrorDisplay(display: Display): Boolean {
-        return Flags.interactiveScreenMirror() &&
+        return virtualDeviceManager != null &&
             virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(display.displayId)
     }
 }

@@ -20,18 +20,20 @@ import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardStatusBarInteractor
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
-import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.batteryController
@@ -85,6 +87,7 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
             KeyguardStatusBarViewModel(
                 testScope.backgroundScope,
                 headsUpNotificationInteractor,
+                kosmos.sceneInteractor,
                 keyguardInteractor,
                 keyguardStatusBarInteractor,
                 batteryController,
@@ -95,7 +98,7 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
     fun isVisible_dozing_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
 
             keyguardRepository.setIsDozing(true)
 
@@ -103,26 +106,27 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         }
 
     @Test
-    fun isVisible_statusBarStateShade_false() =
+    fun isVisible_sceneShade_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
 
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Shade)
 
             assertThat(latest).isFalse()
         }
 
     @Test
-    fun isVisible_statusBarStateShadeLocked_false() =
+    fun isVisible_sceneBouncer_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
 
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Bouncer)
 
             assertThat(latest).isFalse()
         }
 
     @Test
+    @EnableSceneContainer
     fun isVisible_headsUpStatusBarShown_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
@@ -130,7 +134,7 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
             // WHEN HUN displayed on the bypass lock screen
             headsUpRepository.setNotifications(FakeHeadsUpRowRepository("key 0", isPinned = true))
             keyguardTransitionRepository.emitInitialStepsFromOff(KeyguardState.LOCKSCREEN)
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
             faceAuthRepository.isBypassEnabled.value = true
 
             // THEN KeyguardStatusBar is NOT visible to make space for HeadsUpStatusBar
@@ -138,11 +142,11 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
         }
 
     @Test
-    fun isVisible_statusBarStateKeyguard_andNotDozing_andNotShowingHeadsUpStatusBar_true() =
+    fun isVisible_sceneLockscreen_andNotDozing_andNotShowingHeadsUpStatusBar_true() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
 
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
             keyguardRepository.setIsDozing(false)
 
             assertThat(latest).isTrue()

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.app.Flags;
 import android.app.Notification;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -41,11 +42,16 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.StatusBarNotification;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -188,6 +194,34 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         NotificationContentDescription.contentDescForNotification(mContext, n);
 
         // no crash, good
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS})
+    public void setIcon_withPreloaded_usesPreloaded() {
+        Icon mockIcon = mock(Icon.class);
+        when(mockIcon.loadDrawableAsUser(any(), anyInt())).thenReturn(new ColorDrawable(1));
+        mStatusBarIcon.icon = mockIcon;
+        mStatusBarIcon.preloadedIcon = new ShapeDrawable();
+
+        mIconView.set(mStatusBarIcon);
+
+        assertThat(mIconView.getDrawable()).isNotNull();
+        assertThat(mIconView.getDrawable()).isInstanceOf(ShapeDrawable.class);
+    }
+
+    @Test
+    @DisableFlags({Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS})
+    public void setIcon_withPreloadedButFlagDisabled_ignoresPreloaded() {
+        Icon mockIcon = mock(Icon.class);
+        when(mockIcon.loadDrawableAsUser(any(), anyInt())).thenReturn(new ColorDrawable(1));
+        mStatusBarIcon.icon = mockIcon;
+        mStatusBarIcon.preloadedIcon = new ShapeDrawable();
+
+        mIconView.set(mStatusBarIcon);
+
+        assertThat(mIconView.getDrawable()).isNotNull();
+        assertThat(mIconView.getDrawable()).isInstanceOf(ColorDrawable.class);
     }
 
     @Test
@@ -396,6 +430,32 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         float scaleToFitSpIconSize = (float) spIconSize / dpIconSize;
         assertEquals(scaleToFitDrawingSize * scaleToFitSpIconSize,
                 mIconView.getIconScale(), 0.01f);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS})
+    public void set_iconThatWantsFixedSpace_setsScaleType() {
+        mIconView.setScaleType(ImageView.ScaleType.FIT_START);
+        StatusBarIcon icon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
+                Icon.createWithResource(mContext, R.drawable.ic_android), 0, 0, "",
+                StatusBarIcon.Type.SystemIcon, StatusBarIcon.Shape.FIXED_SPACE);
+
+        mIconView.set(icon);
+
+        assertThat(mIconView.getScaleType()).isEqualTo(ImageView.ScaleType.FIT_CENTER);
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_MODES_UI, Flags.FLAG_MODES_UI_ICONS})
+    public void set_iconWithOtherShape_keepsScaleType() {
+        mIconView.setScaleType(ImageView.ScaleType.FIT_START);
+        StatusBarIcon icon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
+                Icon.createWithResource(mContext, R.drawable.ic_android), 0, 0, "",
+                StatusBarIcon.Type.SystemIcon, StatusBarIcon.Shape.WRAP_CONTENT);
+
+        mIconView.set(icon);
+
+        assertThat(mIconView.getScaleType()).isEqualTo(ImageView.ScaleType.FIT_START);
     }
 
     private static StatusBarNotification getMockSbn() {

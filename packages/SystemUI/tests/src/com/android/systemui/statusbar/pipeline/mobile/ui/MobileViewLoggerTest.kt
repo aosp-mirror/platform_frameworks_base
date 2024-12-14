@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui
 
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -32,10 +33,12 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class MobileViewLoggerTest : SysuiTestCase() {
     private val buffer = LogBufferFactory(DumpManager(), mock()).create("buffer", 10)
     private val stringWriter = StringWriter()

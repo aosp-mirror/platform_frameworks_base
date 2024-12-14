@@ -18,19 +18,19 @@
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GrBackendSemaphore.h>
-#include <GrBackendSurface.h>
-#include <GrDirectContext.h>
-#include <GrTypes.h>
 #include <android/sync.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrBackendSemaphore.h>
+#include <include/gpu/ganesh/GrBackendSurface.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrTypes.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSemaphore.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
 #include <include/gpu/ganesh/vk/GrVkDirectContext.h>
+#include <include/gpu/ganesh/vk/GrVkTypes.h>
+#include <include/gpu/vk/VulkanBackendContext.h>
 #include <ui/FatVector.h>
-#include <vk/GrVkExtensions.h>
-#include <vk/GrVkTypes.h>
 
 #include <sstream>
 
@@ -141,7 +141,8 @@ VulkanManager::~VulkanManager() {
     mPhysicalDeviceFeatures2 = {};
 }
 
-void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFeatures2& features) {
+void VulkanManager::setupDevice(skgpu::VulkanExtensions& grExtensions,
+                                VkPhysicalDeviceFeatures2& features) {
     VkResult err;
 
     constexpr VkApplicationInfo app_info = {
@@ -315,6 +316,15 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         deviceFaultFeatures->pNext = nullptr;
         *tailPNext = deviceFaultFeatures;
         tailPNext = &deviceFaultFeatures->pNext;
+    }
+
+    if (grExtensions.hasExtension(VK_EXT_RGBA10X6_FORMATS_EXTENSION_NAME, 1)) {
+        VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* formatFeatures =
+                new VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT;
+        formatFeatures->sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RGBA10X6_FORMATS_FEATURES_EXT;
+        formatFeatures->pNext = nullptr;
+        *tailPNext = formatFeatures;
+        tailPNext = &formatFeatures->pNext;
     }
 
     // query to get the physical device features
@@ -506,7 +516,7 @@ sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
         return vkGetInstanceProcAddr(instance, proc_name);
     };
 
-    GrVkBackendContext backendContext;
+    skgpu::VulkanBackendContext backendContext;
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
     backendContext.fDevice = mDevice;

@@ -30,7 +30,8 @@ public class FrameworkStatsLogWrapper {
             int hostUid,
             int targetUid,
             int timeSinceLastActive,
-            int creationSource) {
+            int creationSource,
+            int stopSource) {
         FrameworkStatsLog.write(
                 code,
                 sessionId,
@@ -39,7 +40,8 @@ public class FrameworkStatsLogWrapper {
                 hostUid,
                 targetUid,
                 timeSinceLastActive,
-                creationSource);
+                creationSource,
+                stopSource);
     }
 
     /** Wrapper around {@link FrameworkStatsLog#write} for MediaProjectionTargetChanged atom. */
@@ -49,13 +51,23 @@ public class FrameworkStatsLogWrapper {
             int targetType,
             int hostUid,
             int targetUid,
-            int windowingMode) {
+            int windowingMode,
+            int width,
+            int height,
+            int centerX,
+            int centerY,
+            int targetChangeType) {
         FrameworkStatsLog.write(
                 code,
                 sessionId,
                 targetType,
                 hostUid,
                 targetUid,
-                windowingMode);
+                windowingMode,
+                width,
+                height,
+                centerX,
+                centerY,
+                targetChangeType);
     }
 }

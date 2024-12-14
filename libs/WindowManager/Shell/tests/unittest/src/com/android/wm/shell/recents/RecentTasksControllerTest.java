@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,6 +46,7 @@ import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -68,13 +69,13 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
-import com.android.wm.shell.shared.DesktopModeStatus;
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
+import com.android.wm.shell.shared.ShellSharedConstants;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
-import com.android.wm.shell.util.SplitBounds;
 
 import org.junit.After;
 import org.junit.Before;
@@ -136,6 +137,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
+        when(mContext.getSystemService(KeyguardManager.class))
+                .thenReturn(mock(KeyguardManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
         mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
                 mDisplayInsetsController, mMainExecutor));
@@ -399,7 +402,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testGetRecentTasks_proto2Enabled_ignoresMinimizedFreeformTasks() {
+    public void testGetRecentTasks_proto2Enabled_includesMinimizedFreeformTasks() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -415,8 +418,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
 
-        // 2 freeform tasks should be grouped into one, 1 task should be skipped, 3 total recents
-        // entries
+        // 3 freeform tasks should be grouped into one, 2 single tasks, 3 total recents entries
         assertEquals(3, recentTasks.size());
         GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
         GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
@@ -428,9 +430,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
 
         // Check freeform group entries
-        assertEquals(2, freeformGroup.getTaskInfoList().size());
+        assertEquals(3, freeformGroup.getTaskInfoList().size());
         assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
-        assertEquals(t5, freeformGroup.getTaskInfoList().get(1));
+        assertEquals(t3, freeformGroup.getTaskInfoList().get(1));
+        assertEquals(t5, freeformGroup.getTaskInfoList().get(2));
 
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());

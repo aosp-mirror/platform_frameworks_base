@@ -237,6 +237,16 @@ public final class WindowManagerImpl implements WindowManager {
     }
 
     @Override
+    public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService()
+                    .getApplicationLaunchKeyboardShortcuts(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public void requestImeKeyboardShortcuts(
             final KeyboardShortcutsReceiver receiver, int deviceId) {
         IResultReceiver resultReceiver = new IResultReceiver.Stub() {

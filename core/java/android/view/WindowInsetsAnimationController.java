@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Insets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
+import android.view.animation.Interpolator;
 
 /**
  * Controller for app-driven animation of system windows.
@@ -188,4 +189,16 @@ public interface WindowInsetsAnimationController {
      *  fullscreen or non-overlapping).
      */
     boolean hasZeroInsetsIme();
+
+    /**
+     * @hide
+     * @return The duration of the animation in {@link java.util.concurrent.TimeUnit#MILLISECONDS}.
+     */
+    long getDurationMs();
+
+    /**
+     * @hide
+     * @return The interpolator of the animation.
+     */
+    Interpolator getInsetsInterpolator();
 }

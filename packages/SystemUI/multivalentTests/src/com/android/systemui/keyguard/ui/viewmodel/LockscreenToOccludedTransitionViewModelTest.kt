@@ -89,9 +89,12 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
     }
 
     @Test
-    fun lockscreenFadeOut() =
+    fun lockscreenFadeOut_shadeNotExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
+            shadeExpanded(false)
+            runCurrent()
+
             repository.sendTransitionSteps(
                 steps =
                     listOf(
@@ -104,10 +107,34 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
                     ),
                 testScope = testScope,
             )
-            // Only 5 values should be present, since the dream overlay runs for a small fraction
-            // of the overall animation time
             assertThat(values.size).isEqualTo(5)
-            values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+            assertThat(values[0]).isEqualTo(1f)
+            assertThat(values[1]).isEqualTo(1f)
+            assertThat(values[2]).isIn(Range.open(0f, 1f))
+            assertThat(values[3]).isIn(Range.open(0f, 1f))
+            assertThat(values[4]).isEqualTo(0f)
+        }
+
+    @Test
+    fun lockscreenFadeOut_shadeExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockscreenAlpha)
+            shadeExpanded(true)
+            runCurrent()
+
+            repository.sendTransitionSteps(
+                steps =
+                    listOf(
+                        step(0f, TransitionState.STARTED), // Should start running here...
+                        step(0f),
+                        step(.1f),
+                        step(.4f),
+                        step(.7f), // ...up to here
+                        step(1f),
+                    ),
+                testScope = testScope,
+            )
+            values.forEach { assertThat(it).isEqualTo(0f) }
         }
 
     @Test
@@ -115,7 +142,7 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
         testScope.runTest {
             configurationRepository.setDimensionPixelSize(
                 R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y,
-                100
+                100,
             )
             val values by collectValues(underTest.lockscreenTranslationY)
             repository.sendTransitionSteps(
@@ -138,7 +165,7 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
         testScope.runTest {
             configurationRepository.setDimensionPixelSize(
                 R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y,
-                100
+                100,
             )
             val values by collectValues(underTest.lockscreenTranslationY)
             repository.sendTransitionSteps(
@@ -171,7 +198,7 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
                     listOf(
                         step(0f, TransitionState.STARTED),
                         step(.5f),
-                        step(1f, TransitionState.FINISHED)
+                        step(1f, TransitionState.FINISHED),
                     ),
                 testScope = testScope,
             )
@@ -201,6 +228,24 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
             assertThat(actual).isEqualTo(0f)
         }
 
+    @Test
+    fun deviceEntryParentViewAlpha_shadeNotExpanded_onCancel() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            shadeExpanded(false)
+            runCurrent()
+
+            // START transition
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(actual).isEqualTo(1f)
+
+            // WHEN transition is canceled
+            repository.sendTransitionStep(step(1f, TransitionState.CANCELED))
+
+            // THEN alpha is immediately set to 0f
+            assertThat(actual).isEqualTo(0f)
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING,
@@ -210,7 +255,7 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) 
             to = KeyguardState.OCCLUDED,
             value = value,
             transitionState = state,
-            ownerName = "LockscreenToOccludedTransitionViewModelTest"
+            ownerName = "LockscreenToOccludedTransitionViewModelTest",
         )
     }
 

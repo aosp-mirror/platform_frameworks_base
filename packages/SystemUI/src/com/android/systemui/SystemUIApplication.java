@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Process;
@@ -38,7 +37,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
@@ -81,7 +80,9 @@ public class SystemUIApplication extends Application implements
 
     public SystemUIApplication() {
         super();
-        Trace.registerWithPerfetto();
+        if (!isSubprocess()) {
+            Trace.registerWithPerfetto();
+        }
         Log.v(TAG, "SystemUIApplication constructed.");
         // SysUI may be building without protolog preprocessing in some cases
         ProtoLog.REQUIRE_PROTOLOGTOOL = false;
@@ -182,9 +183,7 @@ public class SystemUIApplication extends Application implements
         } else {
             // We don't need to startServices for sub-process that is doing some tasks.
             // (screenshots, sweetsweetdesserts or tuner ..)
-            String processName = ActivityThread.currentProcessName();
-            ApplicationInfo info = getApplicationInfo();
-            if (processName != null && processName.startsWith(info.processName + ":")) {
+            if (isSubprocess()) {
                 return;
             }
             // For a secondary user, boot-completed will never be called because it has already
@@ -193,6 +192,12 @@ public class SystemUIApplication extends Application implements
             // start those components now for the current non-system user.
             startSecondaryUserServicesIfNeeded();
         }
+    }
+
+    /** Returns whether this is a subprocess (e.g. com.android.systemui:screenshot) */
+    private boolean isSubprocess() {
+        String processName = ActivityThread.currentProcessName();
+        return processName != null && processName.contains(":");
     }
 
     /**

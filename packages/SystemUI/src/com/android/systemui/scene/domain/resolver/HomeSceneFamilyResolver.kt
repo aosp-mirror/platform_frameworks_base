@@ -22,6 +22,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import dagger.Binds
@@ -45,11 +46,13 @@ class HomeSceneFamilyResolver
 constructor(
     @Application private val applicationScope: CoroutineScope,
     deviceEntryInteractor: DeviceEntryInteractor,
+    keyguardEnabledInteractor: KeyguardEnabledInteractor,
 ) : SceneResolver {
     override val targetFamily: SceneKey = SceneFamilies.Home
 
     override val resolvedScene: StateFlow<SceneKey> =
         combine(
+                keyguardEnabledInteractor.isKeyguardEnabled,
                 deviceEntryInteractor.canSwipeToEnter,
                 deviceEntryInteractor.isDeviceEntered,
                 deviceEntryInteractor.isUnlocked,
@@ -60,20 +63,23 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue =
                     homeScene(
-                        deviceEntryInteractor.canSwipeToEnter.value,
-                        deviceEntryInteractor.isDeviceEntered.value,
-                        deviceEntryInteractor.isUnlocked.value,
+                        isKeyguardEnabled = keyguardEnabledInteractor.isKeyguardEnabled.value,
+                        canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value,
+                        isDeviceEntered = deviceEntryInteractor.isDeviceEntered.value,
+                        isUnlocked = deviceEntryInteractor.isUnlocked.value,
                     )
             )
 
     override fun includesScene(scene: SceneKey): Boolean = scene in homeScenes
 
     private fun homeScene(
+        isKeyguardEnabled: Boolean,
         canSwipeToEnter: Boolean?,
         isDeviceEntered: Boolean,
         isUnlocked: Boolean,
     ): SceneKey =
         when {
+            !isKeyguardEnabled -> Scenes.Gone
             canSwipeToEnter == true -> Scenes.Lockscreen
             !isDeviceEntered -> Scenes.Lockscreen
             !isUnlocked -> Scenes.Lockscreen

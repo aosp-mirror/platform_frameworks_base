@@ -78,9 +78,9 @@ public class BrightnessSynchronizer {
     // Feature flag that will eventually be removed
     private final boolean mIntRangeUserPerceptionEnabled;
 
-    public BrightnessSynchronizer(Context context, boolean intRangeUserPerceptionEnabled) {
-        this(context, Looper.getMainLooper(), SystemClock::uptimeMillis,
-                intRangeUserPerceptionEnabled);
+    public BrightnessSynchronizer(Context context, Looper looper,
+            boolean intRangeUserPerceptionEnabled) {
+        this(context, looper, SystemClock::uptimeMillis, intRangeUserPerceptionEnabled);
     }
 
     @VisibleForTesting
@@ -134,7 +134,8 @@ public class BrightnessSynchronizer {
      * Prints data on dumpsys.
      */
     public void dump(PrintWriter pw) {
-        pw.println("BrightnessSynchronizer");
+        pw.println("BrightnessSynchronizer:");
+        pw.println("-----------------------");
         pw.println("  mLatestIntBrightness=" + mLatestIntBrightness);
         pw.println("  mLatestFloatBrightness=" + mLatestFloatBrightness);
         pw.println("  mCurrentUpdate=" + mCurrentUpdate);

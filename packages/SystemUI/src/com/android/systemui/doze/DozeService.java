@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import android.service.dreams.DreamService;
 import android.util.Log;
 
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.plugins.DozeServicePlugin;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
@@ -31,6 +32,7 @@ import com.android.systemui.plugins.PluginManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -43,9 +45,14 @@ public class DozeService extends DreamService
     private DozeMachine mDozeMachine;
     private DozeServicePlugin mDozePlugin;
     private PluginManager mPluginManager;
+    private DozeLog mDozeLog;
+    private Executor mBgExecutor;
 
     @Inject
-    public DozeService(DozeComponent.Builder dozeComponentBuilder, PluginManager pluginManager) {
+    public DozeService(DozeComponent.Builder dozeComponentBuilder, PluginManager pluginManager,
+            DozeLog dozeLog, @UiBackground Executor bgExecutor) {
+        mDozeLog = dozeLog;
+        mBgExecutor = bgExecutor;
         mDozeComponentBuilder = dozeComponentBuilder;
         setDebug(DEBUG);
         mPluginManager = pluginManager;
@@ -143,9 +150,29 @@ public class DozeService extends DreamService
 
     @Override
     public void setDozeScreenState(int state) {
+        mDozeLog.traceDisplayState(state, /* afterRequest */ false);
         super.setDozeScreenState(state);
+        mDozeLog.traceDisplayState(state, /* afterRequest */ true);
         if (mDozeMachine != null) {
             mDozeMachine.onScreenState(state);
         }
+    }
+
+    @Override
+    public void setDozeScreenBrightness(int brightness) {
+        mBgExecutor.execute(() -> {
+            mDozeLog.traceDozeScreenBrightness(brightness, /* afterRequest */ false);
+            super.setDozeScreenBrightness(brightness);
+            mDozeLog.traceDozeScreenBrightness(brightness, /* afterRequest */ true);
+        });
+    }
+
+    @Override
+    public void setDozeScreenBrightnessFloat(float brightness) {
+        mBgExecutor.execute(() -> {
+            mDozeLog.traceDozeScreenBrightnessFloat(brightness, /* afterRequest */ false);
+            super.setDozeScreenBrightnessFloat(brightness);
+            mDozeLog.traceDozeScreenBrightnessFloat(brightness, /* afterRequest */ true);
+        });
     }
 }

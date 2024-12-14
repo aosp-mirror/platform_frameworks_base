@@ -22,7 +22,17 @@ sealed interface ScreenRecordModel {
     data object Recording : ScreenRecordModel
 
     /** A screen recording will begin in [millisUntilStarted] ms. */
-    data class Starting(val millisUntilStarted: Long) : ScreenRecordModel
+    data class Starting(val millisUntilStarted: Long) : ScreenRecordModel {
+        val countdownSeconds = millisUntilStarted.toCountdownSeconds()
+
+        companion object {
+            /**
+             * Returns the number of seconds until screen recording will start, used to show a 3-2-1
+             * countdown.
+             */
+            fun Long.toCountdownSeconds() = Math.floorDiv(this + 500, 1000)
+        }
+    }
 
     /** There's nothing related to screen recording happening. */
     data object DoingNothing : ScreenRecordModel

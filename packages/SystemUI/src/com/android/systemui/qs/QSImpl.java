@@ -54,6 +54,7 @@ import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSComponent;
+import com.android.systemui.qs.flags.QSComposeFragment;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
@@ -355,7 +356,33 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
 
     @Override
     public View getHeader() {
+        QSComposeFragment.assertInLegacyMode();
         return mHeader;
+    }
+
+    @Override
+    public int getHeaderTop() {
+        return mHeader.getTop();
+    }
+
+    @Override
+    public int getHeaderBottom() {
+        return mHeader.getBottom();
+    }
+
+    @Override
+    public int getHeaderLeft() {
+        return mHeader.getLeft();
+    }
+
+    @Override
+    public void getHeaderBoundsOnScreen(Rect outBounds) {
+        mHeader.getBoundsOnScreen(outBounds);
+    }
+
+    @Override
+    public boolean isHeaderShown() {
+        return mHeader.isShown();
     }
 
     @Override
@@ -965,8 +992,22 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         return mContainer.getQqsHeight();
     }
 
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedQqsHeight() {
+        return mContainer.getSquishedQqsHeight();
+    }
+
     public int getQSHeight() {
         return mContainer.getQsHeight();
+    }
+
+    /**
+     * @return height with the squishiness fraction applied.
+     */
+    public int getSquishedQsHeight() {
+        return mContainer.getSquishedQsHeight();
     }
 
     /**

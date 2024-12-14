@@ -22,6 +22,7 @@ import static com.android.server.am.ActivityManagerService.Injector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -42,6 +43,8 @@ import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.text.TextUtils;
 
+import com.android.internal.os.Clock;
+import com.android.internal.os.MonotonicClock;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
@@ -121,11 +124,18 @@ public class ApplicationStartInfoTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
 
+        mAppStartInfoTracker.mMonotonicClock = new MonotonicClock(
+                Clock.SYSTEM_CLOCK.elapsedRealtime(), Clock.SYSTEM_CLOCK);
         mAppStartInfoTracker.clearProcessStartInfo(true);
         mAppStartInfoTracker.mAppStartInfoLoaded.set(true);
         mAppStartInfoTracker.mAppStartInfoHistoryListSize =
                 mAppStartInfoTracker.APP_START_INFO_HISTORY_LIST_SIZE;
         doNothing().when(mAppStartInfoTracker).schedulePersistProcessStartInfo(anyBoolean());
+
+        mAppStartInfoTracker.mProcStartStoreDir = new File(mContext.getFilesDir(),
+                AppStartInfoTracker.APP_START_STORE_DIR);
+        mAppStartInfoTracker.mProcStartInfoFile = new File(mAppStartInfoTracker.mProcStartStoreDir,
+                AppStartInfoTracker.APP_START_INFO_FILE);
     }
 
     @After
@@ -135,11 +145,8 @@ public class ApplicationStartInfoTest {
 
     @Test
     public void testApplicationStartInfo() throws Exception {
-        mAppStartInfoTracker.mProcStartStoreDir = new File(mContext.getFilesDir(),
-                AppStartInfoTracker.APP_START_STORE_DIR);
+        // Make sure we can write to the file.
         assertTrue(FileUtils.createDir(mAppStartInfoTracker.mProcStartStoreDir));
-        mAppStartInfoTracker.mProcStartInfoFile = new File(mAppStartInfoTracker.mProcStartStoreDir,
-                AppStartInfoTracker.APP_START_INFO_FILE);
 
         final long appStartTimestampIntentStarted = 1000000;
         final long appStartTimestampActivityLaunchFinished = 2000000;
@@ -480,6 +487,84 @@ public class ApplicationStartInfoTest {
         // Confirm that after 2 x MAX_IN_PROGRESS_RECORDS starts only MAX_IN_PROGRESS_RECORDS are
         // present.
         verifyInProgressRecordsSize(AppStartInfoTracker.MAX_IN_PROGRESS_RECORDS);
+    }
+
+    /**
+     * Test to make sure that records are returned in correct order, from most recently added at
+     * index 0 to least recently added at index size - 1.
+     */
+    @Test
+    public void testHistoricalRecordsOrdering() throws Exception {
+        // Clear old records
+        mAppStartInfoTracker.clearProcessStartInfo(false);
+
+        // Add some records with timestamps 0 decreasing as clock increases.
+        ProcessRecord app = makeProcessRecord(
+                APP_1_PID_1,                     // pid
+                APP_1_UID,                       // uid
+                APP_1_UID,                       // packageUid
+                null,                            // definingUid
+                APP_1_PROCESS_NAME,              // processName
+                APP_1_PACKAGE_NAME);             // packageName
+
+        mAppStartInfoTracker.handleProcessBroadcastStart(3, app, buildIntent(COMPONENT),
+                false /* isAlarm */);
+        // Add a brief delay between timestamps to make sure the clock, which is in milliseconds has
+        // actually incremented.
+        sleep(1);
+        mAppStartInfoTracker.handleProcessBroadcastStart(2, app, buildIntent(COMPONENT),
+                false /* isAlarm */);
+        sleep(1);
+        mAppStartInfoTracker.handleProcessBroadcastStart(1, app, buildIntent(COMPONENT),
+                false /* isAlarm */);
+
+        // Get records
+        ArrayList<ApplicationStartInfo> list = new ArrayList<ApplicationStartInfo>();
+        mAppStartInfoTracker.getStartInfo(null, APP_1_UID, 0, 0, list);
+
+        // Confirm that records are in correct order, with index 0 representing the most recently
+        // added record and index size - 1 representing the least recently added one.
+        assertEquals(3, list.size());
+        assertEquals(1L, list.get(0).getStartupTimestamps().get(0).longValue());
+        assertEquals(2L, list.get(1).getStartupTimestamps().get(0).longValue());
+        assertEquals(3L, list.get(2).getStartupTimestamps().get(0).longValue());
+    }
+
+    /**
+     * Test to make sure that persist and restore correctly maintains the state of the monotonic
+     * clock.
+     */
+    @Test
+    public void testPersistAndRestoreMonotonicClock() {
+        // Make sure we can write to the file.
+        assertTrue(FileUtils.createDir(mAppStartInfoTracker.mProcStartStoreDir));
+
+        // No need to persist records for this test, clear any that may be there.
+        mAppStartInfoTracker.clearProcessStartInfo(false);
+
+        // Set clock with an arbitrary 5 minute offset, just needs to be longer than it would take
+        // for code to run.
+        mAppStartInfoTracker.mMonotonicClock = new MonotonicClock(5 * 60 * 1000,
+                Clock.SYSTEM_CLOCK);
+
+        // Record the current time.
+        long originalMonotonicTime = mAppStartInfoTracker.mMonotonicClock.monotonicTime();
+
+        // Now persist the process start info. Records were cleared above so this should just
+        // persist the monotonic time.
+        mAppStartInfoTracker.persistProcessStartInfo();
+
+        // Null out the clock to make sure its set on load.
+        mAppStartInfoTracker.mMonotonicClock = null;
+        assertNull(mAppStartInfoTracker.mMonotonicClock);
+
+        // Now load from disk.
+        mAppStartInfoTracker.loadExistingProcessStartInfo();
+
+        // Confirm clock has been set and that its current time is greater than or equal to the
+        // previous one, thereby ensuring it was loaded from disk.
+        assertNotNull(mAppStartInfoTracker.mMonotonicClock);
+        assertTrue(mAppStartInfoTracker.mMonotonicClock.monotonicTime() >= originalMonotonicTime);
     }
 
     private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {

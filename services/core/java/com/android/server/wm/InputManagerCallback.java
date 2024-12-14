@@ -281,7 +281,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                         + " - Input overlay layer is not initialized.");
                 return null;
             }
-            return mService.makeSurfaceBuilder(dc.getSession())
+            return mService.makeSurfaceBuilder()
                     .setContainerLayer()
                     .setName(name)
                     .setCallsite("createSurfaceForGestureMonitor")

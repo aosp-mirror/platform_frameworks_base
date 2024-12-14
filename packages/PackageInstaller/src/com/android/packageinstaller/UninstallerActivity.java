@@ -91,8 +91,7 @@ public class UninstallerActivity extends Activity {
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
 
-        // TODO(b/318521110) Enable PIA v2 for archive dialog.
-        if (usePiaV2() && !isTv() && !isArchiveDialog(getIntent())) {
+        if (usePiaV2() && !isTv()) {
             Log.i(TAG, "Using Pia V2");
 
             boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
@@ -223,11 +222,6 @@ public class UninstallerActivity extends Activity {
         parseDeleteFlags(intent);
 
         showConfirmationDialog();
-    }
-
-    private boolean isArchiveDialog(Intent intent) {
-        return (intent.getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0)
-                & PackageManager.DELETE_ARCHIVE) != 0;
     }
 
     /**

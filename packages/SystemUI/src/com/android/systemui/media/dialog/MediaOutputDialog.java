@@ -46,14 +46,14 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             Context context,
             boolean aboveStatusbar,
             BroadcastSender broadcastSender,
-            MediaOutputController mediaOutputController,
+            MediaSwitchingController mediaSwitchingController,
             DialogTransitionAnimator dialogTransitionAnimator,
             UiEventLogger uiEventLogger,
             boolean includePlaybackAndAppMetadata) {
-        super(context, broadcastSender, mediaOutputController, includePlaybackAndAppMetadata);
+        super(context, broadcastSender, mediaSwitchingController, includePlaybackAndAppMetadata);
         mDialogTransitionAnimator = dialogTransitionAnimator;
         mUiEventLogger = uiEventLogger;
-        mAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mAdapter = new MediaOutputAdapter(mMediaSwitchingController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
@@ -72,7 +72,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     IconCompat getHeaderIcon() {
-        return mMediaOutputController.getHeaderIcon();
+        return mMediaSwitchingController.getHeaderIcon();
     }
 
     @Override
@@ -83,27 +83,29 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     CharSequence getHeaderText() {
-        return mMediaOutputController.getHeaderTitle();
+        return mMediaSwitchingController.getHeaderTitle();
     }
 
     @Override
     CharSequence getHeaderSubtitle() {
-        return mMediaOutputController.getHeaderSubTitle();
+        return mMediaSwitchingController.getHeaderSubTitle();
     }
 
     @Override
     IconCompat getAppSourceIcon() {
-        return mMediaOutputController.getNotificationSmallIcon();
+        return mMediaSwitchingController.getNotificationSmallIcon();
     }
 
     @Override
     int getStopButtonVisibility() {
         boolean isActiveRemoteDevice = false;
-        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
-            isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
-                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        if (mMediaSwitchingController.getCurrentConnectedMediaDevice() != null) {
+            isActiveRemoteDevice =
+                    mMediaSwitchingController.isActiveRemoteDevice(
+                            mMediaSwitchingController.getCurrentConnectedMediaDevice());
         }
-        boolean showBroadcastButton = isBroadcastSupported() && mMediaOutputController.isPlaying();
+        boolean showBroadcastButton =
+                isBroadcastSupported() && mMediaSwitchingController.isPlaying();
 
         return (isActiveRemoteDevice || showBroadcastButton) ? View.VISIBLE : View.GONE;
     }
@@ -115,13 +117,14 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
         boolean isBroadcastEnabled = false;
         if (FeatureFlagUtils.isEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST)) {
-            if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
-                isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
-                    mMediaOutputController.getCurrentConnectedMediaDevice());
+            if (mMediaSwitchingController.getCurrentConnectedMediaDevice() != null) {
+                isBluetoothLeDevice =
+                        mMediaSwitchingController.isBluetoothLeDevice(
+                                mMediaSwitchingController.getCurrentConnectedMediaDevice());
                 // if broadcast is active, broadcast should be considered as supported
                 // there could be a valid case that broadcast is ongoing
                 // without active LEA device connected
-                isBroadcastEnabled = mMediaOutputController.isBluetoothLeBroadcastEnabled();
+                isBroadcastEnabled = mMediaSwitchingController.isBluetoothLeBroadcastEnabled();
             }
         } else {
             // To decouple LE Audio Broadcast and Unicast, it always displays the button when there
@@ -129,15 +132,16 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             isBluetoothLeDevice = true;
         }
 
-        return mMediaOutputController.isBroadcastSupported()
+        return mMediaSwitchingController.isBroadcastSupported()
                 && (isBluetoothLeDevice || isBroadcastEnabled);
     }
 
     @Override
     public CharSequence getStopButtonText() {
         int resId = R.string.media_output_dialog_button_stop_casting;
-        if (isBroadcastSupported() && mMediaOutputController.isPlaying()
-                && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+        if (isBroadcastSupported()
+                && mMediaSwitchingController.isPlaying()
+                && !mMediaSwitchingController.isBluetoothLeBroadcastEnabled()) {
             resId = R.string.media_output_broadcast;
         }
         return mContext.getText(resId);
@@ -145,8 +149,8 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     public void onStopButtonClick() {
-        if (isBroadcastSupported() && mMediaOutputController.isPlaying()) {
-            if (!mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+        if (isBroadcastSupported() && mMediaSwitchingController.isPlaying()) {
+            if (!mMediaSwitchingController.isBluetoothLeBroadcastEnabled()) {
                 if (startLeBroadcastDialogForFirstTime()) {
                     return;
                 }
@@ -155,7 +159,7 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
                 stopLeBroadcast();
             }
         } else {
-            mMediaOutputController.releaseSession();
+            mMediaSwitchingController.releaseSession();
             mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
             dismiss();
         }
@@ -163,8 +167,9 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     public int getBroadcastIconVisibility() {
-        return (isBroadcastSupported() && mMediaOutputController.isBluetoothLeBroadcastEnabled())
-                ? View.VISIBLE : View.GONE;
+        return (isBroadcastSupported() && mMediaSwitchingController.isBluetoothLeBroadcastEnabled())
+                ? View.VISIBLE
+                : View.GONE;
     }
 
     @Override

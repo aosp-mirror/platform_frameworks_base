@@ -100,6 +100,7 @@ import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.pm.UserManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -145,6 +146,7 @@ public class TrustManagerServiceTest {
 
     private static final String URI_SCHEME_PACKAGE = "package";
     private static final int TEST_USER_ID = 50;
+    private static final int TEST_VISIBLE_BACKGROUND_USER_ID = 51;
     private static final UserInfo TEST_USER =
             new UserInfo(TEST_USER_ID, "user", UserInfo.FLAG_FULL);
     private static final int PARENT_USER_ID = 60;
@@ -170,6 +172,7 @@ public class TrustManagerServiceTest {
     private @Mock KeyStoreAuthorization mKeyStoreAuthorization;
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock LockSettingsInternal mLockSettingsInternal;
+    private @Mock UserManagerInternal mUserManagerInternal;
     private @Mock PackageManager mPackageManager;
     private @Mock UserManager mUserManager;
     private @Mock IWindowManager mWindowManager;
@@ -224,6 +227,7 @@ public class TrustManagerServiceTest {
         when(mUserManager.getAliveUsers()).thenReturn(List.of(TEST_USER));
         when(mUserManager.getEnabledProfileIds(TEST_USER_ID)).thenReturn(new int[0]);
         when(mUserManager.getUserInfo(TEST_USER_ID)).thenReturn(TEST_USER);
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(false);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
 
@@ -591,6 +595,54 @@ public class TrustManagerServiceTest {
         mService.waitForIdle();
 
         verify(mTrustListener, never()).onTrustManagedChanged(anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testDeviceLocked_visibleBackgroundUser_userLocked() throws RemoteException {
+        setupVisibleBackgroundUser(/* visible= */ true, /* unlocked= */ false);
+        mService.waitForIdle();
+        mTrustManager.reportEnabledTrustAgentsChanged(TEST_VISIBLE_BACKGROUND_USER_ID);
+        mService.waitForIdle();
+        assertThat(mService.isDeviceLockedInner(TEST_VISIBLE_BACKGROUND_USER_ID)).isTrue();
+    }
+
+    @Test
+    public void testDeviceLocked_visibleBackgroundUser_userUnlocked() throws RemoteException {
+        setupVisibleBackgroundUser(/* visible= */ true, /* unlocked= */ true);
+        mService.waitForIdle();
+        mTrustManager.reportEnabledTrustAgentsChanged(TEST_VISIBLE_BACKGROUND_USER_ID);
+        mService.waitForIdle();
+        assertThat(mService.isDeviceLockedInner(TEST_VISIBLE_BACKGROUND_USER_ID)).isFalse();
+    }
+
+    @Test
+    public void testDeviceLocked_invisibleBackgroundUser_userUnlocked() throws RemoteException {
+        setupVisibleBackgroundUser(/* visible= */ false, /* unlocked= */ true);
+        mService.waitForIdle();
+        mTrustManager.reportEnabledTrustAgentsChanged(TEST_VISIBLE_BACKGROUND_USER_ID);
+        mService.waitForIdle();
+        assertThat(mService.isDeviceLockedInner(TEST_VISIBLE_BACKGROUND_USER_ID)).isTrue();
+    }
+
+    private void setupVisibleBackgroundUser(boolean visible, boolean unlocked) {
+        UserInfo info = new UserInfo(TEST_VISIBLE_BACKGROUND_USER_ID, "visible bg user",
+                UserInfo.FLAG_FULL);
+
+        when(mActivityManager.isUserRunning(TEST_VISIBLE_BACKGROUND_USER_ID)).thenReturn(true);
+
+        when(mLockPatternUtils.isSecure(TEST_VISIBLE_BACKGROUND_USER_ID)).thenReturn(true);
+
+        when(mUserManager.getAliveUsers()).thenReturn(List.of(TEST_USER, info));
+        when(mUserManager.getEnabledProfileIds(TEST_VISIBLE_BACKGROUND_USER_ID)).thenReturn(
+                new int[0]);
+        when(mUserManager.getUserInfo(TEST_VISIBLE_BACKGROUND_USER_ID)).thenReturn(info);
+        when(mUserManager.isUserUnlocked(TEST_VISIBLE_BACKGROUND_USER_ID)).thenReturn(unlocked);
+        when(mUserManager.isVisibleBackgroundUsersSupported()).thenReturn(true);
+
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, mUserManagerInternal);
+        when(mUserManagerInternal.isVisibleBackgroundFullUser(
+                TEST_VISIBLE_BACKGROUND_USER_ID)).thenReturn(visible);
     }
 
     private void setUpRenewableTrust(ITrustAgentService trustAgent) throws RemoteException {

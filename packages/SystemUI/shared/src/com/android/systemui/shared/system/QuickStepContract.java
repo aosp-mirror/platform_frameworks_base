@@ -124,6 +124,10 @@ public class QuickStepContract {
     public static final long SYSUI_STATE_SHORTCUT_HELPER_SHOWING = 1L << 32;
     // Touchpad gestures are disabled
     public static final long SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED = 1L << 33;
+    // PiP animation is running
+    public static final long SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING = 1L << 34;
+    // Communal hub is showing
+    public static final long SYSUI_STATE_COMMUNAL_HUB_SHOWING = 1L << 35;
 
     // Mask for SystemUiStateFlags to isolate SYSUI_STATE_AWAKE and
     // SYSUI_STATE_WAKEFULNESS_TRANSITION, to match WAKEFULNESS_* constants
@@ -173,6 +177,8 @@ public class QuickStepContract {
             SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY,
             SYSUI_STATE_SHORTCUT_HELPER_SHOWING,
             SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED,
+            SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING,
+            SYSUI_STATE_COMMUNAL_HUB_SHOWING,
     })
     public @interface SystemUiStateFlags {}
 
@@ -277,6 +283,12 @@ public class QuickStepContract {
         if ((flags & SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED) != 0) {
             str.add("touchpad_gestures_disabled");
         }
+        if ((flags & SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING) != 0) {
+            str.add("disable_gesture_pip_animating");
+        }
+        if ((flags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
+            str.add("communal_hub_showing");
+        }
 
         return str.toString();
     }
@@ -332,6 +344,15 @@ public class QuickStepContract {
                 || (sysuiStateFlags & SYSUI_STATE_DIALOG_SHOWING) != 0
                 || (sysuiStateFlags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
             return false;
+        }
+        // Disable back gesture on the hub, but not when the shade is showing.
+        if ((sysuiStateFlags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
+            // Use QS expanded signal as the notification panel is always considered visible
+            // expanded when on the lock screen and when opening hub over lock screen. This does
+            // mean that back gesture is disabled when opening shade over hub while in portrait
+            // mode, since QS is not expanded.
+            // TODO(b/370108274): allow back gesture on shade over hub in portrait
+            return (sysuiStateFlags & SYSUI_STATE_QUICK_SETTINGS_EXPANDED) == 0;
         }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;

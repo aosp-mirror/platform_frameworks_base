@@ -36,6 +36,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
@@ -207,7 +208,7 @@ public final class WebViewFactory {
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
 
-    private static boolean isWebViewSupported() {
+    static boolean isWebViewSupported() {
         // No lock; this is a benign race as Boolean's state is final and the PackageManager call
         // will always return the same value.
         if (sWebViewSupported == null) {
@@ -317,7 +318,7 @@ public final class WebViewFactory {
         String libraryFileName;
         try {
             PackageInfo packageInfo = packageManager.getPackageInfo(packageName,
-                    PackageManager.GET_META_DATA | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+                    PackageManager.GET_META_DATA);
             libraryFileName = getWebViewLibrary(packageInfo.applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(LOGTAG, "Couldn't find package " + packageName);
@@ -339,10 +340,10 @@ public final class WebViewFactory {
             if (sProviderInstance != null) return sProviderInstance;
 
             sTimestamps.mWebViewLoadStart = SystemClock.uptimeMillis();
-            final int uid = android.os.Process.myUid();
-            if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID
-                    || uid == android.os.Process.PHONE_UID || uid == android.os.Process.NFC_UID
-                    || uid == android.os.Process.BLUETOOTH_UID) {
+            final int appId = UserHandle.getAppId(android.os.Process.myUid());
+            if (appId == android.os.Process.ROOT_UID || appId == android.os.Process.SYSTEM_UID
+                    || appId == android.os.Process.PHONE_UID || appId == android.os.Process.NFC_UID
+                    || appId == android.os.Process.BLUETOOTH_UID) {
                 throw new UnsupportedOperationException(
                         "For security reasons, WebView is not allowed in privileged processes");
             }
@@ -478,7 +479,6 @@ public final class WebViewFactory {
                 newPackageInfo = pm.getPackageInfo(
                     response.packageInfo.packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES
-                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
                     // Make sure that we fetch the current provider even if its not
                     // installed for the current user
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES

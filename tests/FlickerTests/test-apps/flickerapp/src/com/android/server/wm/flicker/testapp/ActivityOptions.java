@@ -85,6 +85,12 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".NonResizeablePortraitActivity");
     }
 
+    public static class StartMediaProjectionActivity {
+        public static final String LABEL = "StartMediaProjectionActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".StartMediaProjectionActivity");
+    }
+
     public static class PortraitImmersiveActivity {
         public static final String LABEL = "PortraitImmersiveActivity";
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,

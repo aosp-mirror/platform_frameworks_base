@@ -48,7 +48,7 @@ interface NativeInputManagerService {
 
     int getSwitchState(int deviceId, int sourceMask, int sw);
 
-    void addKeyRemapping(int deviceId, int fromKeyCode, int toKeyCode);
+    void setKeyRemapping(int[] fromKeyCodes, int[] toKeyCodes);
 
     boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
 
@@ -135,6 +135,8 @@ interface NativeInputManagerService {
 
     void setTouchpadTapDraggingEnabled(boolean enabled);
 
+    void setShouldNotifyTouchpadHardwareState(boolean enabled);
+
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
@@ -210,9 +212,12 @@ interface NativeInputManagerService {
 
     void setMotionClassifierEnabled(boolean enabled);
 
-    void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+    void setKeyRepeatConfiguration(int timeoutMs, int delayMs, boolean keyRepeatEnabled);
 
     InputSensorInfo[] getSensorList(int deviceId);
+
+    @Nullable
+    TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId);
 
     boolean flushSensor(int deviceId, int sensorType);
 
@@ -306,7 +311,7 @@ interface NativeInputManagerService {
         public native int getSwitchState(int deviceId, int sourceMask, int sw);
 
         @Override
-        public native void addKeyRemapping(int deviceId, int fromKeyCode, int toKeyCode);
+        public native void setKeyRemapping(int[] fromKeyCodes, int[] toKeyCodes);
 
         @Override
         public native boolean hasKeys(int deviceId, int sourceMask, int[] keyCodes,
@@ -393,6 +398,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadTapDraggingEnabled(boolean enabled);
+
+        @Override
+        public native void setShouldNotifyTouchpadHardwareState(boolean enabled);
 
         @Override
         public native void setTouchpadRightClickZoneEnabled(boolean enabled);
@@ -501,10 +509,14 @@ interface NativeInputManagerService {
         public native void setMotionClassifierEnabled(boolean enabled);
 
         @Override
-        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs,
+                boolean keyRepeatEnabled);
 
         @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
+
+        @Override
+        public native TouchpadHardwareProperties getTouchpadHardwareProperties(int deviceId);
 
         @Override
         public native boolean flushSensor(int deviceId, int sensorType);

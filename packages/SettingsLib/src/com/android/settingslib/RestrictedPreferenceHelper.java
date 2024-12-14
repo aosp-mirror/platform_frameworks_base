@@ -38,8 +38,6 @@ import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.android.settingslib.utils.BuildCompatUtils;
-
 /**
  * Helper class for managing settings preferences that can be disabled
  * by device admins via user restrictions.
@@ -120,9 +118,10 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText = BuildCompatUtils.isAtLeastT()
-                        ? getDisabledByAdminUpdatableString()
-                        : mContext.getString(R.string.disabled_by_admin_summary_text);
+                final CharSequence disabledText =
+                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                                ? getDisabledByAdminUpdatableString()
+                                : mContext.getString(R.string.disabled_by_admin_summary_text);
                 if (mDisabledByAdmin) {
                     summaryView.setText(disabledText);
                 } else if (mDisabledByEcm) {

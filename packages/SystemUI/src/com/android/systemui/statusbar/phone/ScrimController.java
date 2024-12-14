@@ -76,6 +76,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.shared.flag.DualShade;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -87,6 +88,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -101,6 +103,7 @@ import javax.inject.Inject;
  * security method gets shown).
  */
 @SysUISingleton
+@ExperimentalCoroutinesApi
 public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dumpable,
         CoreStartable {
 
@@ -471,6 +474,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         // PRIMARY_BOUNCER->GONE
         collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.getINVALID(),
                 Edge.Companion.create(PRIMARY_BOUNCER, GONE)),
                 mBouncerToGoneTransition, mMainDispatcher);
         collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha(),
@@ -999,7 +1003,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             if (!mScreenOffAnimationController.shouldExpandNotifications()
                     && !mAnimatingPanelExpansionOnUnlock
                     && !occluding) {
-                if (mTransparentScrimBackground) {
+                if (mTransparentScrimBackground || DualShade.isEnabled()) {
                     mBehindAlpha = 0;
                     mNotificationsAlpha = 0;
                 } else if (mClipsQsScrim) {
@@ -1051,7 +1055,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 behindAlpha = 0f;
             }
             mInFrontAlpha = mState.getFrontAlpha();
-            if (mClipsQsScrim) {
+            if (DualShade.isEnabled() && mState == ScrimState.SHADE_LOCKED) {
+                mBehindAlpha = 0;
+                mNotificationsTint = Color.TRANSPARENT;
+                mNotificationsAlpha = 0;
+                mBehindTint = Color.TRANSPARENT;
+            } else if (mClipsQsScrim) {
                 mNotificationsAlpha = behindAlpha;
                 mNotificationsTint = behindTint;
                 mBehindAlpha = 1;
@@ -1105,8 +1114,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private Pair<Integer, Float> calculateBackStateForState(ScrimState state) {
-        // Either darken of make the scrim transparent when you
-        // pull down the shade
+        // Either darken or make the scrim transparent when pulling down the shade.
         float interpolatedFract = getInterpolatedFraction();
 
         float stateBehind = mClipsQsScrim ? state.getNotifAlpha() : state.getBehindAlpha();
@@ -1201,11 +1209,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return true;
         }
 
-        if (mState == ScrimState.PULSING) {
-            return true;
-        }
-
-        return false;
+        return mState == ScrimState.PULSING;
     }
 
     /**

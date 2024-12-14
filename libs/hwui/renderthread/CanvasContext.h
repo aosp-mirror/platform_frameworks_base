@@ -260,7 +260,7 @@ private:
     void finishFrame(FrameInfo* frameInfo);
 
     /**
-     * Invoke 'reportFrameMetrics' on the last frame stored in 'mLast4FrameInfos'.
+     * Invoke 'reportFrameMetrics' on the last frame stored in 'mLastFrameInfos'.
      * Populate the 'presentTime' field before calling.
      */
     void reportMetricsWithPresentTime();
@@ -271,7 +271,7 @@ private:
         int32_t surfaceId;
     };
 
-    FrameInfo* getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId);
+    FrameInfo* getFrameInfoFromLastFew(uint64_t frameNumber, uint32_t surfaceControlId);
 
     Frame getFrame();
 
@@ -336,9 +336,9 @@ private:
 
     // List of data of frames that are awaiting GPU completion reporting. Used to compute frame
     // metrics and determine whether or not to report the metrics.
-    RingBuffer<FrameMetricsInfo, 4> mLast4FrameMetricsInfos
-            GUARDED_BY(mLast4FrameMetricsInfosMutex);
-    std::mutex mLast4FrameMetricsInfosMutex;
+    RingBuffer<FrameMetricsInfo, 6> mLastFrameMetricsInfos
+            GUARDED_BY(mLastFrameMetricsInfosMutex);
+    std::mutex mLastFrameMetricsInfosMutex;
 
     std::string mName;
     JankTracker mJankTracker;
