@@ -275,11 +275,3 @@ flag {
     description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
     bug: "370977414"
 }
-
-flag {
-    name: "wallet_role_icon_property_enabled"
-    is_exported: true
-    namespace: "wallet_integration"
-    description: "This flag is used to enabled the Wallet Role s icon fetching from manifest property"
-    bug: "349942654"
-}
