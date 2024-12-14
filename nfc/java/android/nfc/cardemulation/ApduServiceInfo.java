@@ -71,6 +71,29 @@ public final class ApduServiceInfo implements Parcelable {
     private static final String TAG = "ApduServiceInfo";
 
     /**
+     * Component level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for a system application to change its icon and label
+     * on the default applications page. This property should be added to an
+     * {@link HostApduService} declaration in the manifest.
+     *
+     * <p>For example:
+     * <pre>
+     * &lt;service
+     *     android:apduServiceBanner="@drawable/product_logo"
+     *     android:label="@string/service_label"&gt
+     *      &lt;property
+     *          android:name="android.content.PROPERTY_WALLET_ICON_AND_LABEL_HOLDER"
+     *          android:value="true"/&gt;
+     * &lt/service&gt;
+     * </pre>
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.permission.flags.Flags.FLAG_WALLET_ROLE_ICON_PROPERTY_ENABLED)
+    public static final String PROPERTY_WALLET_PREFERRED_BANNER_AND_LABEL =
+            "android.nfc.cardemulation.PROPERTY_WALLET_PREFERRED_BANNER_AND_LABEL";
+
+    /**
      * The service that implements this
      */
     private final ResolveInfo mService;
@@ -151,7 +174,7 @@ public final class ApduServiceInfo implements Parcelable {
      * Whether or not this service wants to share the same routing priority as the
      * Wallet role owner.
      */
-    private boolean mShareRolePriority;
+    private boolean mWantsRoleHolderPriority;
 
     /**
      * @hide
@@ -291,8 +314,8 @@ public final class ApduServiceInfo implements Parcelable {
                         R.styleable.HostApduService_shouldDefaultToObserveMode,
                         false);
                 if (Flags.nfcAssociatedRoleServices()) {
-                    mShareRolePriority = sa.getBoolean(
-                            R.styleable.HostApduService_shareRolePriority,
+                    mWantsRoleHolderPriority = sa.getBoolean(
+                            R.styleable.HostApduService_wantsRoleHolderPriority,
                             false
                     );
                 }
@@ -327,8 +350,8 @@ public final class ApduServiceInfo implements Parcelable {
                 }
                 mStaticOffHostName = mOffHostName;
                 if (Flags.nfcAssociatedRoleServices()) {
-                    mShareRolePriority = sa.getBoolean(
-                            R.styleable.OffHostApduService_shareRolePriority,
+                    mWantsRoleHolderPriority = sa.getBoolean(
+                            R.styleable.OffHostApduService_wantsRoleHolderPriority,
                             false
                     );
                 }
@@ -729,8 +752,8 @@ public final class ApduServiceInfo implements Parcelable {
      * @return whether or not this service wants to share priority
      */
     @FlaggedApi(Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES)
-    public boolean shareRolePriority() {
-        return mShareRolePriority;
+    public boolean wantsRoleHolderPriority() {
+        return mWantsRoleHolderPriority;
     }
 
     /**
