@@ -69,7 +69,12 @@ class LocationTileMapperTest : SysuiTestCase() {
     fun mapsEnabledDataToOnIconState() {
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(true))
 
-        val expectedIcon = Icon.Loaded(context.getDrawable(R.drawable.qs_location_icon_on)!!, null)
+        val expectedIcon =
+            Icon.Loaded(
+                context.getDrawable(R.drawable.qs_location_icon_on)!!,
+                null,
+                R.drawable.qs_location_icon_on,
+            )
         val actualIcon = tileState.icon
         Truth.assertThat(actualIcon).isEqualTo(expectedIcon)
     }
@@ -78,7 +83,12 @@ class LocationTileMapperTest : SysuiTestCase() {
     fun mapsDisabledDataToOffIconState() {
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(false))
 
-        val expectedIcon = Icon.Loaded(context.getDrawable(R.drawable.qs_location_icon_off)!!, null)
+        val expectedIcon =
+            Icon.Loaded(
+                context.getDrawable(R.drawable.qs_location_icon_off)!!,
+                null,
+                R.drawable.qs_location_icon_off,
+            )
         val actualIcon = tileState.icon
         Truth.assertThat(actualIcon).isEqualTo(expectedIcon)
     }

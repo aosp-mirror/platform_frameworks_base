@@ -91,8 +91,7 @@ class DataSaverTileMapperTest : SysuiTestCase() {
             else context.resources.getStringArray(R.array.tile_states_saver)[0]
 
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

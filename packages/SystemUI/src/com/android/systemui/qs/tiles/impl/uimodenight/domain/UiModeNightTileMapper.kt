@@ -116,11 +116,11 @@ constructor(@ShadeDisplayAware private val resources: Resources, private val the
                     }
                 }
 
-                iconRes =
+                val iconRes =
                     if (activationState == QSTileState.ActivationState.ACTIVE)
                         R.drawable.qs_light_dark_theme_icon_on
                     else R.drawable.qs_light_dark_theme_icon_off
-                icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+                icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
                 supportedActions =
                     if (activationState == QSTileState.ActivationState.UNAVAILABLE)

@@ -49,7 +49,7 @@ constructor(
             supportedActions =
                 setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
             sideViewIcon = QSTileState.SideViewIcon.None
-
+            val iconRes: Int
             if (data.isActivated) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 iconRes = R.drawable.qs_nightlight_icon_on
@@ -58,7 +58,7 @@ constructor(
                 iconRes = R.drawable.qs_nightlight_icon_off
             }
 
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
             secondaryLabel = getSecondaryLabel(data, resources)
 

@@ -61,11 +61,11 @@ constructor(
 
             when (val dataIcon = data.icon) {
                 is InternetTileIconModel.ResourceId -> {
-                    iconRes = dataIcon.resId
                     icon =
                         Icon.Loaded(
                             resources.getDrawable(dataIcon.resId, theme),
                             contentDescription = null,
+                            dataIcon.resId,
                         )
                 }
 
@@ -76,11 +76,11 @@ constructor(
                 }
 
                 is InternetTileIconModel.Satellite -> {
-                    iconRes = dataIcon.resourceIcon.res // level is inferred from res
                     icon =
                         Icon.Loaded(
                             resources.getDrawable(dataIcon.resourceIcon.res, theme),
                             contentDescription = null,
+                            dataIcon.resourceIcon.res,
                         )
                 }
             }

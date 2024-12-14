@@ -35,14 +35,14 @@ constructor(@ShadeDisplayAware private val resources: Resources, private val the
 
     override fun map(config: QSTileConfig, data: FlashlightTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes =
+            val iconRes =
                 if (data is FlashlightTileModel.FlashlightAvailable && data.isEnabled) {
                     R.drawable.qs_flashlight_icon_on
                 } else {
                     R.drawable.qs_flashlight_icon_off
                 }
 
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
             contentDescription = label
 

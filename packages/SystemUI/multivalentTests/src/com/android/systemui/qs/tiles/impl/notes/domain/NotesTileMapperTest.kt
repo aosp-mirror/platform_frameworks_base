@@ -58,8 +58,11 @@ class NotesTileMapperTest : SysuiTestCase() {
 
     private fun createNotesTileState(): QSTileState =
         QSTileState(
-            Icon.Loaded(context.getDrawable(R.drawable.ic_qs_notes)!!, null),
-            R.drawable.ic_qs_notes,
+            Icon.Loaded(
+                context.getDrawable(R.drawable.ic_qs_notes)!!,
+                null,
+                R.drawable.ic_qs_notes,
+            ),
             context.getString(R.string.quick_settings_notes_label),
             QSTileState.ActivationState.INACTIVE,
             /* secondaryLabel= */ null,
