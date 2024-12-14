@@ -64,6 +64,7 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.admin.DevicePolicyManager;
@@ -1652,10 +1653,17 @@ public class AccessibilityManagerServiceTest {
 
     @Test
     @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
-    public void restoreShortcutTargets_qs_a11yQsTargetsRestored() {
-        // TODO: remove the assumption when we fix b/381294327
+    @DisableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargetsAssumeUser0_qs_a11yQsTargetsRestored() {
         assumeTrue("The test is setup to run as a user 0",
                 mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
+        restoreShortcutTargets_qs_a11yQsTargetsRestored();
+    }
+
+    @Test
+    @EnableFlags({android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT,
+            android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE})
+    public void restoreShortcutTargets_qs_a11yQsTargetsRestored() {
         String daltonizerTile =
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
         String colorInversionTile =
@@ -1667,7 +1675,7 @@ public class AccessibilityManagerServiceTest {
 
         broadcastSettingRestored(
                 ShortcutUtils.convertToKey(QUICK_SETTINGS),
-                /*newValue=*/colorInversionTile);
+                /*newValue=*/colorInversionTile, userState.mUserId);
 
         Set<String> expected = Set.of(daltonizerTile, colorInversionTile);
         assertThat(readStringsFromSetting(ShortcutUtils.convertToKey(QUICK_SETTINGS)))
@@ -1677,11 +1685,18 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
-    public void restoreShortcutTargets_qs_a11yQsTargetsNotRestored() {
-        // TODO: remove the assumption when we fix b/381294327
+    @DisableFlags({android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT,
+            android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE})
+    public void restoreShortcutTargetsAssumeUser0_qs_a11yQsTargetsNotRestored() {
         assumeTrue("The test is setup to run as a user 0",
                 mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
+        restoreShortcutTargets_qs_a11yQsTargetsNotRestored();
+    }
+
+    @Test
+    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargets_qs_a11yQsTargetsNotRestored() {
         String daltonizerTile =
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
         String colorInversionTile =
@@ -1694,7 +1709,7 @@ public class AccessibilityManagerServiceTest {
 
         broadcastSettingRestored(
                 ShortcutUtils.convertToKey(QUICK_SETTINGS),
-                /*newValue=*/colorInversionTile);
+                /*newValue=*/colorInversionTile, userState.mUserId);
 
         Set<String> expected = Set.of(daltonizerTile);
         assertThat(readStringsFromSetting(ShortcutUtils.convertToKey(QUICK_SETTINGS)))
@@ -1762,10 +1777,16 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    public void restoreShortcutTargets_hardware_targetsMerged() {
-        // TODO: remove the assumption when we fix b/381294327
+    @DisableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargetsAssumeUser0_hardware_targetsMerged() {
         assumeTrue("The test is setup to run as a user 0",
                 mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
+        restoreShortcutTargets_hardware_targetsMerged();
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargets_hardware_targetsMerged() {
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
         final String servicePrevious = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
         final String otherPrevious = TARGET_MAGNIFICATION;
@@ -1779,7 +1800,7 @@ public class AccessibilityManagerServiceTest {
 
         broadcastSettingRestored(
                 ShortcutUtils.convertToKey(HARDWARE),
-                /*newValue=*/serviceRestored);
+                /*newValue=*/serviceRestored, userState.mUserId);
 
         final Set<String> expected = Set.of(servicePrevious, otherPrevious, serviceRestored);
         assertThat(readStringsFromSetting(ShortcutUtils.convertToKey(HARDWARE)))
@@ -1789,10 +1810,16 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    public void restoreShortcutTargets_hardware_alreadyHadDefaultService_doesNotClear() {
-        // TODO: remove the assumption when we fix b/381294327
+    @DisableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargetsAssumeUser0_hardware_alreadyHadDefaultService_doesNotClear() {
         assumeTrue("The test is setup to run as a user 0",
                 mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
+        restoreShortcutTargets_hardware_alreadyHadDefaultService_doesNotClear();
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargets_hardware_alreadyHadDefaultService_doesNotClear() {
         final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE_NAME;
         mTestableContext.getOrCreateTestableResources().addOverride(
                 R.string.config_defaultAccessibilityService, serviceDefault);
@@ -1807,7 +1834,7 @@ public class AccessibilityManagerServiceTest {
 
         broadcastSettingRestored(
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                /*newValue=*/serviceDefault);
+                /*newValue=*/serviceDefault, userState.mUserId);
 
         final Set<String> expected = Set.of(serviceDefault);
         assertThat(readStringsFromSetting(ShortcutUtils.convertToKey(HARDWARE)))
@@ -1817,10 +1844,16 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    public void restoreShortcutTargets_hardware_didNotHaveDefaultService_clearsDefaultService() {
-        // TODO: remove the assumption when we fix b/381294327
+    @DisableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargetsAsUser0_hardware_noDefaultService_clearsDefaultService() {
         assumeTrue("The test is setup to run as a user 0",
                 mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
+        restoreShortcutTargets_hardware_didNotHaveDefaultService_clearsDefaultService();
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargets_hardware_didNotHaveDefaultService_clearsDefaultService() {
         final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE_NAME;
         final String serviceRestored = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
         // Restored value from the broadcast contains both default and non-default service.
@@ -1833,7 +1866,7 @@ public class AccessibilityManagerServiceTest {
         setupShortcutTargetServices(userState);
 
         broadcastSettingRestored(ShortcutUtils.convertToKey(HARDWARE),
-                /*newValue=*/combinedRestored);
+                /*newValue=*/combinedRestored, userState.mUserId);
 
         // The default service is cleared from the final restored value.
         final Set<String> expected = Set.of(serviceRestored);
@@ -1844,10 +1877,16 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    public void restoreShortcutTargets_hardware_nullSetting_clearsDefaultService() {
-        // TODO: remove the assumption when we fix b/381294327
+    @DisableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargetsAssumeUser0_hardware_nullSetting_clearsDefaultService() {
         assumeTrue("The test is setup to run as a user 0",
                 mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
+        restoreShortcutTargets_hardware_nullSetting_clearsDefaultService();
+    }
+
+    @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
+    public void restoreShortcutTargets_hardware_nullSetting_clearsDefaultService() {
         final String serviceDefault = TARGET_STANDARD_A11Y_SERVICE_NAME;
         final String serviceRestored = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
         // Restored value from the broadcast contains both default and non-default service.
@@ -1864,7 +1903,7 @@ public class AccessibilityManagerServiceTest {
         putShortcutSettingForUser(HARDWARE, null, userState.mUserId);
 
         broadcastSettingRestored(ShortcutUtils.convertToKey(HARDWARE),
-                /*newValue=*/combinedRestored);
+                /*newValue=*/combinedRestored, userState.mUserId);
 
         // The default service is cleared from the final restored value.
         final Set<String> expected = Set.of(serviceRestored);
@@ -2332,12 +2371,12 @@ public class AccessibilityManagerServiceTest {
                 setting, mA11yms.getCurrentUserIdLocked(), strings, str -> str);
     }
 
-    private void broadcastSettingRestored(String setting, String newValue) {
+    private void broadcastSettingRestored(String setting, String newValue, @UserIdInt int userId) {
         Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
                 .putExtra(Intent.EXTRA_SETTING_NAME, setting)
                 .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, newValue);
-        sendBroadcastToAccessibilityManagerService(intent);
+        sendBroadcastToAccessibilityManagerService(intent, userId);
         mTestableLooper.processAllMessages();
     }
 
@@ -2421,12 +2460,24 @@ public class AccessibilityManagerServiceTest {
         userState.updateTileServiceMapForAccessibilityServiceLocked();
     }
 
-    private void sendBroadcastToAccessibilityManagerService(Intent intent) {
+    private void sendBroadcastToAccessibilityManagerService(Intent intent, @UserIdInt int userId) {
         if (!mTestableContext.getBroadcastReceivers().containsKey(intent.getAction())) {
             return;
         }
         mTestableContext.getBroadcastReceivers().get(intent.getAction()).forEach(
-                broadcastReceiver -> broadcastReceiver.onReceive(mTestableContext, intent));
+                broadcastReceiver -> {
+                    BroadcastReceiver.PendingResult result = mock(
+                            BroadcastReceiver.PendingResult.class);
+                    try {
+                        FieldSetter.setField(result,
+                                BroadcastReceiver.PendingResult.class.getDeclaredField(
+                                        "mSendingUser"), userId);
+                    } catch (NoSuchFieldException e) {
+                        // do nothing
+                    }
+                    broadcastReceiver.setPendingResult(result);
+                    broadcastReceiver.onReceive(mTestableContext, intent);
+                });
     }
 
     public static class FakeInputFilter extends AccessibilityInputFilter {
@@ -2449,6 +2500,7 @@ public class AccessibilityManagerServiceTest {
         A11yTestableContext(Context base) {
             super(base);
             mMockContext = mock(Context.class);
+
         }
 
         @Override

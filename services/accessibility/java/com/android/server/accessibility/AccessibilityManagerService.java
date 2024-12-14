@@ -1057,17 +1057,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE);
                     final int restoredFromSdk =
                             intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, 0);
+                    final int userId =
+                            android.view.accessibility.Flags.restoreA11ySecureSettingsOnHsumDevice()
+                                    ? getSendingUserId() : UserHandle.USER_SYSTEM;
                     switch (which) {
                         case Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES -> {
                             synchronized (mLock) {
                                 restoreEnabledAccessibilityServicesLocked(
-                                        previousValue, newValue, restoredFromSdk);
+                                        previousValue, newValue, restoredFromSdk, userId);
                             }
                         }
                         case ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED -> {
                             synchronized (mLock) {
                                 restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
-                                        newValue, restoredFromSdk);
+                                        newValue, restoredFromSdk, userId);
                             }
                         }
                         // Currently in SUW, the user can't see gesture shortcut option as the
@@ -1078,7 +1081,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                              Settings.Secure.ACCESSIBILITY_QS_TARGETS,
                              Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE ->
                                 restoreShortcutTargets(newValue,
-                                        ShortcutUtils.convertToType(which));
+                                        ShortcutUtils.convertToType(which), userId);
                     }
                 }
             }
@@ -1144,10 +1147,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    // Called only during settings restore; currently supports only the owner user
-    // TODO: b/22388012
-    private void restoreLegacyDisplayMagnificationNavBarIfNeededLocked(String newSetting,
-            int restoreFromSdkInt) {
+    // Called only during settings restore; currently supports only the main user
+    // TODO: http://b/374830726
+    private void restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
+            String newSetting, int restoreFromSdkInt, int userId) {
         if (restoreFromSdkInt >= Build.VERSION_CODES.R) {
             return;
         }
@@ -1160,7 +1163,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
-        final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+        final AccessibilityUserState userState = getUserStateLocked(userId);
         final Set<String> targetsFromSetting = new ArraySet<>();
         readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 userState.mUserId, str -> str, targetsFromSetting);
@@ -2225,20 +2228,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         getMagnificationController().onUserRemoved(userId);
     }
 
-    // Called only during settings restore; currently supports only the owner user
-    // TODO: http://b/22388012
-    void restoreEnabledAccessibilityServicesLocked(String oldSetting, String newSetting,
-            int restoreFromSdkInt) {
+    // Called only during settings restore; currently supports only the main user
+    // TODO: http://b/374830726
+    void restoreEnabledAccessibilityServicesLocked(
+            String oldSetting, String newSetting, int restoreFromSdkInt, int userId) {
         readComponentNamesFromStringLocked(oldSetting, mTempComponentNameSet, false);
         readComponentNamesFromStringLocked(newSetting, mTempComponentNameSet, true);
 
-        AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+        AccessibilityUserState userState = getUserStateLocked(userId);
         userState.mEnabledServices.clear();
         userState.mEnabledServices.addAll(mTempComponentNameSet);
         persistComponentNamesToSettingLocked(
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 userState.mEnabledServices,
-                UserHandle.USER_SYSTEM);
+                userState.mUserId);
         onUserStateChangedLocked(userState);
         migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null, restoreFromSdkInt);
     }
@@ -2247,21 +2250,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * User could configure accessibility shortcut during the SUW before restoring user data.
      * Merges the current value and the new value to make sure we don't lost the setting the user's
      * preferences of accessibility shortcut updated in SUW are not lost.
-     * Called only during settings restore; currently supports only the owner user.
+     *
      * <P>
      * Throws an exception if used with {@code TRIPLETAP} or {@code TWOFINGER_DOUBLETAP}.
      * </P>
-     * TODO: http://b/22388012
      */
-    private void restoreShortcutTargets(String newValue,
-            @UserShortcutType int shortcutType) {
+    // Called only during settings restore; currently supports only the main user.
+    // TODO: http://b/374830726
+    private void restoreShortcutTargets(
+            String newValue, @UserShortcutType int shortcutType, int userId) {
         assertNoTapShortcut(shortcutType);
         if (shortcutType == QUICK_SETTINGS && !android.view.accessibility.Flags.a11yQsShortcut()) {
             return;
         }
 
         synchronized (mLock) {
-            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+            final AccessibilityUserState userState = getUserStateLocked(userId);
             final Set<String> mergedTargets = (shortcutType == HARDWARE)
                     ? new ArraySet<>(ShortcutUtils.getShortcutTargetsFromSettings(
                             mContext, shortcutType, userState.mUserId))
@@ -2295,7 +2299,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             userState.updateShortcutTargetsLocked(mergedTargets, shortcutType);
             persistColonDelimitedSetToSettingLocked(ShortcutUtils.convertToKey(shortcutType),
-                    UserHandle.USER_SYSTEM, mergedTargets, str -> str);
+                    userState.mUserId, mergedTargets, str -> str);
             scheduleNotifyClientsOfServicesStateChangeLocked(userState);
             onUserStateChangedLocked(userState);
         }

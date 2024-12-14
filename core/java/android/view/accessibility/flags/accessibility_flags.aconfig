@@ -233,6 +233,16 @@ flag {
 }
 
 flag {
+    name: "restore_a11y_secure_settings_on_hsum_device"
+    namespace: "accessibility"
+    description: "Grab the a11y settings and send the settings restored broadcast for current visible foreground user"
+    bug: "381294327"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "supplemental_description"
     namespace: "accessibility"
     description: "Feature flag for supplemental description api"
