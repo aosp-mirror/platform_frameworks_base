@@ -61,11 +61,13 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Flags;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -78,6 +80,7 @@ import com.android.systemui.statusbar.notification.row.shared.LockscreenOtpRedac
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.util.kotlin.JavaAdapterKt;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.Lazy;
@@ -88,8 +91,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Handles keeping track of the current user, profiles, and various things related to hiding
@@ -110,6 +117,9 @@ public class NotificationLockscreenUserManagerImpl implements
             Settings.Secure.getUriFor(LOCK_SCREEN_SHOW_NOTIFICATIONS);
     private static final Uri SHOW_PRIVATE_LOCKSCREEN =
             Settings.Secure.getUriFor(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+
+    private static final long LOCK_TIME_FOR_SENSITIVE_REDACTION_MS =
+            TimeUnit.MINUTES.toMillis(10);
 
     private final Lazy<NotificationVisibilityProvider> mVisibilityProviderLazy;
     private final Lazy<CommonNotifCollection> mCommonNotifCollectionLazy;
@@ -284,7 +294,12 @@ public class NotificationLockscreenUserManagerImpl implements
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
     protected final SparseArray<UserInfo> mCurrentManagedProfiles = new SparseArray<>();
 
+    // The last lock time. Uses currentTimeMillis
+    @VisibleForTesting
+    protected final AtomicLong mLastLockTime = new AtomicLong(-1);
+
     protected int mCurrentUserId = 0;
+
     protected NotificationPresenter mPresenter;
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
@@ -311,7 +326,10 @@ public class NotificationLockscreenUserManagerImpl implements
             DumpManager dumpManager,
             LockPatternUtils lockPatternUtils,
             FeatureFlagsClassic featureFlags,
-            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy) {
+            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
+            Lazy<KeyguardInteractor> keyguardInteractor,
+            @Application CoroutineScope coroutineScope
+    ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBackgroundExecutor = backgroundExecutor;
@@ -340,6 +358,18 @@ public class NotificationLockscreenUserManagerImpl implements
 
         if (keyguardPrivateNotifications()) {
             init();
+        }
+
+        // To avoid dependency injection cycle, finish constructing this object before using the
+        // KeyguardInteractor. The CoroutineScope will only be null in tests.
+        if (LockscreenOtpRedaction.isEnabled() && coroutineScope != null) {
+            mMainExecutor.execute(() -> JavaAdapterKt.collectFlow(coroutineScope,
+                    keyguardInteractor.get().isKeyguardDismissible(),
+                    unlocked -> {
+                        if (!unlocked) {
+                            mLastLockTime.set(System.currentTimeMillis());
+                        }
+                    }));
         }
     }
 
@@ -443,7 +473,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mCurrentUserId = mUserTracker.getUserId(); // in case we reg'd receiver too late
         updateCurrentProfilesCache();
 
-        // Set  up
+        // Set up
         mBackgroundExecutor.execute(() -> {
             @SuppressLint("MissingPermission") List<UserInfo> users = mUserManager.getUsers();
             for (int i = users.size() - 1; i >= 0; i--) {
@@ -667,8 +697,6 @@ public class NotificationLockscreenUserManagerImpl implements
                 !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
         boolean isNotifForManagedProfile = mCurrentManagedProfiles.contains(userId);
         boolean isNotifUserRedacted = !userAllowsPrivateNotificationsInPublic(userId);
-        boolean isNotifSensitive = LockscreenOtpRedaction.isEnabled()
-                && ent.getRanking() != null && ent.getRanking().hasSensitiveContent();
 
         // redact notifications if the current user is redacting notifications or the notification
         // contains sensitive content. However if the notification is associated with a managed
@@ -689,10 +717,43 @@ public class NotificationLockscreenUserManagerImpl implements
         if (keyguardPrivateNotifications() && !mKeyguardAllowingNotifications) {
             return REDACTION_TYPE_PUBLIC;
         }
-        if (isNotifSensitive) {
+
+        if (shouldShowSensitiveContentRedactedView(ent)) {
             return REDACTION_TYPE_SENSITIVE_CONTENT;
         }
         return REDACTION_TYPE_NONE;
+    }
+
+    /*
+     * We show the sensitive content redaction view if
+     * 1. The feature is enabled
+     * 2. The device is locked
+     * 3. The notification has the `hasSensitiveContent` ranking variable set to true
+     * 4. The device has been locked for at least LOCK_TIME_FOR_SENSITIVE_REDACTION_MS
+     * 5. The notification arrived since the last lock time
+     */
+    private boolean shouldShowSensitiveContentRedactedView(NotificationEntry ent) {
+        if (!LockscreenOtpRedaction.isEnabled()) {
+            return false;
+        }
+
+        if (!mKeyguardManager.isDeviceLocked()) {
+            return false;
+        }
+
+        if (ent.getRanking() == null || !ent.getRanking().hasSensitiveContent()) {
+            return false;
+        }
+
+        long lastLockedTime = mLastLockTime.get();
+        if (ent.getSbn().getPostTime() < lastLockedTime) {
+            return false;
+        }
+
+        if ((System.currentTimeMillis() - lastLockedTime) < LOCK_TIME_FOR_SENSITIVE_REDACTION_MS) {
+            return false;
+        }
+        return true;
     }
 
     private boolean packageHasVisibilityOverride(String key) {
