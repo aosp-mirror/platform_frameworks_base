@@ -147,11 +147,6 @@ public final class NotificationProgressDrawable extends Drawable {
             final Part prevPart = iPart == 0 ? null : mParts.get(iPart - 1);
             final Part nextPart = iPart + 1 == numParts ? null : mParts.get(iPart + 1);
             if (part instanceof Segment segment) {
-                // Update the segment-point gap to 2X upon seeing the first faded segment.
-                // (Assuming that all segments before are solid, and all segments after are faded.)
-                if (segment.mFaded) {
-                    segPointGap = mState.mSegPointGap * 2;
-                }
                 final float segWidth = segment.mFraction * totalWidth;
                 // Advance the start position to account for a point immediately prior.
                 final float startOffset = getSegStartOffset(prevPart, pointRadius, segPointGap, x);
@@ -225,7 +220,7 @@ public final class NotificationProgressDrawable extends Drawable {
         if (nextPart instanceof Segment nextSeg) {
             if (!seg.mFaded && nextSeg.mFaded) {
                 // @see Segment#mFaded
-                return hasTrackerIcon ? 0F : segSegGap * 4F;
+                return hasTrackerIcon ? 0F : segSegGap;
             }
             return segSegGap;
         }
@@ -487,11 +482,10 @@ public final class NotificationProgressDrawable extends Drawable {
          * <p>
          *     <pre>
          *     When mFaded is set to true, a combination of the following is done to the segment:
-         *       1. The drawing color is mColor with opacity updated to 15%.
-         *       2. The segment-point gap is 2X the segment-point gap for non-faded segments.
-         *       3. The gap between faded and non-faded segments is:
-         *          4X the segment-segment gap, when there is no tracker icon
-         *          0, when there is tracker icon
+         *       1. The drawing color is mColor with opacity updated to 40%.
+         *       2. The gap between faded and non-faded segments is:
+         *          - the segment-segment gap, when there is no tracker icon
+         *          - 0, when there is tracker icon
          *     </pre>
          * </p>
          */
@@ -764,7 +758,7 @@ public final class NotificationProgressDrawable extends Drawable {
     @ColorInt
     static int getFadedColor(@ColorInt int color) {
         return Color.argb(
-                (int) (Color.alpha(color) * 0.25f + 0.5f),
+                (int) (Color.alpha(color) * 0.4f + 0.5f),
                 Color.red(color),
                 Color.green(color),
                 Color.blue(color));
