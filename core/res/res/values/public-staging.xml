@@ -119,7 +119,7 @@
     <!-- @FlaggedApi("android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM") -->
     <public name="dreamCategory"/>
     <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
-    <public name="shareRolePriority"/>
+    <public name="wantsRoleHolderPriority"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
