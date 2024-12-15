@@ -332,16 +332,55 @@ public final class Looper {
         return -1;
     }
 
+    private static int getThreadGroup() {
+        int threadGroup = Process.THREAD_GROUP_DEFAULT;
+
+        if (!Process.isIsolated()) {
+            threadGroup = Process.getProcessGroup(Process.myTid());
+        }
+        return threadGroup;
+    }
+
+    private static String threadGroupToString(int threadGroup) {
+        switch (threadGroup) {
+            case Process.THREAD_GROUP_BACKGROUND:
+                return "BACKGROUND";
+            case Process.THREAD_GROUP_FOREGROUND:
+                return "FOREGROUND";
+            case Process.THREAD_GROUP_SYSTEM:
+                return "SYSTEM";
+            case Process.THREAD_GROUP_AUDIO_APP:
+                return "AUDIO_APP";
+            case Process.THREAD_GROUP_AUDIO_SYS:
+                return "AUDIO_SYS";
+            case Process.THREAD_GROUP_TOP_APP:
+                return "TOP_APP";
+            case Process.THREAD_GROUP_RT_APP:
+                return "RT_APP";
+            case Process.THREAD_GROUP_RESTRICTED:
+                return "RESTRICTED";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     private static boolean showSlowLog(long threshold, long measureStart, long measureEnd,
             String what, Message msg) {
         final long actualTime = measureEnd - measureStart;
         if (actualTime < threshold) {
             return false;
         }
+
+        String name = Process.myProcessName();
+        String threadGroup = threadGroupToString(getThreadGroup());
+        boolean isMain = myLooper() == getMainLooper();
+
         // For slow delivery, the current message isn't really important, but log it anyway.
         Slog.w(TAG, "Slow " + what + " took " + actualTime + "ms "
-                + Thread.currentThread().getName() + " h="
-                + msg.target.getClass().getName() + " c=" + msg.callback + " m=" + msg.what);
+                + Thread.currentThread().getName() + " app=" + name
+                + " main=" + isMain + " group=" + threadGroup
+                + " h=" + msg.target.getClass().getName() + " c=" + msg.callback
+                + " m=" + msg.what);
         return true;
     }
 

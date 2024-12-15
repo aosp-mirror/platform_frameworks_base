@@ -21,8 +21,6 @@
 #include <android-base/file.h>
 #include <android-base/hex.h>
 #include <android-base/unique_fd.h>
-#include <bionic/macros.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <linux/fs.h>
@@ -48,8 +46,8 @@ bool punchWithBlockAlignment(borrowed_fd fd, uint64_t start, uint64_t length, ui
         return false;
     }
 
-    start = align_up(start, blockSize);
-    end = align_down(end, blockSize);
+    start = __builtin_align_up(start, blockSize);
+    end = __builtin_align_down(end, blockSize);
 
     uint64_t alignedLength;
     if (__builtin_sub_overflow(end, start, &alignedLength)) {
@@ -67,7 +65,7 @@ bool punchWithBlockAlignment(borrowed_fd fd, uint64_t start, uint64_t length, ui
     int result =
             fallocate(fd.get(), FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, start, alignedLength);
     if (result < 0) {
-        ALOGE("fallocate failed to punch hole, error:%d", errno);
+        ALOGE("fallocate failed to punch hole: %m");
         return false;
     }
 
@@ -78,7 +76,7 @@ bool punchHoles(const char *filePath, const uint64_t offset,
                 const std::vector<Elf64_Phdr> &programHeaders) {
     struct stat64 beforePunch;
     if (int result = lstat64(filePath, &beforePunch); result != 0) {
-        ALOGE("lstat64 failed for filePath %s, error:%d", filePath, errno);
+        ALOGE("lstat64 failed for filePath %s: %m", filePath);
         return false;
     }
 
@@ -190,7 +188,7 @@ bool punchHoles(const char *filePath, const uint64_t offset,
     IF_ALOGD() {
         struct stat64 afterPunch;
         if (int result = lstat64(filePath, &afterPunch); result != 0) {
-            ALOGD("lstat64 failed for filePath %s, error:%d", filePath, errno);
+            ALOGD("lstat64 failed for filePath %s: %m", filePath);
             return false;
         }
         ALOGD("Size after punching holes st_blocks: %" PRIu64 ", st_blksize: %" PRIu64
@@ -269,7 +267,7 @@ bool punchHolesInZip(const char *filePath, uint64_t offset, uint16_t extraFieldL
 
     struct stat64 beforePunch;
     if (int result = lstat64(filePath, &beforePunch); result != 0) {
-        ALOGE("lstat64 failed for filePath %s, error:%d", filePath, errno);
+        ALOGE("lstat64 failed for filePath %s: %m", filePath);
         return false;
     }
 
@@ -348,7 +346,7 @@ bool punchHolesInZip(const char *filePath, uint64_t offset, uint16_t extraFieldL
     IF_ALOGD() {
         struct stat64 afterPunch;
         if (int result = lstat64(filePath, &afterPunch); result != 0) {
-            ALOGD("lstat64 failed for filePath %s, error:%d", filePath, errno);
+            ALOGD("lstat64 failed for filePath %s: %m", filePath);
             return false;
         }
         ALOGD("punchHolesInApk:: Size after punching holes st_blocks: %" PRIu64

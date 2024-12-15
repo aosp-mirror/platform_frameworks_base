@@ -16,9 +16,15 @@
 
 package com.android.systemfeatures;
 
+import static com.android.internal.pm.SystemFeaturesMetadata.maybeGetSdkFeatureIndex;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.pm.PackageManager;
+
 import com.android.internal.pm.SystemFeaturesMetadata;
+
+import com.google.common.collect.Range;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,5 +38,18 @@ public class SystemFeaturesMetadataProcessorTest {
         // See the fake PackageManager definition in this directory.
         // It defines 5 annotated features, and any/all other constants should be ignored.
         assertThat(SystemFeaturesMetadata.SDK_FEATURE_COUNT).isEqualTo(5);
+    }
+
+    @Test
+    public void testSdkFeatureIndex() {
+        // Only SDK-defined features return valid indices.
+        final Range validIndexRange = Range.closedOpen(0, SystemFeaturesMetadata.SDK_FEATURE_COUNT);
+        assertThat(maybeGetSdkFeatureIndex(PackageManager.FEATURE_PC)).isIn(validIndexRange);
+        assertThat(maybeGetSdkFeatureIndex(PackageManager.FEATURE_VULKAN)).isIn(validIndexRange);
+        assertThat(maybeGetSdkFeatureIndex(PackageManager.FEATURE_NOT_ANNOTATED)).isEqualTo(-1);
+        assertThat(maybeGetSdkFeatureIndex(PackageManager.NOT_FEATURE)).isEqualTo(-1);
+        assertThat(maybeGetSdkFeatureIndex("foo")).isEqualTo(-1);
+        assertThat(maybeGetSdkFeatureIndex("0")).isEqualTo(-1);
+        assertThat(maybeGetSdkFeatureIndex("")).isEqualTo(-1);
     }
 }

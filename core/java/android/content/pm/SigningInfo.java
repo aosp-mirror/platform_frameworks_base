@@ -22,7 +22,6 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,41 +39,29 @@ public final class SigningInfo implements Parcelable {
     /**
      * JAR signing (v1 scheme).
      * See https://source.android.com/docs/security/features/apksigning#v1.
-     *
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_CLOUD_COMPILATION_PM)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int VERSION_JAR = SignatureSchemeVersion.JAR;
 
     /**
      * APK signature scheme v2.
      * See https://source.android.com/docs/security/features/apksigning/v2.
-     *
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_CLOUD_COMPILATION_PM)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int VERSION_SIGNING_BLOCK_V2 = SignatureSchemeVersion.SIGNING_BLOCK_V2;
 
     /**
      * APK signature scheme v3.
      * See https://source.android.com/docs/security/features/apksigning/v3.
-     *
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_CLOUD_COMPILATION_PM)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int VERSION_SIGNING_BLOCK_V3 = SignatureSchemeVersion.SIGNING_BLOCK_V3;
 
     /**
      * APK signature scheme v4.
      * See https://source.android.com/docs/security/features/apksigning/v4.
-     *
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_CLOUD_COMPILATION_PM)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int VERSION_SIGNING_BLOCK_V4 = SignatureSchemeVersion.SIGNING_BLOCK_V4;
 
     /** @hide */
@@ -255,11 +242,8 @@ public final class SigningInfo implements Parcelable {
 
     /**
      * Returns true if the signing certificates in this and other match exactly.
-     *
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_CLOUD_COMPILATION_PM)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean signersMatchExactly(@NonNull SigningInfo other) {
         return mSigningDetails.signaturesMatchExactly(other.mSigningDetails);
     }

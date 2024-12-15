@@ -164,6 +164,7 @@ android_app {
         "com.android.window.flags.window-aconfig",
         "android.permission.flags-aconfig",
         "ranging_aconfig_flags",
+        "telephony_flags",
     ],
 }
 

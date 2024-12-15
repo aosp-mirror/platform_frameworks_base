@@ -37,7 +37,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -125,11 +125,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
         whenever(mainUser.identifier).thenReturn(mainUserId)
 
         underTest = create(this)
-        val initialExpectedValue =
-            setUpUsers(
-                count = 3,
-                selectedIndex = 0,
-            )
+        val initialExpectedValue = setUpUsers(count = 3, selectedIndex = 0)
         var userInfos: List<UserInfo>? = null
         var selectedUserInfo: UserInfo? = null
         underTest.userInfos.onEach { userInfos = it }.launchIn(this)
@@ -140,23 +136,14 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(selectedUserInfo).isEqualTo(initialExpectedValue[0])
         assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
 
-        val secondExpectedValue =
-            setUpUsers(
-                count = 4,
-                selectedIndex = 1,
-            )
+        val secondExpectedValue = setUpUsers(count = 4, selectedIndex = 1)
         underTest.refreshUsers()
         assertThat(userInfos).isEqualTo(secondExpectedValue)
         assertThat(selectedUserInfo).isEqualTo(secondExpectedValue[1])
         assertThat(underTest.lastSelectedNonGuestUserId).isEqualTo(selectedUserInfo?.id)
 
         val selectedNonGuestUserId = selectedUserInfo?.id
-        val thirdExpectedValue =
-            setUpUsers(
-                count = 2,
-                isLastGuestUser = true,
-                selectedIndex = 1,
-            )
+        val thirdExpectedValue = setUpUsers(count = 2, isLastGuestUser = true, selectedIndex = 1)
         underTest.refreshUsers()
         assertThat(userInfos).isEqualTo(thirdExpectedValue)
         assertThat(selectedUserInfo).isEqualTo(thirdExpectedValue[1])
@@ -168,12 +155,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
     @Test
     fun refreshUsers_sortsByCreationTime_guestUserLast() = runSelfCancelingTest {
         underTest = create(this)
-        val unsortedUsers =
-            setUpUsers(
-                count = 3,
-                selectedIndex = 0,
-                isLastGuestUser = true,
-            )
+        val unsortedUsers = setUpUsers(count = 3, selectedIndex = 0, isLastGuestUser = true)
         unsortedUsers[0].creationTime = 999
         unsortedUsers[1].creationTime = 900
         unsortedUsers[2].creationTime = 950
@@ -197,30 +179,22 @@ class UserRepositoryImplTest : SysuiTestCase() {
     ): List<UserInfo> {
         val userInfos =
             (0 until count).map { index ->
-                createUserInfo(
-                    index,
-                    isGuest = isLastGuestUser && index == count - 1,
-                )
+                createUserInfo(index, isGuest = isLastGuestUser && index == count - 1)
             }
         whenever(manager.aliveUsers).thenReturn(userInfos)
         tracker.set(userInfos, selectedIndex)
         return userInfos
     }
+
     @Test
     fun userTrackerCallback_updatesSelectedUserInfo() = runSelfCancelingTest {
         underTest = create(this)
         var selectedUserInfo: UserInfo? = null
         underTest.selectedUserInfo.onEach { selectedUserInfo = it }.launchIn(this)
-        setUpUsers(
-            count = 2,
-            selectedIndex = 0,
-        )
+        setUpUsers(count = 2, selectedIndex = 0)
         tracker.onProfileChanged()
         assertThat(selectedUserInfo?.id).isEqualTo(0)
-        setUpUsers(
-            count = 2,
-            selectedIndex = 1,
-        )
+        setUpUsers(count = 2, selectedIndex = 1)
         tracker.onProfileChanged()
         assertThat(selectedUserInfo?.id).isEqualTo(1)
     }
@@ -259,10 +233,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
     }
 
-    private fun createUserInfo(
-        id: Int,
-        isGuest: Boolean,
-    ): UserInfo {
+    private fun createUserInfo(id: Int, isGuest: Boolean): UserInfo {
         val flags = 0
         return UserInfo(
             id,
@@ -312,16 +283,14 @@ class UserRepositoryImplTest : SysuiTestCase() {
      * Executes the given block of execution within the scope of a dedicated [CoroutineScope] which
      * is then automatically canceled and cleaned-up.
      */
-    private fun runSelfCancelingTest(
-        block: suspend CoroutineScope.() -> Unit,
-    ) =
+    private fun runSelfCancelingTest(block: suspend CoroutineScope.() -> Unit) =
         runBlocking(Dispatchers.Main.immediate) {
             val scope = CoroutineScope(coroutineContext + Job())
             block(scope)
             scope.cancel()
         }
 
-    private fun create(scope: CoroutineScope = TestCoroutineScope()): UserRepositoryImpl {
+    private fun create(scope: CoroutineScope = TestScope()): UserRepositoryImpl {
         return UserRepositoryImpl(
             appContext = context,
             manager = manager,

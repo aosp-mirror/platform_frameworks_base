@@ -8010,40 +8010,43 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void waitForAllWindowsDrawn(Message message, long timeout, int displayId) {
             Objects.requireNonNull(message.getTarget());
-            final WindowContainer<?> container = displayId == INVALID_DISPLAY
-                    ? mRoot : mRoot.getDisplayContent(displayId);
-            if (container == null) {
-                // The waiting container doesn't exist, no need to wait to run the callback. Run and
-                // return;
-                message.sendToTarget();
-                return;
-            }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
-                if (mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
-                    // Use the ready-to-play of transition as the signal.
-                    return;
-                }
-                container.waitForAllWindowsDrawn();
-                mWindowPlacerLocked.requestTraversal();
-                mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);
-                if (container.mWaitingForDrawn.isEmpty()) {
-                    allWindowsDrawn = true;
-                } else {
-                    if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
-                        for (int i = 0; i < container.mWaitingForDrawn.size(); i++) {
-                            traceStartWaitingForWindowDrawn(container.mWaitingForDrawn.get(i));
-                        }
-                    }
-
-                    mWaitingForDrawnCallbacks.put(container, message);
-                    mH.sendNewMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, container, timeout);
-                    checkDrawnWindowsLocked();
-                }
+                allWindowsDrawn = waitForAllWindowsDrawnLocked(message, timeout, displayId);
             }
             if (allWindowsDrawn) {
                 message.sendToTarget();
             }
+        }
+
+        /** Return {@code true} if all windows have been drawn. */
+        private boolean waitForAllWindowsDrawnLocked(Message message, long timeout, int displayId) {
+            final WindowContainer<?> container = displayId == INVALID_DISPLAY
+                    ? mRoot : mRoot.getDisplayContent(displayId);
+            if (container == null) {
+                // The waiting container doesn't exist, no need to wait. Treat as drawn.
+                return true;
+            }
+            if (mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
+                // Use the ready-to-play of transition as the signal.
+                return false;
+            }
+            container.waitForAllWindowsDrawn();
+            mWindowPlacerLocked.requestTraversal();
+            mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);
+            if (container.mWaitingForDrawn.isEmpty()) {
+                return true;
+            }
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                for (int i = 0; i < container.mWaitingForDrawn.size(); i++) {
+                    traceStartWaitingForWindowDrawn(container.mWaitingForDrawn.get(i));
+                }
+            }
+
+            mWaitingForDrawnCallbacks.put(container, message);
+            mH.sendNewMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, container, timeout);
+            checkDrawnWindowsLocked();
+            return false;
         }
 
         @Override
