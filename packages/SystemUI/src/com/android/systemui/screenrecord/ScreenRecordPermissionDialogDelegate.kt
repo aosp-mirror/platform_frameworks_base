@@ -19,7 +19,6 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.UserHandle
-import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
@@ -122,6 +121,4 @@ class ScreenRecordPermissionDialogDelegate(
         dialog.setTitle(R.string.screenrecord_title)
         setCancelButtonOnClickListener { dialog.dismiss() }
     }
-
-    @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 }

@@ -38,6 +38,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Switch
+import androidx.annotation.LayoutRes
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
@@ -152,14 +153,16 @@ class ScreenRecordPermissionViewBinder(
         options.isLongClickable = false
     }
 
-    override fun onItemSelected(pos: Int) {
-        super.onItemSelected(pos)
+    override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {
+        super.onItemSelected(adapterView, view, pos, id)
         updateTapsViewVisibility()
     }
 
     private fun updateTapsViewVisibility() {
         tapsView.visibility = if (selectedScreenShareOption.mode == SINGLE_APP) GONE else VISIBLE
     }
+
+    @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 
     /**
      * Starts screen capture after some countdown
