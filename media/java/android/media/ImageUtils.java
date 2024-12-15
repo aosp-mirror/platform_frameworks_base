@@ -56,6 +56,7 @@ class ImageUtils {
             case ImageFormat.YUV_420_888:
             case ImageFormat.NV21:
             case ImageFormat.YCBCR_P010:
+            case ImageFormat.YCBCR_P210:
                 return 3;
             case ImageFormat.NV16:
                 return 2;
@@ -95,6 +96,7 @@ class ImageUtils {
         switch(hardwareBufferFormat) {
             case HardwareBuffer.YCBCR_420_888:
             case HardwareBuffer.YCBCR_P010:
+            case HardwareBuffer.YCBCR_P210:
                 return 3;
             case HardwareBuffer.RGBA_8888:
             case HardwareBuffer.RGBX_8888:
@@ -281,6 +283,7 @@ class ImageUtils {
             case PixelFormat.RGBA_8888:
             case PixelFormat.RGBX_8888:
             case PixelFormat.RGBA_1010102:
+            case ImageFormat.YCBCR_P210:
                 estimatedBytePerPixel = 4.0;
                 break;
             default:
@@ -335,6 +338,12 @@ class ImageUtils {
                 return new Size(image.getWidth(), image.getHeight());
             case ImageFormat.PRIVATE:
                 return new Size(0, 0);
+            case ImageFormat.YCBCR_P210:
+                if (planeIdx == 0) {
+                    return new Size(image.getWidth(), image.getHeight());
+                } else {
+                    return new Size(image.getWidth() / 2, image.getHeight());
+                }
             default:
                 if (Log.isLoggable(IMAGEUTILS_LOG_TAG, Log.VERBOSE)) {
                     Log.v(IMAGEUTILS_LOG_TAG, "getEffectivePlaneSizeForImage() uses"
