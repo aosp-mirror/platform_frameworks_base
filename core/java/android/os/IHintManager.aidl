@@ -39,11 +39,17 @@ interface IHintManager {
      * Throws UnsupportedOperationException if ADPF is not supported, and IllegalStateException
      * if creation is supported but fails.
      */
-    IHintSession createHintSessionWithConfig(in IBinder token, in SessionTag tag,
+    SessionCreationReturn createHintSessionWithConfig(in IBinder token, in SessionTag tag,
             in SessionCreationConfig creationConfig, out SessionConfig config);
 
     void setHintSessionThreads(in IHintSession hintSession, in int[] tids);
     int[] getHintSessionThreadIds(in IHintSession hintSession);
+
+    parcelable SessionCreationReturn {
+        IHintSession session;
+        // True if the graphics pipeline thread limit is being exceeded
+        boolean pipelineThreadLimitExceeded = false;
+    }
 
     /**
      * Returns FMQ channel information for the caller, which it associates to a binder token.
