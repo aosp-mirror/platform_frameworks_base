@@ -1326,7 +1326,7 @@ public class LockPatternUtils {
         try {
             getLockSettings().registerStrongAuthTracker(strongAuthTracker.getStub());
         } catch (RemoteException e) {
-            throw new RuntimeException("Could not register StrongAuthTracker");
+            e.rethrowFromSystemServer();
         }
     }
 

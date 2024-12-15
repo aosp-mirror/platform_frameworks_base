@@ -148,6 +148,12 @@ public final class ApduServiceInfo implements Parcelable {
     private boolean mShouldDefaultToObserveMode;
 
     /**
+     * Whether or not this service wants to share the same routing priority as the
+     * Wallet role owner.
+     */
+    private boolean mShareRolePriority;
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
@@ -284,6 +290,12 @@ public final class ApduServiceInfo implements Parcelable {
                 mShouldDefaultToObserveMode = sa.getBoolean(
                         R.styleable.HostApduService_shouldDefaultToObserveMode,
                         false);
+                if (Flags.nfcAssociatedRoleServices()) {
+                    mShareRolePriority = sa.getBoolean(
+                            R.styleable.HostApduService_shareRolePriority,
+                            false
+                    );
+                }
                 sa.recycle();
             } else {
                 TypedArray sa = res.obtainAttributes(attrs,
@@ -314,6 +326,12 @@ public final class ApduServiceInfo implements Parcelable {
                     }
                 }
                 mStaticOffHostName = mOffHostName;
+                if (Flags.nfcAssociatedRoleServices()) {
+                    mShareRolePriority = sa.getBoolean(
+                            R.styleable.OffHostApduService_shareRolePriority,
+                            false
+                    );
+                }
                 sa.recycle();
             }
 
@@ -702,6 +720,17 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
     public void setShouldDefaultToObserveMode(boolean shouldDefaultToObserveMode) {
         mShouldDefaultToObserveMode = shouldDefaultToObserveMode;
+    }
+
+    /**
+     * Returns whether or not this service wants to share the Wallet role holder priority
+     * with other packages/services with the same signature.
+     *
+     * @return whether or not this service wants to share priority
+     */
+    @FlaggedApi(Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES)
+    public boolean shareRolePriority() {
+        return mShareRolePriority;
     }
 
     /**

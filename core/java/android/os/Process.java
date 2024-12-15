@@ -560,10 +560,9 @@ public class Process {
      * Foreground thread group - All threads in
      * this group are scheduled with a normal share of the CPU.
      * Value is same as constant SP_FOREGROUND of enum SchedPolicy.
-     * Not used at this level.
      * @hide
      **/
-    private static final int THREAD_GROUP_FOREGROUND = 1;
+    public static final int THREAD_GROUP_FOREGROUND = 1;
 
     /**
      * System thread group.
@@ -1314,19 +1313,6 @@ public class Process {
     public static final boolean supportsProcesses() {
         return true;
     }
-
-    /**
-     * Adjust the swappiness level for a process.
-     *
-     * @param pid The process identifier to set.
-     * @param is_increased Whether swappiness should be increased or default.
-     *
-     * @return Returns true if the underlying system supports this
-     *         feature, else false.
-     *
-     * {@hide}
-     */
-    public static final native boolean setSwappiness(int pid, boolean is_increased);
 
     /**
      * Change this process's argv[0] parameter.  This can be useful to show
