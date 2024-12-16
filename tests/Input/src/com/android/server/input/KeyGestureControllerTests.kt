@@ -782,6 +782,54 @@ class KeyGestureControllerTests {
                 KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
+            TestData(
+                "META + ALT + 'Down' -> Magnification Pan Down",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_DPAD_DOWN
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN,
+                intArrayOf(KeyEvent.KEYCODE_DPAD_DOWN),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META + ALT + 'Up' -> Magnification Pan Up",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_DPAD_UP
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP,
+                intArrayOf(KeyEvent.KEYCODE_DPAD_UP),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META + ALT + 'Left' -> Magnification Pan Left",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_DPAD_LEFT
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT,
+                intArrayOf(KeyEvent.KEYCODE_DPAD_LEFT),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "META + ALT + 'Right' -> Magnification Pan Right",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_DPAD_RIGHT
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT,
+                intArrayOf(KeyEvent.KEYCODE_DPAD_RIGHT),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
         )
     }
 

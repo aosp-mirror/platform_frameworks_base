@@ -125,7 +125,10 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK = 75;
     public static final int KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW = 76;
     public static final int KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB = 77;
-
+    public static final int KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT = 78;
+    public static final int KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT = 79;
+    public static final int KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP = 80;
+    public static final int KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN = 81;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -217,7 +220,11 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION,
             KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK,
             KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
-            KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB
+            KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB,
+            KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT,
+            KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT,
+            KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP,
+            KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -792,6 +799,14 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW";
             case KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB:
                 return "KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB";
+            case KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT:
+                return "KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT";
+            case KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT:
+                return "KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT";
+            case KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP:
+                return "KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP";
+            case KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN:
+                return "KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN";
             default:
                 return Integer.toHexString(value);
         }

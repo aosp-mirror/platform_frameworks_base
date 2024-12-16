@@ -245,22 +245,45 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     final boolean complete =
                             event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
                                     && !event.isCancelled();
+
+                    // TODO(b/355499907): Receive and handle held key gestures, which can be used
+                    // for continuous scaling and panning. In addition, handle multiple pan gestures
+                    // at the same time (e.g. user may try to pan diagonally) reasonably, including
+                    // decreasing diagonal movement by sqrt(2) to make it appear the same speed
+                    // as non-diagonal movement.
+
+                    if (!complete) {
+                        return false;
+                    }
+
                     final int gestureType = event.getKeyGestureType();
                     final int displayId = isDisplayIdValid(event.getDisplayId())
                             ? event.getDisplayId() : Display.DEFAULT_DISPLAY;
 
                     switch (gestureType) {
                         case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN:
-                            if (complete) {
                                 mAms.getMagnificationController().scaleMagnificationByStep(
                                         displayId, MagnificationController.ZOOM_DIRECTION_IN);
-                            }
                             return true;
                         case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT:
-                            if (complete) {
                                 mAms.getMagnificationController().scaleMagnificationByStep(
                                         displayId, MagnificationController.ZOOM_DIRECTION_OUT);
-                            }
+                            return true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT:
+                            mAms.getMagnificationController().panMagnificationByStep(
+                                    displayId, MagnificationController.PAN_DIRECTION_LEFT);
+                            return true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT:
+                            mAms.getMagnificationController().panMagnificationByStep(
+                                    displayId, MagnificationController.PAN_DIRECTION_RIGHT);
+                            return true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP:
+                            mAms.getMagnificationController().panMagnificationByStep(
+                                    displayId, MagnificationController.PAN_DIRECTION_UP);
+                            return true;
+                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN:
+                            mAms.getMagnificationController().panMagnificationByStep(
+                                    displayId, MagnificationController.PAN_DIRECTION_DOWN);
                             return true;
                     }
                     return false;
@@ -270,7 +293,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 public boolean isKeyGestureSupported(int gestureType) {
                     return switch (gestureType) {
                         case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_IN,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT -> true;
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_ZOOM_OUT,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_LEFT,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_RIGHT,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_UP,
+                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFIER_PAN_DOWN -> true;
                         default -> false;
                     };
                 }
