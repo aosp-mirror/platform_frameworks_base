@@ -15,23 +15,17 @@
  */
 package com.android.server.wm;
 
-import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY;
-
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
 
 import java.io.PrintWriter;
-import java.util.function.BooleanSupplier;
 
 /**
  * Allows the interaction with all the app compat policies and configurations
  */
 class AppCompatController {
-
-    @NonNull
-    private final ActivityRecord mActivityRecord;
     @NonNull
     private final TransparentPolicy mTransparentPolicy;
     @NonNull
@@ -50,56 +44,28 @@ class AppCompatController {
     private final AppCompatLetterboxPolicy mAppCompatLetterboxPolicy;
     @NonNull
     private final AppCompatSizeCompatModePolicy mAppCompatSizeCompatModePolicy;
-    @NonNull
-    final BooleanSupplier mAllowRestrictedResizability;
 
     AppCompatController(@NonNull WindowManagerService wmService,
                         @NonNull ActivityRecord activityRecord) {
-        mActivityRecord = activityRecord;
         final PackageManager packageManager = wmService.mContext.getPackageManager();
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
         mAppCompatDeviceStateQuery = new AppCompatDeviceStateQuery(activityRecord);
         mTransparentPolicy = new TransparentPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
-        mAppCompatOverrides = new AppCompatOverrides(activityRecord,
+        mAppCompatOverrides = new AppCompatOverrides(activityRecord, packageManager,
                 wmService.mAppCompatConfiguration, optPropBuilder, mAppCompatDeviceStateQuery);
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
         mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
                 mTransparentPolicy, mAppCompatOverrides);
-        mAppCompatReachabilityPolicy = new AppCompatReachabilityPolicy(mActivityRecord,
+        mAppCompatReachabilityPolicy = new AppCompatReachabilityPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
-        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(mActivityRecord,
+        mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
         mDesktopAppCompatAspectRatioPolicy = new DesktopAppCompatAspectRatioPolicy(activityRecord,
                 mAppCompatOverrides, mTransparentPolicy, wmService.mAppCompatConfiguration);
-        mAppCompatSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(mActivityRecord,
+        mAppCompatSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(activityRecord,
                 mAppCompatOverrides);
-        mAllowRestrictedResizability = AppCompatUtils.asLazy(() -> {
-            // Application level.
-            if (allowRestrictedResizability(packageManager, mActivityRecord.packageName)) {
-                return true;
-            }
-            // Activity level.
-            try {
-                return packageManager.getPropertyAsUser(
-                        PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
-                        mActivityRecord.mActivityComponent.getPackageName(),
-                        mActivityRecord.mActivityComponent.getClassName(),
-                        mActivityRecord.mUserId).getBoolean();
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
-        });
-    }
-
-    static boolean allowRestrictedResizability(PackageManager pm, String packageName) {
-        try {
-            return pm.getProperty(PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY, packageName)
-                    .getBoolean();
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
     }
 
     @NonNull
