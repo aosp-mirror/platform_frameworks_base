@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.media.MediaRecorder;
-import android.media.projection.StopReason;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -79,7 +78,6 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private static final String EXTRA_SHOW_TAPS = "extra_showTaps";
     private static final String EXTRA_CAPTURE_TARGET = "extra_captureTarget";
     private static final String EXTRA_DISPLAY_ID = "extra_displayId";
-    private static final String EXTRA_STOP_REASON = "extra_stopReason";
 
     protected static final String ACTION_START = "com.android.systemui.screenrecord.START";
     protected static final String ACTION_SHOW_START_NOTIF =
@@ -244,8 +242,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 // Check user ID - we may be getting a stop intent after user switch, in which case
                 // we want to post the notifications for that user, which is NOT current user
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_ID_NOT_SPECIFIED);
-                int stopReason = intent.getIntExtra(EXTRA_STOP_REASON, mController.getStopReason());
-                stopService(userId, stopReason);
+                stopService(userId);
                 break;
 
             case ACTION_SHARE:
@@ -489,11 +486,11 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 getTag(), notificationIdForGroup, groupNotif, currentUser);
     }
 
-    private void stopService(@StopReason int stopReason) {
-        stopService(USER_ID_NOT_SPECIFIED, stopReason);
+    private void stopService() {
+        stopService(USER_ID_NOT_SPECIFIED);
     }
 
-    private void stopService(int userId, @StopReason int stopReason) {
+    private void stopService(int userId) {
         if (userId == USER_ID_NOT_SPECIFIED) {
             userId = mUserContextTracker.getUserContext().getUserId();
         }
@@ -502,7 +499,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         setTapsVisible(mOriginalShowTaps);
         try {
             if (getRecorder() != null) {
-                getRecorder().end(stopReason);
+                getRecorder().end();
             }
             saveRecording(userId);
         } catch (RuntimeException exception) {
@@ -601,8 +598,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
      * @return
      */
     protected Intent getNotificationIntent(Context context) {
-        return new Intent(context, this.getClass()).setAction(ACTION_STOP_NOTIF)
-                .putExtra(EXTRA_STOP_REASON, StopReason.STOP_HOST_APP);
+        return new Intent(context, this.getClass()).setAction(ACTION_STOP_NOTIF);
     }
 
     private Intent getShareIntent(Context context, Uri path) {
@@ -614,17 +610,14 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     @Override
     public void onInfo(MediaRecorder mr, int what, int extra) {
         Log.d(getTag(), "Media recorder info: " + what);
-        // Stop due to record reaching size limits so log as stopping due to error
-        Intent stopIntent = getStopIntent(this);
-        stopIntent.putExtra(EXTRA_STOP_REASON, StopReason.STOP_ERROR);
-        onStartCommand(stopIntent, 0, 0);
+        onStartCommand(getStopIntent(this), 0, 0);
     }
 
     @Override
-    public void onStopped(@StopReason int stopReason) {
+    public void onStopped() {
         if (mController.isRecording()) {
             Log.d(getTag(), "Stopping recording because the system requested the stop");
-            stopService(stopReason);
+            stopService();
         }
     }
 }

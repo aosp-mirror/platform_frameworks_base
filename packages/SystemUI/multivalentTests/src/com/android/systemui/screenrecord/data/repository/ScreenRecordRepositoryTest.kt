@@ -16,7 +16,6 @@
 
 package com.android.systemui.screenrecord.data.repository
 
-import android.media.projection.StopReason
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -32,7 +31,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -128,8 +126,8 @@ class ScreenRecordRepositoryTest : SysuiTestCase() {
     @Test
     fun stopRecording_invokesController() =
         testScope.runTest {
-            underTest.stopRecording(StopReason.STOP_PRIVACY_CHIP)
+            underTest.stopRecording()
 
-            verify(recordingController).stopRecording(eq(StopReason.STOP_PRIVACY_CHIP))
+            verify(recordingController).stopRecording()
         }
 }

@@ -16,7 +16,6 @@
 
 package com.android.systemui.mediarouter.data.repository
 
-import android.media.projection.StopReason
 import com.android.systemui.statusbar.policy.CastDevice
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -26,7 +25,7 @@ class FakeMediaRouterRepository : MediaRouterRepository {
     var lastStoppedDevice: CastDevice? = null
         private set
 
-    override fun stopCasting(device: CastDevice, @StopReason stopReason: Int) {
+    override fun stopCasting(device: CastDevice) {
         lastStoppedDevice = device
     }
 }
