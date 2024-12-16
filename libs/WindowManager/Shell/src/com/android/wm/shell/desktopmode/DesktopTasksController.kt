@@ -2577,8 +2577,7 @@ class DesktopTasksController(
         val innerPrefix = "$prefix  "
         pw.println("${prefix}DesktopTasksController")
         DesktopModeStatus.dump(pw, innerPrefix, context)
-        pw.println("${prefix}userId=$userId")
-        taskRepository.dump(pw, innerPrefix)
+        userRepositories.dump(pw, innerPrefix)
     }
 
     /** The interface for calls from outside the shell, within the host process. */

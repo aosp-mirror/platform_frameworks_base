@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserManager
 import android.util.SparseArray
+import androidx.core.util.forEach
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
@@ -31,6 +32,7 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.UserChangeListener
+import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
 
 /** Manages per-user DesktopRepository instances. */
@@ -85,6 +87,14 @@ class DesktopUserRepositories(
             }
         }
         return desktopRepoByUserId.getOrCreate(profileId)
+    }
+
+    /** Dumps [DesktopRepository] for each user. */
+    fun dump(pw: PrintWriter, prefix: String) {
+        desktopRepoByUserId.forEach { key, value ->
+            pw.println("${prefix}userId=$key")
+            value.dump(pw, prefix)
+        }
     }
 
     override fun onUserChanged(newUserId: Int, userContext: Context) {
