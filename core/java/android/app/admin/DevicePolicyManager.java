@@ -12190,13 +12190,6 @@ public class DevicePolicyManager {
      * be enforced device-wide. These constants will also state in their documentation which
      * permission is required to manage the restriction using this API.
      *
-     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
-     * above, calling this API will result in applying the restriction locally on the calling user,
-     * or locally on the parent profile if called from the
-     * {@link DevicePolicyManager} instance obtained from
-     * {@link #getParentProfileInstance(ComponentName)}. To set a restriction globally, call
-     * {@link #addUserRestrictionGlobally} instead.
-     *
      * <p>
      * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the user restriction
      * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
@@ -12217,13 +12210,18 @@ public class DevicePolicyManager {
      * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
      * will contain the reason why the policy changed.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or
+     * {@code null} if the caller is not a device admin.
      * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
      * has not been granted the permission to set the given user restriction.
      */
+    // NB: For permission-based callers using this API will result in applying the restriction
+    // locally on the calling user or locally on the parent profile if called from through parent
+    // instance. To set a restriction globally, call addUserRestrictionGlobally() instead.
+    // Permission-based callers must target Android U or above.
     @SupportsCoexistence
-    public void addUserRestriction(@NonNull ComponentName admin,
+    public void addUserRestriction(@Nullable ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
@@ -12358,10 +12356,6 @@ public class DevicePolicyManager {
      * constants state in their documentation which permission is required to manage the restriction
      * using this API.
      *
-     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
-     * above, calling this API will result in clearing any local and global restriction with the
-     * specified key that was previously set by the caller.
-     *
      * <p>
      * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the user restriction
      * policy has been cleared, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
@@ -12382,13 +12376,17 @@ public class DevicePolicyManager {
      * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
      * will contain the reason why the policy changed.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or
+     * {@code null} if the caller is not a device admin.
      * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner  and if the
      *  caller has not been granted the permission to set the given user restriction.
      */
+    // NB: For permission-based callers using this API will result in clearing any local and global
+    // restriction with the specified key that was previously set by the caller.
+    // Permission-based callers must target Android U or above.
     @SupportsCoexistence
-    public void clearUserRestriction(@NonNull ComponentName admin,
+    public void clearUserRestriction(@Nullable ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
@@ -14556,8 +14554,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the profile owner of a managed profile to obtain a {@link DevicePolicyManager}
-     * whose calls act on the parent profile.
+     * Called by the profile owner of a managed profile or other apps in a managed profile to
+     * obtain a {@link DevicePolicyManager} whose calls act on the parent profile.
      *
      * <p>The following methods are supported for the parent instance, all other methods will
      * throw a SecurityException when called on the parent instance:
@@ -14614,10 +14612,12 @@ public class DevicePolicyManager {
      * <li>{@link #wipeData}</li>
      * </ul>
      *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or
+     *         {@code null} if the caller is not a profile owner.
      * @return a new instance of {@link DevicePolicyManager} that acts on the parent profile.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if the current user is not a managed profile.
      */
-    public @NonNull DevicePolicyManager getParentProfileInstance(@NonNull ComponentName admin) {
+    public @NonNull DevicePolicyManager getParentProfileInstance(@Nullable ComponentName admin) {
         throwIfParentInstance("getParentProfileInstance");
         UserManager um = mContext.getSystemService(UserManager.class);
         if (!um.isManagedProfile()) {
