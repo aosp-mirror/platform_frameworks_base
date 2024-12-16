@@ -767,6 +767,70 @@ public class PackageWatchdog {
     }
 
     /**
+     * Indicates that the result of a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} is unknown.
+     */
+    public static final int MITIGATION_RESULT_UNKNOWN =
+            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN;
+
+    /**
+     * Indicates that a mitigation was successfully triggered or executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation}.
+     */
+    public static final int MITIGATION_RESULT_SUCCESS =
+            ObserverMitigationResult.MITIGATION_RESULT_SUCCESS;
+
+    /**
+     * Indicates that a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} was skipped.
+     */
+    public static final int MITIGATION_RESULT_SKIPPED =
+            ObserverMitigationResult.MITIGATION_RESULT_SKIPPED;
+
+    /**
+     * Indicates that a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
+     * but the failure is potentially retryable.
+     */
+    public static final int MITIGATION_RESULT_FAILURE_RETRYABLE =
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE;
+
+    /**
+     * Indicates that a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
+     * and the failure is not retryable.
+     */
+    public static final int MITIGATION_RESULT_FAILURE_NON_RETRYABLE =
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE;
+
+    /**
+     * Possible return values of the for mitigations executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} and
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation}.
+     * @hide
+     */
+    @Retention(SOURCE)
+    @IntDef(prefix = "MITIGATION_RESULT_", value = {
+            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN,
+            ObserverMitigationResult.MITIGATION_RESULT_SUCCESS,
+            ObserverMitigationResult.MITIGATION_RESULT_SKIPPED,
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE,
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE,
+            })
+    public @interface ObserverMitigationResult {
+        int MITIGATION_RESULT_UNKNOWN = 0;
+        int MITIGATION_RESULT_SUCCESS = 1;
+        int MITIGATION_RESULT_SKIPPED = 2;
+        int MITIGATION_RESULT_FAILURE_RETRYABLE = 3;
+        int MITIGATION_RESULT_FAILURE_NON_RETRYABLE = 4;
+    }
+
+    /**
      * The minimum value that can be returned by any observer.
      * It represents that no mitigations were available.
      */
@@ -852,13 +916,20 @@ public class PackageWatchdog {
          * health check.
          *
          * @param versionedPackage the package that is failing. This may be null if a native
-         *                          service is crashing.
-         * @param failureReason   the type of failure that is occurring.
+         *                         service is crashing.
+         * @param failureReason    the type of failure that is occurring.
          * @param mitigationCount the number of times mitigation has been called for this package
-         *                        (including this time).
-         * @return {@code true} if action was executed successfully, {@code false} otherwise
+         *                         (including this time).
+         * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
+         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
+         *         retried,
+         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
+         *         cannot be retried,
+         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
+         *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
-        boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage versionedPackage,
+        @ObserverMitigationResult int onExecuteHealthCheckMitigation(
+                @Nullable VersionedPackage versionedPackage,
                 @FailureReasons int failureReason, int mitigationCount);
 
 
@@ -885,10 +956,16 @@ public class PackageWatchdog {
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
          *
-         * @return {@code true} if action was executed successfully, {@code false} otherwise
+         * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
+         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
+         *         retried,
+         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
+         *         cannot be retried,
+         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
+         *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
-        default boolean onExecuteBootLoopMitigation(int mitigationCount) {
-            return false;
+        default @ObserverMitigationResult int onExecuteBootLoopMitigation(int mitigationCount) {
+            return ObserverMitigationResult.MITIGATION_RESULT_SKIPPED;
         }
 
         // TODO(b/120598832): Ensure uniqueness?

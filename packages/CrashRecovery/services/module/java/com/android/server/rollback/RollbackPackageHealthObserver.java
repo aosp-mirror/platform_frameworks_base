@@ -16,6 +16,8 @@
 
 package com.android.server.rollback;
 
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SKIPPED;
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SUCCESS;
 import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.AnyThread;
@@ -172,7 +174,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
+    public int onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
             @FailureReasons int rollbackReason, int mitigationCount) {
         Slog.i(TAG, "Executing remediation."
                 + " failedPackage: "
@@ -183,7 +185,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             List<RollbackInfo> availableRollbacks = getAvailableRollbacks();
             if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
                 mHandler.post(() -> rollbackAllLowImpact(availableRollbacks, rollbackReason));
-                return true;
+                return MITIGATION_RESULT_SUCCESS;
             }
 
             List<RollbackInfo> lowImpactRollbacks = getRollbacksAvailableForImpactLevel(
@@ -198,7 +200,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         } else {
             if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
                 mHandler.post(() -> rollbackAll(rollbackReason));
-                return true;
+                return MITIGATION_RESULT_SUCCESS;
             }
 
             RollbackInfo rollback = getAvailableRollback(failedPackage);
@@ -210,7 +212,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
 
         // Assume rollbacks executed successfully
-        return true;
+        return MITIGATION_RESULT_SUCCESS;
     }
 
     @Override
@@ -226,15 +228,15 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean onExecuteBootLoopMitigation(int mitigationCount) {
+    public int onExecuteBootLoopMitigation(int mitigationCount) {
         if (Flags.recoverabilityDetection()) {
             List<RollbackInfo> availableRollbacks = getAvailableRollbacks();
 
             triggerLeastImpactLevelRollback(availableRollbacks,
                     PackageWatchdog.FAILURE_REASON_BOOT_LOOP);
-            return true;
+            return MITIGATION_RESULT_SUCCESS;
         }
-        return false;
+        return MITIGATION_RESULT_SKIPPED;
     }
 
     @Override

@@ -25,6 +25,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SKIPPED;
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SUCCESS;
 import static com.android.server.RescueParty.DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN;
 import static com.android.server.RescueParty.LEVEL_FACTORY_RESET;
 
@@ -357,11 +359,13 @@ public class RescuePartyTest {
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
         SystemProperties.set(PROP_DISABLE_RESCUE, Boolean.toString(true));
         assertEquals(RescuePartyObserver.getInstance(mMockContext).onExecuteHealthCheckMitigation(
-                sFailingPackage, PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1), false);
+                sFailingPackage, PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
+                MITIGATION_RESULT_SKIPPED);
 
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
-        assertTrue(RescuePartyObserver.getInstance(mMockContext).onExecuteHealthCheckMitigation(
-                sFailingPackage, PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1));
+        assertEquals(RescuePartyObserver.getInstance(mMockContext).onExecuteHealthCheckMitigation(
+                sFailingPackage, PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
+                MITIGATION_RESULT_SUCCESS);
     }
 
     @Test
@@ -370,7 +374,8 @@ public class RescuePartyTest {
         SystemProperties.set(PROP_DEVICE_CONFIG_DISABLE_FLAG, Boolean.toString(true));
 
         assertEquals(RescuePartyObserver.getInstance(mMockContext).onExecuteHealthCheckMitigation(
-                sFailingPackage, PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1), false);
+                sFailingPackage, PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
+                MITIGATION_RESULT_SKIPPED);
 
         // Restore the property value initialized in SetUp()
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
