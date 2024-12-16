@@ -501,6 +501,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(com.android.systemui.shared.Flags.FLAG_NEW_CUSTOMIZATION_PICKER_UI)
     public void onWallpaperColorsChanged_changeLockWallpaper() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
