@@ -496,13 +496,13 @@ flag {
 }
 
 flag {
-    name: "status_bar_notification_chips_test"
+    name: "promote_notifications_automatically"
     namespace: "systemui"
-    description: "Flag to enable certain features that let us test the status bar notification "
-        "chips with teamfooders. This flag should *never* be released to trunkfood or nextfood."
-    bug: "361346412"
+    description: "Flag to automatically turn certain notifications into promoted notifications so "
+        " we can test promoted notifications with teamfooders. This flag should *never* be released "
+        "to trunkfood or nextfood."
+    bug: "367705002"
 }
-
 
 flag {
     name: "compose_bouncer"
