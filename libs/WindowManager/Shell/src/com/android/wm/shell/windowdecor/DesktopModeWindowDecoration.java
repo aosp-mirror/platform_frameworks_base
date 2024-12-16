@@ -27,18 +27,17 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
-
 import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopModeOrShowAppHandle;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.windowdecor.DragPositioningCallbackUtility.DragEventListener;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge.NONE;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
-import static com.android.wm.shell.windowdecor.DragPositioningCallbackUtility.DragEventListener;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -112,13 +111,13 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.MainCoroutineDispatcher;
-
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.MainCoroutineDispatcher;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -844,6 +843,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mOnCaptionButtonClickListener,
                     mOnCaptionLongClickListener,
                     mOnCaptionGenericMotionListener,
+                    mOnLeftSnapClickListener,
+                    mOnRightSnapClickListener,
+                    mOnMaximizeOrRestoreClickListener,
                     mOnMaximizeHoverListener);
         }
         throw new IllegalArgumentException("Unexpected layout resource id");

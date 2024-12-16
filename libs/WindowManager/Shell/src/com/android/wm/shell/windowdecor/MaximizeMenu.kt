@@ -34,6 +34,7 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.StateListDrawable
 import android.graphics.drawable.shapes.RoundRectShape
+import android.os.Bundle
 import android.util.StateSet
 import android.view.LayoutInflater
 import android.view.MotionEvent.ACTION_HOVER_ENTER
@@ -51,12 +52,16 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.Button
 import android.widget.TextView
 import android.window.TaskConstants
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.animation.addListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.android.wm.shell.R
@@ -401,6 +406,96 @@ class MaximizeMenu(
                     return@setOnTouchListener false
                 }
                 true
+            }
+
+            sizeToggleButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(AccessibilityAction.ACTION_CLICK)
+                    host.isClickable = true
+                }
+
+                override fun performAccessibilityAction(
+                    host: View,
+                    action: Int,
+                    args: Bundle?
+                ): Boolean {
+                    if (action == AccessibilityAction.ACTION_CLICK.id) {
+                        onMaximizeClickListener?.invoke()
+                    }
+                    return super.performAccessibilityAction(host, action, args)
+                }
+            }
+
+            snapLeftButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(AccessibilityAction.ACTION_CLICK)
+                    host.isClickable = true
+                }
+
+                override fun performAccessibilityAction(
+                    host: View,
+                    action: Int,
+                    args: Bundle?
+                ): Boolean {
+                    if (action == AccessibilityAction.ACTION_CLICK.id) {
+                        onLeftSnapClickListener?.invoke()
+                    }
+                    return super.performAccessibilityAction(host, action, args)
+                }
+            }
+
+            snapRightButton.accessibilityDelegate = object : View.AccessibilityDelegate() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfo
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+                    info.addAction(AccessibilityAction.ACTION_CLICK)
+                    host.isClickable = true
+                }
+
+                override fun performAccessibilityAction(
+                    host: View,
+                    action: Int,
+                    args: Bundle?
+                ): Boolean {
+                    if (action == AccessibilityAction.ACTION_CLICK.id) {
+                        onRightSnapClickListener?.invoke()
+                    }
+                    return super.performAccessibilityAction(host, action, args)
+                }
+            }
+
+            with(context.resources) {
+                ViewCompat.replaceAccessibilityAction(
+                    snapLeftButton,
+                    AccessibilityActionCompat.ACTION_CLICK,
+                    getString(R.string.maximize_menu_talkback_action_snap_left_text),
+                    null
+                )
+
+                ViewCompat.replaceAccessibilityAction(
+                    snapRightButton,
+                    AccessibilityActionCompat.ACTION_CLICK,
+                    getString(R.string.maximize_menu_talkback_action_snap_right_text),
+                    null
+                )
+
+                ViewCompat.replaceAccessibilityAction(
+                    sizeToggleButton,
+                    AccessibilityActionCompat.ACTION_CLICK,
+                    getString(R.string.maximize_menu_talkback_action_maximize_restore_text),
+                    null
+                )
             }
 
             // Maximize/restore button.

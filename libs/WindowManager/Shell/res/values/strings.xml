@@ -333,6 +333,28 @@
     <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_snap_right_button_text">Snap right</string>
 
+    <!-- Accessibility text for the Maximize Menu's snap left button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_a11y_action_snap_left">Resize app window left</string>
+    <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_a11y_action_snap_right">Resize app window right</string>
+    <!-- Accessibility text for the Maximize Menu's snap maximize/restore [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_a11y_action_maximize_restore">Maximize or restore window size</string>
+
+    <!-- Accessibility action replacement for caption handle menu split screen button [CHAR LIMIT=NONE] -->
+    <string name="app_handle_menu_talkback_split_screen_mode_button_text">Enter split screen mode</string>
+    <!-- Accessibility action replacement for caption handle menu enter desktop mode button [CHAR LIMIT=NONE] -->
+    <string name="app_handle_menu_talkback_desktop_mode_button_text">Enter desktop windowing mode</string>
+    <!-- Accessibility action replacement for maximize menu enter snap left button [CHAR LIMIT=NONE] -->
+    <string name="maximize_menu_talkback_action_snap_left_text">Resize window to left</string>
+    <!-- Accessibility action replacement for maximize menu enter snap right button [CHAR LIMIT=NONE] -->
+    <string name="maximize_menu_talkback_action_snap_right_text">Resize window to right</string>
+    <!-- Accessibility action replacement for maximize menu enter maximize/restore button [CHAR LIMIT=NONE] -->
+    <string name="maximize_menu_talkback_action_maximize_restore_text">Maximize or restore window size</string>
+    <!-- Accessibility action replacement for app header maximize/restore button [CHAR LIMIT=NONE] -->
+    <string name="maximize_button_talkback_action_maximize_restore_text">Maximize or restore window size</string>
+    <!-- Accessibility action replacement for app header minimize button [CHAR LIMIT=NONE] -->
+    <string name="minimize_button_talkback_action_maximize_restore_text">Minimize app window</string>
+
     <!-- Accessibility text for open by default settings button [CHAR LIMIT=NONE] -->
     <string name="open_by_default_settings_text">Open by default settings</string>
     <!-- Subheader for open by default menu string. -->
