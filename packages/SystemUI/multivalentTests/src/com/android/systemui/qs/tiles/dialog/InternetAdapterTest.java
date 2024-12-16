@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -231,7 +232,8 @@ public class InternetAdapterTest extends SysuiTestCase {
 
         mViewHolder.onWifiClick(mWifiEntry, mock(View.class));
 
-        verify(mSpyContext).startActivity(any());
+        verify(mInternetDialogController).startActivityForDialog(any());
+        verify(mSpyContext, never()).startActivity(any());
     }
 
     @Test
