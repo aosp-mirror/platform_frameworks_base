@@ -137,7 +137,7 @@ public class HubEndpointSession implements AutoCloseable {
      * no service associated to this session.
      *
      * <p>For hub initiated sessions, the object was previously used in as an argument for open
-     * request in {@link IHubEndpointLifecycleCallback#onSessionOpenRequest}.
+     * request in {@link HubEndpointLifecycleCallback#onSessionOpenRequest}.
      *
      * <p>For app initiated sessions, the object was previously used in an open request in {@link
      * android.hardware.location.ContextHubManager#openSession}

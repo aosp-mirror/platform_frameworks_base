@@ -29,7 +29,7 @@ import android.chre.flags.Flags;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_OFFLOAD_API)
-public interface IHubEndpointLifecycleCallback {
+public interface HubEndpointLifecycleCallback {
     /**
      * Called when an endpoint is requesting a session be opened with another endpoint.
      *

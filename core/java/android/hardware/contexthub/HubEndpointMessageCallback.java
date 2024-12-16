@@ -26,18 +26,18 @@ import android.chre.flags.Flags;
  * <p>This interface can be attached to an endpoint through {@link
  * HubEndpoint.Builder#setMessageCallback} method. Methods in this interface will only be called
  * when the endpoint is currently registered and has an open session. The endpoint will receive
- * session lifecycle callbacks through {@link IHubEndpointLifecycleCallback}.
+ * session lifecycle callbacks through {@link HubEndpointLifecycleCallback}.
  *
  * @hide
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_OFFLOAD_API)
-public interface IHubEndpointMessageCallback {
+public interface HubEndpointMessageCallback {
     /**
      * Callback interface for receiving messages for a particular endpoint session.
      *
      * @param session The session this message is sent through. Previously specified in a {@link
-     *     IHubEndpointLifecycleCallback#onSessionOpened(HubEndpointSession)} call.
+     *     HubEndpointLifecycleCallback#onSessionOpened(HubEndpointSession)} call.
      * @param message The {@link HubMessage} object representing a message received by the endpoint
      *     that registered this callback interface. This message is constructed by the
      */

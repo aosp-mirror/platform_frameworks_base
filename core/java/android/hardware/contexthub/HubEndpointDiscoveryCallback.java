@@ -30,7 +30,7 @@ import java.util.List;
  */
 @SystemApi
 @FlaggedApi(Flags.FLAG_OFFLOAD_API)
-public interface IHubEndpointDiscoveryCallback {
+public interface HubEndpointDiscoveryCallback {
     /**
      * Called when a list of hub endpoints have started.
      *

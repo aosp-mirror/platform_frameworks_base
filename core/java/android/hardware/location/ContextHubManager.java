@@ -36,11 +36,11 @@ import android.content.pm.PackageManager;
 import android.hardware.contexthub.ErrorCode;
 import android.hardware.contexthub.HubDiscoveryInfo;
 import android.hardware.contexthub.HubEndpoint;
+import android.hardware.contexthub.HubEndpointDiscoveryCallback;
 import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubEndpointLifecycleCallback;
 import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
-import android.hardware.contexthub.IHubEndpointDiscoveryCallback;
-import android.hardware.contexthub.IHubEndpointLifecycleCallback;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -207,7 +207,7 @@ public final class ContextHubManager {
     private Handler mCallbackHandler;
 
     /** A map of endpoint discovery callbacks currently registered */
-    private Map<IHubEndpointDiscoveryCallback, IContextHubEndpointDiscoveryCallback>
+    private Map<HubEndpointDiscoveryCallback, IContextHubEndpointDiscoveryCallback>
             mDiscoveryCallbacks = new ConcurrentHashMap<>();
 
     /**
@@ -758,7 +758,7 @@ public final class ContextHubManager {
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     private IContextHubEndpointDiscoveryCallback createDiscoveryCallback(
             Executor executor,
-            IHubEndpointDiscoveryCallback callback,
+            HubEndpointDiscoveryCallback callback,
             @Nullable String serviceDescriptor) {
         return new IContextHubEndpointDiscoveryCallback.Stub() {
             @Override
@@ -831,12 +831,12 @@ public final class ContextHubManager {
 
     /**
      * Equivalent to {@link #registerEndpointDiscoveryCallback(Executor,
-     * IHubEndpointDiscoveryCallback, long)} with the default executor in the main thread.
+     * HubEndpointDiscoveryCallback, long)} with the default executor in the main thread.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
-            @NonNull IHubEndpointDiscoveryCallback callback, long endpointId) {
+            @NonNull HubEndpointDiscoveryCallback callback, long endpointId) {
         registerEndpointDiscoveryCallback(
                 new HandlerExecutor(Handler.getMain()), callback, endpointId);
     }
@@ -854,7 +854,7 @@ public final class ContextHubManager {
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
             @NonNull Executor executor,
-            @NonNull IHubEndpointDiscoveryCallback callback,
+            @NonNull HubEndpointDiscoveryCallback callback,
             long endpointId) {
         Objects.requireNonNull(executor, "executor cannot be null");
         Objects.requireNonNull(callback, "callback cannot be null");
@@ -871,12 +871,12 @@ public final class ContextHubManager {
 
     /**
      * Equivalent to {@link #registerEndpointDiscoveryCallback(Executor,
-     * IHubEndpointDiscoveryCallback, String)} with the default executor in the main thread.
+     * HubEndpointDiscoveryCallback, String)} with the default executor in the main thread.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
-            @NonNull IHubEndpointDiscoveryCallback callback, @NonNull String serviceDescriptor) {
+            @NonNull HubEndpointDiscoveryCallback callback, @NonNull String serviceDescriptor) {
         registerEndpointDiscoveryCallback(
                 new HandlerExecutor(Handler.getMain()), callback, serviceDescriptor);
     }
@@ -895,7 +895,7 @@ public final class ContextHubManager {
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
             @NonNull Executor executor,
-            @NonNull IHubEndpointDiscoveryCallback callback,
+            @NonNull HubEndpointDiscoveryCallback callback,
             @NonNull String serviceDescriptor) {
         Objects.requireNonNull(executor, "executor cannot be null");
         Objects.requireNonNull(callback, "callback cannot be null");
@@ -925,7 +925,7 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void unregisterEndpointDiscoveryCallback(
-            @NonNull IHubEndpointDiscoveryCallback callback) {
+            @NonNull HubEndpointDiscoveryCallback callback) {
         Objects.requireNonNull(callback, "callback cannot be null");
         IContextHubEndpointDiscoveryCallback iCallback = mDiscoveryCallbacks.remove(callback);
         if (iCallback == null) {
@@ -1292,7 +1292,7 @@ public final class ContextHubManager {
      * service.
      *
      * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
-     * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
+     * The registered endpoint will receive callbacks on its {@link HubEndpointLifecycleCallback}
      * object regarding the lifecycle events of the session.
      *
      * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
@@ -1312,7 +1312,7 @@ public final class ContextHubManager {
      * described by a {@link HubServiceInfo} object.
      *
      * <p>Context Hub Service will create the endpoint session and notify the registered endpoint.
-     * The registered endpoint will receive callbacks on its {@link IHubEndpointLifecycleCallback}
+     * The registered endpoint will receive callbacks on its {@link HubEndpointLifecycleCallback}
      * object regarding the lifecycle events of the session.
      *
      * @param hubEndpoint {@link HubEndpoint} object previously registered via {@link
