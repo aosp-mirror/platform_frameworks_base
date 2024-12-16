@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.bar
 
+import android.animation.AnimatorTestRule
+import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Insets
 import android.graphics.Rect
@@ -23,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -36,27 +37,34 @@ import com.android.wm.shell.bubbles.BubbleExpandedViewManager
 import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubbleOverflow
 import com.android.wm.shell.bubbles.BubblePositioner
+import com.android.wm.shell.bubbles.BubbleTaskView
 import com.android.wm.shell.bubbles.DeviceConfig
 import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.FakeBubbleFactory
-import com.android.wm.shell.bubbles.FakeBubbleTaskViewFactory
+import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Before
-import org.junit.ClassRule
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.clearInvocations
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 /** Tests for [BubbleBarAnimationHelper] */
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BubbleBarAnimationHelperTest {
 
-    companion object {
-        @JvmField @ClassRule val animatorTestRule: AnimatorTestRule = AnimatorTestRule()
+    @get:Rule val animatorTestRule: AnimatorTestRule = AnimatorTestRule(this)
 
+    companion object {
         const val SCREEN_WIDTH = 2000
         const val SCREEN_HEIGHT = 1000
     }
@@ -148,6 +156,26 @@ class BubbleBarAnimationHelperTest {
     }
 
     @Test
+    fun animateSwitch_bubbleToBubble_updateTaskBounds() {
+        val fromBubble = createBubble("from").initialize(container)
+        val toBubbleTaskController = mock<TaskViewTaskController>()
+        val toBubble = createBubble("to", toBubbleTaskController).initialize(container)
+
+        getInstrumentation().runOnMainSync {
+            animationHelper.animateSwitch(fromBubble, toBubble) {}
+            // Start the animation, but don't finish
+            animatorTestRule.advanceTimeBy(100)
+        }
+        getInstrumentation().waitForIdleSync()
+        // Clear invocations to ensure that bounds update happens after animation ends
+        clearInvocations(toBubbleTaskController)
+        getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(900) }
+        getInstrumentation().waitForIdleSync()
+
+        verify(toBubbleTaskController).setWindowBounds(any())
+    }
+
+    @Test
     fun animateSwitch_bubbleToOverflow_oldHiddenNewShown() {
         val fromBubble = createBubble(key = "from").initialize(container)
         val overflow = createOverflow().initialize(container)
@@ -193,13 +221,43 @@ class BubbleBarAnimationHelperTest {
         assertThat(toBubble.bubbleBarExpandedView?.isSurfaceZOrderedOnTop).isFalse()
     }
 
-    private fun createBubble(key: String): Bubble {
+    @Test
+    fun animateToRestPosition_updateTaskBounds() {
+        val taskController = mock<TaskViewTaskController>()
+        val bubble = createBubble("key", taskController).initialize(container)
+
+        getInstrumentation().runOnMainSync {
+            animationHelper.animateExpansion(bubble) {}
+            animatorTestRule.advanceTimeBy(1000)
+        }
+        getInstrumentation().waitForIdleSync()
+        getInstrumentation().runOnMainSync {
+            animationHelper.animateToRestPosition()
+            animatorTestRule.advanceTimeBy(100)
+        }
+        // Clear invocations to ensure that bounds update happens after animation ends
+        clearInvocations(taskController)
+        getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(900) }
+        getInstrumentation().waitForIdleSync()
+
+        verify(taskController).setWindowBounds(any())
+    }
+
+    private fun createBubble(
+        key: String,
+        taskViewTaskController: TaskViewTaskController = mock<TaskViewTaskController>(),
+    ): Bubble {
+        val taskView = TaskView(context, taskViewTaskController)
+        val taskInfo = mock<ActivityManager.RunningTaskInfo>()
+        whenever(taskViewTaskController.taskInfo).thenReturn(taskInfo)
+        val bubbleTaskView = BubbleTaskView(taskView, mainExecutor)
+
         val bubbleBarExpandedView =
             FakeBubbleFactory.createExpandedView(
                 context,
                 bubblePositioner,
                 expandedViewManager,
-                FakeBubbleTaskViewFactory(context, mainExecutor).create(),
+                bubbleTaskView,
                 mainExecutor,
                 bgExecutor,
                 bubbleLogger,
