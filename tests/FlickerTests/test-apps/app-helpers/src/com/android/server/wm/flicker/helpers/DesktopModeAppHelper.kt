@@ -28,6 +28,9 @@ import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
+import android.view.KeyEvent.KEYCODE_LEFT_BRACKET
+import android.view.KeyEvent.KEYCODE_RIGHT_BRACKET
+import android.view.KeyEvent.META_META_ON
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.window.DesktopModeFlags
@@ -213,6 +216,26 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
                 ?: error("Unable to find object with resource id $buttonResId")
         snapResizeButton.click()
 
+        waitAndVerifySnapResize(wmHelper, context, toLeft)
+    }
+
+    fun snapResizeWithKeyboard(
+        wmHelper: WindowManagerStateHelper,
+        context: Context,
+        keyEventHelper: KeyEventHelper,
+        toLeft: Boolean,
+    ) {
+        val bracketKey = if (toLeft) KEYCODE_LEFT_BRACKET else KEYCODE_RIGHT_BRACKET
+        keyEventHelper.actionDown(bracketKey, META_META_ON)
+        keyEventHelper.actionUp(bracketKey, META_META_ON)
+        waitAndVerifySnapResize(wmHelper, context, toLeft)
+    }
+
+    private fun waitAndVerifySnapResize(
+        wmHelper: WindowManagerStateHelper,
+        context: Context,
+        toLeft: Boolean
+    ) {
         val displayRect = getDisplayRect(wmHelper)
         val insets = getWindowInsets(
             context, WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
