@@ -89,8 +89,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
-        return mAppCompatOverrides.getAppCompatOrientationOverrides();
+    AppCompatOrientationOverrides getOrientationOverrides() {
+        return mAppCompatOverrides.getOrientationOverrides();
     }
 
     @NonNull

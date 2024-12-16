@@ -4261,7 +4261,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void finishRelaunching() {
-        mAppCompatController.getAppCompatOrientationOverrides()
+        mAppCompatController.getOrientationOverrides()
                 .setRelaunchingAfterRequestedOrientationChanged(false);
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRelaunched(this);
 
@@ -8222,7 +8222,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLastReportedConfiguration.getMergedConfiguration())) {
             ensureActivityConfiguration(false /* ignoreVisibility */);
             if (mPendingRelaunchCount > originalRelaunchingCount) {
-                mAppCompatController.getAppCompatOrientationOverrides()
+                mAppCompatController.getOrientationOverrides()
                         .setRelaunchingAfterRequestedOrientationChanged(true);
             }
             if (mTransitionController.inPlayingTransition(this)) {
@@ -10217,7 +10217,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatAspectRatioOverrides()
                         .shouldOverrideMinAspectRatio());
         proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
-                mAppCompatController.getAppCompatOrientationOverrides()
+                mAppCompatController.getOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
                 mAppCompatController.getResizeOverrides().shouldOverrideForceResizeApp());

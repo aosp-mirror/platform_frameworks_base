@@ -264,7 +264,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // that should be respected, Check all activities in display to make sure any eligible
         // activity should be respected.
         final ActivityRecord activity = mDisplayContent.getActivity((r) ->
-                r.mAppCompatController.getAppCompatOrientationOverrides()
+                r.mAppCompatController.getOrientationOverrides()
                     .shouldRespectRequestedOrientationDueToOverride());
         return activity != null;
     }
