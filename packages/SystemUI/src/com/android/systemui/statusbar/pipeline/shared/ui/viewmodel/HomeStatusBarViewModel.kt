@@ -48,7 +48,7 @@ import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
-import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarInteractor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -153,7 +153,7 @@ interface HomeStatusBarViewModel {
 class HomeStatusBarViewModelImpl
 @Inject
 constructor(
-    collapsedStatusBarInteractor: CollapsedStatusBarInteractor,
+    homeStatusBarInteractor: HomeStatusBarInteractor,
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
     private val darkIconInteractor: DarkIconInteractor,
@@ -270,8 +270,8 @@ constructor(
         combine(
             shouldHomeStatusBarBeVisible,
             headsUpNotificationInteractor.statusBarHeadsUpState,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
-            collapsedStatusBarInteractor.shouldShowOperatorName,
+            homeStatusBarInteractor.visibilityViaDisableFlags,
+            homeStatusBarInteractor.shouldShowOperatorName,
         ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags, shouldShowOperator ->
             val hideForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
             shouldStatusBarBeVisible &&
@@ -284,7 +284,7 @@ constructor(
         combine(
             shouldHomeStatusBarBeVisible,
             headsUpNotificationInteractor.statusBarHeadsUpState,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
+            homeStatusBarInteractor.visibilityViaDisableFlags,
         ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags ->
             val hideClockForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
             val showClock =
@@ -299,7 +299,7 @@ constructor(
         combine(
             shouldHomeStatusBarBeVisible,
             isAnyChipVisible,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
+            homeStatusBarInteractor.visibilityViaDisableFlags,
         ) { shouldStatusBarBeVisible, anyChipVisible, visibilityViaDisableFlags ->
             val showNotificationIconContainer =
                 if (anyChipVisible) {
@@ -315,10 +315,9 @@ constructor(
         }
 
     private val isSystemInfoVisible =
-        combine(
-            shouldHomeStatusBarBeVisible,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
+        combine(shouldHomeStatusBarBeVisible, homeStatusBarInteractor.visibilityViaDisableFlags) {
+            shouldStatusBarBeVisible,
+            visibilityViaDisableFlags ->
             val showSystemInfo =
                 shouldStatusBarBeVisible && visibilityViaDisableFlags.isSystemInfoAllowed
             VisibilityModel(showSystemInfo.toVisibleOrGone(), visibilityViaDisableFlags.animate)

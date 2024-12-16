@@ -77,7 +77,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataS
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
 import com.android.systemui.statusbar.phone.data.repository.fakeDarkIconRepository
-import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setCollapsedStatusBarInteractorShowOperatorName
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarInteractorShowOperatorName
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -503,7 +503,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     fun shouldShowOperatorNameView_allowedByInteractor_allowedByDisableFlags_visible() =
         kosmos.runTest {
-            kosmos.setCollapsedStatusBarInteractorShowOperatorName(true)
+            kosmos.setHomeStatusBarInteractorShowOperatorName(true)
 
             val latest by collectLastValue(underTest.shouldShowOperatorNameView)
             transitionKeyguardToGone()
@@ -517,7 +517,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     fun shouldShowOperatorNameView_disAllowedByInteractor_allowedByDisableFlags_notVisible() =
         kosmos.runTest {
-            kosmos.setCollapsedStatusBarInteractorShowOperatorName(false)
+            kosmos.setHomeStatusBarInteractorShowOperatorName(false)
 
             transitionKeyguardToGone()
 
@@ -532,7 +532,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     fun shouldShowOperatorNameView_allowedByInteractor_disallowedByDisableFlags_notVisible() =
         kosmos.runTest {
-            kosmos.setCollapsedStatusBarInteractorShowOperatorName(true)
+            kosmos.setHomeStatusBarInteractorShowOperatorName(true)
 
             val latest by collectLastValue(underTest.shouldShowOperatorNameView)
             transitionKeyguardToGone()
@@ -546,7 +546,7 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
     @Test
     fun shouldShowOperatorNameView_allowedByInteractor_hunPinned_false() =
         kosmos.runTest {
-            kosmos.setCollapsedStatusBarInteractorShowOperatorName(false)
+            kosmos.setHomeStatusBarInteractorShowOperatorName(false)
 
             transitionKeyguardToGone()
 

@@ -27,9 +27,9 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.fake
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.carrierConfigInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.fakeMobileIconsInteractor
 
-val Kosmos.collapsedStatusBarInteractor: CollapsedStatusBarInteractor by
+val Kosmos.homeStatusBarInteractor: HomeStatusBarInteractor by
     Kosmos.Fixture {
-        CollapsedStatusBarInteractor(
+        HomeStatusBarInteractor(
             airplaneModeInteractor,
             carrierConfigInteractor,
             disableFlagsInteractor,
@@ -37,7 +37,7 @@ val Kosmos.collapsedStatusBarInteractor: CollapsedStatusBarInteractor by
     }
 
 /** Set the default data subId to 1, and sets the carrier config setting to [show] */
-fun Kosmos.setCollapsedStatusBarInteractorShowOperatorName(show: Boolean) {
+fun Kosmos.setHomeStatusBarInteractorShowOperatorName(show: Boolean) {
     fakeMobileIconsInteractor.defaultDataSubId.value = 1
     carrierConfigRepository.fake.configsById[1] =
         SystemUiCarrierConfig(

@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.map
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class CollapsedStatusBarInteractor
+class HomeStatusBarInteractor
 @Inject
 constructor(
     airplaneModeInteractor: AirplaneModeInteractor,

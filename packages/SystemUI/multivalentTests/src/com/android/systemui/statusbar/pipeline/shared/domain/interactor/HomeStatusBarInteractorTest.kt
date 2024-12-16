@@ -25,7 +25,6 @@ import android.telephony.CarrierConfigManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
@@ -43,17 +42,16 @@ import com.android.systemui.statusbar.pipeline.shared.fake
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class CollapsedStatusBarInteractorTest : SysuiTestCase() {
+class HomeStatusBarInteractorTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val disableFlagsRepo = kosmos.fakeDisableFlagsRepository
 
-    val underTest = kosmos.collapsedStatusBarInteractor
+    val underTest = kosmos.homeStatusBarInteractor
 
     @Test
     fun visibilityViaDisableFlags_allDisabled() =
