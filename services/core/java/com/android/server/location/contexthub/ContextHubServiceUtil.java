@@ -502,10 +502,8 @@ import java.util.List;
     /* package */
     static HubMessage createHubMessage(Message message) {
         boolean isReliable = (message.flags & Message.FLAG_REQUIRES_DELIVERY_STATUS) != 0;
-        return HubMessage.createMessage(
-                message.type,
-                message.content,
-                HubMessage.DeliveryParams.makeBasic().setResponseRequired(isReliable));
+        return new HubMessage(
+                message.type, message.content, new HubMessage.DeliveryParams(isReliable));
     }
 
     /**
