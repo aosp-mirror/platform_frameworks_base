@@ -750,14 +750,15 @@ public final class ContextHubManager {
     /**
      * Creates an interface to invoke endpoint discovery callbacks to send down to the service.
      *
-     * @param callback the callback to invoke at the client process
      * @param executor the executor to invoke callbacks for this client
+     * @param callback the callback to invoke at the client process
+     * @param serviceDescriptor an optional descriptor to match discovery list with
      * @return the callback interface
      */
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     private IContextHubEndpointDiscoveryCallback createDiscoveryCallback(
-            IHubEndpointDiscoveryCallback callback,
             Executor executor,
+            IHubEndpointDiscoveryCallback callback,
             @Nullable String serviceDescriptor) {
         return new IContextHubEndpointDiscoveryCallback.Stub() {
             @Override
@@ -829,36 +830,36 @@ public final class ContextHubManager {
     }
 
     /**
-     * Equivalent to {@link #registerEndpointDiscoveryCallback(long, IHubEndpointDiscoveryCallback,
-     * Executor)} with the default executor in the main thread.
+     * Equivalent to {@link #registerEndpointDiscoveryCallback(Executor,
+     * IHubEndpointDiscoveryCallback, long)} with the default executor in the main thread.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
-            long endpointId, @NonNull IHubEndpointDiscoveryCallback callback) {
+            @NonNull IHubEndpointDiscoveryCallback callback, long endpointId) {
         registerEndpointDiscoveryCallback(
-                endpointId, callback, new HandlerExecutor(Handler.getMain()));
+                new HandlerExecutor(Handler.getMain()), callback, endpointId);
     }
 
     /**
      * Registers a callback to be notified when the hub endpoint with the corresponding endpoint ID
      * has started or stopped.
      *
-     * @param endpointId The identifier of the hub endpoint.
-     * @param callback The callback to be invoked.
      * @param executor The executor to invoke the callback on.
+     * @param callback The callback to be invoked.
+     * @param endpointId The identifier of the hub endpoint.
      * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
-            long endpointId,
+            @NonNull Executor executor,
             @NonNull IHubEndpointDiscoveryCallback callback,
-            @NonNull Executor executor) {
-        Objects.requireNonNull(callback, "callback cannot be null");
+            long endpointId) {
         Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
         IContextHubEndpointDiscoveryCallback iCallback =
-                createDiscoveryCallback(callback, executor, null);
+                createDiscoveryCallback(executor, callback, null);
         try {
             mService.registerEndpointDiscoveryCallbackId(endpointId, iCallback);
         } catch (RemoteException e) {
@@ -869,42 +870,42 @@ public final class ContextHubManager {
     }
 
     /**
-     * Equivalent to {@link #registerEndpointDiscoveryCallback(String,
-     * IHubEndpointDiscoveryCallback, Executor)} with the default executor in the main thread.
+     * Equivalent to {@link #registerEndpointDiscoveryCallback(Executor,
+     * IHubEndpointDiscoveryCallback, String)} with the default executor in the main thread.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
-            @NonNull String serviceDescriptor, @NonNull IHubEndpointDiscoveryCallback callback) {
+            @NonNull IHubEndpointDiscoveryCallback callback, @NonNull String serviceDescriptor) {
         registerEndpointDiscoveryCallback(
-                serviceDescriptor, callback, new HandlerExecutor(Handler.getMain()));
+                new HandlerExecutor(Handler.getMain()), callback, serviceDescriptor);
     }
 
     /**
      * Registers a callback to be notified when the hub endpoint with the corresponding service
      * descriptor has started or stopped.
      *
+     * @param executor The executor to invoke the callback on.
      * @param serviceDescriptor The service descriptor of the hub endpoint.
      * @param callback The callback to be invoked.
-     * @param executor The executor to invoke the callback on.
      * @throws IllegalArgumentException if the serviceDescriptor is empty.
      * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void registerEndpointDiscoveryCallback(
-            @NonNull String serviceDescriptor,
+            @NonNull Executor executor,
             @NonNull IHubEndpointDiscoveryCallback callback,
-            @NonNull Executor executor) {
-        Objects.requireNonNull(serviceDescriptor, "serviceDescriptor cannot be null");
-        Objects.requireNonNull(callback, "callback cannot be null");
+            @NonNull String serviceDescriptor) {
         Objects.requireNonNull(executor, "executor cannot be null");
+        Objects.requireNonNull(callback, "callback cannot be null");
+        Objects.requireNonNull(serviceDescriptor, "serviceDescriptor cannot be null");
         if (serviceDescriptor.isBlank()) {
             throw new IllegalArgumentException("Invalid service descriptor: " + serviceDescriptor);
         }
 
         IContextHubEndpointDiscoveryCallback iCallback =
-                createDiscoveryCallback(callback, executor, serviceDescriptor);
+                createDiscoveryCallback(executor, callback, serviceDescriptor);
         try {
             mService.registerEndpointDiscoveryCallbackDescriptor(serviceDescriptor, iCallback);
         } catch (RemoteException e) {
