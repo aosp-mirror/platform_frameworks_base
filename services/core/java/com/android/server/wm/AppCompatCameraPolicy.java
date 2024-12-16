@@ -39,7 +39,8 @@ class AppCompatCameraPolicy {
     @VisibleForTesting
     final CameraStateMonitor mCameraStateMonitor;
     @Nullable
-    private final ActivityRefresher mActivityRefresher;
+    @VisibleForTesting
+    final ActivityRefresher mActivityRefresher;
     @Nullable
     final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     @Nullable
