@@ -571,9 +571,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // For flexible split, expand app offscreen as well
             if (mDividerSnapAlgorithm.areOffscreenRatiosSupported()) {
                 if (position <= mDividerSnapAlgorithm.getMiddleTarget().position) {
-                    bounds1.top = bounds1.bottom - bounds2.width();
+                    bounds1.top = bounds1.bottom - bounds2.height();
                 } else {
-                    bounds2.bottom = bounds2.top + bounds1.width();
+                    bounds2.bottom = bounds2.top + bounds1.height();
                 }
             }
         }
