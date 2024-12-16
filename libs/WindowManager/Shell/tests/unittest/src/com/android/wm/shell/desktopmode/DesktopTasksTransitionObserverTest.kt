@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CLOSE
@@ -63,7 +64,14 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+/**
+ * Tests for [@link DesktopTasksTransitionObserver].
+ *
+ * Build/Install/Run: atest WMShellUnitTests:DesktopTasksTransitionObserverTest
+ */
 class DesktopTasksTransitionObserverTest {
+
+    @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
     @JvmField
     @Rule
@@ -245,6 +253,48 @@ class DesktopTasksTransitionObserverTest {
         wct.assertRemoveAt(index = 0, wallpaperToken)
     }
 
+    @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
+        Flags.FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC,
+    )
+    fun topTransparentTaskClosed_clearTaskIdFromRepository() {
+        val mockTransition = Mockito.mock(IBinder::class.java)
+        val topTransparentTask = createTaskInfo(1)
+        whenever(taskRepository.getTopTransparentFullscreenTaskId(any()))
+            .thenReturn(topTransparentTask.taskId)
+
+        transitionObserver.onTransitionReady(
+            transition = mockTransition,
+            info = createCloseTransition(topTransparentTask),
+            startTransaction = mock(),
+            finishTransaction = mock(),
+        )
+
+        verify(taskRepository).clearTopTransparentFullscreenTaskId(topTransparentTask.displayId)
+    }
+
+    @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
+        Flags.FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC,
+    )
+    fun topTransparentTaskSentToBack_clearTaskIdFromRepository() {
+        val mockTransition = Mockito.mock(IBinder::class.java)
+        val topTransparentTask = createTaskInfo(1)
+        whenever(taskRepository.getTopTransparentFullscreenTaskId(any()))
+            .thenReturn(topTransparentTask.taskId)
+
+        transitionObserver.onTransitionReady(
+            transition = mockTransition,
+            info = createToBackTransition(topTransparentTask),
+            startTransaction = mock(),
+            finishTransaction = mock(),
+        )
+
+        verify(taskRepository).clearTopTransparentFullscreenTaskId(topTransparentTask.displayId)
+    }
+
     private fun createBackNavigationTransition(
         task: RunningTaskInfo?,
         type: Int = TRANSIT_TO_BACK,
@@ -293,6 +343,19 @@ class DesktopTasksTransitionObserverTest {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = TRANSIT_CLOSE
+                    parent = null
+                    taskInfo = task
+                    flags = flags
+                }
+            )
+        }
+    }
+
+    private fun createToBackTransition(task: RunningTaskInfo?): TransitionInfo {
+        return TransitionInfo(TRANSIT_TO_BACK, 0 /* flags */).apply {
+            addChange(
+                Change(mock(), mock()).apply {
+                    mode = TRANSIT_TO_BACK
                     parent = null
                     taskInfo = task
                     flags = flags

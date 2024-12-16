@@ -56,6 +56,11 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+/**
+ * Tests for [@link DesktopRepository].
+ *
+ * Build/Install/Run: atest WMShellUnitTests:DesktopRepositoryTest
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
@@ -975,6 +980,22 @@ class DesktopRepositoryTest : ShellTestCase() {
         val tasks = repo.getExpandedTasksOrdered(displayId = DEFAULT_DISPLAY)
 
         assertThat(tasks).containsExactly(1, 3).inOrder()
+    }
+
+    @Test
+    fun setTaskIdAsTopTransparentFullscreenTaskId_savesTaskId() {
+        repo.setTopTransparentFullscreenTaskId(displayId = DEFAULT_DISPLAY, taskId = 1)
+
+        assertThat(repo.getTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)).isEqualTo(1)
+    }
+
+    @Test
+    fun clearTaskIdAsTopTransparentFullscreenTaskId_clearsTaskId() {
+        repo.setTopTransparentFullscreenTaskId(displayId = DEFAULT_DISPLAY, taskId = 1)
+
+        repo.clearTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)
+
+        assertThat(repo.getTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)).isNull()
     }
 
     @Test

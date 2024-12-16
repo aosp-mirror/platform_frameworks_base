@@ -21,7 +21,6 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
 import android.app.KeyguardManager
 import android.app.PendingIntent
-import android.app.TaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -84,6 +83,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
+import com.android.wm.shell.compatui.isTransparentTask
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.DesktopUiEventEnum
@@ -308,11 +308,23 @@ class DesktopTasksController(
         }
     }
 
-    /** Gets number of visible tasks in [displayId]. */
+    /** Gets number of visible freeform tasks in [displayId]. */
     fun visibleTaskCount(displayId: Int): Int = taskRepository.getVisibleTaskCount(displayId)
 
-    /** Returns true if any tasks are visible in Desktop Mode. */
-    fun isDesktopModeShowing(displayId: Int): Boolean = visibleTaskCount(displayId) > 0
+    /**
+     * Returns true if any freeform tasks are visible or if a transparent fullscreen task exists on
+     * top in Desktop Mode.
+     */
+    fun isDesktopModeShowing(displayId: Int): Boolean {
+        if (
+            DesktopModeFlags.INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC
+                .isTrue() && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
+        ) {
+            return visibleTaskCount(displayId) > 0 ||
+                taskRepository.getTopTransparentFullscreenTaskId(displayId) != null
+        }
+        return visibleTaskCount(displayId) > 0
+    }
 
     /** Moves focused task to desktop mode for given [displayId]. */
     fun moveFocusedTaskToDesktop(displayId: Int, transitionSource: DesktopModeTransitionSource) {
@@ -1596,7 +1608,7 @@ class DesktopTasksController(
             TransitionUtil.isOpeningType(request.type) &&
             taskRepository.isActiveTask(triggerTask.taskId))
 
-    private fun isIncompatibleTask(task: TaskInfo) =
+    private fun isIncompatibleTask(task: RunningTaskInfo) =
         DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue() &&
             isTopActivityExemptFromDesktopWindowing(context, task)
 
@@ -1852,6 +1864,15 @@ class DesktopTasksController(
      * fullscreen.
      */
     private fun handleIncompatibleTaskLaunch(task: RunningTaskInfo): WindowContainerTransaction? {
+        logV("handleIncompatibleTaskLaunch")
+        if (!isDesktopModeShowing(task.displayId)) return null
+        // Only update task repository for transparent task.
+        if (
+            DesktopModeFlags.INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC
+                .isTrue() && isTransparentTask(task)
+        ) {
+            taskRepository.setTopTransparentFullscreenTaskId(task.displayId, task.taskId)
+        }
         // Already fullscreen, no-op.
         if (task.isFullscreen) return null
         return WindowContainerTransaction().also { wct -> addMoveToFullscreenChanges(wct, task) }

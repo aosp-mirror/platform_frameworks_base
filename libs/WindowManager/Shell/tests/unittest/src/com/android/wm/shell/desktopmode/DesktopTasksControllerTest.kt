@@ -545,6 +545,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
+        Flags.FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC,
+    )
+    fun isDesktopModeShowing_topTransparentFullscreenTask_returnsTrue() {
+        val topTransparentTask = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+        taskRepository.setTopTransparentFullscreenTaskId(DEFAULT_DISPLAY, topTransparentTask.taskId)
+
+        assertThat(controller.isDesktopModeShowing(displayId = DEFAULT_DISPLAY)).isTrue()
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
     fun showDesktopApps_onSecondaryDisplay_desktopWallpaperEnabled_shouldNotShowWallpaper() {
         val homeTask = setUpHomeTask(SECOND_DISPLAY)
@@ -2620,6 +2632,63 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val result = controller.handleRequest(Binder(), createTransition(task))
         assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
             .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+    }
+
+    @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
+        Flags.FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC,
+    )
+    fun handleRequest_topActivityTransparentWithDisplay_savedToDesktopRepository() {
+        val freeformTask = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        markTaskVisible(freeformTask)
+
+        val transparentTask =
+            setUpFreeformTask(displayId = DEFAULT_DISPLAY).apply {
+                isActivityStackTransparent = true
+                isTopActivityNoDisplay = false
+                numActivities = 1
+            }
+
+        controller.handleRequest(Binder(), createTransition(transparentTask))
+        assertThat(taskRepository.getTopTransparentFullscreenTaskId(DEFAULT_DISPLAY))
+            .isEqualTo(transparentTask.taskId)
+    }
+
+    @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
+        Flags.FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC,
+    )
+    fun handleRequest_desktopNotShowing_topTransparentFullscreenTask_notSavedToDesktopRepository() {
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        controller.handleRequest(Binder(), createTransition(task))
+        assertThat(taskRepository.getTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)).isNull()
+    }
+
+    @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY,
+        Flags.FLAG_INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC,
+    )
+    fun handleRequest_onlyTopTransparentFullscreenTask_returnSwitchToFreeformWCT() {
+        val topTransparentTask = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+        taskRepository.setTopTransparentFullscreenTaskId(DEFAULT_DISPLAY, topTransparentTask.taskId)
+
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        val result = controller.handleRequest(Binder(), createTransition(task))
+        assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun handleRequest_desktopNotShowing_topTransparentFullscreenTask_returnNull() {
+        val task = setUpFullscreenTask(displayId = DEFAULT_DISPLAY)
+
+        assertThat(controller.handleRequest(Binder(), createTransition(task))).isNull()
     }
 
     @Test
