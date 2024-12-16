@@ -43,7 +43,10 @@ import org.junit.Test
  */
 @Ignore("Test Base Class")
 abstract class MinimizeAppWindows
-constructor(private val rotation: Rotation = Rotation.ROTATION_0) {
+constructor(
+    private val rotation: Rotation = Rotation.ROTATION_0,
+    private val usingKeyboard: Boolean = false
+) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
     private val wmHelper = WindowManagerStateHelper(instrumentation)
@@ -68,9 +71,9 @@ constructor(private val rotation: Rotation = Rotation.ROTATION_0) {
 
     @Test
     open fun minimizeAllAppWindows() {
-        testApp3.minimizeDesktopApp(wmHelper, device)
-        testApp2.minimizeDesktopApp(wmHelper, device)
-        testApp1.minimizeDesktopApp(wmHelper, device)
+        testApp3.minimizeDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
+        testApp2.minimizeDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
+        testApp1.minimizeDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
     }
 
     @After

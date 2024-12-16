@@ -29,6 +29,7 @@ import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
 import android.view.KeyEvent.KEYCODE_LEFT_BRACKET
+import android.view.KeyEvent.KEYCODE_MINUS
 import android.view.KeyEvent.KEYCODE_RIGHT_BRACKET
 import android.view.KeyEvent.META_META_ON
 import android.view.WindowInsets
@@ -160,10 +161,21 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
             ?: error("Unable to find resource $MINIMIZE_BUTTON_VIEW\n")
     }
 
-    fun minimizeDesktopApp(wmHelper: WindowManagerStateHelper, device: UiDevice, isPip: Boolean = false) {
-        val caption = getCaptionForTheApp(wmHelper, device)
-        val minimizeButton = getMinimizeButtonForTheApp(caption)
-        minimizeButton.click()
+    fun minimizeDesktopApp(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        isPip: Boolean = false,
+        usingKeyboard: Boolean = false,
+    ) {
+        if (usingKeyboard) {
+            val keyEventHelper = KeyEventHelper(getInstrumentation())
+            keyEventHelper.press(KEYCODE_MINUS, META_META_ON)
+        } else {
+            val caption = getCaptionForTheApp(wmHelper, device)
+            val minimizeButton = getMinimizeButtonForTheApp(caption)
+            minimizeButton.click()
+        }
+
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()
@@ -226,8 +238,7 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         toLeft: Boolean,
     ) {
         val bracketKey = if (toLeft) KEYCODE_LEFT_BRACKET else KEYCODE_RIGHT_BRACKET
-        keyEventHelper.actionDown(bracketKey, META_META_ON)
-        keyEventHelper.actionUp(bracketKey, META_META_ON)
+        keyEventHelper.press(bracketKey, META_META_ON)
         waitAndVerifySnapResize(wmHelper, context, toLeft)
     }
 

@@ -29,6 +29,10 @@ import android.view.KeyEvent
 class KeyEventHelper(
     private val instr: Instrumentation,
 ) {
+    fun press(keyCode: Int, metaState: Int = 0) {
+        actionDown(keyCode, metaState)
+        actionUp(keyCode, metaState)
+    }
 
     fun actionDown(keyCode: Int, metaState: Int = 0, time: Long = SystemClock.uptimeMillis()) {
         injectKeyEvent(ACTION_DOWN, keyCode, metaState, downTime = time, eventTime = time)
