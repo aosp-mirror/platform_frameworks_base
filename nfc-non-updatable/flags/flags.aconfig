@@ -189,3 +189,11 @@ flag {
     description: "App can check its tag intent preference status"
     bug: "335916336"
 }
+
+flag {
+    name: "nfc_apdu_service_info_constructor"
+    is_exported: true
+    namespace: "nfc"
+    description: "Expose constructor for ApduServiceInfo"
+    bug: "380892385"
+}
