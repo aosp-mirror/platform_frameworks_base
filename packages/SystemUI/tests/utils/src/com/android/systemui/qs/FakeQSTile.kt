@@ -19,7 +19,6 @@ package com.android.systemui.qs
 import com.android.internal.logging.InstanceId
 import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.plugins.qs.TileDetailsViewModel
 
 class FakeQSTile(var user: Int, var available: Boolean = true) : QSTile {
     private var tileSpec: String? = null

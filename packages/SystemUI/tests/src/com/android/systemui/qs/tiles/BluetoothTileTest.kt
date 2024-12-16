@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothDevice
 import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.testing.TestableLooper
@@ -20,10 +22,12 @@ import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.flags.QSComposeFragment
+import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.flags.QsInCompose.isEnabled
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
@@ -35,6 +39,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertTrue
 import kotlinx.coroutines.Job
 import org.junit.After
 import org.junit.Before
@@ -199,6 +204,7 @@ class BluetoothTileTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(QsDetailedView.FLAG_NAME)
     fun handleClick_hasSatelliteFeatureButNoQsTileDialogAndClickIsProcessing_doNothing() {
         mSetFlagsRule.enableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
@@ -212,6 +218,7 @@ class BluetoothTileTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(QsDetailedView.FLAG_NAME)
     fun handleClick_noSatelliteFeatureAndNoQsTileDialog_directSetBtEnable() {
         mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
@@ -223,6 +230,7 @@ class BluetoothTileTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(QsDetailedView.FLAG_NAME)
     fun handleClick_noSatelliteFeatureButHasQsTileDialog_showDialog() {
         mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
         `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
@@ -231,6 +239,35 @@ class BluetoothTileTest(flags: FlagsParameterization) : SysuiTestCase() {
         tile.handleClick(null)
 
         verify(bluetoothTileDialogViewModel).showDialog(null)
+    }
+
+    @Test
+    @EnableFlags(QsDetailedView.FLAG_NAME)
+    fun handleClick_hasSatelliteFeatureAndQsDetailedViewIsEnabledAndClickIsProcessing_doNothing() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+        `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
+            .thenReturn(false)
+        `when`(clickJob.isCompleted).thenReturn(false)
+        tile.mClickJob = clickJob
+        var currentModel: TileDetailsViewModel? = null
+
+        tile.getDetailsViewModel { model: TileDetailsViewModel? -> currentModel = model }
+
+        // Click is not allowed.
+        assertThat(currentModel).isEqualTo(null)
+    }
+
+    @Test
+    @EnableFlags(QsDetailedView.FLAG_NAME)
+    fun handleClick_noSatelliteFeatureAndQsDetailedViewIsEnabled_returnDetailsViewModel() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+        `when`(featureFlags.isEnabled(com.android.systemui.flags.Flags.BLUETOOTH_QS_TILE_DIALOG))
+            .thenReturn(false)
+        var currentModel: TileDetailsViewModel? = null
+
+        tile.getDetailsViewModel { model: TileDetailsViewModel? -> currentModel = model }
+
+        assertTrue(currentModel != null)
     }
 
     @Test
