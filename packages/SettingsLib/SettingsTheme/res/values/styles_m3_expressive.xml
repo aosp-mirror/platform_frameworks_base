@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- M3 Expressive filled button style. -->
+    <style name="Widget.Material3Expressive.Button" parent="Widget.Material3.Button">
+        <item name="android:paddingStart">?attr/containerPaddingStart</item>
+        <item name="android:paddingEnd">?attr/containerPaddingEnd</item>
+        <item name="android:paddingTop">?attr/containerPaddingTop</item>
+        <item name="android:paddingBottom">?attr/containerPaddingBottom</item>
+        <item name="android:insetTop">?attr/containerInsetTop</item>
+        <item name="android:insetBottom">?attr/containerInsetBottom</item>
+        <item name="iconPadding">?attr/containerIconPadding</item>
+        <item name="iconSize">?attr/containerIconSize</item>
+        <item name="android:textAppearance">?attr/labelTextAppearance</item>
+        <item name="shapeAppearance">@xml/settingslib_button_shape_state_list</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.Filled</item>
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Small</item>
+    </style>
+    <style name="Widget.Material3Expressive.Button.Icon"/>
+
+    <!-- M3 Expressive tonal button style. -->
+    <style name="Widget.Material3Expressive.Button.TonalButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.Tonal</item>
+    </style>
+    <style name="Widget.Material3Expressive.Button.TonalButton.Icon"/>
+
+    <!-- M3 Expressive outlined button style. -->
+    <style name="Widget.Material3Expressive.Button.OutlinedButton">
+        <item name="android:stateListAnimator" tools:ignore="NewApi">@animator/mtrl_btn_unelevated_state_list_anim</item>
+        <item name="elevation">0dp</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.Outlined</item>
+        <item name="strokeColor">@color/settingslib_expressive_button_outline_color_selector</item>
+        <item name="strokeWidth">?attr/containerStrokeWidth</item>
+        <item name="backgroundTint">@color/settingslib_expressive_button_outlined_background_color_selector</item>
+    </style>
+    <style name="Widget.Material3Expressive.Button.OutlinedButton.Icon"/>
+
+    <!-- M3 Expressive text button style. -->
+    <style name="Widget.Material3Expressive.Button.TextButton">
+        <item name="android:stateListAnimator" tools:ignore="NewApi">@animator/mtrl_btn_unelevated_state_list_anim</item>
+        <item name="elevation">0dp</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.TextButton</item>
+    </style>
+    <style name="Widget.Material3Expressive.Button.TextButton.Icon"/>
+
+    <!-- Styles for M3 Expressive Icon Buttons. -->
+
+    <!-- M3 Expressive icon only button without a container or outline style. -->
+    <style name="Widget.Material3Expressive.Button.IconButton">
+        <item name="android:stateListAnimator" tools:ignore="NewApi">@animator/mtrl_btn_unelevated_state_list_anim</item>
+        <item name="elevation">0dp</item>
+        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="android:insetLeft">?attr/containerInsetLeft</item>
+        <item name="android:insetRight">?attr/containerInsetRight</item>
+        <item name="iconPadding">@dimen/m3_btn_icon_only_icon_padding</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.IconButton.Standard</item>
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.IconButton.Small</item>
+    </style>
+
+    <!-- M3 Expressive icon only button filled container style. -->
+    <style name="Widget.Material3Expressive.Button.IconButton.Filled">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.Filled</item>
+    </style>
+
+    <!-- M3 Expressive icon only button in tonal container style. -->
+    <style name="Widget.Material3Expressive.Button.IconButton.Tonal">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.Tonal</item>
+    </style>
+
+    <!-- M3 Expressive icon only button with an outline style. -->
+    <style name="Widget.Material3Expressive.Button.IconButton.Outlined">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3Expressive.Button.Outlined</item>
+        <item name="strokeColor">@color/settingslib_expressive_button_outline_color_selector</item>
+        <item name="strokeWidth">?attr/containerStrokeWidth</item>
+        <item name="backgroundTint">@color/settingslib_expressive_button_outlined_background_color_selector</item>
+    </style>
+
+    <!-- Styles for M3 Expressive Button Groups. -->
+
+    <!-- M3 Expressive Button Group. -->
+    <style name="Widget.Material3Expressive.MaterialButtonGroup" parent="Widget.Material3.MaterialButtonGroup"/>
+
+    <!-- M3 Expressive Connected Button Group. -->
+    <style name="Widget.Material3Expressive.MaterialButtonGroup.Connected" parent="Widget.Material3.MaterialButtonGroup.Connected">
+        <item name="innerCornerSize">@xml/settingslib_inner_corner_size_state_list</item>
+    </style>
+
+    <!-- M3 Expressive Button Toggle Group (Segmented Button). -->
+    <style name="Widget.Material3Expressive.MaterialButtonToggleGroup" parent="Widget.Material3.MaterialButtonToggleGroup">
+        <item name="innerCornerSize">@xml/settingslib_inner_corner_size_state_list</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="android:spacing">@dimen/settingslib_expressive_space_extrasmall1</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlays for different color variants. -->
+
+    <!-- M3 Expressive Button Theme Overlay for the filled color variant. -->
+    <style name="ThemeOverlay.Material3Expressive.Button.Filled" parent="">
+        <item name="colorContainer">?attr/colorPrimary</item>
+        <item name="colorContainerChecked">?attr/colorPrimary</item>
+        <item name="colorContainerUnchecked">?attr/colorSurfaceContainer</item>
+        <item name="colorOnContainer">?attr/colorOnPrimary</item>
+        <item name="colorOnContainerChecked">?attr/colorOnPrimary</item>
+        <item name="colorOnContainerUnchecked">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the tonal color variant. -->
+    <style name="ThemeOverlay.Material3Expressive.Button.Tonal" parent="">
+        <item name="colorContainer">?attr/colorSecondaryContainer</item>
+        <item name="colorContainerChecked">?attr/colorSecondary</item>
+        <item name="colorContainerUnchecked">?attr/colorSecondaryContainer</item>
+        <item name="colorOnContainer">?attr/colorOnSecondaryContainer</item>
+        <item name="colorOnContainerChecked">?attr/colorOnSecondary</item>
+        <item name="colorOnContainerUnchecked">?attr/colorOnSecondaryContainer</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the outlined variant. -->
+    <style name="ThemeOverlay.Material3Expressive.Button.Outlined" parent="">
+        <item name="colorContainer">@android:color/transparent</item>
+        <item name="colorContainerChecked">?attr/colorSurfaceInverse</item>
+        <item name="colorContainerUnchecked">@android:color/transparent</item>
+        <item name="colorOnContainer">?attr/colorOnSurfaceVariant</item>
+        <item name="colorOnContainerChecked">?attr/colorOnSurfaceInverse</item>
+        <item name="colorOnContainerUnchecked">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the text only variant. -->
+    <style name="ThemeOverlay.Material3Expressive.Button.TextButton" parent="ThemeOverlay.Material3.Button.TextButton">
+        <item name="colorContainerChecked">?attr/colorContainer</item>
+        <item name="colorContainerUnchecked">?attr/colorContainer</item>
+        <item name="colorOnContainerChecked">?attr/colorOnContainer</item>
+        <item name="colorOnContainerUnchecked">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the icon only variant. -->
+    <style name="ThemeOverlay.Material3Expressive.Button.IconButton.Standard" parent="">
+        <item name="colorContainer">@android:color/transparent</item>
+        <item name="colorContainerChecked">@android:color/transparent</item>
+        <item name="colorContainerUnchecked">@android:color/transparent</item>
+        <item name="colorOnContainer">?attr/colorOnSurfaceVariant</item>
+        <item name="colorOnContainerChecked">?attr/colorPrimary</item>
+        <item name="colorOnContainerUnchecked">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the extra small variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.Xsmall" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall6</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall6</item>
+        <item name="containerPaddingTop">6dp</item>
+        <item name="containerPaddingBottom">6dp</item>
+        <item name="containerInsetTop">8dp</item>
+        <item name="containerInsetBottom">8dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_small3</item>
+        <item name="containerIconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="containerStrokeWidth">1dp</item>
+        <item name="labelTextAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerSmall</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerMedium</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.Xsmall.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the small variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.Small" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_small1</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_small1</item>
+        <item name="containerPaddingTop">10dp</item>
+        <item name="containerPaddingBottom">10dp</item>
+        <item name="containerInsetTop">4dp</item>
+        <item name="containerInsetBottom">4dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_small3</item>
+        <item name="containerIconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="containerStrokeWidth">1dp</item>
+        <item name="labelTextAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerSmall</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerMedium</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.Small.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the medium variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.Medium" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_small4</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_small4</item>
+        <item name="containerPaddingTop">16dp</item>
+        <item name="containerPaddingBottom">16dp</item>
+        <item name="containerInsetTop">0dp</item>
+        <item name="containerInsetBottom">0dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_small4</item>
+        <item name="containerIconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="containerStrokeWidth">1dp</item>
+        <item name="labelTextAppearance">?attr/textAppearanceTitleMedium</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerMedium</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerLarge</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.Medium.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerLarge</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the large variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.Large" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="containerPaddingTop">32dp</item>
+        <item name="containerPaddingBottom">32dp</item>
+        <item name="containerInsetTop">0dp</item>
+        <item name="containerInsetBottom">0dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_medium1</item>
+        <item name="containerIconPadding">@dimen/settingslib_expressive_space_extrasmall6</item>
+        <item name="containerStrokeWidth">@dimen/settingslib_expressive_space_extrasmall1</item>
+        <item name="labelTextAppearance">?attr/textAppearanceHeadlineSmall</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerLarge</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerExtraLarge</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.Large.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <!-- M3 Expressive Button Theme Overlay for the extra large variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.Xlarge" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_large2</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_large2</item>
+        <item name="containerPaddingTop">48dp</item>
+        <item name="containerPaddingBottom">48dp</item>
+        <item name="containerInsetTop">0dp</item>
+        <item name="containerInsetBottom">0dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_medium3</item>
+        <item name="containerIconPadding">@dimen/settingslib_expressive_space_small1</item>
+        <item name="containerStrokeWidth">3dp</item>
+        <item name="labelTextAppearance">?attr/textAppearanceHeadlineLarge</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerLarge</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerExtraLarge</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.Xlarge.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <!-- M3 Expressive Icon Button Theme Overlay for the extra small variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xsmall" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall3</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall3</item>
+        <item name="containerPaddingTop">6dp</item>
+        <item name="containerPaddingBottom">6dp</item>
+        <item name="containerInsetTop">8dp</item>
+        <item name="containerInsetBottom">8dp</item>
+        <item name="containerInsetLeft">8dp</item>
+        <item name="containerInsetRight">8dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_small3</item>
+        <item name="containerStrokeWidth">1dp</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerSmall</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerMedium</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xsmall.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xsmall.Narrow">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall2</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall2</item>
+        <item name="containerInsetLeft">10dp</item>
+        <item name="containerInsetRight">10dp</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xsmall.Narrow.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xsmall.Wide">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall5</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall5</item>
+        <item name="containerInsetLeft">4dp</item>
+        <item name="containerInsetRight">4dp</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xsmall.Wide.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <!-- M3 Expressive Icon Button Theme Overlay for the small variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Small" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="containerPaddingTop">8dp</item>
+        <item name="containerPaddingBottom">8dp</item>
+        <item name="containerInsetTop">4dp</item>
+        <item name="containerInsetBottom">4dp</item>
+        <item name="containerInsetLeft">4dp</item>
+        <item name="containerInsetRight">4dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_small4</item>
+        <item name="containerStrokeWidth">1dp</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerSmall</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerMedium</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Small.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Small.Narrow">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall2</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall2</item>
+        <item name="containerInsetLeft">8dp</item>
+        <item name="containerInsetRight">8dp</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Small.Narrow.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Small.Wide">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall7</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall7</item>
+        <item name="containerInsetLeft">0dp</item>
+        <item name="containerInsetRight">0dp</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Small.Wide.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerMedium</item>
+    </style>
+
+    <!-- M3 Expressive Icon Button Theme Overlay for the medium variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Medium" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_small1</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_small1</item>
+        <item name="containerPaddingTop">16dp</item>
+        <item name="containerPaddingBottom">16dp</item>
+        <item name="containerInsetTop">0dp</item>
+        <item name="containerInsetBottom">0dp</item>
+        <item name="containerInsetLeft">0dp</item>
+        <item name="containerInsetRight">0dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_small4</item>
+        <item name="containerStrokeWidth">1dp</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerMedium</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerLarge</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Medium.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerLarge</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Medium.Narrow">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_extrasmall6</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_extrasmall6</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Medium.Narrow.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerLarge</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Medium.Wide">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_small4</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_small4</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Medium.Wide.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerLarge</item>
+    </style>
+
+    <!-- M3 Expressive Icon Button Theme Overlay for the large variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Large" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_medium1</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_medium1</item>
+        <item name="containerPaddingTop">32dp</item>
+        <item name="containerPaddingBottom">32dp</item>
+        <item name="containerInsetTop">0dp</item>
+        <item name="containerInsetBottom">0dp</item>
+        <item name="containerInsetLeft">0dp</item>
+        <item name="containerInsetRight">0dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_medium1</item>
+        <item name="containerStrokeWidth">@dimen/settingslib_expressive_space_extrasmall1</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerLarge</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerExtraLarge</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Large.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Large.Narrow">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_small1</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_small1</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Large.Narrow.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Large.Wide">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_medium4</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Large.Wide.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <!-- M3 Expressive Icon Button Theme Overlay for the extra large variant. -->
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xlarge" parent="">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="containerPaddingTop">48dp</item>
+        <item name="containerPaddingBottom">48dp</item>
+        <item name="containerInsetTop">0dp</item>
+        <item name="containerInsetBottom">0dp</item>
+        <item name="containerInsetLeft">0dp</item>
+        <item name="containerInsetRight">0dp</item>
+        <item name="containerIconSize">@dimen/settingslib_expressive_space_medium3</item>
+        <item name="containerStrokeWidth">3dp</item>
+        <item name="containerShapePressed">?attr/shapeAppearanceCornerLarge</item>
+        <item name="containerShapeChecked">?attr/shapeAppearanceCornerExtraLarge</item>
+        <item name="containerShapeDefault">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xlarge.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xlarge.Narrow">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_medium1</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_medium1</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xlarge.Narrow.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xlarge.Wide">
+        <item name="containerPaddingStart">@dimen/settingslib_expressive_space_large3</item>
+        <item name="containerPaddingEnd">@dimen/settingslib_expressive_space_large3</item>
+    </style>
+    <style name="SizeOverlay.Material3Expressive.Button.IconButton.Xlarge.Wide.Square">
+        <item name="containerShapeChecked">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="containerShapeDefault">?attr/shapeAppearanceCornerExtraLarge</item>
+    </style>
+
+    <!-- M3 shape -->
+    <style name="ShapeAppearance.Material3.Corner.Full" parent="">
+        <item name="cornerFamily">?attr/shapeCornerFamily</item>
+        <item name="cornerSize">50%</item>
+    </style>
+</resources>

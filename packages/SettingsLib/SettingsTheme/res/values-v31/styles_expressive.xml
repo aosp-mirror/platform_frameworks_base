@@ -17,27 +17,16 @@
 
 <resources>
     <style name="SettingsLibButtonStyle.Expressive.Filled"
-        parent="@style/Widget.Material3.Button">
+        parent="@style/Widget.Material3Expressive.Button.Icon">
         <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
-        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:backgroundTint">@color/settingslib_materialColorPrimary</item>
         <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
-        <item name="android:textColor">@color/settingslib_materialColorOnPrimary</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconTint">@color/settingslib_materialColorOnPrimary</item>
-        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
     </style>
 
     <style name="SettingsLibButtonStyle.Expressive.Filled.Large">
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small4</item>
-        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.TitleMedium</item>
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
     </style>
 
     <style name="SettingsLibButtonStyle.Expressive.Filled.Extra"
@@ -45,28 +34,34 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
-    <style name="SettingsLibButtonStyle.Expressive.Tonal"
-        parent="@style/Widget.Material3.Button.TonalButton">
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Filled"
+        parent="@style/Widget.Material3Expressive.Button.IconButton.Filled">
         <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
-        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:backgroundTint">@color/settingslib_materialColorSecondaryContainer</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Filled.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Filled.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Icon.Filled.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Tonal"
+        parent="@style/Widget.Material3Expressive.Button.TonalButton.Icon">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
         <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
-        <item name="android:textColor">@color/settingslib_materialColorOnSecondaryContainer</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconTint">@color/settingslib_materialColorOnSecondaryContainer</item>
-        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
     </style>
 
     <style name="SettingsLibButtonStyle.Expressive.Tonal.Large">
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small4</item>
-        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.TitleMedium</item>
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
     </style>
 
     <style name="SettingsLibButtonStyle.Expressive.Tonal.Extra"
@@ -74,29 +69,34 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
-    <style name="SettingsLibButtonStyle.Expressive.Outline"
-        parent="@style/Widget.Material3.Button.OutlinedButton.Icon">
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Tonal"
+        parent="@style/Widget.Material3Expressive.Button.IconButton.Tonal">
         <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
-        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Tonal.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Tonal.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Tonal.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Outline"
+        parent="@style/Widget.Material3Expressive.Button.OutlinedButton.Icon">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
         <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
-        <item name="android:textColor">@color/settingslib_materialColorPrimary</item>
-        <item name="iconTint">@color/settingslib_materialColorPrimary</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
-        <item name="iconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
-        <item name="strokeColor">@color/settingslib_materialColorOutlineVariant</item>
     </style>
 
     <style name="SettingsLibButtonStyle.Expressive.Outline.Large">
-        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_small1</item>
-        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small4</item>
-        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.TitleMedium</item>
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
     </style>
 
     <style name="SettingsLibButtonStyle.Expressive.Outline.Extra"
@@ -105,15 +105,10 @@
     </style>
 
     <style name="SettingslibTextButtonStyle.Expressive"
-        parent="@style/Widget.Material3.Button.TextButton.Icon">
+        parent="@style/Widget.Material3Expressive.Button.TextButton.Icon">
         <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.BodyLarge.Emphasized</item>
-        <item name="android:textColor">@color/settingslib_materialColorOnSurface</item>
-        <item name="iconTint">@null</item>
-        <item name="iconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
-        <item name="rippleColor">?android:attr/colorControlHighlight</item>
     </style>
 
     <style name="SettingsLibCardStyle" parent="">
