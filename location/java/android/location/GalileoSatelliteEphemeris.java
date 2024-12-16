@@ -43,8 +43,8 @@ import java.util.List;
 @SystemApi
 public final class GalileoSatelliteEphemeris implements Parcelable {
 
-    /** Satellite code number. */
-    private int mSatelliteCodeNumber;
+    /** PRN or satellite ID number for the Galileo satellite. */
+    private int mSvid;
 
     /** Array of satellite clock model. */
     @NonNull private final List<GalileoSatelliteClockModel> mSatelliteClockModels;
@@ -59,8 +59,8 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
     @NonNull private final SatelliteEphemerisTime mSatelliteEphemerisTime;
 
     private GalileoSatelliteEphemeris(Builder builder) {
-        // Allow satelliteCodeNumber beyond the range to support potential future extensibility.
-        Preconditions.checkArgument(builder.mSatelliteCodeNumber >= 1);
+        // Allow svid beyond the range to support potential future extensibility.
+        Preconditions.checkArgument(builder.mSvid >= 1);
         Preconditions.checkNotNull(
                 builder.mSatelliteClockModels, "SatelliteClockModels cannot be null");
         Preconditions.checkNotNull(
@@ -68,7 +68,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
         Preconditions.checkNotNull(builder.mSatelliteHealth, "SatelliteHealth cannot be null");
         Preconditions.checkNotNull(
                 builder.mSatelliteEphemerisTime, "SatelliteEphemerisTime cannot be null");
-        mSatelliteCodeNumber = builder.mSatelliteCodeNumber;
+        mSvid = builder.mSvid;
         final List<GalileoSatelliteClockModel> satelliteClockModels = builder.mSatelliteClockModels;
         mSatelliteClockModels = Collections.unmodifiableList(new ArrayList<>(satelliteClockModels));
         mSatelliteOrbitModel = builder.mSatelliteOrbitModel;
@@ -76,10 +76,10 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
         mSatelliteEphemerisTime = builder.mSatelliteEphemerisTime;
     }
 
-    /** Returns the satellite code number. */
+    /** Returns the PRN or satellite ID number for the Galileo satellite. */
     @IntRange(from = 1, to = 36)
-    public int getSatelliteCodeNumber() {
-        return mSatelliteCodeNumber;
+    public int getSvid() {
+        return mSvid;
     }
 
     /** Returns the list of satellite clock models. */
@@ -113,7 +113,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
                 public GalileoSatelliteEphemeris createFromParcel(Parcel in) {
                     final GalileoSatelliteEphemeris.Builder galileoSatelliteEphemeris =
                             new Builder();
-                    galileoSatelliteEphemeris.setSatelliteCodeNumber(in.readInt());
+                    galileoSatelliteEphemeris.setSvid(in.readInt());
                     List<GalileoSatelliteClockModel> satelliteClockModels = new ArrayList<>();
                     in.readTypedList(satelliteClockModels, GalileoSatelliteClockModel.CREATOR);
                     galileoSatelliteEphemeris.setSatelliteClockModels(satelliteClockModels);
@@ -139,7 +139,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mSatelliteCodeNumber);
+        parcel.writeInt(mSvid);
         parcel.writeTypedList(mSatelliteClockModels, flags);
         parcel.writeTypedObject(mSatelliteOrbitModel, flags);
         parcel.writeTypedObject(mSatelliteHealth, flags);
@@ -150,7 +150,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
     @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder("GalileoSatelliteEphemeris[");
-        builder.append("satelliteCodeNumber = ").append(mSatelliteCodeNumber);
+        builder.append("svid = ").append(mSvid);
         builder.append(", satelliteClockModels = ").append(mSatelliteClockModels);
         builder.append(", satelliteOrbitModel = ").append(mSatelliteOrbitModel);
         builder.append(", satelliteHealth = ").append(mSatelliteHealth);
@@ -161,17 +161,16 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
 
     /** Builder for {@link GalileoSatelliteEphemeris}. */
     public static final class Builder {
-        private int mSatelliteCodeNumber;
+        private int mSvid;
         private List<GalileoSatelliteClockModel> mSatelliteClockModels;
         private KeplerianOrbitModel mSatelliteOrbitModel;
         private GalileoSvHealth mSatelliteHealth;
         private SatelliteEphemerisTime mSatelliteEphemerisTime;
 
-        /** Sets the satellite code number. */
+        /** Sets the PRN or satellite ID number for the Galileo satellite. */
         @NonNull
-        public Builder setSatelliteCodeNumber(
-                @IntRange(from = 1, to = 36) int satelliteCodeNumber) {
-            mSatelliteCodeNumber = satelliteCodeNumber;
+        public Builder setSvid(@IntRange(from = 1, to = 36) int svid) {
+            mSvid = svid;
             return this;
         }
 
@@ -218,37 +217,107 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
      * <p>This is defined in Galileo-OS-SIS-ICD 5.1.9.3.
      */
     public static final class GalileoSvHealth implements Parcelable {
+
+        /**
+         * Galileo data validity status.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({DATA_STATUS_DATA_VALID, DATA_STATUS_WORKING_WITHOUT_GUARANTEE})
+        public @interface GalileoDataValidityStatus {}
+
+        /**
+         * The following enumerations must be in sync with the values declared in
+         * GalileoHealthDataVaidityType in GalileoSatelliteEphemeris.aidl.
+         */
+
+        /** Data validity status is data valid. */
+        public static final int DATA_STATUS_DATA_VALID = 0;
+
+        /** Data validity status is working without guarantee. */
+        public static final int DATA_STATUS_WORKING_WITHOUT_GUARANTEE = 1;
+
+        /**
+         * Galileo signal health status.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+            HEALTH_STATUS_OK,
+            HEALTH_STATUS_OUT_OF_SERVICE,
+            HEALTH_STATUS_EXTENDED_OPERATION_MODE,
+            HEALTH_STATUS_IN_TEST
+        })
+        public @interface GalileoHealthStatus {}
+
+        /**
+         * The following enumerations must be in sync with the values declared in
+         * GalileoHealthStatusType in GalileoSatelliteEphemeris.aidl.
+         */
+
+        /** Health status is ok. */
+        public static final int HEALTH_STATUS_OK = 0;
+
+        /** Health status is out of service. */
+        public static final int HEALTH_STATUS_OUT_OF_SERVICE = 1;
+
+        /** Health status is in extended operation mode. */
+        public static final int HEALTH_STATUS_EXTENDED_OPERATION_MODE = 2;
+
+        /** Health status is in test mode. */
+        public static final int HEALTH_STATUS_IN_TEST = 3;
+
         /** E1-B data validity status. */
-        private int mDataValidityStatusE1b;
+        private @GalileoDataValidityStatus int mDataValidityStatusE1b;
 
         /** E1-B/C signal health status. */
-        private int mSignalHealthStatusE1b;
+        private @GalileoHealthStatus int mSignalHealthStatusE1b;
 
         /** E5a data validity status. */
-        private int mDataValidityStatusE5a;
+        private @GalileoDataValidityStatus int mDataValidityStatusE5a;
 
         /** E5a signal health status. */
-        private int mSignalHealthStatusE5a;
+        private @GalileoHealthStatus int mSignalHealthStatusE5a;
 
         /** E5b data validity status. */
-        private int mDataValidityStatusE5b;
+        private @GalileoDataValidityStatus int mDataValidityStatusE5b;
 
         /** E5b signal health status. */
-        private int mSignalHealthStatusE5b;
+        private @GalileoHealthStatus int mSignalHealthStatusE5b;
 
         private GalileoSvHealth(Builder builder) {
             Preconditions.checkArgumentInRange(
-                    builder.mDataValidityStatusE1b, 0, 1, "DataValidityStatusE1b");
+                    builder.mDataValidityStatusE1b,
+                    DATA_STATUS_DATA_VALID,
+                    DATA_STATUS_WORKING_WITHOUT_GUARANTEE,
+                    "DataValidityStatusE1b");
             Preconditions.checkArgumentInRange(
-                    builder.mSignalHealthStatusE1b, 0, 3, "SignalHealthStatusE1b");
+                    builder.mSignalHealthStatusE1b,
+                    HEALTH_STATUS_OK,
+                    HEALTH_STATUS_IN_TEST,
+                    "SignalHealthStatusE1b");
             Preconditions.checkArgumentInRange(
-                    builder.mDataValidityStatusE5a, 0, 1, "DataValidityStatusE5a");
+                    builder.mDataValidityStatusE5a,
+                    DATA_STATUS_DATA_VALID,
+                    DATA_STATUS_WORKING_WITHOUT_GUARANTEE,
+                    "DataValidityStatusE5a");
             Preconditions.checkArgumentInRange(
-                    builder.mSignalHealthStatusE5a, 0, 3, "SignalHealthStatusE5a");
+                    builder.mSignalHealthStatusE5a,
+                    HEALTH_STATUS_OK,
+                    HEALTH_STATUS_IN_TEST,
+                    "SignalHealthStatusE5a");
             Preconditions.checkArgumentInRange(
-                    builder.mDataValidityStatusE5b, 0, 1, "DataValidityStatusE5b");
+                    builder.mDataValidityStatusE5b,
+                    DATA_STATUS_DATA_VALID,
+                    DATA_STATUS_WORKING_WITHOUT_GUARANTEE,
+                    "DataValidityStatusE5b");
             Preconditions.checkArgumentInRange(
-                    builder.mSignalHealthStatusE5b, 0, 3, "SignalHealthStatusE5b");
+                    builder.mSignalHealthStatusE5b,
+                    HEALTH_STATUS_OK,
+                    HEALTH_STATUS_IN_TEST,
+                    "SignalHealthStatusE5b");
             mDataValidityStatusE1b = builder.mDataValidityStatusE1b;
             mSignalHealthStatusE1b = builder.mSignalHealthStatusE1b;
             mDataValidityStatusE5a = builder.mDataValidityStatusE5a;
@@ -258,37 +327,37 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
         }
 
         /** Returns the E1-B data validity status. */
-        @IntRange(from = 0, to = 1)
+        @GalileoDataValidityStatus
         public int getDataValidityStatusE1b() {
             return mDataValidityStatusE1b;
         }
 
         /** Returns the E1-B/C signal health status. */
-        @IntRange(from = 0, to = 3)
+        @GalileoHealthStatus
         public int getSignalHealthStatusE1b() {
             return mSignalHealthStatusE1b;
         }
 
         /** Returns the E5a data validity status. */
-        @IntRange(from = 0, to = 1)
+        @GalileoDataValidityStatus
         public int getDataValidityStatusE5a() {
             return mDataValidityStatusE5a;
         }
 
         /** Returns the E5a signal health status. */
-        @IntRange(from = 0, to = 3)
+        @GalileoHealthStatus
         public int getSignalHealthStatusE5a() {
             return mSignalHealthStatusE5a;
         }
 
         /** Returns the E5b data validity status. */
-        @IntRange(from = 0, to = 1)
+        @GalileoDataValidityStatus
         public int getDataValidityStatusE5b() {
             return mDataValidityStatusE5b;
         }
 
         /** Returns the E5b signal health status. */
-        @IntRange(from = 0, to = 3)
+        @GalileoHealthStatus
         public int getSignalHealthStatusE5b() {
             return mSignalHealthStatusE5b;
         }
@@ -355,7 +424,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
             /** Sets the E1-B data validity status. */
             @NonNull
             public Builder setDataValidityStatusE1b(
-                    @IntRange(from = 0, to = 1) int dataValidityStatusE1b) {
+                    @GalileoDataValidityStatus int dataValidityStatusE1b) {
                 mDataValidityStatusE1b = dataValidityStatusE1b;
                 return this;
             }
@@ -363,7 +432,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
             /** Sets the E1-B/C signal health status. */
             @NonNull
             public Builder setSignalHealthStatusE1b(
-                    @IntRange(from = 0, to = 3) int signalHealthStatusE1b) {
+                    @GalileoHealthStatus int signalHealthStatusE1b) {
                 mSignalHealthStatusE1b = signalHealthStatusE1b;
                 return this;
             }
@@ -371,7 +440,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
             /** Sets the E5a data validity status. */
             @NonNull
             public Builder setDataValidityStatusE5a(
-                    @IntRange(from = 0, to = 1) int dataValidityStatusE5a) {
+                    @GalileoDataValidityStatus int dataValidityStatusE5a) {
                 mDataValidityStatusE5a = dataValidityStatusE5a;
                 return this;
             }
@@ -379,7 +448,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
             /** Sets the E5a signal health status. */
             @NonNull
             public Builder setSignalHealthStatusE5a(
-                    @IntRange(from = 0, to = 3) int signalHealthStatusE5a) {
+                    @GalileoHealthStatus int signalHealthStatusE5a) {
                 mSignalHealthStatusE5a = signalHealthStatusE5a;
                 return this;
             }
@@ -387,7 +456,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
             /** Sets the E5b data validity status. */
             @NonNull
             public Builder setDataValidityStatusE5b(
-                    @IntRange(from = 0, to = 1) int dataValidityStatusE5b) {
+                    @GalileoDataValidityStatus int dataValidityStatusE5b) {
                 mDataValidityStatusE5b = dataValidityStatusE5b;
                 return this;
             }
@@ -395,7 +464,7 @@ public final class GalileoSatelliteEphemeris implements Parcelable {
             /** Sets the E5b signal health status. */
             @NonNull
             public Builder setSignalHealthStatusE5b(
-                    @IntRange(from = 0, to = 3) int signalHealthStatusE5b) {
+                    @GalileoHealthStatus int signalHealthStatusE5b) {
                 mSignalHealthStatusE5b = signalHealthStatusE5b;
                 return this;
             }

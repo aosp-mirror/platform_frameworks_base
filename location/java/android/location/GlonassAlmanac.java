@@ -21,6 +21,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.location.GlonassSatelliteEphemeris.GlonassHealthStatus;
 import android.location.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -121,11 +122,17 @@ public final class GlonassAlmanac implements Parcelable {
         /** Slot number. */
         private final int mSlotNumber;
 
-        /** Satellite health information (0=healthy, 1=unhealthy). */
-        private final int mSvHealth;
+        /** Satellite health status. */
+        private final @GlonassHealthStatus int mHealthState;
 
         /** Frequency channel number. */
-        private final int mFreqChannel;
+        private final int mFrequencyChannelNumber;
+
+        /** Calendar day number within the four-year period beginning since the leap year. */
+        private final int mCalendarDayNumber;
+
+        /** Flag to indicates if the satellite is a GLONASS-M satellitee. */
+        private final boolean mGlonassM;
 
         /** Coarse value of satellite time correction to GLONASS time in seconds. */
         private final double mTau;
@@ -148,15 +155,18 @@ public final class GlonassAlmanac implements Parcelable {
         /** Eccentricity. */
         private final double mEccentricity;
 
-        /** Argument of perigee in radians. */
+        /** Argument of perigee in semi-circles. */
         private final double mOmega;
 
         private GlonassSatelliteAlmanac(Builder builder) {
             // Allow slotNumber beyond the range to support potential future extensibility.
             Preconditions.checkArgument(builder.mSlotNumber >= 1);
-            // Allow svHealth beyond the range to support potential future extensibility.
-            Preconditions.checkArgument(builder.mSvHealth >= 0);
-            Preconditions.checkArgumentInRange(builder.mFreqChannel, 0, 31, "FreqChannel");
+            // Allow healthState beyond the range to support potential future extensibility.
+            Preconditions.checkArgument(builder.mHealthState >= 0);
+            Preconditions.checkArgumentInRange(
+                    builder.mFrequencyChannelNumber, 0, 31, "FrequencyChannelNumber");
+            Preconditions.checkArgumentInRange(
+                    builder.mCalendarDayNumber, 1, 1461, "CalendarDayNumber");
             Preconditions.checkArgumentInRange(builder.mTau, -1.9e-3f, 1.9e-3f, "Tau");
             Preconditions.checkArgumentInRange(builder.mTLambda, 0.0f, 44100.0f, "TLambda");
             Preconditions.checkArgumentInRange(builder.mLambda, -1.0f, 1.0f, "Lambda");
@@ -166,8 +176,10 @@ public final class GlonassAlmanac implements Parcelable {
             Preconditions.checkArgumentInRange(builder.mEccentricity, 0.0f, 0.03f, "Eccentricity");
             Preconditions.checkArgumentInRange(builder.mOmega, -1.0f, 1.0f, "Omega");
             mSlotNumber = builder.mSlotNumber;
-            mSvHealth = builder.mSvHealth;
-            mFreqChannel = builder.mFreqChannel;
+            mHealthState = builder.mHealthState;
+            mFrequencyChannelNumber = builder.mFrequencyChannelNumber;
+            mCalendarDayNumber = builder.mCalendarDayNumber;
+            mGlonassM = builder.mGlonassM;
             mTau = builder.mTau;
             mTLambda = builder.mTLambda;
             mLambda = builder.mLambda;
@@ -184,16 +196,29 @@ public final class GlonassAlmanac implements Parcelable {
             return mSlotNumber;
         }
 
-        /** Returns the Satellite health information (0=healthy, 1=unhealthy). */
-        @IntRange(from = 0, to = 1)
-        public int getSvHealth() {
-            return mSvHealth;
+        /** Returns the satellite health status. */
+        public @GlonassHealthStatus int getHealthState() {
+            return mHealthState;
         }
 
         /** Returns the frequency channel number. */
         @IntRange(from = 0, to = 31)
-        public int getFreqChannel() {
-            return mFreqChannel;
+        public int getFrequencyChannelNumber() {
+            return mFrequencyChannelNumber;
+        }
+
+        /**
+         * Returns the calendar day number within the four-year period beginning since the leap
+         * year.
+         */
+        @IntRange(from = 1, to = 1461)
+        public int getCalendarDayNumber() {
+            return mCalendarDayNumber;
+        }
+
+        /** Returns true if the satellite is a GLONASS-M satellitee, false otherwise. */
+        public boolean isGlonassM() {
+            return mGlonassM;
         }
 
         /** Returns the coarse value of satellite time correction to GLONASS time in seconds. */
@@ -241,7 +266,7 @@ public final class GlonassAlmanac implements Parcelable {
             return mEccentricity;
         }
 
-        /** Returns the argument of perigee in radians. */
+        /** Returns the Argument of perigee in semi-circles. */
         @FloatRange(from = -1.0f, to = 1.0f)
         public double getOmega() {
             return mOmega;
@@ -255,8 +280,10 @@ public final class GlonassAlmanac implements Parcelable {
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(mSlotNumber);
-            dest.writeInt(mSvHealth);
-            dest.writeInt(mFreqChannel);
+            dest.writeInt(mHealthState);
+            dest.writeInt(mFrequencyChannelNumber);
+            dest.writeInt(mCalendarDayNumber);
+            dest.writeBoolean(mGlonassM);
             dest.writeDouble(mTau);
             dest.writeDouble(mTLambda);
             dest.writeDouble(mLambda);
@@ -273,8 +300,10 @@ public final class GlonassAlmanac implements Parcelable {
                     public GlonassSatelliteAlmanac createFromParcel(@NonNull Parcel source) {
                         return new GlonassSatelliteAlmanac.Builder()
                                 .setSlotNumber(source.readInt())
-                                .setSvHealth(source.readInt())
-                                .setFreqChannel(source.readInt())
+                                .setHealthState(source.readInt())
+                                .setFrequencyChannelNumber(source.readInt())
+                                .setCalendarDayNumber(source.readInt())
+                                .setGlonassM(source.readBoolean())
                                 .setTau(source.readDouble())
                                 .setTLambda(source.readDouble())
                                 .setLambda(source.readDouble())
@@ -297,8 +326,10 @@ public final class GlonassAlmanac implements Parcelable {
         public String toString() {
             StringBuilder builder = new StringBuilder("GlonassSatelliteAlmanac[");
             builder.append("slotNumber = ").append(mSlotNumber);
-            builder.append(", svHealth = ").append(mSvHealth);
-            builder.append(", freqChannel = ").append(mFreqChannel);
+            builder.append(", healthState = ").append(mHealthState);
+            builder.append(", frequencyChannelNumber = ").append(mFrequencyChannelNumber);
+            builder.append(", calendarDayNumber = ").append(mCalendarDayNumber);
+            builder.append(", glonassM = ").append(mGlonassM);
             builder.append(", tau = ").append(mTau);
             builder.append(", tLambda = ").append(mTLambda);
             builder.append(", lambda = ").append(mLambda);
@@ -314,8 +345,10 @@ public final class GlonassAlmanac implements Parcelable {
         /** Builder for {@link GlonassSatelliteAlmanac}. */
         public static final class Builder {
             private int mSlotNumber;
-            private int mSvHealth;
-            private int mFreqChannel;
+            private int mHealthState;
+            private int mFrequencyChannelNumber;
+            private int mCalendarDayNumber;
+            private boolean mGlonassM;
             private double mTau;
             private double mTLambda;
             private double mLambda;
@@ -332,17 +365,36 @@ public final class GlonassAlmanac implements Parcelable {
                 return this;
             }
 
-            /** Sets the Satellite health information (0=healthy, 1=unhealthy). */
+            /** Sets the satellite health status. */
             @NonNull
-            public Builder setSvHealth(@IntRange(from = 0, to = 1) int svHealth) {
-                mSvHealth = svHealth;
+            public Builder setHealthState(@GlonassHealthStatus int healthState) {
+                mHealthState = healthState;
                 return this;
             }
 
             /** Sets the frequency channel number. */
             @NonNull
-            public Builder setFreqChannel(@IntRange(from = 0, to = 31) int freqChannel) {
-                mFreqChannel = freqChannel;
+            public Builder setFrequencyChannelNumber(
+                    @IntRange(from = 0, to = 31) int frequencyChannelNumber) {
+                mFrequencyChannelNumber = frequencyChannelNumber;
+                return this;
+            }
+
+            /**
+             * Sets the calendar day number within the four-year period beginning since the leap
+             * year.
+             */
+            @NonNull
+            public Builder setCalendarDayNumber(
+                    @IntRange(from = 1, to = 1461) int calendarDayNumber) {
+                mCalendarDayNumber = calendarDayNumber;
+                return this;
+            }
+
+            /** Sets to true if the satellite is a GLONASS-M satellitee, false otherwise. */
+            @NonNull
+            public Builder setGlonassM(boolean isGlonassM) {
+                this.mGlonassM = isGlonassM;
                 return this;
             }
 
@@ -401,7 +453,7 @@ public final class GlonassAlmanac implements Parcelable {
                 return this;
             }
 
-            /** Sets the argument of perigee in radians. */
+            /** Sets the Argument of perigee in semi-circles. */
             @NonNull
             public Builder setOmega(@FloatRange(from = -1.0f, to = 1.0f) double omega) {
                 mOmega = omega;
