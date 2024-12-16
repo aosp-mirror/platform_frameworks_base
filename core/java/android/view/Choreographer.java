@@ -239,6 +239,7 @@ public final class Choreographer {
          * stuffing events.
          */
         public void reset() {
+            isStuffed.set(false);
             isRecovering = false;
             numberWaitsForNextVsync = 0;
         }
