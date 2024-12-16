@@ -185,13 +185,13 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public void stopCasting(CastDevice device, @StopReason int stopReason) {
+    public void stopCasting(CastDevice device) {
         final boolean isProjection = device.getTag() instanceof MediaProjectionInfo;
         mLogger.logStopCasting(isProjection);
         if (isProjection) {
             final MediaProjectionInfo projection = (MediaProjectionInfo) device.getTag();
             if (Objects.equals(mProjectionManager.getActiveProjectionInfo(), projection)) {
-                mProjectionManager.stopActiveProjection(stopReason);
+                mProjectionManager.stopActiveProjection(StopReason.STOP_QS_TILE);
             } else {
                 mLogger.logStopCastingNoProjection(projection);
             }

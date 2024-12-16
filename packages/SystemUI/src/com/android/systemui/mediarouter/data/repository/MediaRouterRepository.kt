@@ -16,7 +16,6 @@
 
 package com.android.systemui.mediarouter.data.repository
 
-import android.media.projection.StopReason
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
@@ -41,7 +40,7 @@ interface MediaRouterRepository {
     val castDevices: StateFlow<List<CastDevice>>
 
     /** Stops the cast to the given device. */
-    fun stopCasting(device: CastDevice, @StopReason stopReason: Int)
+    fun stopCasting(device: CastDevice)
 }
 
 @SysUISingleton
@@ -68,8 +67,8 @@ constructor(
             .map { it.filter { device -> device.origin == CastDevice.CastOrigin.MediaRouter } }
             .stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
 
-    override fun stopCasting(device: CastDevice, @StopReason stopReason: Int) {
-        castController.stopCasting(device, stopReason)
+    override fun stopCasting(device: CastDevice) {
+        castController.stopCasting(device)
     }
 
     companion object {

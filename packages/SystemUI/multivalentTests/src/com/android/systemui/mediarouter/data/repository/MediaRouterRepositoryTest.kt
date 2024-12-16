@@ -16,9 +16,8 @@
 
 package com.android.systemui.mediarouter.data.repository
 
-import android.media.projection.StopReason
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -102,7 +101,7 @@ class MediaRouterRepositoryTest : SysuiTestCase() {
                 origin = CastDevice.CastOrigin.MediaRouter,
             )
 
-        underTest.stopCasting(device, StopReason.STOP_UNKNOWN)
+        underTest.stopCasting(device)
 
         assertThat(castController.lastStoppedDevice).isEqualTo(device)
     }

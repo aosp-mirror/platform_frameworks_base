@@ -36,7 +36,6 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.projection.StopReason;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -155,7 +154,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         PendingIntent stopIntent = Mockito.mock(PendingIntent.class);
 
         mController.startCountdown(0, 0, startIntent, stopIntent);
-        mController.stopRecording(StopReason.STOP_UNKNOWN);
+        mController.stopRecording();
 
         assertFalse(mController.isStarting());
         assertFalse(mController.isRecording());

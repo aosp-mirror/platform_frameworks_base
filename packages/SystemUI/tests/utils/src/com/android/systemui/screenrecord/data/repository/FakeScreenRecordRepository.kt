@@ -16,7 +16,6 @@
 
 package com.android.systemui.screenrecord.data.repository
 
-import android.media.projection.StopReason
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -26,7 +25,7 @@ class FakeScreenRecordRepository : ScreenRecordRepository {
 
     var stopRecordingInvoked = false
 
-    override suspend fun stopRecording(@StopReason stopReason: Int) {
+    override suspend fun stopRecording() {
         stopRecordingInvoked = true
     }
 }

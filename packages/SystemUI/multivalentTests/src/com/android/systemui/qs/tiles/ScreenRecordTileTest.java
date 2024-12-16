@@ -27,13 +27,11 @@ import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
-import android.media.projection.StopReason;
 import android.os.Handler;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.Tile;
@@ -236,7 +234,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleClick(null /* view */);
 
-        verify(mController, times(1)).stopRecording(eq(StopReason.STOP_QS_TILE));
+        verify(mController, times(1)).stopRecording();
     }
 
     @Test

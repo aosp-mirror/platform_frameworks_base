@@ -20,7 +20,6 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -31,7 +30,6 @@ import static org.mockito.Mockito.when;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.media.projection.MediaProjectionInfo;
-import android.media.projection.StopReason;
 import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
@@ -338,8 +336,7 @@ public class CastTileTest extends SysuiTestCase {
         mCastTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
 
-        verify(mController, times(1))
-                .stopCasting(same(device), eq(StopReason.STOP_QS_TILE));
+        verify(mController, times(1)).stopCasting(same(device));
     }
 
     @Test

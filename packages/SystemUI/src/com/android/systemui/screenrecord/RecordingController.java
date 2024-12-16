@@ -23,7 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.projection.StopReason;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Process;
@@ -59,7 +58,6 @@ public class RecordingController
     private boolean mIsStarting;
     private boolean mIsRecording;
     private PendingIntent mStopIntent;
-    private @StopReason int mStopReason = StopReason.STOP_UNKNOWN;
     private final Bundle mInteractiveBroadcastOption;
     private CountDownTimer mCountDownTimer = null;
     private final Executor mMainExecutor;
@@ -85,7 +83,7 @@ public class RecordingController
             new UserTracker.Callback() {
                 @Override
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
-                    stopRecording(StopReason.STOP_USER_SWITCH);
+                    stopRecording();
                 }
             };
 
@@ -242,11 +240,9 @@ public class RecordingController
     }
 
     /**
-     * Stop the recording and sets the stop reason to be used by the RecordingService
-     * @param stopReason the method of the recording stopped (i.e. QS tile, status bar chip, etc.)
+     * Stop the recording
      */
-    public void stopRecording(@StopReason int stopReason) {
-        mStopReason = stopReason;
+    public void stopRecording() {
         try {
             if (mStopIntent != null) {
                 mRecordingControllerLogger.logRecordingStopped();
@@ -279,10 +275,6 @@ public class RecordingController
                 cb.onRecordingEnd();
             }
         }
-    }
-
-    public @StopReason int getStopReason() {
-        return mStopReason;
     }
 
     @Override

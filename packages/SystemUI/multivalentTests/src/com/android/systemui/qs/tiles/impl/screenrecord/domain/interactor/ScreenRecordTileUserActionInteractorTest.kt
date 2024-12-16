@@ -17,7 +17,6 @@
 package com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor
 
 import android.app.Dialog
-import android.media.projection.StopReason
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -93,7 +92,7 @@ class ScreenRecordTileUserActionInteractorTest : SysuiTestCase() {
 
         underTest.handleInput(QSTileInputTestKtx.click(recordingModel))
 
-        verify(recordingController).stopRecording(eq(StopReason.STOP_QS_TILE))
+        verify(recordingController).stopRecording()
     }
 
     @Test

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.media.projection.StopReason;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.CastController.Callback;
 
@@ -27,7 +26,7 @@ public interface CastController extends CallbackController<Callback>, Dumpable {
     void setCurrentUserId(int currentUserId);
     List<CastDevice> getCastDevices();
     void startCasting(CastDevice device);
-    void stopCasting(CastDevice device, @StopReason int stopReason);
+    void stopCasting(CastDevice device);
 
     /**
      * @return whether we have a connected device.

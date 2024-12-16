@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.domain.interactor
 
-import android.media.projection.StopReason
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -141,7 +140,7 @@ constructor(
 
     /** Stops the recording. */
     fun stopRecording() {
-        scope.launch { screenRecordRepository.stopRecording(StopReason.STOP_PRIVACY_CHIP) }
+        scope.launch { screenRecordRepository.stopRecording() }
     }
 
     companion object {

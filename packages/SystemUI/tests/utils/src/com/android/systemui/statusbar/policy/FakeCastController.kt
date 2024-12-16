@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy
 
-import android.media.projection.StopReason
 import java.io.PrintWriter
 
 class FakeCastController : CastController {
@@ -46,7 +45,7 @@ class FakeCastController : CastController {
 
     override fun startCasting(device: CastDevice?) {}
 
-    override fun stopCasting(device: CastDevice?, @StopReason stopReason: Int) {
+    override fun stopCasting(device: CastDevice?) {
         lastStoppedDevice = device
     }
 

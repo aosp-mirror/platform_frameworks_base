@@ -18,7 +18,6 @@ package com.android.systemui.qs.tiles;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.media.projection.StopReason;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
@@ -227,7 +226,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     private void stopRecording() {
-        mController.stopRecording(StopReason.STOP_QS_TILE);
+        mController.stopRecording();
     }
 
     private final class Callback implements RecordingController.RecordingStateChangeCallback {
