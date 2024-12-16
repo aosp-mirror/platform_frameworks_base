@@ -585,14 +585,6 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     // TODO: Move these calls to a builder?
-    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
-            IWindow iwindow) {
-        final WindowToken token = createWindowToken(
-                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
-        return createWindow(parent, type, token, name, 0 /* ownerId */,
-                false /* ownerCanAddInternalSystemWindow */, iwindow);
-    }
-
     WindowState createWindow(WindowState parent, int type, String name) {
         return (parent == null)
                 ? createWindow(parent, type, mDisplayContent, name)

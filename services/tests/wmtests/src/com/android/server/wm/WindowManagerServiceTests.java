@@ -253,7 +253,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final Session session = createTestSession(mAtm, wpc.getPid(), wpc.mUid);
         spyOn(session);
         assertTrue(session.mCanAddInternalSystemWindow);
-        final WindowState window = createWindow(null, LayoutParams.TYPE_PHONE, "win");
+        final WindowState window = newWindowBuilder("win", LayoutParams.TYPE_PHONE).build();
         session.onWindowSurfaceVisibilityChanged(window, true /* visible */);
         verify(session).setHasOverlayUi(true);
         session.onWindowSurfaceVisibilityChanged(window, false /* visible */);
@@ -262,7 +262,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testRelayoutExitingWindow() {
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
+        final WindowState win = newWindowBuilder("appWin", TYPE_BASE_APPLICATION).build();
         win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
         win.mWinAnimator.mSurfaceControl = mock(SurfaceControl.class);
         spyOn(win.mTransitionController);
@@ -396,7 +396,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             int startPrivateFlags, int newFlags, int newPrivateFlags, int expectedChangedFlags,
             int expectedChangedPrivateFlags, int expectedFlagsValue,
             int expectedPrivateFlagsValue) {
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
+        final WindowState win = newWindowBuilder("appWin", TYPE_BASE_APPLICATION).build();
         win.mRelayoutCalled = !firstRelayout;
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
         spyOn(mDisplayContent.mDwpcHelper);
@@ -529,7 +529,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void testAddWindowWithSubWindowTypeByWindowContext() {
         spyOn(mWm.mWindowContextListenerController);
 
-        final WindowState parentWin = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState parentWin = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         final IBinder parentToken = parentWin.mToken.token;
         parentWin.mAttrs.token = parentToken;
         mWm.mWindowMap.put(parentToken, parentWin);
@@ -1260,8 +1260,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final IWindow window = mock(IWindow.class);
         final IBinder binder = mock(IBinder.class);
         doReturn(binder).when(window).asBinder();
-        final WindowState windowState =
-                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "appWin", window);
+        final WindowState windowState = newWindowBuilder("appWin",
+                TYPE_BASE_APPLICATION).setDisplay(mDisplayContent).setClientWindow(window).build();
         doNothing().when(mWm.mContext).enforceCallingOrSelfPermission(anyString(), anyString());
         doReturn(windowState).when(mWm).getFocusedWindowLocked();
         doReturn(windowState).when(mWm.mRoot).getCurrentInputMethodWindow();
