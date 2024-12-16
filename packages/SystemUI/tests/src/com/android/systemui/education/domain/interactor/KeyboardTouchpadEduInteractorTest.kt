@@ -151,8 +151,14 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
         }
 
     private suspend fun setUpForInitialDelayElapse() {
-        tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
-        tutorialSchedulerRepository.updateLaunchTime(DeviceType.KEYBOARD, eduClock.instant())
+        tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+            DeviceType.TOUCHPAD,
+            eduClock.instant(),
+        )
+        tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+            DeviceType.KEYBOARD,
+            eduClock.instant(),
+        )
         eduClock.offset(initialDelayElapsedDuration)
     }
 

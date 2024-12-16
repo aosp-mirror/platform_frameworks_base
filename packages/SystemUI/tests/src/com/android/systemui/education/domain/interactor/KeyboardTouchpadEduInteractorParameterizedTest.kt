@@ -357,7 +357,10 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
     fun dataUpdatedOnIncrementSignalCountAfterInitialDelay() =
         testScope.runTest {
             setUpForDeviceConnection()
-            tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
+            tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+                DeviceType.TOUCHPAD,
+                eduClock.instant(),
+            )
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
@@ -372,7 +375,10 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
     fun dataUnchangedOnIncrementSignalCountBeforeInitialDelay() =
         testScope.runTest {
             setUpForDeviceConnection()
-            tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
+            tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+                DeviceType.TOUCHPAD,
+                eduClock.instant(),
+            )
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
@@ -398,8 +404,14 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
         }
 
     private suspend fun setUpForInitialDelayElapse() {
-        tutorialSchedulerRepository.updateLaunchTime(DeviceType.TOUCHPAD, eduClock.instant())
-        tutorialSchedulerRepository.updateLaunchTime(DeviceType.KEYBOARD, eduClock.instant())
+        tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+            DeviceType.TOUCHPAD,
+            eduClock.instant(),
+        )
+        tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+            DeviceType.KEYBOARD,
+            eduClock.instant(),
+        )
         eduClock.offset(initialDelayElapsedDuration)
     }
 

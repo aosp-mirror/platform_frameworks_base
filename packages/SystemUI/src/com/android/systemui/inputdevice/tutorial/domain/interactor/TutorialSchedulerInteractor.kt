@@ -17,8 +17,8 @@
 package com.android.systemui.inputdevice.tutorial.domain.interactor
 
 import android.os.SystemProperties
-import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType
 import com.android.systemui.inputdevice.tutorial.data.repository.DeviceType.KEYBOARD
@@ -35,6 +35,7 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.toKotlinDuration
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -58,6 +60,7 @@ constructor(
     private val repo: TutorialSchedulerRepository,
     private val logger: InputDeviceTutorialLogger,
     commandRegistry: CommandRegistry,
+    @Background private val backgroundScope: CoroutineScope,
 ) {
     init {
         commandRegistry.registerCommand(COMMAND) { TutorialCommand() }
@@ -70,14 +73,14 @@ constructor(
         )
 
     private val touchpadScheduleFlow = flow {
-        if (!repo.isLaunched(TOUCHPAD)) {
+        if (!repo.isNotified(TOUCHPAD)) {
             schedule(TOUCHPAD)
             emit(TOUCHPAD)
         }
     }
 
     private val keyboardScheduleFlow = flow {
-        if (!repo.isLaunched(KEYBOARD)) {
+        if (!repo.isNotified(KEYBOARD)) {
             schedule(KEYBOARD)
             emit(KEYBOARD)
         }
@@ -88,9 +91,9 @@ constructor(
             logger.d("Waiting for $deviceType to connect")
             waitForDeviceConnection(deviceType)
             logger.logDeviceFirstConnection(deviceType)
-            repo.updateFirstConnectionTime(deviceType, Instant.now())
+            repo.setFirstConnectionTime(deviceType, Instant.now())
         }
-        val remainingTime = remainingTime(start = repo.firstConnectionTime(deviceType)!!)
+        val remainingTime = remainingTime(start = repo.getFirstConnectionTime(deviceType)!!)
         logger.d("Tutorial is scheduled in ${remainingTime.inWholeSeconds} seconds")
         delay(remainingTime)
         waitForDeviceConnection(deviceType)
@@ -100,18 +103,17 @@ constructor(
         isAnyDeviceConnected[deviceType]!!.filter { it }.first()
 
     // Only for testing notifications. This should behave independently from scheduling
-    @VisibleForTesting val commandTutorials = MutableStateFlow(TutorialType.NONE)
+    val commandTutorials = MutableStateFlow(TutorialType.NONE)
 
     // Merging two flows ensures that tutorial is launched consecutively to avoid race condition
     val tutorials: Flow<TutorialType> =
         merge(touchpadScheduleFlow, keyboardScheduleFlow).map {
             val tutorialType = resolveTutorialType(it)
 
-            // TODO: notifying time is not oobe launching time - move these updates into oobe
             if (tutorialType == TutorialType.KEYBOARD || tutorialType == TutorialType.BOTH)
-                repo.updateLaunchTime(KEYBOARD, Instant.now())
+                repo.setNotified(KEYBOARD)
             if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
-                repo.updateLaunchTime(TOUCHPAD, Instant.now())
+                repo.setNotified(TOUCHPAD)
 
             logger.logTutorialLaunched(tutorialType)
             tutorialType
@@ -121,16 +123,25 @@ constructor(
         // Resolve the type of tutorial depending on which device are connected when the tutorial is
         // launched. E.g. when the keyboard is connected for [LAUNCH_DELAY], both keyboard and
         // touchpad are connected, we launch the tutorial for both.
-        if (repo.isLaunched(deviceType)) return TutorialType.NONE
+        if (repo.isNotified(deviceType)) return TutorialType.NONE
         val otherDevice = if (deviceType == KEYBOARD) TOUCHPAD else KEYBOARD
         val isOtherDeviceConnected = isAnyDeviceConnected[otherDevice]!!.first()
-        if (!repo.isLaunched(otherDevice) && isOtherDeviceConnected) return TutorialType.BOTH
+        if (!repo.isNotified(otherDevice) && isOtherDeviceConnected) return TutorialType.BOTH
         return if (deviceType == KEYBOARD) TutorialType.KEYBOARD else TutorialType.TOUCHPAD
     }
 
     private fun remainingTime(start: Instant): kotlin.time.Duration {
         val elapsed = Duration.between(start, Instant.now())
         return LAUNCH_DELAY.minus(elapsed).toKotlinDuration()
+    }
+
+    fun updateLaunchInfo(tutorialType: TutorialType) {
+        backgroundScope.launch {
+            if (tutorialType == TutorialType.KEYBOARD || tutorialType == TutorialType.BOTH)
+                repo.setScheduledTutorialLaunchTime(KEYBOARD, Instant.now())
+            if (tutorialType == TutorialType.TOUCHPAD || tutorialType == TutorialType.BOTH)
+                repo.setScheduledTutorialLaunchTime(TOUCHPAD, Instant.now())
+        }
     }
 
     inner class TutorialCommand : Command {
@@ -147,10 +158,20 @@ constructor(
                     }
                 "info" ->
                     runBlocking {
-                        pw.println("Keyboard connect time = ${repo.firstConnectionTime(KEYBOARD)}")
-                        pw.println("         launch time = ${repo.launchTime(KEYBOARD)}")
-                        pw.println("Touchpad connect time = ${repo.firstConnectionTime(TOUCHPAD)}")
-                        pw.println("         launch time = ${repo.launchTime(TOUCHPAD)}")
+                        pw.println(
+                            "Keyboard connect time = ${repo.getFirstConnectionTime(KEYBOARD)}"
+                        )
+                        pw.println("         notified = ${repo.isNotified(KEYBOARD)}")
+                        pw.println(
+                            "         launch time = ${repo.getScheduledTutorialLaunchTime(KEYBOARD)}"
+                        )
+                        pw.println(
+                            "Touchpad connect time = ${repo.getFirstConnectionTime(TOUCHPAD)}"
+                        )
+                        pw.println("         notified = ${repo.isNotified(TOUCHPAD)}")
+                        pw.println(
+                            "         launch time = ${repo.getScheduledTutorialLaunchTime(TOUCHPAD)}"
+                        )
                     }
                 "notify" -> {
                     if (args.size != 2) help(pw)
