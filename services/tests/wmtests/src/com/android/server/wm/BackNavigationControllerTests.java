@@ -447,8 +447,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void backInfoWindowWithNoActivity() {
-        WindowState window = createWindow(null, WindowManager.LayoutParams.TYPE_WALLPAPER,
-                "Wallpaper");
+        WindowState window = newWindowBuilder("Wallpaper",
+                WindowManager.LayoutParams.TYPE_WALLPAPER).build();
         addToWindowMap(window, true);
         makeWindowVisibleAndDrawn(window);
 
@@ -468,8 +468,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void backInfoWithAnimationCallback() {
-        WindowState window = createWindow(null, WindowManager.LayoutParams.TYPE_WALLPAPER,
-                "Wallpaper");
+        WindowState window = newWindowBuilder("Wallpaper",
+                WindowManager.LayoutParams.TYPE_WALLPAPER).build();
         addToWindowMap(window, true);
         makeWindowVisibleAndDrawn(window);
 
@@ -535,8 +535,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 .build();
         testActivity.info.applicationInfo.privateFlagsExt |=
                 PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
-        final WindowState window = createWindow(null, TYPE_BASE_APPLICATION, testActivity,
-                "window");
+        final WindowState window = newWindowBuilder("window", TYPE_BASE_APPLICATION).setWindowToken(
+                testActivity).build();
         addToWindowMap(window, true);
         makeWindowVisibleAndDrawn(window);
         IOnBackInvokedCallback callback = withSystemCallback(testActivity.getTask());
@@ -610,8 +610,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
     @Test
     public void backInfoWindowWithoutDrawn() {
-        WindowState window = createWindow(null, WindowManager.LayoutParams.TYPE_APPLICATION,
-                "TestWindow");
+        WindowState window = newWindowBuilder("TestWindow", TYPE_APPLICATION).build();
         addToWindowMap(window, true);
 
         IOnBackInvokedCallback callback = createOnBackInvokedCallback();
@@ -677,7 +676,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertEquals("change focus back, callback should not have been called",
                 1, navigationObserver.getCount());
 
-        WindowState newWindow = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlayWindow");
+        WindowState newWindow = newWindowBuilder("overlayWindow", TYPE_APPLICATION_OVERLAY).build();
         addToWindowMap(newWindow, true);
         mBackNavigationController.onFocusChanged(newWindow);
         assertEquals("Focus change, callback should have been called",
@@ -902,7 +901,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // enable OnBackInvokedCallbacks
         record.info.applicationInfo.privateFlagsExt |=
                 PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
-        WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, record, "window");
+        WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).setWindowToken(
+                record).build();
         when(record.mSurfaceControl.isValid()).thenReturn(true);
         Mockito.doNothing().when(task).reparentSurfaceControl(any(), any());
         mAtm.setFocusedTask(task.mTaskId, record);
@@ -918,8 +918,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // enable OnBackInvokedCallbacks
         record.info.applicationInfo.privateFlagsExt |=
                 PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
-        WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, record, "window");
-        WindowState dialog = createWindow(null, TYPE_APPLICATION, record, "dialog");
+        WindowState window = newWindowBuilder("window", FIRST_APPLICATION_WINDOW).setWindowToken(
+                record).build();
+        WindowState dialog = newWindowBuilder("dialog", TYPE_APPLICATION).setWindowToken(
+                record).build();
         when(record.mSurfaceControl.isValid()).thenReturn(true);
         Mockito.doNothing().when(task).reparentSurfaceControl(any(), any());
         mAtm.setFocusedTask(task.mTaskId, record);
@@ -944,8 +946,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         // enable OnBackInvokedCallbacks
         record2.info.applicationInfo.privateFlagsExt |=
                 PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK;
-        WindowState window1 = createWindow(null, FIRST_APPLICATION_WINDOW, record1, "window1");
-        WindowState window2 = createWindow(null, FIRST_APPLICATION_WINDOW, record2, "window2");
+        WindowState window1 = newWindowBuilder("window1", FIRST_APPLICATION_WINDOW).setWindowToken(
+                record1).build();
+        WindowState window2 = newWindowBuilder("window2", FIRST_APPLICATION_WINDOW).setWindowToken(
+                record2).build();
         when(task.mSurfaceControl.isValid()).thenReturn(true);
         when(record1.mSurfaceControl.isValid()).thenReturn(true);
         when(record2.mSurfaceControl.isValid()).thenReturn(true);
