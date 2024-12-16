@@ -27,39 +27,34 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.InitController
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
-import com.android.systemui.flags.EnableSceneContainer
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.runTest
 import com.android.systemui.plugins.activityStarter
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.panelExpansionInteractor
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.NotificationRemoteInputManager
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.lockscreenShadeTransitionController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
-import com.android.systemui.statusbar.notification.domain.interactor.notificationAlertsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor
 import com.android.systemui.statusbar.notification.dynamicPrivacyController
 import com.android.systemui.statusbar.notification.headsup.headsUpManager
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionCondition
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionFilter
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.stack.notificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.visualInterruptionDecisionProvider
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.statusbar.notificationRemoteInputManager
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.statusbar.policy.keyguardStateController
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -67,9 +62,7 @@ import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -79,7 +72,9 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class StatusBarNotificationPresenterTest : SysuiTestCase() {
-    private lateinit var kosmos: Kosmos
+    private val kosmos = testKosmos()
+
+    private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
 
     private var interruptSuppressor: NotificationInterruptSuppressor? = null
     private var alertsDisabledCondition: VisualInterruptionCondition? = null
@@ -88,30 +83,20 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
     private var panelsDisabledCondition: VisualInterruptionCondition? = null
 
     private val commandQueue: CommandQueue = CommandQueue(mContext, FakeDisplayTracker(mContext))
-    private val keyguardStateController: KeyguardStateController
-        get() = kosmos.keyguardStateController
-
-    private val notificationAlertsInteractor
-        get() = kosmos.notificationAlertsInteractor
-
-    private val visualInterruptionDecisionProvider
-        get() = kosmos.visualInterruptionDecisionProvider
+    private val shadeController: ShadeController = mock()
+    private val notificationAlertsInteractor: NotificationAlertsInteractor = mock()
+    private val keyguardStateController: KeyguardStateController = mock()
 
     private lateinit var underTest: StatusBarNotificationPresenter
 
     @Before
     fun setup() {
-        kosmos =
-            testKosmos().apply {
-                whenever(notificationAlertsInteractor.areNotificationAlertsEnabled())
-                    .thenReturn(true)
-                whenever(notificationStackScrollLayoutController.expandHelperCallback)
-                    .thenReturn(mock())
-                lockscreenShadeTransitionController.setStackScroller(
-                    notificationStackScrollLayoutController
-                )
-                lockscreenShadeTransitionController.centralSurfaces = mock()
-            }
+        mDependency.injectTestDependency(StatusBarStateController::class.java, mock())
+        mDependency.injectTestDependency(ShadeController::class.java, shadeController)
+        mDependency.injectMockDependency(NotificationRemoteInputManager.Callback::class.java)
+        mDependency.injectMockDependency(NotificationShadeWindowController::class.java)
+
+        whenever(notificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(true)
 
         underTest = createPresenter()
         if (VisualInterruptionRefactor.isEnabled) {
@@ -309,60 +294,14 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
         assertThat(types).contains(VisualInterruptionType.BUBBLE)
     }
 
-    @Test
-    @EnableSceneContainer
-    fun testExpandSensitiveNotification_onLockScreen_opensShade() =
-        kosmos.runTest {
-            // Given we are on the keyguard
-            kosmos.sysuiStatusBarStateController.state = StatusBarState.KEYGUARD
-            // And the device is locked
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-
-            // When the user expands a sensitive Notification
-            val entry =
-                createRow().entry.apply {
-                    setSensitive(/* sensitive= */ true, /* deviceSensitive= */ true)
-                }
-            underTest.onExpandClicked(entry, mock(), /* nowExpanded= */ true)
-
-            // Then we open the locked shade
-            assertThat(kosmos.sysuiStatusBarStateController.state)
-                .isEqualTo(StatusBarState.SHADE_LOCKED)
-        }
-
-    @Test
-    @EnableSceneContainer
-    fun testExpandSensitiveNotification_onLockedShade_showsBouncer() =
-        kosmos.runTest {
-            // Given we are on the locked shade
-            kosmos.sysuiStatusBarStateController.state = StatusBarState.SHADE_LOCKED
-            // And the device is locked
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin
-            )
-
-            // When the user expands a sensitive Notification
-            val entry =
-                createRow().entry.apply {
-                    setSensitive(/* sensitive= */ true, /* deviceSensitive= */ true)
-                }
-            underTest.onExpandClicked(entry, mock(), /* nowExpanded= */ true)
-
-            // Then we show the bouncer
-            verify(kosmos.activityStarter).dismissKeyguardThenExecute(any(), eq(null), eq(false))
-            // AND we are still on the locked shade
-            assertThat(kosmos.sysuiStatusBarStateController.state)
-                .isEqualTo(StatusBarState.SHADE_LOCKED)
-        }
-
     private fun createPresenter(): StatusBarNotificationPresenter {
         val shadeViewController: ShadeViewController = mock()
 
         val notificationShadeWindowView: NotificationShadeWindowView = mock()
         whenever(notificationShadeWindowView.resources).thenReturn(mContext.resources)
-        whenever(kosmos.notificationStackScrollLayoutController.view).thenReturn(mock())
+
+        val stackScrollLayoutController: NotificationStackScrollLayoutController = mock()
+        whenever(stackScrollLayoutController.view).thenReturn(mock())
 
         val initController: InitController = InitController()
 
@@ -374,12 +313,12 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
                 kosmos.headsUpManager,
                 notificationShadeWindowView,
                 kosmos.activityStarter,
-                kosmos.notificationStackScrollLayoutController,
+                stackScrollLayoutController,
                 kosmos.dozeScrimController,
                 kosmos.notificationShadeWindowController,
                 kosmos.dynamicPrivacyController,
-                kosmos.keyguardStateController,
-                kosmos.notificationAlertsInteractor,
+                keyguardStateController,
+                notificationAlertsInteractor,
                 kosmos.lockscreenShadeTransitionController,
                 kosmos.powerInteractor,
                 commandQueue,
@@ -389,11 +328,10 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
                 /* notificationMediaManager = */ mock(),
                 /* notificationGutsManager = */ mock(),
                 initController,
-                kosmos.visualInterruptionDecisionProvider,
+                visualInterruptionDecisionProvider,
                 kosmos.notificationRemoteInputManager,
                 /* remoteInputManagerCallback = */ mock(),
                 /* notificationListContainer = */ mock(),
-                kosmos.deviceUnlockedInteractor,
             )
             .also { initController.executePostInitTasks() }
     }
@@ -424,21 +362,14 @@ class StatusBarNotificationPresenterTest : SysuiTestCase() {
         interruptSuppressor = suppressorCaptor.lastValue
     }
 
-    private fun createRow(): ExpandableNotificationRow {
-        val row: ExpandableNotificationRow = mock()
-        val entry: NotificationEntry = createNotificationEntry()
-        whenever(row.entry).thenReturn(entry)
-        entry.row = row
-        return row
-    }
-
-    private fun createNotificationEntry(): NotificationEntry =
-        NotificationEntryBuilder()
+    private fun createNotificationEntry(): NotificationEntry {
+        return NotificationEntryBuilder()
             .setPkg("a")
             .setOpPkg("a")
             .setTag("a")
             .setNotification(Builder(mContext, "a").build())
             .build()
+    }
 
     private fun createFsiNotificationEntry(): NotificationEntry {
         val notification: Notification =
