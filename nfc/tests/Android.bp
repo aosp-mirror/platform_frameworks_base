@@ -29,7 +29,6 @@ android_test {
         "androidx.test.rules",
         "androidx.test.runner",
         "androidx.test.ext.junit",
-        "framework-nfc.impl",
         "mockito-target-extended-minus-junit4",
         "frameworks-base-testutils",
         "truth",
@@ -40,16 +39,25 @@ android_test {
         "testables",
     ],
     libs: [
+        "androidx.annotation_annotation",
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+        "framework-permission-s.stubs.module_lib",
+        "framework-permission.stubs.module_lib",
         "android.test.base.stubs.system",
         "android.test.mock.stubs.system",
         "android.test.runner.stubs.system",
+        "framework-nfc.impl",
     ],
     jni_libs: [
         // Required for ExtendedMockito
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
     ],
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        ":framework-nfc-updatable-sources",
+        ":framework-nfc-non-updatable-sources",
+    ],
     platform_apis: true,
     certificate: "platform",
     test_suites: [
