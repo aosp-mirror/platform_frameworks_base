@@ -485,6 +485,11 @@ public abstract class ActivityManagerInternal {
      */
     public static final int OOM_ADJ_REASON_FOLLOW_UP = 23;
 
+    /**
+     * Oom Adj Reason: Update after oom adjuster configuration has changed.
+     */
+    public static final int OOM_ADJ_REASON_RECONFIGURATION = 24;
+
     @IntDef(prefix = {"OOM_ADJ_REASON_"}, value = {
         OOM_ADJ_REASON_NONE,
         OOM_ADJ_REASON_ACTIVITY,
@@ -510,6 +515,7 @@ public abstract class ActivityManagerInternal {
         OOM_ADJ_REASON_RESTRICTION_CHANGE,
         OOM_ADJ_REASON_COMPONENT_DISABLED,
         OOM_ADJ_REASON_FOLLOW_UP,
+        OOM_ADJ_REASON_RECONFIGURATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OomAdjReason {}
