@@ -26,7 +26,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.clocks.ClockMessageBuffers;
 import com.android.systemui.res.R;
@@ -70,7 +69,7 @@ public abstract class ClockRegistryModule {
                         context,
                         layoutInflater,
                         resources,
-                        MigrateClocksToBlueprint.isEnabled(),
+
                         com.android.systemui.Flags.clockReactiveVariants()
                 ),
                 context.getString(R.string.lockscreen_clock_id_fallback),

@@ -24,7 +24,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
@@ -50,9 +49,6 @@ constructor(
     }
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         if (emptyView.parent != null) {
             // As emptyView is lazy, it might be already attached.
             (emptyView.parent as? ViewGroup)?.removeView(emptyView)
@@ -68,17 +64,10 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         clockViewModel.burnInLayer = burnInLayer
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         constraintSet.apply {
             // The empty view should not occupy any space
             constrainHeight(R.id.burn_in_layer_empty_view, 1)

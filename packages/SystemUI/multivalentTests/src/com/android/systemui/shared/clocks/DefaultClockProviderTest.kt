@@ -117,7 +117,6 @@ class DefaultClockProviderTest : SysuiTestCase() {
         verify(mockLargeClockView).onTimeZoneChanged(notNull())
         verify(mockSmallClockView).refreshTime()
         verify(mockLargeClockView).refreshTime()
-        verify(mockLargeClockView).setLayoutParams(any())
     }
 
     @Test
@@ -163,7 +162,6 @@ class DefaultClockProviderTest : SysuiTestCase() {
         clock.largeClock.events.onFontSettingChanged(200f)
 
         verify(mockLargeClockView).setTextSize(eq(TypedValue.COMPLEX_UNIT_PX), eq(200f))
-        verify(mockLargeClockView).setLayoutParams(any())
     }
 
     @Test

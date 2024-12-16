@@ -47,7 +47,6 @@ class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
     val resources: Resources,
-    private val migratedClocks: Boolean = false,
     private val isClockReactiveVariantsEnabled: Boolean = false,
 ) : ClockProvider {
     private var messageBuffers: ClockMessageBuffers? = null
@@ -83,14 +82,7 @@ class DefaultClockProvider(
                 FLEX_DESIGN,
             )
         } else {
-            DefaultClockController(
-                ctx,
-                layoutInflater,
-                resources,
-                settings,
-                migratedClocks,
-                messageBuffers,
-            )
+            DefaultClockController(ctx, layoutInflater, resources, settings, messageBuffers)
         }
     }
 

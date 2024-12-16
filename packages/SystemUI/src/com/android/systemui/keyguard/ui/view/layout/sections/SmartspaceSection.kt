@@ -26,7 +26,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -70,7 +69,6 @@ constructor(
     }
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         smartspaceView = smartspaceController.buildAndConnectView(constraintLayout)
         weatherView = smartspaceController.buildAndConnectWeatherView(constraintLayout)
@@ -98,7 +96,6 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         disposableHandle?.dispose()
         disposableHandle =
@@ -111,13 +108,11 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         val dateWeatherPaddingStart = KeyguardSmartspaceViewModel.getDateWeatherStartMargin(context)
         val smartspaceHorizontalPadding =
             KeyguardSmartspaceViewModel.getSmartspaceHorizontalMargin(context)
         constraintSet.apply {
-            // migrate addDateWeatherView, addWeatherView from KeyguardClockSwitchController
             constrainHeight(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
             constrainWidth(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
             connect(
@@ -128,7 +123,6 @@ constructor(
                 dateWeatherPaddingStart,
             )
 
-            // migrate addSmartspaceView from KeyguardClockSwitchController
             constrainHeight(sharedR.id.bc_smartspace_view, ConstraintSet.WRAP_CONTENT)
             constrainWidth(sharedR.id.bc_smartspace_view, ConstraintSet.MATCH_CONSTRAINT)
             connect(
@@ -182,7 +176,6 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         listOf(smartspaceView, dateWeatherView).forEach {
             it?.let {
