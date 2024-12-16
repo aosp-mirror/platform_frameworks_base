@@ -1296,6 +1296,22 @@ public final class Settings {
     public static final String ACTION_LOCKSCREEN_SETTINGS = "android.settings.LOCK_SCREEN_SETTINGS";
 
     /**
+     * Activity Action: Show settings of notifications on lockscreen.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LOCKSCREEN_NOTIFICATIONS_SETTINGS =
+            "android.settings.LOCK_SCREEN_NOTIFICATIONS_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow pairing bluetooth devices.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
