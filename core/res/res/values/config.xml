@@ -7277,4 +7277,7 @@
          features. Examples include the search functionality or the app
          predictor. -->
     <string name="config_systemVendorIntelligence" translatable="false"></string>
+
+    <!-- Whether the device supports Wi-Fi USD feature. -->
+    <bool name="config_deviceSupportsWifiUsd">false</bool>
 </resources>
