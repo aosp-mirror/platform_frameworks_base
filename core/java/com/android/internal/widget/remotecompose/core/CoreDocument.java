@@ -601,14 +601,23 @@ public class CoreDocument {
         for (Operation o : operations) {
             if (o instanceof Container) {
                 Container container = (Container) o;
-                containers.add(container);
-                ops = container.getList();
                 if (container instanceof Component) {
                     Component component = (Component) container;
+                    // Make sure to set the parent when a component is first found, so that
+                    // the inflate when closing the component is in a state where the hierarchy
+                    // is already existing.
+                    if (!containers.isEmpty()) {
+                        Container parentContainer = containers.get(containers.size() - 1);
+                        if (parentContainer instanceof Component) {
+                            component.setParent((Component) parentContainer);
+                        }
+                    }
                     if (component.getComponentId() < mLastId) {
                         mLastId = component.getComponentId();
                     }
                 }
+                containers.add(container);
+                ops = container.getList();
             } else if (o instanceof ContainerEnd) {
                 // check if we have a parent container
                 Container container = null;
@@ -628,9 +637,6 @@ public class CoreDocument {
                 if (container != null) {
                     if (container instanceof Component) {
                         Component component = (Component) container;
-                        if (parentContainer instanceof Component) {
-                            component.setParent((Component) parentContainer);
-                        }
                         component.inflate();
                     }
                     ops.add((Operation) container);
