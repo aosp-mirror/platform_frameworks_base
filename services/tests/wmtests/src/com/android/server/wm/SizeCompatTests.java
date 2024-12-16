@@ -330,7 +330,7 @@ public class SizeCompatTests extends WindowTestsBase {
         if (horizontalReachability) {
             final Consumer<Integer> doubleClick =
                     (Integer x) -> {
-                        mActivity.mAppCompatController.getAppCompatReachabilityPolicy()
+                        mActivity.mAppCompatController.getReachabilityPolicy()
                                 .handleDoubleTap(x, displayHeight / 2);
                         mActivity.mRootWindowContainer.performSurfacePlacement();
                     };
@@ -360,7 +360,7 @@ public class SizeCompatTests extends WindowTestsBase {
         } else {
             final Consumer<Integer> doubleClick =
                     (Integer y) -> {
-                        mActivity.mAppCompatController.getAppCompatReachabilityPolicy()
+                        mActivity.mAppCompatController.getReachabilityPolicy()
                                 .handleDoubleTap(displayWidth / 2, y);
                         mActivity.mRootWindowContainer.performSurfacePlacement();
                     };
@@ -421,7 +421,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         final Consumer<Integer> doubleClick =
                 (Integer y) -> {
-                    activity.mAppCompatController.getAppCompatReachabilityPolicy()
+                    activity.mAppCompatController.getReachabilityPolicy()
                             .handleDoubleTap(dw / 2, y);
                     activity.mRootWindowContainer.performSurfacePlacement();
                 };
@@ -3427,7 +3427,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         setUpAllowThinLetterboxed(/* thinLetterboxAllowed */ false);
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivity.mAppCompatController.getAppCompatReachabilityOverrides();
+                mActivity.mAppCompatController.getReachabilityOverrides();
         assertFalse(reachabilityOverrides.isVerticalReachabilityEnabled());
         assertFalse(reachabilityOverrides.isHorizontalReachabilityEnabled());
     }
@@ -3451,7 +3451,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
 
         // Horizontal reachability is disabled because the app is in split screen.
-        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertFalse(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isHorizontalReachabilityEnabled());
     }
 
@@ -3475,7 +3475,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
 
         // Vertical reachability is disabled because the app is in split screen.
-        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertFalse(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isVerticalReachabilityEnabled());
     }
 
@@ -3498,7 +3498,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Vertical reachability is disabled because the app does not match parent width
         assertNotEquals(mActivity.getScreenResolvedBounds().width(),
                 mActivity.mDisplayContent.getBounds().width());
-        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertFalse(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isVerticalReachabilityEnabled());
     }
 
@@ -3516,7 +3516,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
 
         // Vertical reachability is still enabled as resolved bounds is not empty
-        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertTrue(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isVerticalReachabilityEnabled());
     }
 
@@ -3533,7 +3533,7 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(0, 0, 0, 0), mActivity.getBounds());
 
         // Horizontal reachability is still enabled as resolved bounds is not empty
-        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertTrue(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isHorizontalReachabilityEnabled());
     }
 
@@ -3548,7 +3548,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareMinAspectRatio(mActivity, OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
                 SCREEN_ORIENTATION_PORTRAIT);
 
-        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertTrue(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isHorizontalReachabilityEnabled());
     }
 
@@ -3563,7 +3563,7 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareMinAspectRatio(mActivity, OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
                 SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertTrue(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isVerticalReachabilityEnabled());
     }
 
@@ -3585,7 +3585,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Horizontal reachability is disabled because the app does not match parent height
         assertNotEquals(mActivity.getScreenResolvedBounds().height(),
                 mActivity.mDisplayContent.getBounds().height());
-        assertFalse(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertFalse(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isHorizontalReachabilityEnabled());
     }
 
@@ -3608,7 +3608,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Horizontal reachability is enabled because the app matches parent height
         assertEquals(mActivity.getScreenResolvedBounds().height(),
                 mActivity.mDisplayContent.getBounds().height());
-        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertTrue(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isHorizontalReachabilityEnabled());
     }
 
@@ -3631,7 +3631,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Vertical reachability is enabled because the app matches parent width
         assertEquals(mActivity.getScreenResolvedBounds().width(),
                 mActivity.mDisplayContent.getBounds().width());
-        assertTrue(mActivity.mAppCompatController.getAppCompatReachabilityOverrides()
+        assertTrue(mActivity.mAppCompatController.getReachabilityOverrides()
                 .isVerticalReachabilityEnabled());
     }
 
@@ -4315,7 +4315,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Make sure app doesn't jump to top (default tabletop position) when unfolding.
         assertEquals(1.0f, mActivity.mAppCompatController
-                .getAppCompatReachabilityOverrides().getVerticalPositionMultiplier(mActivity
+                .getReachabilityOverrides().getVerticalPositionMultiplier(mActivity
                         .getParent().getConfiguration()), 0);
 
         // Simulate display fully open after unfolding.
@@ -4323,7 +4323,7 @@ public class SizeCompatTests extends WindowTestsBase {
         doReturn(false).when(mActivity.mDisplayContent).inTransition();
 
         assertEquals(1.0f, mActivity.mAppCompatController
-                .getAppCompatReachabilityOverrides().getVerticalPositionMultiplier(mActivity
+                .getReachabilityOverrides().getVerticalPositionMultiplier(mActivity
                         .getParent().getConfiguration()), 0);
     }
 
@@ -5028,7 +5028,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
     private void setUpAllowThinLetterboxed(boolean thinLetterboxAllowed) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivity.mAppCompatController.getAppCompatReachabilityOverrides();
+                mActivity.mAppCompatController.getReachabilityOverrides();
         spyOn(reachabilityOverrides);
         doReturn(thinLetterboxAllowed).when(reachabilityOverrides)
                 .allowVerticalReachabilityForThinLetterbox();

@@ -205,7 +205,7 @@ class AppCompatLetterboxPolicy {
         }
         pw.println(prefix + "  letterboxReason="
                 + AppCompatUtils.getLetterboxReasonString(mActivityRecord, mainWin));
-        mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy().dump(pw, prefix);
+        mActivityRecord.mAppCompatController.getReachabilityPolicy().dump(pw, prefix);
         final AppCompatLetterboxOverrides letterboxOverride = mActivityRecord.mAppCompatController
                 .getAppCompatLetterboxOverrides();
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
@@ -276,12 +276,12 @@ class AppCompatLetterboxPolicy {
                 final AppCompatLetterboxOverrides letterboxOverrides = mActivityRecord
                         .mAppCompatController.getAppCompatLetterboxOverrides();
                 final AppCompatReachabilityPolicy reachabilityPolicy = mActivityRecord
-                        .mAppCompatController.getAppCompatReachabilityPolicy();
+                        .mAppCompatController.getReachabilityPolicy();
                 mLetterbox = new Letterbox(() -> mActivityRecord.makeChildSurface(null),
                         mActivityRecord.mWmService.mTransactionFactory,
                         reachabilityPolicy, letterboxOverrides,
                         this::getLetterboxParentSurface);
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
+                mActivityRecord.mAppCompatController.getReachabilityPolicy()
                         .setLetterboxInnerBoundsSupplier(mLetterbox::getInnerFrame);
             }
             final Point letterboxPosition = new Point();
@@ -291,7 +291,7 @@ class AppCompatLetterboxPolicy {
             final Rect innerFrame = new Rect();
             calculateLetterboxInnerBounds(mActivityRecord, w, innerFrame);
             mLetterbox.layout(spaceToFill, innerFrame, letterboxPosition);
-            if (mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides()
+            if (mActivityRecord.mAppCompatController.getReachabilityOverrides()
                     .isDoubleTapEvent()) {
                 // We need to notify Shell that letterbox position has changed.
                 mActivityRecord.getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
@@ -321,7 +321,7 @@ class AppCompatLetterboxPolicy {
                 mLetterbox.destroy();
                 mLetterbox = null;
             }
-            mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
+            mActivityRecord.mAppCompatController.getReachabilityPolicy()
                     .setLetterboxInnerBoundsSupplier(null);
         }
 
@@ -415,7 +415,7 @@ class AppCompatLetterboxPolicy {
             calculateLetterboxPosition(mActivityRecord, mLetterboxPosition);
             calculateLetterboxOuterBounds(mActivityRecord, mOuterBounds);
             calculateLetterboxInnerBounds(mActivityRecord, w, mInnerBounds);
-            mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
+            mActivityRecord.mAppCompatController.getReachabilityPolicy()
                     .setLetterboxInnerBoundsSupplier(() -> mInnerBounds);
         }
 
@@ -438,7 +438,7 @@ class AppCompatLetterboxPolicy {
             mLetterboxPosition.set(0, 0);
             mInnerBounds.setEmpty();
             mOuterBounds.setEmpty();
-            mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
+            mActivityRecord.mAppCompatController.getReachabilityPolicy()
                     .setLetterboxInnerBoundsSupplier(null);
         }
 

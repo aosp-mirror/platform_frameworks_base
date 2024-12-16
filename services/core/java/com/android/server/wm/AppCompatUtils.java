@@ -138,7 +138,7 @@ final class AppCompatUtils {
             return;
         }
         final AppCompatReachabilityOverrides reachabilityOverrides = top.mAppCompatController
-                .getAppCompatReachabilityOverrides();
+                .getReachabilityOverrides();
         final boolean isTopActivityResumed = top.getOrganizedTask() == task && top.isState(RESUMED);
         final boolean isTopActivityVisible = top.getOrganizedTask() == task && top.isVisible();
         // Whether the direct top activity is in size compat mode.

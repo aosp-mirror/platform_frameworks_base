@@ -37,7 +37,7 @@ public class AppCompatOverrides {
     @NonNull
     private final AppCompatResizeOverrides mResizeOverrides;
     @NonNull
-    private final AppCompatReachabilityOverrides mAppCompatReachabilityOverrides;
+    private final AppCompatReachabilityOverrides mReachabilityOverrides;
     @NonNull
     private final AppCompatLetterboxOverrides mAppCompatLetterboxOverrides;
 
@@ -50,11 +50,11 @@ public class AppCompatOverrides {
                 appCompatConfiguration, optPropBuilder);
         mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
-        mAppCompatReachabilityOverrides = new AppCompatReachabilityOverrides(activityRecord,
+        mReachabilityOverrides = new AppCompatReachabilityOverrides(activityRecord,
                 appCompatConfiguration, appCompatDeviceStateQuery);
         mAppCompatAspectRatioOverrides = new AppCompatAspectRatioOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder, appCompatDeviceStateQuery,
-                mAppCompatReachabilityOverrides);
+                mReachabilityOverrides);
         mAppCompatFocusOverrides = new AppCompatFocusOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder);
         mResizeOverrides = new AppCompatResizeOverrides(activityRecord, packageManager,
@@ -89,8 +89,8 @@ public class AppCompatOverrides {
     }
 
     @NonNull
-    AppCompatReachabilityOverrides getAppCompatReachabilityOverrides() {
-        return mAppCompatReachabilityOverrides;
+    AppCompatReachabilityOverrides getReachabilityOverrides() {
+        return mReachabilityOverrides;
     }
 
     @NonNull

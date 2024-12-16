@@ -33,7 +33,7 @@ class AppCompatController {
     @NonNull
     private final AppCompatAspectRatioPolicy mAppCompatAspectRatioPolicy;
     @NonNull
-    private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
+    private final AppCompatReachabilityPolicy mReachabilityPolicy;
     @NonNull
     private final DesktopAppCompatAspectRatioPolicy mDesktopAppCompatAspectRatioPolicy;
     @NonNull
@@ -58,7 +58,7 @@ class AppCompatController {
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
         mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
                 mTransparentPolicy, mAppCompatOverrides);
-        mAppCompatReachabilityPolicy = new AppCompatReachabilityPolicy(activityRecord,
+        mReachabilityPolicy = new AppCompatReachabilityPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
         mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
@@ -109,8 +109,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatReachabilityPolicy getAppCompatReachabilityPolicy() {
-        return mAppCompatReachabilityPolicy;
+    AppCompatReachabilityPolicy getReachabilityPolicy() {
+        return mReachabilityPolicy;
     }
 
     @NonNull
@@ -124,8 +124,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatReachabilityOverrides getAppCompatReachabilityOverrides() {
-        return mAppCompatOverrides.getAppCompatReachabilityOverrides();
+    AppCompatReachabilityOverrides getReachabilityOverrides() {
+        return mAppCompatOverrides.getReachabilityOverrides();
     }
 
     @NonNull

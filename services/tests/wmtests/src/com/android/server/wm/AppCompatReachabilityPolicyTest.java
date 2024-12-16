@@ -246,8 +246,8 @@ public class AppCompatReachabilityPolicyTest extends WindowTestsBase {
         @Override
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
-            spyOn(activity.mAppCompatController.getAppCompatReachabilityOverrides());
-            activity.mAppCompatController.getAppCompatReachabilityPolicy()
+            spyOn(activity.mAppCompatController.getReachabilityOverrides());
+            activity.mAppCompatController.getReachabilityPolicy()
                     .setLetterboxInnerBoundsSupplier(mLetterboxInnerBoundsSupplier);
         }
 
@@ -281,12 +281,12 @@ public class AppCompatReachabilityPolicyTest extends WindowTestsBase {
 
         @NonNull
         private AppCompatReachabilityOverrides getAppCompatReachabilityOverrides() {
-            return activity().top().mAppCompatController.getAppCompatReachabilityOverrides();
+            return activity().top().mAppCompatController.getReachabilityOverrides();
         }
 
         @NonNull
         private AppCompatReachabilityPolicy getAppCompatReachabilityPolicy() {
-            return activity().top().mAppCompatController.getAppCompatReachabilityPolicy();
+            return activity().top().mAppCompatController.getReachabilityPolicy();
         }
 
     }

@@ -77,7 +77,7 @@ class AppCompatReachabilityPolicy {
 
     void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
+                mActivityRecord.mAppCompatController.getReachabilityOverrides();
         pw.println(prefix + "  isVerticalThinLetterboxed=" + reachabilityOverrides
                 .isVerticalThinLetterboxed());
         pw.println(prefix + "  isHorizontalThinLetterboxed=" + reachabilityOverrides
@@ -96,7 +96,7 @@ class AppCompatReachabilityPolicy {
 
     private void handleHorizontalDoubleTap(int x) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
+                mActivityRecord.mAppCompatController.getReachabilityOverrides();
         if (!reachabilityOverrides.isHorizontalReachabilityEnabled()
                 || mActivityRecord.isInTransition()) {
             return;
@@ -142,7 +142,7 @@ class AppCompatReachabilityPolicy {
 
     private void handleVerticalDoubleTap(int y) {
         final AppCompatReachabilityOverrides reachabilityOverrides =
-                mActivityRecord.mAppCompatController.getAppCompatReachabilityOverrides();
+                mActivityRecord.mAppCompatController.getReachabilityOverrides();
         if (!reachabilityOverrides.isVerticalReachabilityEnabled()
                 || mActivityRecord.isInTransition()) {
             return;
