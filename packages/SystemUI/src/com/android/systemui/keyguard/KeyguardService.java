@@ -538,27 +538,30 @@ public class KeyguardService extends Service {
 
         @Override // Binder interface
         public void onFinishedGoingToSleep(
-                @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
+                @PowerManager.GoToSleepReason int pmSleepReason, boolean
+                powerButtonLaunchGestureTriggered) {
             trace("onFinishedGoingToSleep pmSleepReason=" + pmSleepReason
-                    + " cameraGestureTriggered=" + cameraGestureTriggered);
+                    + " powerButtonLaunchTriggered=" + powerButtonLaunchGestureTriggered);
             checkPermission();
             mKeyguardViewMediator.onFinishedGoingToSleep(
                     WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason),
-                    cameraGestureTriggered);
-            mPowerInteractor.onFinishedGoingToSleep(cameraGestureTriggered);
+                    powerButtonLaunchGestureTriggered);
+            mPowerInteractor.onFinishedGoingToSleep(powerButtonLaunchGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.FINISHED_GOING_TO_SLEEP);
         }
 
         @Override // Binder interface
         public void onStartedWakingUp(
-                @PowerManager.WakeReason int pmWakeReason, boolean cameraGestureTriggered) {
+                @PowerManager.WakeReason int pmWakeReason,
+                boolean powerButtonLaunchGestureTriggered) {
             trace("onStartedWakingUp pmWakeReason=" + pmWakeReason
-                    + " cameraGestureTriggered=" + cameraGestureTriggered);
+                    + " powerButtonLaunchGestureTriggered=" + powerButtonLaunchGestureTriggered);
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
-            mKeyguardViewMediator.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
-            mPowerInteractor.onStartedWakingUp(pmWakeReason, cameraGestureTriggered);
+            mKeyguardViewMediator.onStartedWakingUp(pmWakeReason,
+                    powerButtonLaunchGestureTriggered);
+            mPowerInteractor.onStartedWakingUp(pmWakeReason, powerButtonLaunchGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.STARTED_WAKING_UP, pmWakeReason);
             Trace.endSection();

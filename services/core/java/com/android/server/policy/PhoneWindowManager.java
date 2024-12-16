@@ -562,8 +562,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mPowerKeyHandled;
     volatile boolean mBackKeyHandled;
     volatile boolean mEndCallKeyHandled;
-    volatile boolean mCameraGestureTriggered;
-    volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
+    volatile boolean mPowerButtonLaunchGestureTriggered;
+    volatile boolean mPowerButtonLaunchGestureTriggeredDuringGoingToSleep;
 
     /**
      * {@code true} if the device is entering a low-power state; {@code false otherwise}.
@@ -5893,7 +5893,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mGestureLauncherService == null) {
             return false;
         }
-        mCameraGestureTriggered = false;
+        mPowerButtonLaunchGestureTriggered = false;
         final MutableBoolean outLaunched = new MutableBoolean(false);
         final boolean intercept =
                 mGestureLauncherService.interceptPowerKeyDown(event, interactive, outLaunched);
@@ -5903,9 +5903,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // detector from processing the power key later on.
             return intercept;
         }
-        mCameraGestureTriggered = true;
+        mPowerButtonLaunchGestureTriggered = true;
         if (mRequestedOrSleepingDefaultDisplay) {
-            mCameraGestureTriggeredDuringGoingToSleep = true;
+            mPowerButtonLaunchGestureTriggeredDuringGoingToSleep = true;
             // Wake device up early to prevent display doing redundant turning off/on stuff.
             mWindowWakeUpPolicy.wakeUpFromPowerKeyCameraGesture();
         }
@@ -6282,13 +6282,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason,
-                    mCameraGestureTriggeredDuringGoingToSleep);
+                    mPowerButtonLaunchGestureTriggeredDuringGoingToSleep);
         }
         if (mDisplayFoldController != null) {
             mDisplayFoldController.finishedGoingToSleep();
         }
-        mCameraGestureTriggeredDuringGoingToSleep = false;
-        mCameraGestureTriggered = false;
+        mPowerButtonLaunchGestureTriggeredDuringGoingToSleep = false;
+        mPowerButtonLaunchGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
@@ -6319,10 +6319,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedWakingUp(pmWakeReason, mCameraGestureTriggered);
+            mKeyguardDelegate.onStartedWakingUp(pmWakeReason, mPowerButtonLaunchGestureTriggered);
         }
 
-        mCameraGestureTriggered = false;
+        mPowerButtonLaunchGestureTriggered = false;
     }
 
     // Called on the PowerManager's Notifier thread.
