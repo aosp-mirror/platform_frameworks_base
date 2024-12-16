@@ -145,7 +145,8 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
         super.closeSession_enforcePermission();
         if (!mIsRegistered.get()) throw new IllegalStateException("Endpoint is not registered");
         try {
-            mContextHubProxy.closeEndpointSession(sessionId, (byte) reason);
+            mContextHubProxy.closeEndpointSession(
+                    sessionId, ContextHubServiceUtil.toHalReason(reason));
         } catch (RemoteException | IllegalArgumentException | UnsupportedOperationException e) {
             Log.e(TAG, "Exception while calling HAL closeEndpointSession", e);
             throw e;
