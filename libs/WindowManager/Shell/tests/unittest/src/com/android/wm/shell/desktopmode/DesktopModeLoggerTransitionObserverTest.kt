@@ -509,6 +509,20 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     }
 
     @Test
+    fun transitExitBackGesture_logTaskRemovedAndExitReasonTaskMovedToBack() {
+        // add a freeform task
+        transitionObserver.addTaskInfosToCachedMap(createTaskInfo(WINDOWING_MODE_FREEFORM))
+        transitionObserver.isSessionActive = true
+
+        // task moved to back
+        val change = createChange(TRANSIT_TO_BACK, createTaskInfo(WINDOWING_MODE_FREEFORM))
+        val transitionInfo = TransitionInfoBuilder(TRANSIT_TO_BACK).addChange(change).build()
+        callOnTransitionReady(transitionInfo)
+
+        verifyTaskRemovedAndExitLogging(ExitReason.TASK_MOVED_TO_BACK, DEFAULT_TASK_UPDATE)
+    }
+
+    @Test
     fun transitExitDesktopUnknown_logTaskRemovedAndExitReasonUnknown() {
         // add a freeform task
         transitionObserver.addTaskInfosToCachedMap(createTaskInfo(WINDOWING_MODE_FREEFORM))

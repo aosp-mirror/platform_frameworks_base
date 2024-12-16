@@ -404,12 +404,17 @@ class DesktopModeLoggerTransitionObserver(
                 wasPreviousTransitionExitByScreenOff = true
                 ExitReason.SCREEN_OFF
             }
+            // TODO(b/384490301): differentiate back gesture / button exit from clicking the close
+            // button located in the window top corner.
+            transitionInfo.type == WindowManager.TRANSIT_TO_BACK -> ExitReason.TASK_MOVED_TO_BACK
             transitionInfo.type == WindowManager.TRANSIT_CLOSE -> ExitReason.TASK_FINISHED
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_TASK_DRAG -> ExitReason.DRAG_TO_EXIT
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_HANDLE_MENU_BUTTON ->
                 ExitReason.APP_HANDLE_MENU_BUTTON_EXIT
+
             transitionInfo.type == TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT ->
                 ExitReason.KEYBOARD_SHORTCUT_EXIT
+
             transitionInfo.isExitToRecentsTransition() -> ExitReason.RETURN_HOME_OR_OVERVIEW
             transitionInfo.type == Transitions.TRANSIT_MINIMIZE -> ExitReason.TASK_MINIMIZED
             else -> {
