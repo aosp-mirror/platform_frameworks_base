@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.chips.ui.view
 
+import android.view.View
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -41,26 +42,80 @@ class ChipTextTruncationHelperTest : SysuiTestCase() {
 
     @Test
     fun shouldShowText_desiredLessThanMax_true() {
-        val result = underTest.shouldShowText(desiredTextWidthPx = MAX_WIDTH / 2)
+        val result =
+            underTest.shouldShowText(
+                desiredTextWidthPx = MAX_WIDTH / 2,
+                widthMeasureSpec = UNLIMITED_WIDTH_SPEC,
+            )
 
         assertThat(result).isTrue()
     }
 
     @Test
     fun shouldShowText_desiredSlightlyLargerThanMax_true() {
-        val result = underTest.shouldShowText(desiredTextWidthPx = (MAX_WIDTH * 1.1).toInt())
+        val result =
+            underTest.shouldShowText(
+                desiredTextWidthPx = (MAX_WIDTH * 1.1).toInt(),
+                widthMeasureSpec = UNLIMITED_WIDTH_SPEC,
+            )
 
         assertThat(result).isTrue()
     }
 
     @Test
     fun shouldShowText_desiredMoreThanTwiceMax_false() {
-        val result = underTest.shouldShowText(desiredTextWidthPx = (MAX_WIDTH * 2.2).toInt())
+        val result =
+            underTest.shouldShowText(
+                desiredTextWidthPx = (MAX_WIDTH * 2.2).toInt(),
+                widthMeasureSpec = UNLIMITED_WIDTH_SPEC,
+            )
 
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun shouldShowText_widthSpecLessThanMax_usesWidthSpec() {
+        val smallerWidthSpec =
+            SysuiMeasureSpec(
+                View.MeasureSpec.makeMeasureSpec(MAX_WIDTH / 2, View.MeasureSpec.AT_MOST)
+            )
+
+        // WHEN desired is more than twice the smallerWidthSpec
+        val desiredWidth = (MAX_WIDTH * 1.1).toInt()
+
+        val result =
+            underTest.shouldShowText(
+                desiredTextWidthPx = desiredWidth,
+                widthMeasureSpec = smallerWidthSpec,
+            )
+
+        // THEN returns false because smallerWidthSpec is used as the requirement
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun shouldShowText_maxLessThanWidthSpec_usesMax() {
+        val largerWidthSpec =
+            SysuiMeasureSpec(
+                View.MeasureSpec.makeMeasureSpec(MAX_WIDTH * 3, View.MeasureSpec.AT_MOST)
+            )
+
+        // WHEN desired is more than twice the max
+        val desiredWidth = (MAX_WIDTH * 2.2).toInt()
+
+        val result =
+            underTest.shouldShowText(
+                desiredTextWidthPx = desiredWidth,
+                widthMeasureSpec = largerWidthSpec,
+            )
+
+        // THEN returns false because the max is used as the requirement
         assertThat(result).isFalse()
     }
 
     companion object {
         private const val MAX_WIDTH = 200
+        private val UNLIMITED_WIDTH_SPEC =
+            SysuiMeasureSpec(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
     }
 }
