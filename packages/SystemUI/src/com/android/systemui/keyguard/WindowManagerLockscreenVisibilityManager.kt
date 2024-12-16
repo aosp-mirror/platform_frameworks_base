@@ -131,8 +131,18 @@ constructor(
             Log.d(TAG, "ActivityTaskManagerService#keyguardGoingAway()")
             activityTaskManagerService.keyguardGoingAway(0)
             isKeyguardGoingAway = true
-        } else {
-            // Hide the surface by setting the lockscreen showing.
+        } else if (isLockscreenShowing == true) {
+            // Re-show the lockscreen if the surface was visible and we want to make it invisible,
+            // and the lockscreen is currently showing (this is the usual case of the going away
+            // animation). Re-showing the lockscreen will cancel the going away animation. If we
+            // want to hide the surface, but the lockscreen is not currently showing, do nothing and
+            // wait for lockscreenVisibility to emit if it's appropriate to show the lockscreen (it
+            // might be disabled/suppressed).
+            Log.d(
+                TAG,
+                "setLockscreenShown(true) because we're setting the surface invisible " +
+                    "and lockscreen is already showing.",
+            )
             setLockscreenShown(true)
         }
     }
@@ -153,6 +163,10 @@ constructor(
         nonApps: Array<RemoteAnimationTarget>,
         finishedCallback: IRemoteAnimationFinishedCallback,
     ) {
+        // Make sure this is true - we set it true when requesting keyguardGoingAway, but there are
+        // cases where WM starts this transition on its own.
+        isKeyguardGoingAway = true
+
         // Ensure that we've started a dismiss keyguard transition. WindowManager can start the
         // going away animation on its own, if an activity launches and then requests dismissing the
         // keyguard. In this case, this is the first and only signal we'll receive to start

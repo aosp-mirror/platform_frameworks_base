@@ -106,7 +106,7 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
             repository.setKeyguardEnabled(true)
             runCurrent()
 
-            assertEquals(listOf(false, true, false), canWake)
+            assertEquals(listOf(false, true), canWake)
         }
 
     @Test
@@ -374,6 +374,8 @@ class KeyguardWakeDirectlyToGoneInteractorTest : SysuiTestCase() {
                     // Should be canceled by the wakeup, but there would still be an
                     // alarm in flight that should be canceled.
                     false,
+                    // True once we're actually GONE.
+                    true,
                 ),
                 canWake,
             )

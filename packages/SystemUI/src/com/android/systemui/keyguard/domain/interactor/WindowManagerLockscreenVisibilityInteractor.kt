@@ -34,7 +34,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.Lazy
@@ -240,10 +240,11 @@ constructor(
         combine(
                 transitionInteractor.currentKeyguardState,
                 wakeToGoneInteractor.canWakeDirectlyToGone,
-                ::Pair,
+                surfaceBehindVisibility,
+                ::Triple,
             )
-            .sample(transitionInteractor.startedStepWithPrecedingStep, ::toTriple)
-            .map { (currentState, canWakeDirectlyToGone, startedWithPrev) ->
+            .sample(transitionInteractor.startedStepWithPrecedingStep, ::toQuad)
+            .map { (currentState, canWakeDirectlyToGone, surfaceBehindVis, startedWithPrev) ->
                 val startedFromStep = startedWithPrev.previousValue
                 val startedStep = startedWithPrev.newValue
                 val returningToGoneAfterCancellation =
@@ -296,6 +297,11 @@ constructor(
                     // we should simply tell WM that the lockscreen is no longer visible, and
                     // *not* play the going away animation or related animations.
                     false
+                } else if (!surfaceBehindVis) {
+                    // If the surface behind is not visible, then the lockscreen has to be visible
+                    // since there's nothing to show. The surface behind will never be invisible if
+                    // the lockscreen is disabled or suppressed.
+                    true
                 } else {
                     currentState != KeyguardState.GONE
                 }
