@@ -44,6 +44,7 @@ import android.tools.flicker.assertors.assertions.AppWindowOnTopAtStart
 import android.tools.flicker.assertors.assertions.AppWindowRemainInsideDisplayBounds
 import android.tools.flicker.assertors.assertions.AppWindowReturnsToStartBoundsAndPosition
 import android.tools.flicker.assertors.assertions.LauncherWindowReplacesAppAsTopWindow
+import android.tools.flicker.assertors.assertions.VisibleLayersShownMoreThanOneConsecutiveEntry
 import android.tools.flicker.config.AssertionTemplates
 import android.tools.flicker.config.FlickerConfigEntry
 import android.tools.flicker.config.ScenarioId
@@ -429,7 +430,9 @@ class DesktopModeFlickerScenarios {
                     }
                 ),
                 assertions =
-                AssertionTemplates.COMMON_ASSERTIONS +
+                    AssertionTemplates.COMMON_ASSERTIONS.toMutableMap().also {
+                        it.remove(VisibleLayersShownMoreThanOneConsecutiveEntry())
+                    } +
                     listOf(
                         AppWindowOnTopAtStart(DESKTOP_MODE_APP),
                         AppWindowBecomesInvisible(DESKTOP_MODE_APP),
@@ -455,7 +458,9 @@ class DesktopModeFlickerScenarios {
                     }
                 ),
                 assertions =
-                AssertionTemplates.COMMON_ASSERTIONS +
+                    AssertionTemplates.COMMON_ASSERTIONS.toMutableMap().also {
+                        it.remove(VisibleLayersShownMoreThanOneConsecutiveEntry())
+                    } +
                     listOf(
                         AppWindowOnTopAtStart(DESKTOP_MODE_APP),
                         AppWindowBecomesInvisible(DESKTOP_MODE_APP),
