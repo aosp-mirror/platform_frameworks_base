@@ -19,6 +19,7 @@ package com.android.systemui.communal
 import android.app.StatsManager
 import android.app.StatsManager.StatsPullAtomCallback
 import android.content.pm.UserInfo
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.util.StatsEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -32,6 +33,7 @@ import com.android.systemui.communal.shared.log.CommunalMetricsLogger
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.fakeUserTracker
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -75,10 +77,7 @@ class CommunalMetricsStartableTest : SysuiTestCase() {
         // Set up an existing user, which is required for widgets to show
         val userInfos = listOf(UserInfo(0, "main", UserInfo.FLAG_MAIN))
         userRepository.setUserInfos(userInfos)
-        userTracker.set(
-            userInfos = userInfos,
-            selectedUserIndex = 0,
-        )
+        userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
 
         underTest =
             CommunalMetricsStartable(
@@ -90,14 +89,16 @@ class CommunalMetricsStartableTest : SysuiTestCase() {
             )
     }
 
+    @DisableFlags(Flags.FLAG_GLANCEABLE_HUB_V2)
     @Test
-    fun start_communalFlagDisabled_doNotSetPullAtomCallback() {
-        kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
+    fun start_communalFlagDisabled_doNotSetPullAtomCallback() =
+        kosmos.runTest {
+            fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, false)
 
-        underTest.start()
+            underTest.start()
 
-        verify(statsManager, never()).setPullAtomCallback(anyInt(), anyOrNull(), any(), any())
-    }
+            verify(statsManager, never()).setPullAtomCallback(anyInt(), anyOrNull(), any(), any())
+        }
 
     @Test
     fun onPullAtom_atomTagDoesNotMatch_pullSkip() {
