@@ -158,6 +158,7 @@ public class SettingsToPropertiesMapper {
         "aoc",
         "app_widgets",
         "arc_next",
+        "art_cloud",
         "art_mainline",
         "art_performance",
         "attack_tools",
