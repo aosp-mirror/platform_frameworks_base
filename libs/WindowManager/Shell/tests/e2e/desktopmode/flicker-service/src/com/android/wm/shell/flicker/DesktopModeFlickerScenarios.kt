@@ -262,6 +262,40 @@ class DesktopModeFlickerScenarios {
                 ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
 
+        val SNAP_RESIZE_LEFT_WITH_KEYBOARD =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_LEFT_WITH_KEYBOARD"),
+                extractor =
+                    TaggedScenarioExtractorBuilder()
+                        .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                        .setTransitionMatcher(
+                            TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                        )
+                        .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversLeftHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val SNAP_RESIZE_RIGHT_WITH_KEYBOARD =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("SNAP_RESIZE_RIGHT_WITH_KEYBOARD"),
+                extractor =
+                    TaggedScenarioExtractorBuilder()
+                        .setTargetTag(CujType.CUJ_DESKTOP_MODE_SNAP_RESIZE)
+                        .setTransitionMatcher(
+                            TaggedCujTransitionMatcher(associatedTransitionRequired = false)
+                        )
+                        .build(),
+                assertions = AssertionTemplates.DESKTOP_MODE_APP_VISIBILITY_ASSERTIONS + listOf(
+                    AppWindowCoversRightHalfScreenAtEnd(
+                        DESKTOP_MODE_APP, SNAP_WINDOW_MAX_DIFF_THRESHOLD_RATIO
+                    )
+                ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
         val SNAP_RESIZE_LEFT_WITH_DRAG =
             FlickerConfigEntry(
                 scenarioId = ScenarioId("SNAP_RESIZE_LEFT_WITH_DRAG"),
