@@ -345,7 +345,7 @@ aconfig_declarations {
     name: "android.nfc.flags-aconfig",
     package: "android.nfc",
     container: "system",
-    srcs: ["nfc/java/android/nfc/*.aconfig"],
+    srcs: ["nfc-non-updatable/flags/*.aconfig"],
 }
 
 cc_aconfig_library {
