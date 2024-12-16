@@ -3169,7 +3169,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         doThrow(new SecurityException("no access")).when(mUgmInternal)
                 .checkGrantUriPermission(eq(UID_N_MR1), any(), eq(sound),
-                    anyInt(), eq(Process.myUserHandle().getIdentifier()));
+                    anyInt(), eq(UserHandle.getUserId(UID_N_MR1)));
 
         final NotificationChannel channel = new NotificationChannel("id2", "name2",
                 NotificationManager.IMPORTANCE_DEFAULT);
@@ -3189,7 +3189,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         doThrow(new SecurityException("no access")).when(mUgmInternal)
                 .checkGrantUriPermission(eq(UID_N_MR1), any(), any(),
-                    anyInt(), eq(Process.myUserHandle().getIdentifier()));
+                    anyInt(), eq(UserHandle.getUserId(UID_N_MR1)));
 
         final NotificationChannel channel = new NotificationChannel("id2", "name2",
                 NotificationManager.IMPORTANCE_DEFAULT);
@@ -3208,7 +3208,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         doThrow(new SecurityException("no access")).when(mUgmInternal)
                 .checkGrantUriPermission(eq(UID_N_MR1), any(), any(),
-                    anyInt(), eq(Process.myUserHandle().getIdentifier()));
+                    anyInt(), eq(UserHandle.getUserId(UID_N_MR1)));
 
         final NotificationChannel channel = new NotificationChannel("id2", "name2",
                 NotificationManager.IMPORTANCE_DEFAULT);
