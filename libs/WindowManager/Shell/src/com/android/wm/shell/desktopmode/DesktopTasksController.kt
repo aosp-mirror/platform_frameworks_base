@@ -863,7 +863,11 @@ class DesktopTasksController(
         }
 
         val wct = WindowContainerTransaction()
-        if (!task.isFreeform) addMoveToDesktopChanges(wct, task, displayId)
+        if (!task.isFreeform) {
+            addMoveToDesktopChanges(wct, task, displayId)
+        } else if (Flags.enableMoveToNextDisplayShortcut()) {
+            applyFreeformDisplayChange(wct, task, displayId)
+        }
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
 
         if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
@@ -1907,6 +1911,50 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, DESKTOP_DENSITY_OVERRIDE)
         }
+    }
+
+    /**
+     * Apply changes to move a freeform task from one display to another, which includes handling
+     * density changes between displays.
+     */
+    private fun applyFreeformDisplayChange(
+        wct: WindowContainerTransaction,
+        taskInfo: RunningTaskInfo,
+        destDisplayId: Int,
+    ) {
+        val sourceLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+        val destLayout = displayController.getDisplayLayout(destDisplayId) ?: return
+        val bounds = taskInfo.configuration.windowConfiguration.bounds
+        val scaledWidth = bounds.width() * destLayout.densityDpi() / sourceLayout.densityDpi()
+        val scaledHeight = bounds.height() * destLayout.densityDpi() / sourceLayout.densityDpi()
+        val sourceWidthMargin = sourceLayout.width() - bounds.width()
+        val sourceHeightMargin = sourceLayout.height() - bounds.height()
+        val destWidthMargin = destLayout.width() - scaledWidth
+        val destHeightMargin = destLayout.height() - scaledHeight
+        val scaledLeft =
+            if (sourceWidthMargin != 0) {
+                bounds.left * destWidthMargin / sourceWidthMargin
+            } else {
+                destWidthMargin / 2
+            }
+        val scaledTop =
+            if (sourceHeightMargin != 0) {
+                bounds.top * destHeightMargin / sourceHeightMargin
+            } else {
+                destHeightMargin / 2
+            }
+        val boundsWithinDisplay =
+            if (destWidthMargin >= 0 && destHeightMargin >= 0) {
+                Rect(0, 0, scaledWidth, scaledHeight).apply {
+                    offsetTo(
+                        scaledLeft.coerceIn(0, destWidthMargin),
+                        scaledTop.coerceIn(0, destHeightMargin),
+                    )
+                }
+            } else {
+                getInitialBounds(destLayout, taskInfo, destDisplayId)
+            }
+        wct.setBounds(taskInfo.token, boundsWithinDisplay)
     }
 
     private fun getInitialBounds(
