@@ -58,14 +58,14 @@
         />
 
         <!-- Shows generic text. -->
-        <TextView
+        <com.android.systemui.statusbar.chips.ui.view.ChipTextView
             android:id="@+id/ongoing_activity_chip_text"
             style="@style/StatusBar.Chip.Text.LimitedWidth"
             android:visibility="gone"
             />
 
         <!-- Shows a time delta in short form, like "15min" or "1hr". -->
-        <android.widget.DateTimeView
+        <com.android.systemui.statusbar.chips.ui.view.ChipDateTimeView
             android:id="@+id/ongoing_activity_chip_short_time_delta"
             style="@style/StatusBar.Chip.Text.LimitedWidth"
             android:visibility="gone"
