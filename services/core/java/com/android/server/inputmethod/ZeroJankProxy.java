@@ -302,6 +302,12 @@ final class ZeroJankProxy implements IInputMethodManagerImpl.Callback {
         mInner.onImeSwitchButtonClickFromSystem(displayId);
     }
 
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
+    @Override
+    public boolean shouldShowImeSwitcherButtonForTest() {
+        return mInner.shouldShowImeSwitcherButtonForTest();
+    }
+
     @Override
     public InputMethodSubtype getCurrentInputMethodSubtype(int userId) {
         return mInner.getCurrentInputMethodSubtype(userId);

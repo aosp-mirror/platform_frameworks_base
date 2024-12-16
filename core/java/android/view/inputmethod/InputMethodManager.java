@@ -4537,6 +4537,19 @@ public final class InputMethodManager {
     }
 
     /**
+     * A test API for CTS to check whether the IME Switcher button should be shown when the IME
+     * is shown.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    public boolean shouldShowImeSwitcherButtonForTest() {
+        return IInputMethodManagerGlobalInvoker.shouldShowImeSwitcherButtonForTest();
+    }
+
+    /**
      * A test API for CTS to check whether there are any pending IME visibility requests.
      *
      * @return {@code true} iff there are pending IME visibility requests.
