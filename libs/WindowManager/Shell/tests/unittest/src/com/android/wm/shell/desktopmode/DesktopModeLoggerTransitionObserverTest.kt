@@ -46,6 +46,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
@@ -566,7 +567,10 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
         assertFalse(transitionObserver.isSessionActive)
         verify(desktopModeEventLogger, times(1)).logSessionExit(eq(ExitReason.TASK_MINIMIZED))
-        verify(desktopModeEventLogger, times(1)).logTaskRemoved(eq(DEFAULT_TASK_UPDATE))
+        verify(desktopModeEventLogger, times(1))
+            .logTaskRemoved(
+                eq(DEFAULT_TASK_UPDATE.copy(minimizeReason = MinimizeReason.MINIMIZE_BUTTON))
+            )
         verifyZeroInteractions(desktopModeEventLogger)
     }
 
