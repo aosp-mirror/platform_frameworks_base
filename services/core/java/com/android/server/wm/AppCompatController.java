@@ -104,8 +104,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatResizeOverrides getAppCompatResizeOverrides() {
-        return mAppCompatOverrides.getAppCompatResizeOverrides();
+    AppCompatResizeOverrides getResizeOverrides() {
+        return mAppCompatOverrides.getResizeOverrides();
     }
 
     @NonNull

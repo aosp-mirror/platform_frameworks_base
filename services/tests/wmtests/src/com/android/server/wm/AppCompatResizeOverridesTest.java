@@ -184,12 +184,12 @@ public class AppCompatResizeOverridesTest extends WindowTestsBase {
 
         void checkShouldOverrideForceResizeApp(boolean expected) {
             Assert.assertEquals(expected, activity().top().mAppCompatController
-                    .getAppCompatResizeOverrides().shouldOverrideForceResizeApp());
+                    .getResizeOverrides().shouldOverrideForceResizeApp());
         }
 
         void checkShouldOverrideForceNonResizeApp(boolean expected) {
             Assert.assertEquals(expected, activity().top().mAppCompatController
-                    .getAppCompatResizeOverrides().shouldOverrideForceNonResizeApp());
+                    .getResizeOverrides().shouldOverrideForceNonResizeApp());
         }
     }
 
