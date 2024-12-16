@@ -2272,15 +2272,24 @@ public class TransitionTests extends WindowTestsBase {
             public void cleanUp(SurfaceControl.Transaction t) {
             }
         });
+        assertEquals(WindowAnimator.PENDING_STATE_NONE, mWm.mAnimator.mPendingState);
+        app.startAnimation(app.getPendingTransaction(), mock(AnimationAdapter.class),
+                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        assertEquals(WindowAnimator.PENDING_STATE_HAS_CHANGES, mWm.mAnimator.mPendingState);
+
         final Task task = app.getTask();
         transition.collect(task);
+        assertEquals(WindowAnimator.PENDING_STATE_NEED_APPLY, mWm.mAnimator.mPendingState);
         final Rect bounds = new Rect(task.getBounds());
         Configuration c = new Configuration(task.getRequestedOverrideConfiguration());
         bounds.inset(10, 10);
         c.windowConfiguration.setBounds(bounds);
         task.onRequestedOverrideConfigurationChanged(c);
         assertTrue(freezeCalls.contains(task));
-        transition.abort();
+
+        transition.start();
+        mWm.mSyncEngine.abort(transition.getSyncId());
+        assertEquals(WindowAnimator.PENDING_STATE_NONE, mWm.mAnimator.mPendingState);
     }
 
     @Test
