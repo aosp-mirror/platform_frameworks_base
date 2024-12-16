@@ -40,9 +40,8 @@ class TouchpadGestureHandler(
         return if (isFromTouchpad && !buttonClick) {
             if (isTwoFingerSwipe(event)) {
                 easterEggGestureMonitor.processTouchpadEvent(event)
-            } else {
-                gestureRecognizer.accept(event)
             }
+            gestureRecognizer.accept(event)
             true
         } else {
             false

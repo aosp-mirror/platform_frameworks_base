@@ -83,13 +83,40 @@ class ThreeFingerGestureRecognizerTest(
     }
 
     @Test
-    fun doesntTriggerGestureFinished_onTwoFingersSwipe() {
-        assertStateAfterEvents(events = TwoFingerGesture.swipeRight(), expectedState = NotStarted)
+    fun triggersGestureError_onTwoFingersSwipe() {
+        assertStateAfterEvents(events = TwoFingerGesture.swipeRight(), expectedState = Error)
     }
 
     @Test
-    fun doesntTriggerGestureFinished_onFourFingersSwipe() {
-        assertStateAfterEvents(events = FourFingerGesture.swipeRight(), expectedState = NotStarted)
+    fun doesntTriggerGestureError_TwoFingerSwipeInProgress() {
+        assertStateAfterEvents(
+            events = TwoFingerGesture.eventsForGestureInProgress { move(deltaX = SWIPE_DISTANCE) },
+            expectedState = NotStarted,
+        )
+    }
+
+    @Test
+    fun triggersGestureError_onFourFingersSwipe() {
+        assertStateAfterEvents(events = FourFingerGesture.swipeRight(), expectedState = Error)
+    }
+
+    @Test
+    fun doesntTriggerGestureError_FourFingerSwipeInProgress() {
+        assertStateAfterEvents(
+            events = FourFingerGesture.eventsForGestureInProgress { move(deltaX = SWIPE_DISTANCE) },
+            expectedState = NotStarted,
+        )
+    }
+
+    @Test
+    fun ignoresOneFingerSwipes() {
+        val oneFingerSwipe =
+            listOf(
+                touchpadEvent(MotionEvent.ACTION_DOWN, 50f, 50f),
+                touchpadEvent(MotionEvent.ACTION_MOVE, 55f, 55f),
+                touchpadEvent(MotionEvent.ACTION_UP, 60f, 60f),
+            )
+        assertStateAfterEvents(events = oneFingerSwipe, expectedState = NotStarted)
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {

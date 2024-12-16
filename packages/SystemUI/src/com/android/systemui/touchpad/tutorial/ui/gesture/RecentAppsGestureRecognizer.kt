@@ -43,7 +43,13 @@ class RecentAppsGestureRecognizer(
     }
 
     override fun accept(event: MotionEvent) {
-        if (!isThreeFingerTouchpadSwipe(event)) return
+        if (!isMultifingerTouchpadSwipe(event)) return
+        if (!isThreeFingerTouchpadSwipe(event)) {
+            if (event.actionMasked == MotionEvent.ACTION_UP) {
+                gestureStateChangedCallback(GestureState.Error)
+            }
+            return
+        }
         val gestureState = distanceTracker.processEvent(event)
         velocityTracker.accept(event)
 
