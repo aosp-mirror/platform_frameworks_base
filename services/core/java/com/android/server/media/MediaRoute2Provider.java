@@ -179,8 +179,29 @@ abstract class MediaRoute2Provider {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 long requestId, @Nullable RoutingSessionInfo sessionInfo);
-        void onSessionUpdated(@NonNull MediaRoute2Provider provider,
-                @NonNull RoutingSessionInfo sessionInfo);
+
+        /**
+         * Called when there's a session info change.
+         *
+         * <p>If the provided {@code sessionInfo} has a null {@link
+         * RoutingSessionInfo#getClientPackageName()}, that means that it's applicable to all
+         * packages. We call this type of routing session "global". This is typically used for
+         * system provided {@link RoutingSessionInfo}. However, some applications may be exempted
+         * from the global routing sessions, because their media is being routed using a session
+         * different from the global routing session.
+         *
+         * @param provider The provider that owns the session that changed.
+         * @param sessionInfo The new {@link RoutingSessionInfo}.
+         * @param packageNamesWithRoutingSessionOverrides The names of packages that are not
+         *     affected by global session changes. This set may only be non-empty when the {@code
+         *     sessionInfo} is for the global session, and therefore has no {@link
+         *     RoutingSessionInfo#getClientPackageName()}.
+         */
+        void onSessionUpdated(
+                @NonNull MediaRoute2Provider provider,
+                @NonNull RoutingSessionInfo sessionInfo,
+                Set<String> packageNamesWithRoutingSessionOverrides);
+
         void onSessionReleased(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
 
