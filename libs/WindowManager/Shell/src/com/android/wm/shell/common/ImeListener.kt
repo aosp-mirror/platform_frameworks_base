@@ -22,8 +22,8 @@ import android.view.InsetsState
 import com.android.wm.shell.common.DisplayInsetsController.OnInsetsChangedListener
 
 abstract class ImeListener(
-    private val mDisplayController: DisplayController,
-    private val mDisplayId: Int
+    private val displayController: DisplayController,
+    val displayId: Int
 ) : OnInsetsChangedListener {
     // The last insets state
     private val mInsetsState = InsetsState()
@@ -36,17 +36,11 @@ abstract class ImeListener(
 
         // Get the stable bounds that account for display cutout and system bars to calculate the
         // relative IME height
-        val layout = mDisplayController.getDisplayLayout(mDisplayId)
-        if (layout == null) {
-            return
-        }
+        val layout = displayController.getDisplayLayout(displayId) ?: return
         layout.getStableBounds(mTmpBounds)
 
-        val wasVisible = getImeVisibilityAndHeight(mInsetsState).first
-        val oldHeight = getImeVisibilityAndHeight(mInsetsState).second
-
-        val isVisible = getImeVisibilityAndHeight(insetsState).first
-        val newHeight = getImeVisibilityAndHeight(insetsState).second
+        val (wasVisible, oldHeight) = getImeVisibilityAndHeight(mInsetsState)
+        val (isVisible, newHeight) = getImeVisibilityAndHeight(insetsState)
 
         mInsetsState.set(insetsState, true)
         if (wasVisible != isVisible || oldHeight != newHeight) {
@@ -54,8 +48,7 @@ abstract class ImeListener(
         }
     }
 
-    private fun getImeVisibilityAndHeight(
-            insetsState: InsetsState): Pair<Boolean, Int> {
+    private fun getImeVisibilityAndHeight(insetsState: InsetsState): Pair<Boolean, Int> {
         val source = insetsState.peekSource(InsetsSource.ID_IME)
         val frame = if (source != null && source.isVisible) source.frame else null
         val height = if (frame != null) mTmpBounds.bottom - frame.top else 0

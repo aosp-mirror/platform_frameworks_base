@@ -36,10 +36,10 @@ import com.android.internal.statusbar.IStatusBarService
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.TestShellExecutor
-import com.android.wm.shell.WindowManagerShellWrapper
 import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayImeController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.SyncTransactionQueue
@@ -141,7 +141,8 @@ class BubbleViewInfoTaskTest {
                 bubbleDataRepository,
                 mock<IStatusBarService>(),
                 windowManager,
-                WindowManagerShellWrapper(mainExecutor),
+                mock<DisplayInsetsController>(),
+                mock<DisplayImeController>(),
                 mock<UserManager>(),
                 mock<LauncherApps>(),
                 bubbleLogger,

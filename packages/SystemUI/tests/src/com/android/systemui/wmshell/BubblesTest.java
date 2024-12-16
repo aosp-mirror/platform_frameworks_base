@@ -167,7 +167,6 @@ import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleData;
 import com.android.wm.shell.bubbles.BubbleDataRepository;
@@ -184,6 +183,8 @@ import com.android.wm.shell.bubbles.StackEducationView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayImeController;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -325,7 +326,9 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private LauncherApps mLauncherApps;
     @Mock
-    private WindowManagerShellWrapper mWindowManagerShellWrapper;
+    private DisplayInsetsController mDisplayInsetsController;
+    @Mock
+    private DisplayImeController mDisplayImeController;
     @Mock
     private BubbleLogger mBubbleLogger;
     @Mock
@@ -503,7 +506,7 @@ public class BubblesTest extends SysuiTestCase {
                         mContext,
                         mock(NotificationManager.class),
                         mock(NotificationSettingsInteractor.class)
-                        );
+                );
         interruptionDecisionProvider.start();
 
         mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),
@@ -523,7 +526,8 @@ public class BubblesTest extends SysuiTestCase {
                 mDataRepository,
                 mStatusBarService,
                 mWindowManager,
-                mWindowManagerShellWrapper,
+                mDisplayInsetsController,
+                mDisplayImeController,
                 mUserManager,
                 mLauncherApps,
                 mBubbleLogger,
@@ -1430,9 +1434,12 @@ public class BubblesTest extends SysuiTestCase {
                 mPositioner,
                 mBubbleController.getStackView(),
                 new BubbleIconFactory(mContext,
-                        mContext.getResources().getDimensionPixelSize(com.android.wm.shell.R.dimen.bubble_size),
-                        mContext.getResources().getDimensionPixelSize(com.android.wm.shell.R.dimen.bubble_badge_size),
-                        mContext.getResources().getColor(com.android.launcher3.icons.R.color.important_conversation),
+                        mContext.getResources().getDimensionPixelSize(
+                                com.android.wm.shell.R.dimen.bubble_size),
+                        mContext.getResources().getDimensionPixelSize(
+                                com.android.wm.shell.R.dimen.bubble_badge_size),
+                        mContext.getResources().getColor(
+                                com.android.launcher3.icons.R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(
                                 com.android.internal.R.dimen.importance_ring_stroke_width)),
                 bubble,

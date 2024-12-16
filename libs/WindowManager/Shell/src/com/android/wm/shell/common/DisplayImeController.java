@@ -727,6 +727,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
      * Allows other things to synchronize with the ime position
      */
     public interface ImePositionProcessor {
+
+        /** Default animation flags. */
+        int IME_ANIMATION_DEFAULT = 0;
+
         /**
          * Indicates that ime shouldn't animate alpha. It will always be opaque. Used when stuff
          * behind the IME shouldn't be visible (for example during split-screen adjustment where
@@ -736,6 +740,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
         /** @hide */
         @IntDef(prefix = {"IME_ANIMATION_"}, value = {
+                IME_ANIMATION_DEFAULT,
                 IME_ANIMATION_NO_ALPHA,
         })
         @interface ImeAnimationFlags {
@@ -762,7 +767,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         @ImeAnimationFlags
         default int onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean showing, boolean isFloating, SurfaceControl.Transaction t) {
-            return 0;
+            return IME_ANIMATION_DEFAULT;
         }
 
         /**
