@@ -503,7 +503,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             Slog.w(TAG, "adb backup cancel of " + target);
         }
         if (target != null) {
-            mUserBackupManagerService.tearDownAgentAndKill(mCurrentTarget.applicationInfo);
+            mUserBackupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                    target.applicationInfo, /* allowKill= */ true);
         }
         mOperationStorage.removeOperation(mCurrentOpToken);
     }

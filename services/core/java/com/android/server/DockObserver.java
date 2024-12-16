@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -35,6 +36,7 @@ import android.provider.Settings;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -259,11 +261,19 @@ final class DockObserver extends SystemService {
                     + mReportedDockState);
             final int previousDockState = mPreviousDockState;
             mPreviousDockState = mReportedDockState;
-            // Skip the dock intent if not yet provisioned.
+
             final ContentResolver cr = getContext().getContentResolver();
-            if (!mDeviceProvisionedObserver.isDeviceProvisioned()) {
-                Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
-                return;
+
+            /// If the allow dock rotation before provision is enabled then we allow rotation.
+            final Resources r = getContext().getResources();
+            final boolean allowDockBeforeProvision =
+                    r.getBoolean(R.bool.config_allowDockBeforeProvision);
+            if (!allowDockBeforeProvision) {
+                // Skip the dock intent if not yet provisioned.
+                if (!mDeviceProvisionedObserver.isDeviceProvisioned()) {
+                    Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
+                    return;
+                }
             }
 
             // Pack up the values and broadcast them to everyone

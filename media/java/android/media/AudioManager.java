@@ -8068,15 +8068,15 @@ public class AudioManager {
             ArrayList<AudioDevicePort> ports_A, ArrayList<AudioDevicePort> ports_B, int flags) {
 
         ArrayList<AudioDevicePort> delta_ports = new ArrayList<AudioDevicePort>();
-
-        AudioDevicePort cur_port = null;
         for (int cur_index = 0; cur_index < ports_B.size(); cur_index++) {
             boolean cur_port_found = false;
-            cur_port = ports_B.get(cur_index);
+            AudioDevicePort cur_port = ports_B.get(cur_index);
             for (int prev_index = 0;
                  prev_index < ports_A.size() && !cur_port_found;
                  prev_index++) {
-                cur_port_found = (cur_port.id() == ports_A.get(prev_index).id());
+                // Do not compare devices by port ID as these change when the native
+                // audio server restarts
+                cur_port_found = cur_port.isSameAs(ports_A.get(prev_index));
             }
 
             if (!cur_port_found) {
@@ -8422,12 +8422,9 @@ public class AudioManager {
          * Callback method called when the mediaserver dies
          */
         public void onServiceDied() {
-            synchronized (mDeviceCallbacks) {
-                broadcastDeviceListChange_sync(null);
-            }
+           // Nothing to do here
         }
     }
-
 
     /**
      * @hide
@@ -8469,9 +8466,13 @@ public class AudioManager {
     /**
      * @hide
      * Registers a callback for notification of audio server state changes.
-     * @param executor {@link Executor} to handle the callbacks
-     * @param stateCallback the callback to receive the audio server state changes
-     *        To remove the callabck, pass a null reference for both executor and stateCallback.
+     * @param executor {@link Executor} to handle the callbacks. Must be non null.
+     * @param stateCallback the callback to receive the audio server state changes.
+     *                      Must be non null. To remove the callabck,
+     *                      call {@link #clearAudioServerStateCallback()}
+     * @throws IllegalArgumentException If a null argument is specified.
+     * @throws IllegalStateException If a callback is already registered
+     * *
      */
     @SystemApi
     public void setAudioServerStateCallback(@NonNull Executor executor,

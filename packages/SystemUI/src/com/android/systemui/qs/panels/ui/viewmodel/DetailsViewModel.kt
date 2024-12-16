@@ -23,11 +23,9 @@ import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
 
 @SysUISingleton
-class DetailsViewModel
-@Inject constructor(val currentTilesInteractor: CurrentTilesInteractor) {
+class DetailsViewModel @Inject constructor(val currentTilesInteractor: CurrentTilesInteractor) {
 
     /**
      * The current active [TileDetailsViewModel]. If it's `null`, it means the qs overlay is not
@@ -38,6 +36,7 @@ class DetailsViewModel
 
     /**
      * Update the active [TileDetailsViewModel] to `null`.
+     *
      * @see activeTileDetails
      */
     fun closeDetailedView() {
@@ -45,8 +44,9 @@ class DetailsViewModel
     }
 
     /**
-     * Update the active [TileDetailsViewModel] to the `spec`'s corresponding view model.
-     * Return if the [TileDetailsViewModel] is successfully found.
+     * Update the active [TileDetailsViewModel] to the `spec`'s corresponding view model. Return if
+     * the [TileDetailsViewModel] is successfully handled.
+     *
      * @see activeTileDetails
      */
     fun onTileClicked(spec: TileSpec?): Boolean {
@@ -55,11 +55,11 @@ class DetailsViewModel
             return false
         }
 
-        _activeTileDetails.value = currentTilesInteractor
-            .currentQSTiles
-            .firstOrNull { it.tileSpec == spec.spec }
-            ?.detailsViewModel
+        val currentTile =
+            currentTilesInteractor.currentQSTiles.firstOrNull { it.tileSpec == spec.spec }
 
-        return _activeTileDetails.value != null
+        return currentTile?.getDetailsViewModel { detailsViewModel ->
+            _activeTileDetails.value = detailsViewModel
+        } ?: false
     }
 }

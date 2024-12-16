@@ -45,5 +45,6 @@ public interface ConfigurationController extends CallbackController<Configuratio
         default void onLocaleListChanged() {}
         default void onLayoutDirectionChanged(boolean isLayoutRtl) {}
         default void onOrientationChanged(int orientation) {}
+        default void onMovedToDisplay(int newDisplayId, Configuration newConfiguration) {}
     }
 }

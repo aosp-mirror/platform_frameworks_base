@@ -62,6 +62,7 @@ constructor(private val viewModel: VolumeDialogSlidersViewModel) {
     ) {
         with(component.sliderViewBinder()) { bind(sliderContainer) }
         with(component.sliderTouchesViewBinder()) { bind(sliderContainer) }
+        with(component.sliderHapticsViewBinder()) { bind(sliderContainer) }
     }
 }
 

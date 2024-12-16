@@ -4197,12 +4197,21 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     private boolean hasUserRestrictionForUser(@NonNull @UserRestrictionKey String restrictionKey,
-            @UserIdInt int userId) {
-        try {
-            return mService.hasUserRestriction(restrictionKey, userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+            @NonNull @UserIdInt int userId) {
+        return getUserRestrictionFromQuery(new Pair(restrictionKey, userId));
+    }
+
+    /** @hide */
+    @CachedProperty()
+    private boolean getUserRestrictionFromQuery(@NonNull Pair<String, Integer> restrictionPerUser) {
+        return UserManagerCache.getUserRestrictionFromQuery(
+                (Pair<String, Integer> q) -> mService.hasUserRestriction(q.first, q.second),
+                restrictionPerUser);
+    }
+
+    /** @hide */
+    public static final void invalidateUserRestriction() {
+        UserManagerCache.invalidateUserRestrictionFromQuery();
     }
 
     /**
@@ -6477,6 +6486,7 @@ public class UserManager {
             UserManagerCache.invalidateProfileParent();
         }
         invalidateEnabledProfileIds();
+        invalidateUserRestriction();
     }
 
     /**
@@ -6501,7 +6511,11 @@ public class UserManager {
      * @hide
      */
     public static final void invalidateCacheOnUserDataChanged() {
-        if (android.multiuser.Flags.cacheProfilesReadOnly()) {
+        if (android.multiuser.Flags.cacheProfilesReadOnly()
+                || android.multiuser.Flags.cacheUserInfoReadOnly()) {
+            // TODO(b/383175685): Rename the invalidation call to make it clearer that it
+            // invalidates the caches for both getProfiles and getUserInfo (since they both use the
+            // same user_manager_user_data CachedProperty.api).
             UserManagerCache.invalidateProfiles();
         }
     }

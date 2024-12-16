@@ -66,13 +66,14 @@ public class HubEndpoint {
                 REASON_CLOSE_ENDPOINT_SESSION_REQUESTED,
                 REASON_ENDPOINT_INVALID,
                 REASON_ENDPOINT_STOPPED,
+                REASON_PERMISSION_DENIED,
             })
     public @interface Reason {}
 
     /** Unclassified failure */
     public static final int REASON_FAILURE = 0;
 
-    // The values 1 and 2 are reserved at the Context Hub HAL but not exposed to apps.
+    // The values 1-2 are reserved at the Context Hub HAL but not exposed to apps.
 
     /** The peer rejected the request to open this endpoint session. */
     public static final int REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED = 3;
@@ -82,6 +83,11 @@ public class HubEndpoint {
 
     /** The peer endpoint is invalid. */
     public static final int REASON_ENDPOINT_INVALID = 5;
+
+    // The values 6-8 are reserved at the Context Hub HAL but not exposed to apps.
+
+    /** The endpoint did not have the required permissions. */
+    public static final int REASON_PERMISSION_DENIED = 9;
 
     /**
      * The endpoint is now stopped. The app should retrieve the endpoint info using {@link
@@ -107,7 +113,7 @@ public class HubEndpoint {
                 public void onSessionOpenRequest(
                         int sessionId,
                         HubEndpointInfo initiator,
-                        @Nullable HubServiceInfo serviceInfo)
+                        @Nullable String serviceDescriptor)
                         throws RemoteException {
                     HubEndpointSession activeSession;
                     synchronized (mLock) {
@@ -128,16 +134,16 @@ public class HubEndpoint {
                                         processSessionOpenRequestResult(
                                                 sessionId,
                                                 initiator,
-                                                serviceInfo,
+                                                serviceDescriptor,
                                                 mLifecycleCallback.onSessionOpenRequest(
-                                                        initiator, serviceInfo)));
+                                                        initiator, serviceDescriptor)));
                     }
                 }
 
                 private void processSessionOpenRequestResult(
                         int sessionId,
                         HubEndpointInfo initiator,
-                        @Nullable HubServiceInfo serviceInfo,
+                        @Nullable String serviceDescriptor,
                         HubEndpointSessionResult result) {
                     if (result == null) {
                         throw new IllegalArgumentException(
@@ -145,7 +151,7 @@ public class HubEndpoint {
                     }
 
                     if (result.isAccepted()) {
-                        acceptSession(sessionId, initiator, serviceInfo);
+                        acceptSession(sessionId, initiator, serviceDescriptor);
                     } else {
                         Log.i(
                                 TAG,
@@ -162,7 +168,7 @@ public class HubEndpoint {
                 private void acceptSession(
                         int sessionId,
                         HubEndpointInfo initiator,
-                        @Nullable HubServiceInfo serviceInfo) {
+                        @Nullable String serviceDescriptor) {
                     if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
                         // No longer registered?
                         return;
@@ -187,7 +193,7 @@ public class HubEndpoint {
                                         HubEndpoint.this,
                                         mAssignedHubEndpointInfo,
                                         initiator,
-                                        serviceInfo);
+                                        serviceDescriptor);
                         try {
                             // oneway call to notify system service that the request is completed
                             mServiceToken.openSessionRequestComplete(sessionId);
@@ -334,7 +340,6 @@ public class HubEndpoint {
             @Nullable IHubEndpointMessageCallback endpointMessageCallback,
             @NonNull Executor messageCallbackExecutor) {
         mPendingHubEndpointInfo = pendingEndpointInfo;
-
         mLifecycleCallback = endpointLifecycleCallback;
         mLifecycleCallbackExecutor = lifecycleCallbackExecutor;
         mMessageCallback = endpointMessageCallback;
@@ -350,7 +355,10 @@ public class HubEndpoint {
         }
         try {
             IContextHubEndpoint serviceToken =
-                    service.registerEndpoint(mPendingHubEndpointInfo, mServiceCallback);
+                    service.registerEndpoint(
+                            mPendingHubEndpointInfo,
+                            mServiceCallback,
+                            mPendingHubEndpointInfo.getTag());
             mAssignedHubEndpointInfo = serviceToken.getAssignedHubEndpointInfo();
             mServiceToken = serviceToken;
         } catch (RemoteException e) {
@@ -387,7 +395,7 @@ public class HubEndpoint {
     }
 
     /** @hide */
-    public void openSession(HubEndpointInfo destinationInfo, @Nullable HubServiceInfo serviceInfo) {
+    public void openSession(HubEndpointInfo destinationInfo, @Nullable String serviceDescriptor) {
         // TODO(b/378974199): Consider refactor these assertions
         if (mServiceToken == null || mAssignedHubEndpointInfo == null) {
             // No longer registered?
@@ -396,18 +404,18 @@ public class HubEndpoint {
 
         HubEndpointSession newSession;
         try {
-            // Request system service to assign session id.
-            int sessionId = mServiceToken.openSession(destinationInfo, serviceInfo);
-
-            // Save the newly created session
             synchronized (mLock) {
+                // Request system service to assign session id.
+                int sessionId = mServiceToken.openSession(destinationInfo, serviceDescriptor);
+
+                // Save the newly created session
                 newSession =
                         new HubEndpointSession(
                                 sessionId,
                                 HubEndpoint.this,
                                 destinationInfo,
                                 mAssignedHubEndpointInfo,
-                                serviceInfo);
+                                serviceDescriptor);
                 mActiveSessions.put(sessionId, newSession);
             }
         } catch (RemoteException e) {

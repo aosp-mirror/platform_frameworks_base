@@ -40,21 +40,25 @@ sealed interface ColorsModel {
     }
 
     /**
-     * The chip should have the given background color, and text color that matches dark/light
-     * theme.
+     * The chip should have the given background color and primary text color.
+     *
+     * If [primaryTextColorInt] is null, the text color will match the current UI mode (light/dark).
      */
-    data class Custom(val backgroundColorInt: Int) : ColorsModel {
+    data class Custom(val backgroundColorInt: Int, val primaryTextColorInt: Int? = null) :
+        ColorsModel {
         override fun background(context: Context): ColorStateList =
             ColorStateList.valueOf(backgroundColorInt)
 
-        // TODO(b/361346412): When dark theme changes, the chip should automatically re-render with
+        // TODO(b/361346412): When UI mode changes, the chip should automatically re-render with
         // the right text color. Right now, it has the right text color when the chip is first
-        // created but the color doesn't update if dark theme changes.
-        override fun text(context: Context) =
-            Utils.getColorAttrDefaultColor(
-                context,
-                com.android.internal.R.attr.materialColorOnSurface,
-            )
+        // created but the color doesn't update if UI mode changes.
+        override fun text(context: Context): Int {
+            return primaryTextColorInt
+                ?: Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.color.materialColorOnSurface,
+                )
+        }
     }
 
     /** The chip should have a red background with white text. */

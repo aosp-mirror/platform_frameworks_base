@@ -24,8 +24,8 @@ import com.android.settingslib.Utils
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.docking.domain.interactor.KeyboardDockingIndicationInteractor
-import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.surfaceeffects.glowboxeffect.GlowBoxConfig
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -36,10 +36,10 @@ import kotlinx.coroutines.flow.asStateFlow
 class KeyboardDockingIndicationViewModel
 @Inject
 constructor(
-    private val windowManager: WindowManager,
-    private val context: Context,
+    @Main private val windowManager: WindowManager,
+    @Main private val context: Context,
     keyboardDockingIndicationInteractor: KeyboardDockingIndicationInteractor,
-    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
+    @Main configurationInteractor: ConfigurationInteractor,
     @Background private val backgroundScope: CoroutineScope,
 ) {
 

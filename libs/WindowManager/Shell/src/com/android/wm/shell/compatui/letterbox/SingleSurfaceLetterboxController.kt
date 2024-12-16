@@ -20,6 +20,8 @@ import android.graphics.Rect
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.compatui.letterbox.LetterboxUtils.Maps.runOnItem
+import com.android.wm.shell.compatui.letterbox.LetterboxUtils.Transactions.moveAndCrop
 import com.android.wm.shell.dagger.WMSingleton
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_APP_COMPAT
 import javax.inject.Inject
@@ -34,7 +36,7 @@ class SingleSurfaceLetterboxController @Inject constructor(
 
     companion object {
         @JvmStatic
-        private val TAG = "LetterboxController"
+        private val TAG = "SingleSurfaceLetterboxController"
     }
 
     private val letterboxMap = mutableMapOf<LetterboxKey, SurfaceControl>()
@@ -93,7 +95,8 @@ class SingleSurfaceLetterboxController @Inject constructor(
     override fun updateLetterboxSurfaceBounds(
         key: LetterboxKey,
         transaction: Transaction,
-        taskBounds: Rect
+        taskBounds: Rect,
+        activityBounds: Rect
     ) {
         letterboxMap.runOnItem(key, onFound = { item ->
             item.run {
@@ -105,32 +108,4 @@ class SingleSurfaceLetterboxController @Inject constructor(
     override fun dump() {
         ProtoLog.v(WM_SHELL_APP_COMPAT, "%s: %s", TAG, "${letterboxMap.keys}")
     }
-
-    /*
-     * Executes [onFound] on the [SurfaceControl] if present or [onMissed] if not present.
-     */
-    private fun MutableMap<LetterboxKey, SurfaceControl>.runOnItem(
-        key: LetterboxKey,
-        onFound: (SurfaceControl) -> Unit = { _ -> },
-        onMissed: (
-            LetterboxKey,
-            MutableMap<LetterboxKey, SurfaceControl>
-        ) -> Unit = { _, _ -> }
-    ) {
-        this[key]?.let {
-            return onFound(it)
-        }
-        return onMissed(key, this)
-    }
-
-    private fun Transaction.moveAndCrop(
-        surface: SurfaceControl,
-        rect: Rect
-    ): Transaction =
-        setPosition(surface, rect.left.toFloat(), rect.top.toFloat())
-            .setWindowCrop(
-                surface,
-                rect.width(),
-                rect.height()
-            )
 }

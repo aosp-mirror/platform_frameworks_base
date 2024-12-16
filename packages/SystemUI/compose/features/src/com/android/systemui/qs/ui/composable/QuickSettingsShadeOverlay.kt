@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,6 +52,8 @@ import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileDetails
 import com.android.systemui.qs.panels.ui.compose.TileGrid
+import com.android.systemui.qs.panels.ui.compose.toolbar.Toolbar
+import com.android.systemui.qs.ui.composable.QuickSettingsShade.Dimensions.GridMaxHeight
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayContentViewModel
@@ -122,7 +126,9 @@ constructor(
 // A sealed interface to represent the possible states of the `ShadeBody`
 sealed interface ShadeBodyState {
     data object Editing : ShadeBodyState
+
     data object TileDetails : ShadeBodyState
+
     data object Default : ShadeBodyState
 }
 
@@ -149,9 +155,8 @@ fun SceneScope.ShadeBody(viewModel: QuickSettingsContainerViewModel) {
             ShadeBodyState.Editing -> {
                 EditMode(
                     viewModel = viewModel.editModeViewModel,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(QuickSettingsShade.Dimensions.Padding),
+                    modifier =
+                        Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding),
                 )
             }
             ShadeBodyState.TileDetails -> {
@@ -182,22 +187,23 @@ fun SceneScope.QuickSettingsLayout(
                 .padding(
                     start = QuickSettingsShade.Dimensions.Padding,
                     end = QuickSettingsShade.Dimensions.Padding,
-                    top = QuickSettingsShade.Dimensions.Padding,
+                    bottom = QuickSettingsShade.Dimensions.Padding / 2,
                 ),
     ) {
+        Toolbar(viewModel.toolbarViewModelFactory)
         BrightnessSliderContainer(
             viewModel = viewModel.brightnessSliderViewModel,
             modifier =
                 Modifier.fillMaxWidth().height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
         )
-        Box {
+        Box(
+            modifier =
+                Modifier.requiredHeightIn(max = GridMaxHeight)
+                    .verticalNestedScrollToScene()
+                    .verticalScroll(rememberScrollState())
+        ) {
             GridAnchor()
-            TileGrid(
-                viewModel = viewModel.tileGridViewModel,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
-            )
+            TileGrid(viewModel = viewModel.tileGridViewModel, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -207,6 +213,6 @@ object QuickSettingsShade {
     object Dimensions {
         val Padding = 16.dp
         val BrightnessSliderHeight = 64.dp
-        val GridMaxHeight = 800.dp
+        val GridMaxHeight = 420.dp
     }
 }

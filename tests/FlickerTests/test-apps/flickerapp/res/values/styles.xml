@@ -62,6 +62,12 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="TranslucentTheme" parent="@style/OptOutEdgeToEdge">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="no_starting_window" parent="@style/OptOutEdgeToEdge">
         <item name="android:windowDisablePreview">true</item>
     </style>

@@ -48,6 +48,7 @@ public final class PictureProfile implements Parcelable {
     private final String mPackageName;
     @NonNull
     private final PersistableBundle mParams;
+    private final PictureProfileHandle mHandle;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -121,6 +122,7 @@ public final class PictureProfile implements Parcelable {
         mInputId = in.readString();
         mPackageName = in.readString();
         mParams = in.readPersistableBundle();
+        mHandle = in.readParcelable(PictureProfileHandle.class.getClassLoader());
     }
 
     @Override
@@ -131,6 +133,7 @@ public final class PictureProfile implements Parcelable {
         dest.writeString(mInputId);
         dest.writeString(mPackageName);
         dest.writePersistableBundle(mParams);
+        dest.writeParcelable(mHandle, flags);
     }
 
     @Override
@@ -163,13 +166,15 @@ public final class PictureProfile implements Parcelable {
             @NonNull String name,
             @Nullable String inputId,
             @NonNull String packageName,
-            @NonNull PersistableBundle params) {
+            @NonNull PersistableBundle params,
+            @NonNull PictureProfileHandle handle) {
         this.mId = id;
         this.mType = type;
         this.mName = name;
         this.mInputId = inputId;
         this.mPackageName = packageName;
         this.mParams = params;
+        this.mHandle = handle;
     }
 
     /**
@@ -251,6 +256,15 @@ public final class PictureProfile implements Parcelable {
     }
 
     /**
+     * Gets profile handle
+     * @hide
+     */
+    @NonNull
+    public PictureProfileHandle getHandle() {
+        return mHandle;
+    }
+
+    /**
      * A builder for {@link PictureProfile}.
      */
     public static final class Builder {
@@ -265,6 +279,7 @@ public final class PictureProfile implements Parcelable {
         private String mPackageName;
         @NonNull
         private PersistableBundle mParams;
+        private PictureProfileHandle mHandle;
 
         /**
          * Creates a new Builder.
@@ -283,6 +298,7 @@ public final class PictureProfile implements Parcelable {
             mPackageName = p.getPackageName();
             mInputId = p.getInputId();
             mParams = p.getParameters();
+            mHandle = p.getHandle();
         }
 
         /**
@@ -350,6 +366,16 @@ public final class PictureProfile implements Parcelable {
         }
 
         /**
+         * Sets profile handle.
+         * @hide
+         */
+        @NonNull
+        public Builder setHandle(@NonNull PictureProfileHandle handle) {
+            mHandle = handle;
+            return this;
+        }
+
+        /**
          * Builds the instance.
          */
         @NonNull
@@ -361,7 +387,8 @@ public final class PictureProfile implements Parcelable {
                     mName,
                     mInputId,
                     mPackageName,
-                    mParams);
+                    mParams,
+                    mHandle);
             return o;
         }
     }

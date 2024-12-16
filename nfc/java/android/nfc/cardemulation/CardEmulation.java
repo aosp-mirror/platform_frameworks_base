@@ -39,7 +39,7 @@ import android.nfc.ComponentNameAndUser;
 import android.nfc.Constants;
 import android.nfc.Flags;
 import android.nfc.INfcCardEmulation;
-import android.nfc.INfcEventListener;
+import android.nfc.INfcEventCallback;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.RemoteException;
@@ -1114,6 +1114,14 @@ public final class CardEmulation {
     @FlaggedApi(android.nfc.Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
     public static final int SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED = 3;
 
+    /**
+     * Setting the default subscription ID failed because of unknown error.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_CARD_EMULATION_EUICC)
+    public static final int SET_SUBSCRIPTION_ID_STATUS_UNKNOWN = -1;
+
     /** @hide */
     @IntDef(prefix = "SET_SUBSCRIPTION_ID_STATUS_",
             value = {
@@ -1121,6 +1129,7 @@ public final class CardEmulation {
                     SET_SUBSCRIPTION_ID_STATUS_FAILED_INVALID_SUBSCRIPTION_ID,
                     SET_SUBSCRIPTION_ID_STATUS_FAILED_INTERNAL_ERROR,
                     SET_SUBSCRIPTION_ID_STATUS_FAILED_NOT_SUPPORTED,
+                    SET_SUBSCRIPTION_ID_STATUS_UNKNOWN
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SetSubscriptionIdStatus {}
@@ -1129,9 +1138,10 @@ public final class CardEmulation {
      * Sets the system's default NFC subscription id.
      *
      * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this sets the
-     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     * default UICC NFCEE that will handle NFC offhost CE transactions </p>
      *
-     * @param subscriptionId the default NFC subscription Id to set.
+     * @param subscriptionId the default NFC subscription Id to set. User can get subscription id
+     *                       from {@link SubscriptionManager#getSubscriptionId(int)}
      * @return status of the operation.
      *
      * @throws UnsupportedOperationException If the device does not have
@@ -1153,7 +1163,7 @@ public final class CardEmulation {
      * Returns the system's default NFC subscription id.
      *
      * <p> For devices with multiple UICC/EUICC that is configured to be NFCEE, this returns the
-     * default UICC NFCEE that will handle NFC offhost CE transactoions </p>
+     * default UICC NFCEE that will handle NFC offhost CE transactions </p>
      * <p> If the device has no UICC that can serve as NFCEE, this will return
      * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.</p>
      *
@@ -1294,7 +1304,7 @@ public final class CardEmulation {
 
     /** Listener for preferred service state changes. */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public interface NfcEventListener {
+    public interface NfcEventCallback {
         /**
          * This method is called when this package gains or loses preferred Nfc service status,
          * either the Default Wallet Role holder (see {@link
@@ -1317,7 +1327,10 @@ public final class CardEmulation {
 
         /**
          * This method is called when an AID conflict is detected during an NFC transaction. This
-         * can happen when multiple services are registered for the same AID.
+         * can happen when multiple services are registered for the same AID. If your service is
+         * registered for this AID you may want to instruct users to bring your app to the
+         * foreground and ensure you call {@link #setPreferredService(Activity, ComponentName)}
+         * to ensure the transaction is routed to your service.
          *
          * @param aid The AID that is in conflict
          */
@@ -1367,10 +1380,10 @@ public final class CardEmulation {
         default void onInternalErrorReported(@NfcInternalErrorType int errorType) {}
     }
 
-    private final ArrayMap<NfcEventListener, Executor> mNfcEventListeners = new ArrayMap<>();
+    private final ArrayMap<NfcEventCallback, Executor> mNfcEventCallbacks = new ArrayMap<>();
 
-    final INfcEventListener mINfcEventListener =
-            new INfcEventListener.Stub() {
+    final INfcEventCallback mINfcEventCallback =
+            new INfcEventCallback.Stub() {
                 public void onPreferredServiceChanged(ComponentNameAndUser componentNameAndUser) {
                     if (!android.nfc.Flags.nfcEventListener()) {
                         return;
@@ -1430,12 +1443,12 @@ public final class CardEmulation {
                 }
 
                 interface ListenerCall {
-                    void invoke(NfcEventListener listener);
+                    void invoke(NfcEventCallback listener);
                 }
 
                 private void callListeners(ListenerCall listenerCall) {
-                    synchronized (mNfcEventListeners) {
-                        mNfcEventListeners.forEach(
+                    synchronized (mNfcEventCallbacks) {
+                        mNfcEventCallbacks.forEach(
                             (listener, executor) -> {
                                 executor.execute(() -> listenerCall.invoke(listener));
                             });
@@ -1450,34 +1463,34 @@ public final class CardEmulation {
      * @param listener The listener to register
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public void registerNfcEventListener(
-            @NonNull @CallbackExecutor Executor executor, @NonNull NfcEventListener listener) {
+    public void registerNfcEventCallback(
+            @NonNull @CallbackExecutor Executor executor, @NonNull NfcEventCallback listener) {
         if (!android.nfc.Flags.nfcEventListener()) {
             return;
         }
-        synchronized (mNfcEventListeners) {
-            mNfcEventListeners.put(listener, executor);
-            if (mNfcEventListeners.size() == 1) {
-                callService(() -> sService.registerNfcEventListener(mINfcEventListener));
+        synchronized (mNfcEventCallbacks) {
+            mNfcEventCallbacks.put(listener, executor);
+            if (mNfcEventCallbacks.size() == 1) {
+                callService(() -> sService.registerNfcEventCallback(mINfcEventCallback));
             }
         }
     }
 
     /**
      * Unregister a preferred service listener that was previously registered with {@link
-     * #registerNfcEventListener(Executor, NfcEventListener)}
+     * #registerNfcEventCallback(Executor, NfcEventCallback)}
      *
      * @param listener The previously registered listener to unregister
      */
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_EVENT_LISTENER)
-    public void unregisterNfcEventListener(@NonNull NfcEventListener listener) {
+    public void unregisterNfcEventCallback(@NonNull NfcEventCallback listener) {
         if (!android.nfc.Flags.nfcEventListener()) {
             return;
         }
-        synchronized (mNfcEventListeners) {
-            mNfcEventListeners.remove(listener);
-            if (mNfcEventListeners.size() == 0) {
-                callService(() -> sService.unregisterNfcEventListener(mINfcEventListener));
+        synchronized (mNfcEventCallbacks) {
+            mNfcEventCallbacks.remove(listener);
+            if (mNfcEventCallbacks.size() == 0) {
+                callService(() -> sService.unregisterNfcEventCallback(mINfcEventCallback));
             }
         }
     }

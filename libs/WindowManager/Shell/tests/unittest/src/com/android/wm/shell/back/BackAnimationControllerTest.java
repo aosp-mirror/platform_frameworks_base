@@ -33,6 +33,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -86,7 +88,6 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -254,7 +255,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void instantiateController_addExternalInterface() {
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION), any(), any());
+                eq(IBackAnimation.DESCRIPTOR), any(), any());
     }
 
     @Test
@@ -635,7 +636,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         releaseBackGesture();
         mShellExecutor.flushAll();
 
-        verify(mAppCallback).setHandoffHandler(any());
+        verify(mAppCallback).setHandoffHandler(notNull());
     }
 
     @Test
@@ -655,7 +656,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         releaseBackGesture();
         mShellExecutor.flushAll();
 
-        verify(mAppCallback, never()).setHandoffHandler(any());
+        verify(mAppCallback).setHandoffHandler(isNull());
     }
 
     @Test
@@ -717,7 +718,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         tInfo = createTransitionInfo(TRANSIT_PREPARE_BACK_NAVIGATION, open);
         callback = mock(Transitions.TransitionFinishCallback.class);
         mBackTransitionHandler.startAnimation(mockBinder, tInfo, st, ft, callback);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(tInfo), eq(st), eq(ft), eq(callback));
         mBackTransitionHandler.mCloseTransitionRequested = true;
         TransitionInfo tInfo2 = createTransitionInfo(TRANSIT_CLOSE, close);
@@ -749,7 +750,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 null /* remoteTransition */);
         mBackTransitionHandler.handleRequest(mockBinder, requestInfo);
         mBackTransitionHandler.startAnimation(mockBinder, tInfo, st, ft, callback);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(tInfo), eq(st), eq(ft), eq(callback));
 
         mBackTransitionHandler.onAnimationFinished();
@@ -800,7 +801,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         canHandle = mBackTransitionHandler.startAnimation(mockBinder,
                 prepareInfo, st, ft, callback2);
         assertTrue("Handle prepare transition" , canHandle);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(prepareInfo), eq(st), eq(ft), eq(callback2));
         final TransitionInfo closeInfo = createTransitionInfo(TRANSIT_CLOSE, close);
         Transitions.TransitionFinishCallback mergeCallback =
@@ -818,7 +819,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         canHandle = mBackTransitionHandler.startAnimation(
                 mockBinder, prepareInfo, st, ft, callback3);
         assertTrue("Handle prepare transition" , canHandle);
-        verify(mBackTransitionHandler).handlePrepareTransition(
+        verify(mBackTransitionHandler).handlePrepareTransition(eq(mockBinder),
                 eq(prepareInfo), eq(st), eq(ft), eq(callback3));
         final TransitionInfo.Change open2 = createAppChange(
                 openTaskId2, TRANSIT_OPEN, FLAG_MOVED_TO_TOP);

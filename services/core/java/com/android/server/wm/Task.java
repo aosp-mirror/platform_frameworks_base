@@ -2500,20 +2500,79 @@ class Task extends TaskFragment {
         return parentTask == null ? null : parentTask.getCreatedByOrganizerTask();
     }
 
-    /** @return the first adjacent task of this task or its parent. */
+    /** @deprecated b/373709676 replace with {@link #forOtherAdjacentTasks(Consumer)} ()}. */
+    @Deprecated
     @Nullable
     Task getAdjacentTask() {
-        final TaskFragment adjacentTaskFragment = getAdjacentTaskFragment();
-        if (adjacentTaskFragment != null && adjacentTaskFragment.asTask() != null) {
-            return adjacentTaskFragment.asTask();
+        if (Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalStateException("allowMultipleAdjacentTaskFragments is enabled. "
+                    + "Use #forOtherAdjacentTasks instead");
         }
+        final Task taskWithAdjacent = getTaskWithAdjacent();
+        if (taskWithAdjacent == null) {
+            return null;
+        }
+        return taskWithAdjacent.getAdjacentTaskFragment().asTask();
+    }
 
+    /** Finds the first Task parent (or itself) that has adjacent. */
+    @Nullable
+    Task getTaskWithAdjacent() {
+        if (hasAdjacentTaskFragment()) {
+            return this;
+        }
         final WindowContainer parent = getParent();
         if (parent == null || parent.asTask() == null) {
             return null;
         }
+        return parent.asTask().getTaskWithAdjacent();
+    }
 
-        return parent.asTask().getAdjacentTask();
+    /** Returns true if this or its parent has adjacent Task. */
+    boolean hasAdjacentTask() {
+        return getTaskWithAdjacent() != null;
+    }
+
+    /**
+     * Finds the first Task parent (or itself) that has adjacent. Runs callback on all the adjacent
+     * Tasks. The invoke order is not guaranteed.
+     */
+    void forOtherAdjacentTasks(@NonNull Consumer<Task> callback) {
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalStateException("allowMultipleAdjacentTaskFragments is not enabled. "
+                    + "Use #getAdjacentTask instead");
+        }
+
+        final Task taskWithAdjacent = getTaskWithAdjacent();
+        if (taskWithAdjacent == null) {
+            return;
+        }
+        final AdjacentSet adjacentTasks = taskWithAdjacent.getAdjacentTaskFragments();
+        adjacentTasks.forAllTaskFragments(tf -> {
+            // We don't support Task adjacent to non-Task TaskFragment.
+            callback.accept(tf.asTask());
+        }, taskWithAdjacent /* exclude */);
+    }
+
+    /**
+     * Finds the first Task parent (or itself) that has adjacent. Runs callback on all the adjacent
+     * Tasks. Returns early if callback returns true on any of them. The invoke order is not
+     * guaranteed.
+     */
+    boolean forOtherAdjacentTasks(@NonNull Predicate<Task> callback) {
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalStateException("allowMultipleAdjacentTaskFragments is not enabled. "
+                    + "Use getAdjacentTask instead");
+        }
+        final Task taskWithAdjacent = getTaskWithAdjacent();
+        if (taskWithAdjacent == null) {
+            return false;
+        }
+        final AdjacentSet adjacentTasks = taskWithAdjacent.getAdjacentTaskFragments();
+        return adjacentTasks.forAllTaskFragments(tf -> {
+            // We don't support Task adjacent to non-Task TaskFragment.
+            return callback.test(tf.asTask());
+        }, taskWithAdjacent /* exclude */);
     }
 
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
@@ -2907,7 +2966,7 @@ class Task extends TaskFragment {
             Rect outSurfaceInsets) {
         // If this task has its adjacent task, it means they should animate together. Use display
         // bounds for them could move same as full screen task.
-        if (getAdjacentTask() != null) {
+        if (hasAdjacentTask()) {
             super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
             return;
         }
@@ -3425,6 +3484,7 @@ class Task extends TaskFragment {
         info.isTopActivityNoDisplay = top != null && top.isNoDisplay();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
+        info.isActivityStackTransparent = !topTask.forAllActivities(r -> (r.occludesParent()));
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
         final WindowState windowState = top != null
                 ? top.findMainWindow(/* includeStartingApp= */ false) : null;
@@ -3862,6 +3922,9 @@ class Task extends TaskFragment {
         pw.print(prefix); pw.println(" isTrimmable=" + mIsTrimmableFromRecents);
         if (mLaunchAdjacentDisabled) {
             pw.println(prefix + "mLaunchAdjacentDisabled=true");
+        }
+        if (mReparentLeafTaskIfRelaunch) {
+            pw.println(prefix + "mReparentLeafTaskIfRelaunch=true");
         }
     }
 
@@ -4488,7 +4551,7 @@ class Task extends TaskFragment {
     }
 
     void onPictureInPictureParamsChanged() {
-        if (inPinnedWindowingMode()) {
+        if (inPinnedWindowingMode() || Flags.enableDesktopWindowingPip()) {
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
     }
@@ -6290,12 +6353,6 @@ class Task extends TaskFragment {
 
     AnimatingActivityRegistry getAnimatingActivityRegistry() {
         return mAnimatingActivityRegistry;
-    }
-
-    @Override
-    void executeAppTransition(ActivityOptions options) {
-        mDisplayContent.executeAppTransition();
-        ActivityOptions.abort(options);
     }
 
     private Rect getRawBounds() {

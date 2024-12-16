@@ -50,7 +50,7 @@ import java.util.ArrayDeque;
 class SnapshotPersistQueue {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final long DELAY_MS = 100;
-    private static final int MAX_STORE_QUEUE_DEPTH = 2;
+    static final int MAX_STORE_QUEUE_DEPTH = 2;
     private static final int COMPRESS_QUALITY = 95;
 
     @GuardedBy("mLock")
@@ -103,12 +103,42 @@ class SnapshotPersistQueue {
     }
 
     /**
-     * Write out everything in the queue because of shutdown.
+     * Prepare to enqueue all visible task snapshots because of shutdown.
      */
-    void shutdown() {
+    void prepareShutdown() {
         synchronized (mLock) {
             mShutdown = true;
-            mLock.notifyAll();
+        }
+    }
+
+    private boolean isQueueEmpty() {
+        synchronized (mLock) {
+            return mWriteQueue.isEmpty() || mQueueIdling || mPaused;
+        }
+    }
+
+    void waitFlush(long timeout) {
+        if (timeout <= 0) {
+            return;
+        }
+        final long endTime = System.currentTimeMillis() + timeout;
+        while (true) {
+            if (!isQueueEmpty()) {
+                long timeRemaining = endTime - System.currentTimeMillis();
+                if (timeRemaining > 0) {
+                    synchronized (mLock) {
+                        try {
+                            mLock.wait(timeRemaining);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                } else {
+                    Slog.w(TAG, "Snapshot Persist Queue flush timed out");
+                    break;
+                }
+            } else {
+                break;
+            }
         }
     }
 
@@ -124,7 +154,12 @@ class SnapshotPersistQueue {
         }
     }
 
-    @VisibleForTesting
+    int peekWriteQueueSize() {
+        synchronized (mLock) {
+            return mStoreQueueItems.size();
+        }
+    }
+
     int peekQueueSize() {
         synchronized (mLock) {
             return mWriteQueue.size();
@@ -139,7 +174,9 @@ class SnapshotPersistQueue {
             mWriteQueue.addLast(item);
         }
         item.onQueuedLocked();
-        ensureStoreQueueDepthLocked();
+        if (!mShutdown) {
+            ensureStoreQueueDepthLocked();
+        }
         if (!mPaused) {
             mLock.notifyAll();
         }
@@ -212,6 +249,9 @@ class SnapshotPersistQueue {
                     final boolean writeQueueEmpty = mWriteQueue.isEmpty();
                     if (!writeQueueEmpty && !mPaused) {
                         continue;
+                    }
+                    if (mShutdown && writeQueueEmpty) {
+                        mLock.notifyAll();
                     }
                     try {
                         mQueueIdling = writeQueueEmpty;

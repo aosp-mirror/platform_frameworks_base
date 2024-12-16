@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade.domain.interactor
 
-import com.android.keyguard.LockIconViewController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -38,7 +37,6 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
-    private val lockIconViewController: LockIconViewController,
     shadeRepository: ShadeRepository,
 ) : ShadeLockscreenInteractor {
 
@@ -61,7 +59,7 @@ constructor(
     }
 
     override fun dozeTimeTick() {
-        lockIconViewController.dozeTimeTick()
+        // TODO("b/383591086") Implement replacement or delete
     }
 
     @Deprecated("Not supported by scenes")

@@ -73,6 +73,7 @@ cc_library_shared {
         "surface_control.cpp",
         "surface_texture.cpp",
         "system_fonts.cpp",
+        "system_health.cpp",
         "trace.cpp",
         "thermal.cpp",
     ],

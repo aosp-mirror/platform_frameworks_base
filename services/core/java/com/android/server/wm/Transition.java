@@ -1429,8 +1429,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Commit wallpaper visibility after activity, because usually the wallpaper target token is
         // an activity, and wallpaper's visibility depends on activity's visibility.
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
-            final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
-            if (wt == null) continue;
+            final WindowContainer<?> wc = mParticipants.valueAt(i);
+            WallpaperWindowToken wt = wc.asWallpaperToken();
+            if (!Flags.ensureWallpaperInTransitions()) {
+                if (wt == null) {
+                    final WindowState windowState = wc.asWindowState();
+                    if (windowState != null) {
+                        wt = windowState.mToken.asWallpaperToken();
+                    }
+                }
+            }
+            if (wt == null || !wt.isVisible()) continue;
             final WindowState target = wt.mDisplayContent.mWallpaperController.getWallpaperTarget();
             final boolean isTargetInvisible = target == null || !target.mToken.isVisible();
             final boolean isWallpaperVisibleAtEnd =
@@ -1861,7 +1870,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayArea<?> da = wc.asDisplayArea();
             if (da == null) continue;
             if (da.isVisibleRequested()) {
-                mController.mValidateDisplayVis.remove(da);
+                final int inValidateList = mController.mValidateDisplayVis.indexOf(da);
+                if (inValidateList >= 0
+                        // The display-area is visible, but if we only detect a non-visibility
+                        // change, then we shouldn't remove the validator.
+                        && !mChanges.get(da).mVisible) {
+                    mController.mValidateDisplayVis.remove(inValidateList);
+                }
             } else {
                 // In case something accidentally hides a displayarea and nothing shows it again.
                 mController.mValidateDisplayVis.add(da);
@@ -2262,19 +2277,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
-    /**
-
-     * Wallpaper will set itself as target if it wants to keep itself visible without a target.
-     */
-    private static boolean wallpaperIsOwnTarget(WallpaperWindowToken wallpaper) {
-        final WindowState target =
-                wallpaper.getDisplayContent().mWallpaperController.getWallpaperTarget();
-        return target != null && target.isDescendantOf(wallpaper);
-    }
-
-    /**
-     * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
-     */
     private void commitVisibleWallpapers(SurfaceControl.Transaction t) {
         boolean showWallpaper = shouldWallpaperBeVisible();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
@@ -2282,11 +2284,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wallpaper != null) {
                 if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
                     wallpaper.commitVisibility(showWallpaper);
-                } else if (wallpaper.mWmService.mFlags.mEnsureWallpaperInTransitions
-                        && wallpaper.isVisible()
-                        && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
-                        && !wallpaperIsOwnTarget(wallpaper)) {
-                    wallpaper.setVisibleRequested(false);
                 }
                 if (showWallpaper && wallpaper.isVisibleRequested()) {
                     for (int j = wallpaper.mChildren.size() - 1; j >= 0; --j) {
@@ -4135,7 +4132,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             .setSourceCrop(cropBounds)
                             .setCaptureSecureLayers(true)
                             .setAllowProtected(true)
-                            .setHintForSeamlessTransition(isDisplayRotation)
+                            // We always reroute this screenshot to the display, so this transition
+                            // is ALWAYS seamless
+                            .setHintForSeamlessTransition(true)
                             .build();
             ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                     ScreenCapture.captureLayers(captureArgs);

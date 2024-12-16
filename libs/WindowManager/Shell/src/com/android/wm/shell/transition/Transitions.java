@@ -41,7 +41,6 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 import static com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived;
 import static com.android.window.flags.Flags.ensureWallpaperInTransitions;
 import static com.android.window.flags.Flags.migratePredictiveBackTransition;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 
@@ -373,7 +372,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mOrganizer.shareTransactionQueue();
         }
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SHELL_TRANSITIONS,
+        mShellController.addExternalInterface(IShellTransitions.DESCRIPTOR,
                 this::createExternalInterface, this);
 
         ContentResolver resolver = mContext.getContentResolver();
@@ -1077,9 +1076,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             @Nullable TransitionHandler skip
     ) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
-            if (mHandlers.get(i) == skip) continue;
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try handler %s",
-                    mHandlers.get(i));
+            if (mHandlers.get(i) == skip) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " skip handler %s",
+                        mHandlers.get(i));
+                continue;
+            }
             boolean consumed = mHandlers.get(i).startAnimation(transition, info, startT, finishT,
                     finishCB);
             if (consumed) {

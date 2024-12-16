@@ -23,12 +23,12 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleOwner
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -38,6 +38,7 @@ import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.util.icuMessageFormat
 import javax.inject.Inject
 import javax.inject.Named
@@ -54,7 +55,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "FooterActionsViewModel"
 
@@ -113,7 +113,7 @@ class FooterActionsViewModel(
     class Factory
     @Inject
     constructor(
-        @ShadeDisplayAware  private val context: Context,
+        @ShadeDisplayAware private val context: Context,
         private val falsingManager: FalsingManager,
         private val footerActionsInteractor: FooterActionsInteractor,
         private val globalActionsDialogLiteProvider: Provider<GlobalActionsDialogLite>,
@@ -211,7 +211,7 @@ fun FooterActionsViewModel(
                 false /* if the dismiss should be deferred */
             },
             null /* cancelAction */,
-            true /* afterKeyguardGone */
+            true, /* afterKeyguardGone */
         )
     }
 
@@ -269,29 +269,7 @@ fun FooterActionsViewModel(
             .distinctUntilChanged()
 
     val userSwitcher =
-        footerActionsInteractor.userSwitcherStatus
-            .map { userSwitcherStatus ->
-                when (userSwitcherStatus) {
-                    UserSwitcherStatusModel.Disabled -> null
-                    is UserSwitcherStatusModel.Enabled -> {
-                        if (userSwitcherStatus.currentUserImage == null) {
-                            Log.e(
-                                TAG,
-                                "Skipped the addition of user switcher button because " +
-                                    "currentUserImage is missing",
-                            )
-                            return@map null
-                        }
-
-                        userSwitcherButtonViewModel(
-                            qsThemedContext,
-                            userSwitcherStatus,
-                            ::onUserSwitcherClicked
-                        )
-                    }
-                }
-            }
-            .distinctUntilChanged()
+        userSwitcherViewModel(qsThemedContext, footerActionsInteractor, ::onUserSwitcherClicked)
 
     val settings = settingsButtonViewModel(qsThemedContext, ::onSettingsButtonClicked)
     val power =
@@ -309,6 +287,36 @@ fun FooterActionsViewModel(
         power = power,
         observeDeviceMonitoringDialogRequests = ::observeDeviceMonitoringDialogRequests,
     )
+}
+
+fun userSwitcherViewModel(
+    themedContext: Context,
+    footerActionsInteractor: FooterActionsInteractor,
+    onUserSwitcherClicked: (Expandable) -> Unit,
+): Flow<FooterActionsButtonViewModel?> {
+    return footerActionsInteractor.userSwitcherStatus
+        .map { userSwitcherStatus ->
+            when (userSwitcherStatus) {
+                UserSwitcherStatusModel.Disabled -> null
+                is UserSwitcherStatusModel.Enabled -> {
+                    if (userSwitcherStatus.currentUserImage == null) {
+                        Log.e(
+                            TAG,
+                            "Skipped the addition of user switcher button because " +
+                                "currentUserImage is missing",
+                        )
+                        return@map null
+                    }
+
+                    userSwitcherButtonViewModel(
+                        themedContext,
+                        userSwitcherStatus,
+                        onUserSwitcherClicked,
+                    )
+                }
+            }
+        }
+        .distinctUntilChanged()
 }
 
 fun securityButtonViewModel(
@@ -369,7 +377,7 @@ fun userSwitcherButtonViewModel(
 
 private fun userSwitcherContentDescription(
     qsThemedContext: Context,
-    currentUser: String?
+    currentUser: String?,
 ): String? {
     return currentUser?.let { user ->
         qsThemedContext.getString(R.string.accessibility_quick_settings_user, user)
@@ -384,13 +392,9 @@ fun settingsButtonViewModel(
         id = R.id.settings_button_container,
         Icon.Resource(
             R.drawable.ic_settings,
-            ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
+            ContentDescription.Resource(R.string.accessibility_quick_settings_settings),
         ),
-        iconTint =
-            Utils.getColorAttrDefaultColor(
-                qsThemedContext,
-                R.attr.onShadeInactiveVariant,
-            ),
+        iconTint = Utils.getColorAttrDefaultColor(qsThemedContext, R.attr.onShadeInactiveVariant),
         backgroundColor = R.attr.shadeInactive,
         onSettingsButtonClicked,
     )
@@ -404,14 +408,14 @@ fun powerButtonViewModel(
         id = R.id.pm_lite,
         Icon.Resource(
             android.R.drawable.ic_lock_power_off,
-            ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
+            ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu),
         ),
         iconTint =
             Utils.getColorAttrDefaultColor(
                 qsThemedContext,
-                R.attr.onShadeActive,
+                if (DualShade.isEnabled) R.attr.onShadeInactiveVariant else R.attr.onShadeActive,
             ),
-        backgroundColor = R.attr.shadeActive,
+        backgroundColor = if (DualShade.isEnabled) R.attr.shadeInactive else R.attr.shadeActive,
         onPowerButtonClicked,
     )
 }

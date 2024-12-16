@@ -58,6 +58,11 @@ public class SplitScreenConstants {
      */
     public static final int SPLIT_POSITION_BOTTOM_OR_RIGHT = 1;
 
+    /**
+     * Deprecated and will be replaced fully by @SplitIndex. With support for 3+ apps in split,
+     * existing references to top/left and bottom/right will be replaced by INDEX_0 and INDEX_1
+     * respectively. For now they can be used interchangeably, the underlying ints are the same.
+     */
     @IntDef(prefix = {"SPLIT_POSITION_"}, value = {
             SPLIT_POSITION_UNDEFINED,
             SPLIT_POSITION_TOP_OR_LEFT,
@@ -84,6 +89,24 @@ public class SplitScreenConstants {
     })
     public @interface SplitIndex {
     }
+
+    /**
+     * Return the @SplitIndex constant for a given integer index. @SplitIndex is the replacement
+     * for @SplitPosition, and will be used interchangeably with @SplitPosition to support 3+ apps
+     * in split.
+     */
+    public static int getIndex(int i) {
+        return switch (i) {
+            case 0 -> SPLIT_INDEX_0;
+            case 1 -> SPLIT_INDEX_1;
+            case 2 -> SPLIT_INDEX_2;
+            case 3 -> SPLIT_INDEX_3;
+            default -> SPLIT_INDEX_UNDEFINED;
+        };
+    }
+
+    /** Signifies that user is currently not in split screen. */
+    public static final int NOT_IN_SPLIT = -1;
 
     /**
      * A snap target for two apps, where the split is 33-66. With FLAG_ENABLE_FLEXIBLE_SPLIT,
@@ -150,6 +173,41 @@ public class SplitScreenConstants {
             SNAP_TO_3_10_45_45,
     })
     public @interface PersistentSnapPosition {}
+
+    /**
+     * These are all the valid "states" that split screen can be in. It's the set of
+     * {@link PersistentSnapPosition} + {@link #NOT_IN_SPLIT}.
+     */
+    @IntDef(value = {
+            NOT_IN_SPLIT, // user is not in split screen
+            SNAP_TO_NONE, // in "free snap mode," where apps are fully resizable
+            SNAP_TO_2_33_66,
+            SNAP_TO_2_50_50,
+            SNAP_TO_2_66_33,
+            SNAP_TO_2_90_10,
+            SNAP_TO_2_10_90,
+            SNAP_TO_3_33_33_33,
+            SNAP_TO_3_45_45_10,
+            SNAP_TO_3_10_45_45,
+    })
+    public @interface SplitScreenState {}
+
+    /** Converts a {@link SplitScreenState} to a human-readable string. */
+    public static String stateToString(@SplitScreenState int state) {
+        return switch (state) {
+            case NOT_IN_SPLIT -> "NOT_IN_SPLIT";
+            case SNAP_TO_NONE -> "SNAP_TO_NONE";
+            case SNAP_TO_2_33_66 -> "SNAP_TO_2_33_66";
+            case SNAP_TO_2_50_50 -> "SNAP_TO_2_50_50";
+            case SNAP_TO_2_66_33 -> "SNAP_TO_2_66_33";
+            case SNAP_TO_2_90_10 -> "SNAP_TO_2_90_10";
+            case SNAP_TO_2_10_90 -> "SNAP_TO_2_10_90";
+            case SNAP_TO_3_33_33_33 -> "SNAP_TO_3_33_33_33";
+            case SNAP_TO_3_45_45_10 -> "SNAP_TO_3_45_45_10";
+            case SNAP_TO_3_10_45_45 -> "SNAP_TO_3_10_45_45";
+            default -> "UNKNOWN";
+        };
+    }
 
     /**
      * Checks if the snapPosition in question is a {@link PersistentSnapPosition}.

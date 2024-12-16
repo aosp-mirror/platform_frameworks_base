@@ -253,6 +253,16 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         verify(configurationForwarder).onConfigurationChanged(eq(config))
     }
 
+    @Test
+    @EnableFlags(AConfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
+    fun onMovedToDisplay_configForwarderSet_propagatesConfig() {
+        val config = Configuration()
+
+        underTest.onMovedToDisplay(1, config)
+
+        verify(configurationForwarder).dispatchOnMovedToDisplay(eq(1), eq(config))
+    }
+
     private fun captureInteractionEventHandler() {
         verify(underTest).setInteractionEventHandler(interactionEventHandlerCaptor.capture())
         interactionEventHandler = interactionEventHandlerCaptor.value

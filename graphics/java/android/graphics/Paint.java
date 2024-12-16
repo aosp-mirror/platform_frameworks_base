@@ -34,6 +34,7 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
@@ -2141,6 +2142,14 @@ public class Paint {
      * @see FontVariationAxis
      */
     public boolean setFontVariationSettings(String fontVariationSettings) {
+        return setFontVariationSettings(fontVariationSettings, 0 /* wght adjust */);
+    }
+
+    /**
+     * Set font variation settings with weight adjustment
+     * @hide
+     */
+    public boolean setFontVariationSettings(String fontVariationSettings, int wghtAdjust) {
         final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
                 && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
         if (useFontVariationStore) {
@@ -2154,8 +2163,13 @@ public class Paint {
 
             long builderPtr = nCreateFontVariationBuilder(axes.length);
             for (int i = 0; i < axes.length; ++i) {
-                nAddFontVariationToBuilder(builderPtr, axes[i].getOpenTypeTagValue(),
-                        axes[i].getStyleValue());
+                int tag = axes[i].getOpenTypeTagValue();
+                float value = axes[i].getStyleValue();
+                if (tag == 0x77676874 /* wght */) {
+                    value = Math.clamp(value + wghtAdjust,
+                            FontStyle.FONT_WEIGHT_MIN, FontStyle.FONT_WEIGHT_MAX);
+                }
+                nAddFontVariationToBuilder(builderPtr, tag, value);
             }
             nSetFontVariationOverride(mNativePaint, builderPtr);
             mFontVariationSettings = fontVariationSettings;

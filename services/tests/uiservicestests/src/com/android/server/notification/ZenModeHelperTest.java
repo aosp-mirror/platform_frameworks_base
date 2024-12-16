@@ -202,6 +202,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParserException;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -220,9 +223,6 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
@@ -2759,18 +2759,20 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     @EnableFlags(FLAG_MODES_API)
     public void addAutomaticZenRule_fromApp_ignoresHiddenEffects() {
-        ZenDeviceEffects zde = new ZenDeviceEffects.Builder()
-                .setShouldDisplayGrayscale(true)
-                .setShouldSuppressAmbientDisplay(true)
-                .setShouldDimWallpaper(true)
-                .setShouldUseNightMode(true)
-                .setShouldDisableAutoBrightness(true)
-                .setShouldDisableTapToWake(true)
-                .setShouldDisableTiltToWake(true)
-                .setShouldDisableTouch(true)
-                .setShouldMinimizeRadioUsage(true)
-                .setShouldMaximizeDoze(true)
-                .build();
+        ZenDeviceEffects zde =
+                new ZenDeviceEffects.Builder()
+                        .setShouldDisplayGrayscale(true)
+                        .setShouldSuppressAmbientDisplay(true)
+                        .setShouldDimWallpaper(true)
+                        .setShouldUseNightMode(true)
+                        .setShouldDisableAutoBrightness(true)
+                        .setShouldDisableTapToWake(true)
+                        .setShouldDisableTiltToWake(true)
+                        .setShouldDisableTouch(true)
+                        .setShouldMinimizeRadioUsage(true)
+                        .setShouldMaximizeDoze(true)
+                        .setShouldUseNightLight(true)
+                        .build();
 
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
                 mContext.getPackageName(),

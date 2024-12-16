@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Стандартната идентификация на повикванията е „забранено“. За следващото обаждане тя е разрешена."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е забранена."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е разрешена."</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Това приложение не е съвместимо със страници с размер 16 KB. Проверката за съответствие с APK файла не бе успешна. Това приложение ще се изпълнява в режим на съвместимост с размера на страницата. За най-добра съвместимост компилирайте отново приложението така, че да поддържа страници с размер 16 KB. За повече информация вижте &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Това приложение не е съвместимо със страници с размер 16 KB. Проверката за съответствие с ELF файла не бе успешна. Това приложение ще се изпълнява в режим на съвместимост с размера на страницата. За най-добра съвместимост компилирайте отново приложението така, че да поддържа страници с размер 16 KB. За повече информация вижте &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Това приложение не е съвместимо със страници с размер 16 KB. Проверките за съответствие с APK и ELF файловете не бяха успешни. Това приложение ще се изпълнява в режим на съвместимост с размера на страницата. За най-добра съвместимост компилирайте отново приложението така, че да поддържа страници с размер 16 KB. За повече информация вижте &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услугата не е обезпечена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да променяте настройката за идентификация на обажданията."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Преминахте към мобилни данни от <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -1155,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"след <xliff:g id="COUNT">%d</xliff:g> ч"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"след <xliff:g id="COUNT">%d</xliff:g> д"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"след <xliff:g id="COUNT">%d</xliff:g> г."</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"преди <xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"преди <xliff:g id="COUNT">%d</xliff:g> ч"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"преди <xliff:g id="COUNT">%d</xliff:g> д"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"преди <xliff:g id="COUNT">%d</xliff:g> г."</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ч"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> д"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> г."</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"след <xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"след <xliff:g id="COUNT">%d</xliff:g> ч"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"след <xliff:g id="COUNT">%d</xliff:g> д"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"след <xliff:g id="COUNT">%d</xliff:g> г."</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"преди <xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"преди <xliff:g id="COUNT">%d</xliff:g> ч"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"преди <xliff:g id="COUNT">%d</xliff:g> д"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"преди <xliff:g id="COUNT">%d</xliff:g> г."</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{преди # минута}other{преди # минути}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{преди # час}other{преди # часа}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{преди # ден}other{преди # дни}}"</string>
@@ -1947,8 +1966,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"От <xliff:g id="START">%1$s</xliff:g> до <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Всички календари"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> заглушава някои звуци"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Възникна вътрешен проблем с устройството ви. То може да е нестабилно, докато не възстановите фабричните настройки."</string>

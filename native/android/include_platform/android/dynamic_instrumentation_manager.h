@@ -40,9 +40,12 @@ typedef struct ADynamicInstrumentationManager_ExecutableMethodFileOffsets
  *
  * @param uid of targeted process.
  * @param pid of targeted process.
- * @param processName to disambiguate from corner cases that may arise from pid reuse.
+ * @param processName UTF-8 encoded string representing the same process as specified by `pid`.
+ *                    Supplied to disambiguate from corner cases that may arise from pid reuse.
+ *                    Referenced parameter must outlive the returned
+ *                    ADynamicInstrumentationManager_TargetProcess.
  */
-ADynamicInstrumentationManager_TargetProcess* _Nonnull
+ADynamicInstrumentationManager_TargetProcess* _Nullable
         ADynamicInstrumentationManager_TargetProcess_create(
                 uid_t uid, pid_t pid, const char* _Nonnull processName) __INTRODUCED_IN(36);
 /**
@@ -51,22 +54,27 @@ ADynamicInstrumentationManager_TargetProcess* _Nonnull
  * @param instance returned from ADynamicInstrumentationManager_TargetProcess_create.
  */
 void ADynamicInstrumentationManager_TargetProcess_destroy(
-        const ADynamicInstrumentationManager_TargetProcess* _Nonnull instance) __INTRODUCED_IN(36);
+        const ADynamicInstrumentationManager_TargetProcess* _Nullable instance) __INTRODUCED_IN(36);
 
 /**
  * Initializes an ADynamicInstrumentationManager_MethodDescriptor. Caller must clean up when they
- * are done with ADynamicInstrumentationManager_MethodDescriptor_Destroy.
+ * are done with ADynamicInstrumentationManager_MethodDescriptor_destroy.
  *
- * @param fullyQualifiedClassName fqcn of class containing the method.
- * @param methodName
- * @param fullyQualifiedParameters fqcn of parameters of the method's signature, or e.g. "int" for
- *                                 primitives.
+ * @param fullyQualifiedClassName UTF-8 encoded fqcn of class containing the method. Referenced
+ *                                parameter must outlive the returned
+ *                                ADynamicInstrumentationManager_MethodDescriptor.
+ * @param methodName UTF-8 encoded method name. Referenced parameter must outlive the returned
+ *                   ADynamicInstrumentationManager_MethodDescriptor.
+ * @param fullyQualifiedParameters UTF-8 encoded fqcn of parameters of the method's signature,
+ *                                 or e.g. "int" for primitives. Referenced parameter should
+ *                                 outlive the returned
+ *                                 ADynamicInstrumentationManager_MethodDescriptor.
  * @param numParameters length of `fullyQualifiedParameters` array.
  */
-ADynamicInstrumentationManager_MethodDescriptor* _Nonnull
+ADynamicInstrumentationManager_MethodDescriptor* _Nullable
         ADynamicInstrumentationManager_MethodDescriptor_create(
                 const char* _Nonnull fullyQualifiedClassName, const char* _Nonnull methodName,
-                const char* _Nonnull fullyQualifiedParameters[_Nonnull], size_t numParameters)
+                const char* _Nonnull* _Nonnull fullyQualifiedParameters, size_t numParameters)
                 __INTRODUCED_IN(36);
 /**
  * Clean up an ADynamicInstrumentationManager_MethodDescriptor.
@@ -74,14 +82,16 @@ ADynamicInstrumentationManager_MethodDescriptor* _Nonnull
  * @param instance returned from ADynamicInstrumentationManager_MethodDescriptor_create.
  */
 void ADynamicInstrumentationManager_MethodDescriptor_destroy(
-        const ADynamicInstrumentationManager_MethodDescriptor* _Nonnull instance)
+        const ADynamicInstrumentationManager_MethodDescriptor* _Nullable instance)
         __INTRODUCED_IN(36);
 
 /**
  * Get the containerPath calculated by
  * ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
  * @param instance created with ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
- * @return The OS path of the containing file.
+ * @return The OS path of the containing file as a UTF-8 string, which has the same lifetime
+ *         as the ADynamicInstrumentationManager_ExecutableMethodFileOffsets instance passed
+ *         as a param.
  */
 const char* _Nullable ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerPath(
         const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
@@ -90,7 +100,8 @@ const char* _Nullable ADynamicInstrumentationManager_ExecutableMethodFileOffsets
  * Get the containerOffset calculated by
  * ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
  * @param instance created with ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
- * @return The offset of the containing file within the process' memory.
+ * @return The absolute address of the containing file within remote the process' virtual memory
+ *         space.
  */
 uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerOffset(
         const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
@@ -98,7 +109,8 @@ uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainer
 /**
  * Get the methodOffset calculated by ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
  * @param instance created with ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
- * @return The offset of the method within the containing file.
+ * @return The offset of the method within the container whose address is returned by
+ *         ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerOffset.
  */
 uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOffset(
         const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
@@ -109,7 +121,7 @@ uint64_t ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOff
  * @param instance returned from ADynamicInstrumentationManager_getExecutableMethodFileOffsets.
  */
 void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
-        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nonnull instance)
+        const ADynamicInstrumentationManager_ExecutableMethodFileOffsets* _Nullable instance)
         __INTRODUCED_IN(36);
 /**
  * Provides ART metadata about the described java method within the target process.
@@ -118,7 +130,9 @@ void ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy(
  * @param methodDescriptor describes the targeted method.
  * @param out will be populated with the data if successful. A nullptr combined
  *        with an OK status means that the program method is defined, but the offset
- *        info was unavailable because it is not AOT compiled.
+ *        info was unavailable because it is not AOT compiled. Caller owns `out` and
+ *        should clean it up with
+ *        ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy.
  * @return status indicating success or failure. The values correspond to the `binder_exception_t`
  *         enum values from <android/binder_status.h>.
  */

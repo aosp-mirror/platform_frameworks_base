@@ -16,11 +16,14 @@
 
 package com.android.systemui.education.ui.viewmodel
 
+import com.android.systemui.contextualeducation.GestureType
+
 sealed class ContextualEduContentViewModel(open val userId: Int)
 
 data class ContextualEduNotificationViewModel(
     val title: String,
     val message: String,
+    val gestureType: GestureType,
     override val userId: Int,
 ) : ContextualEduContentViewModel(userId)
 

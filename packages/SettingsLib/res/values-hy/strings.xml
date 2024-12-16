@@ -239,7 +239,7 @@
     <string name="category_work" msgid="4014193632325996115">"Աշխատանքային"</string>
     <string name="category_private" msgid="4244892185452788977">"Մասնավոր"</string>
     <string name="category_clone" msgid="1554511758987195974">"Կլոն"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Մշակողի ընտրանքներ"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Ծրագրավորողի ընտրանքներ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Միացնել մշակողի ընտրանքները"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտատիրոջ"</string>
@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Այս հեռախոսը"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Այս պլանշետը"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Այս համակարգիչը (ներքին)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (8508713779441163887) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Այս հեռուստացույցը"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Դոկ-կայանով բարձրախոս"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Արտաքին սարք"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Միացված սարք"</string>
@@ -607,10 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Միացված է ARC-ի միջոցով"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Միացված է eARC-ի միջոցով"</string>
-    <!-- no translation found for tv_media_transfer_internal_speakers (4662765121700213785) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi_title (6715658310934507444) -->
-    <skip />
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Ներկառուցված բարձրախոս"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Հեռուստացույցի աուդիո"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Կապի խնդիր կա: Սարքն անջատեք և նորից միացրեք:"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Լարով աուդիո սարք"</string>
     <string name="help_label" msgid="3528360748637781274">"Օգնություն և հետադարձ կապ"</string>

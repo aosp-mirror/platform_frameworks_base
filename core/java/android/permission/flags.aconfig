@@ -57,7 +57,7 @@ flag {
     is_exported: true
     is_fixed_read_only: true
     namespace: "permissions"
-    description: "enable enhanced confirmation incall apis"
+    description: "DEPRECATED, does not gate any apis"
     bug: "364535720"
 }
 
@@ -213,6 +213,7 @@ flag {
     namespace: "permissions"
     description: "Enable getDeviceId API in OpEventProxyInfo"
     bug: "337340961"
+    is_exported: true
 }
 
 flag {
@@ -254,6 +255,7 @@ flag {
   namespace: "permissions"
   description: "New setOnOpNotedCallback API to allow subscribing to only sync ops."
   bug: "372910217"
+  is_exported: true
 }
 
 flag {
@@ -338,7 +340,7 @@ flag {
     is_fixed_read_only: true
     namespace: "health_fitness_aconfig"
     description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
-    bug: "376014879" # android_fr bug
+    bug: "324019102" # android_fr bug
     is_exported: true
 }
 
@@ -454,3 +456,40 @@ flag {
     description: "API change to enable getTextClassifier by type"
     bug: "377229653"
 }
+
+flag {
+    name: "updatable_text_classifier_for_otp_detection_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables text classifier for OTP detection that is updatable from mainline module"
+    bug: "377229653"
+}
+
+flag {
+    name: "rate_limit_batched_note_op_async_callbacks_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Rate limit async noteOp callbacks for batched noteOperation binder call"
+    bug: "366013082"
+}
+
+flag {
+    name: "system_vendor_intelligence_role_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "This flag is used to enable the role system_vendor_intelligence"
+    bug: "377553620"
+}
+
+flag {
+    name: "fine_power_monitor_permission"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Add support for fine-grained PowerMonitor readings"
+    bug: "341941666"
+}
+

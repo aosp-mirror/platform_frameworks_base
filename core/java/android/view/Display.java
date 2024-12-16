@@ -19,6 +19,7 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES;
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
@@ -58,6 +59,7 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1048,6 +1050,19 @@ public final class Display {
     }
 
     /**
+     * Returns the smallest size of the display in dp
+     * @hide
+     */
+    public float getMinSizeDimensionDp() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            mDisplayInfo.getAppMetrics(mTempMetrics);
+            return TypedValue.deriveDimension(COMPLEX_UNIT_DIP,
+                    Math.min(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight), mTempMetrics);
+        }
+    }
+
+    /**
      * @deprecated Use {@link WindowMetrics#getBounds#width()} instead.
      */
     @Deprecated
@@ -1301,17 +1316,23 @@ public final class Display {
     }
 
     /**
-     * Represents the {@link FrameRateCategory} for the Normal frame rate
+     * Normal category determines the framework's recommended normal frame rate.
+     * Opt for this normal rate unless a higher frame rate significantly enhances
+     * the user experience.
      *
-     * @see FrameRateCategory
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_HIGH
      */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
 
     /**
-     * Represents the {@link FrameRateCategory} for the High frame rate
+     * High category determines the framework's recommended high frame rate.
+     * Opt for this high rate when a higher frame rate significantly enhances
+     * the user experience.
      *
-     * @see FrameRateCategory
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_NORMAL
      */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_HIGH = 1;
@@ -1332,22 +1353,17 @@ public final class Display {
      *
      * <p> For example, an animation that does not require fast render rates can use
      * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
-     * The suggested frame rate then can be used in the
-     * {@link Surface.FrameRateParams.Builder#setDesiredRateRange} for desiredMinRate.
      *
      * <pre>{@code
      *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
-     *  Surface.FrameRateParams params = new Surface.FrameRateParams.Builder().
-     *                                      setDesiredRateRange(desiredMinRate, Float.MAX).build();
-     *  surface.setFrameRate(params);
+     *  surface.setFrameRate(desiredMinRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
      * }</pre>
      * </p>
      *
      * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
      *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
      *
-     * @see Surface#setFrameRate(Surface.FrameRateParams)
-     * @see SurfaceControl.Transaction#setFrameRate(SurfaceControl, Surface.FrameRateParams)
+     * @see Surface#setFrameRate(float, int)
      * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
      * or {@link #FRAME_RATE_CATEGORY_HIGH}
      */
@@ -2036,6 +2052,22 @@ public final class Display {
         synchronized (mLock) {
             updateDisplayInfoLocked();
             return mIsValid ? mDisplayInfo.committedState : STATE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Returns whether the display is eligible for hosting tasks.
+     *
+     * For example, if the display is used for mirroring, this will return {@code false}.
+     *
+     * TODO (b/383666349): Rename this later once there is a better option.
+     *
+     * @hide
+     */
+    public boolean canHostTasks() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mIsValid && mDisplayInfo.canHostTasks;
         }
     }
 

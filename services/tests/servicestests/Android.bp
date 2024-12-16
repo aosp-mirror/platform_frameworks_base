@@ -897,16 +897,6 @@ test_module_config {
 }
 
 test_module_config {
-    name: "FrameworksServicesTests_server_accessibility",
-    base: "FrameworksServicesTests",
-    test_suites: [
-        "automotive-tests",
-        "device-tests",
-    ],
-    include_filters: ["com.android.server.accessibility"],
-}
-
-test_module_config {
     name: "FrameworksServicesTests_server_binarytransparencyservicetest",
     base: "FrameworksServicesTests",
     test_suites: [

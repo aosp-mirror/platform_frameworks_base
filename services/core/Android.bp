@@ -127,6 +127,7 @@ java_library_static {
         "android.hardware.power-java_shared",
         "latest_android_hardware_broadcastradio_java_static",
         "services_crashrecovery_stubs_conditionally",
+        "ondeviceintelligence_conditionally",
     ],
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
@@ -148,6 +149,9 @@ java_library_static {
 
         // Java/AIDL sources to be moved out to CrashRecovery module
         ":services-crashrecovery-sources",
+
+        // Indicate whether VCN is in platform or mainline
+        ":vcn-location-sources",
     ],
 
     libs: [
@@ -157,8 +161,8 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.gnss-V2-java",
         "android.hardware.vibrator-V3-java",
+        "androidx.annotation_annotation",
         "app-compat-annotations",
-        "art_exported_aconfig_flags_lib",
         "framework-tethering.stubs.module_lib",
         "keepanno-annotations",
         "service-art.stubs.system_server",
@@ -178,6 +182,7 @@ java_library_static {
 
     static_libs: [
         "android.frameworks.vibrator-V1-java", // AIDL
+        "android.frameworks.devicestate-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.authsecret-V1-java",
         "android.hardware.boot-V1.0-java", // HIDL
@@ -238,11 +243,12 @@ java_library_static {
         "connectivity_flags_lib",
         "device_config_service_flags_java",
         "dreams_flags_lib",
-        "aconfig_flags_java",
         "aconfig_new_storage_flags_lib",
         "powerstats_flags_lib",
         "locksettings_flags_lib",
         "profiling_flags_lib",
+        "android.adpf.sessionmanager_aidl-java",
+        "uprobestats_flags_java_lib",
     ],
     javac_shard_size: 50,
     javacflags: [

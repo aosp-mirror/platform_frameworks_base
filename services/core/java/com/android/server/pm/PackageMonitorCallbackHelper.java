@@ -34,6 +34,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -73,22 +74,16 @@ public class PackageMonitorCallbackHelper {
     }
 
     public void onUserRemoved(int userId) {
-        ArrayList<IRemoteCallback> targetUnRegisteredCallbacks = null;
+        final ArrayList<IRemoteCallback> targetUnRegisteredCallbacks = new ArrayList<>();
         synchronized (mLock) {
-            int registerCount = mCallbacks.getRegisteredCallbackCount();
-            for (int i = 0; i < registerCount; i++) {
-                RegisterUser registerUser =
-                        (RegisterUser) mCallbacks.getRegisteredCallbackCookie(i);
+            mCallbacks.broadcast((callback, user) -> {
+                RegisterUser registerUser = (RegisterUser) user;
                 if (registerUser.getUserId() == userId) {
-                    IRemoteCallback callback = mCallbacks.getRegisteredCallbackItem(i);
-                    if (targetUnRegisteredCallbacks == null) {
-                        targetUnRegisteredCallbacks = new ArrayList<>();
-                    }
                     targetUnRegisteredCallbacks.add(callback);
                 }
-            }
+            });
         }
-        if (targetUnRegisteredCallbacks != null && targetUnRegisteredCallbacks.size() > 0) {
+        if (!targetUnRegisteredCallbacks.isEmpty()) {
             int count = targetUnRegisteredCallbacks.size();
             for (int i = 0; i < count; i++) {
                 unregisterPackageMonitorCallback(targetUnRegisteredCallbacks.get(i));
@@ -202,21 +197,13 @@ public class PackageMonitorCallbackHelper {
 
     private void doNotifyCallbacksByIntent(Intent intent, int userId,
             int[] broadcastAllowList, Handler handler) {
-        RemoteCallbackList<IRemoteCallback> callbacks;
-        synchronized (mLock) {
-            callbacks = mCallbacks;
-        }
-        doNotifyCallbacks(callbacks, intent, userId, broadcastAllowList, handler,
+        doNotifyCallbacks(intent, userId, broadcastAllowList, handler,
                 null /* filterExtrasFunction */);
     }
 
     private void doNotifyCallbacksByAction(String action, String pkg, Bundle extras, int[] userIds,
             SparseArray<int[]> broadcastAllowList, Handler handler,
             BiFunction<Integer, Bundle, Bundle> filterExtrasFunction) {
-        RemoteCallbackList<IRemoteCallback> callbacks;
-        synchronized (mLock) {
-            callbacks = mCallbacks;
-        }
         for (int userId : userIds) {
             final Intent intent = new Intent(action,
                     pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
@@ -232,48 +219,58 @@ public class PackageMonitorCallbackHelper {
 
             final int[] allowUids =
                     broadcastAllowList != null ? broadcastAllowList.get(userId) : null;
-            doNotifyCallbacks(callbacks, intent, userId, allowUids, handler, filterExtrasFunction);
+            doNotifyCallbacks(intent, userId, allowUids, handler, filterExtrasFunction);
         }
     }
 
-    private void doNotifyCallbacks(RemoteCallbackList<IRemoteCallback> callbacks,
-            Intent intent, int userId, int[] allowUids, Handler handler,
+    private void doNotifyCallbacks(Intent intent, int userId, int[] allowUids, Handler handler,
             BiFunction<Integer, Bundle, Bundle> filterExtrasFunction) {
-        handler.post(() -> callbacks.broadcast((callback, user) -> {
-            RegisterUser registerUser = (RegisterUser) user;
-            if ((registerUser.getUserId() != UserHandle.USER_ALL) && (registerUser.getUserId()
-                    != userId)) {
-                return;
-            }
-            int registerUid = registerUser.getUid();
-            if (allowUids != null && !UserHandle.isSameApp(registerUid, Process.SYSTEM_UID)
-                    && !ArrayUtils.contains(allowUids, registerUid)) {
-                if (DEBUG) {
-                    Slog.w(TAG, "Skip invoke PackageMonitorCallback for " + intent.getAction()
-                            + ", uid " + registerUid);
-                }
-                return;
-            }
-            Intent newIntent = intent;
-            if (filterExtrasFunction != null) {
-                final Bundle extras = intent.getExtras();
-                if (extras != null) {
-                    final Bundle filteredExtras = filterExtrasFunction.apply(registerUid, extras);
-                    if (filteredExtras == null) {
-                        // caller is unable to access this intent
+        handler.post(() -> {
+            final ArrayList<Pair<IRemoteCallback, Intent>> target = new ArrayList<>();
+            synchronized (mLock) {
+                mCallbacks.broadcast((callback, user) -> {
+                    RegisterUser registerUser = (RegisterUser) user;
+                    if ((registerUser.getUserId() != UserHandle.USER_ALL)
+                            && (registerUser.getUserId() != userId)) {
+                        return;
+                    }
+                    int registerUid = registerUser.getUid();
+                    if (allowUids != null && !UserHandle.isSameApp(registerUid, Process.SYSTEM_UID)
+                            && !ArrayUtils.contains(allowUids, registerUid)) {
                         if (DEBUG) {
-                            Slog.w(TAG,
-                                    "Skip invoke PackageMonitorCallback for " + intent.getAction()
-                                            + " because null filteredExtras");
+                            Slog.w(TAG, "Skip invoke PackageMonitorCallback for "
+                                    + intent.getAction() + ", uid " + registerUid);
                         }
                         return;
                     }
-                    newIntent = new Intent(newIntent);
-                    newIntent.replaceExtras(filteredExtras);
-                }
+                    Intent newIntent = intent;
+                    if (filterExtrasFunction != null) {
+                        final Bundle extras = intent.getExtras();
+                        if (extras != null) {
+                            final Bundle filteredExtras =
+                                    filterExtrasFunction.apply(registerUid, extras);
+                            if (filteredExtras == null) {
+                                // caller is unable to access this intent
+                                if (DEBUG) {
+                                    Slog.w(TAG,
+                                            "Skip invoke PackageMonitorCallback for "
+                                                    + intent.getAction()
+                                                    + " because null filteredExtras");
+                                }
+                                return;
+                            }
+                            newIntent = new Intent(newIntent);
+                            newIntent.replaceExtras(filteredExtras);
+                        }
+                    }
+                    target.add(new Pair<>(callback, newIntent));
+                });
             }
-            invokeCallback(callback, newIntent);
-        }));
+            for (int i = 0; i < target.size(); i++) {
+                Pair<IRemoteCallback, Intent> p = target.get(i);
+                invokeCallback(p.first, p.second);
+            }
+        });
     }
 
     private void invokeCallback(IRemoteCallback callback, Intent intent) {

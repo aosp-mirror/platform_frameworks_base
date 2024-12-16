@@ -128,7 +128,7 @@
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"输入设备"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"互联网连接"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"允许访问通讯录和通话记录"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"信息将用于来电通知等用途"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"这些信息将用于来电通知等用途"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"共享互联网连接"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"短信"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 卡访问权限"</string>
@@ -586,8 +586,7 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"这部手机"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"这部平板电脑"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此计算机（内部）"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (8508713779441163887) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"此电视"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
@@ -607,10 +606,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"已通过 ARC 连接"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"已通过 eARC 连接"</string>
-    <!-- no translation found for tv_media_transfer_internal_speakers (4662765121700213785) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi_title (6715658310934507444) -->
-    <skip />
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"内置扬声器"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"电视音频"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>

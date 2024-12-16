@@ -55,7 +55,7 @@
             android:layout_height="@dimen/screenrecord_option_icon_size"
             android:layout_weight="0"
             android:src="@drawable/ic_screenrecord"
-            app:tint="?androidprv:attr/materialColorOnSurface"
+            app:tint="@androidprv:color/materialColorOnSurface"
             android:importantForAccessibility="no"
             android:layout_gravity="center"
             android:layout_marginEnd="@dimen/screenrecord_option_padding" />
@@ -95,7 +95,7 @@
             android:layout_height="@dimen/screenrecord_option_icon_size"
             android:layout_weight="0"
             android:src="@drawable/ic_bugreport"
-            app:tint="?androidprv:attr/materialColorOnSurface"
+            app:tint="@androidprv:color/materialColorOnSurface"
             android:importantForAccessibility="no"
             android:layout_gravity="center"
             android:layout_marginEnd="@dimen/screenrecord_option_padding" />

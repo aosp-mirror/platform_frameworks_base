@@ -521,6 +521,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
             Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata,
             boolean bootCompleted, DisplayManagerFlags flags) {
+        final Resources resources = context.getResources();
+
         mFlags = flags;
         mInjector = injector != null ? injector : new Injector();
         mClock = mInjector.getClock();
@@ -540,7 +542,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mDisplayPowerProximityStateController = mInjector.getDisplayPowerProximityStateController(
                 mWakelockController, mDisplayDeviceConfig, mHandler.getLooper(),
                 () -> updatePowerState(), mDisplayId, mSensorManager);
-        mDisplayStateController = new DisplayStateController(mDisplayPowerProximityStateController);
+        mDisplayStateController = new DisplayStateController(
+            mDisplayPowerProximityStateController,
+            resources.getBoolean(R.bool.config_skipScreenOffTransition));
         mTag = TAG + "[" + mDisplayId + "]";
         mThermalBrightnessThrottlingDataId =
                 logicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
@@ -574,17 +578,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 Settings.Global.getUriFor(Settings.Global.Wearable.BEDTIME_MODE),
                 false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
 
-        final Resources resources = context.getResources();
-
         // DOZE AND DIM SETTINGS
         mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
                 mDisplayDeviceConfig.getDefaultDozeBrightness());
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 R.bool.config_skipScreenOnBrightnessRamp);
-        mDozeScaleFactor = context.getResources().getFraction(
-                R.fraction.config_screenAutoBrightnessDozeScaleFactor,
-                1, 1);
+        mDozeScaleFactor = resources.getFraction(
+                R.fraction.config_screenAutoBrightnessDozeScaleFactor, 1, 1);
 
         Runnable modeChangeCallback = () -> {
             sendUpdatePowerState();
@@ -906,6 +907,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mLogicalDisplay.getPowerThrottlingDataIdLocked();
 
         mHandler.postAtTime(() -> {
+            if (mStopped) {
+                // DPC has already stopped, don't execute any more.
+                return;
+            }
+
             boolean changed = false;
 
             if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
@@ -1641,6 +1647,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 (mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_TEMPORARY)
                         || mAutomaticBrightnessStrategy
                         .isTemporaryAutoBrightnessAdjustmentApplied();
+        float rampSpeed = 0;
         if (!mPendingScreenOff) {
             if (mSkipScreenOnBrightnessRamp) {
                 if (state == Display.STATE_ON) {
@@ -1742,7 +1749,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                             customAnimationRate, /* ignoreAnimationLimits = */true);
                 } else {
                     boolean isIncreasing = animateValue > currentBrightness;
-                    final float rampSpeed;
                     final boolean idle = mAutomaticBrightnessController != null
                             && mAutomaticBrightnessController.isInIdleMode();
                     if (isIncreasing && slowChange) {
@@ -1827,6 +1833,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 .getDisplayBrightnessStrategyName());
         mTempBrightnessEvent.setAutomaticBrightnessEnabled(
                 displayBrightnessState.getShouldUseAutoBrightness());
+        mTempBrightnessEvent.setSlowChange(slowChange);
+        mTempBrightnessEvent.setRampSpeed(rampSpeed);
         // Temporary is what we use during slider interactions. We avoid logging those so that
         // we don't spam logcat when the slider is being used.
         boolean tempToTempTransition =
@@ -2228,7 +2236,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     setReportedScreenState(REPORTED_TO_POLICY_SCREEN_TURNING_OFF);
                     blockScreenOff();
                     mWindowManagerPolicy.screenTurningOff(mDisplayId, mPendingScreenOffUnblocker);
-                    unblockScreenOff();
                 } else if (mPendingScreenOffUnblocker != null) {
                     // Abort doing the state change until screen off is unblocked.
                     return false;
@@ -3306,7 +3313,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 int displayId, SensorManager sensorManager) {
             return new DisplayPowerProximityStateController(wakelockController, displayDeviceConfig,
                     looper, nudgeUpdatePowerState,
-                    displayId, sensorManager, /* injector= */ null);
+                    displayId, sensorManager);
         }
 
         AutomaticBrightnessController getAutomaticBrightnessController(

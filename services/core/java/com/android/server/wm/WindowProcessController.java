@@ -1263,7 +1263,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
                             && com.android.window.flags.Flags
                                     .processPriorityPolicyForMultiWindowMode()
-                            && task.getAdjacentTask() != null) {
+                            && task.hasAdjacentTask()) {
                         stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
                     } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
                         hasResumedFreeform = true;

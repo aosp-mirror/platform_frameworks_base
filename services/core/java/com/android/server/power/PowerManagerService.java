@@ -6099,16 +6099,28 @@ public final class PowerManagerService extends SystemService
             }
         }
 
-        public float getBrightnessConstraint(int constraint) {
+        @Override
+        public float getBrightnessConstraint(
+                int displayId, @PowerManager.BrightnessConstraint int constraint) {
+            DisplayInfo info = null;
+            if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()
+                    && mDisplayManagerInternal != null) {
+                info = mDisplayManagerInternal.getDisplayInfo(displayId);
+            }
             switch (constraint) {
                 case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM:
-                    return mScreenBrightnessMinimum;
+                    return info != null && isValidBrightnessValue(info.brightnessMinimum)
+                            ? info.brightnessMinimum : mScreenBrightnessMinimum;
                 case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM:
-                    return mScreenBrightnessMaximum;
+                    return info != null && isValidBrightnessValue(info.brightnessMaximum)
+                            ? info.brightnessMaximum : mScreenBrightnessMaximum;
                 case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT:
-                    return mScreenBrightnessDefault;
+                    return info != null && isValidBrightnessValue(info.brightnessDefault)
+                            ? info.brightnessDefault : mScreenBrightnessDefault;
                 case PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM:
-                    return mScreenBrightnessDim;
+                    return android.companion.virtualdevice.flags.Flags.deviceAwareDisplayPower()
+                            && info != null && isValidBrightnessValue(info.brightnessDim)
+                            ? info.brightnessDim : mScreenBrightnessDim;
                 default:
                     return PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
@@ -7081,7 +7093,11 @@ public final class PowerManagerService extends SystemService
                     if ((flags & PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP) != 0) {
                         if (mFoldGracePeriodProvider.isEnabled()) {
                             if (!powerGroup.hasWakeLockKeepingScreenOnLocked()) {
+                                Slog.d(TAG, "Showing dismissible keyguard");
                                 mNotifier.showDismissibleKeyguard();
+                            } else {
+                                Slog.i(TAG, "There is a screen wake lock present: "
+                                        + "sleep request will be ignored");
                             }
                             continue; // never actually goes to sleep for SOFT_SLEEP
                         } else {

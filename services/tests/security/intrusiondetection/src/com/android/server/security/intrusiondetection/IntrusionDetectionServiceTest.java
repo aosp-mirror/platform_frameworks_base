@@ -16,12 +16,12 @@
 
 package com.android.server.security.intrusiondetection;
 
+import static android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE;
 import static android.Manifest.permission.INTERNET;
 import static android.Manifest.permission.MANAGE_INTRUSION_DETECTION_STATE;
 import static android.Manifest.permission.READ_INTRUSION_DETECTION_STATE;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -45,7 +45,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.Bundle;
 import android.os.Looper;
 import android.os.PermissionEnforcer;
 import android.os.RemoteException;
@@ -61,17 +60,13 @@ import android.util.Log;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.bedstead.harrier.BedsteadJUnit4;
-import com.android.bedstead.harrier.annotations.AfterClass;
-import com.android.bedstead.harrier.annotations.BeforeClass;
 import com.android.bedstead.multiuser.annotations.RequireRunOnSystemUser;
 import com.android.bedstead.nene.TestApis;
 import com.android.bedstead.nene.devicepolicy.DeviceOwner;
-import com.android.bedstead.nene.exceptions.NeneException;
 import com.android.bedstead.permissions.CommonPermissions;
 import com.android.bedstead.permissions.PermissionContext;
 import com.android.bedstead.permissions.annotations.EnsureHasPermission;
 import com.android.coretests.apps.testapp.LocalIntrusionDetectionEventTransport;
-import com.android.internal.infra.AndroidFuture;
 import com.android.server.ServiceThread;
 
 import org.junit.Before;
@@ -129,28 +124,6 @@ public class IntrusionDetectionServiceTest {
         "com.android.coretests.apps.testapp";
     private static final String TEST_SERVICE = TEST_PKG + ".TestLoggingService";
 
-    @BeforeClass
-    public static void setDeviceOwner() {
-        ComponentName admin =
-                new ComponentName(
-                        ApplicationProvider.getApplicationContext(),
-                        IntrusionDetectionAdminReceiver.class);
-        try {
-            sDeviceOwner = TestApis.devicePolicy().setDeviceOwner(admin);
-        } catch (NeneException e) {
-            fail("Failed to set device owner " + admin.flattenToString() + ": " + e);
-        }
-    }
-
-    @AfterClass
-    public static void removeDeviceOwner() {
-        try {
-            sDeviceOwner.remove();
-        } catch (NeneException e) {
-            fail("Failed to remove device owner : " + e);
-        }
-    }
-
     @SuppressLint("VisibleForTests")
     @Before
     public void setUp() throws Exception {
@@ -159,6 +132,7 @@ public class IntrusionDetectionServiceTest {
         mPermissionEnforcer = new FakePermissionEnforcer();
         mPermissionEnforcer.grant(READ_INTRUSION_DETECTION_STATE);
         mPermissionEnforcer.grant(MANAGE_INTRUSION_DETECTION_STATE);
+        mPermissionEnforcer.grant(BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE);
 
         mTestLooper = new TestLooper();
         mLooper = mTestLooper.getLooper();
@@ -178,6 +152,7 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
+    @EnsureHasPermission(CommonPermissions.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void testRemoveStateCallback_NoPermission() {
         mPermissionEnforcer.revoke(READ_INTRUSION_DETECTION_STATE);
         StateCallback scb = new StateCallback();
@@ -229,6 +204,7 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
+    @Ignore("Unit test does not run as system service UID")
     public void testRemoveStateCallback() throws RemoteException {
         mIntrusionDetectionService.setState(STATE_DISABLED);
         StateCallback scb1 = new StateCallback();
@@ -239,7 +215,6 @@ public class IntrusionDetectionServiceTest {
         assertEquals(STATE_DISABLED, scb1.mState);
         assertEquals(STATE_DISABLED, scb2.mState);
 
-        doReturn(true).when(mDataAggregator).initialize();
         doReturn(true).when(mIntrusionDetectionEventTransportConnection).initialize();
 
         mIntrusionDetectionService.getBinderService().removeStateCallback(scb2);
@@ -252,6 +227,7 @@ public class IntrusionDetectionServiceTest {
         assertNull(ccb.mErrorCode);
     }
 
+    @Ignore("Unit test does not run as system service UID")
     @Test
     public void testEnable_FromDisabled_TwoStateCallbacks() throws RemoteException {
         mIntrusionDetectionService.setState(STATE_DISABLED);
@@ -412,39 +388,13 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
-    @RequireRunOnSystemUser
-    public void testDataSources_Initialize_HasDeviceOwner() throws Exception {
-        NetworkLogSource networkLogSource = new NetworkLogSource(mContext, mDataAggregator);
-        SecurityLogSource securityLogSource = new SecurityLogSource(mContext, mDataAggregator);
-
-        assertTrue(networkLogSource.initialize());
-        assertTrue(securityLogSource.initialize());
-    }
-
-    @Test
-    @RequireRunOnSystemUser
-    public void testDataSources_Initialize_NoDeviceOwner() throws Exception {
-        NetworkLogSource networkLogSource = new NetworkLogSource(mContext, mDataAggregator);
-        SecurityLogSource securityLogSource = new SecurityLogSource(mContext, mDataAggregator);
-        ComponentName admin = sDeviceOwner.componentName();
-
-        try {
-            sDeviceOwner.remove();
-            assertFalse(networkLogSource.initialize());
-            assertFalse(securityLogSource.initialize());
-        } finally {
-            sDeviceOwner = TestApis.devicePolicy().setDeviceOwner(admin);
-        }
-    }
-
-    @Test
+    @Ignore("Unit test does not run as system service UID")
     @RequireRunOnSystemUser
     @EnsureHasPermission(CommonPermissions.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void testDataAggregator_AddSecurityEvent() throws Exception {
         mIntrusionDetectionService.setState(STATE_ENABLED);
         ServiceThread mockThread = spy(ServiceThread.class);
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
-        assertTrue(mDataAggregator.initialize());
 
         // SecurityLogging generates a number of events and callbacks, so create a latch to wait for
         // the given event.
@@ -488,12 +438,12 @@ public class IntrusionDetectionServiceTest {
 
     @Test
     @RequireRunOnSystemUser
+    @Ignore("Unit test does not run as system service UID")
     @EnsureHasPermission(CommonPermissions.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void testDataAggregator_AddNetworkEvent() throws Exception {
         mIntrusionDetectionService.setState(STATE_ENABLED);
         ServiceThread mockThread = spy(ServiceThread.class);
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
-        assertTrue(mDataAggregator.initialize());
 
         // Network logging may log multiple and callbacks, so create a latch to wait for
         // the given event.
@@ -578,6 +528,9 @@ public class IntrusionDetectionServiceTest {
     }
 
     @Test
+    @RequireRunOnSystemUser
+    @EnsureHasPermission(
+            android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE)
     public void test_StartIntrusionDetectionEventTransportService() {
         final String TAG = "test_StartIntrusionDetectionEventTransportService";
         ServiceConnection serviceConnection = null;
@@ -637,6 +590,20 @@ public class IntrusionDetectionServiceTest {
         assertEquals(1, transport.getEvents().size());
 
         return serviceConnection;
+    }
+
+    @Test
+    @RequireRunOnSystemUser
+    @EnsureHasPermission(
+            android.Manifest.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE)
+    public void testIntrusionDetectionEventTransportConnection_isValidAndBinds()
+            throws InterruptedException {
+        IntrusionDetectionEventTransportConnection intrusionDetectionEventTransportConnection =
+                new IntrusionDetectionEventTransportConnection(mContext);
+        // In a real scenario, the connection will be initialized by the service.
+        // Just to show that the connection is valid and able to bind,
+        // we initialize it here.
+        assertTrue(intrusionDetectionEventTransportConnection.initialize());
     }
 
     private class MockInjector implements IntrusionDetectionService.Injector {

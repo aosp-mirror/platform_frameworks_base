@@ -41,7 +41,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInte
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
-import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder
 import com.android.systemui.keyguard.ui.composable.LockscreenContent
@@ -50,7 +49,6 @@ import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel
@@ -59,7 +57,6 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
@@ -86,9 +83,6 @@ class KeyguardViewConfigurator
 constructor(
     private val keyguardRootView: KeyguardRootView,
     private val keyguardRootViewModel: KeyguardRootViewModel,
-    private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
-    private val notificationShadeWindowView: NotificationShadeWindowView,
-    private val indicationController: KeyguardIndicationController,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
@@ -161,23 +155,6 @@ constructor(
         if (deviceEntryUnlockTrackerViewBinder.isPresent) {
             deviceEntryUnlockTrackerViewBinder.get().bind(keyguardRootView)
         }
-    }
-
-    fun bindIndicationArea() {
-        indicationAreaHandle?.dispose()
-
-        if (!KeyguardBottomAreaRefactor.isEnabled) {
-            keyguardRootView.findViewById<View?>(R.id.keyguard_indication_area)?.let {
-                keyguardRootView.removeView(it)
-            }
-        }
-
-        indicationAreaHandle =
-            KeyguardIndicationAreaBinder.bind(
-                notificationShadeWindowView.requireViewById(R.id.keyguard_indication_area),
-                keyguardIndicationAreaViewModel,
-                indicationController,
-            )
     }
 
     /** Initialize views so that corresponding controllers have a view set. */

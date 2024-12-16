@@ -102,7 +102,7 @@
     <string name="windowing_desktop_mode_exit_education_tooltip" msgid="5225660258192054132">"Keer enige tyd terug na volskerm vanaf die appkieslys"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Sien en doen meer"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Sleep ’n ander app in vir verdeelde skerm"</string>
-    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik buite ’n program om dit te herposisioneer"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dubbeltik buite ’n app om dit te herposisioneer"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Het dit"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Vou uit vir meer inligting."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Herbegin vir ’n beter aansig?"</string>
@@ -133,8 +133,7 @@
     <string name="collapse_menu_text" msgid="7515008122450342029">"Maak kieslys toe"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Maak kieslys oop"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maksimeer skerm"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_snap_text (5673738963174074006) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Verander grootte"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"App kan nie hierheen geskuif word nie"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Meesleurend"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Stel terug"</string>

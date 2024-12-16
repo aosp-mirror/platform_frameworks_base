@@ -35,12 +35,15 @@ class LetterboxTransitionObserver(
     shellInit: ShellInit,
     private val transitions: Transitions,
     private val letterboxController: LetterboxController,
-    private val transitionStateHolder: TransitionStateHolder
+    private val transitionStateHolder: TransitionStateHolder,
+    private val letterboxModeStrategy: LetterboxControllerStrategy
 ) : Transitions.TransitionObserver {
 
     companion object {
         @JvmStatic
         private val TAG = "LetterboxTransitionObserver"
+        @JvmStatic
+        private val EMPTY_BOUNDS = Rect()
     }
 
     init {
@@ -61,7 +64,6 @@ class LetterboxTransitionObserver(
         // We recognise the operation to execute and delegate to the LetterboxController
         // the related operation.
         // TODO(b/377875151): Identify Desktop Windowing Transactions.
-        // TODO(b/377857898): Handling multiple surfaces
         // TODO(b/371500295): Handle input events detection.
         for (change in info.changes) {
             change.taskInfo?.let { ti ->
@@ -81,15 +83,19 @@ class LetterboxTransitionObserver(
                     } else {
                         val isTopActivityLetterboxed = ti.appCompatTaskInfo.isTopActivityLetterboxed
                         if (isTopActivityLetterboxed) {
+                            letterboxModeStrategy.configureLetterboxMode()
                             createLetterboxSurface(
                                 key,
                                 startTransaction,
                                 change.leash
                             )
+                            val activityBounds =
+                                ti.appCompatTaskInfo.topActivityLetterboxBounds ?: EMPTY_BOUNDS
                             updateLetterboxSurfaceBounds(
                                 key,
                                 startTransaction,
-                                taskBounds
+                                taskBounds,
+                                activityBounds
                             )
                         }
                         updateLetterboxSurfaceVisibility(

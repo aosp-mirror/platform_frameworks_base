@@ -55,7 +55,6 @@ import com.android.systemui.shared.regionsampling.RegionSampler;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerAlwaysOnDisplayViewBinder;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.util.ViewController;
@@ -85,7 +84,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final DumpManager mDumpManager;
     private final ClockEventController mClockEventController;
     private final LogBuffer mLogBuffer;
-    private final NotificationIconContainerAlwaysOnDisplayViewBinder mNicViewBinder;
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
@@ -147,7 +145,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             ClockRegistry clockRegistry,
             KeyguardSliceViewController keyguardSliceViewController,
             LockscreenSmartspaceController smartspaceController,
-            NotificationIconContainerAlwaysOnDisplayViewBinder nicViewBinder,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main DelayableExecutor uiExecutor,
@@ -163,7 +160,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockRegistry = clockRegistry;
         mKeyguardSliceViewController = keyguardSliceViewController;
         mSmartspaceController = smartspaceController;
-        mNicViewBinder = nicViewBinder;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mBgExecutor = bgExecutor;
@@ -277,7 +273,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             hideSliceViewAndNotificationIconContainer();
             return;
         }
-        updateAodIcons();
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
 
         mBgExecutor.execute(() -> {
@@ -567,21 +562,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             return mKeyguardClockInteractor.getClockSize().getValue().getLegacyValue() == LARGE;
         }
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
-    }
-
-    private void updateAodIcons() {
-        if (!MigrateClocksToBlueprint.isEnabled()) {
-            NotificationIconContainer nic = (NotificationIconContainer)
-                    mView.findViewById(
-                            com.android.systemui.res.R.id.left_aligned_notification_icon_container);
-            if (mAodIconsBindHandle != null) {
-                mAodIconsBindHandle.dispose();
-            }
-            if (nic != null) {
-                mAodIconsBindHandle = mNicViewBinder.bindWhileAttached(nic);
-                mAodIconContainer = nic;
-            }
-        }
     }
 
     private void setClock(ClockController clock) {

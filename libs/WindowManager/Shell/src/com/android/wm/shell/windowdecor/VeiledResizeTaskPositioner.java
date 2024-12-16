@@ -37,6 +37,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.Cuj;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -44,6 +45,7 @@ import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -53,6 +55,9 @@ import java.util.function.Supplier;
  * If the drag is repositioning, we update in the typical manner.
  */
 public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.TransitionHandler {
+    // Timeout used for resize and drag CUJs, this is longer than the default timeout to avoid
+    // timing out in the middle of a resize or drag action.
+    private static final long LONG_CUJ_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10L);
 
     private DesktopModeWindowDecoration mDesktopWindowDecoration;
     private ShellTaskOrganizer mTaskOrganizer;
@@ -99,15 +104,15 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     @Override
-    public Rect onDragPositioningStart(int ctrlType, float x, float y) {
+    public Rect onDragPositioningStart(int ctrlType, int displayId, float x, float y) {
         mCtrlType = ctrlType;
         mTaskBoundsAtDragStart.set(
                 mDesktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
         mRepositionStartPoint.set(x, y);
         if (isResizing()) {
             // Capture CUJ for re-sizing window in DW mode.
-            mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
-                    mDesktopWindowDecoration.mContext, mHandler, CUJ_DESKTOP_MODE_RESIZE_WINDOW);
+            mInteractionJankMonitor.begin(
+                    createLongTimeoutJankConfigBuilder(CUJ_DESKTOP_MODE_RESIZE_WINDOW));
             if (!mDesktopWindowDecoration.mHasGlobalFocus) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true /* onTop */,
@@ -131,7 +136,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     @Override
-    public Rect onDragPositioningMove(float x, float y) {
+    public Rect onDragPositioningMove(int displayId, float x, float y) {
         if (Looper.myLooper() != mHandler.getLooper()) {
             // This method must run on the shell main thread to use the correct Choreographer
             // instance below.
@@ -153,8 +158,8 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
             }
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             // Begin window drag CUJ instrumentation only when drag position moves.
-            mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
-                    mDesktopWindowDecoration.mContext, mHandler, CUJ_DESKTOP_MODE_DRAG_WINDOW);
+            mInteractionJankMonitor.begin(
+                    createLongTimeoutJankConfigBuilder(CUJ_DESKTOP_MODE_DRAG_WINDOW));
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             DragPositioningCallbackUtility.setPositionOnDrag(mDesktopWindowDecoration,
                     mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);
@@ -165,7 +170,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
     }
 
     @Override
-    public Rect onDragPositioningEnd(float x, float y) {
+    public Rect onDragPositioningEnd(int displayId, float x, float y) {
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y,
                 mRepositionStartPoint);
         if (isResizing()) {
@@ -205,6 +210,14 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
             mDesktopWindowDecoration.hideResizeVeil();
             mIsResizingOrAnimatingResize = false;
         }
+    }
+
+    private InteractionJankMonitor.Configuration.Builder createLongTimeoutJankConfigBuilder(
+            @Cuj.CujType int cujType) {
+        return InteractionJankMonitor.Configuration.Builder
+                .withSurface(cujType, mDesktopWindowDecoration.mContext,
+                        mDesktopWindowDecoration.mTaskSurface, mHandler)
+                .setTimeout(LONG_CUJ_TIMEOUT_MS);
     }
 
     @Override

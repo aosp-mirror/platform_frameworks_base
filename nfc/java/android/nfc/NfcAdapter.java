@@ -1789,6 +1789,11 @@ public final class NfcAdapter {
      * @param listenTechnology Flags indicating listen technologies.
      * @throws UnsupportedOperationException if FEATURE_NFC,
      * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF are unavailable.
+     *
+     * NOTE: This API overrides all technology flags regardless of the current device state,
+     *       it is incompatible with enableReaderMode() API and the others that either update
+     *       or assume any techlology flag set by the OS.
+     *       Please use with care.
      */
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_SET_DISCOVERY_TECH)

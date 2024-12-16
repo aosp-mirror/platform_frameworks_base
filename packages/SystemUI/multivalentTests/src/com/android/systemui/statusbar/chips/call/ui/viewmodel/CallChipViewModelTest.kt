@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
@@ -160,6 +161,28 @@ class CallChipViewModelTest : SysuiTestCase() {
                         as OngoingActivityChipModel.ChipIcon.StatusBarView)
                     .impl
             assertThat(actualIcon).isEqualTo(notifIcon)
+        }
+
+    @Test
+    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON, StatusBarConnectedDisplays.FLAG_NAME)
+    fun chip_positiveStartTime_notifIconAndConnectedDisplaysFlagOn_iconIsNotifIcon() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            val notifKey = "testNotifKey"
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 1000, notificationIcon = null, notificationKey = notifKey)
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).icon)
+                .isInstanceOf(
+                    OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon::class.java
+                )
+            val actualNotifKey =
+                (((latest as OngoingActivityChipModel.Shown).icon)
+                        as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon)
+                    .notificationKey
+            assertThat(actualNotifKey).isEqualTo(notifKey)
         }
 
     @Test

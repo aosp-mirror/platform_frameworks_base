@@ -213,6 +213,7 @@ public class SaferIntentUtils {
      * CTS tests. The code in this method shall properly avoid control flows using these arguments.
      */
     public static void blockNullAction(IntentArgs args, List componentList) {
+        if (args.intent.getAction() != null) return;
         if (ActivityManager.canAccessUnexportedComponents(args.callingUid)) return;
 
         final Computer computer = (Computer) args.snapshot;
@@ -235,14 +236,11 @@ public class SaferIntentUtils {
                 }
                 final ParsedMainComponent comp = infoToComponent(
                         resolveInfo.getComponentInfo(), resolver, args.isReceiver);
-                if (comp != null && !comp.getIntents().isEmpty()
-                        && args.intent.getAction() == null) {
+                if (comp != null && !comp.getIntents().isEmpty()) {
                     match = false;
                 }
             } else if (c instanceof IntentFilter) {
-                if (args.intent.getAction() == null) {
-                    match = false;
-                }
+                match = false;
             }
 
             if (!match) {

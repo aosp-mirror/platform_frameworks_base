@@ -21,6 +21,7 @@ import android.hardware.input.InputGestureData
 import android.view.KeyboardShortcutGroup
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategoriesUtils
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 
 /**
  * Internal Keyboard Shortcut models to use with [ShortcutCategoriesUtils.fetchShortcutCategory]
@@ -48,10 +49,15 @@ data class InternalKeyboardShortcutGroup(
  * @param isCustomShortcut If Shortcut is user customized or system defined.
  */
 data class InternalKeyboardShortcutInfo(
-    val label: String,
+    val label: String = "",
     val keycode: Int,
     val modifiers: Int,
     val baseCharacter: Char = Char.MIN_VALUE,
     val icon: Icon? = null,
     val isCustomShortcut: Boolean = false,
+)
+
+data class InternalGroupsSource(
+    val groups: List<InternalKeyboardShortcutGroup>,
+    val type: ShortcutCategoryType,
 )

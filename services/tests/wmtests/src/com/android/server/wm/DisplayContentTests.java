@@ -601,12 +601,12 @@ public class DisplayContentTests extends WindowTestsBase {
                 TYPE_WALLPAPER, TYPE_APPLICATION);
 
         // Verify not waiting for display without system decorations.
-        doReturn(false).when(secondaryDisplay).supportsSystemDecorations();
+        doReturn(false).when(secondaryDisplay).isSystemDecorationsSupported();
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify waiting for non-drawn windows on display with system decorations.
         reset(secondaryDisplay);
-        doReturn(true).when(secondaryDisplay).supportsSystemDecorations();
+        doReturn(true).when(secondaryDisplay).isSystemDecorationsSupported();
         assertTrue(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
 
         // Verify not waiting for drawn windows on display with system decorations.
@@ -898,6 +898,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testOrientationDefinedByKeyguard() {
         final DisplayContent dc = mDisplayContent;
         dc.getDisplayPolicy().setAwake(true);
+        dc.setIgnoreOrientationRequest(false);
 
         // Create a window that requests landscape orientation. It will define device orientation
         // by default.
@@ -925,6 +926,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testOrientationForAspectRatio() {
         final DisplayContent dc = createNewDisplay();
+        dc.setIgnoreOrientationRequest(false);
 
         // When display content is created its configuration is not yet initialized, which could
         // cause unnecessary configuration propagation, so initialize it here.
@@ -1034,6 +1036,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testAllowsTopmostFullscreenOrientation() {
         final DisplayContent dc = createNewDisplay();
+        dc.setIgnoreOrientationRequest(false);
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, dc.getOrientation());
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
@@ -1112,6 +1115,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testOnDescendantOrientationRequestChanged() {
         final DisplayContent dc = createNewDisplay();
+        dc.setIgnoreOrientationRequest(false);
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
         dc.getDefaultTaskDisplayArea().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -1130,6 +1134,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testOnDescendantOrientationRequestChanged_FrozenToUserRotation() {
         final DisplayContent dc = createNewDisplay();
+        dc.setIgnoreOrientationRequest(false);
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         dc.getDisplayRotation().setUserRotation(
@@ -1152,6 +1157,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testOrientationBehind() {
         assertNull(mDisplayContent.getLastOrientationSource());
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setScreenOrientation(getRotatedOrientation(mDisplayContent)).build();
         prev.setVisibleRequested(false);
@@ -1172,6 +1178,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFixedToUserRotationChanged() {
         final DisplayContent dc = createNewDisplay();
+        dc.setIgnoreOrientationRequest(false);
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         dc.getDisplayRotation().setUserRotation(
@@ -1589,6 +1596,7 @@ public class DisplayContentTests extends WindowTestsBase {
             W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test
     public void testApplyTopFixedRotationTransform() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         spyOn(displayPolicy);
         // Only non-movable (gesture) navigation bar will be animated by fixed rotation animation.
@@ -1742,6 +1750,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testFixedRotationWithPip() {
         final DisplayContent displayContent = mDefaultDisplay;
+        displayContent.setIgnoreOrientationRequest(false);
         unblockDisplayRotation(displayContent);
         // Unblock the condition in PinnedTaskController#continueOrientationChangeIfNeeded.
         doNothing().when(displayContent).prepareAppTransition(anyInt());
@@ -1865,7 +1874,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mRootWindowContainer.getDisplayRotationCoordinator();
         final DisplayContent defaultDisplayContent = mDisplayContent;
         final DisplayRotation defaultDisplayRotation = defaultDisplayContent.getDisplayRotation();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -1922,7 +1930,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
-        coordinator.removeDefaultDisplayRotationChangedCallback();
 
         DeviceStateController deviceStateController = mock(DeviceStateController.class);
         when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
@@ -2263,25 +2270,25 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testForceDesktopMode() {
+    public void testIsPublicSecondaryDisplayWithDesktopModeForceEnabled() {
         mWm.mForceDesktopModeOnExternalDisplays = true;
         // Not applicable for default display
-        assertFalse(mDefaultDisplay.forceDesktopMode());
+        assertFalse(mDefaultDisplay.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Not applicable for private secondary display.
         final DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.flags = FLAG_PRIVATE;
         final DisplayContent privateDc = createNewDisplay(displayInfo);
-        assertFalse(privateDc.forceDesktopMode());
+        assertFalse(privateDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Applicable for public secondary display.
         final DisplayContent publicDc = createNewDisplay();
-        assertTrue(publicDc.forceDesktopMode());
+        assertTrue(publicDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
 
         // Make sure forceDesktopMode() is false when the force config is disabled.
         mWm.mForceDesktopModeOnExternalDisplays = false;
-        assertFalse(publicDc.forceDesktopMode());
+        assertFalse(publicDc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
     }
 
     @Test

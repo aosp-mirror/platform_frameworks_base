@@ -18,17 +18,26 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
+import android.app.Instrumentation;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
 import android.os.UserHandle;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.ravenwood.annotation.RavenwoodRedirect;
 import android.ravenwood.annotation.RavenwoodRedirectionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.Log;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -116,39 +125,89 @@ public final class MessageQueue {
     private native static void nativeSetFileDescriptorEvents(long ptr, int fd, int events);
 
     MessageQueue(boolean quitAllowed) {
-        if (sIsProcessAllowedToUseConcurrent == null) {
-            // Concurrent mode modifies behavior that is observable via reflection and is commonly
-            // used by tests.
-            // For now, we limit it to system processes to avoid breaking apps and their tests.
-            boolean useConcurrent = UserHandle.isCore(Process.myUid());
-
-            // Some platform tests run in system UIDs.
-            // Use this awful heuristic to detect them.
-            if (useConcurrent) {
-                final String processName = Process.myProcessName();
-                if (processName == null
-                        || processName.contains("test")
-                        || processName.contains("Test")) {
-                    useConcurrent = false;
-                }
-            }
-
-            // We can lift this restriction in the future after we've made it possible for test
-            // authors to test Looper and MessageQueue without resorting to reflection.
-
-            // Holdback study.
-            if (useConcurrent && Flags.messageQueueForceLegacy()) {
-                useConcurrent = false;
-            }
-
-            sIsProcessAllowedToUseConcurrent = useConcurrent;
-            mUseConcurrent = useConcurrent;
-        } else {
-            mUseConcurrent = sIsProcessAllowedToUseConcurrent;
-        }
-
+        initIsProcessAllowedToUseConcurrent();
+        mUseConcurrent = sIsProcessAllowedToUseConcurrent && !isInstrumenting();
         mQuitAllowed = quitAllowed;
         mPtr = nativeInit();
+    }
+
+    private static void initIsProcessAllowedToUseConcurrent() {
+        if (sIsProcessAllowedToUseConcurrent != null) {
+            return;
+        }
+
+        if (RavenwoodEnvironment.getInstance().isRunningOnRavenwood()) {
+            sIsProcessAllowedToUseConcurrent = false;
+            return;
+        }
+
+        final String processName = Process.myProcessName();
+        if (processName == null) {
+            // Assume that this is a host-side test and avoid concurrent mode for now.
+            sIsProcessAllowedToUseConcurrent = false;
+            return;
+        }
+
+        // Concurrent mode modifies behavior that is observable via reflection and is commonly
+        // used by tests.
+        // For now, we limit it to system processes to avoid breaking apps and their tests.
+        sIsProcessAllowedToUseConcurrent = UserHandle.isCore(Process.myUid());
+
+        if (sIsProcessAllowedToUseConcurrent) {
+            // Some platform tests run in core UIDs.
+            // Use this awful heuristic to detect them.
+            if (processName.contains("test") || processName.contains("Test")) {
+                sIsProcessAllowedToUseConcurrent = false;
+            }
+        } else {
+            // Also explicitly allow SystemUI processes.
+            // SystemUI doesn't run in a core UID, but we want to give it the performance boost,
+            // and we know that it's safe to use the concurrent implementation in SystemUI.
+            sIsProcessAllowedToUseConcurrent =
+                    processName.equals("com.android.systemui")
+                            || processName.startsWith("com.android.systemui:");
+            // On Android distributions where SystemUI has a different process name,
+            // the above condition may need to be adjusted accordingly.
+        }
+
+        // We can lift these restrictions in the future after we've made it possible for test
+        // authors to test Looper and MessageQueue without resorting to reflection.
+
+        // Holdback study.
+        if (sIsProcessAllowedToUseConcurrent && Flags.messageQueueForceLegacy()) {
+            sIsProcessAllowedToUseConcurrent = false;
+        }
+    }
+
+    @RavenwoodReplace
+    private static void throwIfNotTest() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            // Only tests can reach here.
+            return;
+        }
+        final Instrumentation instrumentation = activityThread.getInstrumentation();
+        if (instrumentation == null) {
+            // Only tests can reach here.
+            return;
+        }
+        if (instrumentation.isInstrumenting()) {
+            return;
+        }
+        throw new IllegalStateException("Test-only API called not from a test!");
+    }
+
+    private static void throwIfNotTest$ravenwood() {
+        return;
+    }
+
+    private static boolean isInstrumenting() {
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            return false;
+        }
+        final Instrumentation instrumentation = activityThread.getInstrumentation();
+        return instrumentation != null && instrumentation.isInstrumenting();
     }
 
     @Override
@@ -171,12 +230,9 @@ public final class MessageQueue {
 
     private static final class MatchDeliverableMessages extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
-            if (m.when <= when) {
-                return true;
-            }
-            return false;
+            return n.mMessage.when <= when;
         }
     }
     private final MatchDeliverableMessages mMatchDeliverableMessages =
@@ -323,7 +379,7 @@ public final class MessageQueue {
      * @see OnFileDescriptorEventListener
      * @see #removeOnFileDescriptorEventListener
      */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
+    @RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
     public void addOnFileDescriptorEventListener(@NonNull FileDescriptor fd,
             @OnFileDescriptorEventListener.Events int events,
             @NonNull OnFileDescriptorEventListener listener) {
@@ -357,7 +413,7 @@ public final class MessageQueue {
      * @see OnFileDescriptorEventListener
      * @see #addOnFileDescriptorEventListener
      */
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
+    @RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
     public void removeOnFileDescriptorEventListener(@NonNull FileDescriptor fd) {
         if (fd == null) {
             throw new IllegalArgumentException("fd must not be null");
@@ -373,7 +429,7 @@ public final class MessageQueue {
         }
     }
 
-    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
+    @RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
     private void updateOnFileDescriptorEventListenerLocked(FileDescriptor fd, int events,
             OnFileDescriptorEventListener listener) {
         final int fdNum = fd.getInt$();
@@ -496,7 +552,7 @@ public final class MessageQueue {
     /* This is only read/written from the Looper thread. For use with Concurrent MQ */
     private int mNextPollTimeoutMillis;
     private boolean mMessageDirectlyQueued;
-    private Message nextMessage() {
+    private Message nextMessage(boolean peek) {
         int i = 0;
 
         while (true) {
@@ -658,7 +714,7 @@ public final class MessageQueue {
             if (sState.compareAndSet(this, sStackStateActive, nextOp)) {
                 mMessageCounts.clearCounts();
                 if (found != null) {
-                    if (!removeFromPriorityQueue(found)) {
+                    if (!peek && !removeFromPriorityQueue(found)) {
                         /*
                          * RemoveMessages() might be able to pull messages out from under us
                          * However we can detect that here and just loop around if it happens.
@@ -692,7 +748,7 @@ public final class MessageQueue {
             mMessageDirectlyQueued = false;
             nativePollOnce(ptr, mNextPollTimeoutMillis);
 
-            Message msg = nextMessage();
+            Message msg = nextMessage(false);
             if (msg != null) {
                 msg.markInUse();
                 return msg;
@@ -1011,8 +1067,9 @@ public final class MessageQueue {
         }
 
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == null && m.arg1 == mBarrierToken) {
                 return true;
             }
@@ -1215,10 +1272,158 @@ public final class MessageQueue {
         return true;
     }
 
+    private Message legacyPeekOrPoll(boolean peek) {
+        synchronized (this) {
+            // Try to retrieve the next message.  Return if found.
+            final long now = SystemClock.uptimeMillis();
+            Message prevMsg = null;
+            Message msg = mMessages;
+            if (msg != null && msg.target == null) {
+                // Stalled by a barrier.  Find the next asynchronous message in the queue.
+                do {
+                    prevMsg = msg;
+                    msg = msg.next;
+                } while (msg != null && !msg.isAsynchronous());
+            }
+            if (msg != null) {
+                if (now >= msg.when) {
+                    // Got a message.
+                    mBlocked = false;
+                    if (peek) {
+                        return msg;
+                    }
+                    if (prevMsg != null) {
+                        prevMsg.next = msg.next;
+                        if (prevMsg.next == null) {
+                            mLast = prevMsg;
+                        }
+                    } else {
+                        mMessages = msg.next;
+                        if (msg.next == null) {
+                            mLast = null;
+                        }
+                    }
+                    msg.next = null;
+                    msg.markInUse();
+                    if (msg.isAsynchronous()) {
+                        mAsyncMessageCount--;
+                    }
+                    if (TRACE) {
+                        Trace.setCounter("MQ.Delivered", mMessagesDelivered.incrementAndGet());
+                    }
+                    return msg;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get the timestamp of the next executable message in our priority queue.
+     * Returns null if there are no messages ready for delivery.
+     *
+     * Caller must ensure that this doesn't race 'next' from the Looper thread.
+     */
+    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
+    Long peekWhenForTest() {
+        throwIfNotTest();
+        Message ret;
+        if (mUseConcurrent) {
+            ret = nextMessage(true);
+        } else {
+            ret = legacyPeekOrPoll(true);
+        }
+        return ret != null ? ret.when : null;
+    }
+
+    /**
+     * Return the next executable message in our priority queue.
+     * Returns null if there are no messages ready for delivery
+     *
+     * Caller must ensure that this doesn't race 'next' from the Looper thread.
+     */
+    @SuppressLint("VisiblySynchronized") // Legacy MessageQueue synchronizes on this
+    @Nullable
+    Message pollForTest() {
+        throwIfNotTest();
+        if (mUseConcurrent) {
+            return nextMessage(false);
+        } else {
+            return legacyPeekOrPoll(false);
+        }
+    }
+
+    /**
+     * @return true if we are blocked on a sync barrier
+     *
+     * Calls to this method must not be allowed to race with `next`.
+     * Specifically, the Looper thread must be paused before calling this method,
+     * and may not be resumed until after returning from this method.
+     */
+    boolean isBlockedOnSyncBarrier() {
+        throwIfNotTest();
+        if (mUseConcurrent) {
+            // Call nextMessage to get the stack drained into our priority queues
+            nextMessage(true);
+
+            Iterator<MessageNode> queueIter = mPriorityQueue.iterator();
+            MessageNode queueNode = iterateNext(queueIter);
+
+            if (queueNode != null && queueNode.isBarrier()) {
+                long now = SystemClock.uptimeMillis();
+
+                /* Look for a deliverable async node. If one exists we are not blocked. */
+                Iterator<MessageNode> asyncQueueIter = mAsyncPriorityQueue.iterator();
+                MessageNode asyncNode = iterateNext(asyncQueueIter);
+                if (asyncNode != null && now >= asyncNode.getWhen()) {
+                    return false;
+                }
+                /*
+                 * Look for a deliverable sync node. In this case, if one exists we are blocked
+                 * since the barrier prevents delivery of the Message.
+                 */
+                while (queueNode != null && queueNode.isBarrier()) {
+                    queueNode = iterateNext(queueIter);
+                }
+                if (queueNode != null && now >= queueNode.getWhen()) {
+                    return true;
+                }
+            }
+        } else {
+            Message msg = mMessages;
+            if (msg != null && msg.target == null) {
+                Message iter = msg;
+                /* Look for a deliverable async node */
+                do {
+                    iter = iter.next;
+                } while (iter != null && !iter.isAsynchronous());
+
+                long now = SystemClock.uptimeMillis();
+                if (iter != null && now >= iter.when) {
+                    return false;
+                }
+                /*
+                 * Look for a deliverable sync node. In this case, if one exists we are blocked
+                 * since the barrier prevents delivery of the Message.
+                 */
+                iter = msg;
+                do {
+                    iter = iter.next;
+                } while (iter != null && (iter.target == null || iter.isAsynchronous()));
+
+                if (iter != null && now >= iter.when) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static final class MatchHandlerWhatAndObject extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.what == what && (object == null || m.obj == object)) {
                 return true;
             }
@@ -1249,8 +1454,9 @@ public final class MessageQueue {
 
     private static final class MatchHandlerWhatAndObjectEquals extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.what == what && (object == null || object.equals(m.obj))) {
                 return true;
             }
@@ -1282,8 +1488,9 @@ public final class MessageQueue {
 
     private static final class MatchHandlerRunnableAndObject extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.callback == r && (object == null || m.obj == object)) {
                 return true;
             }
@@ -1316,12 +1523,9 @@ public final class MessageQueue {
 
     private static final class MatchHandler extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
-            if (m.target == h) {
-                return true;
-            }
-            return false;
+            return n.mMessage.target == h;
         }
     }
     private final MatchHandler mMatchHandler = new MatchHandler();
@@ -1499,8 +1703,9 @@ public final class MessageQueue {
 
     private static final class MatchHandlerRunnableAndObjectEquals extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && m.callback == r && (object == null || object.equals(m.obj))) {
                 return true;
             }
@@ -1562,8 +1767,9 @@ public final class MessageQueue {
 
     private static final class MatchHandlerAndObject extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && (object == null || m.obj == object)) {
                 return true;
             }
@@ -1623,8 +1829,9 @@ public final class MessageQueue {
 
     private static final class MatchHandlerAndObjectEquals extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
+            final Message m = n.mMessage;
             if (m.target == h && (object == null || object.equals(m.obj))) {
                 return true;
             }
@@ -1730,7 +1937,7 @@ public final class MessageQueue {
 
     private static final class MatchAllMessages extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
             return true;
         }
@@ -1742,9 +1949,10 @@ public final class MessageQueue {
 
     private static final class MatchAllFutureMessages extends MessageCompare {
         @Override
-        public boolean compareMessage(Message m, Handler h, int what, Object object, Runnable r,
+        public boolean compareMessage(MessageNode n, Handler h, int what, Object object, Runnable r,
                 long when) {
-            if (m.when > when) {
+            final Message m = n.mMessage;
+                    if (m.when > when) {
                 return true;
             }
             return false;
@@ -2450,7 +2658,7 @@ public final class MessageQueue {
      * This class is used to find matches for hasMessages() and removeMessages()
      */
     private abstract static class MessageCompare {
-        public abstract boolean compareMessage(Message m, Handler h, int what, Object object,
+        public abstract boolean compareMessage(MessageNode n, Handler h, int what, Object object,
                 Runnable r, long when);
     }
 
@@ -2485,7 +2693,7 @@ public final class MessageQueue {
         MessageNode p = (MessageNode) top;
 
         while (true) {
-            if (compare.compareMessage(p.mMessage, h, what, object, r, when)) {
+            if (compare.compareMessage(p, h, what, object, r, when)) {
                 found = true;
                 if (DEBUG) {
                     Log.d(TAG_C, "stackHasMessages node matches");
@@ -2530,7 +2738,7 @@ public final class MessageQueue {
         while (iterator.hasNext()) {
             MessageNode msg = iterator.next();
 
-            if (compare.compareMessage(msg.mMessage, h, what, object, r, when)) {
+            if (compare.compareMessage(msg, h, what, object, r, when)) {
                 if (removeMatches) {
                     found = true;
                     if (queue.remove(msg)) {

@@ -2,10 +2,18 @@ package: "android.service.autofill"
 container: "system"
 
 flag {
+  name: "autofill_session_destroyed"
+  namespace: "autofill"
+  description: "Guards against new metrics definitions introduced in W"
+  bug: "342676602"
+}
+
+flag {
   name: "autofill_w_metrics"
   namespace: "autofill"
   description: "Guards against new metrics definitions introduced in W"
   bug: "342676602"
+  is_exported: true
 }
 
 flag {
@@ -28,6 +36,14 @@ flag {
     namespace: "autofill"
     description: "Guards against Autofill-Credman Phase1 developer integration via new APIs"
     bug: "320730001"
+}
+
+flag {
+    name: "fill_dialog_improvements_impl"
+    is_exported: true
+    namespace: "autofill"
+    description: "Improvements for Fill Dialog for non-api changes"
+    bug: "336223371"
 }
 
 flag {

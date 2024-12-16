@@ -23,6 +23,10 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.usage.UsageStatsManager;
+import android.compat.Compatibility;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.pm.PackageManager;
@@ -349,6 +353,16 @@ public class JobParameters implements Parcelable {
     private JobCleanupCallback mJobCleanupCallback;
     @Nullable
     private Cleaner.Cleanable mCleanable;
+    /**
+     * Override handling of abandoned jobs in the system. Overriding this change
+     * will prevent the system to handle abandoned jobs and report it as a new
+     * stop reason STOP_REASON_TIMEOUT_ABANDONED.
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_HANDLE_ABANDONED_JOBS = 372529068L;
 
     /** @hide */
     public JobParameters(IBinder callback, String namespace, int jobId, PersistableBundle extras,
@@ -677,6 +691,10 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public void enableCleaner() {
+        if (!Flags.handleAbandonedJobs()
+                || Compatibility.isChangeEnabled(OVERRIDE_HANDLE_ABANDONED_JOBS)) {
+            return;
+        }
         // JobParameters objects are passed by reference in local Binder
         // transactions for clients running as SYSTEM. The life cycle of the
         // JobParameters objects are no longer controlled by the client.
@@ -695,6 +713,10 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public void disableCleaner() {
+        if (!Flags.handleAbandonedJobs()
+                || Compatibility.isChangeEnabled(OVERRIDE_HANDLE_ABANDONED_JOBS)) {
+            return;
+        }
         if (mJobCleanupCallback != null) {
             mJobCleanupCallback.disableCleaner();
             if (mCleanable != null) {

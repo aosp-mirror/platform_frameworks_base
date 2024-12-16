@@ -419,6 +419,7 @@ applications that come with the platform
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING" />
+        <permission name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER" />
         <permission name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
         <permission name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE" />
@@ -514,7 +515,6 @@ applications that come with the platform
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
         <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
-        <permission name="android.permission.READ_DROPBOX_DATA" />
         <permission name="android.permission.READ_LOGS" />
         <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
         <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -607,6 +607,8 @@ applications that come with the platform
         <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
         <permission name="android.permission.READ_INTRUSION_DETECTION_STATE" />
         <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
+        <!-- Permission required for CTS test - KeyguardLockedStateApiTest -->
+        <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -676,5 +678,9 @@ applications that come with the platform
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
+    </privapp-permissions>
+
+    <privapp-permissions package="com.android.wm.shell">
+        <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
     </privapp-permissions>
 </permissions>

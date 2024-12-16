@@ -53,4 +53,6 @@
     battery history, in bytes. -->
     <integer name="config_accumulatedBatteryUsageStatsSpanSize">32768</integer>
 
+    <!-- Size of storage allocated to battery history, in bytes -->
+    <integer name="config_batteryHistoryStorageSize">4194304</integer>
 </resources>

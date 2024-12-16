@@ -29,7 +29,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
-/** Represents an app function related errors. */
+/**
+ * Represents an app function related error.
+ *
+ * <p>This exception may include an {@link AppFunctionException#getExtras() Bundle} containing
+ * additional error-specific metadata.
+ *
+ * <p>The AppFunction SDK can expose structured APIs by packing and unpacking this Bundle.
+ */
 @FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public final class AppFunctionException extends Exception implements Parcelable {
     /**
@@ -76,6 +83,13 @@ public final class AppFunctionException extends Exception implements Parcelable 
      * <p>This error is in the {@link #ERROR_CATEGORY_SYSTEM} category.
      */
     public static final int ERROR_CANCELLED = 2001;
+
+    /**
+     * The operation was disallowed by enterprise policy.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_SYSTEM} category.
+     */
+    public static final int ERROR_ENTERPRISE_POLICY_DISALLOWED = 2002;
 
     /**
      * An unknown error occurred while processing the call in the AppFunctionService.
@@ -224,7 +238,8 @@ public final class AppFunctionException extends Exception implements Parcelable 
                 ERROR_SYSTEM_ERROR,
                 ERROR_INVALID_ARGUMENT,
                 ERROR_DISABLED,
-                ERROR_CANCELLED
+                ERROR_CANCELLED,
+                ERROR_ENTERPRISE_POLICY_DISALLOWED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ErrorCode {}

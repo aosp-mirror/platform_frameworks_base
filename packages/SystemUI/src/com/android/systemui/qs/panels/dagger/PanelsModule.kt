@@ -21,8 +21,6 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
 import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepositoryImpl
-import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepository
-import com.android.systemui.qs.panels.data.repository.GridLayoutTypeRepositoryImpl
 import com.android.systemui.qs.panels.domain.interactor.EditTilesResetInteractor
 import com.android.systemui.qs.panels.domain.interactor.SizedTilesResetInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
@@ -47,9 +45,6 @@ interface PanelsModule {
     fun bindDefaultLargeTilesSpecsRepository(
         impl: DefaultLargeTilesRepositoryImpl
     ): DefaultLargeTilesRepository
-
-    @Binds
-    fun bindGridLayoutTypeRepository(impl: GridLayoutTypeRepositoryImpl): GridLayoutTypeRepository
 
     @Binds
     fun bindEditTilesResetInteractor(impl: SizedTilesResetInteractor): EditTilesResetInteractor

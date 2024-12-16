@@ -16,9 +16,8 @@
 
 package com.android.systemui.shade.domain.interactor
 
-import android.content.Context
 import android.util.Log
-import android.view.WindowManager
+import android.window.WindowContext
 import androidx.annotation.UiThread
 import com.android.app.tracing.coroutines.launchTraced
 import com.android.app.tracing.traceSection
@@ -28,7 +27,8 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeDisplayAware
-import com.android.systemui.shade.ShadeWindowLayoutParams
+import com.android.systemui.shade.ShadeTraceLogger.logMoveShadeWindowTo
+import com.android.systemui.shade.ShadeTraceLogger.traceReparenting
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.util.kotlin.getOrNull
@@ -45,14 +45,10 @@ class ShadeDisplaysInteractor
 constructor(
     optionalShadeRootView: Optional<WindowRootView>,
     private val shadePositionRepository: ShadeDisplaysRepository,
-    @ShadeDisplayAware private val shadeContext: Context,
-    @ShadeDisplayAware private val wm: WindowManager,
+    @ShadeDisplayAware private val shadeContext: WindowContext,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainThreadContext: CoroutineContext,
 ) : CoreStartable {
-
-    private val shadeLayoutParams: WindowManager.LayoutParams =
-        ShadeWindowLayoutParams.create(shadeContext)
 
     private val shadeRootView =
         optionalShadeRootView.getOrNull()
@@ -74,7 +70,12 @@ constructor(
     /** Tries to move the shade. If anything wrong happens, fails gracefully without crashing. */
     private suspend fun moveShadeWindowTo(destinationId: Int) {
         Log.d(TAG, "Trying to move shade window to display with id $destinationId")
-        val currentDisplay = shadeRootView.display
+        logMoveShadeWindowTo(destinationId)
+        // Why using the shade context here instead of the view's Display?
+        // The context's display is updated before the view one, so it is a better indicator of
+        // which display the shade is supposed to be at. The View display is updated after the first
+        // rendering with the new config.
+        val currentDisplay = shadeContext.display
         if (currentDisplay == null) {
             Log.w(TAG, "Current shade display is null")
             return
@@ -85,7 +86,9 @@ constructor(
             return
         }
         try {
-            withContext(mainThreadContext) { moveShadeWindow(toId = destinationId) }
+            withContext(mainThreadContext) {
+                traceReparenting { reparentToDisplayId(id = destinationId) }
+            }
         } catch (e: IllegalStateException) {
             Log.e(
                 TAG,
@@ -96,25 +99,8 @@ constructor(
     }
 
     @UiThread
-    private fun moveShadeWindow(toId: Int) {
-        traceSection({ "moveShadeWindow  to $toId" }) {
-            removeShadeWindow()
-            updateContextDisplay(toId)
-            addShadeWindow()
-        }
-    }
-
-    @UiThread
-    private fun removeShadeWindow(): Unit =
-        traceSection("removeShadeWindow") { wm.removeView(shadeRootView) }
-
-    @UiThread
-    private fun addShadeWindow(): Unit =
-        traceSection("addShadeWindow") { wm.addView(shadeRootView, shadeLayoutParams) }
-
-    @UiThread
-    private fun updateContextDisplay(newDisplayId: Int) {
-        traceSection("updateContextDisplay") { shadeContext.updateDisplay(newDisplayId) }
+    private fun reparentToDisplayId(id: Int) {
+        traceSection({ "reparentToDisplayId(id=$id)" }) { shadeContext.reparentToDisplay(id) }
     }
 
     private companion object {

@@ -71,10 +71,10 @@ import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -106,6 +106,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     @Mock ShellExecutor mMainExecutor;
     @Mock Handler mMainHandler;
+    @Mock ShellExecutor mBgExecutor;
     @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock DisplayInsetsController mDisplayInsetsController;
@@ -119,6 +120,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock WindowDecorViewModel mWindowDecorViewModel;
     @Mock DesktopTasksController mDesktopTasksController;
     @Mock MultiInstanceHelper mMultiInstanceHelper;
+    @Mock SplitState mSplitState;
     @Captor ArgumentCaptor<Intent> mIntentCaptor;
 
     private ShellController mShellController;
@@ -136,7 +138,8 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
                 mIconProvider, Optional.of(mRecentTasks), mLaunchAdjacentController,
                 Optional.of(mWindowDecorViewModel), Optional.of(mDesktopTasksController),
-                mStageCoordinator, mMultiInstanceHelper, mMainExecutor, mMainHandler));
+                mStageCoordinator, mMultiInstanceHelper, mSplitState, mMainExecutor, mMainHandler,
+                mBgExecutor));
     }
 
     @Test
@@ -178,7 +181,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
         when(mDisplayController.getDisplayLayout(anyInt())).thenReturn(new DisplayLayout());
         mSplitScreenController.onInit();
         verify(mShellController, times(1)).addExternalInterface(
-                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN), any(), any());
+                eq(ISplitScreen.DESCRIPTOR), any(), any());
     }
 
     @Test

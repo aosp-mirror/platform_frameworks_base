@@ -16,9 +16,11 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.coretests.apps.testapp">
+     <uses-permission android:name="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE" />
 
     <application>
         <service android:name=".TestLoggingService"
-                  android:exported="true" />
+                  android:exported="true"
+                  android:permission="android.permission.BIND_INTRUSION_DETECTION_EVENT_TRANSPORT_SERVICE" />
     </application>
 </manifest>

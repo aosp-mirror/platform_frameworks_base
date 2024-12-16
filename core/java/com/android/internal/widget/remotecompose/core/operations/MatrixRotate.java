@@ -26,8 +26,9 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 
 import java.util.List;
 
+/** The rotate the rendering command */
 public class MatrixRotate extends DrawBase3 {
-    public static final int OP_CODE = Operations.MATRIX_ROTATE;
+    private static final int OP_CODE = Operations.MATRIX_ROTATE;
     private static final String CLASS_NAME = "MatrixRotate";
 
     /**
@@ -57,6 +58,11 @@ public class MatrixRotate extends DrawBase3 {
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

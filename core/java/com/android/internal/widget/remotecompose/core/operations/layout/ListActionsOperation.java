@@ -29,11 +29,11 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.ArrayList;
 
 public abstract class ListActionsOperation extends PaintOperation
-        implements ModifierOperation, DecoratorComponent {
+        implements Container, ModifierOperation, DecoratorComponent {
 
     String mOperationName;
-    float mWidth = 0;
-    float mHeight = 0;
+    protected float mWidth = 0;
+    protected float mHeight = 0;
 
     private final float[] mLocationInWindow = new float[2];
 
@@ -43,6 +43,7 @@ public abstract class ListActionsOperation extends PaintOperation
 
     public ArrayList<Operation> mList = new ArrayList<>();
 
+    @NonNull
     public ArrayList<Operation> getList() {
         return mList;
     }
@@ -57,6 +58,7 @@ public abstract class ListActionsOperation extends PaintOperation
         for (Operation op : mList) {
             if (op instanceof TextData) {
                 op.apply(context);
+                context.incrementOpCount();
             }
         }
     }
@@ -71,7 +73,7 @@ public abstract class ListActionsOperation extends PaintOperation
     public void paint(PaintContext context) {}
 
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(RemoteContext context, Component component, float width, float height) {
         mWidth = width;
         mHeight = height;
     }

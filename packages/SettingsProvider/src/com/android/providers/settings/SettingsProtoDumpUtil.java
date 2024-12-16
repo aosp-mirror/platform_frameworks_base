@@ -1778,6 +1778,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
                 SecureSettingsProto.Accessibility.HIGH_TEXT_CONTRAST_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_HCT_RECT_PROMPT_STATUS,
+                SecureSettingsProto.Accessibility.HCT_RECT_PROMPT_STATUS);
+        dumpSetting(s, p,
                 Settings.Secure.CONTRAST_LEVEL,
                 SecureSettingsProto.Accessibility.CONTRAST_LEVEL);
         dumpSetting(s, p,
@@ -3049,6 +3052,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
                 SystemSettingsProto.Touchpad.THREE_FINGER_TAP_CUSTOMIZATION);
+        dumpSetting(s, p,
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES,
+                SystemSettingsProto.Touchpad.SYSTEM_GESTURES);
         p.end(touchpadToken);
 
         dumpSetting(s, p,

@@ -62,7 +62,11 @@ final public class DnsEvent {
             return isSuccess;
         }
         if (eventCount == eventTypes.length) {
-            resize((int) (1.4 * eventCount));
+            int resizeLength = (int) (1.4 * eventCount);
+            if (eventCount == resizeLength) {
+                resizeLength++;
+            }
+            resize(resizeLength);
         }
         eventTypes[eventCount] = eventType;
         returnCodes[eventCount] = returnCode;

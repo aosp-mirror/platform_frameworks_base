@@ -24,27 +24,31 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.ListActionsOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
+import com.android.internal.widget.remotecompose.core.operations.layout.ScrollDelegate;
 import com.android.internal.widget.remotecompose.core.operations.layout.TouchHandler;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
 
 /** Represents a scroll modifier. */
-public class ScrollModifierOperation extends DecoratorModifierOperation implements TouchHandler {
+public class ScrollModifierOperation extends ListActionsOperation
+        implements TouchHandler, DecoratorComponent, ScrollDelegate, VariableSupport {
     private static final int OP_CODE = Operations.MODIFIER_SCROLL;
     public static final String CLASS_NAME = "ScrollModifierOperation";
 
     private final float mPositionExpression;
     private final float mMax;
     private final float mNotchMax;
-
-    float mWidth = 0;
-    float mHeight = 0;
 
     int mDirection;
 
@@ -63,11 +67,42 @@ public class ScrollModifierOperation extends DecoratorModifierOperation implemen
     float mHostDimension;
     float mContentDimension;
 
+    private TouchExpression mTouchExpression;
+
     public ScrollModifierOperation(int direction, float position, float max, float notchMax) {
+        super("SCROLL_MODIFIER");
         this.mDirection = direction;
         this.mPositionExpression = position;
         this.mMax = max;
         this.mNotchMax = notchMax;
+    }
+
+    /**
+     * Inflate the operation
+     *
+     * @param component
+     */
+    public void inflate(Component component) {
+        for (Operation op : mList) {
+            if (op instanceof TouchExpression) {
+                mTouchExpression = (TouchExpression) op;
+                mTouchExpression.setComponent(component);
+            }
+        }
+    }
+
+    @Override
+    public void registerListening(@NonNull RemoteContext context) {
+        if (mTouchExpression != null) {
+            mTouchExpression.registerListening(context);
+        }
+    }
+
+    @Override
+    public void updateVariables(@NonNull RemoteContext context) {
+        if (mTouchExpression != null) {
+            mTouchExpression.updateVariables(context);
+        }
     }
 
     public boolean isVerticalScroll() {
@@ -113,6 +148,12 @@ public class ScrollModifierOperation extends DecoratorModifierOperation implemen
 
     @Override
     public void paint(PaintContext context) {
+        for (Operation op : mList) {
+            op.apply(context.getContext());
+        }
+        if (mTouchExpression == null) {
+            return;
+        }
         float position =
                 context.getContext()
                         .mRemoteComposeState
@@ -130,6 +171,12 @@ public class ScrollModifierOperation extends DecoratorModifierOperation implemen
         return "ScrollModifierOperation(" + mDirection + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
@@ -166,17 +213,38 @@ public class ScrollModifierOperation extends DecoratorModifierOperation implemen
                 .field(INT, "direction", "");
     }
 
+    private float getMaxScrollPosition(Component component, int direction) {
+        if (component instanceof LayoutComponent) {
+            LayoutComponent layoutComponent = (LayoutComponent) component;
+            int numChildren = layoutComponent.getChildrenComponents().size();
+            if (numChildren > 0) {
+                Component lastChild = layoutComponent.getChildrenComponents().get(numChildren - 1);
+                if (direction == 0) { // VERTICAL
+                    return lastChild.getY();
+                } else {
+                    return lastChild.getX();
+                }
+            }
+        }
+        return 0f;
+    }
+
     @Override
-    public void layout(RemoteContext context, float width, float height) {
+    public void layout(RemoteContext context, Component component, float width, float height) {
         mWidth = width;
         mHeight = height;
-        if (mDirection == 0) { // VERTICAL
-            context.loadFloat(Utils.idFromNan(mMax), mMaxScrollY);
-            context.loadFloat(Utils.idFromNan(mNotchMax), mContentDimension);
-        } else {
-            context.loadFloat(Utils.idFromNan(mMax), mMaxScrollX);
-            context.loadFloat(Utils.idFromNan(mNotchMax), mContentDimension);
+        float max = mMaxScrollY;
+        if (mDirection != 0) { // HORIZONTAL
+            max = mMaxScrollX;
         }
+        if (mTouchExpression != null) {
+            float maxScrollPosition = getMaxScrollPosition(component, mDirection);
+            if (maxScrollPosition > 0) {
+                max = maxScrollPosition;
+            }
+        }
+        context.loadFloat(Utils.idFromNan(mMax), max);
+        context.loadFloat(Utils.idFromNan(mNotchMax), mContentDimension);
     }
 
     @Override
@@ -186,18 +254,36 @@ public class ScrollModifierOperation extends DecoratorModifierOperation implemen
         mTouchDownY = y;
         mInitialScrollX = mScrollX;
         mInitialScrollY = mScrollY;
+        if (mTouchExpression != null) {
+            mTouchExpression.updateVariables(context);
+            mTouchExpression.touchDown(context, x + mScrollX, y + mScrollY);
+        }
         document.appliedTouchOperation(component);
     }
 
     @Override
     public void onTouchUp(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            RemoteContext context,
+            CoreDocument document,
+            Component component,
+            float x,
+            float y,
+            float dx,
+            float dy) {
+        if (mTouchExpression != null) {
+            mTouchExpression.updateVariables(context);
+            mTouchExpression.touchUp(context, x + mScrollX, y + mScrollY, dx, dy);
+        }
         // If not using touch expression, should add velocity decay here
     }
 
     @Override
     public void onTouchDrag(
             RemoteContext context, CoreDocument document, Component component, float x, float y) {
+        if (mTouchExpression != null) {
+            mTouchExpression.updateVariables(context);
+            mTouchExpression.touchDrag(context, x + mScrollX, y + mScrollY);
+        }
         float dx = x - mTouchDownX;
         float dy = y - mTouchDownY;
 
@@ -228,5 +314,36 @@ public class ScrollModifierOperation extends DecoratorModifierOperation implemen
 
     public float getContentDimension() {
         return mContentDimension;
+    }
+
+    @Override
+    public float getScrollX(float currentValue) {
+        if (mDirection == 1) {
+            return mScrollX;
+        }
+        return 0f;
+    }
+
+    @Override
+    public float getScrollY(float currentValue) {
+        if (mDirection == 0) {
+            return mScrollY;
+        }
+        return 0f;
+    }
+
+    @Override
+    public boolean handlesHorizontalScroll() {
+        return mDirection == 1;
+    }
+
+    @Override
+    public boolean handlesVerticalScroll() {
+        return mDirection == 0;
+    }
+
+    @Override
+    public void reset() {
+        // nothing here for now
     }
 }

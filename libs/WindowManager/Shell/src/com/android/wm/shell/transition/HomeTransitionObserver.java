@@ -76,8 +76,8 @@ public class HomeTransitionObserver implements TransitionObserver,
                 if (Flags.migratePredictiveBackTransition()) {
                     final boolean gestureToHomeTransition = isBackGesture
                             && TransitionUtil.isClosingType(info.getType());
-                    if (gestureToHomeTransition
-                            || (!isBackGesture && TransitionUtil.isOpenOrCloseMode(mode))) {
+                    if (gestureToHomeTransition || TransitionUtil.isClosingMode(mode)
+                            || (!isBackGesture && TransitionUtil.isOpeningMode(mode))) {
                         notifyHomeVisibilityChanged(gestureToHomeTransition
                                 || TransitionUtil.isOpeningType(mode));
                     }

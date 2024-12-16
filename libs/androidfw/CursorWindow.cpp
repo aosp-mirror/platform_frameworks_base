@@ -38,7 +38,7 @@ CursorWindow::CursorWindow() {
 }
 
 CursorWindow::~CursorWindow() {
-    if (mAshmemFd != -1) {
+    if (mAshmemFd >= 0) {
         ::munmap(mData, mSize);
         ::close(mAshmemFd);
     } else {
@@ -155,23 +155,27 @@ status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outWindow
     bool isAshmem;
     if (parcel->readBool(&isAshmem)) goto fail;
     if (isAshmem) {
-        window->mAshmemFd = parcel->readFileDescriptor();
-        if (window->mAshmemFd < 0) {
+        int tempFd = parcel->readFileDescriptor();
+        if (tempFd < 0) {
             LOG(ERROR) << "Failed readFileDescriptor";
             goto fail_silent;
         }
 
-        window->mAshmemFd = ::fcntl(window->mAshmemFd, F_DUPFD_CLOEXEC, 0);
-        if (window->mAshmemFd < 0) {
+        tempFd = ::fcntl(tempFd, F_DUPFD_CLOEXEC, 0);
+        if (tempFd < 0) {
             PLOG(ERROR) << "Failed F_DUPFD_CLOEXEC";
             goto fail_silent;
         }
 
-        window->mData = ::mmap(nullptr, window->mSize, PROT_READ, MAP_SHARED, window->mAshmemFd, 0);
+        window->mData = ::mmap(nullptr, window->mSize, PROT_READ, MAP_SHARED, tempFd, 0);
         if (window->mData == MAP_FAILED) {
+            ::close(tempFd);
             PLOG(ERROR) << "Failed mmap";
             goto fail_silent;
         }
+
+        window->mAshmemFd = tempFd;
+
     } else {
         window->mAshmemFd = -1;
 

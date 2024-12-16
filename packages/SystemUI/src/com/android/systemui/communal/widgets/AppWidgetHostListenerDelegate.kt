@@ -36,7 +36,7 @@ constructor(
 ) : AppWidgetHostListener {
 
     @AssistedFactory
-    interface Factory {
+    fun interface Factory {
         fun create(listener: AppWidgetHostListener): AppWidgetHostListenerDelegate
     }
 

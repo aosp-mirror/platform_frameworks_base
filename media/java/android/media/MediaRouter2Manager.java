@@ -20,9 +20,11 @@ import static android.media.MediaRouter2.SCANNING_STATE_NOT_SCANNING;
 import static android.media.MediaRouter2.SCANNING_STATE_WHILE_INTERACTIVE;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+import static com.android.media.flags.Flags.FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -285,6 +287,7 @@ public final class MediaRouter2Manager {
                 (route) -> sessionInfo.isSystemSession() ^ route.isSystemRoute());
     }
 
+    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     private List<MediaRoute2Info> getSortedRoutes(RouteDiscoveryPreference preference) {
         if (!preference.shouldRemoveDuplicates()) {
             synchronized (mRoutesLock) {
@@ -302,12 +305,15 @@ public final class MediaRouter2Manager {
             routes = new ArrayList<>(mRoutes.values());
         }
         // take the negative for descending order
-        routes.sort(Comparator.comparingInt(
-                r -> -packagePriority.getOrDefault(r.getPackageName(), 0)));
+        routes.sort(
+                Comparator.comparingInt(
+                        r -> -packagePriority.getOrDefault(r.getProviderPackageName(), 0)));
         return routes;
     }
 
-    private List<MediaRoute2Info> getFilteredRoutes(@NonNull RoutingSessionInfo sessionInfo,
+    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
+    private List<MediaRoute2Info> getFilteredRoutes(
+            @NonNull RoutingSessionInfo sessionInfo,
             boolean includeSelectedRoutes,
             @Nullable Predicate<MediaRoute2Info> additionalFilter) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
@@ -336,9 +342,10 @@ public final class MediaRouter2Manager {
                 continue;
             }
             if (!discoveryPreference.getAllowedPackages().isEmpty()
-                    && (route.getPackageName() == null
-                    || !discoveryPreference.getAllowedPackages()
-                    .contains(route.getPackageName()))) {
+                    && (route.getProviderPackageName() == null
+                            || !discoveryPreference
+                                    .getAllowedPackages()
+                                    .contains(route.getProviderPackageName()))) {
                 continue;
             }
             if (additionalFilter != null && !additionalFilter.test(route)) {

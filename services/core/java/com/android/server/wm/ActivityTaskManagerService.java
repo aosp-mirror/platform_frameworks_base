@@ -1555,7 +1555,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
 
             final ActivityRecord[] outActivity = new ActivityRecord[1];
-            getActivityStartController().obtainStarter(intent, "dream")
+            final int res = getActivityStartController()
+                    .obtainStarter(intent, "dream")
                     .setCallingUid(callingUid)
                     .setCallingPid(callingPid)
                     .setCallingPackage(intent.getPackage())
@@ -1569,9 +1570,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .execute();
 
             final ActivityRecord started = outActivity[0];
-            final IAppTask appTask = started == null ? null :
-                    new AppTaskImpl(this, started.getTask().mTaskId, callingUid);
-            return appTask;
+            if (started == null || !ActivityManager.isStartResultSuccessful(res)) {
+                // start the dream activity failed.
+                return null;
+            }
+            return new AppTaskImpl(this, started.getTask().mTaskId, callingUid);
         }
     }
 
@@ -3794,6 +3797,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             r.setPictureInPictureParams(params);
             enterPipTransition.setPipActivity(r);
             r.mAutoEnteringPip = isAutoEnter;
+
+            if (r.getTaskFragment() != null && r.getTaskFragment().isEmbeddedWithBoundsOverride()
+                    && enterPipTransition != null) {
+                enterPipTransition.addFlag(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+            }
+
             getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
                 getTransitionController().requestStartTransition(enterPipTransition,
                         r.getTask(), null /* remoteTransition */, null /* displayChange */);
@@ -3987,15 +3996,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Try to load snapshot from cache first, and add reference if the snapshot is in cache.
             final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
-                    task.mUserId, false /* restoreFromDisk */, isLowResolution);
+                    isLowResolution, usage);
             if (snapshot != null) {
-                snapshot.addReference(usage);
                 return snapshot;
             }
         }
         // Don't call this while holding the lock as this operation might hit the disk.
-        return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
-                task.mUserId, true /* restoreFromDisk */, isLowResolution);
+        return mWindowManager.mTaskSnapshotController.getSnapshotFromDisk(taskId,
+                task.mUserId,  isLowResolution, usage);
     }
 
     @Override
@@ -4011,10 +4019,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
                     return null;
                 }
+                final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(
+                        taskId, isLowResolution, TaskSnapshot.REFERENCE_WRITE_TO_PARCEL);
+                if (snapshot != null) {
+                    return snapshot;
+                }
             }
             // Don't call this while holding the lock as this operation might hit the disk.
-            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
-                    task.mUserId, true /* restoreFromDisk */, isLowResolution);
+            return mWindowManager.mTaskSnapshotController.getSnapshotFromDisk(taskId,
+                    task.mUserId, isLowResolution, TaskSnapshot.REFERENCE_WRITE_TO_PARCEL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

@@ -58,6 +58,8 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHost;
+import com.android.wm.shell.windowdecor.common.viewhost.WindowDecorViewHostSupplier;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 
 /**
@@ -90,8 +92,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             Handler handler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
-            SyncTransactionQueue syncQueue) {
-        super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface);
+            SyncTransactionQueue syncQueue,
+            @NonNull WindowDecorViewHostSupplier<WindowDecorViewHost> windowDecorViewHostSupplier) {
+        super(context, userContext, displayController, taskOrganizer, taskInfo,
+                taskSurface, windowDecorViewHostSupplier);
         mHandler = handler;
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;

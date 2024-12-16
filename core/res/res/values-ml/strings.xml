@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"നിയന്ത്രിക്കേണ്ട സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടില്ല"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"നിയന്ത്രിക്കേണ്ടതല്ലാത്ത സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടുണ്ട്"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"നിയന്ത്രിക്കേണ്ടതല്ലാത്ത സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടില്ല"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ഈ ആപ്പ് 16 KB-ക്ക് അനുയോജ്യമല്ല. APK അലൈൻമെന്റ് പരിശോധന നടത്താനായില്ല. പേജ് വലുപ്പത്തിന് അനുയോജ്യമായ മോഡ് ഉപയോഗിച്ച് ഈ ആപ്പ് റൺ ചെയ്യും. മികച്ച അനുയോജ്യതയ്ക്കായി, 16 KB പിന്തുണയോടെ ആപ്പ് വീണ്ടും കംപൈൽ ചെയ്യുക. കൂടുതൽ വിവരങ്ങൾക്ക്, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; കാണുക"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ഈ ആപ്പ് 16 KB-ക്ക് അനുയോജ്യമല്ല. ELF അലൈൻമെന്റ് പരിശോധന നടത്താനായില്ല. പേജ് വലുപ്പത്തിന് അനുയോജ്യമായ മോഡ് ഉപയോഗിച്ച് ഈ ആപ്പ് റൺ ചെയ്യും. മികച്ച അനുയോജ്യതയ്ക്കായി, 16 KB പിന്തുണയോടെ ആപ്പ് വീണ്ടും കംപൈൽ ചെയ്യുക. കൂടുതൽ വിവരങ്ങൾക്ക്, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; കാണുക"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ഈ ആപ്പ് 16 KB-ക്ക് അനുയോജ്യമല്ല. APK, ELF അലൈൻമെന്റ് പരിശോധനകൾ നടത്താനായില്ല. പേജ് വലുപ്പത്തിന് അനുയോജ്യമായ മോഡ് ഉപയോഗിച്ച് ഈ ആപ്പ് റൺ ചെയ്യും. മികച്ച അനുയോജ്യതയ്ക്കായി, 16 KB പിന്തുണയോടെ ആപ്പ് വീണ്ടും കംപൈൽ ചെയ്യുക. കൂടുതൽ വിവരങ്ങൾക്ക്, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; കാണുക"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"സേവനം വ്യവസ്ഥ ചെയ്‌തിട്ടില്ല."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"വിളിച്ച നമ്പർ ക്രമീകരണം നിങ്ങൾക്ക് മാറ്റാനാവില്ല."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> എന്നതിലേക്ക് ഡാറ്റ മാറ്റി"</string>
@@ -1155,6 +1158,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>മണിക്കൂറിൽ"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>ദിവസത്തിൽ"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>വർഷത്തിനുള്ളിൽ"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g>m മുമ്പ്"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g>h മുമ്പ്"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g>ദിവസം മുമ്പ്"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g>വർഷം മുമ്പ്"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>മിനിറ്റ്"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>മണിക്കൂർ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g>ദിവസം"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g>വർഷം"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g>മിനിറ്റിൽ"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g>മണിക്കൂറിൽ"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g>ദിവസത്തിനുള്ളിൽ"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g>വർഷത്തിൽ"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g>മിനിറ്റ് മുമ്പ്"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g>മണിക്കൂർ മുമ്പ്"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g>ദിവസം മുമ്പ്"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g>വർഷം മുമ്പ്"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# മിനിറ്റ് മുമ്പ്}other{# മിനിറ്റ് മുമ്പ്}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# മണിക്കൂർ മുമ്പ്}other{# മണിക്കൂർ മുമ്പ്}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ദിവസം മുമ്പ്}other{# ദിവസം മുമ്പ്}}"</string>
@@ -1947,8 +1966,7 @@
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> മുതൽ <xliff:g id="END">%2$s</xliff:g> വരെ"</string>
-    <!-- no translation found for zen_mode_trigger_summary_combined (6492381546327807669) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"എല്ലാ കലണ്ടറിലും"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ചില ശബ്‌ദങ്ങൾ മ്യൂട്ട് ചെയ്യുന്നു"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>

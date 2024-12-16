@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCA
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.pm.ActivityInfo.isFixedOrientation;
 import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
+import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
 import static android.content.pm.ActivityInfo.screenOrientationToString;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -66,6 +67,7 @@ class AppCompatOrientationPolicy {
         final boolean shouldCameraCompatControlOrientation =
                 AppCompatCameraPolicy.shouldCameraCompatControlOrientation(mActivityRecord);
         if (hasFullscreenOverride && isIgnoreOrientationRequestEnabled
+                && (isFixedOrientationLandscape(candidate) || isFixedOrientationPortrait(candidate))
                 // Do not override orientation to fullscreen for camera activities.
                 // Fixed-orientation activities are rarely tested in other orientations, and it
                 // often results in sideways or stretched previews. As the camera compat treatment

@@ -34,6 +34,7 @@ import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.widget.AdaptiveIcon
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
@@ -64,7 +65,6 @@ import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig
 import com.android.systemui.surfaceeffects.ripple.RippleShader
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "MediaControlViewBinder"
@@ -85,7 +85,7 @@ object MediaControlViewBinder {
                 launch {
                     viewModel.player.collectLatest { player ->
                         player?.let {
-                            if (viewModel.isNewPlayer(it)) {
+                            if (viewModel.setPlayer(it)) {
                                 bindMediaCard(
                                     viewHolder,
                                     viewController,

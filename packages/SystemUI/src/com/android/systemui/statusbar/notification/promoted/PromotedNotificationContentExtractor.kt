@@ -27,6 +27,7 @@ import android.app.Notification.EXTRA_TITLE
 import android.app.Notification.ProgressStyle
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.Style
@@ -38,7 +39,7 @@ class PromotedNotificationContentExtractor
 @Inject
 constructor(
     private val promotedNotificationsProvider: PromotedNotificationsProvider,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val logger: PromotedNotificationLogger,
 ) {
     fun extractContent(
@@ -70,11 +71,19 @@ constructor(
         contentBuilder.appName = notification.loadHeaderAppName(context)
         contentBuilder.subText = notification.subText()
         contentBuilder.time = notification.extractWhen()
+        contentBuilder.shortCriticalText = notification.shortCriticalText()
         contentBuilder.lastAudiblyAlertedMs = entry.lastAudiblyAlertedMs
         contentBuilder.profileBadgeResId = null // TODO
         contentBuilder.title = notification.title()
         contentBuilder.text = notification.text()
         contentBuilder.skeletonLargeIcon = null // TODO
+
+        val colorsFromNotif = recoveredBuilder.getColors(/* header= */ false)
+        contentBuilder.colors =
+            PromotedNotificationContentModel.Colors(
+                backgroundColor = colorsFromNotif.backgroundColor,
+                primaryTextColor = colorsFromNotif.primaryTextColor,
+            )
 
         recoveredBuilder.style?.extractContent(contentBuilder)
             ?: run { contentBuilder.style = Style.Ineligible }
@@ -89,6 +98,13 @@ private fun Notification.text(): CharSequence? = extras?.getCharSequence(EXTRA_T
 
 private fun Notification.subText(): String? = extras?.getString(EXTRA_SUB_TEXT)
 
+private fun Notification.shortCriticalText(): String? {
+    if (!android.app.Flags.apiRichOngoing()) {
+        return null
+    }
+    return this.shortCriticalText
+}
+
 private fun Notification.chronometerCountDown(): Boolean =
     extras?.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN, /* defaultValue= */ false) ?: false
 
@@ -99,7 +115,7 @@ private fun Notification.extractWhen(): When? {
     val countDown = chronometerCountDown()
 
     return when {
-        showsTime -> When(time, When.Mode.Absolute)
+        showsTime -> When(time, When.Mode.BasicTime)
         showsChronometer -> When(time, if (countDown) When.Mode.CountDown else When.Mode.CountUp)
         else -> null
     }

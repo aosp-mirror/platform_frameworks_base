@@ -754,6 +754,7 @@ public final class ContextHubManager {
      * @param executor the executor to invoke callbacks for this client
      * @return the callback interface
      */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     private IContextHubEndpointDiscoveryCallback createDiscoveryCallback(
             IHubEndpointDiscoveryCallback callback,
             Executor executor,
@@ -767,21 +768,9 @@ public final class ContextHubManager {
                 }
                 executor.execute(
                         () -> {
-                            // TODO(b/380293951): Refactor
                             List<HubDiscoveryInfo> discoveryList =
-                                    new ArrayList<>(hubEndpointInfoList.length);
-                            for (HubEndpointInfo info : hubEndpointInfoList) {
-                                if (serviceDescriptor != null) {
-                                    for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
-                                        if (sInfo.getServiceDescriptor()
-                                                .equals(serviceDescriptor)) {
-                                            discoveryList.add(new HubDiscoveryInfo(info, sInfo));
-                                        }
-                                    }
-                                } else {
-                                    discoveryList.add(new HubDiscoveryInfo(info));
-                                }
-                            }
+                                    getMatchingEndpointDiscoveryList(
+                                            hubEndpointInfoList, serviceDescriptor);
                             if (discoveryList.isEmpty()) {
                                 Log.w(TAG, "onEndpointsStarted: no matching service descriptor");
                             } else {
@@ -799,19 +788,8 @@ public final class ContextHubManager {
                 executor.execute(
                         () -> {
                             List<HubDiscoveryInfo> discoveryList =
-                                    new ArrayList<>(hubEndpointInfoList.length);
-                            for (HubEndpointInfo info : hubEndpointInfoList) {
-                                if (serviceDescriptor != null) {
-                                    for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
-                                        if (sInfo.getServiceDescriptor()
-                                                .equals(serviceDescriptor)) {
-                                            discoveryList.add(new HubDiscoveryInfo(info, sInfo));
-                                        }
-                                    }
-                                } else {
-                                    discoveryList.add(new HubDiscoveryInfo(info));
-                                }
-                            }
+                                    getMatchingEndpointDiscoveryList(
+                                            hubEndpointInfoList, serviceDescriptor);
                             if (discoveryList.isEmpty()) {
                                 Log.w(TAG, "onEndpointsStopped: no matching service descriptor");
                             } else {
@@ -820,6 +798,34 @@ public final class ContextHubManager {
                         });
             }
         };
+    }
+
+    /**
+     * Generates a list of matching endpoint discovery info, given the list and an (optional)
+     * service descriptor. If service descriptor is null, all endpoints are added to the filtered
+     * output list.
+     *
+     * @param hubEndpointInfoList The hub endpoints to filter.
+     * @param serviceDescriptor The optional service descriptor to match, null if adding all
+     *     endpoints.
+     * @return The list of filtered HubDiscoveryInfo which matches the serviceDescriptor.
+     */
+    @FlaggedApi(Flags.FLAG_OFFLOAD_API)
+    private List<HubDiscoveryInfo> getMatchingEndpointDiscoveryList(
+            HubEndpointInfo[] hubEndpointInfoList, @Nullable String serviceDescriptor) {
+        List<HubDiscoveryInfo> discoveryList = new ArrayList<>(hubEndpointInfoList.length);
+        for (HubEndpointInfo info : hubEndpointInfoList) {
+            if (serviceDescriptor != null) {
+                for (HubServiceInfo sInfo : info.getServiceInfoCollection()) {
+                    if (sInfo.getServiceDescriptor().equals(serviceDescriptor)) {
+                        discoveryList.add(new HubDiscoveryInfo(info, sInfo));
+                    }
+                }
+            } else {
+                discoveryList.add(new HubDiscoveryInfo(info));
+            }
+        }
+        return discoveryList;
     }
 
     /**
@@ -841,6 +847,7 @@ public final class ContextHubManager {
      * @param endpointId The identifier of the hub endpoint.
      * @param callback The callback to be invoked.
      * @param executor The executor to invoke the callback on.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -881,6 +888,7 @@ public final class ContextHubManager {
      * @param callback The callback to be invoked.
      * @param executor The executor to invoke the callback on.
      * @throws IllegalArgumentException if the serviceDescriptor is empty.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -911,6 +919,7 @@ public final class ContextHubManager {
      *
      * @param callback The callback previously registered.
      * @throws IllegalArgumentException If the callback was not previously registered.
+     * @throws UnsupportedOperationException If the operation is not supported.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -1267,6 +1276,9 @@ public final class ContextHubManager {
      * registration succeeds, the endpoint can receive notifications through the provided callback.
      *
      * @param hubEndpoint {@link HubEndpoint} object created by {@link HubEndpoint.Builder}
+     * @throws IllegalStateException if the registration failed, for example if too many endpoints
+     *     are registered at the service
+     * @throws UnsupportedOperationException if endpoint registration is not supported
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
@@ -1306,16 +1318,18 @@ public final class ContextHubManager {
      *     ContextHubManager#registerEndpoint(HubEndpoint)}.
      * @param destination {@link HubEndpointInfo} object that represents an endpoint from previous
      *     endpoint discovery results (e.g. from {@link ContextHubManager#findEndpoints(long)}).
-     * @param serviceInfo {@link HubServiceInfo} object that describes the service associated with
-     *     this session. The information will be sent to the destination as part of open request.
+     * @param serviceDescriptor A string that describes the service associated with this session.
+     *     The information will be sent to the destination as part of open request.
+     * @throws IllegalStateException if hubEndpoint was not successfully registered, or if there is
+     *     insufficient capacity for creating a session.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @FlaggedApi(Flags.FLAG_OFFLOAD_API)
     public void openSession(
             @NonNull HubEndpoint hubEndpoint,
             @NonNull HubEndpointInfo destination,
-            @NonNull HubServiceInfo serviceInfo) {
-        hubEndpoint.openSession(destination, serviceInfo);
+            @NonNull String serviceDescriptor) {
+        hubEndpoint.openSession(destination, serviceDescriptor);
     }
 
     /**

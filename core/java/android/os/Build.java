@@ -41,6 +41,8 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.View;
 
+import com.android.internal.util.FrameworkStatsLog;
+
 import dalvik.system.VMRuntime;
 
 import java.lang.annotation.Retention;
@@ -401,7 +403,7 @@ public class Build {
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
          * This constant records the major version of Android. Use {@link
-         * SDK_INT_FULL} if you need to consider the minor version of Android
+         * #SDK_INT_FULL} if you need to consider the minor version of Android
          * as well.
          * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
@@ -1556,6 +1558,7 @@ public class Build {
      * @hide
      */
     @SuppressWarnings("FlaggedApi") // SDK_INT_MULTIPLIER is defined in this file
+    @SuppressLint("InlinedApi")
     public static @SdkIntFull int parseFullVersion(@NonNull String version) {
         int index = version.indexOf('.');
         int major;
@@ -1567,12 +1570,22 @@ public class Build {
                 major = Integer.parseInt(version.substring(0, index));
                 minor = Integer.parseInt(version.substring(index + 1));
             }
-            if (major < 0 || minor < 0) {
-                throw new NumberFormatException();
+            if (major < 0) {
+                throw new NumberFormatException("negative major version");
+            }
+            if (major >= 21474) {
+                throw new NumberFormatException("major version too large, must be less than 21474");
+            }
+            if (minor < 0) {
+                throw new NumberFormatException("negative minor version");
+            }
+            if (minor >= VERSION_CODES_FULL.SDK_INT_MULTIPLIER) {
+                throw new NumberFormatException("minor version too large, must be less than "
+                        + VERSION_CODES_FULL.SDK_INT_MULTIPLIER);
             }
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("failed to parse '" + version
-                    + "' as a major.minor version code");
+                    + "' as a major.minor version code", e);
         }
         return major * VERSION_CODES_FULL.SDK_INT_MULTIPLIER + minor;
     }
@@ -1666,11 +1679,14 @@ public class Build {
      */
     @FlaggedApi(android.os.Flags.FLAG_API_FOR_BACKPORTED_FIXES)
     public static @BackportedFixStatus int getBackportedFixStatus(long id) {
-        if (id <= 0 || id > 1023) {
-            return BACKPORTED_FIX_STATUS_UNKNOWN;
+        @BackportedFixStatus int status = BACKPORTED_FIX_STATUS_UNKNOWN;
+        int uid = Binder.getCallingUid();
+        if (id > 0 && id <= 1023) {
+            status = isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
+                    ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
         }
-        return isBitSet(BackportedFixesProperties.alias_bitset(), (int) id)
-                ? BACKPORTED_FIX_STATUS_FIXED : BACKPORTED_FIX_STATUS_UNKNOWN;
+        FrameworkStatsLog.write(FrameworkStatsLog.BACKPORTED_FIX_STATUS_REPORTED, uid, id, status);
+        return status;
     }
 
     private static boolean isBitSet(List<Long> bitsetLongArray, int bitIndex) {

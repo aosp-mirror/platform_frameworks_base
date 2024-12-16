@@ -73,12 +73,10 @@ import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
+import com.android.internal.widget.remotecompose.core.operations.layout.ContainerEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.LoopEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.OperationsListEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.TouchCancelModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.TouchDownModifierOperation;
@@ -98,8 +96,10 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostNamedActionOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.MarqueeModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.OffsetModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RippleModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueFloatChangeActionOperation;
@@ -110,6 +110,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
+import com.android.internal.widget.remotecompose.core.semantics.CoreSemantics;
 import com.android.internal.widget.remotecompose.core.types.BooleanConstant;
 import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
 import com.android.internal.widget.remotecompose.core.types.LongConstant;
@@ -126,6 +127,9 @@ public class Operations {
     public static final int CLICK_AREA = 64;
     public static final int ROOT_CONTENT_BEHAVIOR = 65;
     public static final int ROOT_CONTENT_DESCRIPTION = 103;
+    // TODO reorder before submitting
+    public static final int ACCESSIBILITY_SEMANTICS = 250;
+    //    public static final int ACCESSIBILITY_CUSTOM_ACTION = 251;
 
     ////////////////////////////////////////
     // Draw commands
@@ -202,7 +206,6 @@ public class Operations {
     public static final int LAYOUT_STATE = 217;
 
     public static final int COMPONENT_START = 2;
-    public static final int COMPONENT_END = 3;
 
     public static final int MODIFIER_WIDTH = 16;
     public static final int MODIFIER_HEIGHT = 67;
@@ -217,15 +220,16 @@ public class Operations {
     public static final int MODIFIER_TOUCH_UP = 220;
     public static final int MODIFIER_TOUCH_CANCEL = 225;
 
-    public static final int OPERATIONS_LIST_END = 214;
+    public static final int CONTAINER_END = 214;
 
     public static final int MODIFIER_OFFSET = 221;
     public static final int MODIFIER_ZINDEX = 223;
     public static final int MODIFIER_GRAPHICS_LAYER = 224;
     public static final int MODIFIER_SCROLL = 226;
+    public static final int MODIFIER_MARQUEE = 228;
+    public static final int MODIFIER_RIPPLE = 229;
 
     public static final int LOOP_START = 215;
-    public static final int LOOP_END = 216;
 
     public static final int MODIFIER_VISIBILITY = 211;
     public static final int HOST_ACTION = 209;
@@ -303,12 +307,10 @@ public class Operations {
         map.put(TEXT_LOOKUP_INT, TextLookupInt::read);
 
         map.put(LOOP_START, LoopOperation::read);
-        map.put(LOOP_END, LoopEnd::read);
 
         // Layout
 
         map.put(COMPONENT_START, ComponentStart::read);
-        map.put(COMPONENT_END, ComponentEnd::read);
         map.put(ANIMATION_SPEC, AnimationSpec::read);
 
         map.put(MODIFIER_WIDTH, WidthModifierOperation::read);
@@ -327,8 +329,10 @@ public class Operations {
         map.put(MODIFIER_ZINDEX, ZIndexModifierOperation::read);
         map.put(MODIFIER_GRAPHICS_LAYER, GraphicsLayerModifierOperation::read);
         map.put(MODIFIER_SCROLL, ScrollModifierOperation::read);
+        map.put(MODIFIER_MARQUEE, MarqueeModifierOperation::read);
+        map.put(MODIFIER_RIPPLE, RippleModifierOperation::read);
 
-        map.put(OPERATIONS_LIST_END, OperationsListEnd::read);
+        map.put(CONTAINER_END, ContainerEnd::read);
 
         map.put(HOST_ACTION, HostActionOperation::read);
         map.put(HOST_NAMED_ACTION, HostNamedActionOperation::read);
@@ -362,5 +366,8 @@ public class Operations {
         map.put(PATH_TWEEN, PathTween::read);
         map.put(PATH_CREATE, PathCreate::read);
         map.put(PATH_ADD, PathAppend::read);
+
+        map.put(ACCESSIBILITY_SEMANTICS, CoreSemantics::read);
+        //        map.put(ACCESSIBILITY_CUSTOM_ACTION, CoreSemantics::read);
     }
 }

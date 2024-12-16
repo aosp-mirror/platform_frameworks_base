@@ -180,6 +180,15 @@ public abstract class Image implements AutoCloseable {
      *     a semi-planar format, the Cb plane can also be treated as an interleaved Cb/Cr plane.
      *   </td>
      * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#YCBCR_P210 YCBCR_P210}</td>
+     *   <td>3</td>
+     *   <td>P210 is a 4:2:2 YCbCr semiplanar format comprised of a WxH Y plane
+     *     followed by a WxH Cb and Cr planes. Each sample is represented by a 16-bit
+     *     little-endian value, with the lower 6 bits set to zero. Since this is guaranteed to be
+     *     a semi-planar format, the Cb plane can also be treated as an interleaved Cb/Cr plane.
+     *   </td>
+     * </tr>
      * </table>
      *
      * @see android.graphics.ImageFormat

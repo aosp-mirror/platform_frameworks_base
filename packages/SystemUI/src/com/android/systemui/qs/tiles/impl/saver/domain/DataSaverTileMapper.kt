@@ -18,19 +18,21 @@ package com.android.systemui.qs.tiles.impl.saver.domain
 
 import android.content.res.Resources
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.saver.domain.model.DataSaverTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [DataSaverTileModel] to [QSTileState]. */
 class DataSaverTileMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
-    QSTileDataToStateMapper<DataSaverTileModel> {
+constructor(
+    @ShadeDisplayAware private val resources: Resources,
+    private val theme: Resources.Theme,
+) : QSTileDataToStateMapper<DataSaverTileModel> {
     override fun map(config: QSTileConfig, data: DataSaverTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             with(data) {

@@ -1149,9 +1149,9 @@ status_t JMediaCodec::unsubscribeFromVendorParameters(JNIEnv *env, jobject names
 
 static jobject getJavaResources(
         JNIEnv *env,
-        const std::vector<MediaCodec::InstanceResourceInfo>& resources) {
+        const std::vector<InstanceResourceInfo>& resources) {
     jobject resourcesObj = env->NewObject(gArrayListInfo.clazz, gArrayListInfo.ctorId);
-    for (const MediaCodec::InstanceResourceInfo& res : resources) {
+    for (const InstanceResourceInfo& res : resources) {
         ScopedLocalRef<jobject> object{env, env->NewObject(
                 gInstanceResourceInfo.clazz, gInstanceResourceInfo.ctorId)};
         ScopedLocalRef<jstring> nameStr{env, env->NewStringUTF(res.mName.c_str())};
@@ -1169,7 +1169,7 @@ static jobject getJavaResources(
 }
 
 status_t JMediaCodec::getRequiredResources(JNIEnv *env, jobject *resourcesObj) {
-    std::vector<MediaCodec::InstanceResourceInfo> resources;
+    std::vector<InstanceResourceInfo> resources;
     status_t status = mCodec->getRequiredResources(resources);
     if (status != OK) {
         return status;
@@ -3615,9 +3615,9 @@ static void android_media_MediaCodec_unsubscribeFromVendorParameters(
 
 static jobject getJavaResources(
         JNIEnv *env,
-        const std::vector<MediaCodec::GlobalResourceInfo>& resources) {
+        const std::vector<GlobalResourceInfo>& resources) {
     jobject resourcesObj = env->NewObject(gArrayListInfo.clazz, gArrayListInfo.ctorId);
-    for (const MediaCodec::GlobalResourceInfo& res : resources) {
+    for (const GlobalResourceInfo& res : resources) {
         ScopedLocalRef<jobject> object{env, env->NewObject(
                 gGlobalResourceInfo.clazz, gGlobalResourceInfo.ctorId)};
         ScopedLocalRef<jstring> nameStr{env, env->NewStringUTF(res.mName.c_str())};
@@ -3633,7 +3633,7 @@ static jobject getJavaResources(
 static jobject android_media_MediaCodec_getGloballyAvailableResources(
         JNIEnv *env, jobject thiz) {
     (void)thiz;
-    std::vector<MediaCodec::GlobalResourceInfo> resources;
+    std::vector<GlobalResourceInfo> resources;
     status_t status = MediaCodec::getGloballyAvailableResources(resources);
     if (status != OK) {
         if (status == ERROR_UNSUPPORTED) {

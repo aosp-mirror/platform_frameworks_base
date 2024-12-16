@@ -2363,7 +2363,6 @@ public abstract class NotificationListenerService extends Service {
         // -- parcelable interface --
 
         private RankingMap(Parcel in) {
-            final ClassLoader cl = getClass().getClassLoader();
             final int count = in.readInt();
             mOrderedKeys.ensureCapacity(count);
             mRankings.ensureCapacity(count);

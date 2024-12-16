@@ -75,7 +75,7 @@ class DesktopModeUiEventLogger(
         instanceId: InstanceId,
         uid: Int,
         packageName: String,
-        event: DesktopUiEventEnum
+        event: DesktopUiEventEnum,
     ) {
         if (packageName.isEmpty() || uid < 0) {
             logD("Skip logging since package name is empty or bad uid")
@@ -84,11 +84,12 @@ class DesktopModeUiEventLogger(
         uiEventLogger.logWithInstanceId(event, uid, packageName, instanceId)
     }
 
-    private fun getUid(packageName: String, userId: Int): Int = try {
-        packageManager.getApplicationInfoAsUser(packageName, /* flags= */ 0, userId).uid
-    } catch (e: PackageManager.NameNotFoundException) {
-        INVALID_PACKAGE_UID
-    }
+    private fun getUid(packageName: String, userId: Int): Int =
+        try {
+            packageManager.getApplicationInfoAsUser(packageName, /* flags= */ 0, userId).uid
+        } catch (e: PackageManager.NameNotFoundException) {
+            INVALID_PACKAGE_UID
+        }
 
     private fun logD(msg: String, vararg arguments: Any?) {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)

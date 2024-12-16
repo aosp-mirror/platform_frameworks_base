@@ -35,7 +35,6 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
 
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
@@ -522,7 +521,7 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         mShellController.addConfigurationChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_BUBBLES,
+        mShellController.addExternalInterface(IBubbles.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
     }
@@ -2073,10 +2072,7 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void suppressionChanged(Bubble bubble, boolean isSuppressed) {
-            if (mLayerView != null) {
-                // TODO (b/273316505) handle suppression changes, although might not need to
-                //  to do anything on the layerview side for this...
-            }
+            // Nothing to do for our views, handled by launcher / in the bubble bar.
         }
 
         @Override

@@ -34,6 +34,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.bluetooth.BluetoothAdapter;
@@ -51,6 +52,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.AidlInputGestureData;
 import android.hardware.input.HostUsiVersion;
@@ -181,6 +183,7 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
     private static final int MSG_CURRENT_USER_CHANGED = 4;
+    private static final int MSG_SYSTEM_READY = 5;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -351,6 +354,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages loading PointerIcons
     private final PointerIconCache mPointerIconCache;
 
+    // Manages storage and retrieval of input data.
+    private final InputDataStore mInputDataStore;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -471,11 +477,9 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         KeyboardBacklightControllerInterface getKeyboardBacklightController(
-                NativeInputManagerService nativeService, PersistentDataStore dataStore) {
-            return InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
-                    ? new KeyboardBacklightController(mContext, nativeService, dataStore,
-                    mLooper, mUEventManager)
-                    : new KeyboardBacklightControllerInterface() {};
+                NativeInputManagerService nativeService) {
+            return new KeyboardBacklightController(mContext, nativeService, mLooper,
+                    mUEventManager);
         }
     }
 
@@ -500,9 +504,11 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
-        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative, mDataStore);
+        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative);
         mStickyModifierStateController = new StickyModifierStateController();
-        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
+        mInputDataStore = new InputDataStore();
+        mKeyGestureController = new KeyGestureController(mContext, injector.getLooper(),
+                mInputDataStore);
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
                 mNative);
         mKeyRemapper = new KeyRemapper(mContext, mNative, mDataStore, injector.getLooper());
@@ -564,6 +570,14 @@ public class InputManagerService extends IInputManager.Stub
 
         // Add ourselves to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+    }
+
+    private void onBootPhase(int phase) {
+        // On ActivityManager thread, shift to handler to avoid blocking other system services in
+        // this boot phase.
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
+        }
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -646,6 +660,10 @@ public class InputManagerService extends IInputManager.Stub
         // Attempt to update the default pointer display when the viewports change.
         // Take care to not make calls to window manager while holding internal locks.
         mNative.setPointerDisplayId(mWindowManagerCallbacks.getPointerDisplayId());
+    }
+
+    private void setDisplayTopologyInternal(DisplayTopology topology) {
+        mNative.setDisplayTopology(topology.getGraph());
     }
 
     /**
@@ -2608,38 +2626,14 @@ public class InputManagerService extends IInputManager.Stub
         return mWindowManagerCallbacks.interceptUnhandledKey(event, focus);
     }
 
+    @SuppressLint("MissingPermission")
     private void initKeyGestures() {
         InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
         im.registerKeyGestureEventHandler(new InputManager.KeyGestureEventHandler() {
             @Override
             public boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
                     @Nullable IBinder focussedToken) {
-                int deviceId = event.getDeviceId();
-                boolean complete = event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
-                        && !event.isCancelled();
-                switch (event.getKeyGestureType()) {
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
-                        if (complete) {
-                            mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
-                        }
-                        return true;
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
-                        if (complete) {
-                            mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
-                        }
-                        return true;
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
-                        // TODO(b/367748270): Add functionality to turn keyboard backlight on/off.
-                        return true;
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
-                        if (complete) {
-                            mNative.toggleCapsLock(deviceId);
-                        }
-                        return true;
-                    default:
-                        return false;
-
-                }
+                return InputManagerService.this.handleKeyGestureEvent(event);
             }
 
             @Override
@@ -2649,6 +2643,10 @@ public class InputManagerService extends IInputManager.Stub
                     case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
                         return true;
                     default:
                         return false;
@@ -2656,6 +2654,73 @@ public class InputManagerService extends IInputManager.Stub
                 }
             }
         });
+    }
+
+    @SuppressLint("MissingPermission")
+    @VisibleForTesting
+    boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event) {
+        int deviceId = event.getDeviceId();
+        boolean complete = event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                && !event.isCancelled();
+        switch (event.getKeyGestureType()) {
+            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
+                if (complete) {
+                    mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
+                if (complete) {
+                    mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
+                // TODO(b/367748270): Add functionality to turn keyboard backlight on/off.
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
+                if (complete) {
+                    mNative.toggleCapsLock(deviceId);
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS:
+                if (complete && InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
+                    final boolean bounceKeysEnabled =
+                            InputSettings.isAccessibilityBounceKeysEnabled(mContext);
+                    InputSettings.setAccessibilityBounceKeysThreshold(mContext,
+                            bounceKeysEnabled ? 0
+                                    : InputSettings.DEFAULT_BOUNCE_KEYS_THRESHOLD_MILLIS);
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS:
+                if (complete && InputSettings.isAccessibilityMouseKeysFeatureFlagEnabled()) {
+                    final boolean mouseKeysEnabled = InputSettings.isAccessibilityMouseKeysEnabled(
+                            mContext);
+                    InputSettings.setAccessibilityMouseKeysEnabled(mContext, !mouseKeysEnabled);
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS:
+                if (complete && InputSettings.isAccessibilityStickyKeysFeatureEnabled()) {
+                    final boolean stickyKeysEnabled =
+                            InputSettings.isAccessibilityStickyKeysEnabled(mContext);
+                    InputSettings.setAccessibilityStickyKeysEnabled(mContext, !stickyKeysEnabled);
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS:
+                if (complete && InputSettings.isAccessibilitySlowKeysFeatureFlagEnabled()) {
+                    final boolean slowKeysEnabled =
+                            InputSettings.isAccessibilitySlowKeysEnabled(mContext);
+                    InputSettings.setAccessibilitySlowKeysThreshold(mContext,
+                            slowKeysEnabled ? 0 : InputSettings.DEFAULT_SLOW_KEYS_THRESHOLD_MILLIS);
+                    return true;
+                }
+                break;
+            default:
+                return false;
+
+        }
+        return false;
     }
 
     // Native callback.
@@ -3222,6 +3287,9 @@ public class InputManagerService extends IInputManager.Stub
                 case MSG_CURRENT_USER_CHANGED:
                     handleCurrentUserChanged((int) msg.obj);
                     break;
+                case MSG_SYSTEM_READY:
+                    systemRunning();
+                    break;
             }
         }
     }
@@ -3426,10 +3494,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void onBootPhase(int phase) {
-            // Called on ActivityManager thread.
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemRunning();
-            }
+            mService.onBootPhase(phase);
         }
 
         @Override
@@ -3446,6 +3511,11 @@ public class InputManagerService extends IInputManager.Stub
         @Override
         public void setDisplayViewports(List<DisplayViewport> viewports) {
             setDisplayViewportsInternal(viewports);
+        }
+
+        @Override
+        public void setDisplayTopology(DisplayTopology topology) {
+            setDisplayTopologyInternal(topology);
         }
 
         @Override

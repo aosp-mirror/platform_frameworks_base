@@ -56,9 +56,6 @@ public:
                  const SessionCreationConfig& creationConfig, hal::SessionConfig* config,
                  std::shared_ptr<IHintSession>* _aidl_return),
                 (override));
-    MOCK_METHOD(ScopedAStatus, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
-    MOCK_METHOD(ScopedAStatus, getMaxGraphicsPipelineThreadsCount, (int32_t* _aidl_return),
-                (override));
     MOCK_METHOD(ScopedAStatus, setHintSessionThreads,
                 (const std::shared_ptr<IHintSession>& hintSession,
                  const ::std::vector<int32_t>& tids),
@@ -83,6 +80,12 @@ public:
                 (override));
     MOCK_METHOD(ScopedAStatus, getGpuHeadroomMinIntervalMillis, (int64_t* _aidl_return),
                 (override));
+    MOCK_METHOD(ScopedAStatus, passSessionManagerBinder, (const SpAIBinder& sessionManager));
+    MOCK_METHOD(ScopedAStatus, registerClient,
+                (const std::shared_ptr<::aidl::android::os::IHintManager::IHintManagerClient>&
+                         clientDataIn,
+                 ::aidl::android::os::IHintManager::HintManagerClientData* _aidl_return),
+                (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -99,6 +102,8 @@ public:
     MOCK_METHOD(ScopedAStatus, close, (), (override));
     MOCK_METHOD(ScopedAStatus, reportActualWorkDuration2,
                 (const ::std::vector<hal::WorkDuration>& workDurations), (override));
+    MOCK_METHOD(ScopedAStatus, associateToLayers,
+                (const std::vector<::ndk::SpAIBinder>& in_layerTokens), (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -122,10 +127,9 @@ public:
 
     APerformanceHintManager* createManager() {
         APerformanceHint_setUseFMQForTesting(mUsingFMQ);
-        ON_CALL(*mMockIHintManager, getHintSessionPreferredRate(_))
-                .WillByDefault(DoAll(SetArgPointee<0>(123L), [] { return ScopedAStatus::ok(); }));
-        ON_CALL(*mMockIHintManager, getMaxGraphicsPipelineThreadsCount(_))
-                .WillByDefault(DoAll(SetArgPointee<0>(5), [] { return ScopedAStatus::ok(); }));
+        ON_CALL(*mMockIHintManager, registerClient(_, _))
+                .WillByDefault(
+                        DoAll(SetArgPointee<1>(mClientData), [] { return ScopedAStatus::ok(); }));
         return APerformanceHint_getManager();
     }
 
@@ -235,6 +239,20 @@ public:
     int kMockQueueSize = 20;
     bool mUsingFMQ = false;
 
+    IHintManager::HintManagerClientData mClientData{
+            .powerHalVersion = 6,
+            .maxGraphicsPipelineThreads = 5,
+            .preferredRateNanos = 123L,
+            .supportInfo{
+                    .usesSessions = true,
+                    .boosts = 0,
+                    .modes = 0,
+                    .sessionHints = -1,
+                    .sessionModes = -1,
+                    .sessionTags = -1,
+            },
+    };
+
     int32_t mMaxLoadHintsPerInterval;
     int64_t mLoadHintInterval;
 
@@ -251,12 +269,6 @@ bool equalsWithoutTimestamp(hal::WorkDuration lhs, hal::WorkDuration rhs) {
     return lhs.workPeriodStartTimestampNanos == rhs.workPeriodStartTimestampNanos &&
             lhs.cpuDurationNanos == rhs.cpuDurationNanos &&
             lhs.gpuDurationNanos == rhs.gpuDurationNanos && lhs.durationNanos == rhs.durationNanos;
-}
-
-TEST_F(PerformanceHintTest, TestGetPreferredUpdateRateNanos) {
-    APerformanceHintManager* manager = createManager();
-    int64_t preferredUpdateRateNanos = APerformanceHint_getPreferredUpdateRateNanos(manager);
-    EXPECT_EQ(123L, preferredUpdateRateNanos);
 }
 
 TEST_F(PerformanceHintTest, TestSession) {
@@ -295,6 +307,10 @@ TEST_F(PerformanceHintTest, TestSession) {
     EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_RESET))).Times(Exactly(1));
     EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::GPU_LOAD_RESET))).Times(Exactly(1));
     result = APerformanceHint_notifyWorkloadReset(session, true, true, "Test hint");
+    EXPECT_EQ(0, result);
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::CPU_LOAD_SPIKE))).Times(Exactly(1));
+    EXPECT_CALL(*mMockSession, sendHint(Eq(SessionHint::GPU_LOAD_SPIKE))).Times(Exactly(1));
+    result = APerformanceHint_notifyWorkloadSpike(session, true, true, "Test hint");
     EXPECT_EQ(0, result);
 
     result = APerformanceHint_sendHint(session, static_cast<SessionHint>(-1));

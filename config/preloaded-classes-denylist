@@ -3,7 +3,6 @@ android.media.MediaCodecInfo$CodecCapabilities$FeatureList
 android.net.ConnectivityThread$Singleton
 android.os.FileObserver
 android.os.NullVibrator
-android.permission.PermissionManager
 android.provider.MediaStore
 android.speech.tts.TextToSpeech$Connection$SetupConnectionAsyncTask
 android.view.HdrRenderState

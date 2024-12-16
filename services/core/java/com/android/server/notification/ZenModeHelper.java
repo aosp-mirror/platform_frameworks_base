@@ -112,9 +112,10 @@ import android.util.SparseArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
@@ -277,6 +278,11 @@ public class ZenModeHelper {
 
     public void removeCallback(Callback callback) {
         mCallbacks.remove(callback);
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public List<Callback> getCallbacks() {
+        return mCallbacks;
     }
 
     public void initZenMode() {
@@ -1548,15 +1554,18 @@ public class ZenModeHelper {
 
         if (isFromApp) {
             // Don't allow apps to toggle hidden (non-public-API) effects.
-            newEffects = new ZenDeviceEffects.Builder(newEffects)
-                    .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
-                    .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
-                    .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
-                    .setShouldDisableTouch(oldEffects.shouldDisableTouch())
-                    .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
-                    .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
-                    .setExtraEffects(oldEffects.getExtraEffects())
-                    .build();
+            newEffects =
+                    new ZenDeviceEffects.Builder(newEffects)
+                            .setShouldDisableAutoBrightness(
+                                    oldEffects.shouldDisableAutoBrightness())
+                            .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
+                            .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
+                            .setShouldDisableTouch(oldEffects.shouldDisableTouch())
+                            .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
+                            .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                            .setShouldUseNightLight(oldEffects.shouldUseNightLight())
+                            .setExtraEffects(oldEffects.getExtraEffects())
+                            .build();
         }
 
         zenRule.zenDeviceEffects = newEffects;
@@ -1594,6 +1603,9 @@ public class ZenModeHelper {
             }
             if (oldEffects.shouldMaximizeDoze() != newEffects.shouldMaximizeDoze()) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_MAXIMIZE_DOZE;
+            }
+            if (oldEffects.shouldUseNightLight() != newEffects.shouldUseNightLight()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_NIGHT_LIGHT;
             }
             if (!Objects.equals(oldEffects.getExtraEffects(), newEffects.getExtraEffects())) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_EXTRA_EFFECTS;

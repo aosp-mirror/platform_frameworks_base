@@ -454,7 +454,7 @@ class DragResizeInputListener implements AutoCloseable {
                         ProtoLog.d(WM_SHELL_DESKTOP_MODE,
                                 "%s: Handling action down, update ctrlType to %d", TAG, ctrlType);
                         mDragStartTaskBounds = mCallback.onDragPositioningStart(ctrlType,
-                                rawX, rawY);
+                                e.getDisplayId(), rawX, rawY);
                         mLastMotionEventOnDown = e;
                         mResizeTrigger = (ctrlType == CTRL_TYPE_BOTTOM || ctrlType == CTRL_TYPE_TOP
                                 || ctrlType == CTRL_TYPE_RIGHT || ctrlType == CTRL_TYPE_LEFT)
@@ -489,7 +489,8 @@ class DragResizeInputListener implements AutoCloseable {
                     }
                     final float rawX = e.getRawX(dragPointerIndex);
                     final float rawY = e.getRawY(dragPointerIndex);
-                    final Rect taskBounds = mCallback.onDragPositioningMove(rawX, rawY);
+                    final Rect taskBounds = mCallback.onDragPositioningMove(e.getDisplayId(),
+                            rawX, rawY);
                     updateInputSinkRegionForDrag(taskBounds);
                     result = true;
                     break;
@@ -505,7 +506,7 @@ class DragResizeInputListener implements AutoCloseable {
                                     TAG, e.getActionMasked());
                             break;
                         }
-                        final Rect taskBounds = mCallback.onDragPositioningEnd(
+                        final Rect taskBounds = mCallback.onDragPositioningEnd(e.getDisplayId(),
                                 e.getRawX(dragPointerIndex), e.getRawY(dragPointerIndex));
                         // If taskBounds has changed, setGeometry will be called and update the
                         // sink region. Otherwise, we should revert it here.

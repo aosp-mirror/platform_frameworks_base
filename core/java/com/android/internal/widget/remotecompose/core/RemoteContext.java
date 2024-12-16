@@ -40,6 +40,7 @@ import java.time.ZoneOffset;
  * <p>We also contain a PaintContext, so that any operation can draw as needed.
  */
 public abstract class RemoteContext {
+    private static final int MAX_OP_COUNT = 100_000; // Maximum cmds per frame
     protected @NonNull CoreDocument mDocument =
             new CoreDocument(); // todo: is this a valid way to initialize? bbade@
     public @NonNull RemoteComposeState mRemoteComposeState =
@@ -52,6 +53,7 @@ public abstract class RemoteContext {
 
     int mDebug = 0;
 
+    private int mOpCount;
     private int mTheme = Theme.UNSPECIFIED;
 
     public float mWidth = 0f;
@@ -62,6 +64,8 @@ public abstract class RemoteContext {
 
     public @Nullable Component mLastComponent;
     public long currentTime = 0L;
+
+    private boolean mUseChoreographer = true;
 
     public float getDensity() {
         return mDensity;
@@ -185,6 +189,40 @@ public abstract class RemoteContext {
     public abstract void clearNamedIntegerOverride(@NonNull String integerName);
 
     /**
+     * Set the value of a named float. This overrides the float in the document
+     *
+     * @param floatName the name of the float to override
+     * @param value Override the default float
+     */
+    public abstract void setNamedFloatOverride(String floatName, float value);
+
+    /**
+     * Allows to clear a named Float.
+     *
+     * <p>If an override exists, we revert back to the default value in the document.
+     *
+     * @param floatName the name of the float to override
+     */
+    public abstract void clearNamedFloatOverride(String floatName);
+
+    /**
+     * Set the value of a named Object. This overrides the Object in the document
+     *
+     * @param dataName the name of the Object to override
+     * @param value Override the default float
+     */
+    public abstract void setNamedDataOverride(String dataName, Object value);
+
+    /**
+     * Allows to clear a named Object.
+     *
+     * <p>If an override exists, we revert back to the default value in the document.
+     *
+     * @param dataName the name of the Object to override
+     */
+    public abstract void clearNamedDataOverride(String dataName);
+
+    /**
      * Support Collections by registering this collection
      *
      * @param id id of the collection
@@ -213,6 +251,31 @@ public abstract class RemoteContext {
      * @param type 0 = none, 1-21 ,see HapticFeedbackConstants
      */
     public abstract void hapticEffect(int type);
+
+    /** Set the repaint flag. This will trigger a repaint of the current document. */
+    public void needsRepaint() {
+        if (mPaintContext != null) {
+            mPaintContext.needsRepaint();
+        }
+    }
+
+    /**
+     * Returns true if we should use the choreographter
+     *
+     * @return true if we use the choreographer
+     */
+    public boolean useChoreographer() {
+        return mUseChoreographer;
+    }
+
+    /**
+     * Set to true to use the android choreographer
+     *
+     * @param value
+     */
+    public void setUseChoreographer(boolean value) {
+        mUseChoreographer = value;
+    }
 
     /**
      * The context can be used in a few different mode, allowing operations to skip being executed:
@@ -486,6 +549,9 @@ public abstract class RemoteContext {
 
     public static final int ID_DENSITY = 27;
 
+    /** Defines when the last build was made */
+    public static final int ID_API_LEVEL = 28;
+
     public static final float FLOAT_DENSITY = Utils.asNan(ID_DENSITY);
 
     /** CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600 */
@@ -559,6 +625,9 @@ public abstract class RemoteContext {
     /** Ambient light level in SI lux */
     public static final float FLOAT_LIGHT = Utils.asNan(ID_LIGHT);
 
+    /** When was this player built */
+    public static final float FLOAT_API_LEVEL = Utils.asNan(ID_API_LEVEL);
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -618,4 +687,23 @@ public abstract class RemoteContext {
             float right,
             float bottom,
             int metadataId);
+
+    /** increments the count of operations executed in a pass */
+    public void incrementOpCount() {
+        mOpCount++;
+        if (mOpCount > MAX_OP_COUNT) {
+            throw new RuntimeException("Too many operations executed");
+        }
+    }
+
+    /**
+     * Get the last Op Count and clear the count.
+     *
+     * @return the number of ops executed.
+     */
+    public int getLastOpCount() {
+        int count = mOpCount;
+        mOpCount = 0;
+        return count;
+    }
 }

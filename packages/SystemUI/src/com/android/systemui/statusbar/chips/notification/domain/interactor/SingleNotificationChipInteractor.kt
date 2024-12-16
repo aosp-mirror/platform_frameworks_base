@@ -22,6 +22,7 @@ import com.android.systemui.log.core.Logger
 import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -56,6 +57,14 @@ constructor(
     // top-level tag. It should instead be provided as the first string in each log message.
     private val extraLogTag = "SingleChipInteractor[key=$key]"
 
+    init {
+        if (startingModel.promotedContent == null) {
+            logger.e({ "$str1: Starting model has promotedContent=null, which shouldn't happen" }) {
+                str1 = extraLogTag
+            }
+        }
+    }
+
     private val _notificationModel = MutableStateFlow(startingModel)
 
     /**
@@ -67,6 +76,14 @@ constructor(
             logger.w({ "$str1: received model for different key $str2" }) {
                 str1 = extraLogTag
                 str2 = model.key
+            }
+            return
+        }
+        if (model.promotedContent == null) {
+            logger.e({
+                "$str1: received model with promotedContent=null, which shouldn't happen"
+            }) {
+                str1 = extraLogTag
             }
             return
         }
@@ -98,14 +115,29 @@ constructor(
         }
 
     private fun ActiveNotificationModel.toNotificationChipModel(): NotificationChipModel? {
-        val statusBarChipIconView = this.statusBarChipIconView
-        if (statusBarChipIconView == null) {
-            logger.w({ "$str1: Can't show chip because status bar chip icon view is null" }) {
+        val promotedContent = this.promotedContent
+        if (promotedContent == null) {
+            logger.w({
+                "$str1: Can't show chip because promotedContent=null, which shouldn't happen"
+            }) {
                 str1 = extraLogTag
             }
             return null
         }
-        return NotificationChipModel(key, statusBarChipIconView)
+        val statusBarChipIconView = this.statusBarChipIconView
+        if (statusBarChipIconView == null) {
+            if (!StatusBarConnectedDisplays.isEnabled) {
+                logger.w({ "$str1: Can't show chip because status bar chip icon view is null" }) {
+                    str1 = extraLogTag
+                }
+                // When the flag is disabled, we keep the old behavior of returning null.
+                // When the flag is enabled, the icon will always be null, and will later be
+                // fetched in the UI layer using the notification key.
+                return null
+            }
+        }
+
+        return NotificationChipModel(key, statusBarChipIconView, promotedContent)
     }
 
     @AssistedFactory

@@ -195,6 +195,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
     fun setSurfaceBehindVisibility_goesAwayFirst_andIgnoresSecondCall_with_keyguard_shell_transitions() {
         underTest.setLockscreenShown(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, false)
         underTest.setSurfaceBehindVisibility(true)
         verify(keyguardTransitions).startKeyguardTransition(false, false)
 
@@ -205,6 +206,9 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
     fun setSurfaceBehindVisibility_falseSetsLockscreenVisibility_without_keyguard_shell_transitions() {
+        // Show the surface behind, then hide it.
+        underTest.setLockscreenShown(true)
+        underTest.setSurfaceBehindVisibility(true)
         underTest.setSurfaceBehindVisibility(false)
         verify(activityTaskManagerService).setLockScreenShown(eq(true), any())
     }
@@ -212,6 +216,9 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
     fun setSurfaceBehindVisibility_falseSetsLockscreenVisibility_with_keyguard_shell_transitions() {
+        // Show the surface behind, then hide it.
+        underTest.setLockscreenShown(true)
+        underTest.setSurfaceBehindVisibility(true)
         underTest.setSurfaceBehindVisibility(false)
         verify(keyguardTransitions).startKeyguardTransition(eq(true), any())
     }

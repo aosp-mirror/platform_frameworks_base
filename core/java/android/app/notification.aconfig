@@ -284,6 +284,20 @@ flag {
 }
 
 flag {
+  name: "nm_binder_perf_cache_channels"
+  namespace: "systemui"
+  description: "Use IpcDataCache for notification channel/group lookups"
+  bug: "362981561"
+}
+
+flag {
+  name: "nm_binder_perf_throttle_notify"
+  namespace: "systemui"
+  description: "Rate-limit calls to enqueueNotificationWithTag client-side"
+  bug: "362981561"
+}
+
+flag {
   name: "no_sbnholder"
   namespace: "systemui"
   description: "removes sbnholder from NLS"

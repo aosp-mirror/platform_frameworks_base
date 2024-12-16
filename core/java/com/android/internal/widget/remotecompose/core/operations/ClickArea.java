@@ -21,14 +21,17 @@ import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Add a click area to the document */
-public class ClickArea extends Operation implements RemoteComposeOperation {
+public class ClickArea extends Operation
+        implements RemoteComposeOperation, AccessibleComponent, VariableSupport {
     private static final int OP_CODE = Operations.CLICK_AREA;
     private static final String CLASS_NAME = "ClickArea";
     int mId;
@@ -37,6 +40,10 @@ public class ClickArea extends Operation implements RemoteComposeOperation {
     float mTop;
     float mRight;
     float mBottom;
+    float mOutLeft;
+    float mOutTop;
+    float mOutRight;
+    float mOutBottom;
     int mMetadata;
 
     /**
@@ -61,11 +68,35 @@ public class ClickArea extends Operation implements RemoteComposeOperation {
             int metadata) {
         this.mId = id;
         this.mContentDescription = contentDescription;
-        this.mLeft = left;
-        this.mTop = top;
-        this.mRight = right;
-        this.mBottom = bottom;
-        this.mMetadata = metadata;
+        mOutLeft = mLeft = left;
+        mOutTop = mTop = top;
+        mOutRight = mRight = right;
+        mOutBottom = mBottom = bottom;
+        mMetadata = metadata;
+    }
+
+    @Override
+    public void registerListening(@NonNull RemoteContext context) {
+        if (Float.isNaN(mLeft)) {
+            context.listensTo(Utils.idFromNan(mLeft), this);
+        }
+        if (Float.isNaN(mTop)) {
+            context.listensTo(Utils.idFromNan(mTop), this);
+        }
+        if (Float.isNaN(mRight)) {
+            context.listensTo(Utils.idFromNan(mRight), this);
+        }
+        if (Float.isNaN(mBottom)) {
+            context.listensTo(Utils.idFromNan(mBottom), this);
+        }
+    }
+
+    @Override
+    public void updateVariables(@NonNull RemoteContext context) {
+        mOutLeft = Float.isNaN(mLeft) ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
+        mOutTop = Float.isNaN(mTop) ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
+        mRight = Float.isNaN(mRight) ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
+        mOutBottom = Float.isNaN(mBottom) ? context.getFloat(Utils.idFromNan(mBottom)) : mBottom;
     }
 
     @Override
@@ -101,10 +132,8 @@ public class ClickArea extends Operation implements RemoteComposeOperation {
 
     @Override
     public void apply(@NonNull RemoteContext context) {
-        if (context.getMode() != RemoteContext.ContextMode.DATA) {
-            return;
-        }
-        context.addClickArea(mId, mContentDescription, mLeft, mTop, mRight, mBottom, mMetadata);
+        context.addClickArea(
+                mId, mContentDescription, mOutLeft, mOutTop, mOutRight, mOutBottom, mMetadata);
     }
 
     @NonNull
@@ -113,6 +142,11 @@ public class ClickArea extends Operation implements RemoteComposeOperation {
         return indent + toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -127,6 +161,21 @@ public class ClickArea extends Operation implements RemoteComposeOperation {
         return OP_CODE;
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescription;
+    }
+
+    /**
+     * @param buffer
+     * @param id
+     * @param contentDescription
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param metadata
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int id,

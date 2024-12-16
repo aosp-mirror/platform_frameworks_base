@@ -30,13 +30,20 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.IpcDataCache;
 import android.os.IpcDataCache.Config;
+import android.os.ParcelFileDescriptor;
 import android.os.UpdateLock;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.view.WindowManagerPolicyConstants;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastPrintWriter;
+
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 /** @hide */
 public class BroadcastStickyCache {
@@ -71,8 +78,10 @@ public class BroadcastStickyCache {
     @VisibleForTesting
     public static final ArrayMap<String, String> sActionApiNameMap = new ArrayMap<>();
 
+    @GuardedBy("BroadcastStickyCache.class")
     private static final ArrayMap<String, IpcDataCache.Config> sActionConfigMap = new ArrayMap<>();
 
+    @GuardedBy("BroadcastStickyCache.class")
     private static final ArrayMap<StickyBroadcastFilter, IpcDataCache<Void, Intent>>
             sFilterCacheMap = new ArrayMap<>();
 
@@ -154,37 +163,44 @@ public class BroadcastStickyCache {
             @Nullable String broadcastPermission,
             @UserIdInt int userId,
             @RegisterReceiverFlags int flags) {
-        IpcDataCache<Void, Intent> intentDataCache = findIpcDataCache(filter);
+        IpcDataCache<Void, Intent> intentDataCache;
 
-        if (intentDataCache == null) {
-            final String action = filter.getAction(0);
-            final StickyBroadcastFilter stickyBroadcastFilter =
-                    new StickyBroadcastFilter(filter, action);
-            final Config config = getConfig(action);
+        synchronized (BroadcastStickyCache.class) {
+            intentDataCache = findIpcDataCache(filter);
 
-            intentDataCache =
-                    new IpcDataCache<>(config,
-                            (query) -> ActivityManager.getService().registerReceiverWithFeature(
-                                    applicationThread,
-                                    mBasePackageName,
-                                    attributionTag,
-                                    /* receiverId= */ "null",
-                                    /* receiver= */ null,
-                                    filter,
-                                    broadcastPermission,
-                                    userId,
-                                    flags));
-            sFilterCacheMap.put(stickyBroadcastFilter, intentDataCache);
+            if (intentDataCache == null) {
+                final String action = filter.getAction(0);
+                final StickyBroadcastFilter stickyBroadcastFilter =
+                        new StickyBroadcastFilter(filter, action);
+                final Config config = getConfig(action);
+
+                intentDataCache =
+                        new IpcDataCache<>(config,
+                                (query) -> ActivityManager.getService().registerReceiverWithFeature(
+                                        applicationThread,
+                                        mBasePackageName,
+                                        attributionTag,
+                                        /* receiverId= */ "null",
+                                        /* receiver= */ null,
+                                        filter,
+                                        broadcastPermission,
+                                        userId,
+                                        flags));
+                sFilterCacheMap.put(stickyBroadcastFilter, intentDataCache);
+            }
         }
         return intentDataCache.query(null);
     }
 
     @VisibleForTesting
     public static void clearCacheForTest() {
-        sFilterCacheMap.clear();
+        synchronized (BroadcastStickyCache.class) {
+            sFilterCacheMap.clear();
+        }
     }
 
     @Nullable
+    @GuardedBy("BroadcastStickyCache.class")
     private static IpcDataCache<Void, Intent> findIpcDataCache(
             @NonNull IntentFilter filter) {
         for (int i = sFilterCacheMap.size() - 1; i >= 0; i--) {
@@ -198,15 +214,54 @@ public class BroadcastStickyCache {
     }
 
     @NonNull
+    @GuardedBy("BroadcastStickyCache.class")
     private static IpcDataCache.Config getConfig(@NonNull String action) {
         if (!sActionConfigMap.containsKey(action)) {
             // We only need 1 entry per cache but just to be on the safer side we are choosing 32
             // although we don't expect more than 1.
             sActionConfigMap.put(action,
-                    new Config(32, IpcDataCache.MODULE_SYSTEM, sActionApiNameMap.get(action)));
+                    new Config(32, IpcDataCache.MODULE_SYSTEM,
+                            sActionApiNameMap.get(action)).cacheNulls(true));
         }
 
         return sActionConfigMap.get(action);
+    }
+
+    public static void dumpCacheInfo(@NonNull ParcelFileDescriptor pfd) {
+        if (!Flags.useStickyBcastCache()) {
+            return;
+        }
+        final PrintWriter pw = new FastPrintWriter(new FileOutputStream(pfd.getFileDescriptor()));
+        synchronized (BroadcastStickyCache.class) {
+            dumpCacheLocked(pw);
+        }
+        pw.flush();
+    }
+
+    @GuardedBy("BroadcastStickyCache.class")
+    private static void dumpCacheLocked(@NonNull PrintWriter pw) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(
+                pw, "  " /* singleIndent */, "  " /* prefix */);
+        ipw.println("Cached sticky broadcasts:");
+        ipw.increaseIndent();
+        final int count = sFilterCacheMap.size();
+        if (count == 0) {
+            ipw.println("<empty>");
+        } else {
+            for (int i = 0; i < count; ++i) {
+                final StickyBroadcastFilter stickyBroadcast = sFilterCacheMap.keyAt(i);
+                final IpcDataCache<Void, Intent> ipcDataCache = sFilterCacheMap.valueAt(i);
+                ipw.print("Entry #");
+                ipw.print(i);
+                ipw.println(":");
+                ipw.increaseIndent();
+                ipw.print("action", stickyBroadcast.action).println();
+                ipw.print("filter", stickyBroadcast.filter.toLongString()).println();
+                ipcDataCache.dumpCacheEntries(pw);
+                ipw.decreaseIndent();
+            }
+        }
+        ipw.decreaseIndent();
     }
 
     @VisibleForTesting

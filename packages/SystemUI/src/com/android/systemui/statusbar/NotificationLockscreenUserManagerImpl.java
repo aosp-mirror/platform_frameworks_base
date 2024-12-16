@@ -654,8 +654,13 @@ public class NotificationLockscreenUserManagerImpl implements
         }
     }
 
-    /** @return true if the entry needs redaction when on the lockscreen. */
-    public boolean needsRedaction(NotificationEntry ent) {
+    /**
+     * Determine what type of redaction is needed, if any. Returns REDACTION_TYPE_NONE if no
+     * redaction type is needed, REDACTION_TYPE_PUBLIC if private notifications are blocked, and
+     * REDACTION_TYPE_SENSITIVE_CONTENT if sensitive content is detected, and REDACTION_TYPE_PUBLIC
+     * doesn't apply.
+     */
+    public @RedactionType int getRedactionType(NotificationEntry ent) {
         int userId = ent.getSbn().getUserId();
 
         boolean isCurrentUserRedactingNotifs =
@@ -675,13 +680,19 @@ public class NotificationLockscreenUserManagerImpl implements
                 ent.isNotificationVisibilityPrivate();
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
-        if (keyguardPrivateNotifications()) {
-            return !mKeyguardAllowingNotifications || isNotifSensitive
-                    || userForcesRedaction || (notificationRequestsRedaction && isNotifRedacted);
-        } else {
-            return userForcesRedaction || isNotifSensitive
-                    || (notificationRequestsRedaction && isNotifRedacted);
+        if (userForcesRedaction) {
+            return REDACTION_TYPE_PUBLIC;
         }
+        if (notificationRequestsRedaction && isNotifRedacted) {
+            return REDACTION_TYPE_PUBLIC;
+        }
+        if (keyguardPrivateNotifications() && !mKeyguardAllowingNotifications) {
+            return REDACTION_TYPE_PUBLIC;
+        }
+        if (isNotifSensitive) {
+            return REDACTION_TYPE_SENSITIVE_CONTENT;
+        }
+        return REDACTION_TYPE_NONE;
     }
 
     private boolean packageHasVisibilityOverride(String key) {

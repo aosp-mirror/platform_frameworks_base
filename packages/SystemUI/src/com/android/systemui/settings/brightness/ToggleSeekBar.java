@@ -62,7 +62,7 @@ public class ToggleSeekBar extends SeekBar {
         } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
             setHovered(false);
         }
-        return true;
+        return super.onHoverEvent(event);
     }
 
     @Override
@@ -85,12 +85,12 @@ public class ToggleSeekBar extends SeekBar {
         }
     }
 
-    void setAdminBlocker(AdminBlocker blocker) {
+    public void setAdminBlocker(AdminBlocker blocker) {
         mAdminBlocker = blocker;
         setEnabled(blocker == null);
     }
 
-    interface AdminBlocker {
+    public interface AdminBlocker {
         boolean block();
     }
 }

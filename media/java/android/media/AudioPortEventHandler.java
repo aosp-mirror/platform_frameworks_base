@@ -97,17 +97,15 @@ class AudioPortEventHandler {
 
                         ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
                         ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
-                        if (msg.what != AUDIOPORT_EVENT_SERVICE_DIED) {
-                            int status = AudioManager.updateAudioPortCache(ports, patches, null);
-                            if (status != AudioManager.SUCCESS) {
-                                // Since audio ports and audio patches are not null, the return
-                                // value could be ERROR due to inconsistency between port generation
-                                // and patch generation. In this case, we need to reschedule the
-                                // message to make sure the native callback is done.
-                                sendMessageDelayed(obtainMessage(msg.what, msg.obj),
-                                        RESCHEDULE_MESSAGE_DELAY_MS);
-                                return;
-                            }
+                        int status = AudioManager.updateAudioPortCache(ports, patches, null);
+                        if (status != AudioManager.SUCCESS) {
+                            // Since audio ports and audio patches are not null, the return
+                            // value could be ERROR due to inconsistency between port generation
+                            // and patch generation. In this case, we need to reschedule the
+                            // message to make sure the native callback is done.
+                            sendMessageDelayed(obtainMessage(msg.what, msg.obj),
+                                    RESCHEDULE_MESSAGE_DELAY_MS);
+                            return;
                         }
 
                         switch (msg.what) {

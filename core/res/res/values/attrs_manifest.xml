@@ -2572,7 +2572,9 @@
              against a development branch, in which case it will only work against
              the development builds. -->
         <attr name="minSdkVersion" format="integer|string" />
-        <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SUPPORT_MINOR_VERSIONS_IN_MINSDKVERSION) -->
+        <!-- This is the minimum SDK major and minor version (e.g. "36.1") that
+             the application requires. Verified independently of minSdkVersion.
+             @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
         <attr name="minSdkVersionFull" format="string" />
         <!-- This is the SDK version number that the application is targeting.
              It is able to run on older versions (down to minSdkVersion), but
@@ -2887,6 +2889,17 @@
          <p>This appears as a child tag of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestOriginalPackage" parent="AndroidManifest">
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- Private tag to declare the package name that the permissions of this package
+         is based on.  Only used for packages installed in the system image.  If
+         given, the permissions from the other package will be propagated into the
+         new package.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestAdoptPermissions" parent="AndroidManifest">
         <attr name="name" />
     </declare-styleable>
 

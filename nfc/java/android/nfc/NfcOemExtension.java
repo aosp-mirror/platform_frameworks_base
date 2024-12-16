@@ -150,28 +150,24 @@ public final class NfcOemExtension {
 
     /**
      * Technology Type for {@link #getActiveNfceeList()}.
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int NFCEE_TECH_NONE = 0;
 
     /**
      * Technology Type for {@link #getActiveNfceeList()}.
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int NFCEE_TECH_A = 1;
 
     /**
      * Technology Type for {@link #getActiveNfceeList()}.
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int NFCEE_TECH_B = 1 << 1;
 
     /**
      * Technology Type for {@link #getActiveNfceeList()}.
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public static final int NFCEE_TECH_F = 1 << 2;
@@ -670,12 +666,15 @@ public final class NfcOemExtension {
     /**
      * Get the Active NFCEE (NFC Execution Environment) List
      *
-     * @see Reader#getName() for the list of possible NFCEE names.
-     *
      * @return Map< String, @NfceeTechnology Integer >
      *         A HashMap where keys are activated secure elements and
-     *         the values are bitmap of technologies supported by each secure element
-     *         on success keys can contain "eSE" and "UICC", otherwise empty map.
+     *         the values are bitmap of technologies supported by each secure element:
+     *          NFCEE_TECH_A == 0x1
+     *          NFCEE_TECH_B == 0x2
+     *          NFCEE_TECH_F == 0x4
+     *         and keys can contain "eSE" and "SIM" with a number,
+     *         in case of failure an empty map is returned.
+     *         @see Reader#getName() for the list of possible NFCEE names.
      */
     @NonNull
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
@@ -887,18 +886,22 @@ public final class NfcOemExtension {
             switch (entry.getType()) {
                 case TYPE_TECHNOLOGY -> result.add(
                         new RoutingTableTechnologyEntry(entry.getNfceeId(),
-                                RoutingTableTechnologyEntry.techStringToInt(entry.getEntry()))
+                                RoutingTableTechnologyEntry.techStringToInt(entry.getEntry()),
+                                routeStringToInt(entry.getRoutingType()))
                 );
                 case TYPE_PROTOCOL -> result.add(
                         new RoutingTableProtocolEntry(entry.getNfceeId(),
-                                RoutingTableProtocolEntry.protocolStringToInt(entry.getEntry()))
+                                RoutingTableProtocolEntry.protocolStringToInt(entry.getEntry()),
+                                routeStringToInt(entry.getRoutingType()))
                 );
                 case TYPE_AID -> result.add(
-                        new RoutingTableAidEntry(entry.getNfceeId(), entry.getEntry())
+                        new RoutingTableAidEntry(entry.getNfceeId(), entry.getEntry(),
+                                routeStringToInt(entry.getRoutingType()))
                 );
                 case TYPE_SYSTEMCODE -> result.add(
                         new RoutingTableSystemCodeEntry(entry.getNfceeId(),
-                                entry.getEntry().getBytes(StandardCharsets.UTF_8))
+                                entry.getEntry().getBytes(StandardCharsets.UTF_8),
+                                routeStringToInt(entry.getRoutingType()))
                 );
             }
         }

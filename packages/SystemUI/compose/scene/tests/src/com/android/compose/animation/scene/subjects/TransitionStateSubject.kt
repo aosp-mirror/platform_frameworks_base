@@ -168,12 +168,12 @@ abstract class BaseTransitionSubject<T : TransitionState.Transition>(
 
     fun hasBouncingContent(content: ContentKey) {
         val actual = actual
-        if (actual !is TransitionState.HasOverscrollProperties) {
+        if (actual !is TransitionState.DirectionProperties) {
             failWithActual(simpleFact("expected to be ContentState.HasOverscrollProperties"))
         }
 
         check("bouncingContent")
-            .that((actual as TransitionState.HasOverscrollProperties).bouncingContent)
+            .that((actual as TransitionState.DirectionProperties).bouncingContent)
             .isEqualTo(content)
     }
 }

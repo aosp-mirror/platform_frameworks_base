@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_CPU_TIME;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -40,6 +41,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP_SLEEPING;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_NONE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SHORT_FGS_TIMEOUT;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -281,6 +283,15 @@ public class MockingOomAdjusterTests {
             field.set(obj, val);
         } catch (NoSuchFieldException | IllegalAccessException e) {
         }
+    }
+
+    private static void assertNoCpuTime(ProcessRecord app) {
+        assertEquals(0, app.mState.getSetCapability() & PROCESS_CAPABILITY_CPU_TIME);
+    }
+
+    private static void assertCpuTime(ProcessRecord app) {
+        assertEquals(PROCESS_CAPABILITY_CPU_TIME,
+                app.mState.getSetCapability() & PROCESS_CAPABILITY_CPU_TIME);
     }
 
     private static void assertBfsl(ProcessRecord app) {
@@ -661,6 +672,7 @@ public class MockingOomAdjusterTests {
         // SHORT_SERVICE, timed out already.
         s = ServiceRecord.newEmptyInstanceForTest(mService);
         s.appInfo = new ApplicationInfo();
+
         mProcessStateController.setStartRequested(s, true);
         s.isForeground = true;
         s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
@@ -683,6 +695,51 @@ public class MockingOomAdjusterTests {
             assertEquals(app.mState.getSetProcState(), PROCESS_STATE_SERVICE);
             assertNoBfsl(app);
         }
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_USE_CPU_TIME_CAPABILITY)
+    public void testUpdateOomAdjFreezeState_bindingFromShortFgs() {
+        // Setting up a started short FGS within app1.
+        final ServiceRecord s = ServiceRecord.newEmptyInstanceForTest(mService);
+        s.appInfo = new ApplicationInfo();
+        mProcessStateController.setStartRequested(s, true);
+        s.isForeground = true;
+        s.foregroundServiceType = FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
+        mProcessStateController.setShortFgsInfo(s, SystemClock.uptimeMillis());
+
+        final ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        mProcessStateController.setHostProcess(s, app);
+        mProcessStateController.setHasForegroundServices(app.mServices, true,
+                FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, /* hasNoneType=*/false);
+        mProcessStateController.startService(app.mServices, s);
+        app.mState.setLastTopTime(SystemClock.uptimeMillis()
+                - mService.mConstants.TOP_TO_FGS_GRACE_DURATION);
+
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        // App1 with short service binds to app2
+        bindService(app2, app, null, null, 0, mock(IBinder.class));
+
+        setProcessesToLru(app, app2);
+        updateOomAdj(app);
+
+        assertCpuTime(app);
+        assertCpuTime(app2);
+
+        // Timeout the short FGS.
+        mProcessStateController.setShortFgsInfo(s, SystemClock.uptimeMillis()
+                - mService.mConstants.mShortFgsTimeoutDuration
+                - mService.mConstants.mShortFgsProcStateExtraWaitDuration);
+        mService.mServices.onShortFgsProcstateTimeout(s);
+        // mService is a mock, but this verifies that the timeout would trigger an update.
+        verify(mService).updateOomAdjLocked(app, OOM_ADJ_REASON_SHORT_FGS_TIMEOUT);
+        updateOomAdj(app);
+
+        assertNoCpuTime(app);
+        assertNoCpuTime(app2);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3142,11 +3199,19 @@ public class MockingOomAdjusterTests {
         assertEquals(true, app.getUidRecord().isSetAllowListed());
         assertFreezeState(app, false);
         assertFreezeState(app2, false);
+        if (Flags.useCpuTimeCapability()) {
+            assertCpuTime(app);
+            assertCpuTime(app2);
+        }
 
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
         assertEquals(false, app.getUidRecord().isSetAllowListed());
         assertFreezeState(app, true);
         assertFreezeState(app2, true);
+        if (Flags.useCpuTimeCapability()) {
+            assertNoCpuTime(app);
+            assertNoCpuTime(app2);
+        }
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3171,6 +3236,11 @@ public class MockingOomAdjusterTests {
         assertFreezeState(app, false);
         assertFreezeState(app2, false);
         assertFreezeState(app3, false);
+        if (Flags.useCpuTimeCapability()) {
+            assertCpuTime(app);
+            assertCpuTime(app2);
+            assertCpuTime(app3);
+        }
 
         // Remove app1 from allowlist.
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP_UID, false);
@@ -3179,6 +3249,11 @@ public class MockingOomAdjusterTests {
         assertFreezeState(app, true);
         assertFreezeState(app2, false);
         assertFreezeState(app3, false);
+        if (Flags.useCpuTimeCapability()) {
+            assertNoCpuTime(app);
+            assertCpuTime(app2);
+            assertCpuTime(app3);
+        }
 
         // Now remove app2 from allowlist.
         mProcessStateController.setUidTempAllowlistStateLSP(MOCKAPP2_UID, false);
@@ -3187,6 +3262,11 @@ public class MockingOomAdjusterTests {
         assertFreezeState(app, true);
         assertFreezeState(app2, true);
         assertFreezeState(app3, true);
+        if (Flags.useCpuTimeCapability()) {
+            assertNoCpuTime(app);
+            assertNoCpuTime(app2);
+            assertNoCpuTime(app3);
+        }
     }
 
     @SuppressWarnings("GuardedBy")

@@ -1170,12 +1170,12 @@ class KairosTests {
                                     mergeIncrementally
                                         .onEach { println("patch: $it") }
                                         .foldMapIncrementally()
-                                        .flatMap { it.combineValues() }
+                                        .flatMap { it.combine() }
                                 }
                             }
                         }
                         .foldMapIncrementally()
-                        .flatMap { it.combineValues() }
+                        .flatMap { it.combine() }
 
                 accState.toStateFlow()
             }
@@ -1297,6 +1297,26 @@ class KairosTests {
         assertEquals(2, lastFlows.value.first.value)
         // but the new one is
         assertEquals(1, lastFlows.value.second.value)
+    }
+
+    @Test
+    fun buildScope_stateAccumulation() = runFrpTest { network ->
+        val input = network.mutableTFlow<Unit>()
+        var observedCount: Int? = null
+        activateSpec(network) {
+            val (c, j) = asyncScope { input.fold(0) { _, x -> x + 1 } }
+            deferredBuildScopeAction { c.get().observe { observedCount = it } }
+        }
+        runCurrent()
+        assertEquals(0, observedCount)
+
+        input.emit(Unit)
+        runCurrent()
+        assertEquals(1, observedCount)
+
+        input.emit(Unit)
+        runCurrent()
+        assertEquals(2, observedCount)
     }
 
     @Test

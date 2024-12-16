@@ -777,6 +777,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task rootTask = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
@@ -815,6 +816,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_displayContent() {
         removeGlobalMinSizeRestriction();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task rootTask = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
@@ -922,6 +924,49 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertEquals(task1.getAdjacentTaskFragment(), null);
         assertEquals(task2.getAdjacentTaskFragment(), null);
         assertEquals(dc.getDefaultTaskDisplayArea().mLaunchAdjacentFlagRootTask, null);
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testSetAdjacentLaunchRootSet() {
+        final DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+
+        final Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
+        final RunningTaskInfo info1 = task1.getTaskInfo();
+        final Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
+        final RunningTaskInfo info2 = task2.getTaskInfo();
+        final Task task3 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
+        final RunningTaskInfo info3 = task3.getTaskInfo();
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setAdjacentRootSet(info1.token, info2.token, info3.token);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertTrue(task1.hasAdjacentTaskFragment());
+        assertTrue(task2.hasAdjacentTaskFragment());
+        assertTrue(task3.hasAdjacentTaskFragment());
+        assertTrue(task1.isAdjacentTo(task2));
+        assertTrue(task1.isAdjacentTo(task3));
+        assertTrue(task2.isAdjacentTo(task3));
+
+        wct = new WindowContainerTransaction();
+        wct.clearAdjacentRoots(info1.token);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertFalse(task1.hasAdjacentTaskFragment());
+        assertTrue(task2.hasAdjacentTaskFragment());
+        assertTrue(task3.hasAdjacentTaskFragment());
+        assertFalse(task1.isAdjacentTo(task2));
+        assertFalse(task1.isAdjacentTo(task3));
+        assertTrue(task2.isAdjacentTo(task3));
+
+        wct = new WindowContainerTransaction();
+        wct.clearAdjacentRoots(info2.token);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertFalse(task2.hasAdjacentTaskFragment());
+        assertFalse(task3.hasAdjacentTaskFragment());
+        assertFalse(task2.isAdjacentTo(task3));
     }
 
     @Test

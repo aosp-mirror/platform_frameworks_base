@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_PIP;
@@ -30,6 +31,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_RESIZE_PIP;
+import static com.android.wm.shell.transition.Transitions.transitTypeToString;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
@@ -44,6 +46,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -52,6 +55,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -120,7 +124,6 @@ public class PipTransition extends PipTransitionController implements
     // Internal state and relevant cached info
     //
 
-    @Nullable
     private Transitions.TransitionFinishCallback mFinishCallback;
 
     private ValueAnimator mTransitionAnimator;
@@ -193,7 +196,7 @@ public class PipTransition extends PipTransitionController implements
             @NonNull TransitionRequestInfo request) {
         if (isAutoEnterInButtonNavigation(request) || isEnterPictureInPictureModeRequest(request)) {
             mEnterTransition = transition;
-            return getEnterPipTransaction(transition, request);
+            return getEnterPipTransaction(transition, request.getPipChange());
         }
         return null;
     }
@@ -202,7 +205,8 @@ public class PipTransition extends PipTransitionController implements
     public void augmentRequest(@NonNull IBinder transition, @NonNull TransitionRequestInfo request,
             @NonNull WindowContainerTransaction outWct) {
         if (isAutoEnterInButtonNavigation(request) || isEnterPictureInPictureModeRequest(request)) {
-            outWct.merge(getEnterPipTransaction(transition, request), true /* transfer */);
+            outWct.merge(getEnterPipTransaction(transition, request.getPipChange()),
+                    true /* transfer */);
             mEnterTransition = transition;
         }
     }
@@ -231,7 +235,6 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        mFinishCallback = finishCallback;
         if (transition == mEnterTransition || info.getType() == TRANSIT_PIP) {
             mEnterTransition = null;
             // If we are in swipe PiP to Home transition we are ENTERING_PIP as a jumpcut transition
@@ -277,9 +280,33 @@ public class PipTransition extends PipTransitionController implements
         if (isRemovePipTransition(info)) {
             return removePipImmediately(info, startTransaction, finishTransaction, finishCallback);
         }
-        mFinishCallback = null;
         return false;
     }
+
+    @Override
+    public boolean isEnteringPip(@NonNull TransitionInfo.Change change,
+            @WindowManager.TransitionType int transitType) {
+        if (change.getTaskInfo() != null
+                && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
+            // TRANSIT_TO_FRONT, though uncommon with triggering PiP, should semantically also
+            // be allowed to animate if the task in question is pinned already - see b/308054074.
+            if (transitType == TRANSIT_PIP || transitType == TRANSIT_OPEN
+                    || transitType == TRANSIT_TO_FRONT) {
+                return true;
+            }
+            // This can happen if the request to enter PIP happens when we are collecting for
+            // another transition, such as TRANSIT_CHANGE (display rotation).
+            if (transitType == TRANSIT_CHANGE) {
+                return true;
+            }
+
+            // Please file a bug to handle the unexpected transition type.
+            android.util.Slog.e(TAG, "Found new PIP in transition with mis-matched type="
+                    + transitTypeToString(transitType), new Throwable());
+        }
+        return false;
+    }
+
 
     @Override
     public void end() {
@@ -301,6 +328,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
         // We expect the PiP activity as a separate change in a config-at-end transition;
         // only flings are not using config-at-end for resize bounds changes
         TransitionInfo.Change pipActivityChange = getDeferConfigActivityChange(info,
@@ -348,6 +376,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipActivityChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
 
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect destinationBounds = pipChange.getEndAbsBounds();
@@ -416,6 +445,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipActivityChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
 
         final SurfaceControl pipLeash = getLeash(pipChange);
         final Rect startBounds = pipChange.getStartAbsBounds();
@@ -542,6 +572,7 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
+        mFinishCallback = finishCallback;
 
         Rect destinationBounds = pipChange.getEndAbsBounds();
         SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
@@ -584,6 +615,7 @@ public class PipTransition extends PipTransitionController implements
                 return false;
             }
         }
+        mFinishCallback = finishCallback;
 
         // The parent change if we were in a multi-activity PiP; null if single activity PiP.
         final TransitionInfo.Change parentBeforePip = pipChange.getTaskInfo() == null
@@ -627,6 +659,12 @@ public class PipTransition extends PipTransitionController implements
             finishTransition();
         });
         cacheAndStartTransitionAnimator(animator);
+
+        // Save the PiP bounds in case, we re-enter the PiP with the same component.
+        float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
+                mPipBoundsState.getBounds());
+        mPipBoundsState.saveReentryState(snapFraction);
+
         return true;
     }
 
@@ -649,19 +687,6 @@ public class PipTransition extends PipTransitionController implements
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getTaskInfo() != null
                     && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
-                return change;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private TransitionInfo.Change getDeferConfigActivityChange(TransitionInfo info,
-            @NonNull WindowContainerToken parent) {
-        for (TransitionInfo.Change change : info.getChanges()) {
-            if (change.getTaskInfo() == null
-                    && change.hasFlags(TransitionInfo.FLAG_CONFIG_AT_END)
-                    && change.getParent() != null && change.getParent().equals(parent)) {
                 return change;
             }
         }
@@ -706,6 +731,10 @@ public class PipTransition extends PipTransitionController implements
             if (cutoutInsets != null
                     && getFixedRotationDelta(info, pipTaskChange) == ROTATION_90) {
                 adjustedSourceRectHint.offset(cutoutInsets.left, cutoutInsets.top);
+            }
+            if (Flags.enableDesktopWindowingPip()) {
+                adjustedSourceRectHint.offset(-pipActivityChange.getStartAbsBounds().left,
+                        -pipActivityChange.getStartAbsBounds().top);
             }
         } else {
             // For non-valid app provided src-rect-hint, calculate one to crop into during
@@ -754,9 +783,9 @@ public class PipTransition extends PipTransitionController implements
     }
 
     private WindowContainerTransaction getEnterPipTransaction(@NonNull IBinder transition,
-            @NonNull TransitionRequestInfo request) {
+            @NonNull TransitionRequestInfo.PipChange pipChange) {
         // cache the original task token to check for multi-activity case later
-        final ActivityManager.RunningTaskInfo pipTask = request.getPipTask();
+        final ActivityManager.RunningTaskInfo pipTask = pipChange.getTaskInfo();
         PictureInPictureParams pipParams = pipTask.pictureInPictureParams;
         mPipTaskListener.setPictureInPictureParams(pipParams);
         mPipBoundsState.setBoundsStateForEntry(pipTask.topActivity, pipTask.topActivityInfo,
@@ -766,14 +795,18 @@ public class PipTransition extends PipTransitionController implements
         final Rect entryBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
         mPipBoundsState.setBounds(entryBounds);
 
+        // Operate on the TF token in case we are dealing with AE case; this should avoid marking
+        // activities in other TFs as config-at-end.
+        WindowContainerToken token = pipChange.getTaskFragmentToken();
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.movePipActivityToPinnedRootTask(pipTask.token, entryBounds);
-        wct.deferConfigToTransitionEnd(pipTask.token);
+        wct.movePipActivityToPinnedRootTask(token, entryBounds);
+        wct.deferConfigToTransitionEnd(token);
         return wct;
     }
 
     private boolean isAutoEnterInButtonNavigation(@NonNull TransitionRequestInfo requestInfo) {
-        final ActivityManager.RunningTaskInfo pipTask = requestInfo.getPipTask();
+        final ActivityManager.RunningTaskInfo pipTask = requestInfo.getPipChange() != null
+                ? requestInfo.getPipChange().getTaskInfo() : null;
         if (pipTask == null) {
             return false;
         }
@@ -912,11 +945,6 @@ public class PipTransition extends PipTransitionController implements
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
-                // Save the PiP bounds in case, we re-enter the PiP with the same component.
-                float snapFraction = mPipBoundsAlgorithm.getSnapFraction(
-                        mPipBoundsState.getBounds());
-                mPipBoundsState.saveReentryState(snapFraction);
-
                 mPipTransitionState.setPinnedTaskLeash(null);
                 mPipTransitionState.setPipTaskInfo(null);
                 break;

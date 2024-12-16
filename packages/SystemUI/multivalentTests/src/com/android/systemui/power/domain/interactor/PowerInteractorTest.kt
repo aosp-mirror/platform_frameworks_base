@@ -18,6 +18,7 @@
 package com.android.systemui.power.domain.interactor
 
 import android.os.PowerManager
+import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,9 +26,12 @@ import com.android.systemui.camera.cameraGestureHelper
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.dozeInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.data.repository.fakePowerRepository
+import com.android.systemui.power.shared.model.DozeScreenStateModel
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -51,9 +55,9 @@ class PowerInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val cameraGestureHelper = kosmos.cameraGestureHelper
+    private val repository: FakePowerRepository = kosmos.fakePowerRepository
 
     private lateinit var underTest: PowerInteractor
-    private lateinit var repository: FakePowerRepository
     private val keyguardRepository = FakeKeyguardRepository()
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
@@ -63,7 +67,6 @@ class PowerInteractorTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        repository = FakePowerRepository()
         underTest =
             PowerInteractor(
                 repository,
@@ -208,7 +211,7 @@ class PowerInteractorTest : SysuiTestCase() {
         whenever(cameraGestureHelper.canCameraGestureBeLaunched(any())).thenReturn(false)
         underTest.onStartedWakingUp(
             PowerManager.WAKE_REASON_POWER_BUTTON,
-            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false,
         )
         underTest.onFinishedWakingUp()
         underTest.onCameraLaunchGestureDetected()
@@ -224,7 +227,7 @@ class PowerInteractorTest : SysuiTestCase() {
     fun onCameraLaunchGestureDetected_maintainsAllOtherState() {
         underTest.onStartedWakingUp(
             PowerManager.WAKE_REASON_POWER_BUTTON,
-            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false,
         )
         underTest.onFinishedWakingUp()
         underTest.onCameraLaunchGestureDetected()
@@ -244,7 +247,7 @@ class PowerInteractorTest : SysuiTestCase() {
         underTest.onFinishedGoingToSleep(/* powerButtonLaunchGestureTriggeredDuringSleep= */ false)
         underTest.onStartedWakingUp(
             PowerManager.WAKE_REASON_POWER_BUTTON,
-            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false,
         )
         underTest.onFinishedWakingUp()
 
@@ -262,7 +265,7 @@ class PowerInteractorTest : SysuiTestCase() {
         // This state should only be reset onStartedGoingToSleep.
         underTest.onStartedWakingUp(
             PowerManager.WAKE_REASON_POWER_BUTTON,
-            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false
+            /*powerButtonLaunchGestureTriggeredDuringSleep= */ false,
         )
         underTest.onFinishedWakingUp()
 
@@ -272,4 +275,26 @@ class PowerInteractorTest : SysuiTestCase() {
             .isEqualTo(WakeSleepReason.POWER_BUTTON)
         assertTrue(repository.wakefulness.value.powerButtonLaunchGestureTriggered)
     }
+
+    @Test
+    fun dozeScreenState() =
+        testScope.runTest {
+            val dozeScreenState by collectLastValue(underTest.dozeScreenState)
+            assertThat(dozeScreenState).isEqualTo(DozeScreenStateModel.UNKNOWN)
+
+            kosmos.dozeInteractor.setDozeScreenState(Display.STATE_OFF)
+            assertThat(dozeScreenState).isEqualTo(DozeScreenStateModel.OFF)
+
+            kosmos.dozeInteractor.setDozeScreenState(Display.STATE_ON)
+            assertThat(dozeScreenState).isEqualTo(DozeScreenStateModel.ON)
+
+            kosmos.dozeInteractor.setDozeScreenState(Display.STATE_DOZE)
+            assertThat(dozeScreenState).isEqualTo(DozeScreenStateModel.DOZE)
+
+            kosmos.dozeInteractor.setDozeScreenState(Display.STATE_DOZE_SUSPEND)
+            assertThat(dozeScreenState).isEqualTo(DozeScreenStateModel.DOZE_SUSPEND)
+
+            kosmos.dozeInteractor.setDozeScreenState(Display.STATE_ON_SUSPEND)
+            assertThat(dozeScreenState).isEqualTo(DozeScreenStateModel.ON_SUSPEND)
+        }
 }

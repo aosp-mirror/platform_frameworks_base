@@ -49,27 +49,25 @@
              ongoing_activity_chip_short_time_delta] will ever be shown at one time. -->
 
         <!-- Shows a timer, like 00:01. -->
+        <!-- Don't use the LimitedWidth style for the timer because the end of the timer is often
+             the most important value. ChipChronometer has the correct logic for when the timer is
+             too large for the space allowed. -->
         <com.android.systemui.statusbar.chips.ui.view.ChipChronometer
             android:id="@+id/ongoing_activity_chip_time"
             style="@style/StatusBar.Chip.Text"
         />
 
         <!-- Shows generic text. -->
-        <!-- Since there's so little room in the status bar chip area, don't ellipsize the text and
-             instead just fade it out a bit at the end. -->
         <TextView
             android:id="@+id/ongoing_activity_chip_text"
-            style="@style/StatusBar.Chip.Text"
-            android:ellipsize="none"
-            android:requiresFadingEdge="horizontal"
-            android:fadingEdgeLength="@dimen/ongoing_activity_chip_text_fading_edge_length"
+            style="@style/StatusBar.Chip.Text.LimitedWidth"
             android:visibility="gone"
             />
 
         <!-- Shows a time delta in short form, like "15min" or "1hr". -->
         <android.widget.DateTimeView
             android:id="@+id/ongoing_activity_chip_short_time_delta"
-            style="@style/StatusBar.Chip.Text"
+            style="@style/StatusBar.Chip.Text.LimitedWidth"
             android:visibility="gone"
             />
 

@@ -363,6 +363,17 @@ flag {
   is_fixed_read_only: true
 }
 
+flag {
+    name: "cache_user_restrictions_read_only"
+    namespace: "multiuser"
+    description: "Cache hasUserRestriction to avoid unnecessary binder calls"
+    bug: "350419621"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
     name: "enable_private_space_features"
@@ -582,4 +593,5 @@ flag {
     namespace: "profile_experiences"
     description: "Add support for LauncherUserInfo configs"
     bug: "346553745"
+    is_exported: true
 }

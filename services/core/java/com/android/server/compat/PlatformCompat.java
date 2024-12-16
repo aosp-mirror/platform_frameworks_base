@@ -523,7 +523,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         // older target sdk to impact all system uid apps
         if (Flags.systemUidTargetSystemSdk() && !mIsWear &&
                 uid == Process.SYSTEM_UID && appInfo != null) {
-            appInfo.targetSdkVersion = Build.VERSION.SDK_INT;
+            appInfo.targetSdkVersion = mBuildClassifier.platformTargetSdk();
         }
         return appInfo;
     }

@@ -43,6 +43,7 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -73,6 +74,10 @@ public final class StageTaskListenerTests extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mSyncQueue;
     @Mock
+    private ShellExecutor mMainExecutor;
+    @Mock
+    private ShellExecutor mBgExecutor;
+    @Mock
     private IconProvider mIconProvider;
     @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
@@ -95,6 +100,8 @@ public final class StageTaskListenerTests extends ShellTestCase {
                 mCallbacks,
                 mSyncQueue,
                 mIconProvider,
+                mMainExecutor,
+                mBgExecutor,
                 Optional.of(mWindowDecorViewModel),
                 STAGE_TYPE_UNDEFINED);
         mRootTask = new TestRunningTaskInfoBuilder().build();

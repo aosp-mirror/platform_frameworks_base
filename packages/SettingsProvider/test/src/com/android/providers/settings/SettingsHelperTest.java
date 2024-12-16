@@ -33,6 +33,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -82,6 +83,9 @@ public class SettingsHelperTest {
     private static final String DEFAULT_ALARM_VALUE =
             "content://media/internal/audio/media/30?title=DefaultAlarm&canonical=1";
     private static final String VIBRATION_FILE_NAME = "haptics.xml";
+
+    private static final LocaleList LOCALE_LIST =
+        LocaleList.forLanguageTags("en-US,en-UK");
 
     private SettingsHelper mSettingsHelper;
 
@@ -776,6 +780,15 @@ public class SettingsHelperTest {
         restoreAutoRotationSetting(newValue);
 
         assertThat(getAutoRotationSettingValue()).isEqualTo(previousValue);
+    }
+
+    @Test
+    public void getLocaleList_returnsLocaleList() {
+        Configuration config = new Configuration();
+        config.setLocales(LOCALE_LIST);
+        when(mResources.getConfiguration()).thenReturn(config);
+
+        assertThat(mSettingsHelper.getLocaleList()).isEqualTo(LOCALE_LIST);
     }
 
     private int getAutoRotationSettingValue() {

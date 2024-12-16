@@ -16,11 +16,18 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
+import android.annotation.SystemApi;
+
+import com.android.internal.telephony.flags.Flags;
+
 /**
  * A callback class for selected satellite subscription changed events.
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public interface SelectedNbIotSatelliteSubscriptionCallback {
     /**
      * Called when the selected satellite subscription has changed.

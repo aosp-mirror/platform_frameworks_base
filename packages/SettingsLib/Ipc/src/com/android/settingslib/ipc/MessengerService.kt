@@ -25,7 +25,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
-import android.os.Process
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineScope
@@ -92,7 +91,6 @@ open class MessengerService(
         private val apiHandlers: Array<ApiHandler<*, *>>,
         private val permissionChecker: PermissionChecker,
     ) : Handler(looper) {
-        @VisibleForTesting internal val myUid = Process.myUid()
         val coroutineScope = CoroutineScope(asCoroutineDispatcher().immediate + SupervisorJob())
 
         override fun handleMessage(msg: Message) {
@@ -109,18 +107,22 @@ open class MessengerService(
             }
             val apiId = msg.what
             val txnId = msg.arg1
+            val callingPid = msg.arg2
             val callingUid = msg.sendingUid
             val data = msg.data
             // WARNING: never access "msg" beyond this point as it may be recycled by Looper
             val response = Message.obtain(null, apiId, txnId, ApiServiceException.CODE_OK)
             try {
-                if (permissionChecker.check(application, myUid, callingUid)) {
+                if (permissionChecker.check(application, callingPid, callingUid)) {
                     @Suppress("UNCHECKED_CAST")
                     val apiHandler = findApiHandler(apiId) as? ApiHandler<Any, Any>
                     if (apiHandler != null) {
                         val request = apiHandler.requestCodec.decode(data)
-                        if (apiHandler.hasPermission(application, myUid, callingUid, request)) {
-                            val result = apiHandler.invoke(application, myUid, callingUid, request)
+                        if (
+                            apiHandler.hasPermission(application, callingPid, callingUid, request)
+                        ) {
+                            val result =
+                                apiHandler.invoke(application, callingPid, callingUid, request)
                             response.data = apiHandler.responseCodec.encode(result)
                         } else {
                             response.arg2 = ApiServiceException.CODE_PERMISSION_DENIED

@@ -15,11 +15,15 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import static com.android.internal.widget.remotecompose.core.CoreDocument.MAJOR_VERSION;
+import static com.android.internal.widget.remotecompose.core.CoreDocument.MINOR_VERSION;
+import static com.android.internal.widget.remotecompose.core.CoreDocument.PATCH_VERSION;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.LONG;
 
 import android.annotation.NonNull;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
@@ -38,9 +42,6 @@ import java.util.List;
 public class Header extends Operation implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.HEADER;
     private static final String CLASS_NAME = "Header";
-    public static final int MAJOR_VERSION = 0;
-    public static final int MINOR_VERSION = 1;
-    public static final int PATCH_VERSION = 0;
 
     int mMajorVersion;
     int mMinorVersion;
@@ -115,6 +116,11 @@ public class Header extends Operation implements RemoteComposeOperation {
         return toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;
@@ -185,5 +191,9 @@ public class Header extends Operation implements RemoteComposeOperation {
                 .field(INT, "HEIGHT", "Major version")
                 // .field(FLOAT, "DENSITY", "Major version")
                 .field(LONG, "CAPABILITIES", "Major version");
+    }
+
+    public void setVersion(CoreDocument document) {
+        document.setVersion(mMajorVersion, mMinorVersion, mPatchVersion);
     }
 }

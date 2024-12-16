@@ -20,14 +20,16 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
+import android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf
 import android.provider.Settings
 import android.service.quicksettings.Tile
 import android.testing.TestableLooper
 import androidx.lifecycle.LifecycleOwner
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.classifier.FalsingManagerFake
@@ -44,14 +46,17 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -67,40 +72,33 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class DeviceControlsTileTest : SysuiTestCase() {
+class DeviceControlsTileTest(flags: FlagsParameterization) : SysuiTestCase() {
 
-    @Mock
-    private lateinit var qsHost: QSHost
-    @Mock
-    private lateinit var metricsLogger: MetricsLogger
-    @Mock
-    private lateinit var statusBarStateController: StatusBarStateController
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var qsLogger: QSLogger
-    @Mock
-    private lateinit var controlsComponent: ControlsComponent
-    @Mock
-    private lateinit var controlsUiController: ControlsUiController
-    @Mock
-    private lateinit var controlsListingController: ControlsListingController
-    @Mock
-    private lateinit var controlsController: ControlsController
-    @Mock
-    private lateinit var serviceInfo: ControlsServiceInfo
-    @Mock
-    private lateinit var uiEventLogger: QsEventLogger
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Mock private lateinit var qsHost: QSHost
+    @Mock private lateinit var metricsLogger: MetricsLogger
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var qsLogger: QSLogger
+    @Mock private lateinit var controlsComponent: ControlsComponent
+    @Mock private lateinit var controlsUiController: ControlsUiController
+    @Mock private lateinit var controlsListingController: ControlsListingController
+    @Mock private lateinit var controlsController: ControlsController
+    @Mock private lateinit var serviceInfo: ControlsServiceInfo
+    @Mock private lateinit var uiEventLogger: QsEventLogger
     @Captor
     private lateinit var listingCallbackCaptor:
-            ArgumentCaptor<ControlsListingController.ControlsListingCallback>
-    @Captor
-    private lateinit var intentCaptor: ArgumentCaptor<Intent>
+        ArgumentCaptor<ControlsListingController.ControlsListingCallback>
+    @Captor private lateinit var intentCaptor: ArgumentCaptor<Intent>
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: DeviceControlsTile
@@ -120,8 +118,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
         `when`(qsHost.context).thenReturn(spiedContext)
         `when`(controlsComponent.isEnabled()).thenReturn(true)
         `when`(controlsController.getPreferredSelection())
-                .thenReturn(SelectedItem.StructureItem(
-                        StructureInfo(ComponentName("pkg", "cls"), "structure", listOf())))
+            .thenReturn(
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName("pkg", "cls"), "structure", listOf())
+                )
+            )
         secureSettings.putInt(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 1)
 
         setupControlsComponent()
@@ -140,7 +141,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
             if (featureEnabled) {
                 Optional.of(controlsController)
             } else {
-                Optional.empty()
+                Optional.empty<ControlsController>()
             }
         }
 
@@ -148,7 +149,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
             if (featureEnabled) {
                 Optional.of(controlsListingController)
             } else {
-                Optional.empty()
+                Optional.empty<ControlsController>()
             }
         }
 
@@ -156,12 +157,12 @@ class DeviceControlsTileTest : SysuiTestCase() {
             if (featureEnabled) {
                 Optional.of(controlsUiController)
             } else {
-                Optional.empty()
+                Optional.empty<ControlsController>()
             }
         }
 
         `when`(controlsComponent.getTileTitleId()).thenReturn(R.string.quick_controls_title)
-        `when`(controlsComponent.getTileTitleId()).thenReturn(R.drawable.controls_icon)
+        `when`(controlsComponent.getTileImageId()).thenReturn(R.drawable.controls_icon)
     }
 
     @Test
@@ -182,10 +183,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testObservingCallback() {
-        verify(controlsListingController).observe(
+        verify(controlsListingController)
+            .observe(
                 any(LifecycleOwner::class.java),
-                any(ControlsListingController.ControlsListingCallback::class.java)
-        )
+                any(ControlsListingController.ControlsListingCallback::class.java),
+            )
     }
 
     @Test
@@ -205,10 +207,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testStateUnavailableIfNoListings() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
 
         listingCallbackCaptor.value.onServicesUpdated(emptyList())
         testableLooper.processAllMessages()
@@ -218,10 +218,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testStateUnavailableIfNotEnabled() {
-        verify(controlsListingController).observe(
-            any(LifecycleOwner::class.java),
-            capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.isEnabled()).thenReturn(false)
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
@@ -232,18 +230,19 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testStateActiveIfListingsHasControlsFavorited() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
-        `when`(controlsController.getPreferredSelection()).thenReturn(
-            SelectedItem.StructureItem(StructureInfo(
-                ComponentName("pkg", "cls"),
-                "structure",
-                listOf(ControlInfo("id", "title", "subtitle", 1))
-            ))
-        )
+        `when`(controlsController.getPreferredSelection())
+            .thenReturn(
+                SelectedItem.StructureItem(
+                    StructureInfo(
+                        ComponentName("pkg", "cls"),
+                        "structure",
+                        listOf(ControlInfo("id", "title", "subtitle", 1)),
+                    )
+                )
+            )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -253,14 +252,15 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testStateInactiveIfListingsHasNoControlsFavorited() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         `when`(controlsController.getPreferredSelection())
-                .thenReturn(SelectedItem.StructureItem(
-                        StructureInfo(ComponentName("pkg", "cls"), "structure", listOf())))
+            .thenReturn(
+                SelectedItem.StructureItem(
+                    StructureInfo(ComponentName("pkg", "cls"), "structure", listOf())
+                )
+            )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -270,13 +270,11 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testStateActiveIfPreferredIsPanel() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         `when`(controlsController.getPreferredSelection())
-                .thenReturn(SelectedItem.PanelItem("appName", ComponentName("pkg", "cls")))
+            .thenReturn(SelectedItem.PanelItem("appName", ComponentName("pkg", "cls")))
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -286,10 +284,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testStateInactiveIfLocked() {
-        verify(controlsListingController).observe(
-            any(LifecycleOwner::class.java),
-            capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.getVisibility())
             .thenReturn(ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK)
 
@@ -301,10 +297,8 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun testMoveBetweenStates() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -325,19 +319,20 @@ class DeviceControlsTileTest : SysuiTestCase() {
 
     @Test
     fun handleClick_available_shownOverLockscreenWhenLocked() {
-        verify(controlsListingController).observe(
-                any(LifecycleOwner::class.java),
-                capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.getVisibility()).thenReturn(ControlsComponent.Visibility.AVAILABLE)
         `when`(controlsUiController.resolveActivity()).thenReturn(ControlsActivity::class.java)
-        `when`(controlsController.getPreferredSelection()).thenReturn(
-            SelectedItem.StructureItem(StructureInfo(
-                    ComponentName("pkg", "cls"),
-                    "structure",
-                    listOf(ControlInfo("id", "title", "subtitle", 1))
-            ))
-        )
+        `when`(controlsController.getPreferredSelection())
+            .thenReturn(
+                SelectedItem.StructureItem(
+                    StructureInfo(
+                        ComponentName("pkg", "cls"),
+                        "structure",
+                        listOf(ControlInfo("id", "title", "subtitle", 1)),
+                    )
+                )
+            )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -345,30 +340,33 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(activityStarter).startActivity(
+        verify(activityStarter)
+            .startActivity(
                 intentCaptor.capture(),
                 eq(true) /* dismissShade */,
                 nullable(ActivityTransitionAnimator.Controller::class.java),
-                eq(true) /* showOverLockscreenWhenLocked */)
+                eq(true), /* showOverLockscreenWhenLocked */
+            )
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
 
     @Test
     fun handleClick_availableAfterUnlock_notShownOverLockscreenWhenLocked() {
-        verify(controlsListingController).observe(
-            any(LifecycleOwner::class.java),
-            capture(listingCallbackCaptor)
-        )
+        verify(controlsListingController)
+            .observe(any(LifecycleOwner::class.java), capture(listingCallbackCaptor))
         `when`(controlsComponent.getVisibility())
             .thenReturn(ControlsComponent.Visibility.AVAILABLE_AFTER_UNLOCK)
         `when`(controlsUiController.resolveActivity()).thenReturn(ControlsActivity::class.java)
-        `when`(controlsController.getPreferredSelection()).thenReturn(
-            SelectedItem.StructureItem(StructureInfo(
-                ComponentName("pkg", "cls"),
-                "structure",
-                listOf(ControlInfo("id", "title", "subtitle", 1))
-            ))
-        )
+        `when`(controlsController.getPreferredSelection())
+            .thenReturn(
+                SelectedItem.StructureItem(
+                    StructureInfo(
+                        ComponentName("pkg", "cls"),
+                        "structure",
+                        listOf(ControlInfo("id", "title", "subtitle", 1)),
+                    )
+                )
+            )
 
         listingCallbackCaptor.value.onServicesUpdated(listOf(serviceInfo))
         testableLooper.processAllMessages()
@@ -376,26 +374,41 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verify(activityStarter).startActivity(
+        verify(activityStarter)
+            .startActivity(
                 intentCaptor.capture(),
                 anyBoolean() /* dismissShade */,
                 nullable(ActivityTransitionAnimator.Controller::class.java),
-                eq(false) /* showOverLockscreenWhenLocked */)
+                eq(false), /* showOverLockscreenWhenLocked */
+            )
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
     }
 
     @Test
     fun verifyTileEqualsResourceFromComponent() {
-        assertThat(tile.tileLabel)
-            .isEqualTo(
-                context.getText(
-                    controlsComponent.getTileTitleId()))
+        assertThat(tile.tileLabel).isEqualTo(context.getText(controlsComponent.getTileTitleId()))
     }
 
     @Test
-    fun verifyTileImageEqualsResourceFromComponent() {
-        assertThat(tile.icon)
-            .isEqualTo(QSTileImpl.ResourceIcon.get(controlsComponent.getTileImageId()))
+    @DisableFlags(QSComposeFragment.FLAG_NAME)
+    fun tileIconEqualsResourceFromComponent_composeFlagDisabled() {
+        tile.refreshState()
+        testableLooper.processAllMessages()
+        assertThat(tile.state.icon).isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.controls_icon))
+    }
+
+    @Test
+    @EnableFlags(QSComposeFragment.FLAG_NAME)
+    fun tileIconEqualsResourceFromComponent_composeFlagEnable() {
+        tile.refreshState()
+        testableLooper.processAllMessages()
+        assertThat(tile.state.icon)
+            .isEqualTo(
+                QSTileImpl.DrawableIconWithRes(
+                    mContext.getDrawable(R.drawable.controls_icon),
+                    R.drawable.controls_icon,
+                )
+            )
     }
 
     private fun createTile(): DeviceControlsTile {
@@ -409,10 +422,19 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                controlsComponent
-        ).also {
-            it.initialize()
-            testableLooper.processAllMessages()
+                controlsComponent,
+            )
+            .also {
+                it.initialize()
+                testableLooper.processAllMessages()
+            }
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return allCombinationsOf(QSComposeFragment.FLAG_NAME)
         }
     }
 }

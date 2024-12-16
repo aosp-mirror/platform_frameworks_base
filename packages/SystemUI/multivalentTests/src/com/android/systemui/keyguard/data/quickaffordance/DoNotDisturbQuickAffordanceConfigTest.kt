@@ -405,7 +405,8 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         testScope.runTest {
             val lockScreenState by collectLastValue(underTest.lockScreenState)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
+            val manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE
+            zenModeRepository.addMode(manualDnd)
             runCurrent()
 
             assertThat(lockScreenState)
@@ -419,8 +420,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                     )
                 )
 
-            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(manualDnd)
             runCurrent()
 
             assertThat(lockScreenState)

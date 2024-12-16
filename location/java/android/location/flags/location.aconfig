@@ -6,6 +6,7 @@ flag {
     namespace: "location"
     description: "Deprecates LocationManager ProviderChanged APIs"
     bug: "361811782"
+    is_exported: true
 }
 
 flag {
@@ -27,6 +28,7 @@ flag {
     namespace: "location"
     description: "Flag for new Geocoder APIs"
     bug: "229872126"
+    is_exported: true
 }
 
 flag {
@@ -56,6 +58,7 @@ flag {
     namespace: "location"
     description: "Flag for making geoid heights available via the Altitude HAL"
     bug: "304375846"
+    is_exported: true
 }
 
 flag {
@@ -63,6 +66,7 @@ flag {
     namespace: "location"
     description: "Flag for GNSS API for NavIC L1"
     bug: "302199306"
+    is_exported: true
 }
 
 flag {
@@ -70,6 +74,7 @@ flag {
     namespace: "location"
     description: "Flag for GnssMeasurementRequest WorkSource API"
     bug: "295235160"
+    is_exported: true
 }
 
 flag {
@@ -129,6 +134,7 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+    is_exported: true
 }
 
 flag {
@@ -154,4 +160,11 @@ flag {
     namespace: "location"
     description: "Flag for gating the density-based coarse locations"
     bug: "376198890"
+}
+
+flag {
+    name: "gnss_assistance_interface"
+    namespace: "location"
+    description: "Flag for GNSS assistance interface"
+    bug: "209078566"
 }

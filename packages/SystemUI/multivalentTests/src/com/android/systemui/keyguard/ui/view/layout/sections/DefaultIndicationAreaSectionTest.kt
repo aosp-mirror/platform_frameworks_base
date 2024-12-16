@@ -56,18 +56,9 @@ class DefaultIndicationAreaSectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
-    }
-
-    @Test
-    fun addViewsConditionally_migrateFlagOff() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
-        assertThat(constraintLayout.childCount).isEqualTo(0)
     }
 
     @Test

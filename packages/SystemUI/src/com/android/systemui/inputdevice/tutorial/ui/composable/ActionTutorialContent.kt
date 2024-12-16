@@ -20,6 +20,7 @@ import android.content.res.Configuration
 import androidx.annotation.RawRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,25 +34,44 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Error
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgressAfterError
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
 
 sealed interface TutorialActionState {
     data object NotStarted : TutorialActionState
 
     data class InProgress(
-        val progress: Float = 0f,
-        val startMarker: String? = null,
-        val endMarker: String? = null,
-    ) : TutorialActionState
+        override val progress: Float = 0f,
+        override val startMarker: String? = null,
+        override val endMarker: String? = null,
+    ) : TutorialActionState, Progress
 
     data class Finished(@RawRes val successAnimation: Int) : TutorialActionState
+
+    data object Error : TutorialActionState
+
+    data class InProgressAfterError(val inProgress: InProgress) :
+        TutorialActionState, Progress by inProgress
+}
+
+interface Progress {
+    val progress: Float
+    val startMarker: String?
+    val endMarker: String?
 }
 
 @Composable
@@ -125,17 +145,23 @@ fun TutorialDescription(
     config: TutorialScreenConfig,
     modifier: Modifier = Modifier,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
     val (titleTextId, bodyTextId) =
-        if (actionState is Finished) {
-            config.strings.titleSuccessResId to config.strings.bodySuccessResId
-        } else {
-            config.strings.titleResId to config.strings.bodyResId
+        when (actionState) {
+            is Finished -> config.strings.titleSuccessResId to config.strings.bodySuccessResId
+            Error,
+            is InProgressAfterError ->
+                config.strings.titleErrorResId to config.strings.bodyErrorResId
+            is NotStarted,
+            is InProgress -> config.strings.titleResId to config.strings.bodyResId
         }
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Text(
             text = stringResource(id = titleTextId),
             style = MaterialTheme.typography.displayLarge,
             color = config.colors.title,
+            modifier = Modifier.focusRequester(focusRequester).focusable(),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(

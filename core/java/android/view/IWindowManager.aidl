@@ -62,6 +62,7 @@ import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
+import android.view.inputmethod.ImeTracker;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
@@ -765,7 +766,8 @@ interface IWindowManager
      * container.
      */
     @EnforcePermission("MANAGE_APP_TOKENS")
-    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
+    void updateDisplayWindowRequestedVisibleTypes(int displayId, int visibleTypes, int mask,
+            in @nullable ImeTracker.Token statsToken);
 
     /**
      * Called to get the expected window insets.
@@ -929,6 +931,27 @@ interface IWindowManager
      * @param clientToken the window context's token
      */
     void detachWindowContext(IBinder clientToken);
+
+    /**
+     * Reparents the {@link android.window.WindowContext} to the
+     * {@link com.android.server.wm.DisplayArea} on another display.
+     * This method also reparent the WindowContext associated WindowToken to another display if
+     * necessary.
+     * <p>
+     * {@code type} and {@code options} must be the same as the previous call of
+     * {@link #attachWindowContextToDisplayArea} on the same Context otherwise this will fail
+     * silently.
+     *
+     * @param appThread the process that the window context is on.
+     * @param clientToken the window context's token
+     * @param type The window type of the WindowContext
+     * @param displayId The new display id this context windows should be parented to
+     * @param options Bundle the context was created with
+     *
+     * @return True if the operation was successful, False otherwise.
+     */
+    boolean reparentWindowContextToDisplayArea(in IApplicationThread appThread,
+                IBinder clientToken, int displayId);
 
     /**
      * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.

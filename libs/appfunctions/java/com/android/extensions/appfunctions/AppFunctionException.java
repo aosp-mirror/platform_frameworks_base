@@ -71,6 +71,13 @@ public final class AppFunctionException extends Exception {
     public static final int ERROR_CANCELLED = 2001;
 
     /**
+     * The operation was disallowed by enterprise policy.
+     *
+     * <p>This error is in the {@link #ERROR_CATEGORY_SYSTEM} category.
+     */
+    public static final int ERROR_ENTERPRISE_POLICY_DISALLOWED = 2002;
+
+    /**
      * An unknown error occurred while processing the call in the AppFunctionService.
      *
      * <p>This error is thrown when the service is connected in the remote application but an
@@ -189,7 +196,8 @@ public final class AppFunctionException extends Exception {
                 ERROR_SYSTEM_ERROR,
                 ERROR_INVALID_ARGUMENT,
                 ERROR_DISABLED,
-                ERROR_CANCELLED
+                ERROR_CANCELLED,
+                ERROR_ENTERPRISE_POLICY_DISALLOWED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ErrorCode {}

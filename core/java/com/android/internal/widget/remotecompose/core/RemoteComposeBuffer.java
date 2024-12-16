@@ -15,7 +15,6 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
-import static com.android.internal.widget.remotecompose.core.operations.utilities.AnimatedFloatExpression.ADD;
 import static com.android.internal.widget.remotecompose.core.operations.utilities.AnimatedFloatExpression.MUL;
 
 import android.annotation.NonNull;
@@ -76,10 +75,9 @@ import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.TouchExpression;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
+import com.android.internal.widget.remotecompose.core.operations.layout.ContainerEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.LoopEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
@@ -92,8 +90,10 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BorderModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.MarqueeModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.OffsetModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RippleModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
@@ -728,6 +728,22 @@ public class RemoteComposeBuffer {
             pathId = addPathData(path);
         }
         int textId = addText(text);
+        DrawTextOnPath.apply(mBuffer, textId, pathId, hOffset, vOffset);
+    }
+
+    /**
+     * Draw the text, with origin at (x,y) along the specified path.
+     *
+     * @param textId The text to be drawn
+     * @param path The path the text should follow for its baseline
+     * @param hOffset The distance along the path to add to the text's starting position
+     * @param vOffset The distance above(-) or below(+) the path to position the text
+     */
+    public void addDrawTextOnPath(int textId, Object path, float hOffset, float vOffset) {
+        int pathId = mRemoteComposeState.dataGetId(path);
+        if (pathId == -1) { // never been seen before
+            pathId = addPathData(path);
+        }
         DrawTextOnPath.apply(mBuffer, textId, pathId, hOffset, vOffset);
     }
 
@@ -1610,7 +1626,7 @@ public class RemoteComposeBuffer {
      * create and animation based on description and return as an array of floats. see
      * addAnimatedFloat
      *
-     * @param duration the duration of the aimation
+     * @param duration the duration of the animation in seconds
      * @param type the type of animation
      * @param spec the parameters of the animation if any
      * @param initialValue the initial value if it animates to a start
@@ -1641,6 +1657,16 @@ public class RemoteComposeBuffer {
      */
     public void setStringName(int id, @NonNull String name) {
         NamedVariable.apply(mBuffer, id, NamedVariable.STRING_TYPE, name);
+    }
+
+    /**
+     * This defines the name of the float given the id
+     *
+     * @param id of the float
+     * @param name name of the float
+     */
+    public void setFloatName(int id, String name) {
+        NamedVariable.apply(mBuffer, id, NamedVariable.FLOAT_TYPE, name);
     }
 
     /**
@@ -1683,7 +1709,7 @@ public class RemoteComposeBuffer {
 
     /** Add a component end tag */
     public void addComponentEnd() {
-        ComponentEnd.apply(mBuffer);
+        ContainerEnd.apply(mBuffer);
     }
 
     /**
@@ -1699,6 +1725,9 @@ public class RemoteComposeBuffer {
         float notchMax = this.reserveFloatVariable();
         float touchExpressionDirection =
                 direction != 0 ? RemoteContext.FLOAT_TOUCH_POS_X : RemoteContext.FLOAT_TOUCH_POS_Y;
+
+        ScrollModifierOperation.apply(mBuffer, direction, positionId, max, notchMax);
+
         this.addTouchExpression(
                 positionId,
                 0f,
@@ -1707,20 +1736,13 @@ public class RemoteComposeBuffer {
                 0f,
                 3,
                 new float[] {
-                    touchExpressionDirection,
-                    -1,
-                    // TODO: remove this CONTINUOUS_SEC hack...
-                    MUL,
-                    RemoteContext.FLOAT_CONTINUOUS_SEC,
-                    0f,
-                    MUL,
-                    ADD
+                    touchExpressionDirection, -1, MUL,
                 },
                 TouchExpression.STOP_NOTCHES_EVEN,
                 new float[] {notches, notchMax},
                 null);
 
-        ScrollModifierOperation.apply(mBuffer, direction, positionId, max, notchMax);
+        ContainerEnd.apply(mBuffer);
     }
 
     /**
@@ -1784,6 +1806,38 @@ public class RemoteComposeBuffer {
      */
     public void addModifierZIndex(float value) {
         ZIndexModifierOperation.apply(mBuffer, value);
+    }
+
+    /** Add a ripple effect on touch down as a modifier */
+    public void addModifierRipple() {
+        RippleModifierOperation.apply(mBuffer);
+    }
+
+    /**
+     * Add a marquee modifier
+     *
+     * @param iterations
+     * @param animationMode
+     * @param repeatDelayMillis
+     * @param initialDelayMillis
+     * @param spacing
+     * @param velocity
+     */
+    public void addModifierMarquee(
+            int iterations,
+            int animationMode,
+            float repeatDelayMillis,
+            float initialDelayMillis,
+            float spacing,
+            float velocity) {
+        MarqueeModifierOperation.apply(
+                mBuffer,
+                iterations,
+                animationMode,
+                repeatDelayMillis,
+                initialDelayMillis,
+                spacing,
+                velocity);
     }
 
     /**
@@ -1856,7 +1910,7 @@ public class RemoteComposeBuffer {
     }
 
     public void addLoopEnd() {
-        LoopEnd.apply(mBuffer);
+        ContainerEnd.apply(mBuffer);
     }
 
     public void addStateLayout(

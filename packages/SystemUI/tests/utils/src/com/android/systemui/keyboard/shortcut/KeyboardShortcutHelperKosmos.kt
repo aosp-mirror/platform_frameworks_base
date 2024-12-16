@@ -22,10 +22,14 @@ import android.content.res.mainResources
 import android.hardware.input.fakeInputManager
 import android.view.windowManager
 import com.android.systemui.broadcast.broadcastDispatcher
+import com.android.systemui.keyboard.shortcut.data.repository.AppLaunchDataRepository
+import com.android.systemui.keyboard.shortcut.data.repository.CustomInputGesturesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.CustomShortcutCategoriesRepository
 import com.android.systemui.keyboard.shortcut.data.repository.DefaultShortcutCategoriesRepository
+import com.android.systemui.keyboard.shortcut.data.repository.InputGestureDataAdapter
 import com.android.systemui.keyboard.shortcut.data.repository.InputGestureMaps
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutCategoriesUtils
+import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperInputDeviceRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperStateRepository
 import com.android.systemui.keyboard.shortcut.data.repository.ShortcutHelperTestHelper
 import com.android.systemui.keyboard.shortcut.data.source.AppCategoriesShortcutsSource
@@ -37,6 +41,7 @@ import com.android.systemui.keyboard.shortcut.data.source.SystemShortcutsSource
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutCustomizationInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperCategoriesInteractor
 import com.android.systemui.keyboard.shortcut.domain.interactor.ShortcutHelperStateInteractor
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperExclusions
 import com.android.systemui.keyboard.shortcut.ui.ShortcutCustomizationDialogStarter
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
@@ -44,6 +49,7 @@ import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.backgroundCoroutineContext
+import com.android.systemui.kosmos.backgroundScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.sysUiState
@@ -79,12 +85,16 @@ var Kosmos.shortcutHelperInputShortcutsSource: KeyboardShortcutGroupsSource by
 var Kosmos.shortcutHelperCurrentAppShortcutsSource: KeyboardShortcutGroupsSource by
     Kosmos.Fixture { CurrentAppShortcutsSource(windowManager) }
 
+val Kosmos.shortcutHelperExclusions by
+    Kosmos.Fixture { ShortcutHelperExclusions(applicationContext) }
+
 val Kosmos.shortcutCategoriesUtils by
     Kosmos.Fixture {
         ShortcutCategoriesUtils(
             applicationContext,
             backgroundCoroutineContext,
             fakeInputManager.inputManager,
+            shortcutHelperExclusions,
         )
     }
 
@@ -92,30 +102,54 @@ val Kosmos.defaultShortcutCategoriesRepository by
     Kosmos.Fixture {
         DefaultShortcutCategoriesRepository(
             applicationCoroutineScope,
-            testDispatcher,
             shortcutHelperSystemShortcutsSource,
             shortcutHelperMultiTaskingShortcutsSource,
             shortcutHelperAppCategoriesShortcutsSource,
             shortcutHelperInputShortcutsSource,
             shortcutHelperCurrentAppShortcutsSource,
-            fakeInputManager.inputManager,
-            shortcutHelperStateRepository,
+            shortcutHelperInputDeviceRepository,
             shortcutCategoriesUtils,
         )
     }
 
 val Kosmos.inputGestureMaps by Kosmos.Fixture { InputGestureMaps(applicationContext) }
 
+val Kosmos.inputGestureDataAdapter by
+    Kosmos.Fixture { InputGestureDataAdapter(userTracker, inputGestureMaps, applicationContext) }
+
+val Kosmos.customInputGesturesRepository by
+    Kosmos.Fixture { CustomInputGesturesRepository(userTracker, testDispatcher) }
+
+val Kosmos.shortcutHelperInputDeviceRepository by
+    Kosmos.Fixture {
+        ShortcutHelperInputDeviceRepository(
+            shortcutHelperStateRepository,
+            backgroundScope,
+            backgroundCoroutineContext,
+            fakeInputManager.inputManager,
+        )
+    }
+
+val Kosmos.appLaunchDataRepository by
+    Kosmos.Fixture {
+        AppLaunchDataRepository(
+            fakeInputManager.inputManager,
+            backgroundScope,
+            shortcutCategoriesUtils,
+            shortcutHelperInputDeviceRepository,
+        )
+    }
+
 val Kosmos.customShortcutCategoriesRepository by
     Kosmos.Fixture {
         CustomShortcutCategoriesRepository(
-            shortcutHelperStateRepository,
-            userTracker,
+            shortcutHelperInputDeviceRepository,
             applicationCoroutineScope,
-            testDispatcher,
             shortcutCategoriesUtils,
-            applicationContext,
-            inputGestureMaps,
+            inputGestureDataAdapter,
+            customInputGesturesRepository,
+            fakeInputManager.inputManager,
+            appLaunchDataRepository,
         )
     }
 
@@ -154,6 +188,7 @@ val Kosmos.shortcutHelperCategoriesInteractor by
 val Kosmos.shortcutHelperViewModel by
     Kosmos.Fixture {
         ShortcutHelperViewModel(
+            applicationContext,
             mockRoleManager,
             userTracker,
             applicationCoroutineScope,

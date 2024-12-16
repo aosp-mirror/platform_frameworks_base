@@ -25,7 +25,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.android.compose.animation.scene.content.state.TransitionState
-import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
+import com.android.compose.animation.scene.content.state.TransitionState.DirectionProperties.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -197,7 +197,7 @@ internal class SwipeAnimation<T : ContentKey>(
     private val distance: (SwipeAnimation<T>) -> Float,
     currentContent: T = fromContent,
     dragOffset: Float = 0f,
-) : TransitionState.HasOverscrollProperties {
+) : TransitionState.DirectionProperties {
     /** The [TransitionState.Transition] whose implementation delegates to this [SwipeAnimation]. */
     lateinit var contentTransition: TransitionState.Transition
 
@@ -313,6 +313,17 @@ internal class SwipeAnimation<T : ContentKey>(
 
     fun isAnimatingOffset(): Boolean = offsetAnimation != null
 
+    /** Get the [ContentKey] ([fromContent] or [toContent]) associated to the current [direction] */
+    fun contentByDirection(direction: Float): T {
+        require(direction != 0f) { "Cannot find a content in this direction: $direction" }
+        val isDirectionToContent = (isUpOrLeft && direction < 0) || (!isUpOrLeft && direction > 0)
+        return if (isDirectionToContent) {
+            toContent
+        } else {
+            fromContent
+        }
+    }
+
     /**
      * Animate the offset to a [targetContent], using the [initialVelocity] and an optional [spec]
      *
@@ -326,13 +337,6 @@ internal class SwipeAnimation<T : ContentKey>(
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
 
         val initialProgress = progress
-        // Skip the animation if we have already reached the target content and the overscroll does
-        // not animate anything.
-        val hasReachedTargetContent =
-            (targetContent == toContent && initialProgress >= 1f) ||
-                (targetContent == fromContent && initialProgress <= 0f)
-        val skipAnimation =
-            hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
 
         val targetContent =
             if (targetContent != currentContent && !canChangeContent(targetContent)) {
@@ -340,6 +344,14 @@ internal class SwipeAnimation<T : ContentKey>(
             } else {
                 targetContent
             }
+
+        // Skip the animation if we have already reached the target content and the overscroll does
+        // not animate anything.
+        val hasReachedTargetContent =
+            (targetContent == toContent && initialProgress >= 1f) ||
+                (targetContent == fromContent && initialProgress <= 0f)
+        val skipAnimation =
+            hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
 
         val targetOffset =
             if (targetContent == fromContent) {
@@ -501,7 +513,7 @@ private class ChangeSceneSwipeTransition(
         swipeAnimation.toContent,
         replacedTransition,
     ),
-    TransitionState.HasOverscrollProperties by swipeAnimation {
+    TransitionState.DirectionProperties by swipeAnimation {
 
     constructor(
         other: ChangeSceneSwipeTransition
@@ -563,7 +575,7 @@ private class ShowOrHideOverlaySwipeTransition(
         swipeAnimation.toContent,
         replacedTransition,
     ),
-    TransitionState.HasOverscrollProperties by swipeAnimation {
+    TransitionState.DirectionProperties by swipeAnimation {
     constructor(
         other: ShowOrHideOverlaySwipeTransition
     ) : this(
@@ -622,7 +634,7 @@ private class ReplaceOverlaySwipeTransition(
         swipeAnimation.toContent,
         replacedTransition,
     ),
-    TransitionState.HasOverscrollProperties by swipeAnimation {
+    TransitionState.DirectionProperties by swipeAnimation {
     constructor(
         other: ReplaceOverlaySwipeTransition
     ) : this(

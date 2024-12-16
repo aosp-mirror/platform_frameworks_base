@@ -77,16 +77,23 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
                 new PowerStatsUidResolver());
     }
 
-    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
-            Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
-        super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock,
+            File historyDirectory, Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+        this(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+                powerStatsUidResolver);
+    }
+
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, MonotonicClock monotonicClock,
+            File historyDirectory, Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+        super(config, clock, monotonicClock, historyDirectory, handler,
                 mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
                 mock(UserInfoProvider.class), mockPowerProfile(),
                 new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),
                 powerStatsUidResolver, mock(FrameworkStatsLogger.class),
                 mock(BatteryStatsHistory.TraceDelegate.class),
                 mock(BatteryStatsHistory.EventLogger.class));
-        setMaxHistoryBuffer(128 * 1024);
+        mConstants.MAX_HISTORY_BUFFER = 128 * 1024;
+        mConstants.onChange();
 
         setExternalStatsSyncLocked(mExternalStatsSync);
         informThatAllExternalStatsAreFlushed();
@@ -247,20 +254,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public MockBatteryStatsImpl setOnBatteryInternal(boolean onBatteryInternal) {
         mOnBatteryInternal = onBatteryInternal;
-        return this;
-    }
-
-    @GuardedBy("this")
-    public MockBatteryStatsImpl setMaxHistoryFiles(int maxHistoryFiles) {
-        mConstants.MAX_HISTORY_FILES = maxHistoryFiles;
-        mConstants.onChange();
-        return this;
-    }
-
-    @GuardedBy("this")
-    public MockBatteryStatsImpl setMaxHistoryBuffer(int maxHistoryBuffer) {
-        mConstants.MAX_HISTORY_BUFFER = maxHistoryBuffer;
-        mConstants.onChange();
         return this;
     }
 

@@ -32,7 +32,6 @@ import static com.android.wm.shell.common.split.SplitScreenUtils.isValidToSplit;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.KEY_EXTRA_WIDGET_INTENT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_0;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_1;
@@ -94,6 +93,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.SplitDragPolicy;
@@ -185,6 +185,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     private final LauncherApps mLauncherApps;
     private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
     private final ShellExecutor mMainExecutor;
+    private final ShellExecutor mBgExecutor;
     private final Handler mMainHandler;
     private final SplitScreenImpl mImpl = new SplitScreenImpl();
     private final DisplayController mDisplayController;
@@ -199,6 +200,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
     private final Optional<DesktopTasksController> mDesktopTasksController;
     private final MultiInstanceHelper mMultiInstanceHelpher;
+    private final SplitState mSplitState;
     private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
 
     @VisibleForTesting
@@ -228,8 +230,10 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             Optional<DesktopTasksController> desktopTasksController,
             @Nullable StageCoordinator stageCoordinator,
             MultiInstanceHelper multiInstanceHelper,
+            SplitState splitState,
             ShellExecutor mainExecutor,
-            Handler mainHandler) {
+            Handler mainHandler,
+            ShellExecutor bgExecutor) {
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
         mTaskOrganizer = shellTaskOrganizer;
@@ -239,6 +243,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mRootTDAOrganizer = rootTDAOrganizer;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mBgExecutor = bgExecutor;
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -252,6 +257,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mDesktopTasksController = desktopTasksController;
         mStageCoordinator = stageCoordinator;
         mMultiInstanceHelpher = multiInstanceHelper;
+        mSplitState = splitState;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -278,7 +284,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         mShellCommandHandler.addCommandCallback("splitscreen", mSplitScreenShellCommandHandler,
                 this);
         mShellController.addKeyguardChangeListener(this);
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SPLIT_SCREEN,
+        mShellController.addExternalInterface(ISplitScreen.DESCRIPTOR,
                 this::createExternalInterface, this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
@@ -295,8 +301,9 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         return new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
-                mMainExecutor, mMainHandler, mRecentTasksOptional, mLaunchAdjacentController,
-                mWindowDecorViewModel);
+                mMainExecutor, mMainHandler, mBgExecutor, mRecentTasksOptional,
+                mLaunchAdjacentController, mWindowDecorViewModel, mSplitState,
+                mDesktopTasksController);
     }
 
     @Override
@@ -507,6 +514,11 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
 
     public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
         mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
+    }
+
+    /** Get the parent-based coordinates for split stages. */
+    public void getRefStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        mStageCoordinator.getRefStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
     }
 
     public void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {

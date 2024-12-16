@@ -35,29 +35,25 @@ import java.security.SecureRandom
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
 
-
 /** Event logger for logging desktop mode session events */
 class DesktopModeEventLogger {
     private val random: Random = SecureRandom()
 
     /** The session id for the current desktop mode session */
-    @VisibleForTesting
-    val currentSessionId: AtomicInteger = AtomicInteger(NO_SESSION_ID)
+    @VisibleForTesting val currentSessionId: AtomicInteger = AtomicInteger(NO_SESSION_ID)
 
     private fun generateSessionId() = 1 + random.nextInt(1 shl 20)
 
-    /**
-     * Logs enter into desktop mode with [enterReason]
-     */
+    /** Logs enter into desktop mode with [enterReason] */
     fun logSessionEnter(enterReason: EnterReason) {
         val sessionId = generateSessionId()
         val previousSessionId = currentSessionId.getAndSet(sessionId)
         if (previousSessionId != NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: Existing desktop mode session id: %s found on desktop "
-                    + "mode enter",
-                previousSessionId
+                "DesktopModeLogger: Existing desktop mode session id: %s found on desktop " +
+                    "mode enter",
+                previousSessionId,
             )
         }
 
@@ -65,27 +61,25 @@ class DesktopModeEventLogger {
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session enter, session: %s reason: %s",
             sessionId,
-            enterReason.name
+            enterReason.name,
         )
         FrameworkStatsLog.write(
             DESKTOP_MODE_ATOM_ID,
             /* event */ FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__ENTER,
             /* enterReason */ enterReason.reason,
             /* exitReason */ 0,
-            /* session_id */ sessionId
+            /* session_id */ sessionId,
         )
         EventLogTags.writeWmShellEnterDesktopMode(enterReason.reason, sessionId)
     }
 
-    /**
-     * Logs exit from desktop mode session with [exitReason]
-     */
+    /** Logs exit from desktop mode session with [exitReason] */
     fun logSessionExit(exitReason: ExitReason) {
         val sessionId = currentSessionId.getAndSet(NO_SESSION_ID)
         if (sessionId == NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: No session id found for logging exit from desktop mode"
+                "DesktopModeLogger: No session id found for logging exit from desktop mode",
             )
             return
         }
@@ -94,27 +88,25 @@ class DesktopModeEventLogger {
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging session exit, session: %s reason: %s",
             sessionId,
-            exitReason.name
+            exitReason.name,
         )
         FrameworkStatsLog.write(
             DESKTOP_MODE_ATOM_ID,
             /* event */ FrameworkStatsLog.DESKTOP_MODE_UICHANGED__EVENT__EXIT,
             /* enterReason */ 0,
             /* exitReason */ exitReason.reason,
-            /* session_id */ sessionId
+            /* session_id */ sessionId,
         )
         EventLogTags.writeWmShellExitDesktopMode(exitReason.reason, sessionId)
     }
 
-    /**
-     * Logs that a task with [taskUpdate] was added in a desktop mode session
-     */
+    /** Logs that a task with [taskUpdate] was added in a desktop mode session */
     fun logTaskAdded(taskUpdate: TaskUpdate) {
         val sessionId = currentSessionId.get()
         if (sessionId == NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: No session id found for logging task added"
+                "DesktopModeLogger: No session id found for logging task added",
             )
             return
         }
@@ -123,23 +115,22 @@ class DesktopModeEventLogger {
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task added, session: %s taskId: %s",
             sessionId,
-            taskUpdate.instanceId
+            taskUpdate.instanceId,
         )
         logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED,
-            sessionId, taskUpdate
+            sessionId,
+            taskUpdate,
         )
     }
 
-    /**
-     * Logs that a task with [taskUpdate] was removed from a desktop mode session
-     */
+    /** Logs that a task with [taskUpdate] was removed from a desktop mode session */
     fun logTaskRemoved(taskUpdate: TaskUpdate) {
         val sessionId = currentSessionId.get()
         if (sessionId == NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: No session id found for logging task removed"
+                "DesktopModeLogger: No session id found for logging task removed",
             )
             return
         }
@@ -148,23 +139,22 @@ class DesktopModeEventLogger {
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task remove, session: %s taskId: %s",
             sessionId,
-            taskUpdate.instanceId
+            taskUpdate.instanceId,
         )
         logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED,
-            sessionId, taskUpdate
+            sessionId,
+            taskUpdate,
         )
     }
 
-    /**
-     * Logs that a task with [taskUpdate] had it's info changed in a desktop mode session
-     */
+    /** Logs that a task with [taskUpdate] had it's info changed in a desktop mode session */
     fun logTaskInfoChanged(taskUpdate: TaskUpdate) {
         val sessionId = currentSessionId.get()
         if (sessionId == NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: No session id found for logging task info changed"
+                "DesktopModeLogger: No session id found for logging task info changed",
             )
             return
         }
@@ -173,11 +163,12 @@ class DesktopModeEventLogger {
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task info changed, session: %s taskId: %s",
             sessionId,
-            taskUpdate.instanceId
+            taskUpdate.instanceId,
         )
         logTaskUpdate(
             FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
-            sessionId, taskUpdate
+            sessionId,
+            taskUpdate,
         )
     }
 
@@ -200,30 +191,32 @@ class DesktopModeEventLogger {
         if (sessionId == NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: No session id found for logging start of task resizing"
+                "DesktopModeLogger: No session id found for logging start of task resizing",
             )
             return
         }
 
-        val taskSizeUpdate = createTaskSizeUpdate(
-            resizeTrigger,
-            inputMethod,
-            taskInfo,
-            taskWidth,
-            taskHeight,
-            displayController = displayController,
-            displayLayoutSize = displayLayoutSize,
-        )
+        val taskSizeUpdate =
+            createTaskSizeUpdate(
+                resizeTrigger,
+                inputMethod,
+                taskInfo,
+                taskWidth,
+                taskHeight,
+                displayController = displayController,
+                displayLayoutSize = displayLayoutSize,
+            )
 
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task resize is starting, session: %s, taskSizeUpdate: %s",
             sessionId,
-            taskSizeUpdate
+            taskSizeUpdate,
         )
         logTaskSizeUpdated(
             FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__START_RESIZING_STAGE,
-            sessionId, taskSizeUpdate
+            sessionId,
+            taskSizeUpdate,
         )
     }
 
@@ -245,31 +238,33 @@ class DesktopModeEventLogger {
         if (sessionId == NO_SESSION_ID) {
             ProtoLog.w(
                 WM_SHELL_DESKTOP_MODE,
-                "DesktopModeLogger: No session id found for logging end of task resizing"
+                "DesktopModeLogger: No session id found for logging end of task resizing",
             )
             return
         }
 
-        val taskSizeUpdate = createTaskSizeUpdate(
-            resizeTrigger,
-            inputMethod,
-            taskInfo,
-            taskWidth,
-            taskHeight,
-            displayController,
-            displayLayoutSize,
-        )
+        val taskSizeUpdate =
+            createTaskSizeUpdate(
+                resizeTrigger,
+                inputMethod,
+                taskInfo,
+                taskWidth,
+                taskHeight,
+                displayController,
+                displayLayoutSize,
+            )
 
         ProtoLog.v(
             WM_SHELL_DESKTOP_MODE,
             "DesktopModeLogger: Logging task resize is ending, session: %s, taskSizeUpdate: %s",
             sessionId,
-            taskSizeUpdate
+            taskSizeUpdate,
         )
 
         logTaskSizeUpdated(
             FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__RESIZING_STAGE__END_RESIZING_STAGE,
-            sessionId, taskSizeUpdate
+            sessionId,
+            taskSizeUpdate,
         )
     }
 
@@ -287,12 +282,15 @@ class DesktopModeEventLogger {
         val height = taskHeight ?: taskBounds.height()
         val width = taskWidth ?: taskBounds.width()
 
-        val displaySize = when {
-            displayLayoutSize != null -> displayLayoutSize.height * displayLayoutSize.width
-            displayController != null -> displayController.getDisplayLayout(taskInfo.displayId)
-                ?.let { it.height() * it.width() }
-            else -> null
-        }
+        val displaySize =
+            when {
+                displayLayoutSize != null -> displayLayoutSize.height * displayLayoutSize.width
+                displayController != null ->
+                    displayController.getDisplayLayout(taskInfo.displayId)?.let {
+                        it.height() * it.width()
+                    }
+                else -> null
+            }
 
         return TaskSizeUpdate(
             resizeTrigger,
@@ -316,8 +314,8 @@ class DesktopModeEventLogger {
                 taskHeight = 0,
                 taskWidth = 0,
                 taskX = 0,
-                taskY = 0
-            )
+                taskY = 0,
+            ),
         )
     }
 
@@ -343,7 +341,7 @@ class DesktopModeEventLogger {
             taskUpdate.minimizeReason?.reason ?: UNSET_MINIMIZE_REASON,
             taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
             /* visible_task_count */
-            taskUpdate.visibleTaskCount
+            taskUpdate.visibleTaskCount,
         )
         EventLogTags.writeWmShellDesktopModeTaskUpdate(
             /* task_event */
@@ -365,14 +363,14 @@ class DesktopModeEventLogger {
             taskUpdate.minimizeReason?.reason ?: UNSET_MINIMIZE_REASON,
             taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
             /* visible_task_count */
-            taskUpdate.visibleTaskCount
+            taskUpdate.visibleTaskCount,
         )
     }
 
     private fun logTaskSizeUpdated(
         resizingStage: Int,
         sessionId: Int,
-        taskSizeUpdate: TaskSizeUpdate
+        taskSizeUpdate: TaskSizeUpdate,
     ) {
         FrameworkStatsLog.write(
             DESKTOP_MODE_TASK_SIZE_UPDATED_ATOM_ID,
@@ -393,7 +391,7 @@ class DesktopModeEventLogger {
             /* task_width */
             taskSizeUpdate.taskWidth,
             /* display_area */
-            taskSizeUpdate.displayArea ?: -1
+            taskSizeUpdate.displayArea ?: -1,
         )
     }
 
@@ -410,7 +408,6 @@ class DesktopModeEventLogger {
          * @property taskY y-coordinate of the top-left corner
          * @property minimizeReason the reason the task was minimized
          * @property unminimizeEvent the reason the task was unminimized
-         *
          */
         data class TaskUpdate(
             val instanceId: Int,
@@ -425,8 +422,7 @@ class DesktopModeEventLogger {
         )
 
         /**
-         * Describes a task size update (resizing, snapping or maximizing to
-         * stable bounds).
+         * Describes a task size update (resizing, snapping or maximizing to stable bounds).
          *
          * @property resizeTrigger the trigger for task resize
          * @property inputMethod the input method for resizing this task
@@ -450,9 +446,7 @@ class DesktopModeEventLogger {
         fun getInputMethodFromMotionEvent(e: MotionEvent?): InputMethod {
             if (e == null) return InputMethod.UNKNOWN_INPUT_METHOD
 
-            val toolType = e.getToolType(
-                e.findPointerIndex(e.getPointerId(0))
-            )
+            val toolType = e.getToolType(e.findPointerIndex(e.getPointerId(0)))
             return when {
                 toolType == TOOL_TYPE_STYLUS -> InputMethod.STYLUS
                 toolType == TOOL_TYPE_MOUSE -> InputMethod.MOUSE
@@ -474,8 +468,7 @@ class DesktopModeEventLogger {
                     .DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_TASK_LIMIT
             ),
             MINIMIZE_BUTTON( // TODO(b/356843241): use this enum value
-                FrameworkStatsLog
-                    .DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_BUTTON
+                FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_BUTTON
             ),
         }
 
@@ -611,20 +604,16 @@ class DesktopModeEventLogger {
          */
         enum class InputMethod(val method: Int) {
             UNKNOWN_INPUT_METHOD(
-                FrameworkStatsLog
-                    .DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__UNKNOWN_INPUT_METHOD
+                FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__UNKNOWN_INPUT_METHOD
             ),
             TOUCH(
-                FrameworkStatsLog
-                    .DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__TOUCH_INPUT_METHOD
+                FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__TOUCH_INPUT_METHOD
             ),
             STYLUS(
-                FrameworkStatsLog
-                    .DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__STYLUS_INPUT_METHOD
+                FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__STYLUS_INPUT_METHOD
             ),
             MOUSE(
-                FrameworkStatsLog
-                    .DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__MOUSE_INPUT_METHOD
+                FrameworkStatsLog.DESKTOP_MODE_TASK_SIZE_UPDATED__INPUT_METHOD__MOUSE_INPUT_METHOD
             ),
             TOUCHPAD(
                 FrameworkStatsLog

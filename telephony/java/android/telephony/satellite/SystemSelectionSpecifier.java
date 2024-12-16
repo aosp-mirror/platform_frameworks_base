@@ -16,19 +16,26 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.IntArray;
 
+import com.android.internal.telephony.flags.Flags;
+
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public final class SystemSelectionSpecifier implements Parcelable {
 
     /** Network plmn associated with channel information. */
@@ -188,26 +195,41 @@ public final class SystemSelectionSpecifier implements Parcelable {
         return Objects.hash(mMccMnc, mBands, mEarfcns);
     }
 
+    /** Return network plmn associated with channel information. */
     @NonNull public String getMccMnc() {
         return mMccMnc;
     }
 
-    @NonNull public IntArray getBands() {
-        return mBands;
+    /**
+     * Return the frequency bands to scan.
+     * Maximum length of the vector is 8.
+     */
+    @NonNull public int[] getBands() {
+        return mBands.toArray();
     }
 
-    @NonNull public IntArray getEarfcns() {
-        return mEarfcns;
+    /**
+     * Return the radio channels to scan as defined in 3GPP TS 25.101 and 36.101.
+     * Maximum length of the vector is 32.
+     */
+    @NonNull public int[] getEarfcns() {
+        return mEarfcns.toArray();
     }
 
+    /** Return the list of satellites configured for the current location. */
     @NonNull
-    public SatelliteInfo[] getSatelliteInfos() {
-        return mSatelliteInfos;
+    public List<SatelliteInfo> getSatelliteInfos() {
+        return Arrays.stream(mSatelliteInfos).toList();
     }
 
+    /**
+     * Return the list of tag IDs associated with the current location
+     * Tag Ids are generic IDs an OEM can configure. Each tag ID can map to a region which can be
+     * used by OEM to identify proprietary configuration for that region.
+     */
     @NonNull
-    public IntArray getTagIds() {
-        return mTagIds;
+    public int[] getTagIds() {
+        return mTagIds.toArray();
     }
 
     private void readFromParcel(Parcel in) {

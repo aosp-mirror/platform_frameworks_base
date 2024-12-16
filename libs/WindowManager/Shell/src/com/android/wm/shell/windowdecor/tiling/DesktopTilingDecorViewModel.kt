@@ -31,16 +31,23 @@ import com.android.wm.shell.common.DisplayChangeController
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
-import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainCoroutineDispatcher
 
 /** Manages tiling for each displayId/userId independently. */
 class DesktopTilingDecorViewModel(
     private val context: Context,
+    @ShellMainThread private val mainDispatcher: MainCoroutineDispatcher,
+    @ShellBackgroundThread private val bgScope: CoroutineScope,
     private val displayController: DisplayController,
     private val rootTdaOrganizer: RootTaskDisplayAreaOrganizer,
     private val syncQueue: SyncTransactionQueue,
@@ -48,8 +55,9 @@ class DesktopTilingDecorViewModel(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
-    private val taskRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val taskResourceLoader: WindowDecorTaskResourceLoader,
 ) : DisplayChangeController.OnDisplayChangingListener {
     @VisibleForTesting
     var tilingTransitionHandlerByDisplayId = SparseArray<DesktopTilingWindowDecoration>()
@@ -73,15 +81,18 @@ class DesktopTilingDecorViewModel(
                     val newHandler =
                         DesktopTilingWindowDecoration(
                             context,
+                            mainDispatcher,
+                            bgScope,
                             syncQueue,
                             displayController,
+                            taskResourceLoader,
                             displayId,
                             rootTdaOrganizer,
                             transitions,
                             shellTaskOrganizer,
                             toggleResizeDesktopTaskTransitionHandler,
                             returnToDragStartAnimator,
-                            taskRepository,
+                            desktopUserRepositories,
                             desktopModeEventLogger,
                         )
                     tilingTransitionHandlerByDisplayId.put(displayId, newHandler)

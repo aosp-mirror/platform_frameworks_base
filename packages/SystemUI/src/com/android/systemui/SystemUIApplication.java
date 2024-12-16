@@ -46,6 +46,8 @@ import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.ConfigurationForwarder;
 import com.android.systemui.util.NotificationChannels;
+import com.android.wm.shell.dagger.HasWMComponent;
+import com.android.wm.shell.dagger.WMComponent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
@@ -62,7 +64,7 @@ import javax.inject.Provider;
  * Application class for SystemUI.
  */
 public class SystemUIApplication extends Application implements
-        SystemUIAppComponentFactoryBase.ContextInitializer {
+        SystemUIAppComponentFactoryBase.ContextInitializer, HasWMComponent {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
@@ -489,5 +491,11 @@ public class SystemUIApplication extends Application implements
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, appName);
 
         n.addExtras(extras);
+    }
+
+    @NonNull
+    @Override
+    public WMComponent getWMComponent() {
+        return mInitializer.getWMComponent();
     }
 }

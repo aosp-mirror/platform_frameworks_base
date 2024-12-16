@@ -16,7 +16,6 @@
 
 package android.app;
 
-import static android.app.Flags.FLAG_PIC_CACHE_NULLS;
 import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
 import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
 import static android.app.PropertyInvalidatedCache.MODULE_BLUETOOTH;
@@ -711,7 +710,6 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
-    @RequiresFlagsEnabled(FLAG_PIC_CACHE_NULLS)
     @Test
     public void testCachingNulls() {
         TestCache cache = new TestCache(new Args(MODULE_TEST)
@@ -729,6 +727,21 @@ public class PropertyInvalidatedCacheTests {
 
         cache = new TestCache(new Args(MODULE_TEST)
                 .maxEntries(4).api("testCachingNulls").cacheNulls(false),
+                new TestQuery());
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
+
+        // Verify that the default is not to cache nulls.
+        cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).api("testCachingNulls"),
                 new TestQuery());
         cache.invalidateCache();
         assertEquals("foo1", cache.query(1));

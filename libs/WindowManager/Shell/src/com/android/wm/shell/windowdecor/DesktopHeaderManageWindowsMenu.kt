@@ -32,7 +32,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
-import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.shared.multiinstance.ManageWindowsViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewContainer
@@ -51,7 +51,7 @@ class DesktopHeaderManageWindowsMenu(
     private val displayController: DisplayController,
     private val rootTdaOrganizer: RootTaskDisplayAreaOrganizer,
     context: Context,
-    private val desktopRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
     private val surfaceControlBuilderSupplier: Supplier<SurfaceControl.Builder>,
     private val surfaceControlTransactionSupplier: Supplier<SurfaceControl.Transaction>,
     snapshotList: List<Pair<Int, TaskSnapshot>>,
@@ -76,6 +76,7 @@ class DesktopHeaderManageWindowsMenu(
         val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                 WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+        val desktopRepository = desktopUserRepositories.getProfile(callerTaskInfo.userId)
         menuViewContainer = if (Flags.enableFullyImmersiveInDesktop()
             && desktopRepository.isTaskInFullImmersiveState(callerTaskInfo.taskId)) {
             // Use system view container so that forcibly shown system bars take effect in

@@ -26,9 +26,10 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ComponentStart extends Operation implements ComponentStartOperation {
+public class ComponentStart extends Operation implements Container {
 
     int mType = DEFAULT;
     float mX;
@@ -36,6 +37,8 @@ public class ComponentStart extends Operation implements ComponentStartOperation
     float mWidth;
     float mHeight;
     int mComponentId;
+
+    @NonNull public ArrayList<Operation> mList = new ArrayList<>();
 
     public int getType() {
         return mType;
@@ -157,6 +160,11 @@ public class ComponentStart extends Operation implements ComponentStartOperation
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "ComponentStart";
@@ -198,6 +206,11 @@ public class ComponentStart extends Operation implements ComponentStartOperation
         operations.add(new ComponentStart(type, componentId, width, height));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
@@ -206,5 +219,11 @@ public class ComponentStart extends Operation implements ComponentStartOperation
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .field(FLOAT, "WIDTH", "width of the component")
                 .field(FLOAT, "HEIGHT", "height of the component");
+    }
+
+    @NonNull
+    @Override
+    public ArrayList<Operation> getList() {
+        return mList;
     }
 }

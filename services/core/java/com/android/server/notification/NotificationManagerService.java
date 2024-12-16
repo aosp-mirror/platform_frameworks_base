@@ -361,6 +361,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.GroupHelper.NotificationAttributes;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
+import com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent;
 import com.android.server.notification.toast.CustomToastRecord;
 import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
@@ -1934,10 +1935,20 @@ public class NotificationManagerService extends SystemService {
                 hasSensitiveContent, lifespanMs);
     }
 
-    protected void logClassificationChannelAdjustmentReceived(boolean hasPosted, boolean isAlerting,
-                                                              int classification, int lifespanMs) {
+    protected void logClassificationChannelAdjustmentReceived(NotificationRecord r,
+                                                              boolean hasPosted,
+                                                              int classification) {
+        // Note that this value of isAlerting does not fully indicate whether a notif
+        // would make a sound or HUN on device; it is an approximation for metrics.
+        boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
+        int instanceId = r.getSbn().getInstanceId() == null
+                ? 0 : r.getSbn().getInstanceId().getId();
+
         FrameworkStatsLog.write(FrameworkStatsLog.NOTIFICATION_CHANNEL_CLASSIFICATION,
-                hasPosted, isAlerting, classification, lifespanMs);
+                hasPosted, isAlerting, classification,
+                r.getLifespanMs(System.currentTimeMillis()),
+                NotificationReportedEvent.NOTIFICATION_ADJUSTED.getId(),
+                instanceId, r.getUid());
     }
 
     protected final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
@@ -2594,6 +2605,7 @@ public class NotificationManagerService extends SystemService {
                     intent.setPackage(pkg);
                     intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, id);
                     intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_STATUS, status);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                     getContext().sendBroadcastAsUser(intent, UserHandle.of(userId));
                 });
             }
@@ -6133,7 +6145,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void enforcePolicyAccess(int uid, String method) {
-            if (PERMISSION_GRANTED == getContext().checkCallingPermission(
+            if (PERMISSION_GRANTED == getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
                 return;
             }
@@ -6164,7 +6176,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private void enforcePolicyAccess(String pkg, String method) {
-            if (PERMISSION_GRANTED == getContext().checkCallingPermission(
+            if (PERMISSION_GRANTED == getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MANAGE_NOTIFICATIONS)) {
                 return;
             }
@@ -6973,6 +6985,7 @@ public class NotificationManagerService extends SystemService {
 
     protected void checkNotificationListenerAccess() {
         if (!isCallerSystemOrPhone()) {
+            // Safe to check calling permission as caller is already not system or phone
             getContext().enforceCallingPermission(
                     permission.MANAGE_NOTIFICATION_LISTENERS,
                     "Caller must hold " + permission.MANAGE_NOTIFICATION_LISTENERS);
@@ -7051,11 +7064,8 @@ public class NotificationManagerService extends SystemService {
                     int classification = adjustments.getInt(KEY_TYPE);
                     // swap app provided type with the real thing
                     adjustments.putParcelable(KEY_TYPE, newChannel);
-                    // Note that this value of isAlerting does not fully indicate whether a notif
-                    // would make a sound or HUN on device; it is an approximation for metrics.
-                    boolean isAlerting = r.getChannel().getImportance() >= IMPORTANCE_DEFAULT;
-                    logClassificationChannelAdjustmentReceived(isPosted, isAlerting, classification,
-                            r.getLifespanMs(System.currentTimeMillis()));
+
+                    logClassificationChannelAdjustmentReceived(r, isPosted, classification);
                 }
             }
             r.addAdjustment(adjustment);

@@ -109,6 +109,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.pm.RoSystemFeatures;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.ProtoLog;
@@ -201,7 +202,6 @@ import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
 import com.android.server.om.OverlayManagerService;
-import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService;
 import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.NativeTombstoneManagerService;
@@ -294,6 +294,7 @@ import com.android.server.usage.StorageStatsService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.usb.UsbService;
 import com.android.server.utils.TimingsTraceAndSlog;
+import com.android.server.vcn.VcnLocation;
 import com.android.server.vibrator.VibratorManagerService;
 import com.android.server.voiceinteraction.VoiceInteractionManagerService;
 import com.android.server.vr.VrManagerService;
@@ -392,6 +393,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.sdksandbox.SdkSandboxManagerService$Lifecycle";
     private static final String AD_SERVICES_MANAGER_SERVICE_CLASS =
             "com.android.server.adservices.AdServicesManagerService$Lifecycle";
+    private static final String ON_DEVICE_INTELLIGENCE_MANAGER_SERVICE_CLASS =
+            "com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService";
     private static final String ON_DEVICE_PERSONALIZATION_SYSTEM_SERVICE_CLASS =
             "com.android.server.ondevicepersonalization."
                     + "OnDevicePersonalizationSystemService$Lifecycle";
@@ -429,6 +432,8 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.tethering/javalib/service-connectivity.jar";
     private static final String CONNECTIVITY_SERVICE_INITIALIZER_CLASS =
             "com.android.server.ConnectivityServiceInitializer";
+    private static final String CONNECTIVITY_SERVICE_INITIALIZER_B_CLASS =
+            "com.android.server.ConnectivityServiceInitializerB";
     private static final String NETWORK_STATS_SERVICE_INITIALIZER_CLASS =
             "com.android.server.NetworkStatsServiceInitializer";
     private static final String UWB_APEX_SERVICE_JAR_PATH =
@@ -998,6 +1003,17 @@ public final class SystemServer implements Dumpable {
             }
         });
 
+        // Register callback to report native memory metrics post GC cleanup
+        // for system_server
+        if (android.app.Flags.reportPostgcMemoryMetrics() &&
+            com.android.libcore.readonly.Flags.postCleanupApis()) {
+            VMRuntime.addPostCleanupCallback(new Runnable() {
+                @Override public void run() {
+                    MetricsLoggerWrapper.logPostGcMemorySnapshot();
+                }
+            });
+        }
+
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
@@ -1486,7 +1502,6 @@ public final class SystemServer implements Dumpable {
         IStorageManager storageManager = null;
         NetworkManagementService networkManagement = null;
         VpnManagerService vpnManager = null;
-        VcnManagementService vcnManagement = null;
         NetworkPolicyManagerService networkPolicy = null;
         WindowManagerService wm = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
@@ -1927,6 +1942,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
+        t.traceBegin("UpdateMetricsIfNeeded");
+        mPackageManagerService.updateMetricsIfNeeded();
+        t.traceEnd();
+
         t.traceBegin("PerformFstrimIfNeeded");
         try {
             mPackageManagerService.performFstrimIfNeeded();
@@ -2148,13 +2167,14 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startServiceFromJar(
                         WIFI_SCANNING_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
-                // Start USD service
-                if (android.net.wifi.flags.Flags.usd()) {
-                    t.traceBegin("StartUsd");
-                    mSystemServiceManager.startServiceFromJar(
-                            WIFI_USD_SERVICE_CLASS, WIFI_APEX_SERVICE_JAR_PATH);
-                    t.traceEnd();
-                }
+            }
+
+            if (android.net.wifi.flags.Flags.usd() && context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_deviceSupportsWifiUsd)) {
+                t.traceBegin("StartWifiUsd");
+                mSystemServiceManager.startServiceFromJar(WIFI_USD_SERVICE_CLASS,
+                        WIFI_APEX_SERVICE_JAR_PATH);
+                t.traceEnd();
             }
 
             if (context.getPackageManager().hasSystemFeature(
@@ -2232,8 +2252,13 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartVcnManagementService");
             try {
-                vcnManagement = VcnManagementService.create(context);
-                ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
+                if (VcnLocation.IS_VCN_IN_MAINLINE) {
+                    mSystemServiceManager.startServiceFromJar(
+                            CONNECTIVITY_SERVICE_INITIALIZER_B_CLASS,
+                            CONNECTIVITY_SERVICE_APEX_PATH);
+                } else {
+                    mSystemServiceManager.startService(CONNECTIVITY_SERVICE_INITIALIZER_B_CLASS);
+                }
             } catch (Throwable e) {
                 reportWtf("starting VCN Management Service", e);
             }
@@ -2929,7 +2954,7 @@ public final class SystemServer implements Dumpable {
         t.traceEnd();
 
         // UprobeStats DynamicInstrumentationManager
-        if (com.android.art.flags.Flags.executableMethodFileOffsets()) {
+        if (android.uprobestats.flags.Flags.executableMethodFileOffsets()) {
             t.traceBegin("StartDynamicInstrumentationManager");
             mSystemServiceManager.startService(DynamicInstrumentationManagerService.class);
             t.traceEnd();
@@ -3159,7 +3184,6 @@ public final class SystemServer implements Dumpable {
         final MediaRouterService mediaRouterF = mediaRouter;
         final MmsServiceBroker mmsServiceF = mmsService;
         final VpnManagerService vpnManagerF = vpnManager;
-        final VcnManagementService vcnManagementF = vcnManagement;
         final WindowManagerService windowManagerF = wm;
         final ConnectivityManager connectivityF = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -3284,15 +3308,6 @@ public final class SystemServer implements Dumpable {
                 }
             } catch (Throwable e) {
                 reportWtf("making VpnManagerService ready", e);
-            }
-            t.traceEnd();
-            t.traceBegin("MakeVcnManagementServiceReady");
-            try {
-                if (vcnManagementF != null) {
-                    vcnManagementF.systemReady();
-                }
-            } catch (Throwable e) {
-                reportWtf("making VcnManagementService ready", e);
             }
             t.traceEnd();
             t.traceBegin("MakeNetworkPolicyServiceReady");
@@ -3460,7 +3475,7 @@ public final class SystemServer implements Dumpable {
 
     private void startOnDeviceIntelligenceService(TimingsTraceAndSlog t) {
         t.traceBegin("startOnDeviceIntelligenceManagerService");
-        mSystemServiceManager.startService(OnDeviceIntelligenceManagerService.class);
+        mSystemServiceManager.startService(ON_DEVICE_INTELLIGENCE_MANAGER_SERVICE_CLASS);
         t.traceEnd();
     }
 

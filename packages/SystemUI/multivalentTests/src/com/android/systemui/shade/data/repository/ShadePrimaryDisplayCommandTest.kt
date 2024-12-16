@@ -28,6 +28,7 @@ import com.android.systemui.shade.ShadePrimaryDisplayCommand
 import com.android.systemui.shade.display.ShadeDisplayPolicy
 import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.StringSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
@@ -44,18 +45,17 @@ import org.junit.runner.RunWith
 class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
     private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
+    private val globalSettings = kosmos.fakeGlobalSettings
     private val commandRegistry = kosmos.commandRegistry
     private val displayRepository = kosmos.displayRepository
     private val defaultPolicy = kosmos.defaultShadeDisplayPolicy
-    private val policy1 = makePolicy("policy_1")
     private val shadeDisplaysRepository = kosmos.shadeDisplaysRepository
+    private val policies = kosmos.shadeDisplayPolicies
     private val pw = PrintWriter(StringWriter())
-
-    private val policies =
-        setOf(defaultPolicy, policy1, makePolicy("policy_2"), makePolicy("policy_3"))
 
     private val underTest =
         ShadePrimaryDisplayCommand(
+            globalSettings,
             commandRegistry,
             displayRepository,
             shadeDisplaysRepository,
@@ -69,30 +69,16 @@ class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
     }
 
     @Test
-    fun commandDisplayOverride_updatesDisplayId() =
-        testScope.runTest {
-            val displayId by collectLastValue(shadeDisplaysRepository.displayId)
-            assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
-
-            val newDisplayId = 2
-            commandRegistry.onShellCommand(
-                pw,
-                arrayOf("shade_display_override", newDisplayId.toString()),
-            )
-
-            assertThat(displayId).isEqualTo(newDisplayId)
-        }
-
-    @Test
     fun commandShadeDisplayOverride_resetsDisplayId() =
         testScope.runTest {
             val displayId by collectLastValue(shadeDisplaysRepository.displayId)
             assertThat(displayId).isEqualTo(Display.DEFAULT_DISPLAY)
 
             val newDisplayId = 2
+            displayRepository.addDisplay(displayId = newDisplayId)
             commandRegistry.onShellCommand(
                 pw,
-                arrayOf("shade_display_override", newDisplayId.toString()),
+                arrayOf("shade_display_override", "any_external_display"),
             )
             assertThat(displayId).isEqualTo(newDisplayId)
 
@@ -108,7 +94,10 @@ class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
             val newDisplayId = 2
             displayRepository.addDisplay(displayId = newDisplayId)
 
-            commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", "any_external"))
+            commandRegistry.onShellCommand(
+                pw,
+                arrayOf("shade_display_override", "any_external_display"),
+            )
 
             assertThat(displayId).isEqualTo(newDisplayId)
         }
@@ -127,13 +116,14 @@ class ShadePrimaryDisplayCommandTest : SysuiTestCase() {
         }
 
     @Test
-    fun policies_setsSpecificPolicy() =
+    fun policies_setsNewPolicy() =
         testScope.runTest {
             val policy by collectLastValue(shadeDisplaysRepository.policy)
+            val newPolicy = policies.last().name
 
-            commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", policy1.name))
+            commandRegistry.onShellCommand(pw, arrayOf("shade_display_override", newPolicy))
 
-            assertThat(policy!!.name).isEqualTo(policy1.name)
+            assertThat(policy!!.name).isEqualTo(newPolicy)
         }
 
     private fun makePolicy(policyName: String): ShadeDisplayPolicy {

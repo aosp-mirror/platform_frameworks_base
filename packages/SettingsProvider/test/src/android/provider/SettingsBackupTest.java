@@ -182,6 +182,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
                     Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR,
+                    Settings.Global.DEVELOPMENT_SHADE_DISPLAY_AWARENESS,
                     Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH,
                     Settings.Global.DEVICE_DEMO_MODE,
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
@@ -947,7 +948,9 @@ public class SettingsBackupTest {
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,
                         Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
+                        Settings.System.MULTI_AUDIO_FOCUS_ENABLED, // form-factor/OEM specific
+                        // Potentially disruptive to on-boarding flow on new devices
+                        Settings.System.TOUCHPAD_SYSTEM_GESTURES
                 );
         if (!Flags.backUpSmoothDisplayAndForcePeakRefreshRate()) {
             settings.add(Settings.System.MIN_REFRESH_RATE);

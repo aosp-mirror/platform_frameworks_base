@@ -19,6 +19,7 @@ package android.hardware.contexthub;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.chre.flags.Flags;
 import android.hardware.location.ContextHubTransaction;
@@ -43,7 +44,7 @@ public class HubEndpointSession implements AutoCloseable {
     @NonNull private final HubEndpoint mHubEndpoint;
     @NonNull private final HubEndpointInfo mInitiator;
     @NonNull private final HubEndpointInfo mDestination;
-    @Nullable private final HubServiceInfo mServiceInfo;
+    @Nullable private final String mServiceDescriptor;
 
     private final AtomicBoolean mIsClosed = new AtomicBoolean(true);
 
@@ -53,12 +54,12 @@ public class HubEndpointSession implements AutoCloseable {
             @NonNull HubEndpoint hubEndpoint,
             @NonNull HubEndpointInfo destination,
             @NonNull HubEndpointInfo initiator,
-            @Nullable HubServiceInfo serviceInfo) {
+            @Nullable String serviceDescriptor) {
         mId = id;
         mHubEndpoint = hubEndpoint;
         mDestination = destination;
         mInitiator = initiator;
-        mServiceInfo = serviceInfo;
+        mServiceDescriptor = serviceDescriptor;
     }
 
     /**
@@ -68,8 +69,11 @@ public class HubEndpointSession implements AutoCloseable {
      * @return For messages that does not require a response, the transaction will immediately
      *     complete. For messages that requires a response, the transaction will complete after
      *     receiving the response for the message.
+     * @throws SecurityException if the application doesn't have the right permissions to send this
+     *     message.
      */
     @NonNull
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public ContextHubTransaction<Void> sendMessage(@NonNull HubMessage message) {
         if (mIsClosed.get()) {
             throw new IllegalStateException("Session is already closed.");
@@ -120,6 +124,7 @@ public class HubEndpointSession implements AutoCloseable {
      * <p>When this function is invoked, the messaging associated with this session is invalidated.
      * All futures messages targeted for this client are dropped.
      */
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     public void close() {
         if (!mIsClosed.getAndSet(true)) {
             mCloseGuard.close();
@@ -128,8 +133,8 @@ public class HubEndpointSession implements AutoCloseable {
     }
 
     /**
-     * Get the {@link HubServiceInfo} associated with this session. Null value indicates that there
-     * is no service associated to this session.
+     * Get the service descriptor associated with this session. Null value indicates that there is
+     * no service associated to this session.
      *
      * <p>For hub initiated sessions, the object was previously used in as an argument for open
      * request in {@link IHubEndpointLifecycleCallback#onSessionOpenRequest}.
@@ -138,8 +143,8 @@ public class HubEndpointSession implements AutoCloseable {
      * android.hardware.location.ContextHubManager#openSession}
      */
     @Nullable
-    public HubServiceInfo getServiceInfo() {
-        return mServiceInfo;
+    public String getServiceDescriptor() {
+        return mServiceDescriptor;
     }
 
     @Override

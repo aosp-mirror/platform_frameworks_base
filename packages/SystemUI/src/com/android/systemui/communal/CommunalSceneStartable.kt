@@ -23,7 +23,6 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
-import com.android.systemui.Flags.communalHubOnMobile
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -184,7 +183,12 @@ constructor(
                     this@CommunalSceneStartable.isDreaming = isDreaming
                     if (scene.isCommunal() && isDreaming && timeoutJob == null) {
                         // If dreaming starts after timeout has expired, ex. if dream restarts under
-                        // the hub, just close the hub immediately.
+                        // the hub, wait for IS_ABLE_TO_DREAM_DELAY_MS and then close the hub. The
+                        // delay is necessary so the KeyguardInteractor.isAbleToDream flow passes
+                        // through that same amount of delay and publishes a new value which is then
+                        // picked up by the HomeSceneFamilyResolver such that the next call to
+                        // SceneInteractor.changeScene(Home) will resolve "Home" to "Dream".
+                        delay(KeyguardInteractor.IS_ABLE_TO_DREAM_DELAY_MS)
                         communalSceneInteractor.changeScene(
                             CommunalScenes.Blank,
                             "dream started after timeout",
@@ -218,7 +222,8 @@ constructor(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub timeout",
                             transitionKey =
-                                if (communalHubOnMobile()) CommunalTransitionKeys.SimpleFade
+                                if (communalSettingsInteractor.isV2FlagEnabled())
+                                    CommunalTransitionKeys.SimpleFade
                                 else null,
                         )
                         uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)

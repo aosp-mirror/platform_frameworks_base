@@ -23,7 +23,7 @@
     <string name="dialog_dismiss_button" msgid="989567669882005067">"విస్మరించండి"</string>
     <string name="dialog_continue_button" msgid="8630290044077052145">"కొనసాగించండి"</string>
     <string name="dialog_sign_in_options_button" msgid="448002958902615054">"సైన్ ఇన్ ఆప్షన్‌లు"</string>
-    <string name="sign_in_options_title" msgid="6720572645638986680">"సైన్ ఇన్ ఆప్షన్‌లు"</string>
+    <string name="sign_in_options_title" msgid="6720572645638986680">"సైన్-ఇన్ ఆప్షన్‌లు"</string>
     <string name="provider_list_title" msgid="6803918216129492212">"సైన్‌ ఇన్‌లను మేనేజ్ చేయండి"</string>
     <string name="choose_sign_in_title" msgid="3616025924746872202">"సైన్ ఇన్‌ను ఎంచుకోండి"</string>
     <string name="choose_passkey_title" msgid="8459270617632817465">"పాస్-కీని ఎంచుకోండి"</string>

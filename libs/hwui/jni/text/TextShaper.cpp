@@ -225,8 +225,8 @@ static jboolean TextShaper_Result_getFakeItalic(CRITICAL_JNI_PARAMS_COMMA jlong 
 
 constexpr float NO_OVERRIDE = -1;
 
-float findValueFromVariationSettings(const minikin::FontFakery& fakery, minikin::AxisTag tag) {
-    for (const minikin::FontVariation& fv : fakery.variationSettings()) {
+float findValueFromVariationSettings(const minikin::VariationSettings& axes, minikin::AxisTag tag) {
+    for (const minikin::FontVariation& fv : axes) {
         if (fv.axisTag == tag) {
             return fv.value;
         }
@@ -238,8 +238,8 @@ float findValueFromVariationSettings(const minikin::FontFakery& fakery, minikin:
 static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
     if (text_feature::typeface_redesign_readonly()) {
-        float value =
-                findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_wght);
+        float value = findValueFromVariationSettings(layout->layout.typeface(i)->GetAxes(),
+                                                     minikin::TAG_wght);
         return std::isnan(value) ? NO_OVERRIDE : value;
     } else {
         return layout->layout.getFakery(i).wghtAdjustment();
@@ -250,8 +250,8 @@ static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlon
 static jfloat TextShaper_Result_getItalicOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
     if (text_feature::typeface_redesign_readonly()) {
-        float value =
-                findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_ital);
+        float value = findValueFromVariationSettings(layout->layout.typeface(i)->GetAxes(),
+                                                     minikin::TAG_ital);
         return std::isnan(value) ? NO_OVERRIDE : value;
     } else {
         return layout->layout.getFakery(i).italAdjustment();

@@ -43,7 +43,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieCompositionFactory
-import com.android.systemui.Flags.bpIconA11y
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.biometrics.Utils.ellipsize
 import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
@@ -63,7 +63,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 private const val TAG = "BiometricViewBinder"
 
@@ -327,31 +326,30 @@ object BiometricViewBinder {
 
                 // reuse the icon as a confirm button
                 launch {
-                    if (bpIconA11y()) {
-                        viewModel.isIconConfirmButton.collect { isButton ->
-                            if (isButton) {
-                                iconView.onTouchListener { _: View, event: MotionEvent ->
-                                    viewModel.onOverlayTouch(event)
-                                }
+                    viewModel.isIconConfirmButton.collect { isButton ->
+                        if (isButton && !accessibilityManager.isEnabled) {
+                            iconView.onTouchListener { _: View, event: MotionEvent ->
+                                viewModel.onOverlayTouch(event)
+                            }
+                        } else {
+                            iconView.setOnTouchListener(null)
+                        }
+                    }
+                }
+
+                launch {
+                    combine(viewModel.isIconConfirmButton, viewModel.isAuthenticated, ::Pair)
+                        .collect { (isIconConfirmButton, authState) ->
+                            // Only use the icon as a button for talkback when coex and pending
+                            // confirmation
+                            if (
+                                accessibilityManager.isEnabled &&
+                                    isIconConfirmButton &&
+                                    authState.isAuthenticated
+                            ) {
                                 iconView.setOnClickListener { viewModel.confirmAuthenticated() }
-                            } else {
-                                iconView.setOnTouchListener(null)
-                                iconView.setOnClickListener(null)
                             }
                         }
-                    } else {
-                        viewModel.isIconConfirmButton
-                            .map { isPending ->
-                                when {
-                                    isPending && modalities.hasFaceAndFingerprint ->
-                                        View.OnTouchListener { _: View, event: MotionEvent ->
-                                            viewModel.onOverlayTouch(event)
-                                        }
-                                    else -> null
-                                }
-                            }
-                            .collect { onTouch -> iconView.setOnTouchListener(onTouch) }
-                    }
                 }
 
                 // dismiss prompt when authenticated and confirmed
@@ -365,22 +363,8 @@ object BiometricViewBinder {
                             backgroundView.setOnClickListener(null)
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
-
-                            // Allow icon to be used as confirmation button with udfps and a11y
-                            // enabled
-                            if (
-                                !bpIconA11y() &&
-                                    accessibilityManager.isTouchExplorationEnabled &&
-                                    modalities.hasUdfps
-                            ) {
-                                iconView.setOnClickListener { viewModel.confirmAuthenticated() }
-                            }
                         }
                         if (authState.isAuthenticatedAndConfirmed) {
-                            view.announceForAccessibility(
-                                view.resources.getString(R.string.biometric_dialog_authenticated)
-                            )
-
                             launch {
                                 delay(authState.delay)
                                 if (authState.isAuthenticatedAndExplicitlyConfirmed) {

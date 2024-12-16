@@ -28,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import java.util.List;
 
 /** Represents the content of a LayoutComponent (i.e. the children components) */
-public class LayoutComponentContent extends Component implements ComponentStartOperation {
+public class LayoutComponentContent extends Component {
 
     public LayoutComponentContent(
             int componentId,
@@ -41,6 +41,11 @@ public class LayoutComponentContent extends Component implements ComponentStartO
         super(parent, componentId, animationId, x, y, width, height);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return "LayoutContent";
@@ -77,6 +82,11 @@ public class LayoutComponentContent extends Component implements ComponentStartO
         operations.add(new LayoutComponentContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
     public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")

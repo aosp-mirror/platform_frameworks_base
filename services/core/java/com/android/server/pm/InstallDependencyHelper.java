@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.role.RoleManager.ROLE_SYSTEM_DEPENDENCY_INSTALLER;
 import static android.content.pm.PackageInstaller.ACTION_INSTALL_DEPENDENCY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.os.Process.SYSTEM_UID;
@@ -32,11 +33,13 @@ import android.content.pm.dependencyinstaller.DependencyInstallerCallback;
 import android.content.pm.dependencyinstaller.IDependencyInstallerCallback;
 import android.content.pm.dependencyinstaller.IDependencyInstallerService;
 import android.content.pm.parsing.PackageLite;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.OutcomeReceiver;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -54,8 +57,6 @@ import java.util.concurrent.TimeUnit;
 public class InstallDependencyHelper {
     private static final String TAG = InstallDependencyHelper.class.getSimpleName();
     private static final boolean DEBUG = true;
-    private static final String ROLE_SYSTEM_DEPENDENCY_INSTALLER =
-            "android.app.role.SYSTEM_DEPENDENCY_INSTALLER";
     // The maximum amount of time to wait before the system unbinds from the verifier.
     private static final long UNBIND_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(6);
     private static final long REQUEST_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(1);
@@ -63,12 +64,11 @@ public class InstallDependencyHelper {
     private final Context mContext;
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageInstallerService mPackageInstallerService;
-    private final Object mRemoteServiceLock = new Object();
     @GuardedBy("mTrackers")
     private final List<DependencyInstallTracker> mTrackers = new ArrayList<>();
-
-    @GuardedBy("mRemoteServiceLock")
-    private ServiceConnector<IDependencyInstallerService> mRemoteService = null;
+    @GuardedBy("mRemoteServices")
+    private final ArrayMap<Integer, ServiceConnector<IDependencyInstallerService>> mRemoteServices =
+            new ArrayMap<>();
 
     InstallDependencyHelper(Context context, SharedLibrariesImpl sharedLibraries,
             PackageInstallerService packageInstallerService) {
@@ -77,31 +77,34 @@ public class InstallDependencyHelper {
         mPackageInstallerService = packageInstallerService;
     }
 
-    void resolveLibraryDependenciesIfNeeded(PackageLite pkg, Computer snapshot, int userId,
-            Handler handler, OutcomeReceiver<Void, PackageManagerException> origCallback) {
+    void resolveLibraryDependenciesIfNeeded(List<SharedLibraryInfo> missingLibraries,
+            PackageLite pkg, Computer snapshot, int userId, Handler handler,
+            OutcomeReceiver<Void, PackageManagerException> origCallback) {
         CallOnceProxy callback = new CallOnceProxy(handler, origCallback);
         try {
-            resolveLibraryDependenciesIfNeededInternal(pkg, snapshot, userId, handler, callback);
-        } catch (PackageManagerException e) {
-            callback.onError(e);
+            resolveLibraryDependenciesIfNeededInternal(
+                    missingLibraries, pkg, snapshot, userId, handler, callback);
         } catch (Exception e) {
             onError(callback, e.getMessage());
         }
     }
 
 
-    private void resolveLibraryDependenciesIfNeededInternal(PackageLite pkg, Computer snapshot,
-            int userId, Handler handler, CallOnceProxy callback) throws PackageManagerException {
-        final List<SharedLibraryInfo> missing =
-                mSharedLibraries.collectMissingSharedLibraryInfos(pkg);
-
+    private void resolveLibraryDependenciesIfNeededInternal(List<SharedLibraryInfo> missing,
+            PackageLite pkg, Computer snapshot, int userId, Handler handler,
+            CallOnceProxy callback) {
         if (missing.isEmpty()) {
             if (DEBUG) {
-                Slog.i(TAG, "No missing dependency for " + pkg);
+                Slog.d(TAG, "No missing dependency for " + pkg.getPackageName());
             }
             // No need for dependency resolution. Move to installation directly.
             callback.onResult(null);
             return;
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Missing dependencies found for pkg: " + pkg.getPackageName()
+                    + " user: " + userId);
         }
 
         if (!bindToDependencyInstallerIfNeeded(userId, handler, snapshot)) {
@@ -110,10 +113,10 @@ public class InstallDependencyHelper {
         }
 
         IDependencyInstallerCallback serviceCallback =
-                new DependencyInstallerCallbackCallOnce(handler, callback);
+                new DependencyInstallerCallbackCallOnce(handler, callback, userId);
         boolean scheduleSuccess;
-        synchronized (mRemoteServiceLock) {
-            scheduleSuccess = mRemoteService.run(service -> {
+        synchronized (mRemoteServices) {
+            scheduleSuccess = mRemoteServices.get(userId).run(service -> {
                 service.onDependenciesRequired(missing,
                         new DependencyInstallerCallback(serviceCallback.asBinder()));
             });
@@ -123,14 +126,19 @@ public class InstallDependencyHelper {
         }
     }
 
-    void notifySessionComplete(int sessionId, boolean success) {
+    List<SharedLibraryInfo> getMissingSharedLibraries(PackageLite pkg)
+            throws PackageManagerException {
+        return mSharedLibraries.collectMissingSharedLibraryInfos(pkg);
+    }
+
+    void notifySessionComplete(int sessionId) {
         if (DEBUG) {
-            Slog.i(TAG, "Session complete for " + sessionId + " result: " + success);
+            Slog.d(TAG, "Session complete for " + sessionId);
         }
         synchronized (mTrackers) {
             List<DependencyInstallTracker> completedTrackers = new ArrayList<>();
             for (DependencyInstallTracker tracker: mTrackers) {
-                if (!tracker.onSessionComplete(sessionId, success)) {
+                if (!tracker.onSessionComplete(sessionId)) {
                     completedTrackers.add(tracker);
                 }
             }
@@ -149,14 +157,16 @@ public class InstallDependencyHelper {
 
     private boolean bindToDependencyInstallerIfNeeded(int userId, Handler handler,
             Computer snapshot) {
-        synchronized (mRemoteServiceLock) {
-            if (mRemoteService != null) {
+        synchronized (mRemoteServices) {
+            if (mRemoteServices.containsKey(userId)) {
                 if (DEBUG) {
-                    Slog.i(TAG, "DependencyInstallerService already bound");
+                    Slog.i(TAG, "DependencyInstallerService for user " + userId + " already bound");
                 }
                 return true;
             }
         }
+
+        Slog.i(TAG, "Attempting to bind to Dependency Installer Service for user " + userId);
 
         RoleManager roleManager = mContext.getSystemService(RoleManager.class);
         if (roleManager == null) {
@@ -166,7 +176,7 @@ public class InstallDependencyHelper {
         List<String> holders = roleManager.getRoleHoldersAsUser(
                 ROLE_SYSTEM_DEPENDENCY_INSTALLER, UserHandle.of(userId));
         if (holders.isEmpty()) {
-            Slog.w(TAG, "No holders of ROLE_SYSTEM_DEPENDENCY_INSTALLER found");
+            Slog.w(TAG, "No holders of ROLE_SYSTEM_DEPENDENCY_INSTALLER found for user " + userId);
             return false;
         }
 
@@ -178,6 +188,8 @@ public class InstallDependencyHelper {
                 /*includeInstantApps*/ false, /*resolveForStart*/ false);
 
         if (resolvedIntents.isEmpty()) {
+            Slog.w(TAG, "No package holding ROLE_SYSTEM_DEPENDENCY_INSTALLER found for user "
+                    + userId);
             return false;
         }
 
@@ -206,13 +218,14 @@ public class InstallDependencyHelper {
                 };
 
 
-        synchronized (mRemoteServiceLock) {
+        synchronized (mRemoteServices) {
             // Some other thread managed to connect to the service first
-            if (mRemoteService != null) {
+            if (mRemoteServices.containsKey(userId)) {
                 return true;
             }
-            mRemoteService = serviceConnector;
-            mRemoteService.setServiceLifecycleCallbacks(
+            mRemoteServices.put(userId, serviceConnector);
+            // Block the lock until we connect to the service
+            serviceConnector.setServiceLifecycleCallbacks(
                 new ServiceConnector.ServiceLifecycleCallbacks<>() {
                     @Override
                     public void onDisconnected(@NonNull IDependencyInstallerService service) {
@@ -228,17 +241,18 @@ public class InstallDependencyHelper {
                     }
 
                     private void destroy() {
-                        synchronized (mRemoteServiceLock) {
-                            if (mRemoteService != null) {
-                                mRemoteService.unbind();
-                                mRemoteService = null;
+                        synchronized (mRemoteServices) {
+                            if (mRemoteServices.containsKey(userId)) {
+                                mRemoteServices.get(userId).unbind();
+                                mRemoteServices.remove(userId);
                             }
                         }
                     }
 
                 });
-            AndroidFuture<IDependencyInstallerService> unusedFuture = mRemoteService.connect();
+            AndroidFuture<IDependencyInstallerService> unusedFuture = serviceConnector.connect();
         }
+        Slog.i(TAG, "Successfully bound to Dependency Installer Service for user " + userId);
         return true;
     }
 
@@ -292,79 +306,136 @@ public class InstallDependencyHelper {
 
         private final Handler mHandler;
         private final CallOnceProxy mCallback;
+        private final int mUserId;
 
         @GuardedBy("this")
-        private boolean mCalled = false;
+        private boolean mDependencyInstallerCallbackInvoked = false;
 
-        DependencyInstallerCallbackCallOnce(Handler handler, CallOnceProxy callback) {
+        DependencyInstallerCallbackCallOnce(Handler handler, CallOnceProxy callback, int userId) {
             mHandler = handler;
             mCallback = callback;
+            mUserId = userId;
         }
 
-        // TODO(b/372862145): Consider turning the binder call to two-way so that we can
-        //  throw IllegalArgumentException
         @Override
         public void onAllDependenciesResolved(int[] sessionIds) throws RemoteException {
             synchronized (this) {
-                if (mCalled) {
+                if (mDependencyInstallerCallbackInvoked) {
+                    throw new IllegalStateException(
+                            "Callback is being or has been already processed");
+                }
+                mDependencyInstallerCallbackInvoked = true;
+            }
+
+
+            if (DEBUG) {
+                Slog.d(TAG, "onAllDependenciesResolved started");
+            }
+
+            try {
+                // Before creating any tracker, validate the arguments
+                ArraySet<Integer> validSessionIds = validateSessionIds(sessionIds);
+
+                if (validSessionIds.isEmpty()) {
+                    mCallback.onResult(null);
                     return;
                 }
-                mCalled = true;
-            }
 
-            ArraySet<Integer> set = new ArraySet<>();
-            for (int i = 0; i < sessionIds.length; i++) {
-                if (DEBUG) {
-                    Slog.i(TAG, "onAllDependenciesResolved called with " + sessionIds[i]);
-                }
-                set.add(sessionIds[i]);
-            }
-
-            DependencyInstallTracker tracker = new DependencyInstallTracker(mCallback, set);
-            synchronized (mTrackers) {
-                mTrackers.add(tracker);
-            }
-
-            // In case any of the session ids have already been installed, check if they
-            // are valid.
-            mHandler.post(() -> {
-                if (DEBUG) {
-                    Slog.i(TAG, "onAllDependenciesResolved cleaning up invalid sessions");
+                // Create a tracker now if there are any pending sessions remaining.
+                DependencyInstallTracker tracker = new DependencyInstallTracker(
+                        mCallback, validSessionIds);
+                synchronized (mTrackers) {
+                    mTrackers.add(tracker);
                 }
 
-                for (int i = 0; i < sessionIds.length; i++) {
-                    int sessionId = sessionIds[i];
+                // By the time the tracker was created, some of the sessions in validSessionIds
+                // could have finished. Avoid waiting for them indefinitely.
+                for (int sessionId : validSessionIds) {
                     SessionInfo sessionInfo = mPackageInstallerService.getSessionInfo(sessionId);
 
-                    // Continue waiting if session exists and hasn't passed or failed yet.
-                    if (sessionInfo != null && !sessionInfo.isSessionApplied
-                            && !sessionInfo.isSessionFailed) {
-                        continue;
+                    // Don't wait for sessions that finished already
+                    if (sessionInfo == null) {
+                        Binder.withCleanCallingIdentity(() -> {
+                            notifySessionComplete(sessionId);
+                        });
                     }
-
-                    if (DEBUG) {
-                        Slog.i(TAG, "onAllDependenciesResolved cleaning up finished"
-                                + " session: " + sessionId);
-                    }
-
-                    // If session info is null, we assume it to be success.
-                    // TODO(b/372862145): Check historical sessions to be more precise.
-                    boolean success = sessionInfo == null || sessionInfo.isSessionApplied;
-
-                    notifySessionComplete(sessionId, /*success=*/success);
                 }
-            });
+            } catch (Exception e) {
+                // Allow calling the callback again
+                synchronized (this) {
+                    mDependencyInstallerCallbackInvoked = false;
+                }
+                throw e;
+            }
         }
 
         @Override
         public void onFailureToResolveAllDependencies() throws RemoteException {
             synchronized (this) {
-                if (mCalled) {
-                    return;
+                if (mDependencyInstallerCallbackInvoked) {
+                    throw new IllegalStateException(
+                            "Callback is being or has been already processed");
                 }
-                onError(mCallback, "Failed to resolve all dependencies automatically");
-                mCalled = true;
+                mDependencyInstallerCallbackInvoked = true;
             }
+
+            Binder.withCleanCallingIdentity(() -> {
+                onError(mCallback, "Failed to resolve all dependencies automatically");
+            });
+        }
+
+        private ArraySet<Integer> validateSessionIds(int[] sessionIds) {
+            // Before creating any tracker, validate the arguments
+            ArraySet<Integer> validSessionIds = new ArraySet<>();
+
+            List<SessionInfo> historicalSessions = null;
+            for (int i = 0; i < sessionIds.length; i++) {
+                int sessionId = sessionIds[i];
+                SessionInfo sessionInfo = mPackageInstallerService.getSessionInfo(sessionId);
+
+                // Continue waiting if session exists and hasn't passed or failed yet.
+                if (sessionInfo != null) {
+                    if (sessionInfo.isSessionFailed) {
+                        throw new IllegalArgumentException("Session already finished: "
+                                + sessionId);
+                    }
+
+                    // Wait for session to finish install if it's not already successful.
+                    if (!sessionInfo.isSessionApplied) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "onAllDependenciesResolved pending session: " + sessionId);
+                        }
+                        validSessionIds.add(sessionId);
+                    }
+
+                    // An applied session found. No need to check historical session anymore.
+                    continue;
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "onAllDependenciesResolved cleaning up finished"
+                            + " session: " + sessionId);
+                }
+
+                if (historicalSessions == null) {
+                    historicalSessions = mPackageInstallerService.getHistoricalSessions(
+                            mUserId).getList();
+                }
+
+                sessionInfo = historicalSessions.stream().filter(
+                        s -> s.sessionId == sessionId).findFirst().orElse(null);
+
+                if (sessionInfo == null) {
+                    throw new IllegalArgumentException("Failed to find session: " + sessionId);
+                }
+
+                // Historical session must have been successful, otherwise throw IAE.
+                if (!sessionInfo.isSessionApplied) {
+                    throw new IllegalArgumentException("Session already finished: " + sessionId);
+                }
+            }
+
+            return validSessionIds;
         }
     }
 
@@ -377,6 +448,7 @@ public class InstallDependencyHelper {
     // TODO(b/372862145): Determine and add support for rebooting while dependency is being resolved
     private static class DependencyInstallTracker {
         private final CallOnceProxy mCallback;
+        @GuardedBy("this")
         private final ArraySet<Integer> mPendingSessionIds;
 
         DependencyInstallTracker(CallOnceProxy callback, ArraySet<Integer> pendingSessionIds) {
@@ -389,18 +461,11 @@ public class InstallDependencyHelper {
          *
          * Returns true if we still need to continue tracking.
          */
-        public boolean onSessionComplete(int sessionId, boolean success) {
+        public boolean onSessionComplete(int sessionId) {
             synchronized (this) {
                 if (!mPendingSessionIds.contains(sessionId)) {
                     // This had no impact on tracker, so continue tracking
                     return true;
-                }
-
-                if (!success) {
-                    // If one of the dependency fails, the orig session would fail too.
-                    onError(mCallback, "Failed to install all dependencies");
-                    // TODO(b/372862145): Abandon the rest of the pending sessions.
-                    return false; // No point in tracking anymore
                 }
 
                 mPendingSessionIds.remove(sessionId);
@@ -411,6 +476,5 @@ public class InstallDependencyHelper {
                 return true; // Keep on tracking
             }
         }
-
     }
 }

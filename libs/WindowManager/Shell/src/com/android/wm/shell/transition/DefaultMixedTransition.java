@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.transition;
 
+import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.wm.shell.transition.DefaultMixedHandler.subCopy;
@@ -36,6 +37,8 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
+
+import java.util.List;
 
 class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
     private final UnfoldTransitionHandler mUnfoldHandler;
@@ -127,6 +130,13 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             }
         }
 
+        TransitionInfo.Change pipActivityChange = null;
+        if (pipChange != null) {
+            pipActivityChange = mPipHandler.getDeferConfigActivityChange(
+                    info, pipChange.getContainer());
+            everythingElse.getChanges().remove(pipActivityChange);
+        }
+
         final Transitions.TransitionFinishCallback finishCB = (wct) -> {
             --mInFlightSubAnimations;
             joinFinishArgs(wct);
@@ -139,13 +149,23 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             return false;
         }
 
-        // PIP window should always be on the highest Z order.
-        if (pipChange != null) {
+        if (pipChange != null && pipActivityChange == null) {
+            // We are operating on a single PiP task for the enter animation here.
             mInFlightSubAnimations = 2;
+            // PIP window should always be on the highest Z order.
             mPipHandler.startEnterAnimation(
                     pipChange, startTransaction.setLayer(pipChange.getLeash(), Integer.MAX_VALUE),
                     finishTransaction,
                     finishCB);
+        } else if (pipActivityChange != null) {
+            // If there is both a PiP task and a PiP config-at-end activity change,
+            // put them into a separate TransitionInfo, and send to be animated as TRANSIT_PIP.
+            mInFlightSubAnimations = 2;
+            TransitionInfo pipInfo = subCopy(info, TRANSIT_PIP, false /* withChanges */);
+            pipInfo.getChanges().addAll(List.of(pipChange, pipActivityChange));
+            mPipHandler.startAnimation(mTransition, pipInfo,
+                    startTransaction.setLayer(pipChange.getLeash(), Integer.MAX_VALUE),
+                    finishTransaction, finishCB);
         } else {
             mInFlightSubAnimations = 1;
         }
@@ -184,6 +204,7 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "tryAnimateOpenIntentWithRemoteAndPipOrDesktop");
         TransitionInfo.Change pipChange = null;
+        TransitionInfo.Change pipActivityChange = null;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             TransitionInfo.Change change = info.getChanges().get(i);
             if (mPipHandler.isEnteringPip(change, info.getType())) {
@@ -193,6 +214,12 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
                 }
                 pipChange = change;
                 info.getChanges().remove(i);
+            } else if (change.getTaskInfo() == null && change.getParent() != null
+                    && pipChange != null && change.getParent().equals(pipChange.getContainer())) {
+                // Cache the PiP activity if it's a target and cached pip task change is its parent;
+                // note that we are bottom-to-top, so if such activity has a task
+                // that is also a target, then it must have been cached already as pipChange.
+                pipActivityChange = change;
             }
         }
         TransitionInfo.Change desktopChange = null;
@@ -237,8 +264,16 @@ class DefaultMixedTransition extends DefaultMixedHandler.MixedTransition {
             // make a new startTransaction because pip's startEnterAnimation "consumes" it so
             // we need a separate one to send over to launcher.
             SurfaceControl.Transaction otherStartT = new SurfaceControl.Transaction();
-
-            mPipHandler.startEnterAnimation(pipChange, otherStartT, finishTransaction, finishCB);
+            if (pipActivityChange == null) {
+                mPipHandler.startEnterAnimation(pipChange, otherStartT, finishTransaction,
+                        finishCB);
+            } else {
+                info.getChanges().remove(pipActivityChange);
+                TransitionInfo pipInfo = subCopy(info, TRANSIT_PIP, false /* withChanges */);
+                pipInfo.getChanges().addAll(List.of(pipChange, pipActivityChange));
+                mPipHandler.startAnimation(mTransition, pipInfo, startTransaction,
+                        finishTransaction, finishCB);
+            }
 
             // Dispatch the rest of the transition normally.
             if (mLeftoversHandler != null

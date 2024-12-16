@@ -28,6 +28,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.BouncerPanelExpansionCalculator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.ShadeInterpolation
@@ -51,6 +52,7 @@ import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.QSEvent
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeLog
 import com.android.systemui.qs.composefragment.dagger.QSFragmentComposeModule
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
@@ -62,6 +64,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -101,6 +104,7 @@ constructor(
     DisableFlagsInteractor: DisableFlagsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val largeScreenShadeInterpolator: LargeScreenShadeInterpolator,
+    private val shadeInteractor: ShadeInteractor,
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
@@ -111,6 +115,7 @@ constructor(
     @Named(QUICK_QS_PANEL) val qqsMediaHost: MediaHost,
     @Named(QS_PANEL) val qsMediaHost: MediaHost,
     @Named(QSFragmentComposeModule.QS_USING_MEDIA_PLAYER) private val usingMedia: Boolean,
+    private val uiEventLogger: UiEventLogger,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
 ) : Dumpable, ExclusiveActivatable() {
 
@@ -128,6 +133,9 @@ constructor(
     var isQsExpanded by mutableStateOf(false)
 
     var isQsVisible by mutableStateOf(false)
+
+    val isQsVisibleAndAnyShadeExpanded: Boolean
+        get() = anyShadeExpanded && isQsVisible
 
     // This can only be negative if undefined (in which case it will be -1f), else it will be
     // in [0, 1]. In some cases, it could be set back to -1f internally to indicate that it's
@@ -429,6 +437,12 @@ constructor(
                 ),
         )
 
+    private val anyShadeExpanded by
+        hydrator.hydratedStateOf(
+            traceName = "anyShadeExpanded",
+            source = shadeInteractor.isAnyExpanded,
+        )
+
     fun applyNewQsScrollerBounds(left: Float, top: Float, right: Float, bottom: Float) {
         if (usingMedia) {
             qsMediaHost.currentClipping.set(
@@ -442,6 +456,14 @@ constructor(
 
     fun emitMotionEventForFalsingSwipeNested() {
         falsingInteractor.isFalseTouch(Classifier.QS_SWIPE_NESTED)
+    }
+
+    fun onQQSOpen() {
+        uiEventLogger.log(QSEvent.QQS_PANEL_EXPANDED)
+    }
+
+    fun onQSOpen() {
+        uiEventLogger.log(QSEvent.QS_PANEL_EXPANDED)
     }
 
     override suspend fun onActivated(): Nothing {
@@ -503,6 +525,8 @@ constructor(
             printSection("Quick Settings state") {
                 println("isQSExpanded", isQsExpanded)
                 println("isQSVisible", isQsVisible)
+                println("anyShadeExpanded", anyShadeExpanded)
+                println("isQSVisibleAndAnyShadeExpanded", isQsVisibleAndAnyShadeExpanded)
                 println("isQSEnabled", isQsEnabled)
                 println("isCustomizing", containerViewModel.editModeViewModel.isEditing.value)
                 println("inFirstPage", inFirstPage)

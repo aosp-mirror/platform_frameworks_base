@@ -301,7 +301,6 @@ LIBANDROID {
     ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
-    ASurfaceTransaction_setFrameRateParams; # introduced=36
     ASurfaceTransaction_clearFrameRate; # introduced=34
     ASurfaceTransaction_setFrameTimeline; # introduced=Tiramisu
     ASurfaceTransaction_setGeometry; # introduced=29
@@ -321,6 +320,23 @@ LIBANDROID {
     ASystemFontIterator_open; # introduced=29
     ASystemFontIterator_close; # introduced=29
     ASystemFontIterator_next; # introduced=29
+    ASystemHealth_getCpuHeadroom; # introduced=36
+    ASystemHealth_getGpuHeadroom; # introduced=36
+    ASystemHealth_getCpuHeadroomMinIntervalMillis; # introduced=36
+    ASystemHealth_getGpuHeadroomMinIntervalMillis; # introduced=36
+    ACpuHeadroomParams_create; # introduced=36
+    ACpuHeadroomParams_destroy; # introduced=36
+    ACpuHeadroomParams_setCalculationType; # introduced=36
+    ACpuHeadroomParams_getCalculationType; # introduced=36
+    ACpuHeadroomParams_setCalculationWindowMillis; # introduced=36
+    ACpuHeadroomParams_getCalculationWindowMillis; # introduced=36
+    ACpuHeadroomParams_setTids; # introduced=36
+    AGpuHeadroomParams_create; # introduced=36
+    AGpuHeadroomParams_destroy; # introduced=36
+    AGpuHeadroomParams_setCalculationType; # introduced=36
+    AGpuHeadroomParams_getCalculationType; # introduced=36
+    AGpuHeadroomParams_setCalculationWindowMillis; # introduced=36
+    AGpuHeadroomParams_getCalculationWindowMillis; # introduced=36
     AFont_close; # introduced=29
     AFont_getFontFilePath; # introduced=29
     AFont_getWeight; # introduced=29
@@ -362,6 +378,8 @@ LIBANDROID {
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
     AThermal_getThermalHeadroomThresholds; # introduced=VanillaIceCream
+    AThermal_registerThermalHeadroomListener; # introduced=36
+    AThermal_unregisterThermalHeadroomListener; # introduced=36
     APerformanceHint_getManager; # introduced=Tiramisu
     APerformanceHint_createSession; # introduced=Tiramisu
     APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
@@ -375,7 +393,9 @@ LIBANDROID {
     APerformanceHint_createSessionUsingConfig; # introduced=36
     APerformanceHint_notifyWorkloadIncrease; # introduced=36
     APerformanceHint_notifyWorkloadReset; # introduced=36
+    APerformanceHint_notifyWorkloadSpike; # introduced=36
     APerformanceHint_borrowSessionFromJava; # introduced=36
+    APerformanceHint_setNativeSurfaces; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
@@ -388,6 +408,8 @@ LIBANDROID {
     ASessionCreationConfig_setTargetWorkDurationNanos; # introduced=36
     ASessionCreationConfig_setPreferPowerEfficiency; # introduced=36
     ASessionCreationConfig_setGraphicsPipeline; # introduced=36
+    ASessionCreationConfig_setNativeSurfaces; # introduced=36
+    ASessionCreationConfig_setUseAutoTiming; # introduced=36
   local:
     *;
 };

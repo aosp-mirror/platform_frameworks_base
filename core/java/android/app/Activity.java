@@ -1279,7 +1279,24 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>This method should be utilized when an activity wants to nudge the user to switch
      * to the web application in cases where the web may provide the user with a better
-     * experience. Note that this method does not guarantee that the education will be shown.</p>
+     * experience. Note that this method does not guarantee that the education will be shown.
+     *
+     * <p>The number of times that the "Open in browser" education can be triggered by this method
+     * is limited per application, and, when shown, the education appears above the app's content.
+     * For these reasons, developers should use this method sparingly when it is least
+     * disruptive to the user to show the education and when it is optimal to switch the user to a
+     * browser session. Before requesting to show the education, developers should assert that they
+     * have set a link that can be used by the "Open in browser" feature through either
+     * {@link AssistContent#EXTRA_AUTHENTICATING_USER_WEB_URI} or
+     * {@link AssistContent#setWebUri} so that users are navigated to a relevant page if they choose
+     * to switch to the browser. If a URI is not set using either method, "Open in browser" will
+     * utilize a generic link if available which will direct users to the homepage of the site
+     * associated with the app. The generic link is provided for a limited number of applications by
+     * the system and cannot be edited by developers. If none of these options contains a valid URI,
+     * the user will not be provided with the option to switch to the browser and the education will
+     * not be shown if requested.
+     *
+     * @see android.app.assist.AssistContent#EXTRA_SESSION_TRANSFER_WEB_URI
      */
     @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_TO_WEB_EDUCATION)
     public final void requestOpenInBrowserEducation() {
@@ -5765,8 +5782,7 @@ public class Activity extends ContextThemeWrapper
         }
 
         if (!getAttributionSource().getRenouncedPermissions().isEmpty()) {
-            final int permissionCount = permissions.length;
-            for (int i = 0; i < permissionCount; i++) {
+            for (int i = 0; i < permissions.length; i++) {
                 if (getAttributionSource().getRenouncedPermissions().contains(permissions[i])) {
                     throw new IllegalArgumentException("Cannot request renounced permission: "
                             + permissions[i]);
@@ -5774,11 +5790,53 @@ public class Activity extends ContextThemeWrapper
             }
         }
 
-        PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
-                : createDeviceContext(deviceId).getPackageManager();
+        final Context context = getDeviceId() == deviceId ? this : createDeviceContext(deviceId);
+        if (Flags.permissionRequestShortCircuitEnabled()) {
+            int[] permissionsState = getPermissionRequestStates(context, permissions);
+            boolean hasRequestablePermission = false;
+            for (int i = 0; i < permissionsState.length; i++) {
+                if (permissionsState[i] == Context.PERMISSION_REQUEST_STATE_REQUESTABLE) {
+                    hasRequestablePermission = true;
+                    break;
+                }
+            }
+            // If none of the permissions is requestable, finish the request here.
+            if (!hasRequestablePermission) {
+                mHasCurrentPermissionsRequest = true;
+                Log.v(TAG, "No requestable permission in the request.");
+                int[] results = new int[permissionsState.length];
+                for (int i = 0; i < permissionsState.length; i++) {
+                    if (permissionsState[i] == Context.PERMISSION_REQUEST_STATE_GRANTED) {
+                        results[i] = PackageManager.PERMISSION_GRANTED;
+                    } else {
+                        results[i] = PackageManager.PERMISSION_DENIED;
+                    }
+                }
+                // Currently permission request result is passed to the client app asynchronously
+                // in onRequestPermissionsResult, lets keep async behavior here as well.
+                mHandler.post(() -> {
+                    mHasCurrentPermissionsRequest = false;
+                    onRequestPermissionsResult(requestCode, permissions, results, deviceId);
+                });
+                return;
+            }
+        }
+
+        final PackageManager packageManager = context.getPackageManager();
         final Intent intent = packageManager.buildRequestPermissionsIntent(permissions);
         startActivityForResult(REQUEST_PERMISSIONS_WHO_PREFIX, intent, requestCode, null);
         mHasCurrentPermissionsRequest = true;
+    }
+
+    @NonNull
+    private int[] getPermissionRequestStates(@NonNull Context deviceContext,
+            @NonNull String[] permissions) {
+        final int size = permissions.length;
+        int[] results = new int[size];
+        for (int i = 0; i < size; i++) {
+            results[i] = deviceContext.getPermissionRequestState(permissions[i]);
+        }
+        return results;
     }
 
     /**

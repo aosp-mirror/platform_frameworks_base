@@ -149,7 +149,6 @@ private class SwipeToSceneNode(
         delegate(
             MultiPointerDraggableNode(
                 orientation = draggableHandler.orientation,
-                startDragImmediately = ::startDragImmediately,
                 onDragStarted = draggableHandler::onDragStarted,
                 onFirstPointerDown = ::onFirstPointerDown,
                 swipeDetector = swipeDetector,
@@ -198,21 +197,6 @@ private class SwipeToSceneNode(
     ) = multiPointerDraggableNode.onPointerEvent(pointerEvent, pass, bounds)
 
     override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
-
-    private fun startDragImmediately(pointersDown: PointersInfo.PointersDown): Boolean {
-        // Immediately start the drag if the user can't swipe in the other direction and the gesture
-        // handler can intercept it.
-        return !canOppositeSwipe() && draggableHandler.shouldImmediatelyIntercept(pointersDown)
-    }
-
-    private fun canOppositeSwipe(): Boolean {
-        val oppositeOrientation =
-            when (draggableHandler.orientation) {
-                Orientation.Vertical -> Orientation.Horizontal
-                Orientation.Horizontal -> Orientation.Vertical
-            }
-        return draggableHandler.contentForSwipes().shouldEnableSwipes(oppositeOrientation)
-    }
 }
 
 /** Find the [ScrollBehaviorOwner] for the current orientation. */

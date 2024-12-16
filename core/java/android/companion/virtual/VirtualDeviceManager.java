@@ -1288,6 +1288,21 @@ public final class VirtualDeviceManager {
         @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
         default void onSecureWindowShown(int displayId, @NonNull ComponentName componentName,
                 @NonNull UserHandle user) {}
+
+        /**
+         * Called when there is no longer any window with a secure surface shown on the device.
+         *
+         * <p>This is only called once there are no more secure windows shown on the device. If
+         * there are multiple secure windows shown on the device, this callback will be called only
+         * once all of them are hidden.</p>
+         *
+         * @param displayId The display ID on which the window was shown before.
+         *
+         * @see Display#FLAG_SECURE
+         * @see WindowManager.LayoutParams#FLAG_SECURE
+         */
+        @FlaggedApi(android.companion.virtualdevice.flags.Flags.FLAG_ACTIVITY_CONTROL_API)
+        default void onSecureWindowHidden(int displayId) {}
     }
 
     /**

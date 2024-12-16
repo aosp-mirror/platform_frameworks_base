@@ -222,7 +222,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
                 pipBoundsState, mTouchState, mPipScheduler, mPipTransitionState, pipUiEventLogger,
                 menuController, mainExecutor,
                 mPipPerfHintController);
-        mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
+        mPipBoundsState.addOnAspectRatioChangedCallback(aspectRatio -> {
+            updateMinMaxSize(aspectRatio);
+            onAspectRatioChanged();
+        });
 
         mMoveOnShelVisibilityChanged = () -> {
             if (mIsImeShowing && mImeHeight > mShelfHeight) {
@@ -768,16 +771,17 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
     private void animateToNormalSize(Runnable callback) {
         // Save the current bounds as the user-resize bounds.
         mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
-
-        final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
-        final Size defaultSize = mSizeSpecSource.getDefaultSize(mPipBoundsState.getAspectRatio());
-        final Rect normalBounds = new Rect(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
-        final Rect adjustedNormalBounds = mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(
-                normalBounds, minMenuSize);
-
+        final Rect adjustedNormalBounds = getAdjustedNormalBounds();
         mSavedSnapFraction = mMotionHelper.animateToExpandedState(adjustedNormalBounds,
                 getMovementBounds(mPipBoundsState.getBounds()),
                 getMovementBounds(adjustedNormalBounds), callback /* callback */);
+    }
+
+    private Rect getAdjustedNormalBounds() {
+        final Size minMenuSize = mMenuController.getEstimatedMinMenuSize();
+        final Size defaultSize = mSizeSpecSource.getDefaultSize(mPipBoundsState.getAspectRatio());
+        final Rect normalBounds = new Rect(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
+        return mPipBoundsAlgorithm.adjustNormalBoundsToFitMenu(normalBounds, minMenuSize);
     }
 
     private void animateToUnexpandedState(Rect restoreBounds) {
@@ -1065,6 +1069,10 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         mPipBoundsAlgorithm.getMovementBounds(mPipBoundsState.getBounds(),
                 insetBounds, mPipBoundsState.getMovementBounds(), mIsImeShowing ? mImeHeight : 0);
         mMotionHelper.onMovementBoundsChanged();
+
+        if (mPipResizeGestureHandler.getUserResizeBounds().isEmpty()) {
+            mPipResizeGestureHandler.setUserResizeBounds(getAdjustedNormalBounds());
+        }
     }
 
     private Rect getMovementBounds(Rect curBounds) {

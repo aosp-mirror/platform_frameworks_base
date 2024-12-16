@@ -9,6 +9,7 @@ flag {
     description: "Allows querying of AOD availability"
     bug: "324046664"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -32,14 +33,6 @@ flag {
     namespace: "display_manager"
     description: "Feature flag for Connected Display management"
     bug: "280739508"
-    is_fixed_read_only: true
-}
-
-flag {
-    name: "enable_nbm_controller"
-    namespace: "display_manager"
-    description: "Feature flag for Normal Brightness Mode Controller"
-    bug: "299527549"
     is_fixed_read_only: true
 }
 
@@ -267,6 +260,7 @@ flag {
     description: "Feature flag for an API to get the highest defined HDR/SDR ratio for a display."
     bug: "335181559"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -429,6 +423,7 @@ flag {
     description: "Flag for an API to get whether display supports ARR or not"
     bug: "361433651"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -445,6 +440,7 @@ flag {
     description: "Flag for an API to get suggested frame rates"
     bug: "361433796"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -453,6 +449,7 @@ flag {
     description: "Feature flag for an API to let the apps subscribe to a specific property change of the Display."
     bug: "372700957"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -461,6 +458,7 @@ flag {
     description: "Flag to use the surfaceflinger rates for getSupportedRefreshRates"
     bug: "365163968"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {

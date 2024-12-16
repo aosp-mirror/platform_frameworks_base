@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.appfunctions.flags.Flags;
 import android.os.UserManager;
 
 import java.util.Objects;
@@ -179,6 +180,12 @@ public final class DevicePolicyIdentifiers {
      */
     @FlaggedApi(android.view.contentprotection.flags.Flags.FLAG_MANAGE_DEVICE_POLICY_ENABLED)
     public static final String CONTENT_PROTECTION_POLICY = "contentProtection";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setAppFunctionsPolicy(int)}.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final String APP_FUNCTIONS_POLICY = "appFunctions";
 
     /**
      * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.

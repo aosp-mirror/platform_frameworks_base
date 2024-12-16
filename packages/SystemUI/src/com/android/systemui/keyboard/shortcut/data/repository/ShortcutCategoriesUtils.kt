@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.shortcut.data.repository
 
 import android.content.Context
 import android.graphics.drawable.Icon
+import android.hardware.input.InputGestureData.KeyTrigger
 import android.hardware.input.InputManager
 import android.hardware.input.KeyGlyphMap
 import android.util.Log
@@ -33,6 +34,7 @@ import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
+import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperExclusions
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutIcon
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutKey
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutSubCategory
@@ -46,6 +48,7 @@ constructor(
     private val context: Context,
     @Background private val backgroundCoroutineContext: CoroutineContext,
     private val inputManager: InputManager,
+    private val shortcutHelperExclusions: ShortcutHelperExclusions,
 ) {
 
     fun removeUnsupportedModifiers(modifierMask: Int): Int {
@@ -135,6 +138,7 @@ constructor(
             label = shortcutInfo.label,
             icon = toShortcutIcon(keepIcon, shortcutInfo),
             commands = listOf(shortcutCommand),
+            isCustomizable = shortcutHelperExclusions.isShortcutCustomizable(shortcutInfo.label),
         )
     }
 
@@ -152,6 +156,22 @@ constructor(
             return null
         }
         return ShortcutIcon(packageName = icon.resPackage, resourceId = icon.resId)
+    }
+
+    fun toShortcutCommand(
+        keyGlyphMap: KeyGlyphMap?,
+        keyCharacterMap: KeyCharacterMap,
+        keyTrigger: KeyTrigger,
+    ): ShortcutCommand? {
+        return toShortcutCommand(
+            keyGlyphMap = keyGlyphMap,
+            keyCharacterMap = keyCharacterMap,
+            info =
+                InternalKeyboardShortcutInfo(
+                    keycode = keyTrigger.keycode,
+                    modifiers = keyTrigger.modifierState,
+                ),
+        )
     }
 
     private fun toShortcutCommand(

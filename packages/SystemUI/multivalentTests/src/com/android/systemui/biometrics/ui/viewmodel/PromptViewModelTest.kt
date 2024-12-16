@@ -158,6 +158,22 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private val mockFingerprintIconWidth = 300
     private val mockFingerprintIconHeight = 300
 
+    private val faceIconAuthingDescription =
+        R.string.biometric_dialog_face_icon_description_authenticating
+    private val faceIconAuthedDescription =
+        R.string.biometric_dialog_face_icon_description_authenticated
+    private val faceIconConfirmedDescription =
+        R.string.biometric_dialog_face_icon_description_confirmed
+    private val faceIconIdleDescription = R.string.biometric_dialog_face_icon_description_idle
+    private val sfpsFindSensorDescription =
+        R.string.security_settings_sfps_enroll_find_sensor_message
+    private val udfpsIconDescription = R.string.accessibility_fingerprint_label
+    private val faceFailedDescription = R.string.keyguard_face_failed
+    private val bpTryAgainDescription = R.string.biometric_dialog_try_again
+    private val bpConfirmDescription = R.string.biometric_dialog_confirm
+    private val fingerprintIconAuthenticatedDescription =
+        R.string.fingerprint_dialog_authenticated_confirmation
+
     /** Mock [UdfpsOverlayParams] for a test. */
     private fun mockUdfpsOverlayParams(isLandscape: Boolean = false): UdfpsOverlayParams =
         UdfpsOverlayParams(
@@ -337,21 +353,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             if ((testCase.isCoex && !forceExplicitFlow) || testCase.isFaceOnly) {
                 // Face-only or implicit co-ex auth
                 assertThat(iconAsset).isEqualTo(R.raw.face_dialog_authenticating)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticating)
+                assertThat(iconContentDescriptionId).isEqualTo(faceIconAuthingDescription)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
             } else if ((testCase.isCoex && forceExplicitFlow) || testCase.isFingerprintOnly) {
                 // Fingerprint-only or explicit co-ex auth
                 if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
                     assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintAuthenticating())
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                    assertThat(iconContentDescriptionId).isEqualTo(sfpsFindSensorDescription)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
                 } else {
                     assertThat(iconAsset)
                         .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                    assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                     assertThat(shouldAnimateIconView).isEqualTo(false)
                 }
             }
@@ -397,26 +410,25 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         if (testCase.isFaceOnly) {
             // Face-only auth
             assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_error)
-            assertThat(iconContentDescriptionId).isEqualTo(R.string.keyguard_face_failed)
+            assertThat(iconContentDescriptionId).isEqualTo(faceFailedDescription)
             assertThat(shouldAnimateIconView).isEqualTo(true)
 
             // Clear error, go to idle
             errorJob.join()
 
             assertThat(iconAsset).isEqualTo(R.raw.face_dialog_error_to_idle)
-            assertThat(iconContentDescriptionId)
-                .isEqualTo(R.string.biometric_dialog_face_icon_description_idle)
+            assertThat(iconContentDescriptionId).isEqualTo(faceIconIdleDescription)
             assertThat(shouldAnimateIconView).isEqualTo(true)
         } else if ((testCase.isCoex && forceExplicitFlow) || testCase.isFingerprintOnly) {
             // Fingerprint-only or explicit co-ex auth
             if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
                 assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintToError())
-                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(iconContentDescriptionId).isEqualTo(bpTryAgainDescription)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
             } else {
                 assertThat(iconAsset)
                     .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_error_lottie)
-                assertThat(iconContentDescriptionId).isEqualTo(R.string.biometric_dialog_try_again)
+                assertThat(iconContentDescriptionId).isEqualTo(bpTryAgainDescription)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
             }
 
@@ -425,14 +437,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
             if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
                 assertThat(iconAsset).isEqualTo(getSfpsAsset_errorToFingerprint())
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                assertThat(iconContentDescriptionId).isEqualTo(sfpsFindSensorDescription)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
             } else {
                 assertThat(iconAsset)
                     .isEqualTo(R.raw.fingerprint_dialogue_error_to_fingerprint_lottie)
-                assertThat(iconContentDescriptionId)
-                    .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                 assertThat(shouldAnimateIconView).isEqualTo(true)
             }
         }
@@ -472,13 +482,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     // Covers (1) fingerprint-only (2) co-ex, authenticated by fingerprint
                     if (testCase.authenticatedByFingerprint) {
                         assertThat(iconAsset).isEqualTo(R.raw.biometricprompt_sfps_error_to_success)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                        assertThat(iconContentDescriptionId).isEqualTo(sfpsFindSensorDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     } else { // Covers co-ex, authenticated by face
                         assertThat(iconAsset).isEqualTo(R.raw.biometricprompt_sfps_error_to_unlock)
                         assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                            .isEqualTo(fingerprintIconAuthenticatedDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
 
                         // Confirm authentication
@@ -486,8 +495,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                         assertThat(iconAsset)
                             .isEqualTo(R.raw.biometricprompt_sfps_unlock_to_success)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     }
                 } else { // Non-SFPS (UDFPS / rear-FPS) test cases
@@ -495,14 +503,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     if (testCase.authenticatedByFingerprint) {
                         assertThat(iconAsset)
                             .isEqualTo(R.raw.fingerprint_dialogue_error_to_success_lottie)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     } else { //  co-ex, authenticated by face
                         assertThat(iconAsset)
                             .isEqualTo(R.raw.fingerprint_dialogue_error_to_unlock_lottie)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.biometric_dialog_confirm)
+                        assertThat(iconContentDescriptionId).isEqualTo(bpConfirmDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
 
                         // Confirm authentication
@@ -512,8 +518,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                             .isEqualTo(
                                 R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
                             )
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     }
                 }
@@ -543,22 +548,19 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     // Fingerprint icon asset assertions
                     if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
                         assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintToSuccess())
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.security_settings_sfps_enroll_find_sensor_message)
+                        assertThat(iconContentDescriptionId).isEqualTo(sfpsFindSensorDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     } else {
                         assertThat(iconAsset)
                             .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_success_lottie)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     }
                 } else if (testCase.isFaceOnly || testCase.isCoex) {
                     // Face icon asset assertions
                     // If co-ex, use implicit flow (explicit flow always requires confirmation)
                     assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
+                    assertThat(iconContentDescriptionId).isEqualTo(faceIconAuthedDescription)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
                     assertThat(message).isEqualTo(PromptMessage.Empty)
                 }
@@ -586,20 +588,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                 if (testCase.isFaceOnly) {
                     assertThat(iconAsset).isEqualTo(R.raw.face_dialog_wink_from_dark)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.biometric_dialog_face_icon_description_authenticated)
+                    assertThat(iconContentDescriptionId).isEqualTo(faceIconAuthedDescription)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
                 } else if (testCase.isCoex) { // explicit flow, confirmation requested
                     if (testCase.sensorType == FingerprintSensorProperties.TYPE_POWER_BUTTON) {
                         assertThat(iconAsset).isEqualTo(getSfpsAsset_fingerprintToUnlock())
                         assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_authenticated_confirmation)
+                            .isEqualTo(fingerprintIconAuthenticatedDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     } else {
                         assertThat(iconAsset)
                             .isEqualTo(R.raw.fingerprint_dialogue_fingerprint_to_unlock_lottie)
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.biometric_dialog_confirm)
+                        assertThat(iconContentDescriptionId).isEqualTo(bpConfirmDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     }
                 }
@@ -628,8 +628,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
                 if (testCase.isFaceOnly) {
                     assertThat(iconAsset).isEqualTo(R.raw.face_dialog_dark_to_checkmark)
-                    assertThat(iconContentDescriptionId)
-                        .isEqualTo(R.string.biometric_dialog_face_icon_description_confirmed)
+                    assertThat(iconContentDescriptionId).isEqualTo(faceIconConfirmedDescription)
                     assertThat(shouldAnimateIconView).isEqualTo(true)
                 }
 
@@ -644,8 +643,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                             .isEqualTo(
                                 R.raw.fingerprint_dialogue_unlocked_to_checkmark_success_lottie
                             )
-                        assertThat(iconContentDescriptionId)
-                            .isEqualTo(R.string.fingerprint_dialog_touch_sensor)
+                        assertThat(iconContentDescriptionId).isEqualTo(udfpsIconDescription)
                         assertThat(shouldAnimateIconView).isEqualTo(true)
                     }
                 }
@@ -1589,7 +1587,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             val logoInfo by collectLastValue(kosmos.promptViewModel.logoInfo)
             assertThat(logoInfo).isNotNull()
             assertThat(logoInfo!!.first).isEqualTo(defaultLogoIconWithBadge)
-            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionWithBadge)
+            // Logo label does not use badge info.
+            assertThat(logoInfo!!.second).isEqualTo(defaultLogoDescriptionFromAppInfo)
         }
 
     @Test

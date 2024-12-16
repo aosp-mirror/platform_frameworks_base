@@ -60,7 +60,7 @@ class AppCompatSizeCompatModePolicy {
 
     /**
      * The precomputed display insets for resolving configuration. It will be non-null if
-     * {@link #shouldCreateAppCompatDisplayInsets} returns {@code true}.
+     * {@link ActivityRecord#shouldCreateAppCompatDisplayInsets} returns {@code true}.
      */
     @Nullable
     private AppCompatDisplayInsets mAppCompatDisplayInsets;
@@ -84,7 +84,7 @@ class AppCompatSizeCompatModePolicy {
     }
 
     /**
-     * @return The {@code true} if the current instance has {@link mAppCompatDisplayInsets} without
+     * @return The {@code true} if the current instance has {@link #mAppCompatDisplayInsets} without
      * considering the inheritance implemented in {@link #getAppCompatDisplayInsets()}
      */
     boolean hasAppCompatDisplayInsetsWithoutInheritance() {

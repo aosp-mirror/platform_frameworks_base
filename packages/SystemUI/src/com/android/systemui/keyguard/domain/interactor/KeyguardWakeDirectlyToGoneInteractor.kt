@@ -90,6 +90,7 @@ constructor(
     private val selectedUserInteractor: SelectedUserInteractor,
     keyguardEnabledInteractor: KeyguardEnabledInteractor,
     keyguardServiceLockNowInteractor: KeyguardServiceLockNowInteractor,
+    keyguardInteractor: KeyguardInteractor,
 ) {
 
     /**
@@ -106,13 +107,18 @@ constructor(
             .onStart { emit(false) }
 
     /**
-     * Whether we can wake from AOD/DOZING directly to GONE, bypassing LOCKSCREEN/BOUNCER states.
+     * Whether we can wake from AOD/DOZING or DREAMING directly to GONE, bypassing
+     * LOCKSCREEN/BOUNCER states.
      *
      * This is possible in the following cases:
      * - Keyguard is disabled, either from an app request or from security being set to "None".
      * - Keyguard is suppressed, via adb locksettings.
      * - We're wake and unlocking (fingerprint auth occurred while asleep).
      * - We're allowed to ignore auth and return to GONE, due to timeouts not elapsing.
+     * - We're DREAMING and dismissible.
+     * - We're already GONE. Technically you're already awake when GONE, but this makes it easier to
+     *   reason about this state (for example, if canWakeDirectlyToGone, don't tell WM to pause the
+     *   top activity - something you should never do while GONE as well).
      */
     val canWakeDirectlyToGone =
         combine(
@@ -120,14 +126,19 @@ constructor(
                 shouldSuppressKeyguard,
                 repository.biometricUnlockState,
                 repository.canIgnoreAuthAndReturnToGone,
+                transitionInteractor.currentKeyguardState,
             ) {
                 keyguardEnabled,
                 shouldSuppressKeyguard,
                 biometricUnlockState,
-                canIgnoreAuthAndReturnToGone ->
+                canIgnoreAuthAndReturnToGone,
+                currentState ->
                 (!keyguardEnabled || shouldSuppressKeyguard) ||
                     BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode) ||
-                    canIgnoreAuthAndReturnToGone
+                    canIgnoreAuthAndReturnToGone ||
+                    (currentState == KeyguardState.DREAMING &&
+                        keyguardInteractor.isKeyguardDismissible.value) ||
+                    currentState == KeyguardState.GONE
             }
             .distinctUntilChanged()
 

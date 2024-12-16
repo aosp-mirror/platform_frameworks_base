@@ -16,11 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static android.app.Flags.notificationsRedesignTemplates;
+
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
@@ -171,7 +172,9 @@ public class NotificationChildrenContainer extends ViewGroup
                 R.dimen.notification_children_container_margin_top);
         mNotificationTopPadding = res.getDimensionPixelOffset(
                 R.dimen.notification_children_container_top_padding);
-        mHeaderHeight = mNotificationHeaderMargin + mNotificationTopPadding;
+        mHeaderHeight = notificationsRedesignTemplates()
+                ? res.getDimensionPixelSize(R.dimen.notification_2025_header_height)
+                : mNotificationHeaderMargin + mNotificationTopPadding;
         mCollapsedBottomPadding = res.getDimensionPixelOffset(
                 R.dimen.notification_children_collapsed_bottom_padding);
         mEnableShadowOnChildNotifications =
@@ -499,7 +502,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
         mGroupHeaderWrapper.setExpanded(mChildrenExpanded);
         mGroupHeaderWrapper.onContentUpdated(mContainingNotification);
-
+        resetHeaderVisibilityIfNeeded(mGroupHeader, calculateDesiredHeader());
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
 
@@ -535,6 +538,7 @@ public class NotificationChildrenContainer extends ViewGroup
         invalidate();
 
         mMinimizedGroupHeaderWrapper.onContentUpdated(mContainingNotification);
+        resetHeaderVisibilityIfNeeded(mMinimizedGroupHeader, calculateDesiredHeader());
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
     }
@@ -1127,7 +1131,7 @@ public class NotificationChildrenContainer extends ViewGroup
         final int count = mAttachedChildren.size();
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableNotificationRow child = mAttachedChildren.get(childIdx);
-            child.setChildrenExpanded(childrenExpanded, false);
+            child.setChildrenExpanded(childrenExpanded);
         }
         updateHeaderTouchability();
     }
@@ -1514,10 +1518,9 @@ public class NotificationChildrenContainer extends ViewGroup
         int color = mContainingNotification.getNotificationColor();
         Resources.Theme theme = new ContextThemeWrapper(mContext,
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
-        try (TypedArray ta = theme.obtainStyledAttributes(
-                new int[]{com.android.internal.R.attr.materialColorPrimary})) {
-            color = ta.getColor(0, color);
-        }
+
+        color = mContext.getColor(com.android.internal.R.color.materialColorPrimary);
+
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber, color);
     }
 

@@ -35,6 +35,8 @@ import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.common.split.SplitState;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.transition.Transitions;
@@ -77,14 +79,16 @@ public class SplitTestUtils {
                 StageTaskListener sideStage, DisplayController displayController,
                 DisplayImeController imeController, DisplayInsetsController insetsController,
                 SplitLayout splitLayout, Transitions transitions, TransactionPool transactionPool,
-                ShellExecutor mainExecutor, Handler mainHandler,
+                ShellExecutor mainExecutor, Handler mainHandler, ShellExecutor bgExecutor,
                 Optional<RecentTasksController> recentTasks,
                 LaunchAdjacentController launchAdjacentController,
-                Optional<WindowDecorViewModel> windowDecorViewModel) {
+                Optional<WindowDecorViewModel> windowDecorViewModel, SplitState splitState,
+                Optional<DesktopTasksController> desktopTasksController) {
             super(context, displayId, syncQueue, taskOrganizer, mainStage,
                     sideStage, displayController, imeController, insetsController, splitLayout,
-                    transitions, transactionPool, mainExecutor, mainHandler, recentTasks,
-                    launchAdjacentController, windowDecorViewModel);
+                    transitions, transactionPool, mainExecutor, mainHandler, bgExecutor,
+                    recentTasks, launchAdjacentController, windowDecorViewModel, splitState,
+                    desktopTasksController);
 
             // Prepare root task for testing.
             mRootTask = new TestRunningTaskInfoBuilder().build();

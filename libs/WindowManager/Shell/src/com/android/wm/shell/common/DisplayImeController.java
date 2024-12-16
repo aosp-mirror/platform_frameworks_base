@@ -228,7 +228,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public class PerDisplay implements DisplayInsetsController.OnInsetsChangedListener {
         final int mDisplayId;
         final InsetsState mInsetsState = new InsetsState();
-        @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         boolean mImeRequestedVisible =
                 (WindowInsets.Type.defaultVisible() & WindowInsets.Type.ime()) != 0;
         InsetsSourceControl mImeSourceControl = null;
@@ -339,6 +338,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             // Make mImeSourceControl point to the new control before starting the animation.
             if (hadImeSourceControl && mImeSourceControl != imeSourceControl) {
                 mImeSourceControl.release(SurfaceControl::release);
+                if (android.view.inputmethod.Flags.refactorInsetsController()
+                        && !hasImeLeash && mAnimation != null) {
+                    // In case of losing the leash, the animation should be cancelled.
+                    mAnimation.cancel();
+                }
             }
             mImeSourceControl = imeSourceControl;
 
@@ -403,8 +407,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
         @Override
         // TODO(b/335404678): pass control target
-        public void setImeInputTargetRequestedVisibility(boolean visible) {
+        public void setImeInputTargetRequestedVisibility(boolean visible,
+                @NonNull ImeTracker.Token statsToken) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_DISPLAY_IME_CONTROLLER_SET_IME_REQUESTED_VISIBLE);
                 mImeRequestedVisible = visible;
                 dispatchImeRequested(mDisplayId, mImeRequestedVisible);
 
@@ -412,23 +419,26 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
-                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */);
+                startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */,
+                        statsToken);
 
-                setVisibleDirectly(mImeRequestedVisible || mAnimation != null);
+                // In case of a hide, the statsToken should not been send yet (as the animation
+                // is still ongoing). It will be sent at the end of the animation
+                boolean hideAnimOngoing = !mImeRequestedVisible && mAnimation != null;
+                setVisibleDirectly(mImeRequestedVisible || mAnimation != null,
+                        hideAnimOngoing ? null : statsToken);
             }
         }
 
         /**
          * Sends the local visibility state back to window manager. Needed for legacy adjustForIme.
          */
-        private void setVisibleDirectly(boolean visible) {
+        private void setVisibleDirectly(boolean visible, @Nullable ImeTracker.Token statsToken) {
             mInsetsState.setSourceVisible(InsetsSource.ID_IME, visible);
-            mRequestedVisibleTypes = visible
-                    ? mRequestedVisibleTypes | WindowInsets.Type.ime()
-                    : mRequestedVisibleTypes & ~WindowInsets.Type.ime();
+            int visibleTypes = visible ? WindowInsets.Type.ime() : 0;
             try {
                 mWmService.updateDisplayWindowRequestedVisibleTypes(mDisplayId,
-                        mRequestedVisibleTypes);
+                        visibleTypes, WindowInsets.Type.ime(), statsToken);
             } catch (RemoteException e) {
             }
         }
@@ -640,7 +650,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         t.hide(animatingLeash);
                         removeImeSurface(mDisplayId);
                         if (android.view.inputmethod.Flags.refactorInsetsController()) {
-                            setVisibleDirectly(false /* visible */);
+                            setVisibleDirectly(false /* visible */, statsToken);
                         }
                         ImeTracker.forLogging().onHidden(mStatsToken);
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
@@ -669,13 +679,13 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (!android.view.inputmethod.Flags.refactorInsetsController() && !show) {
                 // When going away, queue up insets change first, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
-                setVisibleDirectly(false /* visible */);
+                setVisibleDirectly(false /* visible */, null /* statsToken */);
             }
             mAnimation.start();
             if (!android.view.inputmethod.Flags.refactorInsetsController() && show) {
                 // When showing away, queue up insets change last, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
-                setVisibleDirectly(true /* visible */);
+                setVisibleDirectly(true /* visible */, null /* statsToken */);
             }
         }
 

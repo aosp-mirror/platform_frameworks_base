@@ -20,6 +20,7 @@ import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 
 import android.annotation.FlaggedApi;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
@@ -117,14 +118,16 @@ public final class WallpaperDescription implements Parcelable {
     }
 
     /**
-     * @return the title for this wallpaper, with each list element intended to be a separate
-     * line, or {@code null} if not provided
+     * @return the title for this wallpaper, or {@code null} if not provided
      */
     @Nullable public CharSequence getTitle() {
         return mTitle;
     }
 
-    /** @return the description for this wallpaper */
+    /**
+     * @return the description for this wallpaper, with each list element intended to be shown on a
+     * separate line in the UI
+     */
     @NonNull
     public List<CharSequence> getDescription() {
         return mDescription;
@@ -153,6 +156,7 @@ public final class WallpaperDescription implements Parcelable {
      * {@link Builder#setCropHints(SparseArray)}
      * @hide
      */
+    @SystemApi
     @NonNull
     public SparseArray<Rect> getCropHints() {
         return mCropHints;

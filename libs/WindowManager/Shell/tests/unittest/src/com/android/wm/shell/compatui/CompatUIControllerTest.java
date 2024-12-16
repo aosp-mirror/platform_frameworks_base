@@ -30,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -38,9 +39,6 @@ import android.content.res.Configuration;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -51,7 +49,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -61,6 +58,8 @@ import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.api.CompatUIInfo;
+import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -69,7 +68,6 @@ import dagger.Lazy;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -77,24 +75,19 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /**
  * Tests for {@link CompatUIController}.
  *
  * Build/Install/Run:
- *  atest WMShellUnitTests:CompatUIControllerTest
+ * atest WMShellUnitTests:CompatUIControllerTest
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUIControllerTest extends ShellTestCase {
+public class CompatUIControllerTest extends CompatUIShellTestCase {
     private static final int DISPLAY_ID = 0;
     private static final int TASK_ID = 12;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private CompatUIController mController;
     private ShellInit mShellInit;
@@ -130,6 +123,10 @@ public class CompatUIControllerTest extends ShellTestCase {
     private CompatUIShellCommandHandler mCompatUIShellCommandHandler;
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private DesktopUserRepositories mDesktopUserRepositories;
+    @Mock
+    private DesktopRepository mDesktopRepository;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
@@ -137,7 +134,6 @@ public class CompatUIControllerTest extends ShellTestCase {
     @NonNull
     private CompatUIStatusManager mCompatUIStatusManager;
 
-    private boolean mInDesktopModePredicateResult;
 
     @Before
     public void setUp() {
@@ -152,6 +148,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(TASK_ID).when(mMockLetterboxEduLayout).getTaskId();
         doReturn(true).when(mMockLetterboxEduLayout).createLayout(anyBoolean());
         doReturn(true).when(mMockLetterboxEduLayout).updateCompatInfo(any(), any(), anyBoolean());
+        doReturn(mDesktopRepository).when(mDesktopUserRepositories).getCurrent();
+        doReturn(mDesktopRepository).when(mDesktopUserRepositories).getProfile(anyInt());
 
         doReturn(DISPLAY_ID).when(mMockRestartDialogLayout).getDisplayId();
         doReturn(TASK_ID).when(mMockRestartDialogLayout).getTaskId();
@@ -164,7 +162,7 @@ public class CompatUIControllerTest extends ShellTestCase {
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
                 mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
                 mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager,
-                mCompatUIStatusManager, i -> mInDesktopModePredicateResult) {
+                mCompatUIStatusManager, Optional.of(mDesktopUserRepositories)) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -707,13 +705,17 @@ public class CompatUIControllerTest extends ShellTestCase {
     @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     @EnableFlags(Flags.FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE)
     public void testUpdateActiveTaskInfo_removeAllComponentWhenInDesktopModeFlagEnabled() {
-        mInDesktopModePredicateResult = false;
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(0);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController, never()).removeLayouts(taskInfo.taskId);
 
-        mInDesktopModePredicateResult = true;
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(2);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController).removeLayouts(taskInfo.taskId);
     }
 
@@ -721,13 +723,17 @@ public class CompatUIControllerTest extends ShellTestCase {
     @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     @DisableFlags(Flags.FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE)
     public void testUpdateActiveTaskInfo_removeAllComponentWhenInDesktopModeFlagDisabled() {
-        mInDesktopModePredicateResult = false;
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(0);
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController, never()).removeLayouts(taskInfo.taskId);
 
-        mInDesktopModePredicateResult = true;
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(2);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController, never()).removeLayouts(taskInfo.taskId);
     }
 

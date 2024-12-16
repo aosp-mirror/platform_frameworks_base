@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1065,8 +1064,7 @@ public class StackScrollAlgorithm {
                             headsUpTranslation);
                     childState.setYTranslation(inSpaceTranslation + extraTranslation);
                     cyclingInHunHeight = -1;
-                } else
-                if (NotificationsImprovedHunAnimation.isEnabled() && !ambientState.isDozing()) {
+                } else if (!ambientState.isDozing()) {
                     if (shouldHunAppearFromBottom(ambientState, childState)) {
                         // move to the bottom of the screen
                         childState.setYTranslation(

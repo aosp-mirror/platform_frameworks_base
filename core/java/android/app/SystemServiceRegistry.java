@@ -42,8 +42,7 @@ import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.contextualsearch.ContextualSearchManager;
 import android.app.ecm.EnhancedConfirmationFrameworkInitializer;
 import android.app.job.JobSchedulerFrameworkInitializer;
-import android.app.ondeviceintelligence.IOnDeviceIntelligenceManager;
-import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceFrameworkInitializer;
 import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleFrameworkInitializer;
@@ -82,8 +81,6 @@ import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
-import android.content.integrity.AppIntegrityManager;
-import android.content.integrity.IAppIntegrityManager;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayManager;
 import android.content.pm.ApplicationInfo;
@@ -292,6 +289,7 @@ import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 import com.android.internal.util.Preconditions;
 
+import java.time.InstantSource;
 import java.util.Map;
 import java.util.Objects;
 
@@ -628,7 +626,7 @@ public final class SystemServiceRegistry {
                                     com.android.internal.R.style.Theme_Holo_Dialog,
                                     com.android.internal.R.style.Theme_DeviceDefault_Dialog,
                                     com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
-                    ctx.mMainThread.getHandler());
+                    InstantSource.system());
             }});
 
         registerService(Context.PEOPLE_SERVICE, PeopleManager.class,
@@ -1581,16 +1579,6 @@ public final class SystemServiceRegistry {
                         return new AttestationVerificationManager(ctx.getOuterContext(),
                                 IAttestationVerificationManagerService.Stub.asInterface(b));
                     }});
-
-        //CHECKSTYLE:ON IndentationCheck
-        registerService(Context.APP_INTEGRITY_SERVICE, AppIntegrityManager.class,
-                new CachedServiceFetcher<AppIntegrityManager>() {
-                    @Override
-                    public AppIntegrityManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        IBinder b = ServiceManager.getServiceOrThrow(Context.APP_INTEGRITY_SERVICE);
-                        return new AppIntegrityManager(IAppIntegrityManager.Stub.asInterface(b));
-                    }});
         registerService(Context.APP_HIBERNATION_SERVICE, AppHibernationManager.class,
                 new CachedServiceFetcher<AppHibernationManager>() {
                     @Override
@@ -1703,19 +1691,6 @@ public final class SystemServiceRegistry {
                         }
                         throw new ServiceNotFoundException(Context.WEARABLE_SENSING_SERVICE);
                     }});
-
-        registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
-                new CachedServiceFetcher<OnDeviceIntelligenceManager>() {
-                    @Override
-                    public OnDeviceIntelligenceManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        IBinder iBinder = ServiceManager.getServiceOrThrow(
-                                Context.ON_DEVICE_INTELLIGENCE_SERVICE);
-                        IOnDeviceIntelligenceManager manager =
-                                IOnDeviceIntelligenceManager.Stub.asInterface(iBinder);
-                        return new OnDeviceIntelligenceManager(ctx.getOuterContext(), manager);
-                    }
-                });
 
         registerService(Context.GRAMMATICAL_INFLECTION_SERVICE, GrammaticalInflectionManager.class,
                 new CachedServiceFetcher<GrammaticalInflectionManager>() {
@@ -1861,6 +1836,7 @@ public final class SystemServiceRegistry {
             ConnectivityFrameworkInitializerTiramisu.registerServiceWrappers();
             NearbyFrameworkInitializer.registerServiceWrappers();
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
+            OnDeviceIntelligenceFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
             ConnectivityFrameworkInitializerBaklava.registerServiceWrappers();

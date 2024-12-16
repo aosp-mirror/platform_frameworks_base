@@ -416,7 +416,7 @@ public class PreparationCoordinator implements Coordinator {
                 /* showSnooze = */ adjustment.isSnoozeEnabled(),
                 /* isChildInGroup = */ adjustment.isChildInGroup(),
                 /* isGroupSummary = */ adjustment.isGroupSummary(),
-                /* needsRedaction = */ adjustment.getNeedsRedaction()
+                /* needsRedaction = */ adjustment.getRedactionType()
         );
     }
 

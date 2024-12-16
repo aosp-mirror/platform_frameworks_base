@@ -16,6 +16,10 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.platform.test.flag.junit.FlagsParameterization.allCombinationsOf;
+
+import static com.android.systemui.Flags.FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
@@ -29,10 +33,10 @@ import static org.mockito.Mockito.when;
 
 import android.app.Dialog;
 import android.os.Handler;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -46,6 +50,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -63,10 +68,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidJUnit4.class)
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ScreenRecordTileTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+    }
 
     @Mock
     private RecordingController mController;
@@ -101,6 +116,11 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
+
+    public ScreenRecordTileTest(FlagsParameterization flags) {
+        super();
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -266,7 +286,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_on));
     }
 
     @Test
@@ -277,7 +297,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_on));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_on));
     }
 
     @Test
@@ -288,7 +308,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleUpdateState(state, /* arg= */ null);
 
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_off));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.qs_screen_record_icon_off));
     }
 
     @Test
@@ -312,6 +332,14 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         verify(mPermissionDialogPrompt).show();
         verify(mMediaProjectionMetricsLogger)
                 .notifyPermissionRequestDisplayed(mContext.getUserId());
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 
 }

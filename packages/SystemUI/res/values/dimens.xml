@@ -237,6 +237,9 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar (2025 redesign version) -->
+    <dimen name="notification_2025_header_height">@*android:dimen/notification_2025_header_height</dimen>
+
+    <!-- Height of a small notification in the status bar (2025 redesign version) -->
     <dimen name="notification_2025_min_height">@*android:dimen/notification_2025_min_height</dimen>
 
     <!-- Height of a small notification in the status bar-->
@@ -1221,6 +1224,9 @@
     <dimen name="min_window_blur_radius">1px</dimen>
     <dimen name="max_window_blur_radius">23px</dimen>
 
+    <!-- Blur radius behind Notification Shade -->
+    <dimen name="max_shade_window_blur_radius">60dp</dimen>
+
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
 
@@ -1754,6 +1760,7 @@
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing activity chip -->
+    <dimen name="ongoing_activity_chip_max_text_width">74dp</dimen>
     <!-- The activity chip side padding, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
     <!-- The activity chip side padding, used with an icon that has embedded padding (e.g. if the icon comes from the notification's smallIcon field). If the icon has padding, the chip itself can have less padding. -->

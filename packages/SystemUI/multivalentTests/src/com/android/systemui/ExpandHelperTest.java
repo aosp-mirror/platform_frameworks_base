@@ -31,7 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.AnimatorTestRule;
-import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -49,7 +49,7 @@ public class ExpandHelperTest extends SysuiTestCase {
     @Rule
     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule(this);
 
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     private ExpandableNotificationRow mRow;
     private ExpandHelper mExpandHelper;
     private ExpandHelper.Callback mCallback;

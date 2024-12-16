@@ -55,6 +55,7 @@ import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.InsetsController;
 import android.view.InsetsSource;
@@ -111,11 +112,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private static final int FLING_EXIT_DURATION = 450;
     private static final int FLING_OFFSCREEN_DURATION = 500;
 
-    /** A split ratio used on larger screens, where we can fit both apps onscreen. */
-    public static final float ONSCREEN_ONLY_ASYMMETRIC_RATIO = 0.33f;
-    /** A split ratio used on smaller screens, where we place one app mostly offscreen. */
-    public static final float OFFSCREEN_ASYMMETRIC_RATIO = 0.1f;
-
     // Here are some (arbitrarily decided) layer definitions used during animations to make sure the
     // layers stay in order. (During transitions, everything is reparented onto a transition root
     // and can be freely relayered.)
@@ -141,6 +137,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             new PathInterpolator(0.45f, 0f, 0.5f, 1f);
     @ShellMainThread
     private final Handler mHandler;
+
+    /** Singleton source of truth for the current state of split screen on this device. */
+    private final SplitState mSplitState;
 
     private int mDividerWindowWidth;
     private int mDividerInsets;
@@ -204,7 +203,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
             DisplayController displayController, DisplayImeController displayImeController,
-            ShellTaskOrganizer taskOrganizer, int parallaxType, @ShellMainThread Handler handler) {
+            ShellTaskOrganizer taskOrganizer, int parallaxType, SplitState splitState,
+            @ShellMainThread Handler handler) {
         mHandler = handler;
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
@@ -220,6 +220,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
         mSurfaceEffectPolicy = new ResizingEffectPolicy(parallaxType);
+        mSplitState = splitState;
 
         final Resources res = mContext.getResources();
         mDimNonImeSide = res.getBoolean(R.bool.config_dimNonImeAttachedSide);
@@ -230,7 +231,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         updateDividerConfig(mContext);
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        updateLayouts();
         mInteractionJankMonitor = InteractionJankMonitor.getInstance();
         resetDividerPosition();
         updateInvisibleRect();
@@ -381,6 +382,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mDividerSnapAlgorithm.calculateNearestSnapPosition(mDividerPosition);
     }
 
+    /** Updates the {@link SplitState} using the current divider position. */
+    public void updateStateWithCurrentPosition() {
+        mSplitState.set(calculateCurrentSnapPosition());
+    }
+
     /**
      * Returns the divider position as a fraction from 0 to 1.
      */
@@ -413,7 +419,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             removeTouchZones();
         }
 
-        int currentPosition = calculateCurrentSnapPosition();
+        int currentPosition = mSplitState.get();
+        // TODO (b/349828130): Can delete this warning after brief soak time.
+        if (currentPosition != calculateCurrentSnapPosition()) {
+            Log.wtf(TAG, "SplitState is " + mSplitState.get()
+                    + ", expected " + calculateCurrentSnapPosition());
+        }
+
         switch (currentPosition) {
             case SNAP_TO_2_10_90:
             case SNAP_TO_3_10_45_45:
@@ -473,7 +485,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mIsLargeScreen = configuration.smallestScreenWidthDp >= 600;
         mIsLeftRightSplit = SplitScreenUtils.isLeftRightSplit(mAllowLeftRightSplitInPortrait,
                 configuration);
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        updateLayouts();
         updateDividerConfig(mContext);
         initDividerPosition(mTempRect, wasLeftRightSplit);
         updateInvisibleRect();
@@ -501,7 +513,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRootBounds.set(tmpRect);
         mIsLeftRightSplit = SplitScreenUtils.isLeftRightSplit(mAllowLeftRightSplitInPortrait,
                 mIsLargeScreen, mRootBounds.width() >= mRootBounds.height());
-        mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+        updateLayouts();
         initDividerPosition(mTempRect, wasLeftRightSplit);
     }
 
@@ -635,7 +647,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         if (!mPinnedTaskbarInsets.equals(pinnedTaskbarInsets)) {
             mPinnedTaskbarInsets = pinnedTaskbarInsets;
             // Refresh the DividerSnapAlgorithm.
-            mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
+            updateLayouts();
             // If the divider is no longer placed on a snap point, animate it to the nearest one.
             DividerSnapAlgorithm.SnapTarget snapTarget =
                     findSnapTarget(mDividerPosition, 0, false /* hardDismiss */);
@@ -764,7 +776,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 break;
             default:
                 flingDividerPosition(currentPosition, snapTarget.position, duration, interpolator,
-                        () -> setDividerPosition(snapTarget.position, true /* applyLayoutChange */));
+                        () -> {
+                            setDividerPosition(snapTarget.position, true /* applyLayoutChange */);
+                            mSplitState.set(snapTarget.snapPosition);
+                        });
                 break;
         }
     }
@@ -779,6 +794,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     void onStartDragging() {
+        // This triggers initialization of things like the resize veil in preparation for
+        // showing it when the user moves the divider past the slop
+        updateDividerBounds(getDividerPosition(), false /* shouldUseParallaxEffect */);
+
         mInteractionJankMonitor.begin(getDividerLeash(), mContext, mHandler,
                 CUJ_SPLIT_SCREEN_RESIZE);
     }
@@ -804,8 +823,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
-    private DividerSnapAlgorithm getSnapAlgorithm(Context context, Rect rootBounds) {
-        final Rect insets = getDisplayStableInsets(context);
+    /**
+     * (Re)calculates the split screen logic for this particular display/orientation. Refreshes the
+     * DividerSnapAlgorithm, which controls divider snap points, and populates a map in SplitState
+     * with bounds for all valid split layouts.
+     */
+    private void updateLayouts() {
+        // Update SplitState map
+
+        if (Flags.enableFlexibleTwoAppSplit()) {
+            mSplitState.populateLayouts(
+                    mRootBounds, mDividerSize, mIsLeftRightSplit, mPinnedTaskbarInsets.toRect());
+        }
+
+        // Get new DividerSnapAlgorithm
+
+        final Rect insets = getDisplayStableInsets(mContext);
 
         // Make split axis insets value same as the larger one to avoid bounds1 and bounds2
         // have difference for avoiding size-compat mode when switching unresizable apps in
@@ -815,10 +848,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             insets.set(insets.left, largerInsets, insets.right, largerInsets);
         }
 
-        return new DividerSnapAlgorithm(
-                context.getResources(),
-                rootBounds.width(),
-                rootBounds.height(),
+        mDividerSnapAlgorithm = new DividerSnapAlgorithm(
+                mContext.getResources(),
+                mRootBounds.width(),
+                mRootBounds.height(),
                 mDividerSize,
                 mIsLeftRightSplit,
                 insets,
@@ -836,10 +869,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Fling divider from current position to center position. */
     public void flingDividerToCenter(@Nullable Runnable finishCallback) {
-        final int pos = mDividerSnapAlgorithm.getMiddleTarget().position;
+        final SnapTarget target = mDividerSnapAlgorithm.getMiddleTarget();
+        final int pos = target.position;
         flingDividerPosition(getDividerPosition(), pos, FLING_ENTER_DURATION, FAST_OUT_SLOW_IN,
                 () -> {
                     setDividerPosition(pos, true /* applyLayoutChange */);
+                    mSplitState.set(target.snapPosition);
                     if (finishCallback != null) {
                         finishCallback.run();
                     }
@@ -1538,7 +1573,9 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             final int imeTargetPosition = getImeTargetPosition();
             mHasImeFocus = imeTargetPosition != SPLIT_POSITION_UNDEFINED;
             if (!mHasImeFocus) {
-                return 0;
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || showing) {
+                    return 0;
+                }
             }
 
             mStartImeTop = showing ? hiddenTop : shownTop;
@@ -1591,7 +1628,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
         @Override
         public void onImePositionChanged(int displayId, int imeTop, SurfaceControl.Transaction t) {
-            if (displayId != mDisplayId || !mHasImeFocus) return;
+            if (displayId != mDisplayId || !mHasImeFocus) {
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || mImeShown) {
+                    return;
+                }
+            }
             onProgress(getProgress(imeTop));
             mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
         }
@@ -1599,7 +1640,12 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         @Override
         public void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {
-            if (displayId != mDisplayId || !mHasImeFocus || cancel) return;
+            if (displayId != mDisplayId || cancel) return;
+            if (!mHasImeFocus) {
+                if (!android.view.inputmethod.Flags.refactorInsetsController() || mImeShown) {
+                    return;
+                }
+            }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "Split IME animation ending, canceled=%b", cancel);
             onProgress(1.0f);

@@ -61,7 +61,7 @@ public class MetricsLoggerWrapper {
             return;
         }
         int pid = Process.myPid();
-        String processName = Application.getProcessName();
+        String processName = Process.myProcessName();
         Collection<NativeAllocationRegistry.Metrics> metrics =
             NativeAllocationRegistry.getMetrics();
         int nMetrics = metrics.size();

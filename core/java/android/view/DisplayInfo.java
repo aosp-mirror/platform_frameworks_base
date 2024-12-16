@@ -361,6 +361,12 @@ public final class DisplayInfo implements Parcelable {
     public float brightnessDefault;
 
     /**
+     * The current dim brightness of the display. Value between 0.0 and 1.0,
+     * derived from the configuration of the display device of this logical display.
+     */
+    public float brightnessDim;
+
+    /**
      * The {@link RoundedCorners} if present, otherwise {@code null}.
      */
     @Nullable
@@ -401,6 +407,15 @@ public final class DisplayInfo implements Parcelable {
      */
     @Nullable
     public String thermalBrightnessThrottlingDataId;
+
+    /**
+     * Indicates whether the display is eligible for hosting tasks.
+     *
+     * For example, if the display is used for mirroring, this will be {@code false}.
+     *
+     * @hide
+     */
+    public boolean canHostTasks;
 
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
@@ -479,6 +494,7 @@ public final class DisplayInfo implements Parcelable {
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
+                && brightnessDim == other.brightnessDim
                 && Objects.equals(roundedCorners, other.roundedCorners)
                 && installOrientation == other.installOrientation
                 && Objects.equals(displayShape, other.displayShape)
@@ -486,7 +502,8 @@ public final class DisplayInfo implements Parcelable {
                 && BrightnessSynchronizer.floatEquals(hdrSdrRatio, other.hdrSdrRatio)
                 && thermalRefreshRateThrottling.contentEquals(other.thermalRefreshRateThrottling)
                 && Objects.equals(
-                thermalBrightnessThrottlingDataId, other.thermalBrightnessThrottlingDataId);
+                thermalBrightnessThrottlingDataId, other.thermalBrightnessThrottlingDataId)
+                && canHostTasks == other.canHostTasks;
     }
 
     @Override
@@ -546,6 +563,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        brightnessDim = other.brightnessDim;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
         displayShape = other.displayShape;
@@ -553,6 +571,7 @@ public final class DisplayInfo implements Parcelable {
         hdrSdrRatio = other.hdrSdrRatio;
         thermalRefreshRateThrottling = other.thermalRefreshRateThrottling;
         thermalBrightnessThrottlingDataId = other.thermalBrightnessThrottlingDataId;
+        canHostTasks = other.canHostTasks;
     }
 
     public void readFromParcel(Parcel source) {
@@ -620,6 +639,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         brightnessDefault = source.readFloat();
+        brightnessDim = source.readFloat();
         roundedCorners = source.readTypedObject(RoundedCorners.CREATOR);
         int numUserDisabledFormats = source.readInt();
         userDisabledHdrTypes = new int[numUserDisabledFormats];
@@ -633,6 +653,7 @@ public final class DisplayInfo implements Parcelable {
         thermalRefreshRateThrottling = source.readSparseArray(null,
                 SurfaceControl.RefreshRateRange.class);
         thermalBrightnessThrottlingDataId = source.readString8();
+        canHostTasks = source.readBoolean();
     }
 
     @Override
@@ -696,6 +717,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeFloat(brightnessDefault);
+        dest.writeFloat(brightnessDim);
         dest.writeTypedObject(roundedCorners, flags);
         dest.writeInt(userDisabledHdrTypes.length);
         for (int i = 0; i < userDisabledHdrTypes.length; i++) {
@@ -707,6 +729,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(hdrSdrRatio);
         dest.writeSparseArray(thermalRefreshRateThrottling);
         dest.writeString8(thermalBrightnessThrottlingDataId);
+        dest.writeBoolean(canHostTasks);
     }
 
     @Override
@@ -994,6 +1017,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(brightnessMaximum);
         sb.append(", brightnessDefault ");
         sb.append(brightnessDefault);
+        sb.append(", brightnessDim ");
+        sb.append(brightnessDim);
         sb.append(", installOrientation ");
         sb.append(Surface.rotationToString(installOrientation));
         sb.append(", layoutLimitedRefreshRate ");
@@ -1008,6 +1033,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(thermalRefreshRateThrottling);
         sb.append(", thermalBrightnessThrottlingDataId ");
         sb.append(thermalBrightnessThrottlingDataId);
+        sb.append(", canHostTasks ");
+        sb.append(canHostTasks);
         sb.append("}");
         return sb.toString();
     }

@@ -16,17 +16,20 @@
 
 package com.android.systemui.shade.data.repository
 
+import android.provider.Settings.Global.DEVELOPMENT_SHADE_DISPLAY_AWARENESS
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.display.data.repository.displayRepository
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shade.display.ShadeDisplayPolicy
-import com.android.systemui.shade.display.SpecificDisplayIdPolicy
+import com.android.systemui.shade.display.AnyExternalShadeDisplayPolicy
+import com.android.systemui.shade.display.DefaultDisplayShadePolicy
+import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
 import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,54 +39,72 @@ import org.junit.runner.RunWith
 class ShadeDisplaysRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val defaultPolicy = SpecificDisplayIdPolicy(0)
+    private val globalSettings = kosmos.fakeGlobalSettings
+    private val displayRepository = kosmos.displayRepository
+    private val defaultPolicy = DefaultDisplayShadePolicy()
+    private val policies = kosmos.shadeDisplayPolicies
 
-    private val shadeDisplaysRepository =
-        ShadeDisplaysRepositoryImpl(defaultPolicy, testScope.backgroundScope)
+    private val underTest =
+        ShadeDisplaysRepositoryImpl(
+            globalSettings,
+            defaultPolicy,
+            testScope.backgroundScope,
+            policies,
+        )
 
     @Test
     fun policy_changing_propagatedFromTheLatestPolicy() =
         testScope.runTest {
-            val displayIds by collectValues(shadeDisplaysRepository.displayId)
-            val policy1 = MutablePolicy()
-            val policy2 = MutablePolicy()
+            val displayIds by collectValues(underTest.displayId)
 
             assertThat(displayIds).containsExactly(0)
 
-            shadeDisplaysRepository.policy.value = policy1
+            globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "any_external_display")
 
-            policy1.sendDisplayId(1)
+            displayRepository.addDisplay(displayId = 1)
 
             assertThat(displayIds).containsExactly(0, 1)
 
-            policy1.sendDisplayId(2)
+            displayRepository.addDisplay(displayId = 2)
+
+            assertThat(displayIds).containsExactly(0, 1)
+
+            displayRepository.removeDisplay(displayId = 1)
 
             assertThat(displayIds).containsExactly(0, 1, 2)
 
-            shadeDisplaysRepository.policy.value = policy2
+            globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "default_display")
 
             assertThat(displayIds).containsExactly(0, 1, 2, 0)
-
-            policy1.sendDisplayId(4)
-
-            // Changes to the first policy don't affect the output now
-            assertThat(displayIds).containsExactly(0, 1, 2, 0)
-
-            policy2.sendDisplayId(5)
-
-            assertThat(displayIds).containsExactly(0, 1, 2, 0, 5)
         }
 
-    private class MutablePolicy : ShadeDisplayPolicy {
-        fun sendDisplayId(id: Int) {
-            _displayId.value = id
+    @Test
+    fun policy_updatesBasedOnSettingValue_defaultDisplay() =
+        testScope.runTest {
+            val policy by collectLastValue(underTest.policy)
+
+            globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "default_display")
+
+            assertThat(policy).isInstanceOf(DefaultDisplayShadePolicy::class.java)
         }
 
-        private val _displayId = MutableStateFlow(0)
-        override val name: String
-            get() = "mutable_policy"
+    @Test
+    fun policy_updatesBasedOnSettingValue_anyExternal() =
+        testScope.runTest {
+            val policy by collectLastValue(underTest.policy)
 
-        override val displayId: StateFlow<Int>
-            get() = _displayId
-    }
+            globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "any_external_display")
+
+            assertThat(policy).isInstanceOf(AnyExternalShadeDisplayPolicy::class.java)
+        }
+
+    @Test
+    fun policy_updatesBasedOnSettingValue_focusBased() =
+        testScope.runTest {
+            val policy by collectLastValue(underTest.policy)
+
+            globalSettings.putString(DEVELOPMENT_SHADE_DISPLAY_AWARENESS, "status_bar_latest_touch")
+
+            assertThat(policy).isInstanceOf(StatusBarTouchShadeDisplayPolicy::class.java)
+        }
 }

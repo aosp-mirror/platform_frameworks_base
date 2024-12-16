@@ -63,6 +63,7 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R as SysuiR
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
@@ -95,9 +96,10 @@ constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    // TODO b/362719719 - We should use the configuration controller associated with the display.
     private val configurationController: ConfigurationController,
     @DisplaySpecific private val resources: Resources,
-    private val context: Context,
+    @DisplaySpecific val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
     private val clockBuffers: ClockMessageBuffers,
@@ -465,6 +467,15 @@ constructor(
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         zenModeController.addCallback(zenModeCallback)
+        if (SceneContainerFlag.isEnabled) {
+            handleDoze(
+                when (AOD) {
+                    keyguardTransitionInteractor.getCurrentState() -> 1f
+                    keyguardTransitionInteractor.getStartedState() -> 1f
+                    else -> 0f
+                }
+            )
+        }
         disposableHandle =
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {

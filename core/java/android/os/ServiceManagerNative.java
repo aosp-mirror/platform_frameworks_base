@@ -50,7 +50,8 @@ public final class ServiceManagerNative {
 class ServiceManagerProxy implements IServiceManager {
     public ServiceManagerProxy(IBinder remote) {
         mRemote = remote;
-        mServiceManager = IServiceManager.Stub.asInterface(this.getNativeServiceManager());
+        mServiceManager = IServiceManager.Stub.asInterface(
+            Binder.allowBlocking(this.getNativeServiceManager()));
     }
 
     public IBinder asBinder() {
@@ -61,7 +62,7 @@ class ServiceManagerProxy implements IServiceManager {
     @UnsupportedAppUsage
     public IBinder getService(String name) throws RemoteException {
         // Same as checkService (old versions of servicemanager had both methods).
-        return checkService(name).getBinder();
+        return checkService(name).getServiceWithMetadata().service;
     }
 
     public Service getService2(String name) throws RemoteException {

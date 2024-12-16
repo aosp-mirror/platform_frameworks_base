@@ -26,9 +26,10 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 
 import java.util.List;
 
+/** translate the matrix command */
 public class MatrixTranslate extends DrawBase2 {
-    public static final int OP_CODE = Operations.MATRIX_TRANSLATE;
-    public static final String CLASS_NAME = "MatrixTranslate";
+    private static final int OP_CODE = Operations.MATRIX_TRANSLATE;
+    private static final String CLASS_NAME = "MatrixTranslate";
 
     /**
      * Read this operation and add it to the list of operations
@@ -50,6 +51,11 @@ public class MatrixTranslate extends DrawBase2 {
         return OP_CODE;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     @NonNull
     public static String name() {
         return CLASS_NAME;

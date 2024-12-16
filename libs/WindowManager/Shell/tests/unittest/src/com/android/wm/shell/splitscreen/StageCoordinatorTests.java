@@ -71,6 +71,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -116,6 +117,10 @@ public class StageCoordinatorTests extends ShellTestCase {
     private LaunchAdjacentController mLaunchAdjacentController;
     @Mock
     private DefaultMixedHandler mDefaultMixedHandler;
+    @Mock
+    private SplitState mSplitState;
+    @Mock
+    private ShellExecutor mBgExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -138,7 +143,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
-                mMainExecutor, mMainHandler, Optional.empty(), mLaunchAdjacentController,
+                mMainExecutor, mMainHandler, mBgExecutor, Optional.empty(),
+                mLaunchAdjacentController, Optional.empty(), mSplitState,
                 Optional.empty()));
         mDividerLeash = new SurfaceControl.Builder().setName("fakeDivider").build();
 

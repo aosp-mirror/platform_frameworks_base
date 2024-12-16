@@ -75,8 +75,8 @@ public class AmbientStatusBarView extends ConstraintLayout {
     private ShadowInfo mAmbientShadowInfo;
     private int mDrawableSize;
     private int mDrawableInsetSize;
-    private static final float KEY_SHADOW_ALPHA = 0.35f;
-    private static final float AMBIENT_SHADOW_ALPHA = 0.4f;
+    private static final float KEY_SHADOW_ALPHA = 0.8f;
+    private static final float AMBIENT_SHADOW_ALPHA = 0.6f;
 
     public AmbientStatusBarView(Context context) {
         this(context, null);
@@ -162,11 +162,12 @@ public class AmbientStatusBarView extends ConstraintLayout {
 
     void showIcon(@StatusIconType int iconType, boolean show, @Nullable String contentDescription) {
         View icon = mStatusIcons.get(iconType);
-        if (icon == null) {
-            return;
-        }
+        if (icon == null) return;
+
         if (show && contentDescription != null) {
             icon.setContentDescription(contentDescription);
+            icon.setFocusable(true);
+            icon.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         }
         icon.setVisibility(show ? View.VISIBLE : View.GONE);
         mSystemStatusViewGroup.setVisibility(areAnyStatusIconsVisible() ? View.VISIBLE : View.GONE);
@@ -174,9 +175,12 @@ public class AmbientStatusBarView extends ConstraintLayout {
 
     void setExtraStatusBarItemViews(List<View> views) {
         removeAllExtraStatusBarItemViews();
-        views.forEach(view -> mExtraSystemStatusViewGroup.addView(view));
+        views.forEach(view -> {
+            view.setFocusable(true);
+            view.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            mExtraSystemStatusViewGroup.addView(view);
+        });
     }
-
     private View fetchStatusIconForResId(int resId) {
         final View statusIcon = findViewById(resId);
         return Objects.requireNonNull(statusIcon);

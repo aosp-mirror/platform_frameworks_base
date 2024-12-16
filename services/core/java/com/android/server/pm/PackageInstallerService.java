@@ -2329,6 +2329,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                             }
                         }
 
+                        if (Flags.sdkDependencyInstaller()) {
+                            mInstallDependencyHelper.notifySessionComplete(session.sessionId);
+                        }
+
                         final File appIconFile = buildAppIconFile(session.sessionId);
                         if (appIconFile.exists()) {
                             appIconFile.delete();

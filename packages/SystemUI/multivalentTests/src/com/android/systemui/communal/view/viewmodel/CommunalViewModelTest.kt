@@ -18,12 +18,16 @@ package com.android.systemui.communal.view.viewmodel
 
 import android.content.ComponentName
 import android.content.pm.UserInfo
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
@@ -99,6 +103,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -167,7 +172,6 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.testDispatcher,
             testScope,
             kosmos.testScope.backgroundScope,
-            context.resources,
             kosmos.keyguardTransitionInteractor,
             kosmos.keyguardInteractor,
             mock<KeyguardIndicationController>(),
@@ -248,7 +252,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoingContent_umoAndOneTimer_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -280,11 +286,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(timer).isInstanceOf(CommunalContentModel.Smartspace::class.java)
             assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
 
-            assertThat(timer?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(umo?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(timer?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoingContent_umoAndTwoTimers_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -324,9 +332,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
 
             // One full-sized timer and a half-sized timer and half-sized UMO.
-            assertThat(timer1?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(timer2?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(umo?.size).isEqualTo(CommunalContentSize.FULL)
+            assertThat(timer1?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(timer2?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FixedSize.FULL)
         }
 
     @Test
@@ -436,6 +444,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
     fun customizeWidgetButton_showsThenHidesAfterTimeout() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -449,6 +458,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
     fun customizeWidgetButton_onDismiss_hidesImmediately() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -459,6 +469,14 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             underTest.onHidePopup()
             assertThat(currentPopup).isNull()
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
+    fun longClickDirectlyStartsEditMode() =
+        testScope.runTest {
+            underTest.onLongClick()
+            verify(communalInteractor).showWidgetEditor(any())
         }
 
     @Test
@@ -891,7 +909,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_RESPONSIVE_GRID)
+                .andSceneContainer()
         }
     }
 }

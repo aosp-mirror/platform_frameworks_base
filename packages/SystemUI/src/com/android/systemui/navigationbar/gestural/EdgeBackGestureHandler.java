@@ -26,6 +26,7 @@ import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.isEdgeResizePermitted;
 
 import static java.util.stream.Collectors.joining;
 
@@ -68,6 +69,7 @@ import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.window.BackEvent;
 
 import androidx.annotation.DimenRes;
@@ -585,6 +587,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mNonLinearFactor = getDimenFloat(res,
                 com.android.internal.R.dimen.back_progress_non_linear_factor);
         updateBackAnimationThresholds();
+        mBackgroundExecutor.execute(this::disableNavBarVirtualKeyHapticFeedback);
     }
 
     private float getDimenFloat(Resources res, @DimenRes int resId) {
@@ -963,11 +966,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         return mDesktopModeExcludeRegion.contains(x, y);
     }
 
-    private boolean isWithinTouchRegion(int x, int y) {
+    private boolean isWithinTouchRegion(MotionEvent ev) {
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
+        int x = (int) ev.getX();
+        int y = (int) ev.getY();
         final boolean isInsidePip = mIsInPip && mPipExcludedBounds.contains(x, y);
-        final boolean isInDesktopExcludeRegion = desktopExcludeRegionContains(x, y);
+        final boolean isInDesktopExcludeRegion = desktopExcludeRegionContains(x, y)
+                && isEdgeResizePermitted(ev);
         if (isInsidePip || isInDesktopExcludeRegion
                 || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
@@ -1096,8 +1102,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         && isValidTrackpadBackGesture(true /* isTrackpadEvent */);
             } else {
                 mAllowGesture = isBackAllowedCommon && !mUsingThreeButtonNav && isWithinInsets
-                        && isWithinTouchRegion((int) ev.getX(), (int) ev.getY())
-                        && !isButtonPressFromTrackpad(ev);
+                        && isWithinTouchRegion(ev) && !isButtonPressFromTrackpad(ev);
             }
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
@@ -1284,6 +1289,15 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mRightInset = rightInset;
         if (mEdgeBackPlugin != null) {
             mEdgeBackPlugin.setInsets(leftInset, rightInset);
+        }
+    }
+
+    private void disableNavBarVirtualKeyHapticFeedback() {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .setNavBarVirtualKeyHapticFeedbackEnabled(false);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to disable navigation bar button haptics: ", e);
         }
     }
 

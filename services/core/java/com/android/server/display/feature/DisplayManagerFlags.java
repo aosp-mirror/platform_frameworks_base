@@ -46,10 +46,6 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT,
             Flags::enableConnectedDisplayManagement);
 
-    private final FlagState mNbmControllerFlagState = new FlagState(
-            Flags.FLAG_ENABLE_NBM_CONTROLLER,
-            Flags::enableNbmController);
-
     private final FlagState mHdrClamperFlagState = new FlagState(
             Flags.FLAG_ENABLE_HDR_CLAMPER,
             Flags::enableHdrClamper);
@@ -92,6 +88,10 @@ public class DisplayManagerFlags {
     private final FlagState mSmallAreaDetectionFlagState = new FlagState(
             com.android.graphics.surfaceflinger.flags.Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
             com.android.graphics.surfaceflinger.flags.Flags::enableSmallAreaDetection);
+
+    private final FlagState mDisplayConfigErrorHalFlagState = new FlagState(
+            com.android.graphics.surfaceflinger.flags.Flags.FLAG_DISPLAY_CONFIG_ERROR_HAL,
+            com.android.graphics.surfaceflinger.flags.Flags::displayConfigErrorHal);
 
     private final FlagState mBrightnessIntRangeUserPerceptionFlagState = new FlagState(
             Flags.FLAG_BRIGHTNESS_INT_RANGE_USER_PERCEPTION,
@@ -256,6 +256,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_DISPLAY_LISTENER_PERFORMANCE_IMPROVEMENTS,
             Flags::displayListenerPerformanceImprovements
     );
+    private final FlagState mEnableDisplayContentModeManagementFlagState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAY_CONTENT_MODE_MANAGEMENT,
+            Flags::enableDisplayContentModeManagement
+    );
 
     private final FlagState mSubscribeGranularDisplayEvents = new FlagState(
             Flags.FLAG_SUBSCRIBE_GRANULAR_DISPLAY_EVENTS,
@@ -272,11 +276,6 @@ public class DisplayManagerFlags {
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
-    }
-
-    /** Returns whether NBM Controller is enabled or not. */
-    public boolean isNbmControllerEnabled() {
-        return mNbmControllerFlagState.isEnabled();
     }
 
     /** Returns whether hdr clamper is enabled on not. */
@@ -355,6 +354,10 @@ public class DisplayManagerFlags {
 
     public boolean isSmallAreaDetectionEnabled() {
         return mSmallAreaDetectionFlagState.isEnabled();
+    }
+
+    public boolean isDisplayConfigErrorHalEnabled() {
+        return mDisplayConfigErrorHalFlagState.isEnabled();
     }
 
     public boolean isBrightnessIntRangeUserPerceptionEnabled() {
@@ -556,6 +559,10 @@ public class DisplayManagerFlags {
         return mDisplayListenerPerformanceImprovementsFlagState.isEnabled();
     }
 
+    public boolean isDisplayContentModeManagementEnabled() {
+        return mEnableDisplayContentModeManagementFlagState.isEnabled();
+    }
+
     /**
      * @return {@code true} if the flag for subscribing to granular display events is enabled
      */
@@ -579,10 +586,10 @@ public class DisplayManagerFlags {
         pw.println(" " + mExternalDisplayLimitModeState);
         pw.println(" " + mDisplayTopology);
         pw.println(" " + mHdrClamperFlagState);
-        pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mEvenDimmerFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
+        pw.println(" " + mDisplayConfigErrorHalFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mRestrictDisplayModes);
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
@@ -618,6 +625,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mEnablePluginManagerFlagState);
         pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
         pw.println(" " + mSubscribeGranularDisplayEvents);
+        pw.println(" " + mEnableDisplayContentModeManagementFlagState);
     }
 
     private static class FlagState {

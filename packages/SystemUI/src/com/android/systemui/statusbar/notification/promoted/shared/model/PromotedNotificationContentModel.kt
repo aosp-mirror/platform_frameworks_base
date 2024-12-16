@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.promoted.shared.model
 
 import android.annotation.DrawableRes
 import android.graphics.drawable.Icon
+import androidx.annotation.ColorInt
 import com.android.internal.widget.NotificationProgressModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
@@ -33,12 +34,18 @@ data class PromotedNotificationContentModel(
     val skeletonSmallIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
     val appName: CharSequence?,
     val subText: CharSequence?,
+    val shortCriticalText: String?,
+    /**
+     * The timestamp associated with the notification. Null if the timestamp should not be
+     * displayed.
+     */
     val time: When?,
     val lastAudiblyAlertedMs: Long,
     @DrawableRes val profileBadgeResId: Int?,
     val title: CharSequence?,
     val text: CharSequence?,
     val skeletonLargeIcon: Icon?, // TODO(b/377568176): Make into an IconModel.
+    val colors: Colors,
     val style: Style,
 
     // for CallStyle:
@@ -55,12 +62,14 @@ data class PromotedNotificationContentModel(
         var appName: CharSequence? = null
         var subText: CharSequence? = null
         var time: When? = null
+        var shortCriticalText: String? = null
         var lastAudiblyAlertedMs: Long = 0L
         @DrawableRes var profileBadgeResId: Int? = null
         var title: CharSequence? = null
         var text: CharSequence? = null
         var skeletonLargeIcon: Icon? = null
         var style: Style = Style.Ineligible
+        var colors: Colors = Colors(backgroundColor = 0, primaryTextColor = 0)
 
         // for CallStyle:
         var personIcon: Icon? = null
@@ -77,12 +86,14 @@ data class PromotedNotificationContentModel(
                 skeletonSmallIcon = skeletonSmallIcon,
                 appName = appName,
                 subText = subText,
+                shortCriticalText = shortCriticalText,
                 time = time,
                 lastAudiblyAlertedMs = lastAudiblyAlertedMs,
                 profileBadgeResId = profileBadgeResId,
                 title = title,
                 text = text,
                 skeletonLargeIcon = skeletonLargeIcon,
+                colors = colors,
                 style = style,
                 personIcon = personIcon,
                 personName = personName,
@@ -96,11 +107,17 @@ data class PromotedNotificationContentModel(
     data class When(val time: Long, val mode: Mode) {
         /** The mode used to display a notification's `when` value. */
         enum class Mode {
-            Absolute,
+            /** No custom mode requested by the notification. */
+            BasicTime,
+            /** Show the notification's time as a chronometer that counts down to [time]. */
             CountDown,
+            /** Show the notification's time as a chronometer that counts up from [time]. */
             CountUp,
         }
     }
+
+    /** The colors used to display the notification. */
+    data class Colors(@ColorInt val backgroundColor: Int, @ColorInt val primaryTextColor: Int)
 
     /** The promotion-eligible style of a notification, or [Style.Ineligible] if not. */
     enum class Style {
