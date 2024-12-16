@@ -38,6 +38,7 @@ import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialS
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.RECENT_APPS_GESTURE
@@ -51,6 +52,7 @@ constructor(
     private val viewModelFactory: TouchpadTutorialViewModel.Factory,
     private val logger: InputDeviceTutorialLogger,
     private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
+    private val backGestureViewModel: BackGestureScreenViewModel,
 ) : ComponentActivity() {
 
     private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
@@ -60,7 +62,9 @@ constructor(
         enableEdgeToEdge()
         setTitle(getString(R.string.launch_touchpad_tutorial_notification_content))
         setContent {
-            PlatformTheme { TouchpadTutorialScreen(vm, closeTutorial = ::finishTutorial) }
+            PlatformTheme {
+                TouchpadTutorialScreen(vm, backGestureViewModel, closeTutorial = ::finishTutorial)
+            }
         }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
@@ -85,7 +89,11 @@ constructor(
 }
 
 @Composable
-fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> Unit) {
+fun TouchpadTutorialScreen(
+    vm: TouchpadTutorialViewModel,
+    backGestureViewModel: BackGestureScreenViewModel,
+    closeTutorial: () -> Unit,
+) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
     var lastSelectedScreen by remember { mutableStateOf(TUTORIAL_SELECTION) }
     when (activeScreen) {
@@ -108,6 +116,7 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
             )
         BACK_GESTURE ->
             BackGestureTutorialScreen(
+                backGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )

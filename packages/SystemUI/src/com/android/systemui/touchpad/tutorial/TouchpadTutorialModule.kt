@@ -28,6 +28,7 @@ import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGestures
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -45,8 +46,10 @@ interface TouchpadTutorialModule {
 
     companion object {
         @Provides
-        fun touchpadScreensProvider(): TouchpadTutorialScreensProvider {
-            return ScreensProvider
+        fun touchpadScreensProvider(
+            backGestureScreenViewModel: BackGestureScreenViewModel
+        ): TouchpadTutorialScreensProvider {
+            return ScreensProvider(backGestureScreenViewModel)
         }
 
         @SysUISingleton
@@ -62,10 +65,11 @@ interface TouchpadTutorialModule {
     }
 }
 
-private object ScreensProvider : TouchpadTutorialScreensProvider {
+private class ScreensProvider(val backGestureScreenViewModel: BackGestureScreenViewModel) :
+    TouchpadTutorialScreensProvider {
     @Composable
     override fun BackGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        BackGestureTutorialScreen(onDoneButtonClicked, onBack)
+        BackGestureTutorialScreen(backGestureScreenViewModel, onDoneButtonClicked, onBack)
     }
 
     @Composable

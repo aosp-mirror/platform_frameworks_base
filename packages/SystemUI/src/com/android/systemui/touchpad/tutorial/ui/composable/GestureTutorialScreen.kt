@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import android.view.MotionEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RawRes
 import androidx.compose.animation.core.Animatable
@@ -111,10 +112,37 @@ fun GestureTutorialScreen(
     val gestureHandler =
         remember(gestureRecognizer) { TouchpadGestureHandler(gestureRecognizer, easterEggMonitor) }
     TouchpadGesturesHandlingBox(
-        gestureHandler,
+        { gestureHandler.onMotionEvent(it) },
         gestureState,
         easterEggTriggered,
-        resetEasterEggFlag = { easterEggTriggered = false },
+        onEasterEggFinished = { easterEggTriggered = false },
+    ) {
+        var lastState: TutorialActionState by remember {
+            mutableStateOf(TutorialActionState.NotStarted)
+        }
+        lastState = gestureState.toTutorialActionState(lastState)
+        ActionTutorialContent(lastState, onDoneButtonClicked, screenConfig)
+    }
+}
+
+@Composable
+fun GestureTutorialScreenNew(
+    screenConfig: TutorialScreenConfig,
+    gestureUiStateFlow: Flow<GestureUiState>,
+    motionEventConsumer: (MotionEvent) -> Boolean,
+    easterEggTriggeredFlow: Flow<Boolean>,
+    onEasterEggFinished: () -> Unit,
+    onDoneButtonClicked: () -> Unit,
+    onBack: () -> Unit,
+) {
+    BackHandler(onBack = onBack)
+    val easterEggTriggered by easterEggTriggeredFlow.collectAsStateWithLifecycle(false)
+    val gestureState by gestureUiStateFlow.collectAsStateWithLifecycle(NotStarted)
+    TouchpadGesturesHandlingBox(
+        motionEventConsumer,
+        gestureState,
+        easterEggTriggered,
+        onEasterEggFinished,
     ) {
         var lastState: TutorialActionState by remember {
             mutableStateOf(TutorialActionState.NotStarted)
@@ -126,10 +154,10 @@ fun GestureTutorialScreen(
 
 @Composable
 private fun TouchpadGesturesHandlingBox(
-    gestureHandler: TouchpadGestureHandler,
+    motionEventConsumer: (MotionEvent) -> Boolean,
     gestureState: GestureUiState,
     easterEggTriggered: Boolean,
-    resetEasterEggFlag: () -> Unit,
+    onEasterEggFinished: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -141,7 +169,7 @@ private fun TouchpadGesturesHandlingBox(
                 targetValue = 360f,
                 animationSpec = tween(durationMillis = 2000),
             )
-            resetEasterEggFlag()
+            onEasterEggFinished()
         }
     }
     Box(
@@ -156,7 +184,7 @@ private fun TouchpadGesturesHandlingBox(
                         if (gestureState is Finished) {
                             false
                         } else {
-                            gestureHandler.onMotionEvent(event)
+                            motionEventConsumer(event)
                         }
                     }
                 )
