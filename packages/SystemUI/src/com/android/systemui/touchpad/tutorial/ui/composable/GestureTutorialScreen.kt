@@ -39,10 +39,7 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionSta
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.Finished
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.NotStarted
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 import kotlinx.coroutines.flow.Flow
 
 sealed interface GestureUiState {
@@ -99,34 +96,6 @@ fun GestureUiState.toTutorialActionState(previousState: TutorialActionState): Tu
 
 @Composable
 fun GestureTutorialScreen(
-    screenConfig: TutorialScreenConfig,
-    gestureRecognizer: GestureRecognizer,
-    gestureUiStateFlow: Flow<GestureUiState>,
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
-    BackHandler(onBack = onBack)
-    var easterEggTriggered by remember { mutableStateOf(false) }
-    val gestureState by gestureUiStateFlow.collectAsStateWithLifecycle(NotStarted)
-    val easterEggMonitor = EasterEggGestureMonitor { easterEggTriggered = true }
-    val gestureHandler =
-        remember(gestureRecognizer) { TouchpadGestureHandler(gestureRecognizer, easterEggMonitor) }
-    TouchpadGesturesHandlingBox(
-        { gestureHandler.onMotionEvent(it) },
-        gestureState,
-        easterEggTriggered,
-        onEasterEggFinished = { easterEggTriggered = false },
-    ) {
-        var lastState: TutorialActionState by remember {
-            mutableStateOf(TutorialActionState.NotStarted)
-        }
-        lastState = gestureState.toTutorialActionState(lastState)
-        ActionTutorialContent(lastState, onDoneButtonClicked, screenConfig)
-    }
-}
-
-@Composable
-fun GestureTutorialScreenNew(
     screenConfig: TutorialScreenConfig,
     gestureUiStateFlow: Flow<GestureUiState>,
     motionEventConsumer: (MotionEvent) -> Boolean,

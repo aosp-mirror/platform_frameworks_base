@@ -39,6 +39,8 @@ import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialS
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.RECENT_APPS_GESTURE
@@ -53,9 +55,12 @@ constructor(
     private val logger: InputDeviceTutorialLogger,
     private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
     private val backGestureViewModel: BackGestureScreenViewModel,
+    private val homeGestureViewModel: HomeGestureScreenViewModel,
+    private val recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
 ) : ComponentActivity() {
 
-    private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
+    private val tutorialViewModel by
+        viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +68,13 @@ constructor(
         setTitle(getString(R.string.launch_touchpad_tutorial_notification_content))
         setContent {
             PlatformTheme {
-                TouchpadTutorialScreen(vm, backGestureViewModel, closeTutorial = ::finishTutorial)
+                TouchpadTutorialScreen(
+                    tutorialViewModel,
+                    backGestureViewModel,
+                    homeGestureViewModel,
+                    recentAppsGestureViewModel,
+                    closeTutorial = ::finishTutorial,
+                )
             }
         }
         // required to handle 3+ fingers on touchpad
@@ -79,12 +90,12 @@ constructor(
 
     override fun onResume() {
         super.onResume()
-        vm.onOpened()
+        tutorialViewModel.onOpened()
     }
 
     override fun onPause() {
         super.onPause()
-        vm.onClosed()
+        tutorialViewModel.onClosed()
     }
 }
 
@@ -92,6 +103,8 @@ constructor(
 fun TouchpadTutorialScreen(
     vm: TouchpadTutorialViewModel,
     backGestureViewModel: BackGestureScreenViewModel,
+    homeGestureViewModel: HomeGestureScreenViewModel,
+    recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
     closeTutorial: () -> Unit,
 ) {
     val activeScreen by vm.screen.collectAsStateWithLifecycle(STARTED)
@@ -122,11 +135,13 @@ fun TouchpadTutorialScreen(
             )
         HOME_GESTURE ->
             HomeGestureTutorialScreen(
+                homeGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
         RECENT_APPS_GESTURE ->
             RecentAppsGestureTutorialScreen(
+                recentAppsGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )

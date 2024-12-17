@@ -46,7 +46,7 @@ fun BackGestureTutorialScreen(
                 ),
             animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_back_edu),
         )
-    GestureTutorialScreenNew(
+    GestureTutorialScreen(
         screenConfig = screenConfig,
         gestureUiStateFlow = viewModel.gestureUiState,
         motionEventConsumer = viewModel::handleEvent,
