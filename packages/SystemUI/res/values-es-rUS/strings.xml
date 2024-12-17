@@ -753,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexión disponible"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS por satélite"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Llamadas de emergencia o SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"sin señal"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"una barra"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"dos barras"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"tres barras"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"cuatro barras"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"señal completa"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunas personas"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El sintonizador de IU del sistema te brinda más formas para editar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, dejar de funcionar o no incluirse en futuras versiones. Procede con precaución."</string>
@@ -786,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Aparece en forma de burbuja y como foto de perfil en la parte superior de las notificaciones de conversación, en la pantalla de bloqueo, y detiene el modo No interrumpir"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaria"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Proporcionar comentarios sobre el conjunto"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"No se pueden modificar las notificaciones de llamada."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"No se puede configurar aquí este grupo de notificaciones"</string>
@@ -872,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Bloquear la pantalla"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Crear una nota"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Tareas múltiples"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Usar la pantalla dividida con la app a la derecha"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Usar la pantalla dividida con la app a la izquierda"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Cambiar a pantalla completa"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Ubicar la app a la derecha o abajo cuando usas la pantalla dividida"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Ubicar la app a la izquierda o arriba cuando usas la pantalla dividida"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Durante pantalla dividida: Reemplaza una app con otra"</string>
@@ -979,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú de encendido"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueo"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Puedes ubicar este teléfono con Encontrar mi dispositivo, incluso si está apagado"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Apagando…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver pasos de mantenimiento"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver pasos de mantenimiento"</string>
@@ -1466,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Ir a la página principal"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Ver apps recientes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Listo"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Atrás"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Desliza hacia la izquierda o la derecha con tres dedos en el panel táctil"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"¡Muy bien!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Completaste el gesto para ir atrás."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir a la página principal"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Desliza hacia arriba con tres dedos en el panel táctil"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"¡Bien hecho!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Completaste el gesto para ir a la página principal"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Ver apps recientes"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Desliza hacia arriba con tres dedos en el panel táctil y mantenlos presionados"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"¡Bien hecho!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Completaste el gesto para ver las apps recientes."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Ver todas las apps"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Presiona la tecla de acción en el teclado"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"¡Bien hecho!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Completaste el gesto para ver todas las apps"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animación del instructivo. Haz clic para pausar y reanudar la reproducción."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación del teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>

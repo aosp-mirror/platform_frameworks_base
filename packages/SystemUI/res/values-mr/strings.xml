@@ -531,8 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"विजेट"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"विजेट\" शॉर्टकट जोडण्यासाठी, सेटिंग्जमध्ये \"लॉक स्‍क्रीनवर विजेट दाखवा\" सुरू असल्याची खात्री करा."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"सेटिंग्ज"</string>
-    <!-- no translation found for accessibility_glanceable_hub_to_dream_button (7552776300297055307) -->
-    <skip />
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"स्क्रीनसेव्हर दाखवा बटण"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"वापरकर्ता स्विच करा"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनू"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
@@ -754,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"सॅटेलाइट, कनेक्शन उपलब्ध"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"सॅटेलाइट SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"आणीबाणी कॉल किंवा SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"कोणताही सिग्नल नाही"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"एक बार"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"दोन बार"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"तीन बार"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"चार बार"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"पूर्ण सिग्नल"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाईल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"सर्वांसाठी नाही तर काहींसाठी मजेदार असू शकते"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनर आपल्‍याला Android यूझर इंटरफेस ट्विक आणि कस्टमाइझ करण्‍याचे अनेक प्रकार देते. ही प्रयोगात्मक वैशिष्‍ट्ये बदलू शकतात, खंडित होऊ शकतात किंवा भविष्‍यातील रिलीज मध्‍ये कदाचित दिसणार नाहीत. सावधगिरी बाळगून पुढे सुरू ठेवा."</string>
@@ -787,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"बंडलसंबंधित फीडबॅक द्या"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"कॉलशी संबंधित सूचनांमध्ये फेरबदल केला जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
@@ -873,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"नोंद घ्या"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"मल्टिटास्किंग"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"ॲप उजवीकडे ठेवून स्प्लिट स्क्रीन वापरा"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"ॲप डावीकडे ठेवून स्प्लिट स्क्रीन वापरा"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"फुल स्क्रीनवर स्विच करणे"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रीन वापरताना उजवीकडील किंवा खालील अ‍ॅपवर स्विच करा"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रीन वापरताना डावीकडील किंवा वरील अ‍ॅपवर स्विच करा"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"स्प्लिट स्क्रीनदरम्यान: एक अ‍ॅप दुसऱ्या अ‍ॅपने बदला"</string>
@@ -980,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पॉवर मेनू"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g> पेज"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
-    <string name="finder_active" msgid="7907846989716941952">"तुम्ही हा फोन बंद असतानादेखील Find My Device वापरून तो शोधू शकता"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"बंद होत आहे…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"काय काळजी घ्यावी ते पहा"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"काय काळजी घ्यावी ते पहा"</string>
@@ -1467,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"होमवर जा"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"अलीकडील अ‍ॅप्स पहा"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"पूर्ण झाले"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"मागे जा"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"तुमच्या टचपॅडवर तीन बोटांनी डावीकडे किंवा उजवीकडे स्‍वाइप करा"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"छान!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"तुम्ही गो बॅक जेश्चर पूर्ण केले."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"होमवर जा"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"तुमच्या टचपॅडवर तीन बोटांनी वर स्वाइप करा"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"उत्तम कामगिरी!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"तुम्ही गो होम जेश्चर पूर्ण केले आहे"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"अलीकडील अ‍ॅप्स पहा"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"तुमच्या टचपॅडवर तीन बोटांनी वर स्वाइप करून धरून ठेवा"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"उत्तम कामगिरी!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"तुम्ही अलीकडील ॲप्स पाहण्याचे जेश्चर पूर्ण केले आहे."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"सर्व अ‍ॅप्स पहा"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"तुमच्या कीबोर्डवर अ‍ॅक्शन की प्रेस करा"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"खूप छान!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"तुम्ही ॲप्स पाहण्याचे जेश्चर पूर्ण केले आहे"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ट्यूटोरियल अ‍ॅनिमेशन थांबवण्यासाठी किंवा पुन्हा सुरू करण्यासाठी प्ले करा वर क्लिक करा."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड बॅकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d पैकी %1$d पातळी"</string>

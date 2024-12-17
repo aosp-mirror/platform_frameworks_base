@@ -531,8 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Widgets"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Hvis du vil tilføje genvejen \"Widgets\", skal du sørge for, at \"Vis widgets på låseskærmen\" er aktiveret i indstillingerne."</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Indstillinger"</string>
-    <!-- no translation found for accessibility_glanceable_hub_to_dream_button (7552776300297055307) -->
-    <skip />
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Knappen Vis pauseskærm"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skift bruger"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullemenu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps og data i denne session slettes."</string>
@@ -754,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit – forbindelsen er tilgængelig"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS-meldinger via satellit"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Nødopkald eller SOS-meldinger via satellit"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"intet signal"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"én bjælke"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"to bjælker"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"tre bjælker"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"fire bjælker"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"fuldt signal"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Arbejdsprofil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Sjovt for nogle, men ikke for alle"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner giver dig flere muligheder for at justere og tilpasse Android-brugerfladen. Disse eksperimentelle funktioner kan ændres, gå i stykker eller forsvinde i fremtidige udgivelser. Vær forsigtig, hvis du fortsætter."</string>
@@ -787,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Vises øverst i samtalenotifikationer og som et profilbillede på låseskærmen. Vises som en boble, der afbryder Forstyr ikke"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke samtalefunktioner"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"Giv feedback om pakker"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse notifikationer kan ikke redigeres."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Opkaldsnotifikationer kan ikke redigeres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Du kan ikke konfigurere denne gruppe notifikationer her"</string>
@@ -873,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lås skærm"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Skriv en note"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Brug opdelt skærm med appen til højre"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Brug opdelt skærm med appen til venstre"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Skift til fuld skærm"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Skift til en app til højre eller nedenfor, når du bruger opdelt skærm"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Skift til en app til venstre eller ovenfor, når du bruger opdelt skærm"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Ved opdelt skærm: Udskift én app med en anden"</string>
@@ -980,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu for afbryderknappen"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskærm"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Du kan finde denne telefon med Find min enhed, også selvom den er slukket"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Lukker ned…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se håndteringsvejledning"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
@@ -1467,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Gå til startsiden"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Se seneste apps"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Udfør"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gå tilbage"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Stryg til venstre eller højre med tre fingre på touchpladen"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Sådan!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Du har udført bevægelsen for Gå tilbage."</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Gå til startskærmen"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Stryg opad med tre fingre på touchpladen"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Flot!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Du har udført bevægelsen for at gå til startsiden"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Se seneste apps"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Stryg opad, og hold tre fingre på touchpladen"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Godt klaret!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Du har udført bevægelsen for at se de seneste apps."</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Se alle apps"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Tryk på handlingstasten på dit tastatur"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Flot klaret!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Du har udført bevægelsen for at se alle apps"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Animation med vejledning. Klik for at sætte afspilningen på pause og genoptage den."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Tastaturets baggrundslys"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveau %1$d af %2$d"</string>

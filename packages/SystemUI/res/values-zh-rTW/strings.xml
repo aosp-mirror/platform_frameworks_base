@@ -531,8 +531,7 @@
     <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"小工具"</string>
     <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"如要新增「小工具」捷徑，請務必前往設定啟用「在螢幕鎖定畫面上顯示小工具」。"</string>
     <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"設定"</string>
-    <!-- no translation found for accessibility_glanceable_hub_to_dream_button (7552776300297055307) -->
-    <skip />
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"顯示螢幕保護程式按鈕"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"切換使用者"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"下拉式選單"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"這個工作階段中的所有應用程式和資料都會刪除。"</string>
@@ -754,6 +753,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛星，可連線"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"緊急衛星連線"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"緊急電話或緊急求救"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>，<xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>。"</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"沒有訊號"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"訊號強度一格"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"訊號強度兩格"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"訊號強度三格"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"訊號強度四格"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"訊號滿格"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"工作資料夾"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"有趣與否，見仁見智"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"系統使用者介面調整精靈可讓你透過其他方式，調整及自訂 Android 使用者介面。這些實驗性功能隨著版本更新可能會變更、損壞或消失，執行時請務必謹慎。"</string>
@@ -787,7 +793,6 @@
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"以對話框的形式顯示在對話通知頂端 (螢幕鎖定時會顯示為個人資料相片)，並會中斷「零打擾」模式"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話功能"</string>
-    <string name="notification_guts_bundle_feedback" msgid="5393570876655201459">"提供套裝組合意見"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"無法修改來電通知。"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"無法在這裡設定這個通知群組"</string>
@@ -873,12 +878,9 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"螢幕鎖定"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"新增記事"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"多工處理"</string>
-    <!-- no translation found for system_multitasking_rhs (8779289852395243004) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (7348595296208696452) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (4940465971687159429) -->
-    <skip />
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"使用分割畫面，並在右側顯示應用程式"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"使用分割畫面，並在左側顯示應用程式"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"切換至全螢幕模式"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"使用分割畫面時，切換到右邊或上方的應用程式"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"使用分割畫面時，切換到左邊或上方的應用程式"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"使用分割畫面期間：更換應用程式"</string>
@@ -980,7 +982,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源鍵選單"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"螢幕鎖定"</string>
-    <string name="finder_active" msgid="7907846989716941952">"即使這支手機關機，仍可透過「尋找我的裝置」找出手機位置"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"關機中…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"查看處理步驟"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看處理步驟"</string>
@@ -1467,22 +1468,32 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"返回主畫面"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"查看最近使用的應用程式"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完成"</string>
+    <!-- no translation found for gesture_error_title (469064941635578511) -->
+    <skip />
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"返回"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"在觸控板上用三指向左或向右滑動"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"很好！"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"你已完成「返回」手勢的教學課程。"</string>
+    <!-- no translation found for touchpad_back_gesture_error_body (7112668207481458792) -->
+    <skip />
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"返回主畫面"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"在觸控板上用三指向上滑動"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"太棒了！"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"你已完成「返回主畫面」手勢教學課程"</string>
+    <!-- no translation found for touchpad_home_gesture_error_body (3810674109999513073) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"查看最近使用的應用程式"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"在觸控板上用三指向上滑動並按住"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"太棒了！"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"你已完成「查看最近使用的應用程式」手勢教學課程。"</string>
+    <!-- no translation found for touchpad_recent_gesture_error_body (8695535720378462022) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"查看所有應用程式"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"按下鍵盤上的快捷操作鍵"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"非常好！"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"你已完成「查看所有應用程式」手勢教學課程"</string>
+    <!-- no translation found for touchpad_action_key_error_body (8685502040091860903) -->
+    <skip />
     <string name="tutorial_animation_content_description" msgid="2698816574982370184">"教學課程動畫，按一下即可暫停和繼續播放。"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
