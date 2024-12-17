@@ -675,17 +675,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
 
         private void add() {
-            if (addFromPosition(getLayoutPosition())) {
-                itemView.announceForAccessibility(
-                        itemView.getContext().getText(R.string.accessibility_qs_edit_tile_added));
-            }
+            addFromPosition(getLayoutPosition());
         }
 
         private void remove() {
-            if (removeFromPosition(getLayoutPosition())) {
-                itemView.announceForAccessibility(
-                        itemView.getContext().getText(R.string.accessibility_qs_edit_tile_removed));
-            }
+            removeFromPosition(getLayoutPosition());
         }
 
         boolean isCurrentTile() {
