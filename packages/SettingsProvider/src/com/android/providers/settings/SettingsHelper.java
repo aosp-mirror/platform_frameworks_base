@@ -742,10 +742,9 @@ public class SettingsHelper {
      * @param data the comma separated BCP-47 language tags in bytes.
      * @param size the size of the data in bytes.
      * @param backupRestoreEventLogger the logger to log the restore event.
-     * @param dataType the data type of the setting for logging purposes.
      */
     /* package */ void setLocaleData(
-        byte[] data, int size, BackupRestoreEventLogger backupRestoreEventLogger, String dataType) {
+        byte[] data, int size, BackupRestoreEventLogger backupRestoreEventLogger) {
         final Configuration conf = mContext.getResources().getConfiguration();
 
         // Replace "_" with "-" to deal with older backups.
@@ -774,13 +773,13 @@ public class SettingsHelper {
                     mContext.getAttributionTag());
             if (Flags.enableMetricsSettingsBackupAgents()) {
                 backupRestoreEventLogger
-                    .logItemsRestored(dataType, localeList.size());
+                    .logItemsRestored(SettingsBackupRestoreKeys.KEY_LOCALE, localeList.size());
             }
         } catch (RemoteException e) {
             if (Flags.enableMetricsSettingsBackupAgents()) {
                 backupRestoreEventLogger
                     .logItemsRestoreFailed(
-                        dataType,
+                        SettingsBackupRestoreKeys.KEY_LOCALE,
                         localeList.size(),
                         ERROR_REMOTE_EXCEPTION_SETTING_LOCALE_DATA);
             }
