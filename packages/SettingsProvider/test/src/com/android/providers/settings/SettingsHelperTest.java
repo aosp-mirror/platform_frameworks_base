@@ -20,10 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -31,9 +28,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import android.app.backup.BackupAnnotations.OperationType;
-import android.app.backup.BackupRestoreEventLogger;
-import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -48,7 +42,6 @@ import android.media.Utils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.BaseColumns;
@@ -72,8 +65,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for the SettingsHelperTest
@@ -96,13 +87,10 @@ public class SettingsHelperTest {
     private static final LocaleList LOCALE_LIST =
         LocaleList.forLanguageTags("en-US,en-UK");
 
-    private static final String LOGGING_DATATYPE = "logging_datatype";
-
     private SettingsHelper mSettingsHelper;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-    @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock private Context mContext;
     @Mock private Resources mResources;
@@ -111,8 +99,6 @@ public class SettingsHelperTest {
 
     @Mock private MockContentResolver mContentResolver;
     private MockSettingsProvider mSettingsProvider;
-
-    private BackupRestoreEventLogger mBackupRestoreEventLogger;
 
     @Before
     public void setUp() {
@@ -129,7 +115,6 @@ public class SettingsHelperTest {
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         mSettingsProvider = new MockSettingsProvider(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
-        mBackupRestoreEventLogger = new BackupRestoreEventLogger(OperationType.RESTORE);
     }
 
     @After
@@ -176,8 +161,7 @@ public class SettingsHelperTest {
     public void testRestoreValue_settingReplaced_doesNotRestore() {
         when(mSettingsHelper.isReplacedSystemSetting(eq(SETTING_KEY))).thenReturn(true);
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
-                SETTING_KEY, SETTING_VALUE, /* restoredFromSdkInt */ 0, mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                SETTING_KEY, SETTING_VALUE, /* restoredFromSdkInt */ 0);
 
         // The only time of interaction happened during setUp()
         verify(mContentResolver, times(1))
@@ -193,8 +177,7 @@ public class SettingsHelperTest {
                 true);
 
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
-                Settings.Global.POWER_BUTTON_LONG_PRESS, "5", 0, mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                Settings.Global.POWER_BUTTON_LONG_PRESS, "5", 0);
 
         assertThat(Settings.Global.getInt(
                 mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1)).isEqualTo(5);
@@ -216,8 +199,7 @@ public class SettingsHelperTest {
                 1);
 
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
-                Settings.Global.POWER_BUTTON_LONG_PRESS, "2", 0, mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                Settings.Global.POWER_BUTTON_LONG_PRESS, "2", 0);
 
         assertThat(Settings.Global.getInt(
                 mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1)).isEqualTo(1);
@@ -239,8 +221,7 @@ public class SettingsHelperTest {
                 1);
 
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
-                Settings.Global.POWER_BUTTON_LONG_PRESS, "2", 0, mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                Settings.Global.POWER_BUTTON_LONG_PRESS, "2", 0);
 
         assertThat(Settings.Global.getInt(
                 mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1)).isEqualTo(1);
@@ -254,8 +235,7 @@ public class SettingsHelperTest {
                 .thenReturn(false);
 
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
-                Settings.Global.POWER_BUTTON_LONG_PRESS, "500", 0, mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                Settings.Global.POWER_BUTTON_LONG_PRESS, "500", 0);
 
         assertThat((Settings.Global.getInt(
                 mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))).isEqualTo(-1);
@@ -269,8 +249,7 @@ public class SettingsHelperTest {
                 false);
 
         mSettingsHelper.restoreValue(mContext, mContentResolver, new ContentValues(), Uri.EMPTY,
-                Settings.Global.POWER_BUTTON_LONG_PRESS, "trees", 0, mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                Settings.Global.POWER_BUTTON_LONG_PRESS, "trees", 0);
 
         assertThat((Settings.Global.getInt(
                 mContentResolver, Settings.Global.POWER_BUTTON_LONG_PRESS, -1))).isEqualTo(-1);
@@ -442,9 +421,7 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 Settings.System.RINGTONE,
                 sourceRingtoneValue,
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
                 .isEqualTo(newRingtoneValueCanonicalized);
@@ -509,9 +486,7 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 Settings.System.RINGTONE,
                 sourceRingtoneValue,
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
                 .isEqualTo(newRingtoneValueCanonicalized);
@@ -576,9 +551,7 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 Settings.System.NOTIFICATION_SOUND,
                 sourceRingtoneValue,
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(
                         Settings.System.getString(
@@ -651,9 +624,7 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 Settings.System.ALARM_ALERT,
                 sourceRingtoneValue,
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(Settings.System.getString(mContentResolver, Settings.System.ALARM_ALERT))
                 .isEqualTo(newRingtoneValueCanonicalized);
@@ -696,9 +667,7 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 Settings.System.RINGTONE,
                 sourceRingtoneValue,
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
                 .isEqualTo(DEFAULT_RINGTONE_VALUE);
@@ -731,9 +700,7 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 Settings.System.RINGTONE,
                 "_silent",
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(Settings.System.getString(mContentResolver, Settings.System.RINGTONE))
                 .isEqualTo(null);
@@ -824,61 +791,6 @@ public class SettingsHelperTest {
         assertThat(mSettingsHelper.getLocaleList()).isEqualTo(LOCALE_LIST);
     }
 
-    @Test
-    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreValue_metricsFlagIsEnabled_restoresSetting_logsSuccess() {
-        mSettingsHelper.restoreValue(
-                mContext,
-                mContentResolver,
-                new ContentValues(),
-                Settings.Secure.getUriFor(SETTING_KEY),
-                SETTING_KEY,
-                SETTING_VALUE,
-                /* restoredFromSdkInt */ 0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
-
-        DataTypeResult loggingResult = getLoggingResultForDatatype(LOGGING_DATATYPE);
-        assertThat(loggingResult).isNotNull();
-        assertThat(loggingResult.getSuccessCount()).isEqualTo(1);
-    }
-
-    @Test
-    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreValue_metricsFlagIsEnabled_doesNotRestoreSetting_logsFailure() {
-        mSettingsHelper.restoreValue(
-                mContext,
-                mContentResolver,
-                new ContentValues(),
-                Uri.EMPTY,
-                SETTING_KEY,
-                SETTING_VALUE,
-                /* restoredFromSdkInt */ 0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
-
-        DataTypeResult loggingResult = getLoggingResultForDatatype(LOGGING_DATATYPE);
-        assertThat(loggingResult).isNotNull();
-        assertThat(loggingResult.getFailCount()).isEqualTo(1);
-    }
-
-    @Test
-    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
-    public void restoreValue_metricsFlagIsDisabled_doesNotLogMetrics() {
-        mSettingsHelper.restoreValue(
-                mContext,
-                mContentResolver,
-                new ContentValues(),
-                Uri.EMPTY,
-                SETTING_KEY,
-                SETTING_VALUE,
-                /* restoredFromSdkInt */ 0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
-
-        assertThat(getLoggingResultForDatatype(LOGGING_DATATYPE)).isNull();
-    }
-
     private int getAutoRotationSettingValue() {
         return Settings.System.getInt(mContentResolver,
                 Settings.System.ACCELEROMETER_ROTATION,
@@ -900,9 +812,7 @@ public class SettingsHelperTest {
                 /* destination= */ Settings.System.CONTENT_URI,
                 /* name= */ Settings.System.ACCELEROMETER_ROTATION,
                 /* value= */ String.valueOf(newValue),
-                /* restoredFromSdkInt= */ 0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                /* restoredFromSdkInt= */ 0);
     }
 
     private void resetRingtoneSettingsToDefault() {
@@ -936,20 +846,9 @@ public class SettingsHelperTest {
                 Uri.EMPTY,
                 settings,
                 testRingtoneSettingsValue,
-                0,
-                mBackupRestoreEventLogger,
-                LOGGING_DATATYPE);
+                0);
 
         assertThat(Settings.System.getString(mContentResolver, settings))
                 .isEqualTo(testRingtoneSettingsValue);
-    }
-
-    private DataTypeResult getLoggingResultForDatatype(String dataType) {
-        for (DataTypeResult result : mBackupRestoreEventLogger.getLoggingResults()) {
-            if (result.getDataType().equals(dataType)) {
-                return result;
-            }
-        }
-        return null;
     }
 }
