@@ -37,12 +37,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -66,6 +68,10 @@ import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderState
+import kotlin.math.round
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun VolumeSlider(
@@ -196,9 +202,17 @@ private fun LegacyVolumeSlider(
                 )
             }
         }
-
-    // Perform haptics due to UI composition
-    hapticsViewModel?.onValueChange(value)
+    var lastDiscreteStep by remember { mutableFloatStateOf(round(value)) }
+    LaunchedEffect(value) {
+        snapshotFlow { value }
+            .map { round(it) }
+            .filter { it != lastDiscreteStep }
+            .distinctUntilChanged()
+            .collect { discreteStep ->
+                lastDiscreteStep = discreteStep
+                hapticsViewModel?.onValueChange(discreteStep)
+            }
+    }
 
     PlatformSlider(
         modifier =
