@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarIconBlockListInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarInteractor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
@@ -118,6 +119,9 @@ interface HomeStatusBarViewModel {
      */
     val systemInfoCombinedVis: StateFlow<SystemInfoCombinedVisibilityModel>
 
+    /** Which icons to block from the home status bar */
+    val iconBlockList: Flow<List<String>>
+
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
      * status bar and navigation icons dim. In this mode, a notification dot appears where the
@@ -154,6 +158,7 @@ class HomeStatusBarViewModelImpl
 @Inject
 constructor(
     homeStatusBarInteractor: HomeStatusBarInteractor,
+    homeStatusBarIconBlockListInteractor: HomeStatusBarIconBlockListInteractor,
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
     private val darkIconInteractor: DarkIconInteractor,
@@ -338,6 +343,9 @@ constructor(
                     Idle,
                 ),
             )
+
+    override val iconBlockList: Flow<List<String>> =
+        homeStatusBarIconBlockListInteractor.iconBlockList
 
     @View.Visibility
     private fun Boolean.toVisibleOrGone(): Int {

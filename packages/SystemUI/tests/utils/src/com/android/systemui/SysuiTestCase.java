@@ -342,7 +342,7 @@ public abstract class SysuiTestCase {
     }
 
     /** Delegates to {@link android.testing.TestableResources#addOverride(int, Object)}. */
-    protected void overrideResource(int resourceId, Object value) {
+    public void overrideResource(int resourceId, Object value) {
         mContext.getOrCreateTestableResources().addOverride(resourceId, value);
     }
 

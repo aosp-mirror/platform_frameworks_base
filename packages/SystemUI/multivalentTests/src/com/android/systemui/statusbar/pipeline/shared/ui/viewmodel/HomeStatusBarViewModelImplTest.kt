@@ -77,6 +77,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataS
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
 import com.android.systemui.statusbar.phone.data.repository.fakeDarkIconRepository
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarIconBlockList
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.setHomeStatusBarInteractorShowOperatorName
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import com.android.systemui.testKosmos
@@ -1049,6 +1050,16 @@ class HomeStatusBarViewModelImplTest : SysuiTestCase() {
             tint = areaTint?.tint(Rect(1, 1, 3, 3))
 
             assertThat(tint).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
+        }
+
+    @Test
+    fun iconBlockList_followsInteractor() =
+        kosmos.runTest {
+            setHomeStatusBarIconBlockList(listOf("icon1", "icon2"))
+
+            val latest by collectLastValue(underTest.iconBlockList)
+
+            assertThat(latest).containsExactly("icon1", "icon2")
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

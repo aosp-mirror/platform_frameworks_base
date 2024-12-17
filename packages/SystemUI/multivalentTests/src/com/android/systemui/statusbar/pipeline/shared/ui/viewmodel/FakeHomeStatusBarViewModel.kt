@@ -72,6 +72,8 @@ class FakeHomeStatusBarViewModel(
             )
         )
 
+    override val iconBlockList: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
+
     override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
 
     val darkRegions = mutableListOf<Rect>()

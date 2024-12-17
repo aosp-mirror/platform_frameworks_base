@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ui.DarkIconManager
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarIconBlockListBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
@@ -150,6 +151,11 @@ fun StatusBarRoot(
                             darkIconDispatcher,
                         )
                     iconController.addIconGroup(darkIconManager)
+                    HomeStatusBarIconBlockListBinder.bind(
+                        statusIconContainer,
+                        darkIconManager,
+                        statusBarViewModel.iconBlockList,
+                    )
 
                     if (!StatusBarChipsModernization.isEnabled) {
                         ongoingCallController.setChipView(
