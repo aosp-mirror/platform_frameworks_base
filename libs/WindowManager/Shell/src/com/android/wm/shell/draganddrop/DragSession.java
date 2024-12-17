@@ -74,7 +74,7 @@ public class DragSession {
         mInitialDragData = data;
         mInitialDragFlags = dragFlags;
         displayLayout = dispLayout;
-        hideDragSourceTaskId = data.getDescription().getExtras() != null
+        hideDragSourceTaskId = data != null && data.getDescription().getExtras() != null
                 ? data.getDescription().getExtras().getInt(EXTRA_HIDE_DRAG_SOURCE_TASK_ID, -1)
                 : -1;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
