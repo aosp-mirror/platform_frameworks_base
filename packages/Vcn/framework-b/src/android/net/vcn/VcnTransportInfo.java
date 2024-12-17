@@ -161,7 +161,14 @@ public final class VcnTransportInfo implements TransportInfo, Parcelable {
         return 0;
     }
 
-    /** @hide */
+    /**
+     * Create a copy of a {@link VcnTransportInfo} with some fields redacted based on the
+     * permissions held by the receiving app.
+     *
+     * @param redactions bitmask of redactions that needs to be performed on this instance.
+     * @return the copy of this instance with the necessary redactions.
+     * @hide
+     */
     @FlaggedApi(FLAG_MAINLINE_VCN_MODULE_API)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @Override
