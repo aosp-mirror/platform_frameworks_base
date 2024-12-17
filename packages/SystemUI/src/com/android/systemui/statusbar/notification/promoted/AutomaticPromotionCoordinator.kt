@@ -16,7 +16,16 @@
 
 package com.android.systemui.statusbar.notification.promoted
 
-import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.coordinator.Coordinator
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
+import javax.inject.Inject
 
-var Kosmos.promotedNotificationsProvider: PromotedNotificationsProvider by
-    Kosmos.Fixture { PromotedNotificationsProviderImpl() }
+/** A coordinator that may automatically promote certain notifications. */
+interface AutomaticPromotionCoordinator : Coordinator
+
+/** A default implementation of [AutomaticPromotionCoordinator] that doesn't promote anything. */
+@CoordinatorScope
+class EmptyAutomaticPromotionCoordinator @Inject constructor() : AutomaticPromotionCoordinator {
+    override fun attach(pipeline: NotifPipeline) {}
+}

@@ -67,7 +67,6 @@ import com.android.systemui.statusbar.notification.icon.IconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractorImpl
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsProviderImpl
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.CoordinateOnClickListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener
@@ -224,7 +223,6 @@ class ExpandableNotificationRowBuilder(
             )
         val promotedNotificationContentExtractor =
             PromotedNotificationContentExtractorImpl(
-                PromotedNotificationsProviderImpl(),
                 context,
                 PromotedNotificationLogger(logcatLogBuffer("PromotedNotifLog")),
             )

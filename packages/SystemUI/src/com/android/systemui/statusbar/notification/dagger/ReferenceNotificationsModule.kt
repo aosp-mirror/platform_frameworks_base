@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.dagger
 
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationsModule
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.ReferenceCoordinatorsModule
 import com.android.systemui.statusbar.notification.row.NotificationRowModule
 import dagger.Module
 
@@ -29,7 +29,7 @@ import dagger.Module
         [
             NotificationsModule::class,
             NotificationRowModule::class,
-            PromotedNotificationsModule::class,
+            ReferenceCoordinatorsModule::class,
         ]
 )
 object ReferenceNotificationsModule

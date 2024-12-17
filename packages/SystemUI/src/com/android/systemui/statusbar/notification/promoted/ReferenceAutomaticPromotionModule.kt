@@ -16,15 +16,15 @@
 
 package com.android.systemui.statusbar.notification.promoted
 
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import dagger.Binds
 import dagger.Module
 
 @Module
-abstract class PromotedNotificationsModule {
+abstract class ReferenceAutomaticPromotionModule {
     @Binds
-    @SysUISingleton
-    abstract fun bindPromotedNotificationsProvider(
-        impl: PromotedNotificationsProviderImpl
-    ): PromotedNotificationsProvider
+    @CoordinatorScope
+    abstract fun bindAutomaticPromotionCoordinator(
+        impl: EmptyAutomaticPromotionCoordinator
+    ): AutomaticPromotionCoordinator
 }

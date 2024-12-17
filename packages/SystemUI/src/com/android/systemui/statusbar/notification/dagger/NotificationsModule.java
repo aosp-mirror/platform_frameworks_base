@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotifPipelineChoreographerModule;
 import com.android.systemui.statusbar.notification.collection.coordinator.ShadeEventCoordinator;
-import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorsModule;
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager;
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
@@ -110,7 +109,6 @@ import javax.inject.Provider;
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
 @Module(includes = {
-        CoordinatorsModule.class,
         FooterViewModelModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
         NotificationDataLayerModule.class,

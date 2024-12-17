@@ -21,9 +21,5 @@ import com.android.systemui.kosmos.Kosmos
 
 var Kosmos.promotedNotificationContentExtractor by
     Kosmos.Fixture {
-        PromotedNotificationContentExtractorImpl(
-            promotedNotificationsProvider,
-            applicationContext,
-            promotedNotificationLogger,
-        )
+        PromotedNotificationContentExtractorImpl(applicationContext, promotedNotificationLogger)
     }

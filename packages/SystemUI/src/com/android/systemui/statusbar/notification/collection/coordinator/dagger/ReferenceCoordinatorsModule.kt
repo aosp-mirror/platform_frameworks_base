@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinatorsImpl
 import com.android.systemui.statusbar.notification.collection.coordinator.SensitiveContentCoordinatorModule
+import com.android.systemui.statusbar.notification.promoted.ReferenceAutomaticPromotionModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -28,12 +29,12 @@ import javax.inject.Qualifier
 import javax.inject.Scope
 
 @Module(subcomponents = [CoordinatorsSubcomponent::class])
-object CoordinatorsModule {
+object ReferenceCoordinatorsModule {
     @SysUISingleton
     @JvmStatic
     @Provides
     fun notifCoordinators(factory: CoordinatorsSubcomponent.Factory): NotifCoordinators =
-            factory.create().notifCoordinators
+        factory.create().notifCoordinators
 }
 
 @CoordinatorScope
@@ -47,9 +48,9 @@ interface CoordinatorsSubcomponent {
     }
 }
 
-@Module(includes = [
-    SensitiveContentCoordinatorModule::class,
-])
+@Module(
+    includes = [SensitiveContentCoordinatorModule::class, ReferenceAutomaticPromotionModule::class]
+)
 abstract class InternalCoordinatorsModule {
     @Binds
     @Internal
@@ -61,7 +62,4 @@ abstract class InternalCoordinatorsModule {
 @Retention(AnnotationRetention.RUNTIME)
 private annotation class Internal
 
-@Scope
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class CoordinatorScope
+@Scope @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class CoordinatorScope

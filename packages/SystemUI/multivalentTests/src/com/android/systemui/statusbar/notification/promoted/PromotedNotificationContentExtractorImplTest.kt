@@ -20,6 +20,7 @@ import android.app.Notification
 import android.app.Notification.BigPictureStyle
 import android.app.Notification.BigTextStyle
 import android.app.Notification.CallStyle
+import android.app.Notification.FLAG_PROMOTED_ONGOING
 import android.app.Notification.MessagingStyle
 import android.app.Notification.ProgressStyle
 import android.app.Notification.ProgressStyle.Segment
@@ -45,9 +46,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
-
-    private val provider =
-        FakePromotedNotificationsProvider().also { kosmos.promotedNotificationsProvider = it }
 
     private val underTest = kosmos.promotedNotificationContentExtractor
 
@@ -87,7 +85,7 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
-    fun shouldNotExtract_providerDidNotPromote() {
+    fun shouldNotExtract_becauseNotPromoted() {
         val entry = createEntry(promoted = false)
         val content = extractContent(entry)
         assertThat(content).isNull()
@@ -231,9 +229,10 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
         builderBlock: Notification.Builder.() -> Unit = {},
     ): NotificationEntry {
         val notif = Notification.Builder(context, "channel").also(builderBlock).build()
-        return NotificationEntryBuilder().setNotification(notif).build().also {
-            provider.shouldPromoteForEntry[it] = promoted
+        if (promoted) {
+            notif.flags = FLAG_PROMOTED_ONGOING
         }
+        return NotificationEntryBuilder().setNotification(notif).build()
     }
 
     companion object {
