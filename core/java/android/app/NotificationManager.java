@@ -55,6 +55,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -677,9 +678,14 @@ public class NotificationManager {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
-    public NotificationManager(Context context, InstantSource clock)
+    public NotificationManager(Context context)
     {
+        this(context, SystemClock.elapsedRealtimeClock());
+    }
+
+    /** {@hide} */
+    @UnsupportedAppUsage
+    public NotificationManager(Context context, InstantSource clock) {
         mContext = context;
         mClock = clock;
     }
