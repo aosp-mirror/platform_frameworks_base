@@ -90,6 +90,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -1648,18 +1649,27 @@ public class BackgroundActivityStartController {
             return bas;
         }
 
-        TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-        if (adjacentTaskFragment == null) {
+        if (!taskFragment.hasAdjacentTaskFragment()) {
             return bas;
         }
 
-        // Check the second fragment.
-        topActivity = adjacentTaskFragment.getActivity(topOfStackPredicate);
-        if (topActivity == null) {
-            return bas;
+        // Check the adjacent fragment.
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+            topActivity = adjacentTaskFragment.getActivity(topOfStackPredicate);
+            if (topActivity == null) {
+                return bas;
+            }
+            return checkCrossUidActivitySwitchFromBelow(topActivity, uid, bas);
         }
-
-        return checkCrossUidActivitySwitchFromBelow(topActivity, uid, bas);
+        final BlockActivityStart[] out = { bas };
+        taskFragment.forOtherAdjacentTaskFragments(adjacentTaskFragment -> {
+            final ActivityRecord top = adjacentTaskFragment.getActivity(topOfStackPredicate);
+            if (top != null) {
+                out[0] = checkCrossUidActivitySwitchFromBelow(top, uid, out[0]);
+            }
+        });
+        return out[0];
     }
 
     /**
