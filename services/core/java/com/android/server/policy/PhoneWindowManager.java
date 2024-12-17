@@ -4068,7 +4068,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     @Nullable IBinder focusedToken) {
                 boolean handled = PhoneWindowManager.this.handleKeyGestureEvent(event,
                         focusedToken);
-                if (handled && Arrays.stream(event.getKeycodes()).anyMatch(
+                if (handled && !event.isCancelled() && Arrays.stream(event.getKeycodes()).anyMatch(
                         (keycode) -> keycode == KeyEvent.KEYCODE_POWER)) {
                     mPowerKeyHandled = true;
                 }
