@@ -1877,6 +1877,11 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals("Display must be portrait after closing the translucent activity",
                 Configuration.ORIENTATION_PORTRAIT,
                 mDisplayContent.getConfiguration().orientation);
+
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(nonTopVisible);
+        mDisplayContent.onTransitionFinished();
+        assertFalse("Complete fixed rotation if not in a transition",
+                mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
     @Test

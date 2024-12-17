@@ -2908,6 +2908,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && !mDisplayRotation.isRotatingSeamlessly()) {
             clearFixedRotationLaunchingApp();
         }
+        // If there won't be a transition to notify the launch is done, then it should be ready to
+        // update with display orientation. E.g. a translucent activity enters pip from a task which
+        // contains another opaque activity.
+        if (mFixedRotationLaunchingApp != null && mFixedRotationLaunchingApp.isVisible()
+                && !mTransitionController.isCollecting()
+                && !mAtmService.mBackNavigationController.isMonitoringFinishTransition()) {
+            final Transition finishTransition = mTransitionController.mFinishingTransition;
+            if (finishTransition == null || !finishTransition.mParticipants.contains(
+                    mFixedRotationLaunchingApp)) {
+                continueUpdateOrientationForDiffOrienLaunchingApp();
+            }
+        }
     }
 
     /**
