@@ -1054,26 +1054,6 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
-    fun testImmersiveButtonClick_entersImmersiveMode() {
-        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
-                as ArgumentCaptor<View.OnClickListener>
-        val decor = createOpenTaskDecoration(
-            windowingMode = WINDOWING_MODE_FREEFORM,
-            onCaptionButtonClickListener = onClickListenerCaptor,
-            requestingImmersive = true,
-        )
-        val view = mock(View::class.java)
-        whenever(view.id).thenReturn(R.id.maximize_window)
-        whenever(mockDesktopRepository.isTaskInFullImmersiveState(decor.mTaskInfo.taskId))
-            .thenReturn(false)
-
-        onClickListenerCaptor.value.onClick(view)
-
-        verify(mockDesktopImmersiveController).moveTaskToImmersive(decor.mTaskInfo)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     fun testImmersiveRestoreButtonClick_exitsImmersiveMode() {
         val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
                 as ArgumentCaptor<View.OnClickListener>

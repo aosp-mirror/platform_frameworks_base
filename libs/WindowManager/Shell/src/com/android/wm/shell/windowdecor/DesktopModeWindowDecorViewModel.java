@@ -935,10 +935,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 //  back to the decoration using
                 //  {@link DesktopModeWindowDecoration#setOnMaximizeOrRestoreClickListener}, which
                 //  should shared with the maximize menu's maximize/restore actions.
+                final DesktopRepository desktopRepository = mDesktopUserRepositories.getProfile(
+                        decoration.mTaskInfo.userId);
                 if (Flags.enableFullyImmersiveInDesktop()
-                        && TaskInfoKt.getRequestingImmersive(decoration.mTaskInfo)) {
-                    // Task is requesting immersive, so it should either enter or exit immersive,
-                    // depending on immersive state.
+                        && desktopRepository.isTaskInFullImmersiveState(
+                                decoration.mTaskInfo.taskId)) {
+                    // Task is in immersive and should exit.
                     onEnterOrExitImmersive(decoration.mTaskInfo);
                 } else {
                     // Full immersive is disabled or task doesn't request/support it, so just
