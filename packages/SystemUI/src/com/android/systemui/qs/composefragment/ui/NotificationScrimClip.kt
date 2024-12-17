@@ -17,16 +17,16 @@
 package com.android.systemui.qs.composefragment.ui
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.layer.CompositingStrategy
-import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * Clipping modifier for clipping out the notification scrim as it slides over QS. It will clip out
@@ -34,16 +34,16 @@ import androidx.compose.ui.graphics.layer.drawLayer
  * from the QS container.
  */
 fun Modifier.notificationScrimClip(clipParams: () -> NotificationScrimClipParams): Modifier {
-    return this.drawWithCache {
+    return this.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
             val params = clipParams()
             val left = -params.leftInset.toFloat()
             val right = size.width + params.rightInset.toFloat()
             val top = params.top.toFloat()
             val bottom = params.bottom.toFloat()
-            val graphicsLayer = obtainGraphicsLayer()
-            graphicsLayer.compositingStrategy = CompositingStrategy.Offscreen
-            graphicsLayer.record {
-                drawContent()
+            val clipSize = Size(right - left, bottom - top)
+            if (!clipSize.isEmpty()) {
                 clipRect {
                     drawRoundRect(
                         color = Color.Black,
@@ -53,9 +53,6 @@ fun Modifier.notificationScrimClip(clipParams: () -> NotificationScrimClipParams
                         size = Size(right - left, bottom - top),
                     )
                 }
-            }
-            onDrawWithContent {
-                drawLayer(graphicsLayer)
             }
         }
 }
