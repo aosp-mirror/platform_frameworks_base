@@ -2564,7 +2564,7 @@
     <string name="accessibility_quick_settings_open_settings">Open <xliff:g name="page" example="Bluetooth">%s</xliff:g> settings.</string>
 
     <!-- accessibility label for button to edit quick settings [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_edit">Edit order of settings.</string>
+    <string name="accessibility_quick_settings_edit">Edit order of Quick Settings.</string>
 
     <!-- accessibility label for button to open power menu [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_power_menu">Power menu</string>

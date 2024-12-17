@@ -54,7 +54,7 @@ fun EditModeButton(
         ) {
             Icon(
                 imageVector = Icons.Default.Edit,
-                contentDescription = stringResource(id = R.string.qs_edit),
+                contentDescription = stringResource(id = R.string.accessibility_quick_settings_edit),
             )
         }
     }
