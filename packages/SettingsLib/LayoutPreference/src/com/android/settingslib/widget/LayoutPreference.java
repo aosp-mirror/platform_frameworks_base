@@ -41,7 +41,7 @@ import androidx.preference.PreferenceViewHolder;
  *      xxxxxxx:allowDividerBelow="true"
  *
  */
-public class LayoutPreference extends Preference {
+public class LayoutPreference extends Preference implements GroupSectionDividerMixin {
 
     private final View.OnClickListener mClickListener = v -> performClick(v);
     private boolean mAllowDividerAbove;
