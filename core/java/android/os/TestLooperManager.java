@@ -41,6 +41,7 @@ public class TestLooperManager {
 
     private boolean mReleased;
     private boolean mLooperBlocked;
+    private final boolean mLooperIsMyLooper;
 
     /**
      * @hide
@@ -54,8 +55,11 @@ public class TestLooperManager {
         }
         mLooper = looper;
         mQueue = mLooper.getQueue();
-        // Post a message that will keep the looper blocked as long as we are dispatching.
-        new Handler(looper).post(new LooperHolder());
+        mLooperIsMyLooper = Looper.myLooper() == looper;
+        if (!mLooperIsMyLooper) {
+            // Post a message that will keep the looper blocked as long as we are dispatching.
+            new Handler(looper).post(new LooperHolder());
+        }
     }
 
     /**
@@ -82,7 +86,7 @@ public class TestLooperManager {
     public Message next() {
         // Wait for the looper block to come up, to make sure we don't accidentally get
         // the message for the block.
-        while (!mLooperBlocked) {
+        while (!mLooperIsMyLooper && !mLooperBlocked) {
             synchronized (this) {
                 try {
                     wait();
@@ -114,9 +118,6 @@ public class TestLooperManager {
      * should be executed by this queue.
      * If the queue is empty or no messages are deliverable, returns null.
      * This method never blocks.
-     *
-     * <p>Callers should always call {@link #recycle(Message)} on the message when all interactions
-     * with it have completed.
      */
     @FlaggedApi(Flags.FLAG_MESSAGE_QUEUE_TESTABILITY)
     @SuppressWarnings("AutoBoxing")  // box the primitive long, or return null to indicate no value
@@ -165,6 +166,9 @@ public class TestLooperManager {
             // This is being called from the thread it should be executed on, we can just dispatch.
             message.target.dispatchMessage(message);
         } else {
+            if (mLooperIsMyLooper) {
+                throw new RuntimeException("Cannot call execute from non Looper thread");
+            }
             MessageExecution execution = new MessageExecution();
             execution.m = message;
             synchronized (execution) {
