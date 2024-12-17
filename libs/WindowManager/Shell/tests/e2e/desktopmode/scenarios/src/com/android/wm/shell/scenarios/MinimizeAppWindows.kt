@@ -61,6 +61,9 @@ constructor(
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         Assume.assumeTrue(Flags.enableMinimizeButton())
+        if (usingKeyboard) {
+            Assume.assumeTrue(Flags.enableTaskResizingKeyboardShortcuts())
+        }
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
         ChangeDisplayOrientationRule.setRotation(rotation)
