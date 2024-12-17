@@ -110,7 +110,7 @@ constructor(
                 apps: Array<RemoteAnimationTarget>,
                 wallpapers: Array<RemoteAnimationTarget>,
                 nonApps: Array<RemoteAnimationTarget>,
-                finishedCallback: IRemoteAnimationFinishedCallback?
+                finishedCallback: IRemoteAnimationFinishedCallback?,
             ) {
                 Log.d(TAG, "occludeAnimationRunner#onAnimationStart")
                 // Wrap the callback so that it's guaranteed to be nulled out once called.
@@ -126,7 +126,7 @@ constructor(
                     taskInfo = apps.firstOrNull()?.taskInfo,
                 )
                 activityTransitionAnimator
-                    .createRunner(occludeAnimationController)
+                    .createEphemeralRunner(occludeAnimationController)
                     .onAnimationStart(
                         transit,
                         apps,
@@ -161,7 +161,7 @@ constructor(
                 apps: Array<RemoteAnimationTarget>,
                 wallpapers: Array<RemoteAnimationTarget>,
                 nonApps: Array<RemoteAnimationTarget>,
-                finishedCallback: IRemoteAnimationFinishedCallback?
+                finishedCallback: IRemoteAnimationFinishedCallback?,
             ) {
                 Log.d(TAG, "unoccludeAnimationRunner#onAnimationStart")
                 // Wrap the callback so that it's guaranteed to be nulled out once called.
@@ -179,14 +179,14 @@ constructor(
                 interactionJankMonitor.begin(
                     createInteractionJankMonitorConf(
                         InteractionJankMonitor.CUJ_LOCKSCREEN_OCCLUSION,
-                        "UNOCCLUDE"
+                        "UNOCCLUDE",
                     )
                 )
                 if (apps.isEmpty()) {
                     Log.d(
                         TAG,
                         "No apps provided to unocclude runner; " +
-                            "skipping animation and unoccluding."
+                            "skipping animation and unoccluding.",
                     )
                     unoccludeAnimationFinishedCallback?.onAnimationFinished()
                     return
@@ -210,7 +210,7 @@ constructor(
                                     0f,
                                     (1f - animatedValue) *
                                         surfaceHeight *
-                                        UNOCCLUDE_TRANSLATE_DISTANCE_PERCENT
+                                        UNOCCLUDE_TRANSLATE_DISTANCE_PERCENT,
                                 )
 
                                 SurfaceParams.Builder(target.leash)
@@ -313,12 +313,12 @@ constructor(
 
     private fun createInteractionJankMonitorConf(
         cuj: Int,
-        tag: String?
+        tag: String?,
     ): InteractionJankMonitor.Configuration.Builder {
         val builder =
             InteractionJankMonitor.Configuration.Builder.withView(
                 cuj,
-                keyguardViewController.get().getViewRootImpl().view
+                keyguardViewController.get().getViewRootImpl().view,
             )
         return if (tag != null) builder.setTag(tag) else builder
     }
