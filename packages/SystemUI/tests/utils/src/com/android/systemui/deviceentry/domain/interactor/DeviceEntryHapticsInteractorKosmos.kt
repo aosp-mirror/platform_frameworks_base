@@ -23,6 +23,7 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyevent.domain.interactor.keyEventInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardBypassInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.util.time.systemClock
@@ -34,6 +35,8 @@ val Kosmos.deviceEntryHapticsInteractor by
         DeviceEntryHapticsInteractor(
             biometricSettingsRepository = biometricSettingsRepository,
             deviceEntryBiometricAuthInteractor = deviceEntryBiometricAuthInteractor,
+            deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
+            keyguardBypassInteractor = keyguardBypassInteractor,
             deviceEntryFingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
             deviceEntrySourceInteractor = deviceEntrySourceInteractor,
             fingerprintPropertyRepository = fingerprintPropertyRepository,

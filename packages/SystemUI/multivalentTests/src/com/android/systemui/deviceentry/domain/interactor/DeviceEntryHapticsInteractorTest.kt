@@ -256,6 +256,22 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
 
     @EnableSceneContainer
     @Test
+    fun playSuccessHaptic_onFaceAuthSuccess_whenBypassDisabled_sceneContainer() =
+        testScope.runTest {
+            underTest = kosmos.deviceEntryHapticsInteractor
+            val playSuccessHaptic by collectLastValue(underTest.playSuccessHaptic)
+
+            enrollFace()
+            kosmos.configureKeyguardBypass(isBypassAvailable = false)
+            runCurrent()
+            configureDeviceEntryFromBiometricSource(isFaceUnlock = true, bypassEnabled = false)
+            kosmos.fakeDeviceEntryFaceAuthRepository.isAuthenticated.value = true
+
+            assertThat(playSuccessHaptic).isNotNull()
+        }
+
+    @EnableSceneContainer
+    @Test
     fun skipSuccessHaptic_onDeviceEntryFromSfps_whenPowerDown_sceneContainer() =
         testScope.runTest {
             kosmos.configureKeyguardBypass(isBypassAvailable = false)
@@ -299,6 +315,7 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
     private fun configureDeviceEntryFromBiometricSource(
         isFpUnlock: Boolean = false,
         isFaceUnlock: Boolean = false,
+        bypassEnabled: Boolean = true,
     ) {
         // Mock DeviceEntrySourceInteractor#deviceEntryBiometricAuthSuccessState
         if (isFpUnlock) {
@@ -314,11 +331,14 @@ class DeviceEntryHapticsInteractorTest : SysuiTestCase() {
             )
 
             // Mock DeviceEntrySourceInteractor#faceWakeAndUnlockMode = MODE_UNLOCK_COLLAPSING
-            kosmos.sceneInteractor.setTransitionState(
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(Scenes.Lockscreen)
+            // if the successful face authentication will bypass keyguard
+            if (bypassEnabled) {
+                kosmos.sceneInteractor.setTransitionState(
+                    MutableStateFlow<ObservableTransitionState>(
+                        ObservableTransitionState.Idle(Scenes.Lockscreen)
+                    )
                 )
-            )
+            }
         }
         underTest = kosmos.deviceEntryHapticsInteractor
     }
