@@ -112,6 +112,7 @@ public final class HubServiceInfo implements Parcelable {
      * <p>The value can be one of {@link HubServiceInfo#FORMAT_CUSTOM}, {@link
      * HubServiceInfo#FORMAT_AIDL} or {@link HubServiceInfo#FORMAT_PW_RPC_PROTOBUF}.
      */
+    @ServiceFormat
     public int getFormat() {
         return mFormat;
     }
@@ -178,7 +179,8 @@ public final class HubServiceInfo implements Parcelable {
          *   <li>Pigweed RPC with Protobuf: com.example.proto.ExampleService
          * </ol>
          *
-         * @param serviceDescriptor The service descriptor.
+         * @param serviceDescriptor The service descriptor for the interface, provided by the
+         *     vendor.
          * @param format One of {@link HubServiceInfo#FORMAT_CUSTOM}, {@link
          *     HubServiceInfo#FORMAT_AIDL} or {@link HubServiceInfo#FORMAT_PW_RPC_PROTOBUF}.
          * @param majorVersion Breaking changes should be a major version bump.
