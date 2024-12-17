@@ -31,26 +31,28 @@ namespace hal = aidl::android::hardware::power;
 struct ACpuHeadroomParams : public CpuHeadroomParamsInternal {};
 struct AGpuHeadroomParams : public GpuHeadroomParamsInternal {};
 
-const int CPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN = 50;
-const int CPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX = 10000;
-const int GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN = 50;
-const int GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX = 10000;
-const int CPU_HEADROOM_MAX_TID_COUNT = 5;
-
 struct ASystemHealthManager {
 public:
     static ASystemHealthManager* getInstance();
-    ASystemHealthManager(std::shared_ptr<IHintManager>& hintManager);
+
+    ASystemHealthManager(std::shared_ptr<IHintManager>& hintManager,
+                         IHintManager::HintManagerClientData&& clientData);
     ASystemHealthManager() = delete;
     ~ASystemHealthManager();
     int getCpuHeadroom(const ACpuHeadroomParams* params, float* outHeadroom);
     int getGpuHeadroom(const AGpuHeadroomParams* params, float* outHeadroom);
     int getCpuHeadroomMinIntervalMillis(int64_t* outMinIntervalMillis);
     int getGpuHeadroomMinIntervalMillis(int64_t* outMinIntervalMillis);
+    int getMaxCpuHeadroomTidsSize(size_t* outSize);
+    int getCpuHeadroomCalculationWindowRange(int32_t* _Nonnull outMinMillis,
+                                             int32_t* _Nonnull outMaxMillis);
+    int getGpuHeadroomCalculationWindowRange(int32_t* _Nonnull outMinMillis,
+                                             int32_t* _Nonnull outMaxMillis);
 
 private:
     static ASystemHealthManager* create(std::shared_ptr<IHintManager> hintManager);
     std::shared_ptr<IHintManager> mHintManager;
+    IHintManager::HintManagerClientData mClientData;
 };
 
 ASystemHealthManager* ASystemHealthManager::getInstance() {
@@ -60,10 +62,11 @@ ASystemHealthManager* ASystemHealthManager::getInstance() {
     return instance;
 }
 
-ASystemHealthManager::ASystemHealthManager(std::shared_ptr<IHintManager>& hintManager)
-      : mHintManager(std::move(hintManager)) {}
+ASystemHealthManager::ASystemHealthManager(std::shared_ptr<IHintManager>& hintManager,
+                                           IHintManager::HintManagerClientData&& clientData)
+      : mHintManager(std::move(hintManager)), mClientData(clientData) {}
 
-ASystemHealthManager::~ASystemHealthManager() {}
+ASystemHealthManager::~ASystemHealthManager() = default;
 
 ASystemHealthManager* ASystemHealthManager::create(std::shared_ptr<IHintManager> hintManager) {
     if (!hintManager) {
@@ -74,20 +77,37 @@ ASystemHealthManager* ASystemHealthManager::create(std::shared_ptr<IHintManager>
         ALOGE("%s: PerformanceHint service is not ready ", __FUNCTION__);
         return nullptr;
     }
-    return new ASystemHealthManager(hintManager);
-}
-
-ASystemHealthManager* ASystemHealth_acquireManager() {
-    return ASystemHealthManager::getInstance();
+    IHintManager::HintManagerClientData clientData;
+    ndk::ScopedAStatus ret = hintManager->getClientData(&clientData);
+    if (!ret.isOk()) {
+        ALOGE("%s: PerformanceHint service is not initialized %s", __FUNCTION__, ret.getMessage());
+        return nullptr;
+    }
+    return new ASystemHealthManager(hintManager, std::move(clientData));
 }
 
 int ASystemHealthManager::getCpuHeadroom(const ACpuHeadroomParams* params, float* outHeadroom) {
+    if (!mClientData.supportInfo.headroom.isCpuSupported) return ENOTSUP;
     std::optional<hal::CpuHeadroomResult> res;
     ::ndk::ScopedAStatus ret;
     CpuHeadroomParamsInternal internalParams;
     if (!params) {
         ret = mHintManager->getCpuHeadroom(internalParams, &res);
     } else {
+        LOG_ALWAYS_FATAL_IF((int)params->tids.size() > mClientData.maxCpuHeadroomThreads,
+                            "%s: tids size should not exceed %d", __FUNCTION__,
+                            mClientData.maxCpuHeadroomThreads);
+        LOG_ALWAYS_FATAL_IF(params->calculationWindowMillis <
+                                            mClientData.supportInfo.headroom
+                                                    .cpuMinCalculationWindowMillis ||
+                                    params->calculationWindowMillis >
+                                            mClientData.supportInfo.headroom
+                                                    .cpuMaxCalculationWindowMillis,
+                            "%s: calculationWindowMillis should be in range [%d, %d] but got %d",
+                            __FUNCTION__,
+                            mClientData.supportInfo.headroom.cpuMinCalculationWindowMillis,
+                            mClientData.supportInfo.headroom.cpuMaxCalculationWindowMillis,
+                            params->calculationWindowMillis);
         ret = mHintManager->getCpuHeadroom(*params, &res);
     }
     if (!ret.isOk()) {
@@ -106,12 +126,24 @@ int ASystemHealthManager::getCpuHeadroom(const ACpuHeadroomParams* params, float
 }
 
 int ASystemHealthManager::getGpuHeadroom(const AGpuHeadroomParams* params, float* outHeadroom) {
+    if (!mClientData.supportInfo.headroom.isGpuSupported) return ENOTSUP;
     std::optional<hal::GpuHeadroomResult> res;
     ::ndk::ScopedAStatus ret;
     GpuHeadroomParamsInternal internalParams;
     if (!params) {
         ret = mHintManager->getGpuHeadroom(internalParams, &res);
     } else {
+        LOG_ALWAYS_FATAL_IF(params->calculationWindowMillis <
+                                            mClientData.supportInfo.headroom
+                                                    .gpuMinCalculationWindowMillis ||
+                                    params->calculationWindowMillis >
+                                            mClientData.supportInfo.headroom
+                                                    .gpuMaxCalculationWindowMillis,
+                            "%s: calculationWindowMillis should be in range [%d, %d] but got %d",
+                            __FUNCTION__,
+                            mClientData.supportInfo.headroom.gpuMinCalculationWindowMillis,
+                            mClientData.supportInfo.headroom.gpuMaxCalculationWindowMillis,
+                            params->calculationWindowMillis);
         ret = mHintManager->getGpuHeadroom(*params, &res);
     }
     if (!ret.isOk()) {
@@ -128,6 +160,7 @@ int ASystemHealthManager::getGpuHeadroom(const AGpuHeadroomParams* params, float
 }
 
 int ASystemHealthManager::getCpuHeadroomMinIntervalMillis(int64_t* outMinIntervalMillis) {
+    if (!mClientData.supportInfo.headroom.isCpuSupported) return ENOTSUP;
     int64_t minIntervalMillis = 0;
     ::ndk::ScopedAStatus ret = mHintManager->getCpuHeadroomMinIntervalMillis(&minIntervalMillis);
     if (!ret.isOk()) {
@@ -142,6 +175,7 @@ int ASystemHealthManager::getCpuHeadroomMinIntervalMillis(int64_t* outMinInterva
 }
 
 int ASystemHealthManager::getGpuHeadroomMinIntervalMillis(int64_t* outMinIntervalMillis) {
+    if (!mClientData.supportInfo.headroom.isGpuSupported) return ENOTSUP;
     int64_t minIntervalMillis = 0;
     ::ndk::ScopedAStatus ret = mHintManager->getGpuHeadroomMinIntervalMillis(&minIntervalMillis);
     if (!ret.isOk()) {
@@ -153,6 +187,57 @@ int ASystemHealthManager::getGpuHeadroomMinIntervalMillis(int64_t* outMinInterva
     }
     *outMinIntervalMillis = minIntervalMillis;
     return OK;
+}
+
+int ASystemHealthManager::getMaxCpuHeadroomTidsSize(size_t* outSize) {
+    if (!mClientData.supportInfo.headroom.isGpuSupported) return ENOTSUP;
+    *outSize = mClientData.maxCpuHeadroomThreads;
+    return OK;
+}
+
+int ASystemHealthManager::getCpuHeadroomCalculationWindowRange(int32_t* _Nonnull outMinMillis,
+                                                               int32_t* _Nonnull outMaxMillis) {
+    if (!mClientData.supportInfo.headroom.isCpuSupported) return ENOTSUP;
+    *outMinMillis = mClientData.supportInfo.headroom.cpuMinCalculationWindowMillis;
+    *outMaxMillis = mClientData.supportInfo.headroom.cpuMaxCalculationWindowMillis;
+    return OK;
+}
+
+int ASystemHealthManager::getGpuHeadroomCalculationWindowRange(int32_t* _Nonnull outMinMillis,
+                                                               int32_t* _Nonnull outMaxMillis) {
+    if (!mClientData.supportInfo.headroom.isGpuSupported) return ENOTSUP;
+    *outMinMillis = mClientData.supportInfo.headroom.gpuMinCalculationWindowMillis;
+    *outMaxMillis = mClientData.supportInfo.headroom.gpuMaxCalculationWindowMillis;
+    return OK;
+}
+
+int ASystemHealth_getMaxCpuHeadroomTidsSize(size_t* _Nonnull outSize) {
+    LOG_ALWAYS_FATAL_IF(outSize == nullptr, "%s: outSize should not be null", __FUNCTION__);
+    auto manager = ASystemHealthManager::getInstance();
+    if (manager == nullptr) return ENOTSUP;
+    return manager->getMaxCpuHeadroomTidsSize(outSize);
+}
+
+int ASystemHealth_getCpuHeadroomCalculationWindowRange(int32_t* _Nonnull outMinMillis,
+                                                       int32_t* _Nonnull outMaxMillis) {
+    LOG_ALWAYS_FATAL_IF(outMinMillis == nullptr, "%s: outMinMillis should not be null",
+                        __FUNCTION__);
+    LOG_ALWAYS_FATAL_IF(outMaxMillis == nullptr, "%s: outMaxMillis should not be null",
+                        __FUNCTION__);
+    auto manager = ASystemHealthManager::getInstance();
+    if (manager == nullptr) return ENOTSUP;
+    return manager->getCpuHeadroomCalculationWindowRange(outMinMillis, outMaxMillis);
+}
+
+int ASystemHealth_getGpuHeadroomCalculationWindowRange(int32_t* _Nonnull outMinMillis,
+                                                       int32_t* _Nonnull outMaxMillis) {
+    LOG_ALWAYS_FATAL_IF(outMinMillis == nullptr, "%s: outMinMillis should not be null",
+                        __FUNCTION__);
+    LOG_ALWAYS_FATAL_IF(outMaxMillis == nullptr, "%s: outMaxMillis should not be null",
+                        __FUNCTION__);
+    auto manager = ASystemHealthManager::getInstance();
+    if (manager == nullptr) return ENOTSUP;
+    return manager->getGpuHeadroomCalculationWindowRange(outMinMillis, outMaxMillis);
 }
 
 int ASystemHealth_getCpuHeadroom(const ACpuHeadroomParams* _Nullable params,
@@ -189,19 +274,15 @@ int ASystemHealth_getGpuHeadroomMinIntervalMillis(int64_t* _Nonnull outMinInterv
 
 void ACpuHeadroomParams_setCalculationWindowMillis(ACpuHeadroomParams* _Nonnull params,
                                                    int windowMillis) {
-    LOG_ALWAYS_FATAL_IF(windowMillis < CPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN ||
-                                windowMillis > CPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX,
-                        "%s: windowMillis should be in range [50, 10000] but got %d", __FUNCTION__,
-                        windowMillis);
+    LOG_ALWAYS_FATAL_IF(windowMillis <= 0, "%s: windowMillis should be positive but got %d",
+                        __FUNCTION__, windowMillis);
     params->calculationWindowMillis = windowMillis;
 }
 
 void AGpuHeadroomParams_setCalculationWindowMillis(AGpuHeadroomParams* _Nonnull params,
                                                    int windowMillis) {
-    LOG_ALWAYS_FATAL_IF(windowMillis < GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MIN ||
-                                windowMillis > GPU_HEADROOM_CALCULATION_WINDOW_MILLIS_MAX,
-                        "%s: windowMillis should be in range [50, 10000] but got %d", __FUNCTION__,
-                        windowMillis);
+    LOG_ALWAYS_FATAL_IF(windowMillis <= 0, "%s: windowMillis should be positive but got %d",
+                        __FUNCTION__, windowMillis);
     params->calculationWindowMillis = windowMillis;
 }
 
@@ -214,13 +295,11 @@ int AGpuHeadroomParams_getCalculationWindowMillis(AGpuHeadroomParams* _Nonnull p
 }
 
 void ACpuHeadroomParams_setTids(ACpuHeadroomParams* _Nonnull params, const int* _Nonnull tids,
-                                int tidsSize) {
+                                size_t tidsSize) {
     LOG_ALWAYS_FATAL_IF(tids == nullptr, "%s: tids should not be null", __FUNCTION__);
-    LOG_ALWAYS_FATAL_IF(tidsSize > CPU_HEADROOM_MAX_TID_COUNT, "%s: tids size should not exceed 5",
-                        __FUNCTION__);
     params->tids.resize(tidsSize);
     params->tids.clear();
-    for (int i = 0; i < tidsSize; ++i) {
+    for (int i = 0; i < (int)tidsSize; ++i) {
         LOG_ALWAYS_FATAL_IF(tids[i] <= 0, "ACpuHeadroomParams_setTids: Invalid non-positive tid %d",
                             tids[i]);
         params->tids[i] = tids[i];
@@ -269,10 +348,10 @@ AGpuHeadroomParams* _Nonnull AGpuHeadroomParams_create() {
     return new AGpuHeadroomParams();
 }
 
-void ACpuHeadroomParams_destroy(ACpuHeadroomParams* _Nonnull params) {
+void ACpuHeadroomParams_destroy(ACpuHeadroomParams* _Nullable params) {
     delete params;
 }
 
-void AGpuHeadroomParams_destroy(AGpuHeadroomParams* _Nonnull params) {
+void AGpuHeadroomParams_destroy(AGpuHeadroomParams* _Nullable params) {
     delete params;
 }

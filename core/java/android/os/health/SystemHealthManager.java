@@ -18,6 +18,7 @@ package android.os.health;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -42,6 +43,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SynchronousResultReceiver;
+import android.util.Pair;
+import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.server.power.optimization.Flags;
@@ -69,15 +72,41 @@ import java.util.function.Consumer;
  * plugged in (e.g. using {@link android.app.job.JobScheduler JobScheduler}), and
  * while that can affect charging rates, it is still preferable to actually draining
  * the battery.
+ * <p>
+ * <b>CPU/GPU Usage</b><br>
+ * CPU/GPU headroom APIs are designed to be best used by applications with consistent and intense
+ * workload such as games to query the remaining capacity headroom over a short period and perform
+ * optimization accordingly. Due to the nature of the fast job scheduling and frequency scaling of
+ * CPU and GPU, the headroom by nature will have "TOCTOU" problem which makes it less suitable for
+ * apps with inconsistent or low workload to take any useful action but simply monitoring. And to
+ * avoid oscillation it's not recommended to adjust workload too frequent (on each polling request)
+ * or too aggressively. As the headroom calculation is more based on reflecting past history usage
+ * than predicting future capacity. Take game as an example, if the API returns CPU headroom of 0 in
+ * one scenario (especially if it's constant across multiple calls), or some value significantly
+ * smaller than other scenarios, then it can reason that the recent performance result is more CPU
+ * bottlenecked. Then reducing the CPU workload intensity can help reserve some headroom to handle
+ * the load variance better, which can result in less frame drops or smooth FPS value. On the other
+ * hand, if the API returns large CPU headroom constantly, the app can be more confident to increase
+ * the workload and expect higher possibility of device meeting its performance expectation.
+ * App can also use thermal APIs to read the current thermal status and headroom first, then poll
+ * the CPU and GPU headroom if the device is (about to) getting thermal throttled. If the CPU/GPU
+ * headrooms provide enough significance such as one valued at 0 while the other at 100, then it can
+ * be used to infer that reducing CPU workload could be more efficient to cool down the device.
+ * There is a caveat that the power controller may scale down the frequency of the CPU and GPU due
+ * to thermal and other reasons, which can result in a higher than usual percentage usage of the
+ * capacity.
  */
 @SystemService(Context.SYSTEM_HEALTH_SERVICE)
 public class SystemHealthManager {
+    private static final String TAG = "SystemHealthManager";
     @NonNull
     private final IBatteryStats mBatteryStats;
     @Nullable
     private final IPowerStatsService mPowerStats;
     @Nullable
     private final IHintManager mHintManager;
+    @Nullable
+    private final IHintManager.HintManagerClientData mHintManagerClientData;
     private List<PowerMonitor> mPowerMonitorsInfo;
     private final Object mPowerMonitorsLock = new Object();
     private static final long TAKE_UID_SNAPSHOT_TIMEOUT_MILLIS = 10_000;
@@ -109,29 +138,72 @@ public class SystemHealthManager {
         mBatteryStats = batteryStats;
         mPowerStats = powerStats;
         mHintManager = hintManager;
+        IHintManager.HintManagerClientData data = null;
+        if (mHintManager != null) {
+            try {
+                data = mHintManager.getClientData();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get hint manager client data", e);
+            }
+        }
+        mHintManagerClientData = data;
     }
 
     /**
-     * Provides an estimate of global available CPU headroom.
+     * Provides an estimate of available CPU capacity headroom of the device.
      * <p>
+     * The value can be used by the calling application to determine if the workload was CPU bound
+     * and then take action accordingly to ensure that the workload can be completed smoothly. It
+     * can also be used with the thermal status and headroom to determine if reducing the CPU bound
+     * workload can help reduce the device temperature to avoid thermal throttling.
+     * <p>
+     * If the params are valid, each call will perform at least one synchronous binder transaction
+     * that can take more than 1ms. So it's not recommended to call or wait for this on critical
+     * threads. Some devices may implement this as an on-demand API with lazy initialization, so the
+     * caller should expect higher latency when making the first call (especially with non-default
+     * params) since app starts or after changing params, as the device may need to change its data
+     * collection.
      *
-     * @param  params params to customize the CPU headroom calculation, null to use default params.
-     * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable.
-     *         A valid value is ranged from [0, 100], where 0 indicates no more CPU resources can be
-     *         granted.
+     * @param  params params to customize the CPU headroom calculation, or null to use default.
+     * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable due to
+     *         server error or not enough user CPU workload.
+     *         Each valid value ranges from [0, 100], where 0 indicates no more cpu resources can be
+     *         granted
      * @throws UnsupportedOperationException if the API is unsupported.
+     * @throws IllegalArgumentException if the params are invalid.
      * @throws SecurityException if the TIDs of the params don't belong to the same process.
      * @throws IllegalStateException if the TIDs of the params don't have the same affinity setting.
      */
     @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
     public @FloatRange(from = 0f, to = 100f) float getCpuHeadroom(
             @Nullable CpuHeadroomParams params) {
-        if (mHintManager == null) {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isCpuSupported) {
             throw new UnsupportedOperationException();
+        }
+        if (params != null) {
+            if (params.mInternal.tids != null && (params.mInternal.tids.length == 0
+                    || params.mInternal.tids.length
+                    > mHintManagerClientData.maxCpuHeadroomThreads)) {
+                throw new IllegalArgumentException(
+                        "Invalid number of TIDs: " + params.mInternal.tids.length);
+            }
+            if (params.mInternal.calculationWindowMillis
+                    < mHintManagerClientData.supportInfo.headroom.cpuMinCalculationWindowMillis
+                    || params.mInternal.calculationWindowMillis
+                    > mHintManagerClientData.supportInfo.headroom.cpuMaxCalculationWindowMillis) {
+                throw new IllegalArgumentException(
+                        "Invalid calculation window: "
+                        + params.mInternal.calculationWindowMillis + ", expect range: ["
+                        + mHintManagerClientData.supportInfo.headroom.cpuMinCalculationWindowMillis
+                        + ", "
+                        + mHintManagerClientData.supportInfo.headroom.cpuMaxCalculationWindowMillis
+                        + "]");
+            }
         }
         try {
             final CpuHeadroomResult ret = mHintManager.getCpuHeadroom(
-                    params != null ? params.getInternal() : new CpuHeadroomParamsInternal());
+                    params != null ? params.mInternal : new CpuHeadroomParamsInternal());
             if (ret == null || ret.getTag() != CpuHeadroomResult.globalHeadroom) {
                 return Float.NaN;
             }
@@ -141,27 +213,69 @@ public class SystemHealthManager {
         }
     }
 
-
+    /**
+     * Gets the maximum number of TIDs this device supports for getting CPU headroom.
+     * <p>
+     * See {@link CpuHeadroomParams#setTids(int...)}.
+     *
+     * @return the maximum size of TIDs supported
+     * @throws UnsupportedOperationException if the CPU headroom API is unsupported.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    public @IntRange(from = 1) int getMaxCpuHeadroomTidsSize() {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isCpuSupported) {
+            throw new UnsupportedOperationException();
+        }
+        return mHintManagerClientData.maxCpuHeadroomThreads;
+    }
 
     /**
-     * Provides an estimate of global available GPU headroom of the device.
+     * Provides an estimate of available GPU capacity headroom of the device.
      * <p>
+     * The value can be used by the calling application to determine if the workload was GPU bound
+     * and then take action accordingly to ensure that the workload can be completed smoothly. It
+     * can also be used with the thermal status and headroom to determine if reducing the GPU bound
+     * workload can help reduce the device temperature to avoid thermal throttling.
+     * <p>
+     * If the params are valid, each call will perform at least one synchronous binder transaction
+     * that can take more than 1ms. So it's not recommended to call or wait for this on critical
+     * threads. Some devices may implement this as an on-demand API with lazy initialization, so the
+     * caller should expect higher latency when making the first call (especially with non-default
+     * params) since app starts or after changing params, as the device may need to change its data
+     * collection.
      *
-     * @param  params params to customize the GPU headroom calculation, null to use default params.
+     * @param  params params to customize the GPU headroom calculation, or null to use default.
      * @return a single value headroom or a {@code Float.NaN} if it's temporarily unavailable.
-     *         A valid value is ranged from [0, 100], where 0 indicates no more GPU resources can be
+     *         Each valid value ranges from [0, 100], where 0 indicates no more cpu resources can be
      *         granted.
      * @throws UnsupportedOperationException if the API is unsupported.
+     * @throws IllegalArgumentException if the params are invalid.
      */
     @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
     public @FloatRange(from = 0f, to = 100f) float getGpuHeadroom(
             @Nullable GpuHeadroomParams params) {
-        if (mHintManager == null) {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isGpuSupported) {
             throw new UnsupportedOperationException();
+        }
+        if (params != null) {
+            if (params.mInternal.calculationWindowMillis
+                    < mHintManagerClientData.supportInfo.headroom.gpuMinCalculationWindowMillis
+                    || params.mInternal.calculationWindowMillis
+                    > mHintManagerClientData.supportInfo.headroom.gpuMaxCalculationWindowMillis) {
+                throw new IllegalArgumentException(
+                        "Invalid calculation window: "
+                        + params.mInternal.calculationWindowMillis + ", expect range: ["
+                        + mHintManagerClientData.supportInfo.headroom.gpuMinCalculationWindowMillis
+                        + ", "
+                        + mHintManagerClientData.supportInfo.headroom.gpuMaxCalculationWindowMillis
+                        + "]");
+            }
         }
         try {
             final GpuHeadroomResult ret = mHintManager.getGpuHeadroom(
-                    params != null ? params.getInternal() : new GpuHeadroomParamsInternal());
+                    params != null ? params.mInternal : new GpuHeadroomParamsInternal());
             if (ret == null || ret.getTag() != GpuHeadroomResult.globalHeadroom) {
                 return Float.NaN;
             }
@@ -172,7 +286,51 @@ public class SystemHealthManager {
     }
 
     /**
-     * Minimum polling interval for calling {@link #getCpuHeadroom(CpuHeadroomParams)} in
+     * Gets the range of the calculation window size for CPU headroom.
+     * <p>
+     * In API version 36, the range will be a superset of [50, 10000].
+     * <p>
+     * See {@link CpuHeadroomParams#setCalculationWindowMillis(int)}.
+     *
+     * @return the range of the calculation window size supported in milliseconds.
+     * @throws UnsupportedOperationException if the CPU headroom API is unsupported.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    @NonNull
+    public Pair<Integer, Integer> getCpuHeadroomCalculationWindowRange() {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isCpuSupported) {
+            throw new UnsupportedOperationException();
+        }
+        return new Pair<>(
+                mHintManagerClientData.supportInfo.headroom.cpuMinCalculationWindowMillis,
+                mHintManagerClientData.supportInfo.headroom.cpuMaxCalculationWindowMillis);
+    }
+
+    /**
+     * Gets the range of the calculation window size for GPU headroom.
+     * <p>
+     * In API version 36, the range will be a superset of [50, 10000].
+     * <p>
+     * See {@link GpuHeadroomParams#setCalculationWindowMillis(int)}.
+     *
+     * @return the range of the calculation window size supported in milliseconds.
+     * @throws UnsupportedOperationException if the GPU headroom API is unsupported.
+     */
+    @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
+    @NonNull
+    public Pair<Integer, Integer> getGpuHeadroomCalculationWindowRange() {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isGpuSupported) {
+            throw new UnsupportedOperationException();
+        }
+        return new Pair<>(
+                mHintManagerClientData.supportInfo.headroom.gpuMinCalculationWindowMillis,
+                mHintManagerClientData.supportInfo.headroom.gpuMaxCalculationWindowMillis);
+    }
+
+    /**
+     * Gets minimum polling interval for calling {@link #getCpuHeadroom(CpuHeadroomParams)} in
      * milliseconds.
      * <p>
      * The {@link #getCpuHeadroom(CpuHeadroomParams)} API may return cached result if called more
@@ -182,7 +340,8 @@ public class SystemHealthManager {
      */
     @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
     public long getCpuHeadroomMinIntervalMillis() {
-        if (mHintManager == null) {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isCpuSupported) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -193,7 +352,7 @@ public class SystemHealthManager {
     }
 
     /**
-     * Minimum polling interval for calling {@link #getGpuHeadroom(GpuHeadroomParams)} in
+     * Gets minimum polling interval for calling {@link #getGpuHeadroom(GpuHeadroomParams)} in
      * milliseconds.
      * <p>
      * The {@link #getGpuHeadroom(GpuHeadroomParams)} API may return cached result if called more
@@ -203,7 +362,8 @@ public class SystemHealthManager {
      */
     @FlaggedApi(android.os.Flags.FLAG_CPU_GPU_HEADROOMS)
     public long getGpuHeadroomMinIntervalMillis() {
-        if (mHintManager == null) {
+        if (mHintManager == null || mHintManagerClientData == null
+                || !mHintManagerClientData.supportInfo.headroom.isGpuSupported) {
             throw new UnsupportedOperationException();
         }
         try {

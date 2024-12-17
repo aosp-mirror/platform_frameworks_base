@@ -66,6 +66,7 @@ interface IHintManager {
     parcelable HintManagerClientData {
         int powerHalVersion;
         int maxGraphicsPipelineThreads;
+        int maxCpuHeadroomThreads;
         long preferredRateNanos;
         SupportInfo supportInfo;
     }
@@ -82,4 +83,6 @@ interface IHintManager {
      * passing back a bundle of support and configuration information.
      */
     HintManagerClientData registerClient(in IHintManagerClient client);
+
+    HintManagerClientData getClientData();
 }
