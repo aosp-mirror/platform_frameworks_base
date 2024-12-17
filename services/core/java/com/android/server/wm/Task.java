@@ -3652,14 +3652,6 @@ class Task extends TaskFragment {
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());
-        if (!Flags.drawSnapshotAspectRatioMatch()) {
-            final WindowState mainWindow = getTopFullscreenMainWindow();
-            if (mainWindow != null) {
-                info.topOpaqueWindowInsetsState =
-                        mainWindow.getInsetsStateWithVisibilityOverride();
-                info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
-            }
-        }
         return info;
     }
 
