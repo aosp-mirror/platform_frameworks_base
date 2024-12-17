@@ -350,15 +350,17 @@ public class IntrusionDetectionServiceTest {
         mDataAggregator.setHandler(mLooperOfDataAggregator, mockThread);
 
         SecurityEvent securityEvent = new SecurityEvent(0, new byte[0]);
-        IntrusionDetectionEvent eventOne = new IntrusionDetectionEvent(securityEvent);
+        IntrusionDetectionEvent eventOne =
+                IntrusionDetectionEvent.createForSecurityEvent(securityEvent);
 
         ConnectEvent connectEvent = new ConnectEvent(
                 "127.0.0.1", 80, null, 0);
-        IntrusionDetectionEvent eventTwo = new IntrusionDetectionEvent(connectEvent);
+        IntrusionDetectionEvent eventTwo =
+                IntrusionDetectionEvent.createForConnectEvent(connectEvent);
 
         DnsEvent dnsEvent = new DnsEvent(
                 null, new String[] {"127.0.0.1"}, 1, null, 0);
-        IntrusionDetectionEvent eventThree = new IntrusionDetectionEvent(dnsEvent);
+        IntrusionDetectionEvent eventThree = IntrusionDetectionEvent.createForDnsEvent(dnsEvent);
 
         List<IntrusionDetectionEvent> events = new ArrayList<>();
         events.add(eventOne);
@@ -581,7 +583,8 @@ public class IntrusionDetectionServiceTest {
 
         // call the methods on the transport object
         IntrusionDetectionEvent event =
-                new IntrusionDetectionEvent(new SecurityEvent(123, new byte[15]));
+                IntrusionDetectionEvent.createForSecurityEvent(
+                        new SecurityEvent(123, new byte[15]));
         List<IntrusionDetectionEvent> events = new ArrayList<>();
         events.add(event);
         assertTrue(transport.initialize());

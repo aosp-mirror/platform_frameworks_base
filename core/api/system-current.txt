@@ -12734,9 +12734,9 @@ package android.security.authenticationpolicy {
 package android.security.intrusiondetection {
 
   @FlaggedApi("android.security.afl_api") public final class IntrusionDetectionEvent implements android.os.Parcelable {
-    ctor public IntrusionDetectionEvent(@NonNull android.app.admin.SecurityLog.SecurityEvent);
-    ctor public IntrusionDetectionEvent(@NonNull android.app.admin.DnsEvent);
-    ctor public IntrusionDetectionEvent(@NonNull android.app.admin.ConnectEvent);
+    method @NonNull public static android.security.intrusiondetection.IntrusionDetectionEvent createForConnectEvent(@NonNull android.app.admin.ConnectEvent);
+    method @NonNull public static android.security.intrusiondetection.IntrusionDetectionEvent createForDnsEvent(@NonNull android.app.admin.DnsEvent);
+    method @NonNull public static android.security.intrusiondetection.IntrusionDetectionEvent createForSecurityEvent(@NonNull android.app.admin.SecurityLog.SecurityEvent);
     method @FlaggedApi("android.security.afl_api") public int describeContents();
     method @NonNull public android.app.admin.ConnectEvent getConnectEvent();
     method @NonNull public android.app.admin.DnsEvent getDnsEvent();

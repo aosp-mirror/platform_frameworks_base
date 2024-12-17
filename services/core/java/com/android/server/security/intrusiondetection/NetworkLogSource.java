@@ -129,7 +129,8 @@ public class NetworkLogSource implements DataSource {
                                     timestamp);
                     dnsEvent.setId(mId);
                     incrementEventID();
-                    mDataAggregator.addSingleData(new IntrusionDetectionEvent(dnsEvent));
+                    mDataAggregator.addSingleData(
+                            IntrusionDetectionEvent.createForDnsEvent(dnsEvent));
                 }
 
                 @Override
@@ -141,7 +142,8 @@ public class NetworkLogSource implements DataSource {
                             new ConnectEvent(ipAddr, port, mPm.getNameForUid(uid), timestamp);
                     connectEvent.setId(mId);
                     incrementEventID();
-                    mDataAggregator.addSingleData(new IntrusionDetectionEvent(connectEvent));
+                    mDataAggregator.addSingleData(
+                            IntrusionDetectionEvent.createForConnectEvent(connectEvent));
                 }
             };
 }
