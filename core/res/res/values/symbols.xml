@@ -1308,6 +1308,7 @@
   <java-symbol type="array" name="config_securityStatePackages" />
   <java-symbol type="array" name="stoppable_fgs_system_apps" />
   <java-symbol type="array" name="vendor_stoppable_fgs_system_apps" />
+  <java-symbol type="array" name="config_availableEMValueOptions" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />

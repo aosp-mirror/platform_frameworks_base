@@ -445,6 +445,8 @@ public class SecureSettingsValidators {
                 Secure.RESOLUTION_MODE_UNKNOWN, Secure.RESOLUTION_MODE_FULL));
         VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
                 new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.EM_VALUE,
+                new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.CHARGE_OPTIMIZATION_MODE, new InclusiveIntegerRangeValidator(0, 10));
         VALIDATORS.put(Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
         VALIDATORS.put(Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
