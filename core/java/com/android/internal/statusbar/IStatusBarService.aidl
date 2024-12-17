@@ -239,4 +239,7 @@ interface IStatusBarService
 
     /** Unbundle a categorized notification */
     void unbundleNotification(String key);
+
+    /** Rebundle an (un)categorized notification */
+    void rebundleNotification(String key);
 }
