@@ -3729,14 +3729,6 @@ public class NotificationStackScrollLayout
 
     // Only when scene container is enabled, mark that we are being dragged so that we start
     // dispatching the rest of the gesture to scene container.
-    void startOverscrollAfterExpanding() {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        getExpandHelper().finishExpanding();
-        setIsBeingDragged(true);
-    }
-
-    // Only when scene container is enabled, mark that we are being dragged so that we start
-    // dispatching the rest of the gesture to scene container.
     void startDraggingOnHun() {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         setIsBeingDragged(true);
