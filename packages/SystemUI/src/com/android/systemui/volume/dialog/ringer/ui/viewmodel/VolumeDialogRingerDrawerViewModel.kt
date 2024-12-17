@@ -33,6 +33,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.onConfigChanged
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
@@ -48,6 +50,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -65,19 +68,29 @@ constructor(
     private val vibrator: VibratorHelper,
     private val volumeDialogLogger: VolumeDialogLogger,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
+    configurationController: ConfigurationController,
 ) {
 
     private val drawerState = MutableStateFlow<RingerDrawerState>(RingerDrawerState.Initial)
+    private val orientation: StateFlow<Int> =
+        configurationController.onConfigChanged
+            .map { it.orientation }
+            .stateIn(
+                coroutineScope,
+                SharingStarted.Eagerly,
+                applicationContext.resources.configuration.orientation,
+            )
 
     val ringerViewModel: StateFlow<RingerViewModelState> =
         combine(
                 soundPolicyInteractor.isZenMuted(AudioStream(STREAM_RING)),
                 ringerInteractor.ringerModel,
                 drawerState,
-            ) { isZenMuted, ringerModel, state ->
+                orientation,
+            ) { isZenMuted, ringerModel, state, orientation ->
                 level = ringerModel.level
                 levelMax = ringerModel.levelMax
-                ringerModel.toViewModel(state, isZenMuted)
+                ringerModel.toViewModel(state, isZenMuted, orientation)
             }
             .flowOn(backgroundDispatcher)
             .stateIn(coroutineScope, SharingStarted.Eagerly, RingerViewModelState.Unavailable)
@@ -133,6 +146,7 @@ constructor(
     private fun VolumeDialogRingerModel.toViewModel(
         drawerState: RingerDrawerState,
         isZenMuted: Boolean,
+        orientation: Int,
     ): RingerViewModelState {
         val currentIndex = availableModes.indexOf(currentRingerMode)
         if (currentIndex == -1) {
@@ -149,7 +163,8 @@ constructor(
                         currentButtonIndex = currentIndex,
                         selectedButton = it,
                         drawerState = drawerState,
-                    )
+                    ),
+                    orientation,
                 )
             } ?: RingerViewModelState.Unavailable
         }
