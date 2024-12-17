@@ -4058,7 +4058,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback)
                 throws RemoteException {
-            mRunner = mActivityTransitionAnimator.get().createRunner(mActivityLaunchController);
+            mRunner = mActivityTransitionAnimator.get()
+                    .createEphemeralRunner(mActivityLaunchController);
             mRunner.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
         }
     }

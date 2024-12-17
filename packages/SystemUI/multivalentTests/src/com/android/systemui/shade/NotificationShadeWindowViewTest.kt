@@ -212,18 +212,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-    fun testDragDownHelperCalledWhenDraggingDown() =
-        testScope.runTest {
-            whenever(dragDownHelper.isDraggingDown).thenReturn(true)
-            val now = SystemClock.elapsedRealtime()
-            val ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0f, 0f, 0 /* meta */)
-            underTest.onTouchEvent(ev)
-            verify(dragDownHelper).onTouchEvent(ev)
-            ev.recycle()
-        }
-
-    @Test
     fun testNoInterceptTouch() =
         testScope.runTest {
             captureInteractionEventHandler()

@@ -118,6 +118,7 @@ final class Utils {
         }
         return ProfcollectForwardingService.sVerityEnforced
             && !ProfcollectForwardingService.sAdbActive
-            && ProfcollectForwardingService.sIsInteractive;
+            && ProfcollectForwardingService.sIsInteractive
+            && !ProfcollectForwardingService.sIsBatteryLow;
     }
 }

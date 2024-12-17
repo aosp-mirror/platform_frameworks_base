@@ -1828,7 +1828,8 @@ public final class ViewRootImpl implements ViewParent,
                         | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_STATE
                         | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED
                 : DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+                        | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE
                         | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         DisplayManagerGlobal
                 .getInstance()

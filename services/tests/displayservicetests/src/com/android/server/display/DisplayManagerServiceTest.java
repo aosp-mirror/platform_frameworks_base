@@ -214,7 +214,8 @@ public class DisplayManagerServiceTest {
     private static final String PACKAGE_NAME = "com.android.frameworks.displayservicetests";
     private static final long STANDARD_DISPLAY_EVENTS =
             DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_ADDED
-            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE
             | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
     private static final long STANDARD_AND_CONNECTION_DISPLAY_EVENTS =
             STANDARD_DISPLAY_EVENTS
@@ -222,7 +223,7 @@ public class DisplayManagerServiceTest {
 
     private static final String EVENT_DISPLAY_ADDED = "EVENT_DISPLAY_ADDED";
     private static final String EVENT_DISPLAY_REMOVED = "EVENT_DISPLAY_REMOVED";
-    private static final String EVENT_DISPLAY_CHANGED = "EVENT_DISPLAY_CHANGED";
+    private static final String EVENT_DISPLAY_BASIC_CHANGED = "EVENT_DISPLAY_BASIC_CHANGED";
     private static final String EVENT_DISPLAY_BRIGHTNESS_CHANGED =
             "EVENT_DISPLAY_BRIGHTNESS_CHANGED";
     private static final String EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED =
@@ -889,7 +890,6 @@ public class DisplayManagerServiceTest {
 
         FakeDisplayManagerCallback callback = registerDisplayListenerCallback(
                 displayManager, bs, displayDevice);
-
         // Simulate DisplayDevice change
         DisplayDeviceInfo displayDeviceInfo2 = new DisplayDeviceInfo();
         displayDeviceInfo2.copyFrom(displayDeviceInfo);
@@ -900,7 +900,8 @@ public class DisplayManagerServiceTest {
 
         Handler handler = displayManager.getDisplayHandler();
         waitForIdleHandler(handler);
-        assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_BASIC_CHANGED,
+                EVENT_DISPLAY_REFRESH_RATE_CHANGED);
     }
 
     /**
@@ -2145,7 +2146,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(myUid, 30f),
                 });
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_BASIC_CHANGED);
         callback.clear();
 
         updateFrameRateOverride(displayManager, displayDevice,
@@ -2154,7 +2155,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(1234, 30f),
                 });
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_BASIC_CHANGED);
 
         updateFrameRateOverride(displayManager, displayDevice,
                 new DisplayEventReceiver.FrameRateOverride[]{
@@ -2163,7 +2164,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(5678, 30f),
                 });
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_BASIC_CHANGED);
         callback.clear();
 
         updateFrameRateOverride(displayManager, displayDevice,
@@ -2172,7 +2173,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(5678, 30f),
                 });
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_BASIC_CHANGED);
         callback.clear();
 
         updateFrameRateOverride(displayManager, displayDevice,
@@ -2180,7 +2181,7 @@ public class DisplayManagerServiceTest {
                         new DisplayEventReceiver.FrameRateOverride(5678, 30f),
                 });
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_BASIC_CHANGED);
     }
 
     /**
@@ -2303,16 +2304,16 @@ public class DisplayManagerServiceTest {
 
         updateRenderFrameRate(displayManager, displayDevice, 30f);
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_REFRESH_RATE_CHANGED);
         callback.clear();
 
         updateRenderFrameRate(displayManager, displayDevice, 30f);
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_REFRESH_RATE_CHANGED);
 
         updateRenderFrameRate(displayManager, displayDevice, 20f);
         waitForIdleHandler(displayManager.getDisplayHandler());
-        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_REFRESH_RATE_CHANGED);
         callback.clear();
     }
 
@@ -3888,7 +3889,7 @@ public class DisplayManagerServiceTest {
         observer.onChange(false, Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY));
         waitForIdleHandler(handler);
 
-        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).doesNotContain(EVENT_DISPLAY_BASIC_CHANGED);
     }
 
     @Test
@@ -3919,7 +3920,7 @@ public class DisplayManagerServiceTest {
         observer.onChange(false, Settings.Secure.getUriFor(MIRROR_BUILT_IN_DISPLAY));
         waitForIdleHandler(handler);
 
-        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_CHANGED);
+        assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_BASIC_CHANGED);
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {
@@ -4389,8 +4390,8 @@ public class DisplayManagerServiceTest {
                     return EVENT_DISPLAY_ADDED;
                 case DisplayManagerGlobal.EVENT_DISPLAY_REMOVED:
                     return EVENT_DISPLAY_REMOVED;
-                case DisplayManagerGlobal.EVENT_DISPLAY_CHANGED:
-                    return EVENT_DISPLAY_CHANGED;
+                case DisplayManagerGlobal.EVENT_DISPLAY_BASIC_CHANGED:
+                    return EVENT_DISPLAY_BASIC_CHANGED;
                 case DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED:
                     return EVENT_DISPLAY_BRIGHTNESS_CHANGED;
                 case DisplayManagerGlobal.EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:

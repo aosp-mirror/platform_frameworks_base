@@ -55,7 +55,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.TestableContext;
-import android.view.InsetsState;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
@@ -338,9 +337,7 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
         windowInfo.appToken = appToken;
         windowInfo.targetActivityInfo = info;
         windowInfo.taskInfo = taskInfo;
-        windowInfo.topOpaqueWindowInsetsState = new InsetsState();
         windowInfo.mainWindowLayoutParams = new WindowManager.LayoutParams();
-        windowInfo.topOpaqueWindowLayoutParams = new WindowManager.LayoutParams();
         return windowInfo;
     }
 

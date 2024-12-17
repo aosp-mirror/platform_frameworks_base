@@ -369,10 +369,9 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
                 tagName = parser.getName();
                 if (TAG_QUOTA.equals(tagName)) {
                     CacheQuotaHint request = getRequestFromXml(parser);
-                    if (request == null) {
-                        continue;
+                    if (request != null) {
+                        quotas.add(request);
                     }
-                    quotas.add(request);
                 }
             }
             eventType = parser.next();

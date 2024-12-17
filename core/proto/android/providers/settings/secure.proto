@@ -567,6 +567,8 @@ message SecureSettingsProto {
     // value.
     optional SettingProto rtt_calling_mode = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto screen_off_udfps_enabled = 104 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     message Screensaver {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -744,5 +746,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 104;
+    // Next tag = 105;
 }

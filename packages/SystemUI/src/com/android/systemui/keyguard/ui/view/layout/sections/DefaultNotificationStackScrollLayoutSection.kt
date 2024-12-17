@@ -24,7 +24,6 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.NotificationPanelView
@@ -54,32 +53,25 @@ constructor(
         sharedNotificationContainerBinder,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         constraintSet.apply {
             val bottomMargin =
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
-            if (MigrateClocksToBlueprint.isEnabled) {
-                val useLargeScreenHeader =
-                    context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)
-                val marginTopLargeScreen =
-                    largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
-                connect(
-                    R.id.nssl_placeholder,
-                    TOP,
-                    R.id.smart_space_barrier_bottom,
-                    BOTTOM,
-                    bottomMargin +
-                        if (useLargeScreenHeader) {
-                            marginTopLargeScreen
-                        } else {
-                            0
-                        }
-                )
-            } else {
-                connect(R.id.nssl_placeholder, TOP, R.id.keyguard_status_view, BOTTOM, bottomMargin)
-            }
+            val useLargeScreenHeader =
+                context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)
+            val marginTopLargeScreen =
+                largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+            connect(
+                R.id.nssl_placeholder,
+                TOP,
+                R.id.smart_space_barrier_bottom,
+                BOTTOM,
+                bottomMargin +
+                    if (useLargeScreenHeader) {
+                        marginTopLargeScreen
+                    } else {
+                        0
+                    },
+            )
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)
 

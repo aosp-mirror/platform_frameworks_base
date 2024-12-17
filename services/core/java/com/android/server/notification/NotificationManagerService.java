@@ -112,6 +112,7 @@ import static android.service.notification.Flags.FLAG_NOTIFICATION_CONVERSATION_
 import static android.service.notification.Flags.callstyleCallbackApi;
 import static android.service.notification.Flags.notificationClassification;
 import static android.service.notification.Flags.notificationForceGrouping;
+import static android.service.notification.Flags.notificationRegroupOnClassification;
 import static android.service.notification.Flags.redactSensitiveNotificationsBigTextStyle;
 import static android.service.notification.Flags.redactSensitiveNotificationsFromUntrustedListeners;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -1851,6 +1852,42 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void unbundleNotification(String key) {
+            if (!(notificationClassification() && notificationRegroupOnClassification())) {
+                return;
+            }
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r == null) {
+                    return;
+                }
+
+                if (DBG) {
+                    Slog.v(TAG, "unbundleNotification: " + r);
+                }
+
+                boolean hasOriginalSummary = false;
+                if (r.getSbn().isAppGroup() && r.getNotification().isGroupChild()) {
+                    final String oldGroupKey = GroupHelper.getFullAggregateGroupKey(
+                            r.getSbn().getPackageName(), r.getOriginalGroupKey(), r.getUserId());
+                    NotificationRecord groupSummary = mSummaryByGroupKey.get(oldGroupKey);
+                    // We only care about app-provided valid groups
+                    hasOriginalSummary = (groupSummary != null
+                            && !GroupHelper.isAggregatedGroup(groupSummary));
+                }
+
+                // Only NotificationRecord's mChannel is updated when bundled, the Notification
+                // mChannelId will always be the original channel.
+                String origChannelId = r.getNotification().getChannelId();
+                NotificationChannel originalChannel = mPreferencesHelper.getNotificationChannel(
+                        r.getSbn().getPackageName(), r.getUid(), origChannelId, false);
+                if (originalChannel != null && !origChannelId.equals(r.getChannel().getId())) {
+                    r.updateNotificationChannel(originalChannel);
+                    mGroupHelper.onNotificationUnbundled(r, hasOriginalSummary);
+                }
+            }
+        }
     };
 
     NotificationManagerPrivate mNotificationManagerPrivate = new NotificationManagerPrivate() {

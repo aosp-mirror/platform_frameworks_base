@@ -35,8 +35,8 @@ import com.android.internal.util.Preconditions;
 @FlaggedApi(Flags.FLAG_GNSS_ASSISTANCE_INTERFACE)
 @SystemApi
 public final class BeidouSatelliteEphemeris implements Parcelable {
-    /** The PRN number of the Beidou satellite. */
-    private final int mPrn;
+    /** The PRN or satellite ID number for the Beidou satellite. */
+    private final int mSvid;
 
     /** Satellite clock model. */
     private final BeidouSatelliteClockModel mSatelliteClockModel;
@@ -51,8 +51,8 @@ public final class BeidouSatelliteEphemeris implements Parcelable {
     private final BeidouSatelliteEphemerisTime mSatelliteEphemerisTime;
 
     private BeidouSatelliteEphemeris(Builder builder) {
-        // Allow PRN beyond the range to support potential future extensibility.
-        Preconditions.checkArgument(builder.mPrn >= 1);
+        // Allow Svid beyond the range to support potential future extensibility.
+        Preconditions.checkArgument(builder.mSvid >= 1);
         Preconditions.checkNotNull(builder.mSatelliteClockModel,
                 "SatelliteClockModel cannot be null");
         Preconditions.checkNotNull(builder.mSatelliteOrbitModel,
@@ -61,17 +61,17 @@ public final class BeidouSatelliteEphemeris implements Parcelable {
                 "SatelliteHealth cannot be null");
         Preconditions.checkNotNull(builder.mSatelliteEphemerisTime,
                 "SatelliteEphemerisTime cannot be null");
-        mPrn = builder.mPrn;
+        mSvid = builder.mSvid;
         mSatelliteClockModel = builder.mSatelliteClockModel;
         mSatelliteOrbitModel = builder.mSatelliteOrbitModel;
         mSatelliteHealth = builder.mSatelliteHealth;
         mSatelliteEphemerisTime = builder.mSatelliteEphemerisTime;
     }
 
-    /** Returns the PRN of the satellite. */
+    /** Returns the PRN or satellite ID number for the Beidou satellite. */
     @IntRange(from = 1, to = 63)
-    public int getPrn() {
-        return mPrn;
+    public int getSvid() {
+        return mSvid;
     }
 
     /** Returns the satellite clock model. */
@@ -105,7 +105,7 @@ public final class BeidouSatelliteEphemeris implements Parcelable {
                 public BeidouSatelliteEphemeris createFromParcel(Parcel in) {
                     final BeidouSatelliteEphemeris.Builder beidouSatelliteEphemeris =
                             new Builder()
-                                    .setPrn(in.readInt())
+                                    .setSvid(in.readInt())
                                     .setSatelliteClockModel(
                                             in.readTypedObject(BeidouSatelliteClockModel.CREATOR))
                                     .setSatelliteOrbitModel(
@@ -131,7 +131,7 @@ public final class BeidouSatelliteEphemeris implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mPrn);
+        parcel.writeInt(mSvid);
         parcel.writeTypedObject(mSatelliteClockModel, flags);
         parcel.writeTypedObject(mSatelliteOrbitModel, flags);
         parcel.writeTypedObject(mSatelliteHealth, flags);
@@ -142,7 +142,7 @@ public final class BeidouSatelliteEphemeris implements Parcelable {
     @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder("BeidouSatelliteEphemeris[");
-        builder.append("prn = ").append(mPrn);
+        builder.append("svid = ").append(mSvid);
         builder.append(", satelliteClockModel = ").append(mSatelliteClockModel);
         builder.append(", satelliteOrbitModel = ").append(mSatelliteOrbitModel);
         builder.append(", satelliteHealth = ").append(mSatelliteHealth);
@@ -153,16 +153,16 @@ public final class BeidouSatelliteEphemeris implements Parcelable {
 
     /** Builder for {@link BeidouSatelliteEphemeris} */
     public static final class Builder {
-        private int mPrn;
+        private int mSvid;
         private BeidouSatelliteClockModel mSatelliteClockModel;
         private KeplerianOrbitModel mSatelliteOrbitModel;
         private BeidouSatelliteHealth mSatelliteHealth;
         private BeidouSatelliteEphemerisTime mSatelliteEphemerisTime;
 
-        /** Sets the PRN of the satellite. */
+        /** Sets the PRN or satellite ID number for the Beidou satellite. */
         @NonNull
-        public Builder setPrn(int prn) {
-            mPrn = prn;
+        public Builder setSvid(int svid) {
+            mSvid = svid;
             return this;
         }
 

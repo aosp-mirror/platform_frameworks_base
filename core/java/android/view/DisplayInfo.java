@@ -447,7 +447,18 @@ public final class DisplayInfo implements Parcelable {
     }
 
     public boolean equals(DisplayInfo other) {
-        return other != null
+        return equals(other, /* compareRefreshRate */ true);
+    }
+
+    /**
+     * Compares if the two DisplayInfo objects are equal or not
+     * @param other The other DisplayInfo against which the comparison is to be done
+     * @param compareRefreshRate Indicates if the refresh rate is also to be considered in
+     *                           comparison
+     * @return
+     */
+    public boolean equals(DisplayInfo other, boolean compareRefreshRate) {
+        boolean isEqualWithoutRefreshRate =  other != null
                 && layerStack == other.layerStack
                 && flags == other.flags
                 && type == other.type
@@ -466,7 +477,6 @@ public final class DisplayInfo implements Parcelable {
                 && logicalHeight == other.logicalHeight
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
-                && modeId == other.modeId
                 && hasArrSupport == other.hasArrSupport
                 && Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)
                 && Arrays.equals(supportedRefreshRates, other.supportedRefreshRates)
@@ -490,7 +500,6 @@ public final class DisplayInfo implements Parcelable {
                 && ownerUid == other.ownerUid
                 && Objects.equals(ownerPackageName, other.ownerPackageName)
                 && removeMode == other.removeMode
-                && getRefreshRate() == other.getRefreshRate()
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
                 && brightnessDefault == other.brightnessDefault
@@ -504,6 +513,13 @@ public final class DisplayInfo implements Parcelable {
                 && Objects.equals(
                 thermalBrightnessThrottlingDataId, other.thermalBrightnessThrottlingDataId)
                 && canHostTasks == other.canHostTasks;
+
+        if (compareRefreshRate) {
+            return isEqualWithoutRefreshRate
+                    && (getRefreshRate() == other.getRefreshRate())
+                    && (modeId == other.modeId);
+        }
+        return isEqualWithoutRefreshRate;
     }
 
     @Override

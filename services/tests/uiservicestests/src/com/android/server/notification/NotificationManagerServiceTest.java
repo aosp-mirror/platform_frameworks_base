@@ -17683,4 +17683,145 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertThat(mService.mNotificationList).isEmpty();
     }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    public void testUnbundleNotification_ungrouped_restoresOriginalChannel() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(true);
+
+        // Post a single notification
+        final boolean hasOriginalSummary = false;
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        final String keyToUnbundle = r.getKey();
+        mService.addNotification(r);
+
+        // Classify notification into the NEWS bundle
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_TYPE, Adjustment.TYPE_NEWS);
+        Adjustment adjustment = new Adjustment(
+                r.getSbn().getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r.applyAdjustments();
+        // Check that the NotificationRecord channel is updated
+        assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
+        // Check that the Notification mChannelId is not updated
+        assertThat(r.getNotification().getChannelId()).isEqualTo(TEST_CHANNEL_ID);
+
+        // Unbundle the notification
+        mService.mNotificationDelegate.unbundleNotification(keyToUnbundle);
+
+        // Check that the original channel was restored
+        assertThat(r.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+        verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(r), eq(hasOriginalSummary));
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+            FLAG_NOTIFICATION_FORCE_GROUPING,
+            FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    public void testUnbundleNotification_grouped_restoresOriginalChannel() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(true);
+
+        // Post grouped notifications
+        final String originalGroupName = "originalGroup";
+        final int summaryId = 0;
+        final NotificationRecord r1 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 1, originalGroupName, false);
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 2, originalGroupName, false);
+        mService.addNotification(r2);
+        final NotificationRecord summary = generateNotificationRecord(mTestNotificationChannel,
+                summaryId, originalGroupName, true);
+        mService.addNotification(summary);
+        final String originalGroupKey = summary.getGroupKey();
+        assertThat(mService.mSummaryByGroupKey).containsEntry(originalGroupKey, summary);
+
+        // Classify a child notification into the NEWS bundle
+        final String keyToUnbundle = r1.getKey();
+        final boolean hasOriginalSummary = true;
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_TYPE, Adjustment.TYPE_NEWS);
+        Adjustment adjustment = new Adjustment(r1.getSbn().getPackageName(), r1.getKey(), signals,
+                "", r1.getUser().getIdentifier());
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r1.applyAdjustments();
+        assertThat(r1.getChannel().getId()).isEqualTo(NEWS_ID);
+
+        // Unbundle the notification
+        mService.mNotificationDelegate.unbundleNotification(keyToUnbundle);
+
+        // Check that the original channel was restored
+        assertThat(r1.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+        verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(r1), eq(hasOriginalSummary));
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION,
+        FLAG_NOTIFICATION_FORCE_GROUPING,
+        FLAG_NOTIFICATION_REGROUP_ON_CLASSIFICATION})
+    public void testUnbundleNotification_groupedSummaryCanceled_restoresOriginalChannel()
+            throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+        when(mAssistants.isAdjustmentKeyTypeAllowed(anyInt())).thenReturn(true);
+        when(mAssistants.isTypeAdjustmentAllowedForPackage(anyString())).thenReturn(true);
+
+        // Post grouped notifications
+        final String originalGroupName = "originalGroup";
+        final int summaryId = 0;
+        final NotificationRecord r1 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 1, originalGroupName, false);
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(mTestNotificationChannel,
+                summaryId + 2, originalGroupName, false);
+        mService.addNotification(r2);
+        final NotificationRecord summary = generateNotificationRecord(mTestNotificationChannel,
+                summaryId, originalGroupName, true);
+        mService.addNotification(summary);
+        final String originalGroupKey = summary.getGroupKey();
+        assertThat(mService.mSummaryByGroupKey).containsEntry(originalGroupKey, summary);
+
+        // Classify a child notification into the NEWS bundle
+        final String keyToUnbundle = r1.getKey();
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_TYPE, Adjustment.TYPE_NEWS);
+        Adjustment adjustment = new Adjustment(r1.getSbn().getPackageName(), r1.getKey(), signals,
+                "", r1.getUser().getIdentifier());
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+        waitForIdle();
+        r1.applyAdjustments();
+        assertThat(r1.getChannel().getId()).isEqualTo(NEWS_ID);
+
+        // Cancel original summary
+        final boolean hasOriginalSummary = false;
+        mService.mSummaryByGroupKey.remove(summary.getGroupKey());
+
+        // Unbundle the notification
+        mService.mNotificationDelegate.unbundleNotification(keyToUnbundle);
+
+        // Check that the original channel was restored
+        assertThat(r1.getChannel().getId()).isEqualTo(TEST_CHANNEL_ID);
+        verify(mGroupHelper, times(1)).onNotificationUnbundled(eq(r1), eq(hasOriginalSummary));
+    }
+
 }

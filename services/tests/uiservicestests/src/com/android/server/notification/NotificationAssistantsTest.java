@@ -274,6 +274,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         assertEquals(new ArraySet<>(), approved.get(true));
     }
 
+    @SuppressWarnings("GuardedBy")
     @Test
     public void testReadXml_userDisabled_restore() throws Exception {
         String xml = "<enabled_assistants version=\"4\" defaults=\"b/b\">"
@@ -289,7 +290,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mAssistants.readXml(parser, mNm::canUseManagedServices, true,
                 ActivityManager.getCurrentUser());
 
-        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(0);
+        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(
+                ActivityManager.getCurrentUser());
 
         // approved should not be null
         assertNotNull(approved);

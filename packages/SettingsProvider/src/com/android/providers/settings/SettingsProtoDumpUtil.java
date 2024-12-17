@@ -2520,6 +2520,13 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.RTT_CALLING_MODE,
                 SecureSettingsProto.RTT_CALLING_MODE);
 
+        final long screenoffudfpsenabledToken = p.start(
+                SecureSettingsProto.SCREEN_OFF_UDFPS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SCREEN_OFF_UNLOCK_UDFPS_ENABLED,
+                SecureSettingsProto.SCREEN_OFF_UDFPS_ENABLED);
+        p.end(screenoffudfpsenabledToken);
+
         final long screensaverToken = p.start(SecureSettingsProto.SCREENSAVER);
         dumpSetting(s, p,
                 Settings.Secure.SCREENSAVER_ENABLED,

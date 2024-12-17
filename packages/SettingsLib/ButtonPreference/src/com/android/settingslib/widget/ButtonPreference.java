@@ -247,4 +247,28 @@ public class ButtonPreference extends Preference implements GroupSectionDividerM
             mButton.setLayoutParams(lp);
         }
     }
+
+    /**
+     * Sets the style of the button.
+     *
+     * @param type Specifies the button's type, which sets the attribute `buttonPreferenceType`.
+     *             Possible values are:
+     *             <ul>
+     *                 <li>0: filled</li>
+     *                 <li>1: tonal</li>
+     *                 <li>2: outline</li>
+     *             </ul>
+     * @param size Specifies the button's size, which sets the attribute `buttonPreferenceSize`.
+     *             Possible values are:
+     *             <ul>
+     *                 <li>0: normal</li>
+     *                 <li>1: large</li>
+     *                 <li>2: extra large</li>
+     *             </ul>
+     */
+    public void setButtonStyle(int type, int size) {
+        int layoutId = ButtonStyle.getLayoutId(type, size);
+        setLayoutResource(layoutId);
+        notifyChanged();
+    }
 }

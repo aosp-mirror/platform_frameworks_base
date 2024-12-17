@@ -32,7 +32,6 @@ import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -82,9 +81,6 @@ constructor(
     override fun addViews(constraintLayout: ConstraintLayout) {}
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         disposableHandle?.dispose()
         disposableHandle =
             KeyguardClockViewBinder.bind(
@@ -99,20 +95,12 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         keyguardClockViewModel.currentClock.value?.let { clock ->
             constraintSet.applyDeltaFrom(buildConstraints(clock, constraintSet))
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         disposableHandle?.dispose()
     }
 

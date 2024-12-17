@@ -16,6 +16,8 @@
 
 package com.android.server.profcollect;
 
+import static android.content.Intent.ACTION_BATTERY_LOW;
+import static android.content.Intent.ACTION_BATTERY_OKAY;
 import static android.content.Intent.ACTION_SCREEN_OFF;
 import static android.content.Intent.ACTION_SCREEN_ON;
 
@@ -77,6 +79,7 @@ public final class ProfcollectForwardingService extends SystemService {
     static boolean sVerityEnforced;
     static boolean sIsInteractive;
     static boolean sAdbActive;
+    static boolean sIsBatteryLow;
 
     private static IProfCollectd sIProfcollect;
     private static ProfcollectForwardingService sSelfService;
@@ -91,7 +94,11 @@ public final class ProfcollectForwardingService extends SystemService {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ACTION_SCREEN_ON.equals(intent.getAction())) {
+            if (ACTION_BATTERY_LOW.equals(intent.getAction())) {
+                sIsBatteryLow = true;
+            } else if (ACTION_BATTERY_OKAY.equals(intent.getAction())) {
+                sIsBatteryLow = false;
+            } else if (ACTION_SCREEN_ON.equals(intent.getAction())) {
                 Log.d(LOG_TAG, "Received broadcast that the device became interactive, was "
                         + sIsInteractive);
                 sIsInteractive = true;
@@ -141,6 +148,8 @@ public final class ProfcollectForwardingService extends SystemService {
             context.getResources().getBoolean(R.bool.config_profcollectReportUploaderEnabled);
 
         final IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_BATTERY_LOW);
+        filter.addAction(ACTION_BATTERY_OKAY);
         filter.addAction(ACTION_SCREEN_ON);
         filter.addAction(ACTION_SCREEN_OFF);
         filter.addAction(INTENT_UPLOAD_PROFILES);

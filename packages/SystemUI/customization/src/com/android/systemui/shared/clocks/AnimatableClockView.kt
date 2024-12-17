@@ -71,7 +71,6 @@ constructor(
         }
 
     var hasCustomPositionUpdatedAnimation: Boolean = false
-    var migratedClocks: Boolean = false
 
     private val time = Calendar.getInstance()
 
@@ -228,11 +227,7 @@ constructor(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure")
 
-        if (
-            migratedClocks &&
-                !isSingleLineInternal &&
-                MeasureSpec.getMode(heightMeasureSpec) == EXACTLY
-        ) {
+        if (!isSingleLineInternal && MeasureSpec.getMode(heightMeasureSpec) == EXACTLY) {
             // Call straight into TextView.setTextSize to avoid setting lastUnconstrainedTextSize
             val size = min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F)
             super.setTextSize(COMPLEX_UNIT_PX, size)
@@ -248,7 +243,7 @@ constructor(
                     }
             }
 
-        if (migratedClocks && hasCustomPositionUpdatedAnimation) {
+        if (hasCustomPositionUpdatedAnimation) {
             // Expand width to avoid clock being clipped during stepping animation
             val targetWidth = measuredWidth + MeasureSpec.getSize(widthMeasureSpec) / 2
 
@@ -582,12 +577,10 @@ constructor(
     }
 
     override fun onRtlPropertiesChanged(layoutDirection: Int) {
-        if (migratedClocks) {
-            if (layoutDirection == LAYOUT_DIRECTION_RTL) {
-                textAlignment = TEXT_ALIGNMENT_TEXT_END
-            } else {
-                textAlignment = TEXT_ALIGNMENT_TEXT_START
-            }
+        if (layoutDirection == LAYOUT_DIRECTION_RTL) {
+            textAlignment = TEXT_ALIGNMENT_TEXT_END
+        } else {
+            textAlignment = TEXT_ALIGNMENT_TEXT_START
         }
         super.onRtlPropertiesChanged(layoutDirection)
     }

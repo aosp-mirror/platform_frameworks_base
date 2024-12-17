@@ -177,13 +177,30 @@ public final class ApduServiceInfo implements Parcelable {
     private boolean mWantsRoleHolderPriority;
 
     /**
+     * Constructor of {@link ApduServiceInfo}.
+     * @param info App component info
+     * @param onHost whether service is on host or not (secure element)
+     * @param description The description of service
+     * @param staticAidGroups static AID groups
+     * @param dynamicAidGroups dynamic AID groups
+     * @param requiresUnlock whether this service should only be started
+     *                       when the device is unlocked
+     * @param bannerResource The id of the service banner specified in XML
+     * @param uid The uid of the package the service belongs to
+     * @param settingsActivityName Settings Activity for this service
+     * @param offHost Off-host reader name
+     * @param staticOffHost Off-host reader name from manifest file
+     *
      * @hide
      */
     @UnsupportedAppUsage
-    public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_APDU_SERVICE_INFO_CONSTRUCTOR)
+    public ApduServiceInfo(@NonNull ResolveInfo info, boolean onHost, @NonNull String description,
+            @NonNull List<AidGroup> staticAidGroups, @NonNull List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
-            String settingsActivityName, String offHost, String staticOffHost) {
+            @NonNull String settingsActivityName, @NonNull String offHost,
+            @NonNull String staticOffHost) {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
                 requiresUnlock, bannerResource, uid, settingsActivityName,
                 offHost, staticOffHost, false);
@@ -193,7 +210,7 @@ public final class ApduServiceInfo implements Parcelable {
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
+            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost,
             boolean isEnabled) {

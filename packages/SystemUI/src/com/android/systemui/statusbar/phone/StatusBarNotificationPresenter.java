@@ -37,12 +37,10 @@ import androidx.annotation.NonNull;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeViewController;
@@ -61,7 +59,6 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionCondition;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
@@ -72,6 +69,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.Set;
@@ -104,7 +102,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final NotificationListContainer mNotifListContainer;
-    private final DeviceUnlockedInteractor mDeviceUnlockedInteractor;
     private final QuickSettingsController mQsController;
 
     protected boolean mVrMode;
@@ -136,8 +133,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             NotificationRemoteInputManager remoteInputManager,
             NotificationRemoteInputManager.Callback remoteInputManagerCallback,
-            NotificationListContainer notificationListContainer,
-            DeviceUnlockedInteractor deviceUnlockedInteractor) {
+            NotificationListContainer notificationListContainer) {
         mActivityStarter = activityStarter;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
@@ -164,7 +160,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mNotifListContainer = notificationListContainer;
-        mDeviceUnlockedInteractor = deviceUnlockedInteractor;
 
         IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
                 Context.VR_SERVICE));
@@ -253,22 +248,11 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());
             } else if (clickedEntry.isSensitive().getValue()
-                    && isInLockedDownShade()) {
+                    && mDynamicPrivacyController.isInLockedDownShade()) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
-                // launch the bouncer
                 mActivityStarter.dismissKeyguardThenExecute(() -> false /* dismissAction */
                         , null /* cancelRunnable */, false /* afterKeyguardGone */);
             }
-        }
-    }
-
-    /** @return true if the Shade is shown over the Lockscreen, and the device is locked */
-    private boolean isInLockedDownShade() {
-        if (SceneContainerFlag.isEnabled()) {
-            return mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
-                    && !mDeviceUnlockedInteractor.getDeviceUnlockStatus().getValue().isUnlocked();
-        } else {
-            return mDynamicPrivacyController.isInLockedDownShade();
         }
     }
 

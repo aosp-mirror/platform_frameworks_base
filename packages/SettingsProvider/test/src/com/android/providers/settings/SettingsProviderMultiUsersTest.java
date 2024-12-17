@@ -16,7 +16,7 @@
 
 package com.android.providers.settings;
 
-import static android.provider.Settings.Secure.ACCESSIBILITY_ENABLED;
+import static android.provider.Settings.Secure.CONTENT_CAPTURE_ENABLED;
 import static android.provider.Settings.Secure.SYNC_PARENT_SOUNDS;
 import static android.provider.Settings.System.RINGTONE;
 
@@ -67,7 +67,7 @@ public class SettingsProviderMultiUsersTest {
     private static final String SPACE_SYSTEM = "system";
     private static final String SPACE_SECURE = "secure";
 
-    private static final String CLONE_TO_MANAGED_PROFILE_SETTING = ACCESSIBILITY_ENABLED;
+    private static final String CLONE_TO_MANAGED_PROFILE_SETTING = CONTENT_CAPTURE_ENABLED;
     private static final String CLONE_FROM_PARENT_SETTINGS = RINGTONE;
     private static final String SYNC_FROM_PARENT_SETTINGS = SYNC_PARENT_SOUNDS;
 
