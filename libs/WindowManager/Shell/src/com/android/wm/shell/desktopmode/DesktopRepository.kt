@@ -27,6 +27,7 @@ import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
+import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -56,6 +57,10 @@ class DesktopRepository(
      * @property topTransparentFullscreenTaskId the task id of any current top transparent
      *   fullscreen task launched on top of Desktop Mode. Cleared when the transparent task is
      *   closed or sent to back. (top is at index 0).
+     * @property pipTaskId the task id of PiP task entered while in Desktop Mode.
+     * @property pipShouldKeepDesktopActive whether an active PiP window should keep the Desktop
+     *   Mode session active. Only false when we are explicitly exiting Desktop Mode (via user
+     *   action) while there is an active PiP window.
      */
     private data class DesktopTaskData(
         val activeTasks: ArraySet<Int> = ArraySet(),
@@ -66,6 +71,8 @@ class DesktopRepository(
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
         var fullImmersiveTaskId: Int? = null,
         var topTransparentFullscreenTaskId: Int? = null,
+        var pipTaskId: Int? = null,
+        var pipShouldKeepDesktopActive: Boolean = true,
     ) {
         fun deepCopy(): DesktopTaskData =
             DesktopTaskData(
@@ -76,6 +83,8 @@ class DesktopRepository(
                 freeformTasksInZOrder = ArrayList(freeformTasksInZOrder),
                 fullImmersiveTaskId = fullImmersiveTaskId,
                 topTransparentFullscreenTaskId = topTransparentFullscreenTaskId,
+                pipTaskId = pipTaskId,
+                pipShouldKeepDesktopActive = pipShouldKeepDesktopActive,
             )
 
         fun clear() {
@@ -86,6 +95,8 @@ class DesktopRepository(
             freeformTasksInZOrder.clear()
             fullImmersiveTaskId = null
             topTransparentFullscreenTaskId = null
+            pipTaskId = null
+            pipShouldKeepDesktopActive = true
         }
     }
 
@@ -103,6 +114,9 @@ class DesktopRepository(
 
     /* Tracks last bounds of task before toggled to immersive state. */
     private val boundsBeforeFullImmersiveByTaskId = SparseArray<Rect>()
+
+    /* Callback for when a pending PiP transition has been aborted. */
+    private var onPipAbortedCallback: ((Int, Int) -> Unit)? = null
 
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
@@ -302,6 +316,54 @@ class DesktopRepository(
         }
     }
 
+    /** Set whether the given task is the Desktop-entered PiP task in this display. */
+    fun setTaskInPip(displayId: Int, taskId: Int, enterPip: Boolean) {
+        val desktopData = desktopTaskDataByDisplayId.getOrCreate(displayId)
+        if (enterPip) {
+            desktopData.pipTaskId = taskId
+            desktopData.pipShouldKeepDesktopActive = true
+        } else {
+            desktopData.pipTaskId =
+                if (desktopData.pipTaskId == taskId) null
+                else {
+                    logW(
+                        "setTaskInPip: taskId=$taskId did not match saved taskId=${desktopData.pipTaskId}"
+                    )
+                    desktopData.pipTaskId
+                }
+        }
+        notifyVisibleTaskListeners(displayId, getVisibleTaskCount(displayId))
+    }
+
+    /** Returns whether there is a PiP that was entered/minimized from Desktop in this display. */
+    fun isMinimizedPipPresentInDisplay(displayId: Int): Boolean =
+        desktopTaskDataByDisplayId.getOrCreate(displayId).pipTaskId != null
+
+    /** Returns whether the given task is the Desktop-entered PiP task in this display. */
+    fun isTaskMinimizedPipInDisplay(displayId: Int, taskId: Int): Boolean =
+        desktopTaskDataByDisplayId.getOrCreate(displayId).pipTaskId == taskId
+
+    /** Returns whether Desktop session should be active in this display due to active PiP. */
+    fun shouldDesktopBeActiveForPip(displayId: Int): Boolean =
+        Flags.enableDesktopWindowingPip() &&
+            isMinimizedPipPresentInDisplay(displayId) &&
+            desktopTaskDataByDisplayId.getOrCreate(displayId).pipShouldKeepDesktopActive
+
+    /** Saves whether a PiP window should keep Desktop session active in this display. */
+    fun setPipShouldKeepDesktopActive(displayId: Int, keepActive: Boolean) {
+        desktopTaskDataByDisplayId.getOrCreate(displayId).pipShouldKeepDesktopActive = keepActive
+    }
+
+    /** Saves callback to handle a pending PiP transition being aborted. */
+    fun setOnPipAbortedCallback(callbackIfPipAborted: ((Int, Int) -> Unit)?) {
+        onPipAbortedCallback = callbackIfPipAborted
+    }
+
+    /** Invokes callback to handle a pending PiP transition with the given task id being aborted. */
+    fun onPipAborted(displayId: Int, pipTaskId: Int) {
+        onPipAbortedCallback?.invoke(displayId, pipTaskId)
+    }
+
     /** Set whether the given task is the full-immersive task in this display. */
     fun setTaskInFullImmersiveState(displayId: Int, taskId: Int, immersive: Boolean) {
         val desktopData = desktopTaskDataByDisplayId.getOrCreate(displayId)
@@ -338,8 +400,12 @@ class DesktopRepository(
     }
 
     private fun notifyVisibleTaskListeners(displayId: Int, visibleTasksCount: Int) {
+        val visibleAndPipTasksCount =
+            if (shouldDesktopBeActiveForPip(displayId)) visibleTasksCount + 1 else visibleTasksCount
         visibleTasksListeners.forEach { (listener, executor) ->
-            executor.execute { listener.onTasksVisibilityChanged(displayId, visibleTasksCount) }
+            executor.execute {
+                listener.onTasksVisibilityChanged(displayId, visibleAndPipTasksCount)
+            }
         }
     }
 

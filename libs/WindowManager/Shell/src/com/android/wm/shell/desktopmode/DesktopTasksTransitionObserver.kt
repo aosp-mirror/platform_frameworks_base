@@ -21,9 +21,11 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.os.IBinder
 import android.view.SurfaceControl
-import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CLOSE
+import android.view.WindowManager.TRANSIT_OPEN
+import android.view.WindowManager.TRANSIT_PIP
 import android.view.WindowManager.TRANSIT_TO_BACK
+import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.DesktopModeFlags
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import android.window.TransitionInfo
@@ -39,6 +41,8 @@ import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP
+import com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP
 
 /**
  * A [Transitions.TransitionObserver] that observes shell transitions and updates the
@@ -57,6 +61,8 @@ class DesktopTasksTransitionObserver(
 ) : Transitions.TransitionObserver {
 
     private var transitionToCloseWallpaper: IBinder? = null
+    /* Pending PiP transition and its associated display id and task id. */
+    private var pendingPipTransitionAndPipTask: Triple<IBinder, Int, Int>? = null
     private var currentProfileId: Int
 
     init {
@@ -90,6 +96,33 @@ class DesktopTasksTransitionObserver(
             removeTaskIfNeeded(info)
         }
         removeWallpaperOnLastTaskClosingIfNeeded(transition, info)
+
+        val desktopRepository = desktopUserRepositories.getProfile(currentProfileId)
+        info.changes.forEach { change ->
+            change.taskInfo?.let { taskInfo ->
+                if (
+                    Flags.enableDesktopWindowingPip() &&
+                        desktopRepository.isTaskMinimizedPipInDisplay(
+                            taskInfo.displayId,
+                            taskInfo.taskId,
+                        )
+                ) {
+                    when (info.type) {
+                        TRANSIT_PIP ->
+                            pendingPipTransitionAndPipTask =
+                                Triple(transition, taskInfo.displayId, taskInfo.taskId)
+
+                        TRANSIT_EXIT_PIP,
+                        TRANSIT_REMOVE_PIP ->
+                            desktopRepository.setTaskInPip(
+                                taskInfo.displayId,
+                                taskInfo.taskId,
+                                enterPip = false,
+                            )
+                    }
+                }
+            }
+        }
     }
 
     private fun removeTaskIfNeeded(info: TransitionInfo) {
@@ -252,6 +285,18 @@ class DesktopTasksTransitionObserver(
                 }
             }
             transitionToCloseWallpaper = null
+        } else if (pendingPipTransitionAndPipTask?.first == transition) {
+            val desktopRepository = desktopUserRepositories.getProfile(currentProfileId)
+            if (aborted) {
+                pendingPipTransitionAndPipTask?.let {
+                    desktopRepository.onPipAborted(
+                        /*displayId=*/ it.second,
+                        /* taskId=*/ it.third,
+                    )
+                }
+            }
+            desktopRepository.setOnPipAbortedCallback(null)
+            pendingPipTransitionAndPipTask = null
         }
     }
 
@@ -263,9 +308,13 @@ class DesktopTasksTransitionObserver(
             change.taskInfo?.let { taskInfo ->
                 if (DesktopWallpaperActivity.isWallpaperTask(taskInfo)) {
                     when (change.mode) {
-                        WindowManager.TRANSIT_OPEN -> {
+                        TRANSIT_OPEN -> {
                             desktopWallpaperActivityTokenProvider.setToken(
                                 taskInfo.token,
+                                taskInfo.displayId,
+                            )
+                            desktopWallpaperActivityTokenProvider.setWallpaperActivityIsVisible(
+                                isVisible = true,
                                 taskInfo.displayId,
                             )
                             // After the task for the wallpaper is created, set it non-trimmable.
@@ -278,6 +327,16 @@ class DesktopTasksTransitionObserver(
                         }
                         TRANSIT_CLOSE ->
                             desktopWallpaperActivityTokenProvider.removeToken(taskInfo.displayId)
+                        TRANSIT_TO_FRONT ->
+                            desktopWallpaperActivityTokenProvider.setWallpaperActivityIsVisible(
+                                isVisible = true,
+                                taskInfo.displayId,
+                            )
+                        TRANSIT_TO_BACK ->
+                            desktopWallpaperActivityTokenProvider.setWallpaperActivityIsVisible(
+                                isVisible = false,
+                                taskInfo.displayId,
+                            )
                         else -> {}
                     }
                 }

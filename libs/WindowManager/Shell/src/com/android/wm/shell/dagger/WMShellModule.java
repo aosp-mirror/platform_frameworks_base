@@ -1312,12 +1312,6 @@ public abstract class WMShellModule {
         return new DesktopModeUiEventLogger(uiEventLogger, packageManager);
     }
 
-    @WMSingleton
-    @Provides
-    static DesktopWallpaperActivityTokenProvider provideDesktopWallpaperActivityTokenProvider() {
-        return new DesktopWallpaperActivityTokenProvider();
-    }
-
     //
     // Drag and drop
     //
