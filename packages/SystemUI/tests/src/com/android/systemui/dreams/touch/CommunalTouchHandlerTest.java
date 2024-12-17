@@ -77,6 +77,8 @@ public class CommunalTouchHandlerTest extends SysuiTestCase {
                 INITIATION_WIDTH,
                 mKosmos.getCommunalInteractor(),
                 mKosmos.getConfigurationInteractor(),
+                mKosmos.getSceneInteractor(),
+                Optional.of(mKosmos.getMockWindowRootViewProvider()),
                 mLifecycle
                 );
     }

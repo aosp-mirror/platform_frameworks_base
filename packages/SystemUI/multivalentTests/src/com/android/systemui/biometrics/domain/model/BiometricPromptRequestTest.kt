@@ -51,7 +51,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
                     title = title,
                     subtitle = subtitle,
                     description = description,
-                    contentView = contentView
+                    contentView = contentView,
                 ),
                 BiometricUserInfo(USER_ID),
                 BiometricOperationInfo(OPERATION_ID),
@@ -101,9 +101,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
         val fpPros = fingerprintSensorPropertiesInternal().first()
         val request =
             BiometricPromptRequest.Biometric(
-                promptInfo(
-                    logoBitmap = logoBitmap,
-                ),
+                promptInfo(logoBitmap = logoBitmap),
                 BiometricUserInfo(USER_ID),
                 BiometricOperationInfo(OPERATION_ID),
                 BiometricModalities(fingerprintProperties = fpPros),
@@ -162,7 +160,7 @@ class BiometricPromptRequestTest : SysuiTestCase() {
                     BiometricUserInfo(USER_ID),
                     BiometricOperationInfo(OPERATION_ID),
                     stealth,
-                )
+                ),
             )
 
         for (request in toCheck) {
