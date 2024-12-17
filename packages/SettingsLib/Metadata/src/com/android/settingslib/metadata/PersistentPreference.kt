@@ -201,3 +201,6 @@ interface RangeValue : ValueDescriptor {
     override fun isValidValue(context: Context, index: Int) =
         index in getMinValue(context)..getMaxValue(context)
 }
+
+/** A persistent preference that has a float value. */
+interface FloatPersistentPreference : PersistentPreference<Float>

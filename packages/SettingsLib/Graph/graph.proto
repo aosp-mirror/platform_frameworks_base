@@ -108,6 +108,7 @@ message PreferenceValueProto {
   oneof value {
     bool boolean_value = 1;
     int32 int_value = 2;
+    float float_value = 3;
   }
 }
 
@@ -116,6 +117,7 @@ message PreferenceValueDescriptorProto {
   oneof type {
     bool boolean_type = 1;
     RangeValueProto range_value = 2;
+    bool float_type = 3;
   }
 }
 
