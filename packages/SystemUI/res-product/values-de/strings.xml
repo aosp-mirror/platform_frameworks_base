@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Entsperre dein Gerät für weitere Optionen"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Wiedergabe läuft auf diesem Smartphone"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Wiedergabe läuft auf diesem Tablet"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Du kannst dieses Smartphone über „Mein Gerät finden“ orten, auch wenn es ausgeschaltet ist"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Du kannst dieses Tablet über „Mein Gerät finden“ orten, auch wenn es ausgeschaltet ist"</string>
 </resources>

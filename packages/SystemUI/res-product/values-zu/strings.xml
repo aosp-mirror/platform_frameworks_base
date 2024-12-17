@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Vula idivayisi yakho ukuthola okunye okungakhethwa"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Okudlala kule foni"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Okudlala kule thebhulethi"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Ungathola le foni ngokuthi Thola Idivayisi Yami noma ivaliwe"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Ungathola le thebhulethi ngokuthi Thola Idivayisi Yami noma ivaliwe"</string>
 </resources>

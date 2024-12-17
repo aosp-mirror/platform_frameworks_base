@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Басқа опцияларды көру үшін құрылғы құлпын ашыңыз."</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Осы телефонда ойнатылуда."</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Осы планшетте ойнатылуда."</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Сіз бұл телефонды, ол тіпті өшірулі тұрса да, Find My Device арқылы таба аласыз."</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Сіз бұл планшетті, ол тіпті өшірулі тұрса да, Find My Device арқылы таба аласыз."</string>
 </resources>
