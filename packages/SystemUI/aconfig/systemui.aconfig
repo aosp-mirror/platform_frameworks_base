@@ -1229,6 +1229,14 @@ flag {
 }
 
 flag {
+  name: "glanceable_hub_v2_resources"
+  namespace: "systemui"
+  description: "Read only flag for rolling out glanceable hub v2 resource values"
+  bug: "375689917"
+  is_fixed_read_only: true
+}
+
+flag {
     name: "dream_overlay_updated_font"
     namespace: "systemui"
     description: "Flag to enable updated font settings for dream overlay"
