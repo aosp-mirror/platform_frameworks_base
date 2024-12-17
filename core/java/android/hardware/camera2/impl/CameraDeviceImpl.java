@@ -482,8 +482,19 @@ public class CameraDeviceImpl extends CameraDevice
 
             mRemoteDevice = new ICameraDeviceUserWrapper(remoteDevice);
             Parcel resultParcel = Parcel.obtain();
-            mRemoteDevice.getCaptureResultMetadataQueue().writeToParcel(resultParcel, 0);
+
+            // Passing in PARCELABLE_WRITE_RETURN_VALUE closes the ParcelFileDescriptors
+            // owned by MQDescriptor returned by getCaptureResultMetadataQueue()
+            // Though these will be closed when GC runs, that may not happen for a while.
+            // Also, apps running with StrictMode would get warnings / crash in the case they're not
+            // explicitly closed.
+            mRemoteDevice.getCaptureResultMetadataQueue().writeToParcel(resultParcel,
+                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             mFMQReader = nativeCreateFMQReader(resultParcel);
+            // Recycle since resultParcel would dup fds from MQDescriptor as well. We don't
+            // need them after the native FMQ reader has been created. That is since the native
+            // creates calls MQDescriptor.readFromParcel() which again dups the fds.
+            resultParcel.recycle();
 
             IBinder remoteDeviceBinder = remoteDevice.asBinder();
             // For legacy camera device, remoteDevice is in the same process, and

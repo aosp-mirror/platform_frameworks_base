@@ -30,6 +30,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "android_os_Parcel.h"
 #include "core_jni_helpers.h"
+#include <android/binder_auto_utils.h>
 #include <android/binder_parcel_jni.h>
 #include <android/hardware/camera2/ICameraDeviceUser.h>
 #include <aidl/android/hardware/common/fmq/MQDescriptor.h>
@@ -40,6 +41,7 @@
 using namespace android;
 
 using ::android::AidlMessageQueue;
+using ndk::ScopedAParcel;
 using ResultMetadataQueue = AidlMessageQueue<int8_t, SynchronizedReadWrite>;
 
 class FMQReader {
@@ -75,15 +77,16 @@ extern "C" {
 
 static jlong CameraDevice_createFMQReader(JNIEnv *env, jclass thiz,
         jobject resultParcel) {
-    AParcel *resultAParcel = AParcel_fromJavaParcel(env, resultParcel);
-    if (resultAParcel == nullptr) {
+    ScopedAParcel sResultAParcel(AParcel_fromJavaParcel(env, resultParcel));
+    if (sResultAParcel.get() == nullptr) {
         ALOGE("%s: Error creating result parcel", __FUNCTION__);
         return 0;
     }
-    AParcel_setDataPosition(resultAParcel, 0);
+
+    AParcel_setDataPosition(sResultAParcel.get(), 0);
 
     MQDescriptor<int8_t, SynchronizedReadWrite> resultMQ;
-    if (resultMQ.readFromParcel(resultAParcel) != OK) {
+    if (resultMQ.readFromParcel(sResultAParcel.get()) != OK) {
         ALOGE("%s: read from result parcel failed", __FUNCTION__);
         return 0;
     }
