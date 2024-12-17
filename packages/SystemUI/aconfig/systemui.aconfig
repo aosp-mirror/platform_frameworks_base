@@ -496,6 +496,13 @@ flag {
 }
 
 flag {
+    name: "status_bar_popup_chips"
+    namespace: "systemui"
+    description: "Show rich ongoing processes as chips in the status bar"
+    bug: "372964148"
+}
+
+flag {
     name: "promote_notifications_automatically"
     namespace: "systemui"
     description: "Flag to automatically turn certain notifications into promoted notifications so "
