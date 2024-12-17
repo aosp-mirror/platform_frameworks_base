@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
+import android.media.MediaRoute2ProviderService.Reason;
 import android.media.MediaRouter2;
 import android.media.MediaRouter2Utils;
 import android.media.RouteDiscoveryPreference;
@@ -123,6 +124,13 @@ abstract class MediaRoute2Provider {
         }
     }
 
+    /** Calls {@link Callback#onRequestFailed} with the given id and reason. */
+    protected void notifyRequestFailed(long requestId, @Reason int reason) {
+        if (mCallback != null) {
+            mCallback.onRequestFailed(/* provider= */ this, requestId, reason);
+        }
+    }
+
     void setAndNotifyProviderState(MediaRoute2ProviderInfo providerInfo) {
         setProviderState(providerInfo);
         notifyProviderState();
@@ -175,7 +183,9 @@ abstract class MediaRoute2Provider {
                 @NonNull RoutingSessionInfo sessionInfo);
         void onSessionReleased(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
-        void onRequestFailed(@NonNull MediaRoute2Provider provider, long requestId, int reason);
+
+        void onRequestFailed(
+                @NonNull MediaRoute2Provider provider, long requestId, @Reason int reason);
     }
 
     /**

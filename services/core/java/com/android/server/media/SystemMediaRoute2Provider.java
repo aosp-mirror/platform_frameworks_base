@@ -327,6 +327,23 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     /**
+     * Returns the {@link RoutingSessionInfo} that corresponds to the package with the given name.
+     */
+    public RoutingSessionInfo getSessionForPackage(String targetPackageName) {
+        synchronized (mLock) {
+            if (!mSessionInfos.isEmpty()) {
+                // Return a copy of the current system session with no modification,
+                // except setting the client package name.
+                return new RoutingSessionInfo.Builder(mSessionInfos.get(0))
+                        .setClientPackageName(targetPackageName)
+                        .build();
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
      * Builds a system {@link RoutingSessionInfo} with the selected route set to the currently
      * selected <b>device</b> route (wired or built-in, but not bluetooth) and transferable routes
      * set to the currently available (connected) bluetooth routes.
@@ -633,10 +650,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         RoutingSessionInfo sessionInfo;
         synchronized (mLock) {
-            sessionInfo = mSessionInfos.get(0);
-            if (sessionInfo == null) {
+            if (mSessionInfos.isEmpty()) {
                 return;
             }
+            sessionInfo = mSessionInfos.get(0);
         }
 
         mCallback.onSessionUpdated(this, sessionInfo);
