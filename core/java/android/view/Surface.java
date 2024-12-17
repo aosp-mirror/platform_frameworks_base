@@ -206,7 +206,8 @@ public class Surface implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
             value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
-                    FRAME_RATE_COMPATIBILITY_GTE})
+                    FRAME_RATE_COMPATIBILITY_AT_LEAST, FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_COMPATIBILITY_MIN})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -219,7 +220,7 @@ public class Surface implements Parcelable {
      * In Android version {@link Build.VERSION_CODES#BAKLAVA} and above, use
      * {@link FRAME_RATE_COMPATIBILITY_DEFAULT} for game content.
      * For other cases, see {@link FRAME_RATE_COMPATIBILITY_FIXED_SOURCE} and
-     * {@link FRAME_RATE_COMPATIBILITY_GTE}.
+     * {@link FRAME_RATE_COMPATIBILITY_AT_LEAST}.
      */
     public static final int FRAME_RATE_COMPATIBILITY_DEFAULT = 0;
 
@@ -234,7 +235,7 @@ public class Surface implements Parcelable {
     public static final int FRAME_RATE_COMPATIBILITY_FIXED_SOURCE = 1;
 
     /**
-     * The surface requests a frame rate that is greater than or equal to the specified frame rate.
+     * The surface requests a frame rate that is at least the specified frame rate.
      * This value should be used for UIs, animations, scrolling and fling, and anything that is not
      * a game or video.
      *
@@ -242,7 +243,7 @@ public class Surface implements Parcelable {
      * {@link FRAME_RATE_COMPATIBILITY_DEFAULT}.
      */
     @FlaggedApi(com.android.graphics.surfaceflinger.flags.Flags.FLAG_ARR_SETFRAMERATE_GTE_ENUM)
-    public static final int FRAME_RATE_COMPATIBILITY_GTE = 2;
+    public static final int FRAME_RATE_COMPATIBILITY_AT_LEAST = 2;
 
     /**
      * This surface belongs to an app on the High Refresh Rate Deny list, and needs the display
