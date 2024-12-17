@@ -20,5 +20,11 @@ import android.annotation.NonNull;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 public interface SerializableToString {
+    /**
+     * Returns a stable string representation of an operation
+     *
+     * @param indent the indentation for that operation
+     * @param serializer the serializer object
+     */
     void serializeToString(int indent, @NonNull StringSerializer serializer);
 }

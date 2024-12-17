@@ -68,6 +68,11 @@ public class ContainerEnd extends Operation {
         return Operations.CONTAINER_END;
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     */
     public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(id());
     }

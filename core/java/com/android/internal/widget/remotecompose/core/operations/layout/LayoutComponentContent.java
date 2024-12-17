@@ -66,6 +66,12 @@ public class LayoutComponentContent extends Component {
         return "CONTENT";
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param componentId
+     */
     public static void apply(@NonNull WireBuffer buffer, int componentId) {
         buffer.start(Operations.LAYOUT_CONTENT);
         buffer.writeInt(componentId);

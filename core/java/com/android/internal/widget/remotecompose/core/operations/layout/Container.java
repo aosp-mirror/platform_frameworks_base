@@ -21,7 +21,13 @@ import com.android.internal.widget.remotecompose.core.Operation;
 
 import java.util.ArrayList;
 
+/** An Operation container */
 public interface Container {
+    /**
+     * Returns a list of child operations
+     *
+     * @return a list of child operations
+     */
     @NonNull
     ArrayList<Operation> getList();
 }

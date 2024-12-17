@@ -92,6 +92,12 @@ public class Theme extends Operation implements RemoteComposeOperation {
         return OP_CODE;
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param theme
+     */
     public static void apply(@NonNull WireBuffer buffer, int theme) {
         buffer.start(OP_CODE);
         buffer.writeInt(theme);

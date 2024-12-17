@@ -118,16 +118,22 @@ public class CoreSemantics extends Operation implements AccessibilityModifier {
         return indent + this;
     }
 
-    @NonNull
-    public String serializedName() {
-        return "SEMANTICS";
-    }
-
     @Override
     public void serializeToString(int indent, @NonNull StringSerializer serializer) {
-        serializer.append(indent, serializedName() + " = " + this);
+        serializer.append(indent, "SEMANTICS" + " = " + this);
     }
 
+    /**
+     * Reads a CoreSemantics object from a WireBuffer and adds it to a list of operations.
+     *
+     * <p>This method reads the data required to construct a CoreSemantics object from the provided
+     * WireBuffer. After reading and constructing the CoreSemantics object, it is added to the
+     * provided list of operations.
+     *
+     * @param buffer The WireBuffer to read data from.
+     * @param operations The list of operations to which the read CoreSemantics object will be
+     *     added.
+     */
     public static void read(WireBuffer buffer, List<Operation> operations) {
         CoreSemantics semantics = new CoreSemantics();
 
@@ -147,11 +153,5 @@ public class CoreSemantics extends Operation implements AccessibilityModifier {
 
     public @Nullable Integer getTextId() {
         return mTextId != 0 ? mTextId : null;
-    }
-
-    public enum Mode {
-        SET,
-        CLEAR_AND_SET,
-        MERGE
     }
 }

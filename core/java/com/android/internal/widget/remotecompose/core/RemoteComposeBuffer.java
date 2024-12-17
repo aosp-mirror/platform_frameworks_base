@@ -58,6 +58,8 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixSkew;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
+import com.android.internal.widget.remotecompose.core.operations.ParticlesCreate;
+import com.android.internal.widget.remotecompose.core.operations.ParticlesLoop;
 import com.android.internal.widget.remotecompose.core.operations.PathAppend;
 import com.android.internal.widget.remotecompose.core.operations.PathCreate;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
@@ -77,6 +79,8 @@ import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
 import com.android.internal.widget.remotecompose.core.operations.layout.ContainerEnd;
+import com.android.internal.widget.remotecompose.core.operations.layout.ImpulseOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.ImpulseProcess;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
@@ -411,11 +415,7 @@ public class RemoteComposeBuffer {
             BitmapData.apply(
                     mBuffer, imageId, imageWidth, imageHeight, data); // todo: potential npe
         }
-        int contentDescriptionId = 0;
-        if (contentDescription != null) {
-            contentDescriptionId = addText(contentDescription);
-        }
-        DrawBitmap.apply(mBuffer, imageId, left, top, right, bottom, contentDescriptionId);
+        addDrawBitmap(imageId, left, top, right, bottom, contentDescription);
     }
 
     /**
@@ -438,6 +438,24 @@ public class RemoteComposeBuffer {
             contentDescriptionId = addText(contentDescription);
         }
         DrawBitmap.apply(mBuffer, imageId, left, top, right, bottom, contentDescriptionId);
+    }
+
+    /**
+     * @param imageId The Id bitmap to be drawn
+     * @param left left coordinate of rectangle that the bitmap will be to fit into
+     * @param top top coordinate of rectangle that the bitmap will be to fit into
+     * @param contentDescription content description of the image
+     */
+    public void addDrawBitmap(
+            int imageId, float left, float top, @Nullable String contentDescription) {
+        int imageWidth = mPlatform.getImageWidth(imageId);
+        int imageHeight = mPlatform.getImageHeight(imageId);
+        int contentDescriptionId = 0;
+        if (contentDescription != null) {
+            contentDescriptionId = addText(contentDescription);
+        }
+        DrawBitmap.apply(
+                mBuffer, imageId, left, top, imageWidth, imageHeight, contentDescriptionId);
     }
 
     /**
@@ -537,7 +555,7 @@ public class RemoteComposeBuffer {
     }
 
     /**
-     * This defines the name of the color given the id.
+     * This defines the name of the bitmap given the id.
      *
      * @param id of the Bitmap
      * @param name Name of the color
@@ -2059,5 +2077,62 @@ public class RemoteComposeBuffer {
 
     public int nextId() {
         return mRemoteComposeState.nextId();
+    }
+
+    private boolean mInImpulseProcess = false;
+
+    /**
+     * add an impulse. (must be followed by impulse end)
+     *
+     * @param duration duration of the impulse
+     * @param start the start time
+     */
+    public void addImpulse(float duration, float start) {
+        ImpulseOperation.apply(mBuffer, duration, start);
+        mInImpulseProcess = false;
+    }
+
+    /** add an impulse process */
+    public void addImpulseProcess() {
+        ImpulseProcess.apply(mBuffer);
+        mInImpulseProcess = true;
+    }
+
+    /** Add an impulse end */
+    public void addImpulseEnd() {
+        ContainerEnd.apply(mBuffer);
+        if (mInImpulseProcess) {
+            ContainerEnd.apply(mBuffer);
+        }
+        mInImpulseProcess = false;
+    }
+
+    /**
+     * Start a particle engine container & initial setup
+     *
+     * @param id the particle engine id
+     * @param varIds list of variable ids
+     * @param initialExpressions the expressions used to initialize the variables
+     * @param particleCount the number of particles to draw
+     */
+    public void addParticles(
+            int id, int[] varIds, float[][] initialExpressions, int particleCount) {
+        ParticlesCreate.apply(mBuffer, id, varIds, initialExpressions, particleCount);
+    }
+
+    /**
+     * Setup the particle engine loop
+     *
+     * @param id the particle engine id
+     * @param restart value on restart
+     * @param expressions the expressions used to update the variables during the particles run
+     */
+    public void addParticlesLoop(int id, float[] restart, float[][] expressions) {
+        ParticlesLoop.apply(mBuffer, id, restart, expressions);
+    }
+
+    /** Closes the particle engine container */
+    public void addParticleLoopEnd() {
+        ContainerEnd.apply(mBuffer);
     }
 }

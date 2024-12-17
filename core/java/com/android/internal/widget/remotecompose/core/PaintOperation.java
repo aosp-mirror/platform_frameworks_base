@@ -39,6 +39,11 @@ public abstract class PaintOperation extends Operation {
         return indent + toString();
     }
 
+    /**
+     * Paint the operation in the context
+     *
+     * @param context painting context
+     */
     public abstract void paint(@NonNull PaintContext context);
 
     /**

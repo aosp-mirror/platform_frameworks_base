@@ -47,6 +47,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     Point mActionDownPoint = new Point(0, 0);
     AndroidRemoteContext mARContext = new AndroidRemoteContext();
     float mDensity = 1f;
+    long mStart = System.nanoTime();
 
     long mLastFrameDelay = 1;
     float mMaxFrameRate = 60f; // frames per seconds
@@ -109,6 +110,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         setContentDescription(mDocument.getDocument().getContentDescription());
         updateClickAreas();
         requestLayout();
+        mARContext.loadFloat(RemoteContext.ID_TOUCH_EVENT_TIME, -Float.MAX_VALUE);
         invalidate();
     }
 
@@ -337,6 +339,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                 mActionDownPoint.y = (int) event.getY();
                 CoreDocument doc = mDocument.getDocument();
                 if (doc.hasTouchListener()) {
+                    mARContext.loadFloat(
+                            RemoteContext.ID_TOUCH_EVENT_TIME, mARContext.getAnimationTime());
                     mInActionDown = true;
                     if (mVelocityTracker == null) {
                         mVelocityTracker = VelocityTracker.obtain();
@@ -368,6 +372,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
                 performClick();
                 doc = mDocument.getDocument();
                 if (doc.hasTouchListener()) {
+                    mARContext.loadFloat(
+                            RemoteContext.ID_TOUCH_EVENT_TIME, mARContext.getAnimationTime());
                     mVelocityTracker.computeCurrentVelocity(1000);
                     float dx = mVelocityTracker.getXVelocity(pointerId);
                     float dy = mVelocityTracker.getYVelocity(pointerId);
@@ -380,6 +386,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             case MotionEvent.ACTION_MOVE:
                 if (mInActionDown) {
                     if (mVelocityTracker != null) {
+                        mARContext.loadFloat(
+                                RemoteContext.ID_TOUCH_EVENT_TIME, mARContext.getAnimationTime());
                         mVelocityTracker.addMovement(event);
                         doc = mDocument.getDocument();
                         boolean repaint = doc.touchDrag(mARContext, event.getX(), event.getY());
@@ -453,7 +461,8 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     private int mCount;
     private long mTime = System.nanoTime();
     private long mDuration;
-    private boolean mEvalTime = false;
+    private boolean mEvalTime = false; // turn on to measure eval time
+    private float mLastAnimationTime = 0.1f; // set to random non 0 number
 
     /**
      * This returns the amount of time in ms the player used to evalueate a pass it is averaged over
@@ -480,7 +489,18 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
-        long start = mEvalTime ? System.nanoTime() : 0;
+        long start = mEvalTime ? System.nanoTime() : 0; // measure execut of commands
+
+        float animationTime = (System.nanoTime() - mStart) * 1E-9f;
+        mARContext.setAnimationTime(animationTime);
+        mARContext.loadFloat(RemoteContext.ID_ANIMATION_TIME, animationTime);
+        mARContext.loadFloat(
+                RemoteContext.ID_ANIMATION_DELTA_TIME, animationTime - mLastAnimationTime);
+        mLastAnimationTime = animationTime;
+        mARContext.setAnimationEnabled(true);
+        mARContext.currentTime = System.currentTimeMillis();
+        mARContext.setDebug(mDebug);
+        float density = getContext().getResources().getDisplayMetrics().density;
         mARContext.useCanvas(canvas);
         mARContext.mWidth = getWidth();
         mARContext.mHeight = getHeight();

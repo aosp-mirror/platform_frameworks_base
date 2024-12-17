@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
+
 /** Interface used by objects to register for touch events */
 public interface TouchListener {
     /**
@@ -45,4 +47,11 @@ public interface TouchListener {
      * @param y the y coord of the drag
      */
     void touchDrag(RemoteContext context, float x, float y);
+
+    /**
+     * Called after the touch event handler is inflated
+     *
+     * @param component component it is under
+     */
+    void setComponent(Component component);
 }

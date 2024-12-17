@@ -95,6 +95,12 @@ public class RootContentDescription extends Operation
         return OP_CODE;
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param contentDescription
+     */
     public static void apply(@NonNull WireBuffer buffer, int contentDescription) {
         buffer.start(Operations.ROOT_CONTENT_DESCRIPTION);
         buffer.writeInt(contentDescription);

@@ -55,6 +55,8 @@ import com.android.internal.widget.remotecompose.core.operations.MatrixSkew;
 import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.PaintData;
+import com.android.internal.widget.remotecompose.core.operations.ParticlesCreate;
+import com.android.internal.widget.remotecompose.core.operations.ParticlesLoop;
 import com.android.internal.widget.remotecompose.core.operations.PathAppend;
 import com.android.internal.widget.remotecompose.core.operations.PathCreate;
 import com.android.internal.widget.remotecompose.core.operations.PathData;
@@ -75,6 +77,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.CanvasCo
 import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
 import com.android.internal.widget.remotecompose.core.operations.layout.ContainerEnd;
+import com.android.internal.widget.remotecompose.core.operations.layout.ImpulseOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.ImpulseProcess;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
@@ -188,6 +192,11 @@ public class Operations {
     public static final int PATH_TWEEN = 158;
     public static final int PATH_CREATE = 159;
     public static final int PATH_ADD = 160;
+    public static final int PARTICLE_CREATE = 161;
+    public static final int PARTICLE_PROCESS = 162;
+    public static final int PARTICLE_LOOP = 163;
+    public static final int IMPULSE_START = 164;
+    public static final int IMPULSE_PROCESS = 165;
 
     ///////////////////////////////////////// ======================
 
@@ -366,6 +375,10 @@ public class Operations {
         map.put(PATH_TWEEN, PathTween::read);
         map.put(PATH_CREATE, PathCreate::read);
         map.put(PATH_ADD, PathAppend::read);
+        map.put(IMPULSE_START, ImpulseOperation::read);
+        map.put(IMPULSE_PROCESS, ImpulseProcess::read);
+        map.put(PARTICLE_CREATE, ParticlesCreate::read);
+        map.put(PARTICLE_LOOP, ParticlesLoop::read);
 
         map.put(ACCESSIBILITY_SEMANTICS, CoreSemantics::read);
         //        map.put(ACCESSIBILITY_CUSTOM_ACTION, CoreSemantics::read);

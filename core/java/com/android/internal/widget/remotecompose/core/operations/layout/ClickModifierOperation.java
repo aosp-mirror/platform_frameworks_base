@@ -77,6 +77,12 @@ public class ClickModifierOperation extends PaintOperation
         return CoreSemantics.Mode.MERGE;
     }
 
+    /**
+     * Animate ripple
+     *
+     * @param x starting position x of the ripple
+     * @param y starting position y of the ripple
+     */
     public void animateRipple(float x, float y) {
         mAnimateRippleStart = System.currentTimeMillis();
         mAnimateRippleX = x;
@@ -212,6 +218,11 @@ public class ClickModifierOperation extends PaintOperation
         return "ClickModifier";
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     */
     public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }

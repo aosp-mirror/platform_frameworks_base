@@ -45,7 +45,7 @@ public abstract class RemoteContext {
             new CoreDocument(); // todo: is this a valid way to initialize? bbade@
     public @NonNull RemoteComposeState mRemoteComposeState =
             new RemoteComposeState(); // todo, is this a valid use of RemoteComposeState -- bbade@
-    long mStart = System.nanoTime(); // todo This should be set at a hi level
+
     @Nullable protected PaintContext mPaintContext = null;
     protected float mDensity = 2.75f;
 
@@ -71,6 +71,11 @@ public abstract class RemoteContext {
         return mDensity;
     }
 
+    /**
+     * Set the density of the document
+     *
+     * @param density
+     */
     public void setDensity(float density) {
         if (density > 0) {
             mDensity = density;
@@ -142,7 +147,6 @@ public abstract class RemoteContext {
      * @return a monotonic time in seconds (arbitrary zero point)
      */
     public float getAnimationTime() {
-        mAnimationTime = (System.nanoTime() - mStart) * 1E-9f; // Eliminate
         return mAnimationTime;
     }
 
@@ -243,6 +247,11 @@ public abstract class RemoteContext {
 
     public abstract @Nullable Object getObject(int mId);
 
+    /**
+     * Add a touch listener to the context
+     *
+     * @param touchExpression
+     */
     public void addTouchListener(TouchListener touchExpression) {}
 
     /**
@@ -337,6 +346,16 @@ public abstract class RemoteContext {
     // Operations
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Set the main information about a document
+     *
+     * @param majorVersion major version of the document protocol used
+     * @param minorVersion minor version of the document protocol used
+     * @param patchVersion patch version of the document protocol used
+     * @param width original width of the document when created
+     * @param height original height of the document when created
+     * @param capabilities bitmask of capabilities used in the document (TBD)
+     */
     public void header(
             int majorVersion,
             int minorVersion,
@@ -552,6 +571,15 @@ public abstract class RemoteContext {
     /** Defines when the last build was made */
     public static final int ID_API_LEVEL = 28;
 
+    /** Defines when the TOUCH EVENT HAPPENED */
+    public static final int ID_TOUCH_EVENT_TIME = 29;
+
+    /** Animation time in seconds */
+    public static final int ID_ANIMATION_TIME = 30;
+
+    /** The delta between current and last Frame */
+    public static final int ID_ANIMATION_DELTA_TIME = 31;
+
     public static final float FLOAT_DENSITY = Utils.asNan(ID_DENSITY);
 
     /** CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600 */
@@ -594,6 +622,15 @@ public abstract class RemoteContext {
 
     /** TOUCH_VEL_Y is the x velocity of the touch */
     public static final float FLOAT_TOUCH_VEL_Y = Utils.asNan(ID_TOUCH_VEL_Y);
+
+    /** TOUCH_EVENT_TIME the time of the touch */
+    public static final float FLOAT_TOUCH_EVENT_TIME = Utils.asNan(ID_TOUCH_EVENT_TIME);
+
+    /** Animation time in seconds */
+    public static final float FLOAT_ANIMATION_TIME = Utils.asNan(ID_ANIMATION_TIME);
+
+    /** Animation time in seconds */
+    public static final float FLOAT_ANIMATION_DELTA_TIME = Utils.asNan(ID_ANIMATION_DELTA_TIME);
 
     /** X acceleration sensor value in M/s^2 */
     public static final float FLOAT_ACCELERATION_X = Utils.asNan(ID_ACCELERATION_X);

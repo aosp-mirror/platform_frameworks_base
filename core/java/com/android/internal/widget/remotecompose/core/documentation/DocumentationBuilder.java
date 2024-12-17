@@ -18,11 +18,33 @@ package com.android.internal.widget.remotecompose.core.documentation;
 import android.annotation.NonNull;
 
 public interface DocumentationBuilder {
+
+    /**
+     * Add arbitrary text to the documentation
+     *
+     * @param value
+     */
     void add(@NonNull String value);
 
+    /**
+     * Add the operation to the documentation
+     *
+     * @param category category of the operation
+     * @param id the OPCODE of the operation
+     * @param name the name of the operation
+     * @return a DocumentedOperation
+     */
     @NonNull
     DocumentedOperation operation(@NonNull String category, int id, @NonNull String name);
 
+    /**
+     * Add the operation to the documentation as a Work in Progress (WIP) operation
+     *
+     * @param category category of the operation
+     * @param id the OPCODE of the operation
+     * @param name the name of the operation
+     * @return a DocumentedOperation
+     */
     @NonNull
     DocumentedOperation wipOperation(@NonNull String category, int id, @NonNull String name);
 }
