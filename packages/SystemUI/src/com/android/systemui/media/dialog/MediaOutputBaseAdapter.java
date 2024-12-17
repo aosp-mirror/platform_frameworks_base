@@ -366,7 +366,6 @@ public abstract class MediaOutputBaseAdapter extends
                                     / (double) seekBar.getMax());
                     mVolumeValueText.setText(mContext.getResources().getString(
                             R.string.media_output_dialog_volume_percentage, percentage));
-                    mVolumeValueText.setVisibility(View.VISIBLE);
                     if (mStartFromMute) {
                         updateUnmutedVolumeIcon(device);
                         mStartFromMute = false;
