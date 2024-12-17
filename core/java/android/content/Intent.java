@@ -4215,6 +4215,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_USER_INFO_CHANGED =
             "android.intent.action.USER_INFO_CHANGED";
 
+
+    /**
+     * Broadcast sent to the system when a user's information changes. Carries an extra
+     * {@link #EXTRA_USER_HANDLE} to indicate which user's information changed.
+     * This is only sent to permission protected manifest receivers. It is sent to all users.
+     * @hide
+     */
+    @BroadcastBehavior(includeBackground = true)
+    public static final String ACTION_USER_INFO_CHANGED_BACKGROUND =
+            "android.intent.action.USER_INFO_CHANGED_BACKGROUND";
+
     /**
      * Broadcast sent to the primary user when an associated managed profile is added (the profile
      * was created and is ready to be used). Carries an extra {@link #EXTRA_USER} that specifies
