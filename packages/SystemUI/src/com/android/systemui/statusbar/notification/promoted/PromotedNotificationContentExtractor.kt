@@ -34,15 +34,22 @@ import com.android.systemui.statusbar.notification.promoted.shared.model.Promote
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel.When
 import javax.inject.Inject
 
+interface PromotedNotificationContentExtractor {
+    fun extractContent(
+        entry: NotificationEntry,
+        recoveredBuilder: Notification.Builder,
+    ): PromotedNotificationContentModel?
+}
+
 @SysUISingleton
-class PromotedNotificationContentExtractor
+class PromotedNotificationContentExtractorImpl
 @Inject
 constructor(
     private val promotedNotificationsProvider: PromotedNotificationsProvider,
     @ShadeDisplayAware private val context: Context,
     private val logger: PromotedNotificationLogger,
-) {
-    fun extractContent(
+) : PromotedNotificationContentExtractor {
+    override fun extractContent(
         entry: NotificationEntry,
         recoveredBuilder: Notification.Builder,
     ): PromotedNotificationContentModel? {
@@ -169,5 +176,5 @@ private fun CallStyle.extractContent(contentBuilder: PromotedNotificationContent
 
 private fun ProgressStyle.extractContent(contentBuilder: PromotedNotificationContentModel.Builder) {
     // TODO: Create NotificationProgressModel.toSkeleton, or something similar.
-    contentBuilder.progress = createProgressModel(0xffffffff.toInt(), 0x00000000)
+    contentBuilder.progress = createProgressModel(0xffffffff.toInt(), 0xff000000.toInt())
 }

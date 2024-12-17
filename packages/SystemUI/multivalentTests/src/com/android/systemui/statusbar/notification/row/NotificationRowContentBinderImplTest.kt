@@ -37,7 +37,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractor
+import com.android.systemui.statusbar.notification.promoted.FakePromotedNotificationContentExtractor
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams
@@ -67,7 +67,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -110,7 +109,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 return inflatedSmartReplyState
             }
         }
-    private val promotedNotificationContentExtractor: PromotedNotificationContentExtractor = mock()
+    private val promotedNotificationContentExtractor = FakePromotedNotificationContentExtractor()
 
     @Before
     fun setUp() {
@@ -234,7 +233,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 packageContext = mContext,
                 remoteViews = NewRemoteViews(),
                 contentModel = NotificationContentModel(headsUpStatusBarModel),
-                extractedPromotedNotificationContentModel = null,
+                promotedContent = null,
             )
         val countDownLatch = CountDownLatch(1)
         NotificationRowContentBinderImpl.applyRemoteView(
@@ -475,12 +474,11 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @DisableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun testExtractsPromotedContent_notWhenBothFlagsDisabled() {
         val content = PromotedNotificationContentModel.Builder("key").build()
-        whenever(promotedNotificationContentExtractor.extractContent(any(), any()))
-            .thenReturn(content)
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
 
         inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
 
-        verify(promotedNotificationContentExtractor, never()).extractContent(any(), any())
+        promotedNotificationContentExtractor.verifyZeroExtractCalls()
     }
 
     @Test
@@ -488,12 +486,11 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @DisableFlags(StatusBarNotifChips.FLAG_NAME)
     fun testExtractsPromotedContent_whenPromotedNotificationUiFlagEnabled() {
         val content = PromotedNotificationContentModel.Builder("key").build()
-        whenever(promotedNotificationContentExtractor.extractContent(any(), any()))
-            .thenReturn(content)
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
 
         inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
 
-        verify(promotedNotificationContentExtractor, times(1)).extractContent(any(), any())
+        promotedNotificationContentExtractor.verifyOneExtractCall()
         Assert.assertEquals(content, row.entry.promotedNotificationContentModel)
     }
 
@@ -502,12 +499,11 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @DisableFlags(PromotedNotificationUi.FLAG_NAME)
     fun testExtractsPromotedContent_whenStatusBarNotifChipsFlagEnabled() {
         val content = PromotedNotificationContentModel.Builder("key").build()
-        whenever(promotedNotificationContentExtractor.extractContent(any(), any()))
-            .thenReturn(content)
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
 
         inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
 
-        verify(promotedNotificationContentExtractor, times(1)).extractContent(any(), any())
+        promotedNotificationContentExtractor.verifyOneExtractCall()
         Assert.assertEquals(content, row.entry.promotedNotificationContentModel)
     }
 
@@ -515,13 +511,23 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun testExtractsPromotedContent_whenBothFlagsEnabled() {
         val content = PromotedNotificationContentModel.Builder("key").build()
-        whenever(promotedNotificationContentExtractor.extractContent(any(), any()))
-            .thenReturn(content)
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
 
         inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
 
-        verify(promotedNotificationContentExtractor, times(1)).extractContent(any(), any())
+        promotedNotificationContentExtractor.verifyOneExtractCall()
         Assert.assertEquals(content, row.entry.promotedNotificationContentModel)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun testExtractsPromotedContent_null() {
+        promotedNotificationContentExtractor.resetForEntry(row.entry, null)
+
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+
+        promotedNotificationContentExtractor.verifyOneExtractCall()
+        Assert.assertNull(row.entry.promotedNotificationContentModel)
     }
 
     private class ExceptionHolder {

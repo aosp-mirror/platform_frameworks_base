@@ -43,7 +43,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class PromotedNotificationContentExtractorTest : SysuiTestCase() {
+class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     private val provider =
@@ -54,7 +54,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @Test
     @DisableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun shouldNotExtract_bothFlagsDisabled() {
-        val notif = createEntry().also { provider.promotedEntries.add(it) }
+        val notif = createEntry()
         val content = extractContent(notif)
         assertThat(content).isNull()
     }
@@ -63,7 +63,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @EnableFlags(PromotedNotificationUi.FLAG_NAME)
     @DisableFlags(StatusBarNotifChips.FLAG_NAME)
     fun shouldExtract_promotedNotificationUiFlagEnabled() {
-        val entry = createEntry().also { provider.promotedEntries.add(it) }
+        val entry = createEntry()
         val content = extractContent(entry)
         assertThat(content).isNotNull()
     }
@@ -72,7 +72,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
     @DisableFlags(PromotedNotificationUi.FLAG_NAME)
     fun shouldExtract_statusBarNotifChipsFlagEnabled() {
-        val entry = createEntry().also { provider.promotedEntries.add(it) }
+        val entry = createEntry()
         val content = extractContent(entry)
         assertThat(content).isNotNull()
     }
@@ -80,7 +80,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun shouldExtract_bothFlagsEnabled() {
-        val entry = createEntry().also { provider.promotedEntries.add(it) }
+        val entry = createEntry()
         val content = extractContent(entry)
         assertThat(content).isNotNull()
     }
@@ -88,22 +88,19 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun shouldNotExtract_providerDidNotPromote() {
-        val entry = createEntry().also { provider.promotedEntries.remove(it) }
+        val entry = createEntry(promoted = false)
         val content = extractContent(entry)
         assertThat(content).isNull()
     }
 
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
-    fun extractContent_commonFields() {
-        val entry =
-            createEntry {
-                    setSubText(TEST_SUB_TEXT)
-                    setContentTitle(TEST_CONTENT_TITLE)
-                    setContentText(TEST_CONTENT_TEXT)
-                    setShortCriticalText(TEST_SHORT_CRITICAL_TEXT)
-                }
-                .also { provider.promotedEntries.add(it) }
+    fun extractsContent_commonFields() {
+        val entry = createEntry {
+            setSubText(TEST_SUB_TEXT)
+            setContentTitle(TEST_CONTENT_TITLE)
+            setContentText(TEST_CONTENT_TEXT)
+        }
 
         val content = extractContent(entry)
 
@@ -117,9 +114,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     @DisableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     fun extractContent_apiFlagOff_shortCriticalTextNotExtracted() {
-        val entry =
-            createEntry { setShortCriticalText(TEST_SHORT_CRITICAL_TEXT) }
-                .also { provider.promotedEntries.add(it) }
+        val entry = createEntry { setShortCriticalText(TEST_SHORT_CRITICAL_TEXT) }
 
         val content = extractContent(entry)
 
@@ -134,9 +129,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
         android.app.Flags.FLAG_API_RICH_ONGOING,
     )
     fun extractContent_apiFlagOn_shortCriticalTextExtracted() {
-        val entry =
-            createEntry { setShortCriticalText(TEST_SHORT_CRITICAL_TEXT) }
-                .also { provider.promotedEntries.add(it) }
+        val entry = createEntry { setShortCriticalText(TEST_SHORT_CRITICAL_TEXT) }
 
         val content = extractContent(entry)
 
@@ -151,7 +144,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
         android.app.Flags.FLAG_API_RICH_ONGOING,
     )
     fun extractContent_noShortCriticalTextSet_textIsNull() {
-        val entry = createEntry {}.also { provider.promotedEntries.add(it) }
+        val entry = createEntry { setShortCriticalText(null) }
 
         val content = extractContent(entry)
 
@@ -161,9 +154,8 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
-    fun extractContent_fromBigPictureStyle() {
-        val entry =
-            createEntry { setStyle(BigPictureStyle()) }.also { provider.promotedEntries.add(it) }
+    fun extractsContent_fromBigPictureStyle() {
+        val entry = createEntry { setStyle(BigPictureStyle()) }
 
         val content = extractContent(entry)
 
@@ -174,8 +166,7 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun extractContent_fromBigTextStyle() {
-        val entry =
-            createEntry { setStyle(BigTextStyle()) }.also { provider.promotedEntries.add(it) }
+        val entry = createEntry { setStyle(BigTextStyle()) }
 
         val content = extractContent(entry)
 
@@ -187,11 +178,13 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun extractContent_fromCallStyle() {
         val hangUpIntent =
-            PendingIntent.getBroadcast(context, 0, Intent("hangup"), PendingIntent.FLAG_IMMUTABLE)
-
-        val entry =
-            createEntry { setStyle(CallStyle.forOngoingCall(TEST_PERSON, hangUpIntent)) }
-                .also { provider.promotedEntries.add(it) }
+            PendingIntent.getBroadcast(
+                context,
+                0,
+                Intent("hangup_action"),
+                PendingIntent.FLAG_IMMUTABLE,
+            )
+        val entry = createEntry { setStyle(CallStyle.forOngoingCall(TEST_PERSON, hangUpIntent)) }
 
         val content = extractContent(entry)
 
@@ -202,11 +195,9 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun extractContent_fromProgressStyle() {
-        val entry =
-            createEntry {
-                    setStyle(ProgressStyle().addProgressSegment(Segment(100)).setProgress(75))
-                }
-                .also { provider.promotedEntries.add(it) }
+        val entry = createEntry {
+            setStyle(ProgressStyle().addProgressSegment(Segment(100)).setProgress(75))
+        }
 
         val content = extractContent(entry)
 
@@ -220,13 +211,9 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
     fun extractContent_fromIneligibleStyle() {
-        val entry =
-            createEntry {
-                    setStyle(
-                        MessagingStyle(TEST_PERSON).addMessage("message text", 0L, TEST_PERSON)
-                    )
-                }
-                .also { provider.promotedEntries.add(it) }
+        val entry = createEntry {
+            setStyle(MessagingStyle(TEST_PERSON).addMessage("message text", 0L, TEST_PERSON))
+        }
 
         val content = extractContent(entry)
 
@@ -239,9 +226,14 @@ class PromotedNotificationContentExtractorTest : SysuiTestCase() {
         return underTest.extractContent(entry, recoveredBuilder)
     }
 
-    private fun createEntry(builderBlock: Notification.Builder.() -> Unit = {}): NotificationEntry {
-        val notif = Notification.Builder(context, "a").also(builderBlock).build()
-        return NotificationEntryBuilder().setNotification(notif).build()
+    private fun createEntry(
+        promoted: Boolean = true,
+        builderBlock: Notification.Builder.() -> Unit = {},
+    ): NotificationEntry {
+        val notif = Notification.Builder(context, "channel").also(builderBlock).build()
+        return NotificationEntryBuilder().setNotification(notif).build().also {
+            provider.shouldPromoteForEntry[it] = promoted
+        }
     }
 
     companion object {
