@@ -45,6 +45,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_M
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_UNMINIMIZE_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,6 +76,12 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         doReturn(displayLayout).whenever(displayController).getDisplayLayout(anyInt())
         doReturn(DISPLAY_WIDTH).whenever(displayLayout).width()
         doReturn(DISPLAY_HEIGHT).whenever(displayLayout).height()
+    }
+
+    @After
+    fun tearDown() {
+        clearInvocations(staticMockMarker(FrameworkStatsLog::class.java))
+        clearInvocations(staticMockMarker(EventLogTags::class.java))
     }
 
     @Test
