@@ -1299,7 +1299,6 @@ public class HeadsUpManagerImpl
         }
 
         private NotificationEntry requireEntry() {
-            /* check if */ SceneContainerFlag.isUnexpectedlyInLegacyMode();
             return Objects.requireNonNull(mEntry);
         }
 
