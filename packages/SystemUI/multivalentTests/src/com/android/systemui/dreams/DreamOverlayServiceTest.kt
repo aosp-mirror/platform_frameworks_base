@@ -92,10 +92,10 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.firstValue
@@ -768,7 +768,7 @@ class DreamOverlayServiceTest(flags: FlagsParameterization?) : SysuiTestCase() {
             runCurrent()
             verify(mDreamOverlayCallback).onRedirectWake(true)
             client.onWakeRequested()
-            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), any(), isNull())
+            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), any(), anyOrNull())
             verify(mUiEventLogger).log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START)
         }
 

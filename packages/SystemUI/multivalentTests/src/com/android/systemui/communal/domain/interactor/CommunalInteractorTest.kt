@@ -35,6 +35,7 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
 import com.android.systemui.Flags.FLAG_COMMUNAL_WIDGET_RESIZING
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
@@ -232,7 +233,7 @@ class CommunalInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     fun isCommunalAvailable_communalDisabled_false() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_COMMUNAL_HUB)
+            mSetFlagsRule.disableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
 
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
