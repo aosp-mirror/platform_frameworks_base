@@ -16,6 +16,8 @@
 
 package com.android.systemui.scrim;
 
+import static com.android.systemui.Flags.notificationShadeBlur;
+
 import static java.lang.Float.isNaN;
 
 import android.annotation.NonNull;
@@ -39,12 +41,11 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
-
-import static com.android.systemui.Flags.notificationShadeBlur;
 
 /**
  * A view which can draw a scrim.  This view maybe be used in multiple windows running on different
@@ -253,8 +254,11 @@ public class ScrimView extends View {
                 mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor, tintAmount);
             }
             if (notificationShadeBlur()) {
-                // TODO(b/370555223): Fix color and transparency to match visual spec exactly
-                mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), Color.GRAY, 0.5f);
+                int layerAbove = ColorUtils.setAlphaComponent(
+                        getResources().getColor(R.color.shade_panel, null),
+                        (int) (0.4f * 255));
+                int layerBelow = ColorUtils.setAlphaComponent(Color.WHITE, (int) (0.1f * 255));
+                mainTinted = ColorUtils.compositeColors(layerAbove, layerBelow);
             }
             drawable.setColor(mainTinted, animated);
         } else {
