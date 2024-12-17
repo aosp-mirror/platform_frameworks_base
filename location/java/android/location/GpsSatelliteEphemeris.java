@@ -37,8 +37,8 @@ import com.android.internal.util.Preconditions;
 @FlaggedApi(Flags.FLAG_GNSS_ASSISTANCE_INTERFACE)
 @SystemApi
 public final class GpsSatelliteEphemeris implements Parcelable {
-    /** Satellite PRN */
-    private final int mPrn;
+    /** PRN or satellite ID number for the GPS satellite. */
+    private final int mSvid;
 
     /** L2 parameters. */
     @NonNull private final GpsL2Params mGpsL2Params;
@@ -56,8 +56,8 @@ public final class GpsSatelliteEphemeris implements Parcelable {
     @NonNull private final SatelliteEphemerisTime mSatelliteEphemerisTime;
 
     private GpsSatelliteEphemeris(Builder builder) {
-        // Allow PRN beyond the range to support potential future extensibility.
-        Preconditions.checkArgument(builder.mPrn >= 1);
+        // Allow svid beyond the range to support potential future extensibility.
+        Preconditions.checkArgument(builder.mSvid >= 1);
         Preconditions.checkNotNull(builder.mGpsL2Params, "GPSL2Params cannot be null");
         Preconditions.checkNotNull(builder.mSatelliteClockModel,
                 "SatelliteClockModel cannot be null");
@@ -67,7 +67,7 @@ public final class GpsSatelliteEphemeris implements Parcelable {
                 "SatelliteHealth cannot be null");
         Preconditions.checkNotNull(builder.mSatelliteEphemerisTime,
                 "SatelliteEphemerisTime cannot be null");
-        mPrn = builder.mPrn;
+        mSvid = builder.mSvid;
         mGpsL2Params = builder.mGpsL2Params;
         mSatelliteClockModel = builder.mSatelliteClockModel;
         mSatelliteOrbitModel = builder.mSatelliteOrbitModel;
@@ -75,10 +75,10 @@ public final class GpsSatelliteEphemeris implements Parcelable {
         mSatelliteEphemerisTime = builder.mSatelliteEphemerisTime;
     }
 
-    /** Returns the PRN of the satellite. */
+    /** Returns the svid of the satellite. */
     @IntRange(from = 1, to = 32)
-    public int getPrn() {
-        return mPrn;
+    public int getSvid() {
+        return mSvid;
     }
 
     /** Returns the L2 parameters of the satellite. */
@@ -118,7 +118,7 @@ public final class GpsSatelliteEphemeris implements Parcelable {
                 public GpsSatelliteEphemeris createFromParcel(Parcel in) {
                     final GpsSatelliteEphemeris.Builder gpsSatelliteEphemeris =
                             new Builder()
-                                    .setPrn(in.readInt())
+                                    .setSvid(in.readInt())
                                     .setGpsL2Params(in.readTypedObject(GpsL2Params.CREATOR))
                                     .setSatelliteClockModel(
                                             in.readTypedObject(GpsSatelliteClockModel.CREATOR))
@@ -144,7 +144,7 @@ public final class GpsSatelliteEphemeris implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
-        parcel.writeInt(mPrn);
+        parcel.writeInt(mSvid);
         parcel.writeTypedObject(mGpsL2Params, flags);
         parcel.writeTypedObject(mSatelliteClockModel, flags);
         parcel.writeTypedObject(mSatelliteOrbitModel, flags);
@@ -156,7 +156,7 @@ public final class GpsSatelliteEphemeris implements Parcelable {
     @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder("GpsSatelliteEphemeris[");
-        builder.append("prn = ").append(mPrn);
+        builder.append("Svid = ").append(mSvid);
         builder.append(", gpsL2Params = ").append(mGpsL2Params);
         builder.append(", satelliteClockModel = ").append(mSatelliteClockModel);
         builder.append(", satelliteOrbitModel = ").append(mSatelliteOrbitModel);
@@ -168,17 +168,17 @@ public final class GpsSatelliteEphemeris implements Parcelable {
 
     /** Builder for {@link GpsSatelliteEphemeris} */
     public static final class Builder {
-        private int mPrn = 0;
+        private int mSvid = 0;
         private GpsL2Params mGpsL2Params;
         private GpsSatelliteClockModel mSatelliteClockModel;
         private KeplerianOrbitModel mSatelliteOrbitModel;
         private GpsSatelliteHealth mSatelliteHealth;
         private SatelliteEphemerisTime mSatelliteEphemerisTime;
 
-        /** Sets the PRN of the satellite. */
+        /** Sets the PRN or satellite ID number for the GPS satellite.. */
         @NonNull
-        public Builder setPrn(@IntRange(from = 1, to = 32) int prn) {
-            mPrn = prn;
+        public Builder setSvid(@IntRange(from = 1, to = 32) int svid) {
+            mSvid = svid;
             return this;
         }
 

@@ -18,6 +18,7 @@ package android.location;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -26,6 +27,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class contains ephemeris parameters specific to Glonass satellites.
@@ -38,17 +42,46 @@ import com.android.internal.util.Preconditions;
 @SystemApi
 public final class GlonassSatelliteEphemeris implements Parcelable {
 
+    /**
+     * Glonass signal health status.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({HEALTH_STATUS_HEALTHY, HEALTH_STATUS_UNHEALTHY})
+    public @interface GlonassHealthStatus {}
+
+    /**
+     * The following enumerations must be in sync with the values declared in
+     * GlonassSatelliteEphemeris.aidl
+     */
+
+    /** Health status is healthy. */
+    public static final int HEALTH_STATUS_HEALTHY = 0;
+
+    /** Health status is unhealthy. */
+    public static final int HEALTH_STATUS_UNHEALTHY = 1;
+
     /** L1/Satellite system (R), satellite number (slot number in sat. constellation). */
     private final int mSlotNumber;
 
-    /** Health state (0=healthy, 1=unhealthy). */
-    private final int mHealthState;
+    /** Health state. */
+    private final @GlonassHealthStatus int mHealthState;
 
     /** Message frame time in seconds of the UTC week (tk+nd*86400). */
     private final double mFrameTimeSeconds;
 
     /** Age of current information in days (E). */
     private final int mAgeInDays;
+
+    /** Update and validity interval in minutes (P1) */
+    private final int mUpdateIntervalMinutes;
+
+    /** Flag to indicate if the update interval is odd or even (P2). */
+    private final boolean mUpdateIntervalOdd;
+
+    /** Flag to indicates if the satellite is a Glonass-M satellitee (M). */
+    private final boolean mGlonassM;
 
     /** Satellite clock model. */
     @NonNull private final GlonassSatelliteClockModel mSatelliteClockModel;
@@ -63,6 +96,8 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         Preconditions.checkArgument(builder.mHealthState >= 0);
         Preconditions.checkArgument(builder.mFrameTimeSeconds >= 0.0f);
         Preconditions.checkArgumentInRange(builder.mAgeInDays, 0, 31, "AgeInDays");
+        Preconditions.checkArgumentInRange(
+                builder.mUpdateIntervalMinutes, 0, 60, "UpdateIntervalMinutes");
         Preconditions.checkNotNull(
                 builder.mSatelliteClockModel, "SatelliteClockModel cannot be null");
         Preconditions.checkNotNull(
@@ -71,6 +106,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         mHealthState = builder.mHealthState;
         mFrameTimeSeconds = builder.mFrameTimeSeconds;
         mAgeInDays = builder.mAgeInDays;
+        mUpdateIntervalMinutes = builder.mUpdateIntervalMinutes;
+        mUpdateIntervalOdd = builder.mUpdateIntervalOdd;
+        mGlonassM = builder.mGlonassM;
         mSatelliteClockModel = builder.mSatelliteClockModel;
         mSatelliteOrbitModel = builder.mSatelliteOrbitModel;
     }
@@ -83,9 +121,8 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         return mSlotNumber;
     }
 
-    /** Returns the health state (0=healthy, 1=unhealthy). */
-    @IntRange(from = 0, to = 1)
-    public int getHealthState() {
+    /** Returns the health state. */
+    public @GlonassHealthStatus int getHealthState() {
         return mHealthState;
     }
 
@@ -99,6 +136,22 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
     @IntRange(from = 0, to = 31)
     public int getAgeInDays() {
         return mAgeInDays;
+    }
+
+    /** Returns the update interval in minutes (P1). */
+    @IntRange(from = 0, to = 60)
+    public int getUpdateIntervalMinutes() {
+        return mUpdateIntervalMinutes;
+    }
+
+    /** Returns true if the update interval (P2) is odd, false otherwise (P2). */
+    public boolean isUpdateIntervalOdd() {
+        return mUpdateIntervalOdd;
+    }
+
+    /** Returns true if the satellite is a Glonass-M satellitee (M), false otherwise. */
+    public boolean isGlonassM() {
+        return mGlonassM;
     }
 
     /** Returns the satellite clock model. */
@@ -124,6 +177,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         dest.writeInt(mHealthState);
         dest.writeDouble(mFrameTimeSeconds);
         dest.writeInt(mAgeInDays);
+        dest.writeInt(mUpdateIntervalMinutes);
+        dest.writeBoolean(mUpdateIntervalOdd);
+        dest.writeBoolean(mGlonassM);
         dest.writeTypedObject(mSatelliteClockModel, flags);
         dest.writeTypedObject(mSatelliteOrbitModel, flags);
     }
@@ -137,6 +193,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
                             .setHealthState(source.readInt())
                             .setFrameTimeSeconds(source.readDouble())
                             .setAgeInDays(source.readInt())
+                            .setUpdateIntervalMinutes(source.readInt())
+                            .setUpdateIntervalOdd(source.readBoolean())
+                            .setGlonassM(source.readBoolean())
                             .setSatelliteClockModel(
                                     source.readTypedObject(GlonassSatelliteClockModel.CREATOR))
                             .setSatelliteOrbitModel(
@@ -158,6 +217,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         builder.append(", healthState = ").append(mHealthState);
         builder.append(", frameTimeSeconds = ").append(mFrameTimeSeconds);
         builder.append(", ageInDays = ").append(mAgeInDays);
+        builder.append(", updateIntervalMinutes = ").append(mUpdateIntervalMinutes);
+        builder.append(", isUpdateIntervalOdd = ").append(mUpdateIntervalOdd);
+        builder.append(", isGlonassM = ").append(mGlonassM);
         builder.append(", satelliteClockModel = ").append(mSatelliteClockModel);
         builder.append(", satelliteOrbitModel = ").append(mSatelliteOrbitModel);
         builder.append("]");
@@ -170,6 +232,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         private int mHealthState;
         private double mFrameTimeSeconds;
         private int mAgeInDays;
+        private int mUpdateIntervalMinutes;
+        private boolean mUpdateIntervalOdd;
+        private boolean mGlonassM;
         private GlonassSatelliteClockModel mSatelliteClockModel;
         private GlonassSatelliteOrbitModel mSatelliteOrbitModel;
 
@@ -182,9 +247,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
             return this;
         }
 
-        /** Sets the health state (0=healthy, 1=unhealthy). */
+        /** Sets the health state. */
         @NonNull
-        public Builder setHealthState(@IntRange(from = 0, to = 1) int healthState) {
+        public Builder setHealthState(@GlonassHealthStatus int healthState) {
             mHealthState = healthState;
             return this;
         }
@@ -219,6 +284,28 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
             return this;
         }
 
+        /** Sets the update interval in minutes (P1). */
+        @NonNull
+        public Builder setUpdateIntervalMinutes(
+                @IntRange(from = 0, to = 60) int updateIntervalMinutes) {
+            mUpdateIntervalMinutes = updateIntervalMinutes;
+            return this;
+        }
+
+        /** Sets to true if the update interval (P2) is odd, false otherwise. */
+        @NonNull
+        public Builder setUpdateIntervalOdd(boolean isUpdateIntervalOdd) {
+            mUpdateIntervalOdd = isUpdateIntervalOdd;
+            return this;
+        }
+
+        /** Sets to true if the satellite is a Glonass-M satellitee (M), false otherwise. */
+        @NonNull
+        public Builder setGlonassM(boolean isGlonassM) {
+            mGlonassM = isGlonassM;
+            return this;
+        }
+
         /** Builds a {@link GlonassSatelliteEphemeris}. */
         @NonNull
         public GlonassSatelliteEphemeris build() {
@@ -246,19 +333,36 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
         /** Frequency bias (+GammaN). */
         private final double mFrequencyBias;
 
-        /** Frequency number. */
-        private final int mFrequencyNumber;
+        /** Frequency channel number. */
+        private final int mFrequencyChannelNumber;
+
+        /* L1/L2 group delay difference in seconds (DeltaTau). */
+        private final double mGroupDelayDiffSeconds;
+
+        /**
+         * Whether the L1/L2 group delay difference in seconds (DeltaTau) is available.
+         *
+         * <p>It is set to true if available, otherwise false.
+         */
+        private final boolean mGroupDelayDiffSecondsAvailable;
 
         private GlonassSatelliteClockModel(Builder builder) {
             Preconditions.checkArgument(builder.mTimeOfClockSeconds >= 0);
             Preconditions.checkArgumentInRange(builder.mClockBias, -0.002f, 0.002f, "ClockBias");
             Preconditions.checkArgumentInRange(
                     builder.mFrequencyBias, -9.32e-10f, 9.32e-10f, "FrequencyBias");
-            Preconditions.checkArgumentInRange(builder.mFrequencyNumber, -7, 6, "FrequencyNumber");
+            Preconditions.checkArgumentInRange(
+                    builder.mFrequencyChannelNumber, -7, 6, "FrequencyChannelNumber");
+            if (builder.mGroupDelayDiffSecondsAvailable) {
+                Preconditions.checkArgumentInRange(
+                        builder.mGroupDelayDiffSeconds, -1.4e-8f, 1.4e-8f, "GroupDelayDiffSeconds");
+            }
             mTimeOfClockSeconds = builder.mTimeOfClockSeconds;
             mClockBias = builder.mClockBias;
             mFrequencyBias = builder.mFrequencyBias;
-            mFrequencyNumber = builder.mFrequencyNumber;
+            mFrequencyChannelNumber = builder.mFrequencyChannelNumber;
+            mGroupDelayDiffSeconds = builder.mGroupDelayDiffSeconds;
+            mGroupDelayDiffSecondsAvailable = builder.mGroupDelayDiffSecondsAvailable;
         }
 
         /** Returns the time of clock in seconds (UTC). */
@@ -279,10 +383,21 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
             return mFrequencyBias;
         }
 
-        /** Returns the frequency number. */
+        /** Returns the Frequency channel number. */
         @IntRange(from = -7, to = 6)
-        public int getFrequencyNumber() {
-            return mFrequencyNumber;
+        public int getFrequencyChannelNumber() {
+            return mFrequencyChannelNumber;
+        }
+
+        /** Returns the L1/L2 group delay difference in seconds (DeltaTau). */
+        @FloatRange(from = -1.4e-8f, to = 1.4e-8f)
+        public double getGroupDelayDiffSeconds() {
+            return mGroupDelayDiffSeconds;
+        }
+
+        /** Returns whether the L1/L2 group delay difference in seconds (DeltaTau) is available. */
+        public boolean isGroupDelayDiffSecondsAvailable() {
+            return mGroupDelayDiffSecondsAvailable;
         }
 
         @Override
@@ -295,7 +410,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
             dest.writeLong(mTimeOfClockSeconds);
             dest.writeDouble(mClockBias);
             dest.writeDouble(mFrequencyBias);
-            dest.writeInt(mFrequencyNumber);
+            dest.writeInt(mFrequencyChannelNumber);
+            dest.writeDouble(mGroupDelayDiffSeconds);
+            dest.writeBoolean(mGroupDelayDiffSecondsAvailable);
         }
 
         public static final @NonNull Parcelable.Creator<GlonassSatelliteClockModel> CREATOR =
@@ -306,7 +423,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
                                 .setTimeOfClockSeconds(source.readLong())
                                 .setClockBias(source.readDouble())
                                 .setFrequencyBias(source.readDouble())
-                                .setFrequencyNumber(source.readInt())
+                                .setFrequencyChannelNumber(source.readInt())
+                                .setGroupDelayDiffSeconds(source.readDouble())
+                                .setGroupDelayDiffSecondsAvailable(source.readBoolean())
                                 .build();
                     }
 
@@ -323,7 +442,10 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
             builder.append("timeOfClockSeconds = ").append(mTimeOfClockSeconds);
             builder.append(", clockBias = ").append(mClockBias);
             builder.append(", frequencyBias = ").append(mFrequencyBias);
-            builder.append(", frequencyNumber = ").append(mFrequencyNumber);
+            builder.append(", frequencyChannelNumber = ").append(mFrequencyChannelNumber);
+            if (mGroupDelayDiffSecondsAvailable) {
+                builder.append(", groupDelayDiffSeconds = ").append(mGroupDelayDiffSeconds);
+            }
             builder.append("]");
             return builder.toString();
         }
@@ -333,7 +455,9 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
             private long mTimeOfClockSeconds;
             private double mClockBias;
             private double mFrequencyBias;
-            private int mFrequencyNumber;
+            private double mGroupDelayDiffSeconds;
+            private int mFrequencyChannelNumber;
+            private boolean mGroupDelayDiffSecondsAvailable;
 
             /** Sets the time of clock in seconds (UTC). */
             @NonNull
@@ -357,10 +481,27 @@ public final class GlonassSatelliteEphemeris implements Parcelable {
                 return this;
             }
 
-            /** Sets the frequency number. */
+            /** Sets the Frequency channel number. */
             @NonNull
-            public Builder setFrequencyNumber(@IntRange(from = -7, to = 6) int frequencyNumber) {
-                mFrequencyNumber = frequencyNumber;
+            public Builder setFrequencyChannelNumber(
+                    @IntRange(from = -7, to = 6) int frequencyChannelNumber) {
+                mFrequencyChannelNumber = frequencyChannelNumber;
+                return this;
+            }
+
+            /** Sets the L1/L2 group delay difference in seconds (DeltaTau). */
+            @NonNull
+            public Builder setGroupDelayDiffSeconds(
+                    @FloatRange(from = -1.4e-8f, to = 1.4e-8f) double groupDelayDiffSeconds) {
+                mGroupDelayDiffSeconds = groupDelayDiffSeconds;
+                return this;
+            }
+
+            /** Sets whether the L1/L2 group delay difference in seconds (DeltaTau) is available. */
+            @NonNull
+            public Builder setGroupDelayDiffSecondsAvailable(
+                    boolean isGroupDelayDiffSecondsAvailable) {
+                mGroupDelayDiffSecondsAvailable = isGroupDelayDiffSecondsAvailable;
                 return this;
             }
 
