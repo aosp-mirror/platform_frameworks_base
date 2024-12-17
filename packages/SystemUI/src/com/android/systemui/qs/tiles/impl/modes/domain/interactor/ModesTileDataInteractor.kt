@@ -17,10 +17,10 @@
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import com.android.app.tracing.coroutines.flow.flowName
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.modes.shared.ModesUiIcons
@@ -31,7 +31,6 @@ import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
-import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -68,44 +67,29 @@ constructor(
     suspend fun getCurrentTileModel() = buildTileData(zenModeInteractor.getActiveModes())
 
     private fun buildTileData(activeModes: ActiveZenModes): ModesTileModel {
-        if (ModesUiIcons.isEnabled) {
-            val tileIcon = getTileIcon(activeModes.mainMode)
-            return ModesTileModel(
-                isActivated = activeModes.isAnyActive(),
-                icon = tileIcon.icon,
-                activeModes = activeModes.modeNames,
-            )
-        } else {
-            return ModesTileModel(
-                isActivated = activeModes.isAnyActive(),
-                icon =
-                    context
-                        .getDrawable(ModesTile.ICON_RES_ID)!!
-                        .asIcon(res = ModesTile.ICON_RES_ID),
-                activeModes = activeModes.modeNames,
-            )
-        }
-    }
+        val drawable: Drawable
+        val iconRes: Int?
+        val activeMode = activeModes.mainMode
 
-    private data class TileIcon(val icon: Icon.Loaded, val resId: Int?)
-
-    private fun getTileIcon(activeMode: ZenModeInfo?): TileIcon {
-        return if (activeMode != null) {
+        if (ModesUiIcons.isEnabled && activeMode != null) {
             // ZenIconKey.resPackage is null if its resId is a system icon.
-            if (activeMode.icon.key.resPackage == null) {
-                TileIcon(
-                    activeMode.icon.drawable.asIcon(res = activeMode.icon.key.resId),
-                    activeMode.icon.key.resId,
-                )
-            } else {
-                TileIcon(activeMode.icon.drawable.asIcon(), null)
-            }
+            iconRes =
+                if (activeMode.icon.key.resPackage == null) {
+                    activeMode.icon.key.resId
+                } else {
+                    null
+                }
+            drawable = activeMode.icon.drawable
         } else {
-            TileIcon(
-                context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(res = ModesTile.ICON_RES_ID),
-                ModesTile.ICON_RES_ID,
-            )
+            iconRes = ModesTile.ICON_RES_ID
+            drawable = context.getDrawable(iconRes)!!
         }
+
+        return ModesTileModel(
+            isActivated = activeModes.isAnyActive(),
+            icon = Icon.Loaded(drawable, null, iconRes),
+            activeModes = activeModes.modeNames,
+        )
     }
 
     override fun availability(user: UserHandle): Flow<Boolean> = flowOf(ModesUi.isEnabled)
