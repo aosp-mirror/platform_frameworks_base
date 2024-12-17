@@ -140,8 +140,8 @@ class FlexClockFaceController(
         }
 
         /**
-         * targetRegion passed to all customized clock applies counter translationY of
-         * KeyguardStatusView and keyguard_large_clock_top_margin from default clock
+         * targetRegion passed to all customized clock applies counter translationY of Keyguard and
+         * keyguard_large_clock_top_margin from default clock
          */
         override fun onTargetRegionChanged(targetRegion: Rect?) {
             // When a clock needs to be aligned with screen, like weather clock

@@ -38,7 +38,6 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
@@ -90,14 +89,10 @@ constructor(
 ) {
 
     init {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            throw IllegalStateException("this requires MigrateClocksToBlueprint.isEnabled")
-        }
         // This scene container section moves the NSSL to the SharedNotificationContainer.
         // This also requires that SharedNotificationContainer gets moved to the
         // SceneWindowRootView by the SceneWindowRootViewBinder. Prior to Scene Container,
-        // but when the KeyguardShadeMigrationNssl flag is enabled, NSSL is moved into this
-        // container by the NotificationStackScrollLayoutSection.
+        // NSSL is moved into this container by the NotificationStackScrollLayoutSection.
         // Ensure stackScrollLayout is a child of sharedNotificationContainer.
 
         if (stackScrollLayout.parent != sharedNotificationContainer) {

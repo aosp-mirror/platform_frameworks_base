@@ -43,7 +43,6 @@ import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags.REGION_SAMPLING
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -85,8 +84,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
 /**
- * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
- * [KeyguardClockSwitchController]. Functionality is forked from [AnimatableClockController].
+ * Controller for a Clock provided by the registry and used on the keyguard. Functionality is forked
+ * from [AnimatableClockController].
  */
 open class ClockEventController
 @Inject
@@ -348,14 +347,6 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardVisibilityChanged(visible: Boolean) {
                 isKeyguardVisible = visible
-                if (!MigrateClocksToBlueprint.isEnabled) {
-                    if (!isKeyguardVisible) {
-                        clock?.run {
-                            smallClock.animations.doze(if (isDozing) 1f else 0f)
-                            largeClock.animations.doze(if (isDozing) 1f else 0f)
-                        }
-                    }
-                }
 
                 if (visible) {
                     refreshTime()
@@ -388,10 +379,6 @@ constructor(
             }
 
             private fun refreshTime() {
-                if (!MigrateClocksToBlueprint.isEnabled) {
-                    return
-                }
-
                 clock?.smallClock?.events?.onTimeTick()
                 clock?.largeClock?.events?.onTimeTick()
             }
@@ -483,14 +470,10 @@ constructor(
                     if (ModesUi.isEnabled) {
                         listenForDnd(this)
                     }
-                    if (MigrateClocksToBlueprint.isEnabled) {
-                        listenForDozeAmountTransition(this)
-                        listenForAnyStateToAodTransition(this)
-                        listenForAnyStateToLockscreenTransition(this)
-                        listenForAnyStateToDozingTransition(this)
-                    } else {
-                        listenForDozeAmount(this)
-                    }
+                    listenForDozeAmountTransition(this)
+                    listenForAnyStateToAodTransition(this)
+                    listenForAnyStateToLockscreenTransition(this)
+                    listenForAnyStateToDozingTransition(this)
                 }
             }
         smallTimeListener?.update(shouldTimeListenerRun)
@@ -596,11 +579,6 @@ constructor(
     }
 
     @VisibleForTesting
-    internal fun listenForDozeAmount(scope: CoroutineScope): Job {
-        return scope.launch { keyguardInteractor.dozeAmount.collect { handleDoze(it) } }
-    }
-
-    @VisibleForTesting
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             merge(
@@ -695,8 +673,7 @@ constructor(
             isRunning = true
             when (clockFace.config.tickRate) {
                 ClockTickRate.PER_MINUTE -> {
-                    // Handled by KeyguardClockSwitchController and
-                    // by KeyguardUpdateMonitorCallback#onTimeChanged.
+                    // Handled by KeyguardUpdateMonitorCallback#onTimeChanged.
                 }
                 ClockTickRate.PER_SECOND -> executor.execute(secondsRunnable)
                 ClockTickRate.PER_FRAME -> {

@@ -25,7 +25,6 @@ import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_INACTIVE
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.Flags
@@ -299,20 +298,6 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-    fun keyguardCallback_visibilityChanged_clockDozeCalled() =
-        runBlocking(IMMEDIATE) {
-            val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
-            verify(keyguardUpdateMonitor).registerCallback(capture(captor))
-
-            captor.value.onKeyguardVisibilityChanged(true)
-            verify(animations, never()).doze(0f)
-
-            captor.value.onKeyguardVisibilityChanged(false)
-            verify(animations, times(2)).doze(0f)
-        }
-
-    @Test
     fun keyguardCallback_timeFormat_clockNotified() =
         runBlocking(IMMEDIATE) {
             val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
@@ -341,19 +326,6 @@ class ClockEventControllerTest : SysuiTestCase() {
             captor.value.onUserSwitchComplete(10)
 
             verify(events).onTimeFormatChanged(false)
-        }
-
-    @Test
-    fun keyguardCallback_verifyKeyguardChanged() =
-        runBlocking(IMMEDIATE) {
-            val job = underTest.listenForDozeAmount(this)
-            repository.setDozeAmount(0.4f)
-
-            yield()
-
-            verify(animations, times(2)).doze(0.4f)
-
-            job.cancel()
         }
 
     @Test
