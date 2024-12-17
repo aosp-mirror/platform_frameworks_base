@@ -20,6 +20,7 @@ import static android.os.Flags.adpfUseFmqChannel;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.adpfSessionTag;
+import static com.android.server.power.hint.Flags.cpuHeadroomAffinityCheck;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 import static com.android.server.power.hint.Flags.resetOnForkEnabled;
 
@@ -191,7 +192,7 @@ public final class HintManagerService extends SystemService {
     private static final String PROPERTY_HWUI_ENABLE_HINT_MANAGER = "debug.hwui.use_hint_manager";
     private static final String PROPERTY_USE_HAL_HEADROOMS = "persist.hms.use_hal_headrooms";
     private static final String PROPERTY_CHECK_HEADROOM_TID = "persist.hms.check_headroom_tid";
-
+    private static final String PROPERTY_CHECK_HEADROOM_AFFINITY = "persist.hms.check_affinity";
     private Boolean mFMQUsesIntegratedEventFlag = false;
 
     private final Object mCpuHeadroomLock = new Object();
@@ -1501,6 +1502,10 @@ public final class HintManagerService extends SystemService {
                         }
                     }
                 }
+                if (cpuHeadroomAffinityCheck() && params.tids.length > 1
+                        && SystemProperties.getBoolean(PROPERTY_CHECK_HEADROOM_AFFINITY, true)) {
+                    checkThreadAffinityForTids(params.tids);
+                }
                 halParams.tids = params.tids;
             }
             if (halParams.calculationWindowMillis
@@ -1527,6 +1532,27 @@ public final class HintManagerService extends SystemService {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to get CPU headroom from Power HAL", e);
                 return null;
+            }
+        }
+        private void checkThreadAffinityForTids(int[] tids) {
+            long[] reference = null;
+            for (int tid : tids) {
+                long[] affinity;
+                try {
+                    affinity = Process.getSchedAffinity(tid);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to get affinity " + tid, e);
+                    throw new IllegalStateException("Could not check affinity for tid " + tid);
+                }
+                if (reference == null) {
+                    reference = affinity;
+                } else if (!Arrays.equals(reference, affinity)) {
+                    Slog.d(TAG, "Thread affinity is different: tid "
+                            + tids[0] + "->" + Arrays.toString(reference) + ", tid "
+                            + tid + "->" + Arrays.toString(affinity));
+                    throw new IllegalStateException("Thread affinity is not the same for tids "
+                            + Arrays.toString(tids));
+                }
             }
         }
 
