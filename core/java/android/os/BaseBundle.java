@@ -480,10 +480,10 @@ public class BaseBundle implements Parcel.ClassLoaderProvider {
             map.erase();
             map.ensureCapacity(count);
         }
-        int numLazyValues = 0;
+        int[] numLazyValues = new int[]{0};
         try {
-            numLazyValues = parcelledData.readArrayMap(map, count, !parcelledByNative,
-                    /* lazy */ ownsParcel, this);
+            parcelledData.readArrayMap(map, count, !parcelledByNative,
+                    /* lazy */ ownsParcel, this, numLazyValues);
         } catch (BadParcelableException e) {
             if (sShouldDefuse) {
                 Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
@@ -494,14 +494,14 @@ public class BaseBundle implements Parcel.ClassLoaderProvider {
         } finally {
             mWeakParcelledData = null;
             if (ownsParcel) {
-                if (numLazyValues == 0) {
+                if (numLazyValues[0] == 0) {
                     recycleParcel(parcelledData);
                 } else {
                     mWeakParcelledData = new WeakReference<>(parcelledData);
                 }
             }
 
-            mLazyValues = numLazyValues;
+            mLazyValues = numLazyValues[0];
             mParcelledByNative = false;
             mMap = map;
             // Set field last as it is volatile
