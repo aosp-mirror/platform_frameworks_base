@@ -55,16 +55,17 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.effect.rememberOffsetOverscrollEffect
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.res.R
 
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
-fun SceneScope.OverlayShade(
+fun ContentScope.OverlayShade(
+    panelAlignment: Alignment,
     onScrimClicked: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -87,7 +88,7 @@ fun SceneScope.OverlayShade(
     ) {
         Scrim(onClicked = onScrimClicked)
 
-        Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = Alignment.TopEnd) {
+        Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = panelAlignment) {
             Panel(
                 modifier =
                     Modifier.element(OverlayShade.Elements.Panel)
@@ -100,7 +101,7 @@ fun SceneScope.OverlayShade(
 }
 
 @Composable
-private fun SceneScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modifier) {
+private fun ContentScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modifier) {
     Spacer(
         modifier =
             modifier
@@ -112,7 +113,7 @@ private fun SceneScope.Scrim(onClicked: () -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun SceneScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
         Spacer(
             modifier =
