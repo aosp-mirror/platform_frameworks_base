@@ -305,6 +305,10 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         this.stringName = null;
     }
 
+    @VisibleForTesting TempAllowListDuration getAllowlistDurationLocked(IBinder allowlistToken) {
+        return mAllowlistDuration.get(allowlistToken);
+    }
+
     void setAllowBgActivityStarts(IBinder token, int flags) {
         if (token == null) return;
         if ((flags & FLAG_ACTIVITY_SENDER) != 0) {
@@ -323,6 +327,12 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         mAllowBgActivityStartsForActivitySender.remove(token);
         mAllowBgActivityStartsForBroadcastSender.remove(token);
         mAllowBgActivityStartsForServiceSender.remove(token);
+        if (mAllowlistDuration != null) {
+            mAllowlistDuration.remove(token);
+            if (mAllowlistDuration.isEmpty()) {
+                mAllowlistDuration = null;
+            }
+        }
     }
 
     public void registerCancelListenerLocked(IResultReceiver receiver) {
@@ -703,7 +713,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         return res;
     }
 
-    private BackgroundStartPrivileges getBackgroundStartPrivilegesForActivitySender(
+    @VisibleForTesting BackgroundStartPrivileges getBackgroundStartPrivilegesForActivitySender(
             IBinder allowlistToken) {
         return mAllowBgActivityStartsForActivitySender.contains(allowlistToken)
                 ? BackgroundStartPrivileges.allowBackgroundActivityStarts(allowlistToken)
