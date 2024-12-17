@@ -56,7 +56,6 @@ import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.divider
 import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
-import com.android.settingslib.spa.framework.theme.toSemiBoldWeight
 
 data class ActionButton(
     val text: String,
@@ -130,7 +129,7 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
                 Text(
                     text = actionButton.text,
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelLarge.toSemiBoldWeight(),
+                    style = MaterialTheme.typography.titleSmall,
                 )
             }
         }
