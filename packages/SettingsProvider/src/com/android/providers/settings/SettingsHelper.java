@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.backup.BackupRestoreEventLogger;
@@ -84,6 +85,7 @@ public class SettingsHelper {
     private Context mContext;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager;
+    @Nullable private BackupRestoreEventLogger mBackupRestoreEventLogger;
 
     /**
      * A few settings elements are special in that a restore of those values needs to
@@ -741,10 +743,8 @@ public class SettingsHelper {
      *
      * @param data the comma separated BCP-47 language tags in bytes.
      * @param size the size of the data in bytes.
-     * @param backupRestoreEventLogger the logger to log the restore event.
      */
-    /* package */ void setLocaleData(
-        byte[] data, int size, BackupRestoreEventLogger backupRestoreEventLogger) {
+    /* package */ void setLocaleData(byte[] data, int size) {
         final Configuration conf = mContext.getResources().getConfiguration();
 
         // Replace "_" with "-" to deal with older backups.
@@ -771,13 +771,13 @@ public class SettingsHelper {
 
             am.updatePersistentConfigurationWithAttribution(config, mContext.getOpPackageName(),
                     mContext.getAttributionTag());
-            if (Flags.enableMetricsSettingsBackupAgents()) {
-                backupRestoreEventLogger
+            if (Flags.enableMetricsSettingsBackupAgents() && mBackupRestoreEventLogger != null) {
+                mBackupRestoreEventLogger
                     .logItemsRestored(SettingsBackupRestoreKeys.KEY_LOCALE, localeList.size());
             }
         } catch (RemoteException e) {
-            if (Flags.enableMetricsSettingsBackupAgents()) {
-                backupRestoreEventLogger
+            if (Flags.enableMetricsSettingsBackupAgents() && mBackupRestoreEventLogger != null) {
+                mBackupRestoreEventLogger
                     .logItemsRestoreFailed(
                         SettingsBackupRestoreKeys.KEY_LOCALE,
                         localeList.size(),
@@ -793,5 +793,14 @@ public class SettingsHelper {
     void applyAudioSettings() {
         AudioManager am = new AudioManager(mContext);
         am.reloadAudioSettings();
+    }
+
+    /**
+     * Sets the backup restore event logger.
+     *
+     * @param backupRestoreEventLogger the logger to log B&R metrics.
+     */
+    void setBackupRestoreEventLogger(BackupRestoreEventLogger backupRestoreEventLogger) {
+        mBackupRestoreEventLogger = backupRestoreEventLogger;
     }
 }

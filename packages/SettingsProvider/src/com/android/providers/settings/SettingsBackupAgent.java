@@ -254,6 +254,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         if (com.android.server.backup.Flags.enableMetricsSettingsBackupAgents()) {
             mBackupRestoreEventLogger = this.getBackupRestoreEventLogger();
+            mSettingsHelper.setBackupRestoreEventLogger(mBackupRestoreEventLogger);
             numberOfSettingsPerKey = new HashMap<>();
             areAgentMetricsEnabled = true;
         }
@@ -409,8 +410,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     mSettingsHelper
                         .setLocaleData(
                             localeData,
-                            size,
-                            mBackupRestoreEventLogger);
+                            size);
                     break;
 
                 case KEY_WIFI_CONFIG :
@@ -548,8 +548,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
             mSettingsHelper
-                .setLocaleData(
-                    buffer, nBytes, mBackupRestoreEventLogger);
+                .setLocaleData(buffer, nBytes);
 
             // Restore older backups performing the necessary migrations.
             if (version < FULL_BACKUP_ADDED_WIFI_NEW) {
