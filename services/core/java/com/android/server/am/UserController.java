@@ -160,6 +160,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -175,6 +176,9 @@ import java.util.function.Consumer;
  */
 class UserController implements Handler.Callback {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
+
+    // Amount of time we wait for observers to handle onBeforeUserSwitching, before crashing system.
+    static final int DEFAULT_BEFORE_USER_SWITCH_TIMEOUT_MS = 20 * 1000;
 
     // Amount of time we wait for observers to handle a user switch before
     // giving up on them and dismissing the user switching dialog.
@@ -1920,8 +1924,14 @@ class UserController implements Handler.Callback {
                 return false;
             }
 
-            mHandler.post(() -> startUserInternalOnHandler(userId, oldUserId, userStartMode,
-                    unlockListener, callingUid, callingPid));
+            final Runnable continueStartUserInternal = () -> continueStartUserInternal(userInfo,
+                    oldUserId, userStartMode, unlockListener, callingUid, callingPid);
+            if (foreground) {
+                mHandler.post(() -> dispatchOnBeforeUserSwitching(userId, () ->
+                        mHandler.post(continueStartUserInternal)));
+            } else {
+                continueStartUserInternal.run();
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1929,11 +1939,11 @@ class UserController implements Handler.Callback {
         return true;
     }
 
-    private void startUserInternalOnHandler(int userId, int oldUserId, int userStartMode,
+    private void continueStartUserInternal(UserInfo userInfo, int oldUserId, int userStartMode,
             IProgressListener unlockListener, int callingUid, int callingPid) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         final boolean foreground = userStartMode == USER_START_MODE_FOREGROUND;
-        final UserInfo userInfo = getUserInfo(userId);
+        final int userId = userInfo.id;
 
         boolean needStart = false;
         boolean updateUmState = false;
@@ -1995,7 +2005,6 @@ class UserController implements Handler.Callback {
             // it should be moved outside, but for now it's not as there are many calls to
             // external components here afterwards
             updateProfileRelatedCaches();
-            dispatchOnBeforeUserSwitching(userId);
             mInjector.getWindowManager().setCurrentUser(userId);
             mInjector.reportCurWakefulnessUsageEvent();
             // Once the internal notion of the active user has switched, we lock the device
@@ -2296,24 +2305,39 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
-    private void dispatchOnBeforeUserSwitching(@UserIdInt int newUserId) {
+    private void dispatchOnBeforeUserSwitching(@UserIdInt int newUserId, Runnable onComplete) {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("dispatchOnBeforeUserSwitching-" + newUserId);
-        final int observerCount = mUserSwitchObservers.beginBroadcast();
-        for (int i = 0; i < observerCount; i++) {
-            final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
-            t.traceBegin("onBeforeUserSwitching-" + name);
+        final AtomicBoolean isSuccessful = new AtomicBoolean(false);
+        startTimeoutForOnBeforeUserSwitching(isSuccessful);
+        informUserSwitchObservers((observer, callback) -> {
             try {
-                mUserSwitchObservers.getBroadcastItem(i).onBeforeUserSwitching(newUserId);
+                observer.onBeforeUserSwitching(newUserId, callback);
             } catch (RemoteException e) {
-                // Ignore
-            } finally {
-                t.traceEnd();
+                // ignore
             }
-        }
-        mUserSwitchObservers.finishBroadcast();
+        }, () -> {
+            isSuccessful.set(true);
+            onComplete.run();
+        }, "onBeforeUserSwitching");
         t.traceEnd();
     }
+
+    private void startTimeoutForOnBeforeUserSwitching(AtomicBoolean isSuccessful) {
+        mHandler.postDelayed(() -> {
+            if (isSuccessful.get()) {
+                return;
+            }
+            String unresponsiveObservers;
+            synchronized (mLock) {
+                unresponsiveObservers = String.join(", ", mCurWaitingUserSwitchCallbacks);
+            }
+            throw new RuntimeException("Timeout on dispatchOnBeforeUserSwitching. "
+                    + "These UserSwitchObservers did not respond in "
+                    + DEFAULT_BEFORE_USER_SWITCH_TIMEOUT_MS + "ms: " + unresponsiveObservers + ".");
+        }, DEFAULT_BEFORE_USER_SWITCH_TIMEOUT_MS);
+    }
+
 
     /** Called on handler thread */
     @VisibleForTesting
@@ -2527,70 +2551,76 @@ class UserController implements Handler.Callback {
         t.traceBegin("dispatchUserSwitch-" + oldUserId + "-to-" + newUserId);
 
         EventLog.writeEvent(EventLogTags.UC_DISPATCH_USER_SWITCH, oldUserId, newUserId);
-
-        final int observerCount = mUserSwitchObservers.beginBroadcast();
-        if (observerCount > 0) {
-            final ArraySet<String> curWaitingUserSwitchCallbacks = new ArraySet<>();
-            synchronized (mLock) {
-                uss.switching = true;
-                mCurWaitingUserSwitchCallbacks = curWaitingUserSwitchCallbacks;
+        uss.switching = true;
+        informUserSwitchObservers((observer, callback) -> {
+            try {
+                observer.onUserSwitching(newUserId, callback);
+            } catch (RemoteException e) {
+                // ignore
             }
-            final AtomicInteger waitingCallbacksCount = new AtomicInteger(observerCount);
-            final long userSwitchTimeoutMs = getUserSwitchTimeoutMs();
-            final long dispatchStartedTime = SystemClock.elapsedRealtime();
-            for (int i = 0; i < observerCount; i++) {
-                final long dispatchStartedTimeForObserver = SystemClock.elapsedRealtime();
-                try {
-                    // Prepend with unique prefix to guarantee that keys are unique
-                    final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
-                    synchronized (mLock) {
-                        curWaitingUserSwitchCallbacks.add(name);
-                    }
-                    final IRemoteCallback callback = new IRemoteCallback.Stub() {
-                        @Override
-                        public void sendResult(Bundle data) throws RemoteException {
-                            asyncTraceEnd("onUserSwitching-" + name, newUserId);
-                            synchronized (mLock) {
-                                long delayForObserver = SystemClock.elapsedRealtime()
-                                        - dispatchStartedTimeForObserver;
-                                if (delayForObserver > LONG_USER_SWITCH_OBSERVER_WARNING_TIME_MS) {
-                                    Slogf.w(TAG, "User switch slowed down by observer " + name
-                                            + ": result took " + delayForObserver
-                                            + " ms to process.");
-                                }
-
-                                long totalDelay = SystemClock.elapsedRealtime()
-                                        - dispatchStartedTime;
-                                if (totalDelay > userSwitchTimeoutMs) {
-                                    Slogf.e(TAG, "User switch timeout: observer " + name
-                                            + "'s result was received " + totalDelay
-                                            + " ms after dispatchUserSwitch.");
-                                }
-
-                                curWaitingUserSwitchCallbacks.remove(name);
-                                // Continue switching if all callbacks have been notified and
-                                // user switching session is still valid
-                                if (waitingCallbacksCount.decrementAndGet() == 0
-                                        && (curWaitingUserSwitchCallbacks
-                                        == mCurWaitingUserSwitchCallbacks)) {
-                                    sendContinueUserSwitchLU(uss, oldUserId, newUserId);
-                                }
-                            }
-                        }
-                    };
-                    asyncTraceBegin("onUserSwitching-" + name, newUserId);
-                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(newUserId, callback);
-                } catch (RemoteException e) {
-                    // Ignore
-                }
-            }
-        } else {
+        }, () -> {
             synchronized (mLock) {
                 sendContinueUserSwitchLU(uss, oldUserId, newUserId);
             }
+        }, "onUserSwitching");
+        t.traceEnd();
+    }
+
+    void informUserSwitchObservers(BiConsumer<IUserSwitchObserver, IRemoteCallback> consumer,
+            final Runnable onComplete, String trace) {
+        final int observerCount = mUserSwitchObservers.beginBroadcast();
+        if (observerCount == 0) {
+            onComplete.run();
+            mUserSwitchObservers.finishBroadcast();
+            return;
+        }
+        final ArraySet<String> curWaitingUserSwitchCallbacks = new ArraySet<>();
+        synchronized (mLock) {
+            mCurWaitingUserSwitchCallbacks = curWaitingUserSwitchCallbacks;
+        }
+        final AtomicInteger waitingCallbacksCount = new AtomicInteger(observerCount);
+        final long userSwitchTimeoutMs = getUserSwitchTimeoutMs();
+        final long dispatchStartedTime = SystemClock.elapsedRealtime();
+        for (int i = 0; i < observerCount; i++) {
+            final long dispatchStartedTimeForObserver = SystemClock.elapsedRealtime();
+            // Prepend with unique prefix to guarantee that keys are unique
+            final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
+            synchronized (mLock) {
+                curWaitingUserSwitchCallbacks.add(name);
+            }
+            final IRemoteCallback callback = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    asyncTraceEnd(trace + "-" + name, 0);
+                    synchronized (mLock) {
+                        long delayForObserver = SystemClock.elapsedRealtime()
+                                - dispatchStartedTimeForObserver;
+                        if (delayForObserver > LONG_USER_SWITCH_OBSERVER_WARNING_TIME_MS) {
+                            Slogf.w(TAG, "User switch slowed down by observer " + name
+                                    + ": result took " + delayForObserver
+                                    + " ms to process. " + trace);
+                        }
+                        long totalDelay = SystemClock.elapsedRealtime() - dispatchStartedTime;
+                        if (totalDelay > userSwitchTimeoutMs) {
+                            Slogf.e(TAG, "User switch timeout: observer " + name
+                                    + "'s result was received " + totalDelay
+                                    + " ms after dispatchUserSwitch. " + trace);
+                        }
+                        curWaitingUserSwitchCallbacks.remove(name);
+                        // Continue switching if all callbacks have been notified and
+                        // user switching session is still valid
+                        if (waitingCallbacksCount.decrementAndGet() == 0
+                                && (curWaitingUserSwitchCallbacks
+                                == mCurWaitingUserSwitchCallbacks)) {
+                            onComplete.run();
+                        }
+                    }
+                }
+            };
+            asyncTraceBegin(trace + "-" + name, 0);
+            consumer.accept(mUserSwitchObservers.getBroadcastItem(i), callback);
         }
         mUserSwitchObservers.finishBroadcast();
-        t.traceEnd(); // end dispatchUserSwitch-
     }
 
     @GuardedBy("mLock")
