@@ -56,6 +56,7 @@ import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.domain.interactor.FakeShadeDialogContextInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -84,6 +85,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     FakeExecutor mMainExecutor;
     FakeExecutor mBackgroundExecutor;
     DeviceConfigProxyFake mDeviceConfigProxyFake;
+    FakeShadeDialogContextInteractor mFakeShadeDialogContextInteractor;
 
     @Mock
     IActivityManager mIActivityManager;
@@ -118,6 +120,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
+        mFakeShadeDialogContextInteractor = new FakeShadeDialogContextInteractor(mContext);
         mDeviceConfigProxyFake = new DeviceConfigProxyFake();
         mSystemClock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(mSystemClock);
@@ -346,7 +349,6 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
                 "true", false);
         FgsManagerController fmc = new FgsManagerControllerImpl(
-                mContext,
                 mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
@@ -359,7 +361,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
-                mSystemUIDialogFactory
+                mSystemUIDialogFactory,
+                mFakeShadeDialogContextInteractor
         );
         fmc.init();
         Assert.assertTrue(fmc.getIncludesUserVisibleJobs());
@@ -374,7 +377,6 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
                 "false", false);
         fmc = new FgsManagerControllerImpl(
-                mContext,
                 mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
@@ -387,7 +389,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
-                mSystemUIDialogFactory
+                mSystemUIDialogFactory,
+                mFakeShadeDialogContextInteractor
         );
         fmc.init();
         Assert.assertFalse(fmc.getIncludesUserVisibleJobs());
@@ -487,7 +490,6 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
         FgsManagerController result = new FgsManagerControllerImpl(
-                mContext,
                 mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
@@ -500,7 +502,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
-                mSystemUIDialogFactory
+                mSystemUIDialogFactory,
+                mFakeShadeDialogContextInteractor
         );
         result.init();
 

@@ -17,7 +17,6 @@
 package com.android.systemui.qs.user
 
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
@@ -34,6 +33,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.user.ui.dialog.DialogShowerImpl
 import javax.inject.Inject
@@ -50,6 +50,7 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val uiEventLogger: UiEventLogger,
     private val dialogFactory: SystemUIDialog.Factory,
+    private val shadeDialogContextInteractor: ShadeDialogContextInteractor,
 ) {
 
     companion object {
@@ -63,7 +64,8 @@ constructor(
      * Populate the dialog with information from and adapter obtained from
      * [userDetailViewAdapterProvider] and show it as launched from [expandable].
      */
-    fun showDialog(context: Context, expandable: Expandable) {
+    fun showDialog(expandable: Expandable) {
+        val context = shadeDialogContextInteractor.context
         with(dialogFactory.create(context)) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)

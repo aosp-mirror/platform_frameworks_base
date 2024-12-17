@@ -58,4 +58,26 @@ class FakeDisplayWindowPropertiesRepository(private val context: Context) :
     fun insert(instance: DisplayWindowProperties) {
         properties.put(instance.displayId, instance.windowType, instance)
     }
+
+    /** inserts an entry, mocking everything except the context. */
+    fun insertForContext(displayId: Int, windowType: Int, context: Context) {
+        properties.put(
+            displayId,
+            windowType,
+            DisplayWindowProperties(
+                displayId = displayId,
+                windowType = windowType,
+                context = context,
+                windowManager = mock(),
+                layoutInflater = mock(),
+            ),
+        )
+    }
+
+    /** Whether the repository contains an entry already. */
+    fun contains(displayId: Int, windowType: Int): Boolean =
+        properties.contains(displayId, windowType)
+
+    /** Removes all the entries. */
+    fun clear() = properties.clear()
 }

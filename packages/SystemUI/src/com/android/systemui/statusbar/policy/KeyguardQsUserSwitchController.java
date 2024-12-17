@@ -192,7 +192,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             mUiEventLogger.log(
                     LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
 
-            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground.getContext(),
+            mUserSwitchDialogController.showDialog(
                     Expandable.fromView(mUserAvatarViewWithBackground));
         });
 

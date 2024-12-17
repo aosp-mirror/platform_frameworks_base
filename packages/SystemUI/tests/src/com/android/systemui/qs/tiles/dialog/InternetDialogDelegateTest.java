@@ -35,6 +35,7 @@ import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.FakeShadeDialogContextInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -149,7 +150,8 @@ public class InternetDialogDelegateTest extends SysuiTestCase {
                 mHandler,
                 mBgExecutor,
                 mKeyguard,
-                mSystemUIDialogFactory);
+                mSystemUIDialogFactory,
+                new FakeShadeDialogContextInteractor(mContext));
         mInternetDialogDelegate.createDialog();
         mInternetDialogDelegate.onCreate(mSystemUIDialog, null);
         mInternetDialogDelegate.mAdapter = mInternetAdapter;

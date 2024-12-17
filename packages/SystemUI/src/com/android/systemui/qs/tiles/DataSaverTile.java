@@ -41,6 +41,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.DataSaverController;
 
@@ -56,6 +57,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     private final DataSaverController mDataSaverController;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final SystemUIDialog.Factory mSystemUIDialogFactory;
+    private final ShadeDialogContextInteractor mShadeDialogContextInteractor;
 
     @Inject
     public DataSaverTile(
@@ -70,13 +72,15 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             QSLogger qsLogger,
             DataSaverController dataSaverController,
             DialogTransitionAnimator dialogTransitionAnimator,
-            SystemUIDialog.Factory systemUIDialogFactory
+            SystemUIDialog.Factory systemUIDialogFactory,
+            ShadeDialogContextInteractor shadeDialogContextInteractor
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDataSaverController = dataSaverController;
         mDialogTransitionAnimator = dialogTransitionAnimator;
         mSystemUIDialogFactory = systemUIDialogFactory;
+        mShadeDialogContextInteractor = shadeDialogContextInteractor;
         mDataSaverController.observe(getLifecycle(), this);
     }
 
@@ -102,7 +106,8 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         // Show a dialog to confirm first. Dialogs shown by the DialogTransitionAnimator must be
         // created and shown on the main thread, so we post it to the UI handler.
         mUiHandler.post(() -> {
-            SystemUIDialog dialog = mSystemUIDialogFactory.create(mContext);
+            SystemUIDialog dialog = mSystemUIDialogFactory.create(
+                    mShadeDialogContextInteractor.getContext());
             dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
             dialog.setMessage(com.android.internal.R.string.data_saver_description);
             dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
