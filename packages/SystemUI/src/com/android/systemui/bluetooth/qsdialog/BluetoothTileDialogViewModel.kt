@@ -35,7 +35,6 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_AUDIO_SHARING
-import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PAIR_NEW_DEVICE
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
 import com.android.systemui.dagger.SysUISingleton
@@ -237,9 +236,10 @@ constructor(
                             }
 
                             DeviceItemClick.Target.ACTION_ICON -> {
-                                // TODO(b/382397280): Move this to DeviceItemActionInteractor, and
-                                // handle click events according to device item type
-                                onDeviceItemGearClicked(it.deviceItem, it.clickedView)
+                                deviceItemActionInteractor.onActionIconClick(it.deviceItem) { intent
+                                    ->
+                                    startSettingsActivity(intent, it.clickedView)
+                                }
                             }
                         }
                     }
@@ -298,20 +298,6 @@ constructor(
             this@BluetoothTileDialogViewModel,
             { cancelJob() },
         )
-    }
-
-    private fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
-        uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_GEAR_CLICKED)
-        val intent =
-            Intent(ACTION_BLUETOOTH_DEVICE_DETAILS).apply {
-                putExtra(
-                    EXTRA_SHOW_FRAGMENT_ARGUMENTS,
-                    Bundle().apply {
-                        putString("device_address", deviceItem.cachedBluetoothDevice.address)
-                    },
-                )
-            }
-        startSettingsActivity(intent, view)
     }
 
     override fun onSeeAllClicked(view: View) {

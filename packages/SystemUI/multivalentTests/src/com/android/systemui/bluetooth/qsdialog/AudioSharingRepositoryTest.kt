@@ -111,6 +111,28 @@ class AudioSharingRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun testStopAudioSharing() =
+        with(kosmos) {
+            testScope.runTest {
+                whenever(localBluetoothManager.profileManager).thenReturn(profileManager)
+                whenever(profileManager.leAudioBroadcastProfile).thenReturn(leAudioBroadcastProfile)
+                audioSharingRepository.setAudioSharingAvailable(true)
+                underTest.stopAudioSharing()
+                verify(leAudioBroadcastProfile).stopLatestBroadcast()
+            }
+        }
+
+    @Test
+    fun testStopAudioSharing_flagOff_doNothing() =
+        with(kosmos) {
+            testScope.runTest {
+                audioSharingRepository.setAudioSharingAvailable(false)
+                underTest.stopAudioSharing()
+                verify(leAudioBroadcastProfile, never()).stopLatestBroadcast()
+            }
+        }
+
+    @Test
     fun testAddSource_flagOff_doesNothing() =
         with(kosmos) {
             testScope.runTest {

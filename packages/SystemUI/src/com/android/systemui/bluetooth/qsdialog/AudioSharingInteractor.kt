@@ -55,6 +55,8 @@ interface AudioSharingInteractor {
 
     suspend fun startAudioSharing()
 
+    suspend fun stopAudioSharing()
+
     suspend fun audioSharingAvailable(): Boolean
 
     suspend fun qsDialogImprovementAvailable(): Boolean
@@ -149,6 +151,13 @@ constructor(
         audioSharingRepository.startAudioSharing()
     }
 
+    override suspend fun stopAudioSharing() {
+        if (!audioSharingAvailable()) {
+            return
+        }
+        audioSharingRepository.stopAudioSharing()
+    }
+
     // TODO(b/367965193): Move this after flags rollout
     override suspend fun audioSharingAvailable(): Boolean {
         return audioSharingRepository.audioSharingAvailable()
@@ -184,6 +193,8 @@ class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingIntera
     override suspend fun switchActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
 
     override suspend fun startAudioSharing() {}
+
+    override suspend fun stopAudioSharing() {}
 
     override suspend fun audioSharingAvailable(): Boolean = false
 

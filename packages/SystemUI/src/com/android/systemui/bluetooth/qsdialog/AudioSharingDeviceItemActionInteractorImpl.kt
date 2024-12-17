@@ -104,6 +104,31 @@ constructor(
         }
     }
 
+    override suspend fun onActionIconClick(deviceItem: DeviceItem, onIntent: (Intent) -> Unit) {
+        withContext(backgroundDispatcher) {
+            if (!audioSharingInteractor.audioSharingAvailable()) {
+                return@withContext deviceItemActionInteractorImpl.onActionIconClick(
+                    deviceItem,
+                    onIntent,
+                )
+            }
+
+            when (deviceItem.type) {
+                DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.CHECK_MARK_ACTION_BUTTON_CLICKED)
+                    audioSharingInteractor.stopAudioSharing()
+                }
+                DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
+                    uiEventLogger.log(BluetoothTileDialogUiEvent.PLUS_ACTION_BUTTON_CLICKED)
+                    audioSharingInteractor.startAudioSharing()
+                }
+                else -> {
+                    deviceItemActionInteractorImpl.onActionIconClick(deviceItem, onIntent)
+                }
+            }
+        }
+    }
+
     private fun inSharingAndDeviceNoSource(
         inAudioSharing: Boolean,
         deviceItem: DeviceItem,

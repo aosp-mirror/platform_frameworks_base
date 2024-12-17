@@ -32,6 +32,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.testKosmos
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -220,6 +221,30 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
                         ArgumentMatchers.anyInt(),
                         ArgumentMatchers.any(),
                     )
+            }
+        }
+    }
+
+    @Test
+    fun testOnActionIconClick_audioSharingMediaDevice_stopBroadcast() {
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                actionInteractorImpl.onActionIconClick(inAudioSharingMediaDeviceItem) {}
+                assertThat(bluetoothTileDialogAudioSharingRepository.audioSharingStarted)
+                    .isEqualTo(false)
+            }
+        }
+    }
+
+    @Test
+    fun testOnActionIconClick_availableAudioSharingMediaDevice_startBroadcast() {
+        with(kosmos) {
+            testScope.runTest {
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                actionInteractorImpl.onActionIconClick(connectedAudioSharingMediaDeviceItem) {}
+                assertThat(bluetoothTileDialogAudioSharingRepository.audioSharingStarted)
+                    .isEqualTo(true)
             }
         }
     }
