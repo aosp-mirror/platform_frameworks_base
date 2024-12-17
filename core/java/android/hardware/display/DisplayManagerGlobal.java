@@ -106,7 +106,7 @@ public final class DisplayManagerGlobal {
 
     @IntDef(prefix = {"EVENT_DISPLAY_"}, flag = true, value = {
             EVENT_DISPLAY_ADDED,
-            EVENT_DISPLAY_CHANGED,
+            EVENT_DISPLAY_BASIC_CHANGED,
             EVENT_DISPLAY_REMOVED,
             EVENT_DISPLAY_BRIGHTNESS_CHANGED,
             EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED,
@@ -119,7 +119,8 @@ public final class DisplayManagerGlobal {
     public @interface DisplayEvent {}
 
     public static final int EVENT_DISPLAY_ADDED = 1;
-    public static final int EVENT_DISPLAY_CHANGED = 2;
+    public static final int EVENT_DISPLAY_BASIC_CHANGED = 2;
+
     public static final int EVENT_DISPLAY_REMOVED = 3;
     public static final int EVENT_DISPLAY_BRIGHTNESS_CHANGED = 4;
     public static final int EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED = 5;
@@ -130,7 +131,7 @@ public final class DisplayManagerGlobal {
 
     @LongDef(prefix = {"INTERNAL_EVENT_FLAG_"}, flag = true, value = {
             INTERNAL_EVENT_FLAG_DISPLAY_ADDED,
-            INTERNAL_EVENT_FLAG_DISPLAY_CHANGED,
+            INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_REMOVED,
             INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED,
             INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
@@ -143,7 +144,7 @@ public final class DisplayManagerGlobal {
     public @interface InternalEventFlag {}
 
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_ADDED = 1L << 0;
-    public static final long INTERNAL_EVENT_FLAG_DISPLAY_CHANGED = 1L << 1;
+    public static final long INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED = 1L << 1;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_REMOVED = 1L << 2;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_BRIGHTNESS_CHANGED = 1L << 3;
     public static final long INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED = 1L << 4;
@@ -485,7 +486,7 @@ public final class DisplayManagerGlobal {
         // There can be racing condition between DMS and WMS callbacks, so force triggering the
         // listener to make sure the client can get the onDisplayChanged callback even if
         // DisplayInfo is not changed (Display read from both DisplayInfo and WindowConfiguration).
-        handleDisplayEvent(displayId, EVENT_DISPLAY_CHANGED, true /* forceUpdate */);
+        handleDisplayEvent(displayId, EVENT_DISPLAY_BASIC_CHANGED, true /* forceUpdate */);
     }
 
     private static Looper getLooperForHandler(@Nullable Handler handler) {
@@ -518,7 +519,8 @@ public final class DisplayManagerGlobal {
         }
         if (mDispatchNativeCallbacks) {
             mask |= INTERNAL_EVENT_FLAG_DISPLAY_ADDED
-                    | INTERNAL_EVENT_FLAG_DISPLAY_CHANGED
+                    | INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+                    | INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE
                     | INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         }
         if (!mTopologyListeners.isEmpty()) {
@@ -571,7 +573,8 @@ public final class DisplayManagerGlobal {
             }
 
             info = getDisplayInfoLocked(displayId);
-            if (event == EVENT_DISPLAY_CHANGED && mDispatchNativeCallbacks) {
+            if ((event == EVENT_DISPLAY_BASIC_CHANGED
+                    || event == EVENT_DISPLAY_REFRESH_RATE_CHANGED) && mDispatchNativeCallbacks) {
                 // Choreographer only supports a single display, so only dispatch refresh rate
                 // changes for the default display.
                 if (displayId == Display.DEFAULT_DISPLAY) {
@@ -1492,9 +1495,9 @@ public final class DisplayManagerGlobal {
                         mListener.onDisplayAdded(displayId);
                     }
                     break;
-                case EVENT_DISPLAY_CHANGED:
-                    if ((mInternalEventFlagsMask & INTERNAL_EVENT_FLAG_DISPLAY_CHANGED)
-                            != 0) {
+                case EVENT_DISPLAY_BASIC_CHANGED:
+                    if ((mInternalEventFlagsMask
+                            & INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED) != 0) {
                         if (info != null && (forceUpdate || !info.equals(mDisplayInfo))) {
                             if (extraLogging()) {
                                 Slog.i(TAG, "Sending onDisplayChanged: Display Changed. Info: "
@@ -1691,8 +1694,8 @@ public final class DisplayManagerGlobal {
         switch (event) {
             case EVENT_DISPLAY_ADDED:
                 return "ADDED";
-            case EVENT_DISPLAY_CHANGED:
-                return "CHANGED";
+            case EVENT_DISPLAY_BASIC_CHANGED:
+                return "BASIC_CHANGED";
             case EVENT_DISPLAY_REMOVED:
                 return "REMOVED";
             case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
@@ -1763,7 +1766,11 @@ public final class DisplayManagerGlobal {
         }
 
         if ((eventFlags & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0) {
-            baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_CHANGED;
+            // For backward compatibility, a client subscribing to
+            // DisplayManager.EVENT_FLAG_DISPLAY_CHANGED will be enrolled to both Basic and
+            // RR changes
+            baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+                    | INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
         }
 
         if ((eventFlags
