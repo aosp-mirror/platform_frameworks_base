@@ -450,7 +450,7 @@ public class DisplayAreaTest extends WindowTestsBase {
     public void testGetOrientation() {
         final DisplayArea.Tokens area = new DisplayArea.Tokens(mWm, ABOVE_TASKS, "test");
         mDisplayContent.addChild(area, POSITION_TOP);
-        final WindowState win = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
+        final WindowState win = newWindowBuilder("overlay", TYPE_APPLICATION_OVERLAY).build();
         win.mAttrs.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
         win.mToken.reparent(area, POSITION_TOP);
         spyOn(win);

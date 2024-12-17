@@ -76,7 +76,7 @@ import org.junit.runner.RunWith;
 public class DisplayPolicyTests extends WindowTestsBase {
 
     private WindowState createOpaqueFullscreen(boolean hasLightNavBar) {
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "opaqueFullscreen");
+        final WindowState win = newWindowBuilder("opaqueFullscreen", TYPE_BASE_APPLICATION).build();
         final WindowManager.LayoutParams attrs = win.mAttrs;
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
@@ -99,7 +99,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     private WindowState createDimmingDialogWindow(boolean canBeImTarget) {
-        final WindowState win = spy(createWindow(null, TYPE_APPLICATION, "dimmingDialog"));
+        final WindowState win = spy(newWindowBuilder("dimmingDialog", TYPE_APPLICATION).build());
         final WindowManager.LayoutParams attrs = win.mAttrs;
         attrs.width = WRAP_CONTENT;
         attrs.height = WRAP_CONTENT;
@@ -111,7 +111,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     private WindowState createInputMethodWindow(boolean visible, boolean drawNavBar,
             boolean hasLightNavBar) {
-        final WindowState win = createWindow(null, TYPE_INPUT_METHOD, "inputMethod");
+        final WindowState win = newWindowBuilder("inputMethod", TYPE_INPUT_METHOD).build();
         final WindowManager.LayoutParams attrs = win.mAttrs;
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
@@ -301,7 +301,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     private WindowState createApplicationWindow() {
-        final WindowState win = createWindow(null, TYPE_APPLICATION, "Application");
+        final WindowState win = newWindowBuilder("Application", TYPE_APPLICATION).build();
         final WindowManager.LayoutParams attrs = win.mAttrs;
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
@@ -312,7 +312,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     private WindowState createBaseApplicationWindow() {
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "Application");
+        final WindowState win = newWindowBuilder("Application", TYPE_BASE_APPLICATION).build();
         final WindowManager.LayoutParams attrs = win.mAttrs;
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
@@ -450,7 +450,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90, di.logicalHeight, di.logicalWidth);
         // Add a window that provides the same insets in current rotation. But it specifies
         // different insets in other rotations.
-        final WindowState bar2 = createWindow(null, navbar.mAttrs.type, "bar2");
+        final WindowState bar2 = newWindowBuilder("bar2", navbar.mAttrs.type).build();
         bar2.mAttrs.providedInsets = new InsetsFrameProvider[] {
                 new InsetsFrameProvider(bar2, 0, WindowInsets.Type.navigationBars())
                         .setInsetsSize(Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
