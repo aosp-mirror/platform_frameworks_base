@@ -81,7 +81,7 @@ import platform.test.runner.parameterized.Parameters
 @OptIn(ExperimentalCoroutinesApi::class)
 @FlakyTest(
     bugId = 292574995,
-    detail = "on certain architectures all permutations with startActivity=true is causing failures"
+    detail = "on certain architectures all permutations with startActivity=true is causing failures",
 )
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
@@ -93,11 +93,7 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
         private val DRAWABLE =
             mock<Icon> {
                 whenever(this.contentDescription)
-                    .thenReturn(
-                        ContentDescription.Resource(
-                            res = CONTENT_DESCRIPTION_RESOURCE_ID,
-                        )
-                    )
+                    .thenReturn(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
             }
         private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
 
@@ -273,13 +269,7 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
                 context = context,
                 userFileManager =
                     mock<UserFileManager>().apply {
-                        whenever(
-                                getSharedPreferences(
-                                    anyString(),
-                                    anyInt(),
-                                    anyInt(),
-                                )
-                            )
+                        whenever(getSharedPreferences(anyString(), anyInt(), anyInt()))
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
@@ -316,9 +306,7 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
-                    KeyguardInteractorFactory.create(
-                            featureFlags = featureFlags,
-                        )
+                    KeyguardInteractorFactory.create(featureFlags = featureFlags)
                         .keyguardInteractor,
                 shadeInteractor = kosmos.shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
@@ -350,9 +338,7 @@ class KeyguardQuickAffordanceInteractorSceneContainerTest : SysuiTestCase() {
 
             homeControls.setState(
                 lockScreenState =
-                    KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                        icon = DRAWABLE,
-                    )
+                    KeyguardQuickAffordanceConfig.LockScreenState.Visible(icon = DRAWABLE)
             )
             homeControls.onTriggeredResult =
                 if (startActivity) {

@@ -16,9 +16,9 @@
 
 package com.android.systemui.controls.ui
 
+import android.view.HapticFeedbackConstants
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import android.view.HapticFeedbackConstants
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.controls.ControlsMetricsLogger
@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.wm.shell.taskview.TaskViewFactory
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,31 +46,20 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ControlActionCoordinatorImplTest : SysuiTestCase() {
-    @Mock
-    private lateinit var vibratorHelper: VibratorHelper
-    @Mock
-    private lateinit var keyguardStateController: KeyguardStateController
-    @Mock
-    private lateinit var bgExecutor: DelayableExecutor
-    @Mock
-    private lateinit var uiExecutor: DelayableExecutor
-    @Mock
-    private lateinit var activityStarter: ActivityStarter
-    @Mock
-    private lateinit var broadcastSender: BroadcastSender
-    @Mock
-    private lateinit var taskViewFactory: Optional<TaskViewFactory>
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private lateinit var cvh: ControlViewHolder
-    @Mock
-    private lateinit var metricsLogger: ControlsMetricsLogger
-    @Mock
-    private lateinit var controlsSettingsDialogManager: ControlsSettingsDialogManager
+    @Mock private lateinit var vibratorHelper: VibratorHelper
+    @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var bgExecutor: DelayableExecutor
+    @Mock private lateinit var uiExecutor: DelayableExecutor
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var broadcastSender: BroadcastSender
+    @Mock private lateinit var taskViewFactory: Optional<TaskViewFactory>
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var cvh: ControlViewHolder
+    @Mock private lateinit var metricsLogger: ControlsMetricsLogger
+    @Mock private lateinit var controlsSettingsDialogManager: ControlsSettingsDialogManager
 
     companion object {
         fun <T> any(): T = Mockito.any<T>()
@@ -89,18 +79,21 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(true)
         controlsSettingsRepository.setCanShowControlsInLockscreen(true)
 
-        coordinator = spy(ControlActionCoordinatorImpl(
-                mContext,
-                bgExecutor,
-                uiExecutor,
-                activityStarter,
-                broadcastSender,
-                keyguardStateController,
-                taskViewFactory,
-                metricsLogger,
-                vibratorHelper,
-                controlsSettingsRepository,
-        ))
+        coordinator =
+            spy(
+                ControlActionCoordinatorImpl(
+                    mContext,
+                    bgExecutor,
+                    uiExecutor,
+                    activityStarter,
+                    broadcastSender,
+                    keyguardStateController,
+                    taskViewFactory,
+                    metricsLogger,
+                    vibratorHelper,
+                    controlsSettingsRepository,
+                )
+            )
         coordinator.activityContext = mContext
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
@@ -198,19 +191,15 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
     fun drag_isEdge_performsSegmentTickHaptics() {
         coordinator.drag(cvh, true)
 
-        verify(vibratorHelper).performHapticFeedback(
-            any(),
-            eq(HapticFeedbackConstants.SEGMENT_TICK)
-        )
+        verify(vibratorHelper)
+            .performHapticFeedback(any(), eq(HapticFeedbackConstants.SEGMENT_TICK))
     }
 
     @Test
     fun drag_isNotEdge_performsFrequentTickHaptics() {
         coordinator.drag(cvh, false)
 
-        verify(vibratorHelper).performHapticFeedback(
-            any(),
-            eq(HapticFeedbackConstants.SEGMENT_FREQUENT_TICK)
-        )
+        verify(vibratorHelper)
+            .performHapticFeedback(any(), eq(HapticFeedbackConstants.SEGMENT_FREQUENT_TICK))
     }
 }
