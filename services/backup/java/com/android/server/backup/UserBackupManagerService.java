@@ -217,6 +217,13 @@ public class UserBackupManagerService {
                                         + mPowerManagerWakeLock.getTag()));
                 return;
             }
+
+            if (!mPowerManagerWakeLock.isHeld()) {
+                Slog.w(TAG, addUserIdToLogMessage(mUserId,
+                        "Wakelock not held: " + mPowerManagerWakeLock.getTag()));
+                return;
+            }
+
             mPowerManagerWakeLock.release();
             Slog.v(
                     TAG,
