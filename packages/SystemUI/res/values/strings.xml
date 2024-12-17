@@ -2504,14 +2504,14 @@
     <!-- Accessibility description of action to remove QS tile on click. It will read as "Double-tap to remove tile" in screen readers [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_remove_tile_action">remove tile</string>
 
-    <!-- Accessibility action of action to add QS tile to end. It will read as "Double-tap to add tile to end" in screen readers [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_add_action">add tile to end</string>
+    <!-- Accessibility action of action to add QS tile to end. It will read as "Double-tap to add tile to the last position" in screen readers [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_add_action">add tile to the last position</string>
 
     <!-- Accessibility action for context menu to move QS tile [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_tile_start_move">Move tile</string>
 
-    <!-- Accessibility action for context menu to add QS tile [CHAR LIMIT=NONE] -->
-    <string name="accessibility_qs_edit_tile_start_add">Add tile</string>
+    <!-- Accessibility action for context menu to add QS tile to a position [CHAR LIMIT=NONE] -->
+    <string name="accessibility_qs_edit_tile_start_add">Add tile to desired position</string>
 
     <!-- Accessibility description when QS tile is to be moved, indicating the destination position [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_tile_move_to_position">Move to <xliff:g id="position" example="5">%1$d</xliff:g></string>
