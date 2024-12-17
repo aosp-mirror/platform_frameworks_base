@@ -29,10 +29,7 @@ import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 import kotlin.time.Duration.Companion.milliseconds
 
-fun TransitionBuilder.toNotificationsShadeTransition(
-    translateClock: Boolean = false,
-    durationScale: Double = 1.0,
-) {
+fun TransitionBuilder.toNotificationsShadeTransition(durationScale: Double = 1.0) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
     swipeSpec =
         spring(
@@ -45,11 +42,6 @@ fun TransitionBuilder.toNotificationsShadeTransition(
         elevateInContent = Overlays.NotificationsShade,
     )
     scaleSize(OverlayShade.Elements.Panel, height = 0f)
-    // TODO(b/376659778): This is a temporary hack to have a shared element transition with the
-    //  lockscreen clock. Remove once nested STLs are supported.
-    if (!translateClock) {
-        translate(ClockElementKeys.smallClockElementKey)
-    }
     // Avoid translating the status bar with the shade panel.
     translate(NotificationsShade.Elements.StatusBar)
     // Slide in the shade panel from the top edge.
