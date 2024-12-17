@@ -102,6 +102,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
     /**
      * Returns the breadcrumbs (navigation context) of Preference.
      * <p>May be empty.
+     * @hide restrict to platform; may be opened wider in the future
      */
     @NonNull
     public List<String> getBreadcrumbs() {
@@ -189,33 +190,32 @@ public final class SettingsPreferenceMetadata implements Parcelable {
     @IntDef(value = {
             NO_SENSITIVITY,
             EXPECT_POST_CONFIRMATION,
-            EXPECT_PRE_CONFIRMATION,
+            DEEPLINK_ONLY,
             NO_DIRECT_ACCESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WriteSensitivity {}
 
     /**
-     * Indicates preference is not sensitive.
+     * Indicates preference is not write-sensitive.
      * <p>Its value is writable without explicit consent, assuming all necessary permissions are
      * granted.
      */
     public static final int NO_SENSITIVITY = 0;
     /**
-     * Indicates preference is mildly sensitive.
+     * Indicates preference is mildly write-sensitive.
      * <p>In addition to necessary permissions, after writing its value the user should be
      * given the option to revert back.
      */
     public static final int EXPECT_POST_CONFIRMATION = 1;
     /**
-     * Indicates preference is sensitive.
-     * <p>In addition to necessary permissions, the user should be prompted for confirmation prior
-     * to making a change. Otherwise it is suggested to provide a deeplink to the Preference's page
-     * instead, accessible via {@link #getLaunchIntent}.
+     * Indicates preference is write-sensitive.
+     * <p>This preference cannot be changed through this API; instead a deeplink to the Preference's
+     * page should be used instead, accessible via {@link #getLaunchIntent}.
      */
-    public static final int EXPECT_PRE_CONFIRMATION = 2;
+    public static final int DEEPLINK_ONLY = 2;
     /**
-     * Indicates preference is highly sensitivity and carries significant user-risk.
+     * Indicates preference is highly write-sensitivity and carries significant user-risk.
      * <p>This Preference cannot be changed through this API and no direct deeplink is available.
      * Other Metadata is still available.
      */
@@ -303,6 +303,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
     /**
      * Builder to construct {@link SettingsPreferenceMetadata}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         private final String mScreenKey;
         private final String mKey;
@@ -355,6 +356,7 @@ public final class SettingsPreferenceMetadata implements Parcelable {
 
         /**
          * Sets the preference breadcrumbs (navigation context).
+         * @hide
          */
         @NonNull
         public Builder setBreadcrumbs(@NonNull List<String> breadcrumbs) {

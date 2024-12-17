@@ -170,6 +170,7 @@ public final class SettingsPreferenceValue implements Parcelable {
     /**
      * Builder to construct {@link SettingsPreferenceValue}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         @Type
         private final int mType;

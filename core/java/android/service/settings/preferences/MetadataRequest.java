@@ -65,6 +65,7 @@ public final class MetadataRequest implements Parcelable {
     /**
      * Builder to construct {@link MetadataRequest}.
      */
+    @FlaggedApi(Flags.FLAG_SETTINGS_CATALYST)
     public static final class Builder {
         /** Constructs an immutable {@link MetadataRequest} object. */
         @NonNull
