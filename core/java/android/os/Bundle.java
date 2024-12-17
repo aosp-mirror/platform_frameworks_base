@@ -141,6 +141,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         STRIPPED.putInt("STRIPPED", 1);
     }
 
+    private boolean isFirstRetrievedFromABundle = false;
+
     /**
      * Constructs a new, empty Bundle.
      */
@@ -1020,10 +1022,27 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             return null;
         }
         try {
-            return (Bundle) o;
+            Bundle bundle = (Bundle) o;
+            bundle.setClassLoaderSameAsContainerBundleWhenRetrievedFirstTime(this);
+            return bundle;
         } catch (ClassCastException e) {
             typeWarning(key, o, "Bundle", e);
             return null;
+        }
+    }
+
+    /**
+     * Set the ClassLoader of a bundle to its container bundle. This is necessary so that when a
+     * bundle's ClassLoader is changed, it can be propagated to its children. Do this only when it
+     * is retrieved from the container bundle first time though. Once it is accessed outside of its
+     * container, its ClassLoader should no longer be changed by its container anymore.
+     *
+     * @param containerBundle the bundle this bundle is retrieved from.
+     */
+    void setClassLoaderSameAsContainerBundleWhenRetrievedFirstTime(BaseBundle containerBundle) {
+        if (!isFirstRetrievedFromABundle) {
+            setClassLoader(containerBundle.getClassLoader());
+            isFirstRetrievedFromABundle = true;
         }
     }
 
