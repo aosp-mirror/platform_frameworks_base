@@ -5834,7 +5834,11 @@ public class Activity extends ContextThemeWrapper
         final int size = permissions.length;
         int[] results = new int[size];
         for (int i = 0; i < size; i++) {
-            results[i] = deviceContext.getPermissionRequestState(permissions[i]);
+            if (permissions[i] == null) {
+                results[i] = Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE;
+            } else {
+                results[i] = deviceContext.getPermissionRequestState(permissions[i]);
+            }
         }
         return results;
     }
