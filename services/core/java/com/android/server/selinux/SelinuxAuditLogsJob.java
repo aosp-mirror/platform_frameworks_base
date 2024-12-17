@@ -51,8 +51,12 @@ final class SelinuxAuditLogsJob {
             return;
         }
         mIsRunning.set(true);
-        boolean done = mAuditLogsCollector.collect(SelinuxAuditLogsService.AUDITD_TAG_CODE);
-        if (done) {
+        try {
+            boolean done = mAuditLogsCollector.collect(SelinuxAuditLogsService.AUDITD_TAG_CODE);
+            if (done) {
+                jobService.jobFinished(params, /* wantsReschedule= */ false);
+            }
+        } catch (QuotaExceededException e) {
             jobService.jobFinished(params, /* wantsReschedule= */ false);
         }
         mIsRunning.set(false);

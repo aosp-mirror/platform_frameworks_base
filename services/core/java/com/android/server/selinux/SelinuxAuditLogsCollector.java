@@ -28,10 +28,8 @@ import com.android.server.utils.Slogf;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.AbstractCollection;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -57,6 +55,7 @@ class SelinuxAuditLogsCollector {
     private final Supplier<String> mAuditDomainSupplier;
     private final RateLimiter mRateLimiter;
     private final QuotaLimiter mQuotaLimiter;
+    private EventLogCollection mEventCollection;
 
     @VisibleForTesting Instant mLastWrite = Instant.MIN;
 
@@ -69,6 +68,7 @@ class SelinuxAuditLogsCollector {
         mAuditDomainSupplier = auditDomainSupplier;
         mRateLimiter = rateLimiter;
         mQuotaLimiter = quotaLimiter;
+        mEventCollection = new EventLogCollection();
     }
 
     SelinuxAuditLogsCollector(RateLimiter rateLimiter, QuotaLimiter quotaLimiter) {
@@ -86,75 +86,72 @@ class SelinuxAuditLogsCollector {
         mStopRequested.set(stopRequested);
     }
 
-    /**
-     * Collect and push SELinux audit logs for the provided {@code tagCode}.
+    /** A Collection to work around EventLog.readEvents() constraints.
      *
-     * @return true if the job was completed. If the job was interrupted, return false.
+     * This collection only supports add(). Any other method inherited from
+     * Collection will throw an UnsupportedOperationException exception.
+     *
+     * This collection ensures that we are processing one event at a time and
+     * avoid collecting all the event objects before processing (e.g.,
+     * ArrayList), which could lead to an OOM situation.
      */
-    boolean collect(int tagCode) {
-        Queue<Event> logLines = new ArrayDeque<>();
-        Instant latestTimestamp = collectLogLines(tagCode, logLines);
+    class EventLogCollection extends AbstractCollection<Event> {
 
-        boolean quotaExceeded = writeAuditLogs(logLines);
-        if (quotaExceeded) {
-            Slog.w(TAG, "Too many SELinux logs in the queue, I am giving up.");
-            mLastWrite = latestTimestamp; // next run we will ignore all these logs.
-            logLines.clear();
+        SelinuxAuditLogBuilder mAuditLogBuilder;
+        int mAuditsWritten = 0;
+        Instant mLatestTimestamp;
+
+        void reset() {
+            mAuditsWritten = 0;
+            mLatestTimestamp = mLastWrite;
+            mAuditLogBuilder = new SelinuxAuditLogBuilder(mAuditDomainSupplier.get());
         }
 
-        return logLines.isEmpty();
-    }
-
-    private Instant collectLogLines(int tagCode, Queue<Event> logLines) {
-        List<Event> events = new ArrayList<>();
-        try {
-            EventLog.readEvents(new int[] {tagCode}, events);
-        } catch (IOException e) {
-            Slog.e(TAG, "Error reading event logs", e);
+        int getAuditsWritten() {
+            return mAuditsWritten;
         }
 
-        Instant latestTimestamp = mLastWrite;
-        for (Event event : events) {
-            Instant eventTime = Instant.ofEpochSecond(0, event.getTimeNanos());
-            if (eventTime.isAfter(latestTimestamp)) {
-                latestTimestamp = eventTime;
+        Instant getLatestTimestamp() {
+            return mLatestTimestamp;
+        }
+
+        @Override
+        public Iterator<Event> iterator() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int size() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean add(Event event) {
+            if (mStopRequested.get()) {
+                throw new IllegalStateException(new InterruptedException());
             }
+
+            Instant eventTime = Instant.ofEpochSecond(/* epochSecond= */ 0, event.getTimeNanos());
             if (eventTime.compareTo(mLastWrite) <= 0) {
-                continue;
+                return true;
             }
             Object eventData = event.getData();
             if (!(eventData instanceof String)) {
-                continue;
+                return true;
             }
-            logLines.add(event);
-        }
-        return latestTimestamp;
-    }
-
-    private boolean writeAuditLogs(Queue<Event> logLines) {
-        final SelinuxAuditLogBuilder auditLogBuilder =
-                new SelinuxAuditLogBuilder(mAuditDomainSupplier.get());
-        int auditsWritten = 0;
-
-        while (!mStopRequested.get() && !logLines.isEmpty()) {
-            Event event = logLines.poll();
-            String logLine = (String) event.getData();
-            Instant logTime = Instant.ofEpochSecond(0, event.getTimeNanos());
+            String logLine = (String) eventData;
             if (!SELINUX_MATCHER.reset(logLine).matches()) {
-                continue;
+                return true;
             }
 
-            auditLogBuilder.reset(SELINUX_MATCHER.group("denial"));
-            final SelinuxAuditLog auditLog = auditLogBuilder.build();
+            mAuditLogBuilder.reset(SELINUX_MATCHER.group("denial"));
+            final SelinuxAuditLog auditLog = mAuditLogBuilder.build();
             if (auditLog == null) {
-                continue;
+                return true;
             }
 
             if (!mQuotaLimiter.acquire()) {
-                if (DEBUG) {
-                    Slogf.d(TAG, "Running out of quota after %d logs.", auditsWritten);
-                }
-                return true;
+                throw new IllegalStateException(new QuotaExceededException());
             }
             mRateLimiter.acquire();
 
@@ -169,16 +166,50 @@ class SelinuxAuditLogsCollector {
                     auditLog.mTClass,
                     auditLog.mPath,
                     auditLog.mPermissive);
-            auditsWritten++;
 
-            if (logTime.isAfter(mLastWrite)) {
-                mLastWrite = logTime;
+            mAuditsWritten++;
+            if (eventTime.isAfter(mLatestTimestamp)) {
+                mLatestTimestamp = eventTime;
             }
+
+            return true;
+        }
+    }
+
+    /**
+     * Collect and push SELinux audit logs for the provided {@code tagCode}.
+     *
+     * @return true if the job was completed. If the job was interrupted or
+     * failed because of IOException, return false.
+     * @throws QuotaExceededException if it ran out of quota.
+     */
+    boolean collect(int tagCode) throws QuotaExceededException {
+        mEventCollection.reset();
+        try {
+            EventLog.readEvents(new int[] {tagCode}, mEventCollection);
+        } catch (IllegalStateException e) {
+            if (e.getCause() instanceof QuotaExceededException) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "Running out of quota after %d logs.",
+                            mEventCollection.getAuditsWritten());
+                }
+                // next run we will ignore all these logs.
+                mLastWrite = mEventCollection.getLatestTimestamp();
+                throw (QuotaExceededException) e.getCause();
+            } else if (e.getCause() instanceof InterruptedException) {
+                mLastWrite = mEventCollection.getLatestTimestamp();
+                return false;
+            }
+            throw e;
+        } catch (IOException e) {
+            Slog.e(TAG, "Error reading event logs", e);
+            return false;
         }
 
+        mLastWrite = mEventCollection.getLatestTimestamp();
         if (DEBUG) {
-            Slogf.d(TAG, "Written %d logs", auditsWritten);
+            Slogf.d(TAG, "Written %d logs", mEventCollection.getAuditsWritten());
         }
-        return false;
+        return true;
     }
 }
