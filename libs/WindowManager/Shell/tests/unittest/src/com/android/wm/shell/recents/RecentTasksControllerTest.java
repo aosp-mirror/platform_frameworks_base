@@ -24,6 +24,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.launcher3.Flags.FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
+import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FREEFORM;
+import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN;
+import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import static org.junit.Assert.assertEquals;
@@ -346,9 +349,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
         GroupedTaskInfo singleGroup2 = recentTasks.get(2);
 
         // Check that groups have expected types
-        assertEquals(GroupedTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, singleGroup1.getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, singleGroup2.getType());
+        assertTrue(freeformGroup.isBaseType(TYPE_FREEFORM));
+        assertTrue(singleGroup1.isBaseType(TYPE_FULLSCREEN));
+        assertTrue(singleGroup2.isBaseType(TYPE_FULLSCREEN));
 
         // Check freeform group entries
         assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
@@ -385,9 +388,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
         GroupedTaskInfo singleGroup = recentTasks.get(2);
 
         // Check that groups have expected types
-        assertEquals(GroupedTaskInfo.TYPE_SPLIT, splitGroup.getType());
-        assertEquals(GroupedTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, singleGroup.getType());
+        assertTrue(splitGroup.isBaseType(TYPE_SPLIT));
+        assertTrue(freeformGroup.isBaseType(TYPE_FREEFORM));
+        assertTrue(singleGroup.isBaseType(TYPE_FULLSCREEN));
 
         // Check freeform group entries
         assertEquals(t3, freeformGroup.getTaskInfoList().get(0));
@@ -420,10 +423,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Expect no grouping of tasks
         assertEquals(4, recentTasks.size());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, recentTasks.get(0).getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, recentTasks.get(1).getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, recentTasks.get(2).getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, recentTasks.get(3).getType());
+        assertTrue(recentTasks.get(0).isBaseType(TYPE_FULLSCREEN));
+        assertTrue(recentTasks.get(1).isBaseType(TYPE_FULLSCREEN));
+        assertTrue(recentTasks.get(2).isBaseType(TYPE_FULLSCREEN));
+        assertTrue(recentTasks.get(3).isBaseType(TYPE_FULLSCREEN));
 
         assertEquals(t1, recentTasks.get(0).getTaskInfo1());
         assertEquals(t2, recentTasks.get(1).getTaskInfo1());
@@ -457,9 +460,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
         GroupedTaskInfo singleGroup2 = recentTasks.get(2);
 
         // Check that groups have expected types
-        assertEquals(GroupedTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, singleGroup1.getType());
-        assertEquals(GroupedTaskInfo.TYPE_FULLSCREEN, singleGroup2.getType());
+        assertTrue(freeformGroup.isBaseType(TYPE_FREEFORM));
+        assertTrue(singleGroup1.isBaseType(TYPE_FULLSCREEN));
+        assertTrue(singleGroup2.isBaseType(TYPE_FULLSCREEN));
 
         // Check freeform group entries
         assertEquals(3, freeformGroup.getTaskInfoList().size());
