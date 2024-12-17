@@ -559,7 +559,7 @@ public class PreferencesHelper implements RankingConfig {
 
             if (r.uid == UNKNOWN_UID) {
                 if (Flags.persistIncompleteRestoreData()) {
-                    r.userId = userId;
+                    r.userIdWhenUidUnknown = userId;
                 }
                 mRestoredWithoutUids.put(unrestoredPackageKey(pkg, userId), r);
             } else {
@@ -756,7 +756,7 @@ public class PreferencesHelper implements RankingConfig {
 
         if (Flags.persistIncompleteRestoreData() && r.uid == UNKNOWN_UID) {
             out.attributeLong(null, ATT_CREATION_TIME, r.creationTime);
-            out.attributeInt(null, ATT_USERID, r.userId);
+            out.attributeInt(null, ATT_USERID, r.userIdWhenUidUnknown);
         }
 
         if (!forBackup) {
@@ -1959,7 +1959,7 @@ public class PreferencesHelper implements RankingConfig {
         ArrayList<ZenBypassingApp> bypassing = new ArrayList<>();
         synchronized (mLock) {
             for (PackagePreferences p : mPackagePreferences.values()) {
-                if (p.userId != userId) {
+                if (UserHandle.getUserId(p.uid) != userId) {
                     continue;
                 }
                 int totalChannelCount = p.channels.size();
@@ -3189,7 +3189,7 @@ public class PreferencesHelper implements RankingConfig {
         // Until we enable the UI, we should return false.
         boolean canHavePromotedNotifs = android.app.Flags.uiRichOngoing();
 
-        @UserIdInt int userId;
+        @UserIdInt int userIdWhenUidUnknown;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
