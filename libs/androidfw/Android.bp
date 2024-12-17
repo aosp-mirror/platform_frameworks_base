@@ -199,6 +199,7 @@ cc_test {
         // This is to suppress warnings/errors from gtest
         "-Wno-unnamed-type-template-args",
     ],
+    require_root: true,
     srcs: [
         // Helpers/infra for testing.
         "tests/CommonHelpers.cpp",
