@@ -35,6 +35,18 @@ object DesktopModeTransitionTypes {
     const val TRANSIT_EXIT_DESKTOP_MODE_KEYBOARD_SHORTCUT = TRANSIT_DESKTOP_MODE_TYPES + 7
     const val TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN = TRANSIT_DESKTOP_MODE_TYPES + 8
 
+    /** Transition type for starting the drag to desktop mode. */
+    const val TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP = TRANSIT_DESKTOP_MODE_TYPES + 9
+
+    /** Transition type for finalizing the drag to desktop mode. */
+    const val TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP = TRANSIT_DESKTOP_MODE_TYPES + 10
+
+    /** Transition type to cancel the drag to desktop mode. */
+    const val TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP = TRANSIT_DESKTOP_MODE_TYPES + 11
+
+    /** Transition type to animate the toggle resize between the max and default desktop sizes. */
+    const val TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE = TRANSIT_DESKTOP_MODE_TYPES + 12
+
     /** Return whether the [TransitionType] corresponds to a transition to enter desktop mode. */
     @JvmStatic
     fun @receiver:TransitionType Int.isEnterDesktopModeTransition(): Boolean {
@@ -92,4 +104,18 @@ object DesktopModeTransitionTypes {
             else -> TRANSIT_EXIT_DESKTOP_MODE_UNKNOWN
         }
     }
+
+    /**
+     * Returns a string representing the [TransitionType]. If not supported, returns an empty
+     * string.
+     */
+    @JvmStatic
+    fun transitTypeToString(transitType: Int): String =
+        when (transitType) {
+            TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP -> "DESKTOP_MODE_START_DRAG_TO_DESKTOP"
+            TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> "DESKTOP_MODE_END_DRAG_TO_DESKTOP"
+            TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP -> "DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP"
+            TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE -> "DESKTOP_MODE_TOGGLE_RESIZE"
+            else -> ""
+        }
 }

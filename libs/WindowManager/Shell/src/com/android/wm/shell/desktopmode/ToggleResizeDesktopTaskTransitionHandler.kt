@@ -30,8 +30,8 @@ import android.window.WindowContainerTransaction
 import androidx.core.animation.addListener
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.util.function.Supplier
 

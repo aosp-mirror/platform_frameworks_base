@@ -85,6 +85,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.FocusTransitionListener;
@@ -166,22 +167,6 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     /** Transition type for maximize to freeform transition. */
     public static final int TRANSIT_RESTORE_FROM_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 9;
-
-    /** Transition type for starting the drag to desktop mode. */
-    public static final int TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP =
-            WindowManager.TRANSIT_FIRST_CUSTOM + 10;
-
-    /** Transition type for finalizing the drag to desktop mode. */
-    public static final int TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP =
-            WindowManager.TRANSIT_FIRST_CUSTOM + 11;
-
-    /** Transition type to cancel the drag to desktop mode. */
-    public static final int TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP =
-            WindowManager.TRANSIT_FIRST_CUSTOM + 13;
-
-    /** Transition type to animate the toggle resize between the max and default desktop sizes. */
-    public static final int TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE =
-            WindowManager.TRANSIT_FIRST_CUSTOM + 14;
 
     /** Transition to resize PiP task. */
     public static final int TRANSIT_RESIZE_PIP = TRANSIT_FIRST_CUSTOM + 16;
@@ -1872,11 +1857,6 @@ public class Transitions implements RemoteCallable<Transitions>,
             case TRANSIT_SPLIT_DISMISS -> "SPLIT_DISMISS";
             case TRANSIT_MAXIMIZE -> "MAXIMIZE";
             case TRANSIT_RESTORE_FROM_MAXIMIZE -> "RESTORE_FROM_MAXIMIZE";
-            case TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP -> "DESKTOP_MODE_START_DRAG_TO_DESKTOP";
-            case TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP -> "DESKTOP_MODE_END_DRAG_TO_DESKTOP";
-            case TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP ->
-                    "DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP";
-            case TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE -> "DESKTOP_MODE_TOGGLE_RESIZE";
             case TRANSIT_RESIZE_PIP -> "RESIZE_PIP";
             case TRANSIT_TASK_FRAGMENT_DRAG_RESIZE -> "TASK_FRAGMENT_DRAG_RESIZE";
             case TRANSIT_SPLIT_PASSTHROUGH -> "SPLIT_PASSTHROUGH";
@@ -1886,6 +1866,9 @@ public class Transitions implements RemoteCallable<Transitions>,
             case TRANSIT_END_RECENTS_TRANSITION -> "END_RECENTS_TRANSITION";
             default -> "";
         };
+        if (typeStr.isEmpty()) {
+            typeStr = DesktopModeTransitionTypes.transitTypeToString(transitType);
+        }
         return typeStr + "(FIRST_CUSTOM+" + (transitType - TRANSIT_FIRST_CUSTOM) + ")";
     }
 

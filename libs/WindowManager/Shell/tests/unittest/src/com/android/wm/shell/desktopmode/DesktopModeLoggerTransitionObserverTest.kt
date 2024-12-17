@@ -48,6 +48,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterRe
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT
@@ -175,7 +176,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
         val change = createChange(TRANSIT_TO_FRONT, createTaskInfo(WINDOWING_MODE_FREEFORM))
         // task change is finalised when drag ends
         val transitionInfo =
-            TransitionInfoBuilder(Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, 0)
+            TransitionInfoBuilder(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, 0)
                 .addChange(change)
                 .build()
 
@@ -436,7 +437,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
         // desktop right after turning the screen on, we move to fullscreen then move another task
         // to desktop
         val transitionInfo =
-            TransitionInfoBuilder(Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, 0)
+            TransitionInfoBuilder(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, 0)
                 .addChange(createChange(TRANSIT_TO_FRONT, freeformTask))
                 .build()
         callOnTransitionReady(transitionInfo)

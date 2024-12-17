@@ -40,6 +40,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterRe
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_KEYBOARD_SHORTCUT
@@ -363,7 +364,7 @@ class DesktopModeLoggerTransitionObserver(
                 ||
                     (transitionInfo.type == WindowManager.TRANSIT_TO_BACK &&
                         wasPreviousTransitionExitByScreenOff) -> EnterReason.SCREEN_ON
-                transitionInfo.type == Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
+                transitionInfo.type == TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP ->
                     EnterReason.APP_HANDLE_DRAG
                 transitionInfo.type == TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON ->
                     EnterReason.APP_HANDLE_MENU_BUTTON
