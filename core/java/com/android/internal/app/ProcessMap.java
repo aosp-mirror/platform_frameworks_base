@@ -28,6 +28,11 @@ public class ProcessMap<E> {
         if (uids == null) return null;
         return uids.get(uid);
     }
+
+    public SparseArray<E> get(String name) {
+        SparseArray<E> uids = mMap.get(name);
+        return uids;
+    }
     
     public E put(String name, int uid, E value) {
         SparseArray<E> uids = mMap.get(name);
