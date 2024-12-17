@@ -22,7 +22,6 @@ import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
-import static android.view.flags.Flags.bufferStuffingRecovery;
 import static android.view.SurfaceControlProto.HASH_CODE;
 import static android.view.SurfaceControlProto.LAYER_ID;
 import static android.view.SurfaceControlProto.NAME;
@@ -5118,11 +5117,9 @@ public final class SurfaceControl implements Parcelable {
          */
         @NonNull
         public Transaction setRecoverableFromBufferStuffing(@NonNull SurfaceControl sc) {
-            if (bufferStuffingRecovery()) {
-                checkPreconditions(sc);
-                nativeSetFlags(mNativeObject, sc.mNativeObject, RECOVERABLE_FROM_BUFFER_STUFFING,
-                        RECOVERABLE_FROM_BUFFER_STUFFING);
-            }
+            checkPreconditions(sc);
+            nativeSetFlags(mNativeObject, sc.mNativeObject, RECOVERABLE_FROM_BUFFER_STUFFING,
+                    RECOVERABLE_FROM_BUFFER_STUFFING);
             return this;
         }
 
