@@ -65,7 +65,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private float mPanelExpansion;
     private int mKeyguardStatusBarHeaderHeight;
     private int mKeyguardStatusHeight;
-    private int mUserSwitchHeight;
     private float mDark;
     private float mQsExpansion;
     private int mCutoutTopInset = 0;
@@ -317,30 +316,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
-    public void notifPaddingAccountsForMultiUserSwitcherInSplitShade() {
-        setSplitShadeTopMargin(100);
-        mUserSwitchHeight = 150;
-        givenLockScreen();
-        mIsSplitShade = true;
-        // WHEN the position algorithm is run
-        positionClock();
-        // THEN the notif padding is split shade top margin + user switch height
-        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(250);
-    }
-
-    @Test
-    public void clockDoesntAccountForMultiUserSwitcherInSplitShade() {
-        setSplitShadeTopMargin(100);
-        mUserSwitchHeight = 150;
-        givenLockScreen();
-        mIsSplitShade = true;
-        // WHEN the position algorithm is run
-        positionClock();
-        // THEN clockY = split shade top margin
-        assertThat(mClockPosition.clockY).isEqualTo(100);
-    }
-
-    @Test
     public void notifPaddingExpandedAlignedWithClockInSplitShadeMode() {
         givenLockScreen();
         mIsSplitShade = true;
@@ -370,9 +345,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mIsSplitShade = false;
         mBypassEnabled = false;
 
-        // mMinTopMargin = 100 = 80 + max(20, 0)
-        mKeyguardStatusBarHeaderHeight = 80;
-        mUserSwitchHeight = 20;
+        mKeyguardStatusBarHeaderHeight = 100;
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_clock_top_margin))
                 .thenReturn(0);
 
@@ -636,8 +609,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
                 mKeyguardStatusBarHeaderHeight,
                 mPanelExpansion,
                 mKeyguardStatusHeight,
-                mUserSwitchHeight,
-                0 /* userSwitchPreferredY */,
                 mDark,
                 ZERO_DRAG,
                 mBypassEnabled,

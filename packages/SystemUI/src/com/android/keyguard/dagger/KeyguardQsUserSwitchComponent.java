@@ -29,7 +29,7 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {KeyguardUserSwitcherModule.class})
 @KeyguardUserSwitcherScope
 public interface KeyguardQsUserSwitchComponent {
-    /** Simple factory for {@link KeyguardUserSwitcherComponent}. */
+    /** Simple factory for {@link KeyguardQsUserSwitchComponent}. */
     @Subcomponent.Factory
     interface Factory {
         KeyguardQsUserSwitchComponent build(@BindsInstance FrameLayout userAvatarContainer);
