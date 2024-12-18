@@ -1616,7 +1616,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
      * lock because this calls out to WindowManagerService.
      */
     void addWindowTokensForAllDisplays() {
-        final Display[] displays = mDisplayManager.getDisplays();
+        Display[] displays = {};
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            displays = mDisplayManager.getDisplays();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         for (int i = 0; i < displays.length; i++) {
             final int displayId = displays[i].getDisplayId();
             addWindowTokenForDisplay(displayId);
@@ -1652,7 +1658,13 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public void onRemoved() {
-        final Display[] displays = mDisplayManager.getDisplays();
+        Display[] displays = {};
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            displays = mDisplayManager.getDisplays();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         for (int i = 0; i < displays.length; i++) {
             final int displayId = displays[i].getDisplayId();
             onDisplayRemoved(displayId);
