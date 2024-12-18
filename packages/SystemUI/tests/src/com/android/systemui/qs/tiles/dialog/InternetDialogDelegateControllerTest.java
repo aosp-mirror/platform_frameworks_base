@@ -557,6 +557,13 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void startActivityForDialog_always_startActivityWithoutDismissShade() {
+        mInternetDialogController.startActivityForDialog(mock(Intent.class));
+
+        verify(mActivityStarter).startActivity(any(Intent.class), eq(false) /* dismissShade */);
+    }
+
+    @Test
     public void launchWifiDetailsSetting_withNoWifiEntryKey_doNothing() {
         mInternetDialogController.launchWifiDetailsSetting(null /* key */, mDialogLaunchView);
 
