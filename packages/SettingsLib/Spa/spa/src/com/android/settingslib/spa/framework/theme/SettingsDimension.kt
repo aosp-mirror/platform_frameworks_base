@@ -64,7 +64,7 @@ object SettingsDimension {
         bottom = itemPaddingVertical,
     )
     val itemPaddingAround = 8.dp
-    val itemDividerHeight = 32.dp
+    val itemDividerHeight = if (isSpaExpressiveEnabled) 40.dp else 32.dp
 
     val iconLarge = 48.dp
     val introIconSize = 40.dp
