@@ -148,6 +148,9 @@ public class WindowTokenClientController {
             info = wms.attachWindowContextToDisplayContent(mAppThread, client, displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed attachToDisplayContent", e);
+            return false;
         }
         if (info == null) {
             return false;

@@ -2945,7 +2945,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
                     if (callingPid != MY_PID) {
-                        throw new WindowManager.InvalidDisplayException(
+                        throw new IllegalArgumentException(
                                 "attachWindowContextToDisplayContent: trying to attach to a"
                                         + " non-existing display:" + displayId);
                     }
