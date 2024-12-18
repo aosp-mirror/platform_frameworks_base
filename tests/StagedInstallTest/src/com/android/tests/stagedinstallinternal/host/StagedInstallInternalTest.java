@@ -592,23 +592,15 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void testGetStagedModuleNames() throws Exception {
-        assumeTrue("Device does not support updating APEX",
-                mHostUtils.isApexUpdateSupported());
-
-        runPhase("testGetStagedModuleNames");
-    }
-
-    @Test
     @LargeTest
-    public void testGetStagedApexInfo() throws Exception {
+    public void testGetStagedApexInfos() throws Exception {
         assumeTrue("Device does not support updating APEX",
                 mHostUtils.isApexUpdateSupported());
 
         pushTestApex(APEXD_TEST_APEX);
         getDevice().reboot();
 
-        runPhase("testGetStagedApexInfo");
+        runPhase("testGetStagedApexInfos");
     }
 
     @Test

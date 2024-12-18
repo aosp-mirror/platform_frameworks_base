@@ -23,7 +23,6 @@ import androidx.annotation.Nullable;
 import com.android.systemui.SystemUIInitializer;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.WMShellModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -32,11 +31,12 @@ import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.shared.ShellTransitions;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
-import com.android.wm.shell.transition.ShellTransitions;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -94,7 +94,7 @@ public interface WMComponent {
     Optional<TaskViewFactory> getTaskViewFactory();
 
     @WMSingleton
-    ShellTransitions getTransitions();
+    ShellTransitions getShellTransitions();
 
     @WMSingleton
     KeyguardTransitions getKeyguardTransitions();

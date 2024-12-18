@@ -16,11 +16,12 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle"
     android:width="@dimen/settingslib_switch_track_width"
     android:height="@dimen/settingslib_switch_track_height">
     <padding android:left="@dimen/settingslib_switch_thumb_margin"
              android:right="@dimen/settingslib_switch_thumb_margin"/>
-    <solid android:color="@color/settingslib_track_on_color"/>
+    <solid android:color="?androidprv:attr/materialColorPrimary"/>
     <corners android:radius="@dimen/settingslib_switch_track_radius"/>
 </shape>

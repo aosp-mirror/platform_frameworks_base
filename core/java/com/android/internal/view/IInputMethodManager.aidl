@@ -31,29 +31,39 @@ import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.InputMethodInfoSafeList;
 
 /**
- * Public interface to the global input method manager, used by all client
- * applications.
+ * Public interface to the global input method manager, used by all client applications.
+ *
+ * When adding new methods, make sure the associated user can be inferred from the arguments.
+ * Consider passing the associated userId when not already passing a display id or a window token.
  */
 interface IInputMethodManager {
     void addClient(in IInputMethodClient client, in IRemoteInputConnection inputmethod,
             int untrustedDisplayId);
 
-    // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
     InputMethodInfo getCurrentInputMethodInfoAsUser(int userId);
 
-    // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    List<InputMethodInfo> getInputMethodList(int userId, int directBootAwareness);
+    InputMethodInfoSafeList getInputMethodList(int userId, int directBootAwareness);
 
-    // TODO: Use ParceledListSlice instead
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
-    List<InputMethodInfo> getEnabledInputMethodList(int userId);
+    InputMethodInfoSafeList getEnabledInputMethodList(int userId);
+
+    // TODO(b/339761278): Remove after getInputMethodList() is fully deployed.
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    List<InputMethodInfo> getInputMethodListLegacy(int userId, int directBootAwareness);
+
+    // TODO(b/339761278): Remove after getEnabledInputMethodList() is fully deployed.
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
+    List<InputMethodInfo> getEnabledInputMethodListLegacy(int userId);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
@@ -66,10 +76,10 @@ interface IInputMethodManager {
 
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
             in ImeTracker.Token statsToken, int flags, int lastClickToolType,
-            in @nullable ResultReceiver resultReceiver, int reason);
+            in @nullable ResultReceiver resultReceiver, int reason, boolean async);
     boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
             in ImeTracker.Token statsToken, int flags,
-            in @nullable ResultReceiver resultReceiver, int reason);
+            in @nullable ResultReceiver resultReceiver, int reason, boolean async);
 
     /**
      * A test API for CTS to request hiding the current soft input window, with the request origin
@@ -110,20 +120,34 @@ interface IInputMethodManager {
             in @nullable EditorInfo editorInfo, in @nullable IRemoteInputConnection inputConnection,
             in @nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, int userId,
-            in ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq);
+            in ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
 
-    @EnforcePermission("WRITE_SECURE_SETTINGS")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.WRITE_SECURE_SETTINGS)")
+    @EnforcePermission(allOf = {"WRITE_SECURE_SETTINGS", "INTERACT_ACROSS_USERS_FULL"})
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(allOf = {android.Manifest."
+    + "permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})")
     void showInputMethodPickerFromSystem(int auxiliarySubtypeMode, int displayId);
 
     @EnforcePermission("TEST_INPUT_METHOD")
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.TEST_INPUT_METHOD)")
     boolean isInputMethodPickerShownForTest();
+
+    /**
+     * Called when the IME switch button was clicked from the system. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @param displayId The ID of the display where the input method picker dialog should be shown.
+     * @param userId    The ID of the user that triggered the click.
+     */
+    @EnforcePermission(allOf = {"WRITE_SECURE_SETTINGS" ,"INTERACT_ACROSS_USERS_FULL"})
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(allOf = {android.Manifest."
+    + "permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})")
+    oneway void onImeSwitchButtonClickFromSystem(int displayId);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)")
@@ -145,10 +169,10 @@ interface IInputMethodManager {
 
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
 
-    @EnforcePermission("INTERNAL_SYSTEM_WINDOW")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
-    void removeImeSurface();
+    @EnforcePermission(allOf = {"INTERNAL_SYSTEM_WINDOW", "INTERACT_ACROSS_USERS_FULL"})
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(allOf = {android.Manifest."
+    + "permission.INTERNAL_SYSTEM_WINDOW, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})")
+    void removeImeSurface(int displayId);
 
     /** Remove the IME surface. Requires passing the currently focused window. */
     oneway void removeImeSurfaceFromWindowAsync(in IBinder windowToken);

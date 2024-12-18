@@ -17,132 +17,37 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.graphics.Rect
-import android.graphics.drawable.Animatable2
-import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
+import android.content.res.Resources
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.android.settingslib.widget.LottieColorUtils
-import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel.AuthType
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.util.kotlin.Utils.Companion.toQuad
+import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.Quad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
+private const val TAG = "PromptIconViewBinder"
 
 /** Sub-binder for [BiometricPromptLayout.iconView]. */
 object PromptIconViewBinder {
-    /**
-     * Binds [BiometricPromptLayout.iconView] and [BiometricPromptLayout.biometric_icon_overlay] to
-     * [PromptIconViewModel].
-     */
+    /** Binds [BiometricPromptLayout.iconView] to [PromptIconViewModel]. */
     @JvmStatic
     fun bind(
         iconView: LottieAnimationView,
-        iconOverlayView: LottieAnimationView,
-        iconViewLayoutParamSizeOverride: Pair<Int, Int>?,
         promptViewModel: PromptViewModel
     ) {
         val viewModel = promptViewModel.iconViewModel
         iconView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.onConfigurationChanged(iconView.context.resources.configuration)
-                if (iconViewLayoutParamSizeOverride != null) {
-                    iconView.layoutParams.width = iconViewLayoutParamSizeOverride.first
-                    iconView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-
-                    iconOverlayView.layoutParams.width = iconViewLayoutParamSizeOverride.first
-                    iconOverlayView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-                } else {
-                    iconView.layoutParams.width = viewModel.fingerprintIconWidth.first()
-                    iconView.layoutParams.height = viewModel.fingerprintIconWidth.first()
-
-                    iconOverlayView.layoutParams.width = viewModel.fingerprintIconWidth.first()
-                    iconOverlayView.layoutParams.height = viewModel.fingerprintIconWidth.first()
-                }
-
-                var faceIcon: AnimatedVectorDrawable? = null
-                val faceIconCallback =
-                    object : Animatable2.AnimationCallback() {
-                        override fun onAnimationStart(drawable: Drawable) {
-                            viewModel.onAnimationStart()
-                        }
-
-                        override fun onAnimationEnd(drawable: Drawable) {
-                            viewModel.onAnimationEnd()
-                        }
-                    }
-
-                launch {
-                    var width = 0
-                    var height = 0
-                    viewModel.activeAuthType.collect { activeAuthType ->
-                        when (activeAuthType) {
-                            AuthType.Fingerprint,
-                            AuthType.Coex -> {
-                                /**
-                                 * View is only set visible in BiometricViewSizeBinder once
-                                 * PromptSize is determined that accounts for iconView size, to
-                                 * prevent prompt resizing being visible to the user.
-                                 *
-                                 * TODO(b/288175072): May be able to remove this once constraint
-                                 *   layout is implemented
-                                 */
-                                iconView.removeAllLottieOnCompositionLoadedListener()
-                                iconView.addLottieOnCompositionLoadedListener {
-                                    promptViewModel.setIsIconViewLoaded(true)
-                                }
-                            }
-                            AuthType.Face -> {
-                                width = viewModel.faceIconWidth
-                                height = viewModel.faceIconHeight
-                                /**
-                                 * Set to true by default since face icon is a drawable, which
-                                 * doesn't have a LottieOnCompositionLoadedListener equivalent.
-                                 *
-                                 * TODO(b/318569643): To be updated once face assets are updated
-                                 *   from drawables
-                                 */
-                                promptViewModel.setIsIconViewLoaded(true)
-                            }
-                        }
-
-                        if (width != 0 && height != 0) {
-                            iconView.layoutParams.width = width
-                            iconView.layoutParams.height = height
-                            iconOverlayView.layoutParams.width = width
-                            iconOverlayView.layoutParams.height = height
-                        }
-                    }
-                }
-
-                launch {
-                    viewModel.iconPosition.collect { position ->
-                        if (constraintBp() && position != Rect()) {
-                            val iconParams = iconView.layoutParams as ConstraintLayout.LayoutParams
-
-                            if (position.left != -1) {
-                                iconParams.endToEnd = ConstraintSet.UNSET
-                                iconParams.leftMargin = position.left
-                            }
-                            if (position.top != -1) {
-                                iconParams.bottomToBottom = ConstraintSet.UNSET
-                                iconParams.topMargin = position.top
-                            }
-                            iconView.layoutParams = iconParams
-                        }
-                    }
-                }
 
                 launch {
                     viewModel.iconAsset
@@ -150,9 +55,9 @@ object PromptIconViewBinder {
                             combine(
                                 viewModel.activeAuthType,
                                 viewModel.shouldAnimateIconView,
-                                viewModel.shouldRepeatAnimation,
+                                viewModel.shouldLoopIconView,
                                 viewModel.showingError,
-                                ::toQuad
+                                ::Quad
                             ),
                             ::toQuint
                         )
@@ -161,78 +66,23 @@ object PromptIconViewBinder {
                                 iconAsset,
                                 activeAuthType,
                                 shouldAnimateIconView,
-                                shouldRepeatAnimation,
+                                shouldLoopIconView,
                                 showingError) ->
                             if (iconAsset != -1) {
-                                when (activeAuthType) {
-                                    AuthType.Fingerprint,
-                                    AuthType.Coex -> {
-                                        iconView.setAnimation(iconAsset)
-                                        iconView.frame = 0
-
-                                        if (shouldAnimateIconView) {
-                                            iconView.playAnimation()
-                                        }
-                                    }
-                                    AuthType.Face -> {
-                                        faceIcon?.apply {
-                                            unregisterAnimationCallback(faceIconCallback)
-                                            stop()
-                                        }
-                                        faceIcon =
-                                            iconView.context.getDrawable(iconAsset)
-                                                as AnimatedVectorDrawable
-                                        faceIcon?.apply {
-                                            iconView.setImageDrawable(this)
-                                            if (shouldAnimateIconView) {
-                                                forceAnimationOnUI()
-                                                if (shouldRepeatAnimation) {
-                                                    registerAnimationCallback(faceIconCallback)
-                                                }
-                                                start()
-                                            }
-                                        }
-                                    }
-                                }
-                                LottieColorUtils.applyDynamicColors(iconView.context, iconView)
+                                iconView.updateAsset(
+                                    "iconAsset",
+                                    iconAsset,
+                                    shouldAnimateIconView,
+                                    shouldLoopIconView,
+                                    activeAuthType
+                                )
                                 viewModel.setPreviousIconWasError(showingError)
                             }
                         }
                 }
 
                 launch {
-                    viewModel.iconOverlayAsset
-                        .sample(
-                            combine(
-                                viewModel.shouldAnimateIconOverlay,
-                                viewModel.showingError,
-                                ::Pair
-                            ),
-                            ::toTriple
-                        )
-                        .collect { (iconOverlayAsset, shouldAnimateIconOverlay, showingError) ->
-                            if (iconOverlayAsset != -1) {
-                                iconOverlayView.setAnimation(iconOverlayAsset)
-                                iconOverlayView.frame = 0
-                                LottieColorUtils.applyDynamicColors(
-                                    iconOverlayView.context,
-                                    iconOverlayView
-                                )
-
-                                if (shouldAnimateIconOverlay) {
-                                    iconOverlayView.playAnimation()
-                                }
-                                viewModel.setPreviousIconOverlayWasError(showingError)
-                            }
-                        }
-                }
-
-                launch {
-                    viewModel.shouldFlipIconView.collect { shouldFlipIconView ->
-                        if (shouldFlipIconView) {
-                            iconView.rotation = 180f
-                        }
-                    }
+                    viewModel.iconViewRotation.collect { rotation -> iconView.rotation = rotation }
                 }
 
                 launch {
@@ -244,5 +94,87 @@ object PromptIconViewBinder {
                 }
             }
         }
+    }
+}
+
+fun LottieAnimationView.updateAsset(
+    type: String,
+    asset: Int,
+    shouldAnimateIconView: Boolean,
+    shouldLoopIconView: Boolean,
+    activeAuthType: AuthType
+) {
+    setFailureListener(type, asset, activeAuthType)
+    pauseAnimation()
+    setAnimation(asset)
+    if (animatingFromSfpsAuthenticating(asset)) {
+        // Skipping to error / success / unlock segment of animation
+        setMinFrame(158)
+    } else {
+        frame = 0
+    }
+    if (shouldAnimateIconView) {
+        loop(shouldLoopIconView)
+        playAnimation()
+    }
+    LottieColorUtils.applyDynamicColors(context, this)
+}
+
+private fun animatingFromSfpsAuthenticating(asset: Int): Boolean =
+    asset in sfpsFpToErrorAssets || asset in sfpsFpToUnlockAssets || asset in sfpsFpToSuccessAssets
+
+private val sfpsFpToErrorAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_error,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_error_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_error_270,
+    )
+
+private val sfpsFpToUnlockAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_unlock_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_unlock_270,
+    )
+
+private val sfpsFpToSuccessAssets: List<Int> =
+    listOf(
+        R.raw.biometricprompt_sfps_fingerprint_to_success,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_90,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_180,
+        R.raw.biometricprompt_sfps_fingerprint_to_success_270,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_90,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_180,
+        R.raw.biometricprompt_sfps_rear_display_fingerprint_to_success_270,
+    )
+
+private fun LottieAnimationView.setFailureListener(type: String, asset: Int, authType: AuthType) {
+    val assetName =
+        try {
+            context.resources.getResourceEntryName(asset)
+        } catch (e: Resources.NotFoundException) {
+            "Asset $asset not found"
+        }
+
+    setFailureListener { result: Throwable? ->
+        Log.d(
+            TAG,
+            "Collecting $type | " +
+                "activeAuthType = $authType | " +
+                "Invalid resource id: $asset, " +
+                "name $assetName",
+            result
+        )
     }
 }

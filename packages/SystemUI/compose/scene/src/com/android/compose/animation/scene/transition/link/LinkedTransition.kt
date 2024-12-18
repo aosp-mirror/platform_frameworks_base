@@ -17,20 +17,22 @@
 package com.android.compose.animation.scene.transition.link
 
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.TransitionKey
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A linked transition which is driven by a [originalTransition]. */
 internal class LinkedTransition(
     private val originalTransition: TransitionState.Transition,
     fromScene: SceneKey,
     toScene: SceneKey,
-) : TransitionState.Transition(fromScene, toScene) {
+    override val key: TransitionKey? = null,
+) : TransitionState.Transition.ChangeScene(fromScene, toScene) {
 
     override val currentScene: SceneKey
         get() {
             return when (originalTransition.currentScene) {
-                originalTransition.fromScene -> fromScene
-                originalTransition.toScene -> toScene
+                originalTransition.fromContent -> fromScene
+                originalTransition.toContent -> toScene
                 else -> error("Original currentScene is neither FromScene nor ToScene")
             }
         }
@@ -43,4 +45,15 @@ internal class LinkedTransition(
 
     override val progress: Float
         get() = originalTransition.progress
+
+    override val progressVelocity: Float
+        get() = originalTransition.progressVelocity
+
+    override suspend fun run() {
+        originalTransition.run()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        originalTransition.freezeAndAnimateToCurrentState()
+    }
 }

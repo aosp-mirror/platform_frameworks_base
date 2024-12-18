@@ -95,6 +95,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
         onKeyguard: Boolean,
         dozing: Boolean,
         bypass: Boolean,
+        idleOnCommunal: Boolean,
         animating: Boolean,
     ) {
         buffer.log(
@@ -103,7 +104,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
             {
                 str1 =
                     "willRemove=$willRemove onKeyguard=$onKeyguard dozing=$dozing" +
-                        " bypass=$bypass animating=$animating"
+                        " bypass=$bypass animating=$animating idleOnCommunal=$idleOnCommunal"
             },
             { "maybeClearHardDozeAmountOverrideHidingNotifs() $str1" }
         )
@@ -177,6 +178,31 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
             {
                 "onStateChanged(newState=${StatusBarState.toString(int1)})" +
                     " stored=${StatusBarState.toString(int2)}"
+            }
+        )
+    }
+
+    fun logOnPanelExpansionChanged(
+        fraction: Float,
+        wasCollapsedEnoughToHide: Boolean,
+        isCollapsedEnoughToHide: Boolean,
+        couldShowPulsingHuns: Boolean,
+        canShowPulsingHuns: Boolean
+    ) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                double1 = fraction.toDouble()
+                bool1 = wasCollapsedEnoughToHide
+                bool2 = isCollapsedEnoughToHide
+                bool3 = couldShowPulsingHuns
+                bool4 = canShowPulsingHuns
+            },
+            {
+                "onPanelExpansionChanged($double1):" +
+                    " collapsedEnoughToHide: $bool1 -> $bool2," +
+                    " canShowPulsingHuns: $bool3 -> $bool4"
             }
         )
     }

@@ -18,7 +18,6 @@ package android.window;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
@@ -30,6 +29,8 @@ import android.view.SurfaceControlViewHost;
 
 import com.android.window.flags.Flags;
 
+import libcore.util.NativeAllocationRegistry;
+
 import java.util.Objects;
 
 /**
@@ -37,9 +38,9 @@ import java.util.Objects;
  * {@link SurfaceControlViewHost} or {@link android.view.SurfaceControl} that has an input channel.
  * <p>
  * The {@link android.view.SurfaceControl} needs to have been registered for input via
- * {@link android.view.WindowManager#registerUnbatchedSurfaceControlInputReceiver(int,
+ * {@link android.view.WindowManager#registerUnbatchedSurfaceControlInputReceiver(
  * InputTransferToken, SurfaceControl, Looper, SurfaceControlInputReceiver)} or
- * {@link android.view.WindowManager#registerBatchedSurfaceControlInputReceiver(int,
+ * {@link android.view.WindowManager#registerBatchedSurfaceControlInputReceiver(
  * InputTransferToken, SurfaceControl, Choreographer, SurfaceControlInputReceiver)} and the
  * returned token can be used to call
  * {@link android.view.WindowManager#transferTouchGesture(InputTransferToken, InputTransferToken)}
@@ -51,28 +52,52 @@ import java.util.Objects;
  */
 @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
 public final class InputTransferToken implements Parcelable {
+    private static native long nativeCreate();
+    private static native long nativeCreate(IBinder token);
+    private static native void nativeWriteToParcel(long nativeObject, Parcel out);
+    private static native long nativeReadFromParcel(Parcel in);
+    private static native IBinder nativeGetBinderToken(long nativeObject);
+    private static native long nativeGetBinderTokenRef(long nativeObject);
+    private static native long nativeGetNativeInputTransferTokenFinalizer();
+    private static native boolean nativeEquals(long nativeObject1, long nativeObject2);
+
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(InputTransferToken.class.getClassLoader(),
+                    nativeGetNativeInputTransferTokenFinalizer());
+
     /**
      * @hide
      */
-    @NonNull
-    public final IBinder mToken;
+    public final long mNativeObject;
+
+    private InputTransferToken(long nativeObject) {
+        mNativeObject = nativeObject;
+        sRegistry.registerNativeAllocation(this, nativeObject);
+    }
 
     /**
      * @hide
      */
     public InputTransferToken(@NonNull IBinder token) {
-        mToken = token;
+        this(nativeCreate(token));
     }
 
     /**
      * @hide
      */
     public InputTransferToken() {
-        mToken = new Binder();
+        this(nativeCreate());
+    }
+
+    /**
+     * @hide
+     */
+    public IBinder getToken() {
+        return nativeGetBinderToken(mNativeObject);
     }
 
     private InputTransferToken(Parcel in) {
-        mToken = in.readStrongBinder();
+        this(nativeReadFromParcel(in));
     }
 
     /**
@@ -88,7 +113,7 @@ public final class InputTransferToken implements Parcelable {
      */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeStrongBinder(mToken);
+        nativeWriteToParcel(mNativeObject, dest);
     }
 
     public static final @NonNull Creator<InputTransferToken> CREATOR = new Creator<>() {
@@ -101,13 +126,12 @@ public final class InputTransferToken implements Parcelable {
         }
     };
 
-
     /**
      * @hide
      */
     @Override
     public int hashCode() {
-        return Objects.hash(mToken);
+        return Objects.hash(nativeGetBinderTokenRef(mNativeObject));
     }
 
     /**
@@ -118,7 +142,8 @@ public final class InputTransferToken implements Parcelable {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         InputTransferToken other = (InputTransferToken) obj;
-        return other.mToken == mToken;
+        if (other.mNativeObject == mNativeObject) return true;
+        return nativeEquals(mNativeObject, other.mNativeObject);
     }
 
 }

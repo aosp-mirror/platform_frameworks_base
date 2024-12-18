@@ -26,10 +26,12 @@ import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationS
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
@@ -44,6 +46,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationAdapter.SnapshotAdapter;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.shared.TransitionUtil;
@@ -141,8 +144,10 @@ class ActivityEmbeddingAnimationRunner {
             // ending states.
             prepareForJumpCut(info, startTransaction);
         } else {
-            addEdgeExtensionIfNeeded(startTransaction, finishTransaction,
-                    postStartTransactionCallbacks, adapters);
+            if (!com.android.graphics.libgui.flags.Flags.edgeExtensionShader()) {
+                addEdgeExtensionIfNeeded(startTransaction, finishTransaction,
+                        postStartTransactionCallbacks, adapters);
+            }
             addBackgroundColorIfNeeded(info, startTransaction, finishTransaction, adapters);
             for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
                 duration = Math.max(duration, adapter.getDurationHint());
@@ -190,6 +195,10 @@ class ActivityEmbeddingAnimationRunner {
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createAnimationAdapters(
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction) {
+        if (info.getType() == TRANSIT_TASK_FRAGMENT_DRAG_RESIZE) {
+            // Jump cut for AE drag resizing because the content is veiled.
+            return new ArrayList<>();
+        }
         boolean isChangeTransition = false;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.hasFlags(FLAG_IS_BEHIND_STARTING_WINDOW)) {
@@ -258,7 +267,10 @@ class ActivityEmbeddingAnimationRunner {
         for (TransitionInfo.Change change : openingChanges) {
             final Animation animation =
                     animationProvider.get(info, change, openingWholeScreenBounds);
-            if (animation.getDuration() == 0) {
+            if (shouldUseJumpCutForAnimation(animation)) {
+                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                    return new ArrayList<>();
+                }
                 continue;
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
@@ -283,7 +295,10 @@ class ActivityEmbeddingAnimationRunner {
             }
             final Animation animation =
                     animationProvider.get(info, change, closingWholeScreenBounds);
-            if (animation.getDuration() == 0) {
+            if (shouldUseJumpCutForAnimation(animation)) {
+                if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                    return new ArrayList<>();
+                }
                 continue;
             }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
@@ -328,7 +343,7 @@ class ActivityEmbeddingAnimationRunner {
             @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
         for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
             final Animation animation = adapter.mAnimation;
-            if (!animation.hasExtension()) {
+            if (animation.getExtensionEdges() == 0) {
                 continue;
             }
             if (adapter.mChange.hasFlags(FLAG_TRANSLUCENT)
@@ -393,7 +408,15 @@ class ActivityEmbeddingAnimationRunner {
         // This is because the TaskFragment surface/change won't contain the Activity's before its
         // reparent.
         Animation changeAnimation = null;
-        Rect parentBounds = new Rect();
+        final Rect parentBounds = new Rect();
+        // We use a single boolean value to record the backdrop override because the override used
+        // for overlay and we restrict to single overlay animation. We should fix the assumption
+        // if we allow multiple overlay transitions.
+        // The backdrop logic is mainly for animations of split animations. The backdrop should be
+        // disabled if there is any open/close target in the same transition as the change target.
+        // However, the overlay change animation usually contains one change target, and shows
+        // backdrop unexpectedly.
+        Boolean overrideShowBackdrop = null;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getMode() != TRANSIT_CHANGE
                     || change.getStartAbsBounds().equals(change.getEndAbsBounds())) {
@@ -416,21 +439,29 @@ class ActivityEmbeddingAnimationRunner {
                 }
             }
 
-            // The TaskFragment may be enter/exit split, so we take the union of both as the parent
-            // size.
-            parentBounds.union(boundsAnimationChange.getStartAbsBounds());
-            parentBounds.union(boundsAnimationChange.getEndAbsBounds());
-            if (boundsAnimationChange != change) {
-                // Union the change starting bounds in case the activity is resized and reparented
-                // to a TaskFragment. In that case, the TaskFragment may not cover the activity's
-                // starting bounds.
-                parentBounds.union(change.getStartAbsBounds());
+            final TransitionInfo.AnimationOptions options = boundsAnimationChange
+                    .getAnimationOptions();
+            if (options != null) {
+                final Animation overrideAnimation = mAnimationSpec.loadCustomAnimationFromOptions(
+                        options, TRANSIT_CHANGE);
+                if (overrideAnimation != null) {
+                    overrideShowBackdrop = overrideAnimation.getShowBackdrop();
+                }
             }
 
+            calculateParentBounds(change, boundsAnimationChange, parentBounds);
             // There are two animations in the array. The first one is for the start leash
             // (snapshot), and the second one is for the end leash (TaskFragment).
-            final Animation[] animations = mAnimationSpec.createChangeBoundsChangeAnimations(change,
-                    parentBounds);
+            final Animation[] animations =
+                    mAnimationSpec.createChangeBoundsChangeAnimations(info, change, parentBounds);
+            // Jump cut if either animation has zero for duration.
+            if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                for (Animation animation : animations) {
+                    if (shouldUseJumpCutForAnimation(animation)) {
+                        return new ArrayList<>();
+                    }
+                }
+            }
             // Keep track as we might need to add background color for the animation.
             // Although there may be multiple change animation, record one of them is sufficient
             // because the background color will be added to the root leash for the whole animation.
@@ -461,7 +492,7 @@ class ActivityEmbeddingAnimationRunner {
 
         // If there is no corresponding open/close window with the change, we should show background
         // color to cover the empty part of the screen.
-        boolean shouldShouldBackgroundColor = true;
+        boolean shouldShowBackgroundColor = true;
         // Handle the other windows that don't have bounds change in the same transition.
         for (TransitionInfo.Change change : info.getChanges()) {
             if (handledChanges.contains(change)) {
@@ -477,23 +508,65 @@ class ActivityEmbeddingAnimationRunner {
                 // window without bounds change.
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
             } else if (TransitionUtil.isClosingType(change.getMode())) {
-                animation = mAnimationSpec.createChangeBoundsCloseAnimation(change, parentBounds);
-                shouldShouldBackgroundColor = false;
+                animation =
+                        mAnimationSpec.createChangeBoundsCloseAnimation(info, change, parentBounds);
+                shouldShowBackgroundColor = false;
             } else {
-                animation = mAnimationSpec.createChangeBoundsOpenAnimation(change, parentBounds);
-                shouldShouldBackgroundColor = false;
+                animation =
+                        mAnimationSpec.createChangeBoundsOpenAnimation(info, change, parentBounds);
+                shouldShowBackgroundColor = false;
+            }
+            if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
+                if (shouldUseJumpCutForAnimation(animation)) {
+                    return new ArrayList<>();
+                }
             }
             adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change,
                     TransitionUtil.getRootFor(change, info)));
         }
 
-        if (shouldShouldBackgroundColor && changeAnimation != null) {
+        shouldShowBackgroundColor = overrideShowBackdrop != null
+                ? overrideShowBackdrop : shouldShowBackgroundColor;
+        if (shouldShowBackgroundColor && changeAnimation != null) {
             // Change animation may leave part of the screen empty. Show background color to cover
             // that.
             changeAnimation.setShowBackdrop(true);
         }
 
         return adapters;
+    }
+
+    /**
+     * Calculates parent bounds of the animation target by {@code change}.
+     */
+    @VisibleForTesting
+    static void calculateParentBounds(@NonNull TransitionInfo.Change change,
+              @NonNull TransitionInfo.Change boundsAnimationChange, @NonNull Rect outParentBounds) {
+        if (Flags.activityEmbeddingOverlayPresentationFlag()) {
+            final Point endParentSize = change.getEndParentSize();
+            if (endParentSize.equals(0, 0)) {
+                return;
+            }
+            final Point endRelPosition = change.getEndRelOffset();
+            final Point endAbsPosition = new Point(change.getEndAbsBounds().left,
+                    change.getEndAbsBounds().top);
+            final Point parentEndAbsPosition = new Point(endAbsPosition.x - endRelPosition.x,
+                    endAbsPosition.y - endRelPosition.y);
+            outParentBounds.set(parentEndAbsPosition.x, parentEndAbsPosition.y,
+                    parentEndAbsPosition.x + endParentSize.x,
+                    parentEndAbsPosition.y + endParentSize.y);
+        } else {
+            // The TaskFragment may be enter/exit split, so we take the union of both as
+            // the parent size.
+            outParentBounds.union(boundsAnimationChange.getStartAbsBounds());
+            outParentBounds.union(boundsAnimationChange.getEndAbsBounds());
+            if (boundsAnimationChange != change) {
+                // Union the change starting bounds in case the activity is resized and
+                // reparented to a TaskFragment. In that case, the TaskFragment may not cover
+                // the activity's starting bounds.
+                outParentBounds.union(change.getStartAbsBounds());
+            }
+        }
     }
 
     /**
@@ -523,8 +596,8 @@ class ActivityEmbeddingAnimationRunner {
     /**
      * Whether we should use jump cut for the change transition.
      * This normally happens when opening a new secondary with the existing primary using a
-     * different split layout. This can be complicated, like from horizontal to vertical split with
-     * new split pairs.
+     * different split layout (ratio or direction). This can be complicated, like from horizontal to
+     * vertical split with new split pairs.
      * Uses a jump cut animation to simplify.
      */
     private boolean shouldUseJumpCutForChangeTransition(@NonNull TransitionInfo info) {
@@ -553,8 +626,8 @@ class ActivityEmbeddingAnimationRunner {
         }
 
         // Check if the transition contains both opening and closing windows.
-        boolean hasOpeningWindow = false;
-        boolean hasClosingWindow = false;
+        final List<TransitionInfo.Change> openChanges = new ArrayList<>();
+        final List<TransitionInfo.Change> closeChanges = new ArrayList<>();
         for (TransitionInfo.Change change : info.getChanges()) {
             if (changingChanges.contains(change)) {
                 continue;
@@ -564,10 +637,36 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window.
                 continue;
             }
-            hasOpeningWindow |= TransitionUtil.isOpeningType(change.getMode());
-            hasClosingWindow |= TransitionUtil.isClosingType(change.getMode());
+            if (TransitionUtil.isOpeningType(change.getMode())) {
+                openChanges.add(change);
+            } else if (TransitionUtil.isClosingType(change.getMode())) {
+                closeChanges.add(change);
+            }
         }
-        return hasOpeningWindow && hasClosingWindow;
+        if (openChanges.isEmpty() || closeChanges.isEmpty()) {
+            // Only skip if the transition contains both open and close.
+            return false;
+        }
+        if (changingChanges.size() != 1 || openChanges.size() != 1 || closeChanges.size() != 1) {
+            // Skip when there are too many windows involved.
+            return true;
+        }
+        final TransitionInfo.Change changingChange = changingChanges.get(0);
+        final TransitionInfo.Change openChange = openChanges.get(0);
+        final TransitionInfo.Change closeChange = closeChanges.get(0);
+        if (changingChange.getStartAbsBounds().equals(openChange.getEndAbsBounds())
+                && changingChange.getEndAbsBounds().equals(closeChange.getStartAbsBounds())) {
+            // Don't skip if the transition is a simple shifting without split direction or ratio
+            // change. For example, A|B -> B|C.
+            return false;
+        }
+        return true;
+    }
+
+    /** Whether or not to use jump cut based on the animation. */
+    @VisibleForTesting
+    static boolean shouldUseJumpCutForAnimation(@NonNull Animation animation) {
+        return animation.getDuration() == 0;
     }
 
     /** Updates the changes to end states in {@code startTransaction} for jump cut animation. */

@@ -56,11 +56,11 @@ class NotificationInterruptLogger @Inject constructor(
         }
     }
 
-    fun logSuspendedAppBubble(entry: NotificationEntry) {
+    fun logNoAlertingAppSuspended(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "No bubble up: notification: app $str1 is suspended"
+            "No alerting: app is suspended: $str1"
         })
     }
 
@@ -190,6 +190,14 @@ class NotificationInterruptLogger @Inject constructor(
             str1 = entry.logKey
         }, {
             "No alerting: suppressed due to group alert behavior: $str1"
+        })
+    }
+
+    fun logNoAlertingSilentNotification(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No alerting: suppressed due to silent notification: $str1"
         })
     }
 

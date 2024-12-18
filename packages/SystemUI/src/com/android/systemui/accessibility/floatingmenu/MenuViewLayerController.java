@@ -20,11 +20,11 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.systemui.Flags;
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
+import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.util.settings.SecureSettings;
 
 /**
@@ -32,13 +32,15 @@ import com.android.systemui.util.settings.SecureSettings;
  * of {@link IAccessibilityFloatingMenu}.
  */
 class MenuViewLayerController implements IAccessibilityFloatingMenu {
-    private final WindowManager mWindowManager;
+    private final ViewCaptureAwareWindowManager mWindowManager;
     private final MenuViewLayer mMenuViewLayer;
     private boolean mIsShowing;
 
     MenuViewLayerController(Context context, WindowManager windowManager,
-            AccessibilityManager accessibilityManager, SecureSettings secureSettings) {
-        mWindowManager = windowManager;
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            AccessibilityManager accessibilityManager, SecureSettings secureSettings,
+            NavigationModeController navigationModeController) {
+        mWindowManager = viewCaptureAwareWindowManager;
 
         MenuViewModel menuViewModel = new MenuViewModel(
                 context, accessibilityManager, secureSettings);
@@ -49,7 +51,8 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
                 menuViewAppearance,
                 new MenuView(context, menuViewModel, menuViewAppearance, secureSettings),
                 this,
-                secureSettings);
+                secureSettings,
+                navigationModeController);
     }
 
     @Override
@@ -88,14 +91,9 @@ class MenuViewLayerController implements IAccessibilityFloatingMenu {
         params.privateFlags |= PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         params.windowAnimations = android.R.style.Animation_Translucent;
         // Insets are configured to allow the menu to display over navigation and system bars.
-        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
-            params.setFitInsetsTypes(0);
-            params.layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        } else {
-            params.setFitInsetsTypes(
-                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-        }
+        params.setFitInsetsTypes(0);
+        params.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return params;
     }
 }

@@ -17,23 +17,22 @@
 package com.android.internal.accessibility.dialog;
 
 import static com.android.internal.accessibility.util.ShortcutUtils.convertToKey;
-import static com.android.internal.accessibility.util.ShortcutUtils.convertToUserType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
 
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType;
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 
 /**
  * Base class for creating accessibility activity target.
  */
 class AccessibilityActivityTarget extends AccessibilityTarget {
 
-    AccessibilityActivityTarget(Context context, @ShortcutType int shortcutType,
+    AccessibilityActivityTarget(Context context, @UserShortcutType int shortcutType,
             @NonNull AccessibilityShortcutInfo shortcutInfo) {
         super(context,
                 shortcutType,
@@ -44,7 +43,7 @@ class AccessibilityActivityTarget extends AccessibilityTarget {
                 shortcutInfo.getActivityInfo().applicationInfo.uid,
                 shortcutInfo.getActivityInfo().loadLabel(context.getPackageManager()),
                 shortcutInfo.getActivityInfo().loadIcon(context.getPackageManager()),
-                convertToKey(convertToUserType(shortcutType)));
+                convertToKey(shortcutType));
     }
 
     @Override

@@ -30,7 +30,7 @@ import android.util.Slog;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 import java.util.ArrayList;
 
@@ -96,6 +96,7 @@ class BLASTSyncEngine {
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
         default void onTransactionCommitTimeout() {}
+        default void onReadyTimeout() {}
     }
 
     /**
@@ -116,6 +117,7 @@ class BLASTSyncEngine {
      */
     class SyncGroup {
         final int mSyncId;
+        final String mSyncName;
         int mSyncMethod = METHOD_BLAST;
         final TransactionReadyListener mListener;
         final Runnable mOnTimeout;
@@ -138,6 +140,7 @@ class BLASTSyncEngine {
 
         private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
+            mSyncName = name;
             mListener = listener;
             mOnTimeout = () -> {
                 Slog.w(TAG, "Sync group " + mSyncId + " timeout");
@@ -221,15 +224,20 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.waitForSyncTransactionCommit(wcAwaitingCommit);
             }
+
+            final int syncId = mSyncId;
+            final long mergedTxId = merged.getId();
+            final String syncName = mSyncName;
             class CommitCallback implements Runnable {
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
                 public void onCommitted(SurfaceControl.Transaction t) {
+                    // Don't wait to hold the global lock to remove the timeout runnable
+                    mHandler.removeCallbacks(this);
                     synchronized (mWm.mGlobalLock) {
                         if (ran) {
                             return;
                         }
-                        mHandler.removeCallbacks(this);
                         ran = true;
                         for (WindowContainer wc : wcAwaitingCommit) {
                             wc.onSyncTransactionCommitted(t);
@@ -246,8 +254,9 @@ class BLASTSyncEngine {
                     // a trace. Since these kind of ANRs can trigger such an issue,
                     // try and ensure we will have some visibility in both cases.
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
-                    Slog.e(TAG, "WM sent Transaction to organized, but never received" +
-                           " commit callback. Application ANR likely to follow.");
+                    Slog.e(TAG, "WM sent Transaction (#" + syncId + ", " + syncName + ", tx="
+                            + mergedTxId + ") to organizer, but never received commit callback."
+                            + " Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     synchronized (mWm.mGlobalLock) {
                         mListener.onTransactionCommitTimeout();
@@ -339,6 +348,11 @@ class BLASTSyncEngine {
                 wc.setSyncGroup(this);
             }
             wc.prepareSync();
+            if (wc.mSyncState == WindowContainer.SYNC_STATE_NONE && wc.mSyncGroup != null) {
+                Slog.w(TAG, "addToSync: unset SyncGroup " + wc.mSyncGroup.mSyncId
+                        + " for non-sync " + wc);
+                wc.mSyncGroup = null;
+            }
             if (mReady) {
                 mWm.mWindowPlacerLocked.requestTraversal();
             }
@@ -402,6 +416,7 @@ class BLASTSyncEngine {
             if (allFinished && !mReady) {
                 Slog.w(TAG, "Sync group " + mSyncId + " timed-out because not ready. If you see "
                         + "this, please file a bug.");
+                mListener.onReadyTimeout();
             }
             finishNow();
             removeFromDependencies(this);

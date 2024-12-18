@@ -26,6 +26,7 @@ import static com.android.server.cpu.CpuInfoReader.CpuInfo.MISSING_FREQUENCY;
 import static com.android.server.cpu.CpuInfoReader.FLAG_CPUSET_CATEGORY_BACKGROUND;
 import static com.android.server.cpu.CpuInfoReader.FLAG_CPUSET_CATEGORY_TOP_APP;
 import static com.android.server.cpu.CpuMonitorService.DEFAULT_MONITORING_INTERVAL_MILLISECONDS;
+import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -75,6 +76,7 @@ public final class CpuMonitorServiceTest {
     private static final long TEST_NORMAL_MONITORING_INTERVAL_MILLISECONDS = 100;
     private static final long TEST_DEBUG_MONITORING_INTERVAL_MILLISECONDS = 150;
     private static final long TEST_LATEST_AVAILABILITY_DURATION_MILLISECONDS = 300;
+    private static final long TEST_STOP_PERIODIC_CPUSET_READING_DELAY_MILLISECONDS = 0;
     private static final CpuAvailabilityMonitoringConfig TEST_MONITORING_CONFIG_ALL_CPUSET =
             new CpuAvailabilityMonitoringConfig.Builder(CPUSET_ALL)
                     .addThreshold(30).addThreshold(70).build();
@@ -119,7 +121,8 @@ public final class CpuMonitorServiceTest {
         mService = new CpuMonitorService(mMockContext, mMockCpuInfoReader, mServiceHandlerThread,
                 /* shouldDebugMonitor= */ true, TEST_NORMAL_MONITORING_INTERVAL_MILLISECONDS,
                 TEST_DEBUG_MONITORING_INTERVAL_MILLISECONDS,
-                TEST_LATEST_AVAILABILITY_DURATION_MILLISECONDS);
+                TEST_LATEST_AVAILABILITY_DURATION_MILLISECONDS,
+                TEST_STOP_PERIODIC_CPUSET_READING_DELAY_MILLISECONDS);
 
         doNothing().when(() -> ServiceManager.addService(eq("cpu_monitor"), any(Binder.class),
                 anyBoolean(), anyInt()));
@@ -535,6 +538,18 @@ public final class CpuMonitorServiceTest {
     }
 
     @Test
+    public void testBootCompleted() throws Exception {
+        mService.onBootPhase(PHASE_BOOT_COMPLETED);
+
+        // Message to stop periodic cpuset reading is posted on the service handler thread. Sync
+        // with this thread before proceeding.
+        syncWithHandler(mServiceHandler, /* delayMillis= */ 0);
+
+        verify(mMockCpuInfoReader, timeout(ASYNC_CALLBACK_WAIT_TIMEOUT_MILLISECONDS))
+                .stopPeriodicCpusetReading();
+    }
+
+    @Test
     public void testHeavyCpuLoadMonitoring() throws Exception {
         // TODO(b/267500110): Once heavy CPU load detection logic is added, add unittest.
     }
@@ -567,7 +582,8 @@ public final class CpuMonitorServiceTest {
                 mServiceHandlerThread, /* shouldDebugMonitor= */ false,
                 TEST_NORMAL_MONITORING_INTERVAL_MILLISECONDS,
                 TEST_DEBUG_MONITORING_INTERVAL_MILLISECONDS,
-                TEST_LATEST_AVAILABILITY_DURATION_MILLISECONDS);
+                TEST_LATEST_AVAILABILITY_DURATION_MILLISECONDS,
+                TEST_STOP_PERIODIC_CPUSET_READING_DELAY_MILLISECONDS);
 
         startService();
     }

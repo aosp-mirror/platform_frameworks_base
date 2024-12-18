@@ -21,15 +21,16 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -38,6 +39,7 @@ import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -50,11 +52,12 @@ import org.mockito.Mockito.verify
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class ShadeControllerSceneImplTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
-    private val sceneInteractor = kosmos.sceneInteractor
-    private val deviceEntryInteractor = kosmos.deviceEntryInteractor
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
 
     private lateinit var shadeInteractor: ShadeInteractor
     private lateinit var underTest: ShadeControllerSceneImpl
@@ -62,13 +65,14 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
     @Before
     fun setup() {
         kosmos.testCase = this
-        kosmos.fakeSceneContainerFlags.enabled = true
         kosmos.fakeFeatureFlagsClassic.apply {
             set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             set(Flags.NSSL_DEBUG_LINES, false)
             set(Flags.FULL_SCREEN_USER_SWITCHER, false)
         }
-        kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+        kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+            SuccessFingerprintAuthenticationStatus(0, true)
+        )
         testScope.runCurrent()
         shadeInteractor = kosmos.shadeInteractor
         underTest = kosmos.shadeControllerSceneImpl
@@ -161,6 +165,10 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
         testScope.runTest {
             // GIVEN shade is collapsed and a post-collapse action is enqueued
             val testRunnable = mock<Runnable>()
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
             setCollapsed()
             underTest.postOnShadeExpanded(testRunnable)
 
@@ -179,7 +187,14 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
         testScope.runCurrent()
     }
 
-    private fun setDeviceEntered(isEntered: Boolean) {
+    private fun TestScope.setDeviceEntered(isEntered: Boolean) {
+        if (isEntered) {
+            // Unlock the device marking the device has entered.
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+        }
         setScene(
             if (isEntered) {
                 Scenes.Gone

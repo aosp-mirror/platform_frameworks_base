@@ -17,23 +17,78 @@
 package com.android.systemui.qs.pipeline.data.repository
 
 import android.content.ComponentName
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
+import android.graphics.drawable.Drawable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 
 class FakeInstalledTilesComponentRepository : InstalledTilesComponentRepository {
 
-    private val installedComponentsPerUser =
-        mutableMapOf<Int, MutableStateFlow<Set<ComponentName>>>()
+    private val installedServicesPerUser = mutableMapOf<Int, MutableStateFlow<List<ServiceInfo>>>()
 
     override fun getInstalledTilesComponents(userId: Int): Flow<Set<ComponentName>> {
-        return getFlow(userId).asStateFlow()
+        return getFlow(userId).map { it.map { it.componentName }.toSet() }
+    }
+
+    override fun getInstalledTilesServiceInfos(userId: Int): List<ServiceInfo> {
+        return getFlow(userId).value
     }
 
     fun setInstalledPackagesForUser(userId: Int, components: Set<ComponentName>) {
-        getFlow(userId).value = components
+        getFlow(userId).value =
+            components.map {
+                ServiceInfo().apply {
+                    packageName = it.packageName
+                    name = it.className
+                    applicationInfo = ApplicationInfo()
+                }
+            }
     }
 
-    private fun getFlow(userId: Int): MutableStateFlow<Set<ComponentName>> =
-        installedComponentsPerUser.getOrPut(userId) { MutableStateFlow(emptySet()) }
+    fun setInstalledServicesForUser(userId: Int, services: List<ServiceInfo>) {
+        getFlow(userId).value = services.toList()
+    }
+
+    private fun getFlow(userId: Int): MutableStateFlow<List<ServiceInfo>> =
+        installedServicesPerUser.getOrPut(userId) { MutableStateFlow(emptyList()) }
+
+    companion object {
+        fun ServiceInfo(
+            componentName: ComponentName,
+            serviceName: String,
+            serviceIcon: Drawable? = null,
+            appName: String = "",
+            appIcon: Drawable? = null
+        ): ServiceInfo {
+            val appInfo =
+                object : ApplicationInfo() {
+                    override fun loadLabel(pm: PackageManager): CharSequence {
+                        return appName
+                    }
+
+                    override fun loadIcon(pm: PackageManager?): Drawable? {
+                        return appIcon
+                    }
+                }
+            val serviceInfo =
+                object : ServiceInfo() {
+                        override fun loadLabel(pm: PackageManager): CharSequence {
+                            return serviceName
+                        }
+
+                        override fun loadIcon(pm: PackageManager?): Drawable? {
+                            return serviceIcon ?: getApplicationInfo().loadIcon(pm)
+                        }
+                    }
+                    .apply {
+                        packageName = componentName.packageName
+                        name = componentName.className
+                        applicationInfo = appInfo
+                    }
+            return serviceInfo
+        }
+    }
 }

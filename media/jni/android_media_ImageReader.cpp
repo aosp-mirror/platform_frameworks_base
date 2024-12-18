@@ -16,34 +16,32 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "ImageReader_JNI"
-#include "android_media_Utils.h"
+#define ATRACE_TAG ATRACE_TAG_CAMERA
+#include <android/hardware_buffer_jni.h>
+#include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
+#include <android_runtime/android_hardware_HardwareBuffer.h>
+#include <android_runtime/android_view_Surface.h>
+#include <com_android_graphics_libgui_flags.h>
 #include <cutils/atomic.h>
-#include <utils/Log.h>
-#include <utils/misc.h>
+#include <grallocusage/GrallocUsageConversion.h>
+#include <gui/BufferItemConsumer.h>
+#include <gui/Surface.h>
+#include <inttypes.h>
+#include <jni.h>
+#include <nativehelper/JNIHelp.h>
+#include <private/android/AHardwareBufferHelpers.h>
+#include <stdint.h>
+#include <ui/Rect.h>
 #include <utils/List.h>
+#include <utils/Log.h>
 #include <utils/String8.h>
+#include <utils/Trace.h>
+#include <utils/misc.h>
 
 #include <cstdio>
 
-#include <gui/BufferItemConsumer.h>
-#include <gui/Surface.h>
-
-#include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/android_view_Surface.h>
-#include <android_runtime/android_graphics_GraphicBuffer.h>
-#include <android_runtime/android_hardware_HardwareBuffer.h>
-#include <grallocusage/GrallocUsageConversion.h>
-
-#include <private/android/AHardwareBufferHelpers.h>
-
-#include <jni.h>
-#include <nativehelper/JNIHelp.h>
-
-#include <stdint.h>
-#include <inttypes.h>
-#include <android/hardware_buffer_jni.h>
-
-#include <ui/Rect.h>
+#include "android_media_Utils.h"
 
 #define ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID       "mNativeContext"
 #define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
@@ -223,6 +221,7 @@ JNIImageReaderContext::~JNIImageReaderContext() {
 
 void JNIImageReaderContext::onFrameAvailable(const BufferItem& /*item*/)
 {
+    ATRACE_CALL();
     ALOGV("%s: frame available", __FUNCTION__);
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
@@ -390,18 +389,25 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
     }
     sp<JNIImageReaderContext> ctx(new JNIImageReaderContext(env, weakThiz, clazz, maxImages));
 
-    sp<IGraphicBufferProducer> gbProducer;
-    sp<IGraphicBufferConsumer> gbConsumer;
-    BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
-    sp<BufferItemConsumer> bufferConsumer;
     String8 consumerName = String8::format("ImageReader-%dx%df%xm%d-%d-%d",
             width, height, nativeHalFormat, maxImages, getpid(),
             createProcessUniqueId());
     uint64_t consumerUsage =
             android_hardware_HardwareBuffer_convertToGrallocUsageBits(ndkUsage);
 
+#if COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
+    sp<BufferItemConsumer> bufferConsumer = new BufferItemConsumer(consumerUsage, maxImages,
+                                                                   /*controlledByApp*/ true);
+    sp<IGraphicBufferProducer> gbProducer =
+            bufferConsumer->getSurface()->getIGraphicBufferProducer();
+#else
+    sp<IGraphicBufferProducer> gbProducer;
+    sp<IGraphicBufferConsumer> gbConsumer;
+    BufferQueue::createBufferQueue(&gbProducer, &gbConsumer);
+    sp<BufferItemConsumer> bufferConsumer;
     bufferConsumer = new BufferItemConsumer(gbConsumer, consumerUsage, maxImages,
             /*controlledByApp*/true);
+#endif // COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
     if (bufferConsumer == nullptr) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
                 "Failed to allocate native buffer consumer for hal format 0x%x and usage 0x%x",
@@ -410,7 +416,11 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint w
     }
 
     if (consumerUsage & GRALLOC_USAGE_PROTECTED) {
+#if COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
+        bufferConsumer->setConsumerIsProtected(true);
+#else
         gbConsumer->setConsumerIsProtected(true);
+#endif // COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
     }
 
     ctx->setBufferConsumer(bufferConsumer);
@@ -932,6 +942,11 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         return static_cast<jint>(PublicFormat::PRIVATE);
     } else {
         BufferItem* buffer = Image_getBufferItem(env, thiz);
+        if (buffer == nullptr) {
+            jniThrowException(env, "java/lang/IllegalStateException",
+                    "Image is not initialized");
+            return -1;
+        }
         int readerHalFormat = mapPublicFormatToHalFormat(static_cast<PublicFormat>(readerFormat));
         int32_t fmt = applyFormatOverrides(
                 buffer->mGraphicBuffer->getPixelFormat(), readerHalFormat);
@@ -950,6 +965,11 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
 
 static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
     BufferItem* buffer = Image_getBufferItem(env, thiz);
+    if (buffer == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Image is not initialized");
+        return NULL;
+    }
     AHardwareBuffer* b = AHardwareBuffer_from_GraphicBuffer(buffer->mGraphicBuffer.get());
     // don't user the public AHardwareBuffer_toHardwareBuffer() because this would force us
     // to link against libandroid.so

@@ -16,8 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.hidl;
 
-import static com.android.server.biometrics.sensors.face.hidl.FaceGenerateChallengeClient.CHALLENGE_TIMEOUT_SEC;
 import static com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter.ENROLL_TIMEOUT_SEC;
+import static com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter.CHALLENGE_TIMEOUT_SEC;
 
 import static com.google.common.truth.Truth.assertThat;
 

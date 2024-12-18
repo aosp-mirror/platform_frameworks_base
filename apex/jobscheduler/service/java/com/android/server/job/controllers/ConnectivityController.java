@@ -107,22 +107,25 @@ public final class ConnectivityController extends RestrictingController implemen
     private static final long MIN_ADJUST_CALLBACK_INTERVAL_MS = 1_000L;
 
     private static final int UNBYPASSABLE_BG_BLOCKED_REASONS =
-            ~ConnectivityManager.BLOCKED_REASON_NONE;
+            ~ConnectivityManager.BLOCKED_REASON_APP_BACKGROUND;
     private static final int UNBYPASSABLE_EJ_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
+                    | ConnectivityManager.BLOCKED_REASON_APP_BACKGROUND
                     | ConnectivityManager.BLOCKED_REASON_DOZE);
     private static final int UNBYPASSABLE_UI_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
                     | ConnectivityManager.BLOCKED_REASON_DOZE
                     | ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER
+                    | ConnectivityManager.BLOCKED_REASON_APP_BACKGROUND
                     | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
     private static final int UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
                     | ConnectivityManager.BLOCKED_REASON_DOZE
                     | ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER
+                    | ConnectivityManager.BLOCKED_REASON_APP_BACKGROUND
                     | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
 
     @VisibleForTesting
@@ -1001,8 +1004,7 @@ public final class ConnectivityController extends RestrictingController implemen
             NetworkCapabilities capabilities, Constants constants) {
         // A restricted job that's out of quota MUST use an unmetered network.
         if (jobStatus.getEffectiveStandbyBucket() == RESTRICTED_INDEX
-                && (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA)
-                || !jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_TARE_WEALTH))) {
+                && (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA))) {
             final NetworkCapabilities.Builder builder =
                     copyCapabilities(jobStatus.getJob().getRequiredNetwork());
             builder.addCapability(NET_CAPABILITY_NOT_METERED);

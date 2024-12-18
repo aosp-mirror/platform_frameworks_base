@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.interruption.FullScreenIntent
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_KEYGUARD_OCCLUDED
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_KEYGUARD_SHOWING
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_LOCKED_SHADE
+import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_USER_SETUP_INCOMPLETE
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_EXPECTED_TO_HUN
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_NOT_IMPORTANT_ENOUGH
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_NO_FULL_SCREEN_INTENT
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.interruption.FullScreenIntent
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
+import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
@@ -93,6 +95,7 @@ class FullScreenIntentDecisionProvider(
             uiEventId = FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA,
             eventLogData = EventLogData("274759612", "bubbleMetadata")
         ),
+        NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION(false, "suppressive setSilent notification"),
         NO_FSI_PACKAGE_SUSPENDED(false, "package suspended"),
         FSI_DEVICE_NOT_INTERACTIVE(true, "device is not interactive"),
         FSI_DEVICE_DREAMING(true, "device is dreaming"),
@@ -101,6 +104,7 @@ class FullScreenIntentDecisionProvider(
         FSI_KEYGUARD_OCCLUDED(true, "keyguard is occluded"),
         FSI_LOCKED_SHADE(true, "locked shade"),
         FSI_DEVICE_NOT_PROVISIONED(true, "device not provisioned"),
+        FSI_USER_SETUP_INCOMPLETE(true, "user setup incomplete"),
         NO_FSI_NO_HUN_OR_KEYGUARD(
             false,
             "no HUN or keyguard",
@@ -152,6 +156,12 @@ class FullScreenIntentDecisionProvider(
             return NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
         }
 
+        if (android.service.notification.Flags.notificationSilentFlag()) {
+            if (sbn.notification.isSilent) {
+                return NO_FSI_SUPPRESSIVE_SILENT_NOTIFICATION
+            }
+        }
+
         val bubbleMetadata = notification.bubbleMetadata
         if (bubbleMetadata != null && bubbleMetadata.isNotificationSuppressed) {
             return NO_FSI_SUPPRESSIVE_BUBBLE_METADATA
@@ -187,6 +197,10 @@ class FullScreenIntentDecisionProvider(
 
         if (!deviceProvisionedController.isDeviceProvisioned) {
             return FSI_DEVICE_NOT_PROVISIONED
+        }
+
+        if (!deviceProvisionedController.isCurrentUserSetup) {
+            return FSI_USER_SETUP_INCOMPLETE
         }
 
         return NO_FSI_NO_HUN_OR_KEYGUARD

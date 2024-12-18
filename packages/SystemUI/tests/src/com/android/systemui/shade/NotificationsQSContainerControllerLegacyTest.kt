@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -26,8 +27,7 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags as AConfigFlags
-import com.android.systemui.Flags.FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX
+import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
@@ -164,33 +164,9 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreen_updateResources_refactorFlagOff_splitShadeHeightIsSetBasedOnResource() {
+    fun testLargeScreen_updateResources_splitShadeHeightIsSetBasedOnHelper() {
         val headerResourceHeight = 20
         val headerHelperHeight = 30
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
-            .thenReturn(headerHelperHeight)
-        overrideResource(R.bool.config_use_large_screen_shade_header, true)
-        overrideResource(R.dimen.qs_header_height, 10)
-        overrideResource(R.dimen.large_screen_shade_header_height, headerResourceHeight)
-
-        // ensure the estimated height (would be 3 here) wouldn't impact this test case
-        overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
-        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 1)
-
-        underTest.updateResources()
-
-        val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
-        verify(view).applyConstraints(capture(captor))
-        assertThat(captor.value.getHeight(R.id.split_shade_status_bar))
-            .isEqualTo(headerResourceHeight)
-    }
-
-    @Test
-    fun testLargeScreen_updateResources_refactorFlagOn_splitShadeHeightIsSetBasedOnHelper() {
-        val headerResourceHeight = 20
-        val headerHelperHeight = 30
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
         whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
             .thenReturn(headerHelperHeight)
         overrideResource(R.bool.config_use_large_screen_shade_header, true)
@@ -400,8 +376,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSplitShadeLayout_isAlignedToGuideline() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd).isEqualTo(R.id.qs_edge_guideline)
@@ -410,8 +386,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSinglePaneLayout_childrenHaveEqualMargins() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         disableSplitShade()
         underTest.updateResources()
         val qsStartMargin = getConstraintSetLayout(R.id.qs_frame).startMargin
@@ -427,8 +403,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSplitShadeLayout_childrenHaveInsideMarginsOfZero() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
@@ -445,32 +421,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreenLayout_refactorFlagOff_qsAndNotifsTopMarginIsOfHeaderHeightResource() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        mSetFlagsRule.disableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
-        setLargeScreen()
-        val largeScreenHeaderResourceHeight = 100
-        val largeScreenHeaderHelperHeight = 200
-        whenever(largeScreenHeaderHelper.getLargeScreenHeaderHeight())
-            .thenReturn(largeScreenHeaderHelperHeight)
-        overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderResourceHeight)
-
-        // ensure the estimated height (would be 30 here) wouldn't impact this test case
-        overrideResource(R.dimen.large_screen_shade_header_min_height, 10)
-        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 10)
-
-        underTest.updateResources()
-
-        assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
-            .isEqualTo(largeScreenHeaderResourceHeight)
-        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
-            .isEqualTo(largeScreenHeaderResourceHeight)
-    }
-
-    @Test
-    fun testLargeScreenLayout_refactorFlagOn_qsAndNotifsTopMarginIsOfHeaderHeightHelper() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-        mSetFlagsRule.enableFlags(FLAG_CENTRALIZED_STATUS_BAR_HEIGHT_FIX)
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+    fun testLargeScreenLayout_qsAndNotifsTopMarginIsOfHeaderHeightHelper() {
         setLargeScreen()
         val largeScreenHeaderResourceHeight = 100
         val largeScreenHeaderHelperHeight = 200
@@ -491,8 +443,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSmallScreenLayout_qsAndNotifsTopMarginIsZero() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         setSmallScreen()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin).isEqualTo(0)
@@ -512,8 +464,8 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun testSinglePaneShadeLayout_isAlignedToParent() {
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         disableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)

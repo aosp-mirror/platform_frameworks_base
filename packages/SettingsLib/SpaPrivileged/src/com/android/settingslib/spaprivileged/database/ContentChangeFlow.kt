@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
 
 /** Content change flow for the given [uri]. */
-internal fun Context.contentChangeFlow(
+fun Context.contentChangeFlow(
     uri: Uri,
     sendInitial: Boolean = true,
 ): Flow<Unit> = callbackFlow {

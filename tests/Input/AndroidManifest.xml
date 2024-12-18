@@ -22,12 +22,22 @@
     <uses-permission android:name="android.permission.MONITOR_INPUT"/>
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
     <application android:label="InputTest" android:debuggable="true">
 
         <activity android:name=".UnresponsiveGestureMonitorActivity"
              android:label="Unresponsive gesture monitor"
              android:process=":externalProcess">
+        </activity>
+
+        <activity android:name="com.android.test.input.CaptureEventActivity"
+            android:label="Capture events"
+            android:configChanges="touchscreen|uiMode|orientation|screenSize|screenLayout|keyboardHidden|uiMode|navigation|keyboard|density|fontScale|layoutDirection|locale|mcc|mnc|smallestScreenSize"
+            android:enableOnBackInvokedCallback="false"
+            android:turnScreenOn="true"
+            android:exported="true">
         </activity>
 
     </application>

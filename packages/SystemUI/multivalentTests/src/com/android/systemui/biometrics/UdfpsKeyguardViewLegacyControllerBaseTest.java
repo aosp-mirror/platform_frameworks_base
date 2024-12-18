@@ -105,7 +105,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);
         when(mView.getUnpausedAlpha()).thenReturn(255);
         when(mShadeExpansionStateManager.addExpansionListener(any())).thenReturn(
-                new ShadeExpansionChangeEvent(0, false, false, 0));
+                new ShadeExpansionChangeEvent(0, false, false));
         mController = createUdfpsKeyguardViewController();
     }
 

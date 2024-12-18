@@ -27,8 +27,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.ravenwood.annotation.RavenwoodClassLoadHook;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
 import android.ravenwood.annotation.RavenwoodReplace;
 import android.ravenwood.annotation.RavenwoodThrow;
 import android.text.TextUtils;
@@ -233,8 +233,7 @@ import java.util.function.IntFunction;
  * {@link #readSparseArray(ClassLoader, Class)}.
  */
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.Parcel_host")
+@RavenwoodClassLoadHook(RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public final class Parcel {
 
     private static final boolean DEBUG_RECYCLE = false;
@@ -389,10 +388,8 @@ public final class Parcel {
     @CriticalNative
     private static native void nativeMarkSensitive(long nativePtr);
     @FastNative
-    @RavenwoodThrow
     private static native void nativeMarkForBinder(long nativePtr, IBinder binder);
     @CriticalNative
-    @RavenwoodThrow
     private static native boolean nativeIsForRpc(long nativePtr);
     @CriticalNative
     private static native int nativeDataSize(long nativePtr);
@@ -424,17 +421,14 @@ public final class Parcel {
     private static native int nativeWriteFloat(long nativePtr, float val);
     @CriticalNative
     private static native int nativeWriteDouble(long nativePtr, double val);
-    @RavenwoodThrow
     private static native void nativeSignalExceptionForError(int error);
     @FastNative
     private static native void nativeWriteString8(long nativePtr, String val);
     @FastNative
     private static native void nativeWriteString16(long nativePtr, String val);
     @FastNative
-    @RavenwoodThrow
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
     @FastNative
-    @RavenwoodThrow
     private static native void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
@@ -453,10 +447,8 @@ public final class Parcel {
     @FastNative
     private static native String nativeReadString16(long nativePtr);
     @FastNative
-    @RavenwoodThrow
     private static native IBinder nativeReadStrongBinder(long nativePtr);
     @FastNative
-    @RavenwoodThrow
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();
@@ -475,17 +467,17 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native boolean nativeHasFileDescriptorsInRange(
             long nativePtr, int offset, int length);
-    @RavenwoodThrow
+
+    private static native boolean nativeHasBinders(long nativePtr);
+    private static native boolean nativeHasBindersInRange(
+            long nativePtr, int offset, int length);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
-    @RavenwoodThrow
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
 
     @CriticalNative
-    @RavenwoodThrow
     private static native boolean nativeReplaceCallingWorkSourceUid(
             long nativePtr, int workSourceUid);
     @CriticalNative
-    @RavenwoodThrow
     private static native int nativeReadCallingWorkSourceUid(long nativePtr);
 
     /** Last time exception with a stack trace was written */
@@ -494,7 +486,6 @@ public final class Parcel {
     private static final int WRITE_EXCEPTION_STACK_TRACE_THRESHOLD_MS = 1000;
 
     @CriticalNative
-    @RavenwoodThrow
     private static native long nativeGetOpenAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
@@ -658,12 +649,10 @@ public final class Parcel {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @RavenwoodThrow
     public static native long getGlobalAllocSize();
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @RavenwoodThrow
     public static native long getGlobalAllocCount();
 
     /**
@@ -859,6 +848,28 @@ public final class Parcel {
     }
 
     /** @hide */
+    public void removeClassCookie(Class clz, Object expectedCookie) {
+        if (mClassCookies != null) {
+            Object removedCookie = mClassCookies.remove(clz);
+            if (removedCookie != expectedCookie) {
+                Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                        + ") but instead removed " + removedCookie);
+            }
+        } else {
+            Log.wtf(TAG, "Expected to remove " + expectedCookie + " (with key=" + clz
+                    + ") but no cookies were present");
+        }
+    }
+
+    /**
+     * Whether {@link #setClassCookie} has been called with the specified {@code clz}.
+     * @hide
+     */
+    public boolean hasClassCookie(Class clz) {
+        return mClassCookies != null && mClassCookies.containsKey(clz);
+    }
+
+    /** @hide */
     public final void adoptClassCookies(Parcel from) {
         mClassCookies = from.mClassCookies;
     }
@@ -881,6 +892,12 @@ public final class Parcel {
 
     /**
      * Report whether the parcel contains any marshalled file descriptors.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      */
     public boolean hasFileDescriptors() {
         return nativeHasFileDescriptors(mNativePtr);
@@ -889,6 +906,12 @@ public final class Parcel {
     /**
      * Report whether the parcel contains any marshalled file descriptors in the range defined by
      * {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @param offset The offset from which the range starts. Should be between 0 and
      *     {@link #dataSize()}.
@@ -909,6 +932,12 @@ public final class Parcel {
      *
      * <p>For most cases, it will use the self-reported {@link Parcelable#describeContents()} method
      * for that.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
      *
      * @throws IllegalArgumentException if you provide any object not supported by above methods
      *     (including if the unsupported object is inside a nested container).
@@ -972,6 +1001,47 @@ public final class Parcel {
             getValueType(value); // Will throw if value is not supported
         }
         return false;
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled IBinder objects.
+     *
+     * @throws UnsupportedOperationException if binder kernel driver was disabled or if method was
+     *                                       invoked in case of Binder RPC protocol.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
+     *
+     * @hide
+     */
+    public boolean hasBinders() {
+        return nativeHasBinders(mNativePtr);
+    }
+
+    /**
+     * Report whether the parcel contains any marshalled {@link IBinder} objects in the range
+     * defined by {@code offset} and {@code length}.
+     *
+     * WARNING: Parcelable definitions change over time. Unless you define
+     * a Parcelable yourself OR the Parcelable explicitly guarantees that
+     * it would never include such objects, you should not expect the return
+     * value to stay the same, and your code should continue to work even
+     * if the return value changes.
+     *
+     * @param offset The offset from which the range starts. Should be between 0 and
+     *               {@link #dataSize()}.
+     * @param length The length of the range. Should be between 0 and {@link #dataSize()} - {@code
+     *               offset}.
+     * @return whether there are binders in the range or not.
+     * @throws IllegalArgumentException if the parameters are out of the permitted ranges.
+     *
+     * @hide
+     */
+    public boolean hasBinders(int offset, int length) {
+        return nativeHasBindersInRange(mNativePtr, offset, length);
     }
 
     /**
@@ -1205,6 +1275,7 @@ public final class Parcel {
      * @hide
      */
     @UnsupportedAppUsage
+    @RavenwoodThrow(blockedBy = android.text.Spanned.class)
     public final void writeCharSequence(@Nullable CharSequence val) {
         TextUtils.writeToParcel(val, this, 0);
     }
@@ -2944,7 +3015,7 @@ public final class Parcel {
      * @see #writeNoException
      * @see #readException
      */
-    @RavenwoodReplace
+    @RavenwoodReplace(blockedBy = AppOpsManager.class)
     public final void writeException(@NonNull Exception e) {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -2983,10 +3054,15 @@ public final class Parcel {
         }
     }
 
-    /** @hide */
-    public final void writeException$ravenwood(@NonNull Exception e) {
-        // Ravenwood doesn't support IPC, no transaction headers needed
-        writeInt(getExceptionCode(e));
+    private void writeException$ravenwood(@NonNull Exception e) {
+        int code = getExceptionCode(e);
+        writeInt(code);
+        if (code == 0) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException(e);
+        }
         writeString(e.getMessage());
         writeInt(0);
     }
@@ -3044,7 +3120,7 @@ public final class Parcel {
      * @see #writeException
      * @see #readException
      */
-    @RavenwoodReplace
+    @RavenwoodReplace(blockedBy = AppOpsManager.class)
     public final void writeNoException() {
         AppOpsManager.prefixParcelWithAppOpsIfNeeded(this);
 
@@ -3075,9 +3151,7 @@ public final class Parcel {
         }
     }
 
-    /** @hide */
-    public final void writeNoException$ravenwood() {
-        // Ravenwood doesn't support IPC, no transaction headers needed
+    private void writeNoException$ravenwood() {
         writeInt(0);
     }
 

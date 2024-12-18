@@ -19,6 +19,7 @@ package com.android.server.power;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -86,7 +87,7 @@ final class WakeLockLog {
     private static final int TAG_DATABASE_SIZE = 128;
     private static final int TAG_DATABASE_SIZE_MAX = 128;
 
-    private static final int LEVEL_UNKNOWN = 0;
+    private static final int LEVEL_SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK = 0;
     private static final int LEVEL_PARTIAL_WAKE_LOCK = 1;
     private static final int LEVEL_FULL_WAKE_LOCK = 2;
     private static final int LEVEL_SCREEN_DIM_WAKE_LOCK = 3;
@@ -96,7 +97,7 @@ final class WakeLockLog {
     private static final int LEVEL_DRAW_WAKE_LOCK = 7;
 
     private static final String[] LEVEL_TO_STRING = {
-        "unknown",
+        "override",
         "partial",
         "full",
         "screen-dim",
@@ -121,6 +122,9 @@ final class WakeLockLog {
             {"*job*/", "*gms_scheduler*/", "IntentOp:"};
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+
+    @VisibleForTesting
+    static final String SYSTEM_PACKAGE_NAME = "System";
 
     /**
      * Lock protects WakeLockLog.dump (binder thread) from conflicting with changes to the log
@@ -154,9 +158,10 @@ final class WakeLockLog {
      * @param tag The wake lock tag
      * @param ownerUid The owner UID of the wake lock.
      * @param flags Flags used for the wake lock.
+     * @param eventTime The time at which the event occurred
      */
-    public void onWakeLockAcquired(String tag, int ownerUid, int flags) {
-        onWakeLockEvent(TYPE_ACQUIRE, tag, ownerUid, flags);
+    public void onWakeLockAcquired(String tag, int ownerUid, int flags, long eventTime) {
+        onWakeLockEvent(TYPE_ACQUIRE, tag, ownerUid, flags, eventTime);
     }
 
     /**
@@ -164,9 +169,10 @@ final class WakeLockLog {
      *
      * @param tag The wake lock tag
      * @param ownerUid The owner UID of the wake lock.
+     * @param eventTime The time at which the event occurred
      */
-    public void onWakeLockReleased(String tag, int ownerUid) {
-        onWakeLockEvent(TYPE_RELEASE, tag, ownerUid, 0 /* flags */);
+    public void onWakeLockReleased(String tag, int ownerUid, long eventTime) {
+        onWakeLockEvent(TYPE_RELEASE, tag, ownerUid, 0 /* flags */, eventTime);
     }
 
     /**
@@ -242,9 +248,10 @@ final class WakeLockLog {
      * @param tag The wake lock's identifying tag.
      * @param ownerUid The owner UID of the wake lock.
      * @param flags The flags used with the wake lock.
+     * @param eventTime The time at which the event occurred
      */
     private void onWakeLockEvent(int eventType, String tag, int ownerUid,
-            int flags) {
+            int flags, long eventTime) {
         if (tag == null) {
             Slog.w(TAG, "Insufficient data to log wakelock [tag: " + tag
                     + ", ownerUid: " + ownerUid
@@ -252,7 +259,8 @@ final class WakeLockLog {
             return;
         }
 
-        final long time = mInjector.currentTimeMillis();
+        final long time = (eventTime == -1) ? mInjector.currentTimeMillis() : eventTime;
+
         final int translatedFlags = eventType == TYPE_ACQUIRE
                 ? translateFlagsFromPowerManager(flags)
                 : 0;
@@ -310,6 +318,9 @@ final class WakeLockLog {
                 break;
             case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                 newFlags = LEVEL_PROXIMITY_SCREEN_OFF_WAKE_LOCK;
+                break;
+            case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
+                newFlags = LEVEL_SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK;
                 break;
             default:
                 Slog.w(TAG, "Unsupported lock level for logging, flags: " + flags);
@@ -509,21 +520,26 @@ final class WakeLockLog {
                 return;
             }
 
-            String[] packages;
-            if (uidToPackagesCache.contains(tag.ownerUid)) {
-                packages = uidToPackagesCache.get(tag.ownerUid);
-            } else {
-                packages = packageManager.getPackagesForUid(tag.ownerUid);
-                uidToPackagesCache.put(tag.ownerUid, packages);
+            if (tag.ownerUid == Process.SYSTEM_UID) {
+                packageName = SYSTEM_PACKAGE_NAME;
             }
+            else {
+                String[] packages;
+                if (uidToPackagesCache.contains(tag.ownerUid)) {
+                    packages = uidToPackagesCache.get(tag.ownerUid);
+                } else {
+                    packages = packageManager.getPackagesForUid(tag.ownerUid);
+                    uidToPackagesCache.put(tag.ownerUid, packages);
+                }
 
-            if (packages != null && packages.length > 0) {
-                packageName = packages[0];
-                if (packages.length > 1) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(packageName)
-                            .append(",...");
-                    packageName = sb.toString();
+                if (packages != null && packages.length > 0) {
+                    packageName = packages[0];
+                    if (packages.length > 1) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(packageName)
+                                .append(",...");
+                        packageName = sb.toString();
+                    }
                 }
             }
         }

@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.NotificationChannel;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.HardwareBuffer;
@@ -37,8 +38,9 @@ import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
+import com.android.wm.shell.shared.annotations.ExternalThread;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleBarUpdate;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -60,8 +62,8 @@ public interface Bubbles {
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
             DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
-            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK, DISMISS_USER_REMOVED,
-            DISMISS_SWITCH_TO_STACK})
+            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK, DISMISS_USER_ACCOUNT_REMOVED,
+            DISMISS_SWITCH_TO_STACK, DISMISS_USER_GESTURE_FROM_LAUNCHER})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {
     }
@@ -81,8 +83,9 @@ public interface Bubbles {
     int DISMISS_PACKAGE_REMOVED = 13;
     int DISMISS_NO_BUBBLE_UP = 14;
     int DISMISS_RELOAD_FROM_DISK = 15;
-    int DISMISS_USER_REMOVED = 16;
+    int DISMISS_USER_ACCOUNT_REMOVED = 16;
     int DISMISS_SWITCH_TO_STACK = 17;
+    int DISMISS_USER_GESTURE_FROM_LAUNCHER = 18;
 
     /** Returns a binder that can be passed to an external process to manipulate Bubbles. */
     default IBubbles createExternalInterface() {
@@ -113,6 +116,14 @@ public interface Bubbles {
      * @param entry the notification for the bubble to be selected
      */
     void expandStackAndSelectBubble(BubbleEntry entry);
+
+    /**
+     * Request the stack expand if needed, then select the specified Bubble as current.
+     * If no bubble exists for this entry, one is created.
+     *
+     * @param info the shortcut info to use to create the bubble.
+     */
+    void expandStackAndSelectBubble(ShortcutInfo info);
 
     /**
      * Request the stack expand if needed, then select the specified Bubble as current.
@@ -296,6 +307,15 @@ public interface Bubbles {
             boolean sensitiveNotificationProtectionActive);
 
     /**
+     * Determines whether Bubbles can show notifications.
+     *
+     * <p>Normally bubble notifications are shown by Bubbles, but in some cases the bubble
+     * notification is suppressed and should be shown by the Notifications pipeline as regular
+     * notifications.
+     */
+    boolean canShowBubbleNotification();
+
+    /**
      * A listener to be notified of bubble state changes, used by launcher to render bubbles in
      * its process.
      */
@@ -304,6 +324,12 @@ public interface Bubbles {
          * Called when the bubbles state changes.
          */
         void onBubbleStateChange(BubbleBarUpdate update);
+
+        /**
+         * Called when bubble bar should temporarily be animated to a new location.
+         * Does not result in a state change.
+         */
+        void animateBubbleBarLocation(BubbleBarLocation location);
     }
 
     /** Listener to find out about stack expansion / collapse events. */

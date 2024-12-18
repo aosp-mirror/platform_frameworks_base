@@ -18,19 +18,22 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.app.IApplicationThread;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
-import android.os.Binder;
+import android.app.servertransaction.LaunchActivityItem;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 /**
  * Class that is able to combine multiple client lifecycle transition requests and/or callbacks,
@@ -41,6 +44,15 @@ import com.android.window.flags.Flags;
 class ClientLifecycleManager {
 
     private static final String TAG = "ClientLifecycleManager";
+
+    /**
+     * To prevent any existing apps from having app compat issue with the non-sdk usages of
+     * {@link ClientTransaction#getActivityToken()}, only allow bundling {@link LaunchActivityItem}
+     * for apps with targetSDK of V and above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long ENABLE_BUNDLE_LAUNCH_ACTIVITY_ITEM = 324203798L;
 
     /** Mapping from client process binder to its pending transaction. */
     @VisibleForTesting
@@ -58,9 +70,8 @@ class ClientLifecycleManager {
      * @throws RemoteException
      *
      * @see ClientTransaction
-     * @deprecated use {@link #scheduleTransactionItem(IApplicationThread, ClientTransactionItem)}.
      */
-    @Deprecated
+    @VisibleForTesting
     void scheduleTransaction(@NonNull ClientTransaction transaction) throws RemoteException {
         final IApplicationThread client = transaction.getClient();
         try {
@@ -69,13 +80,6 @@ class ClientLifecycleManager {
             Slog.w(TAG, "Failed to deliver transaction for " + client
                             + "\ntransaction=" + transaction);
             throw e;
-        } finally {
-            if (!(client instanceof Binder)) {
-                // If client is not an instance of Binder - it's a remote call and at this point it
-                // is safe to recycle the object. All objects used for local calls will be recycled
-                // after the transaction is executed on client in ActivityThread.
-                transaction.recycle();
-            }
         }
     }
 
@@ -87,7 +91,7 @@ class ClientLifecycleManager {
      */
     void scheduleTransactionItemNow(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
+        final ClientTransaction clientTransaction = new ClientTransaction(client);
         clientTransaction.addTransactionItem(transactionItem);
         scheduleTransaction(clientTransaction);
     }
@@ -100,22 +104,13 @@ class ClientLifecycleManager {
      */
     void scheduleTransactionItem(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
-        // The behavior is different depending on the flag.
-        // When flag is on, we wait until RootWindowContainer#performSurfacePlacementNoTrace to
-        // dispatch all pending transactions at once.
-        if (Flags.bundleClientTransactionFlag()) {
-            final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
-            clientTransaction.addTransactionItem(transactionItem);
+        // Wait until RootWindowContainer#performSurfacePlacementNoTrace to dispatch all pending
+        // transactions at once.
+        final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
+        clientTransaction.addTransactionItem(transactionItem);
 
-            onClientTransactionItemScheduled(clientTransaction,
-                    false /* shouldDispatchImmediately */);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            clientTransaction.addTransactionItem(transactionItem);
-
-            scheduleTransaction(clientTransaction);
-        }
+        onClientTransactionItemScheduled(clientTransaction,
+                false /* shouldDispatchImmediately */);
     }
 
     void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
@@ -142,27 +137,18 @@ class ClientLifecycleManager {
             @NonNull ClientTransactionItem transactionItem,
             @NonNull ActivityLifecycleItem lifecycleItem,
             boolean shouldDispatchImmediately) throws RemoteException {
-        // The behavior is different depending on the flag.
-        // When flag is on, we wait until RootWindowContainer#performSurfacePlacementNoTrace to
-        // dispatch all pending transactions at once.
-        if (Flags.bundleClientTransactionFlag()) {
-            final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
-            clientTransaction.addTransactionItem(transactionItem);
-            clientTransaction.addTransactionItem(lifecycleItem);
+        // Wait until RootWindowContainer#performSurfacePlacementNoTrace to dispatch all pending
+        // transactions at once.
+        final ClientTransaction clientTransaction = getOrCreatePendingTransaction(client);
+        clientTransaction.addTransactionItem(transactionItem);
+        clientTransaction.addTransactionItem(lifecycleItem);
 
-            onClientTransactionItemScheduled(clientTransaction, shouldDispatchImmediately);
-        } else {
-            // TODO(b/260873529): cleanup after launch.
-            final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-            clientTransaction.addTransactionItem(transactionItem);
-            clientTransaction.addTransactionItem(lifecycleItem);
-            scheduleTransaction(clientTransaction);
-        }
+        onClientTransactionItemScheduled(clientTransaction, shouldDispatchImmediately);
     }
 
     /** Executes all the pending transactions. */
     void dispatchPendingTransactions() {
-        if (!Flags.bundleClientTransactionFlag() || mPendingTransactions.isEmpty()) {
+        if (mPendingTransactions.isEmpty()) {
             return;
         }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "clientTransactionsDispatched");
@@ -182,9 +168,6 @@ class ClientLifecycleManager {
 
     /** Executes the pending transaction for the given client process. */
     void dispatchPendingTransaction(@NonNull IApplicationThread client) {
-        if (!Flags.bundleClientTransactionFlag()) {
-            return;
-        }
         final ClientTransaction pendingTransaction = mPendingTransactions.remove(client.asBinder());
         if (pendingTransaction != null) {
             try {
@@ -219,7 +202,7 @@ class ClientLifecycleManager {
         }
 
         // Create new transaction if there is no existing.
-        final ClientTransaction transaction = ClientTransaction.obtain(client);
+        final ClientTransaction transaction = new ClientTransaction(client);
         mPendingTransactions.put(clientBinder, transaction);
         return transaction;
     }
@@ -251,16 +234,11 @@ class ClientLifecycleManager {
                 && !mWms.mWindowPlacerLocked.isInLayout();
     }
 
-    /**
-     * Guards the bundleClientTransactionFlag feature with targetSDK on Android 15+.
-     *
-     * Suppressing because it can't guard with @EnabledSince on VANILLA_ICE_CREAM yet since the
-     * version is not published.
-     *
-     * TODO(b/324203798): update in V
-     */
-    @SuppressWarnings("AndroidFrameworkCompatChange")
-    static boolean shouldDispatchCompatClientTransactionIndependently(int appTargetSdk) {
-        return appTargetSdk <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+    /** Guards bundling {@link LaunchActivityItem} with targetSDK. */
+    static boolean shouldDispatchLaunchActivityItemIndependently(
+            @NonNull String appPackageName, int appUid) {
+        return !CompatChanges.isChangeEnabled(ENABLE_BUNDLE_LAUNCH_ACTIVITY_ITEM,
+                appPackageName,
+                UserHandle.getUserHandleForUid(appUid));
     }
 }

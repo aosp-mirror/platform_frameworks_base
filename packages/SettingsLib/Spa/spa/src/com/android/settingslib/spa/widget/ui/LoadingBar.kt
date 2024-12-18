@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.widget.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,23 +24,15 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 /**
  * Indeterminate linear progress bar. Expresses an unspecified wait time.
  */
 @Composable
-fun LinearLoadingBar(
-    isLoading: Boolean,
-    xOffset: Dp = 0.dp,
-    yOffset: Dp = 0.dp
-) {
+fun LinearLoadingBar(isLoading: Boolean) {
     if (isLoading) {
         LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .absoluteOffset(xOffset, yOffset)
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

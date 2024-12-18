@@ -16,32 +16,43 @@
 
 package com.android.systemui.screenshot.dagger;
 
-import android.app.Service;
+import static com.android.systemui.Flags.screenshotUiControllerRefactor;
 
+import android.app.Service;
+import android.view.accessibility.AccessibilityManager;
+
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
-import com.android.systemui.screenshot.RequestProcessor;
+import com.android.systemui.screenshot.InteractiveScreenshotHandler;
+import com.android.systemui.screenshot.LegacyScreenshotController;
+import com.android.systemui.screenshot.ScreenshotController;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
-import com.android.systemui.screenshot.ScreenshotProxyService;
-import com.android.systemui.screenshot.ScreenshotRequestProcessor;
 import com.android.systemui.screenshot.ScreenshotSoundController;
 import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
 import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
+import com.android.systemui.screenshot.TakeScreenshotExecutor;
+import com.android.systemui.screenshot.TakeScreenshotExecutorImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
 import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
 import com.android.systemui.screenshot.appclips.AppClipsService;
+import com.android.systemui.screenshot.message.MessageModule;
+import com.android.systemui.screenshot.policy.ScreenshotPolicyModule;
+import com.android.systemui.screenshot.proxy.SystemUiProxyModule;
+import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /**
  * Defines injectable resources for Screenshots
  */
-@Module
+@Module(includes = {ScreenshotPolicyModule.class, SystemUiProxyModule.class, MessageModule.class})
 public abstract class ScreenshotModule {
 
     @Binds
@@ -50,9 +61,9 @@ public abstract class ScreenshotModule {
     abstract Service bindTakeScreenshotService(TakeScreenshotService service);
 
     @Binds
-    @IntoMap
-    @ClassKey(ScreenshotProxyService.class)
-    abstract Service bindScreenshotProxyService(ScreenshotProxyService service);
+    @SysUISingleton
+    abstract TakeScreenshotExecutor bindTakeScreenshotExecutor(
+            TakeScreenshotExecutorImpl impl);
 
     @Binds
     abstract ScreenshotPolicy bindScreenshotPolicyImpl(ScreenshotPolicyImpl impl);
@@ -71,14 +82,28 @@ public abstract class ScreenshotModule {
     abstract Service bindAppClipsService(AppClipsService service);
 
     @Binds
-    abstract ScreenshotRequestProcessor bindScreenshotRequestProcessor(
-            RequestProcessor requestProcessor);
-
-    @Binds
     abstract ScreenshotSoundProvider bindScreenshotSoundProvider(
             ScreenshotSoundProviderImpl screenshotSoundProviderImpl);
 
     @Binds
     abstract ScreenshotSoundController bindScreenshotSoundController(
             ScreenshotSoundControllerImpl screenshotSoundProviderImpl);
+
+    @Provides
+    @SysUISingleton
+    static ScreenshotViewModel providesScreenshotViewModel(
+            AccessibilityManager accessibilityManager) {
+        return new ScreenshotViewModel(accessibilityManager);
+    }
+
+    @Provides
+    static InteractiveScreenshotHandler.Factory providesScreenshotController(
+            LegacyScreenshotController.Factory legacyScreenshotController,
+            ScreenshotController.Factory screenshotController) {
+        if (screenshotUiControllerRefactor()) {
+            return screenshotController;
+        } else {
+            return legacyScreenshotController;
+        }
+    }
 }

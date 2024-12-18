@@ -96,7 +96,7 @@ public class NotificationHelper {
                     if (messages2 == null) {
                         return -1;
                     }
-                    return (int) (n2.when - n1.when);
+                    return (int) (n2.getWhen() - n1.getWhen());
                 }
             };
 

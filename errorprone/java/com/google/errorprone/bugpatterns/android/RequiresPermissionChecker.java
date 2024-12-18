@@ -130,10 +130,6 @@ public final class RequiresPermissionChecker extends BugChecker
                             .onDescendantOf("android.content.Context")
                             .withNameMatching(
                                     Pattern.compile("^send(Ordered|Sticky)?Broadcast.*AsUser.*$")));
-    private static final Matcher<ExpressionTree> SEND_PENDING_INTENT = methodInvocation(
-            instanceMethod()
-                    .onDescendantOf("android.app.PendingIntent")
-                    .named("send"));
 
     private static final Matcher<ExpressionTree> INTENT_SET_ACTION = methodInvocation(
             instanceMethod().onDescendantOf("android.content.Intent").named("setAction"));

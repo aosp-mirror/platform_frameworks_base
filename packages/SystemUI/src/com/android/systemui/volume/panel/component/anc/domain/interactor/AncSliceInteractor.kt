@@ -19,17 +19,23 @@ package com.android.systemui.volume.panel.component.anc.domain.interactor
 import android.app.slice.Slice.HINT_ERROR
 import android.app.slice.SliceItem.FORMAT_SLICE
 import androidx.slice.Slice
+import com.android.systemui.volume.domain.interactor.AudioOutputInteractor
+import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.anc.data.repository.AncSliceRepository
+import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 
 /** Provides a valid slice from [AncSliceRepository]. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,29 +43,51 @@ import kotlinx.coroutines.flow.shareIn
 class AncSliceInteractor
 @Inject
 constructor(
+    private val audioOutputInteractor: AudioOutputInteractor,
     private val ancSliceRepository: AncSliceRepository,
     scope: CoroutineScope,
 ) {
 
-    // Start with a positive width to check is the Slice is available.
-    private val width = MutableStateFlow(1)
+    // Any positive width to check if the Slice is available.
+    private val buttonSliceWidth = MutableStateFlow(1)
+    private val popupSliceWidth = MutableStateFlow(1)
 
-    /** Provides a valid ANC slice. */
-    val ancSlice: SharedFlow<Slice?> =
-        width
-            .flatMapLatest { width -> ancSliceRepository.ancSlice(width) }
-            .map { slice ->
-                if (slice?.isValidSlice() == true) {
-                    slice
+    val ancSlices: StateFlow<AncSlices> =
+        combine(
+                buttonSliceWidth.flatMapLatest {
+                    ancSlice(width = it, isCollapsed = true, hideLabel = true)
+                },
+                popupSliceWidth.flatMapLatest {
+                    ancSlice(width = it, isCollapsed = false, hideLabel = false)
+                }
+            ) { buttonSlice, popupSlice ->
+                if (buttonSlice != null && popupSlice != null) {
+                    AncSlices.Ready(buttonSlice = buttonSlice, popupSlice = popupSlice)
                 } else {
-                    null
+                    AncSlices.Unavailable
                 }
             }
-            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(scope, SharingStarted.Eagerly, AncSlices.Unavailable)
 
-    /** Updates the width of the [ancSlice] */
-    fun changeWidth(newWidth: Int) {
-        width.value = newWidth
+    /**
+     * Provides a valid [isCollapsed] ANC slice for a given [width]. Use [hideLabel] == true to
+     * remove the labels from the [Slice].
+     */
+    private fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?> {
+        return audioOutputInteractor.currentAudioDevice.flatMapLatest { outputDevice ->
+            if (outputDevice is AudioOutputDevice.Bluetooth) {
+                ancSliceRepository
+                    .ancSlice(
+                        device = outputDevice.cachedBluetoothDevice.device,
+                        width = width,
+                        isCollapsed = isCollapsed,
+                        hideLabel = hideLabel,
+                    )
+                    .filter { it?.isValidSlice() != false }
+            } else {
+                flowOf(null)
+            }
+        }
     }
 
     private fun Slice.isValidSlice(): Boolean {
@@ -72,5 +100,21 @@ constructor(
             }
         }
         return false
+    }
+
+    /**
+     * Call this to update [AncSlices.Ready.popupSlice] width in a reaction to container size
+     * change.
+     */
+    fun onPopupSliceWidthChanged(width: Int) {
+        popupSliceWidth.tryEmit(width)
+    }
+
+    /**
+     * Call this to update [AncSlices.Ready.buttonSlice] width in a reaction to container size
+     * change.
+     */
+    fun onButtonSliceWidthChanged(width: Int) {
+        buttonSliceWidth.tryEmit(width)
     }
 }

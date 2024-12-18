@@ -16,14 +16,20 @@
 
 package androidx.window.extensions;
 
-import android.annotation.NonNull;
+import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.window.extensions.area.WindowAreaComponent;
+import androidx.window.extensions.embedding.ActivityEmbeddingComponent;
+import androidx.window.extensions.layout.WindowLayoutComponent;
 
 /**
  * Provides the OEM implementation of {@link WindowExtensions}.
  */
 public class WindowExtensionsProvider {
 
-    private static final WindowExtensions sWindowExtensions = new WindowExtensionsImpl();
+    private static volatile WindowExtensions sWindowExtensions;
 
     /**
      * Returns the OEM implementation of {@link WindowExtensions}. This method is implemented in
@@ -33,6 +39,44 @@ public class WindowExtensionsProvider {
      */
     @NonNull
     public static WindowExtensions getWindowExtensions() {
+        if (sWindowExtensions == null) {
+            synchronized (WindowExtensionsProvider.class) {
+                if (sWindowExtensions == null) {
+                    sWindowExtensions = WindowManager.hasWindowExtensionsEnabled()
+                            ? new WindowExtensionsImpl()
+                            : new DisabledWindowExtensions();
+                }
+            }
+        }
         return sWindowExtensions;
+    }
+
+    /**
+     * The stub version to return when the WindowManager Extensions is disabled
+     * @see WindowManager#hasWindowExtensionsEnabled
+     */
+    private static class DisabledWindowExtensions implements WindowExtensions {
+        @Override
+        public int getVendorApiLevel() {
+            return 0;
+        }
+
+        @Nullable
+        @Override
+        public WindowLayoutComponent getWindowLayoutComponent() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public ActivityEmbeddingComponent getActivityEmbeddingComponent() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public WindowAreaComponent getWindowAreaComponent() {
+            return null;
+        }
     }
 }

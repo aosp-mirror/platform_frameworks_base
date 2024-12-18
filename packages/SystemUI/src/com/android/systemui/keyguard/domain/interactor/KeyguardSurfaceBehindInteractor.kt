@@ -19,16 +19,20 @@ package com.android.systemui.keyguard.domain.interactor
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardSurfaceBehindRepository
-import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor.Companion.isSurfaceVisible
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
+import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.toPx
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Distance over which the surface behind the keyguard is animated in during a Y-translation
@@ -53,12 +57,18 @@ constructor(
      */
     val viewParams: Flow<KeyguardSurfaceBehindModel> =
         combine(
-                transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.currentKeyguardState,
+                transitionInteractor.isInTransition(
+                    edge = Edge.create(to = Scenes.Gone),
+                    edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
+                ),
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
+                ),
                 notificationLaunchInteractor.isLaunchAnimationRunning,
-            ) { startedStep, currentState, notifAnimationRunning ->
+            ) { transitioningToGone, isOnGone, notifAnimationRunning ->
                 // If we're in transition to GONE, special unlock animation params apply.
-                if (startedStep.to == KeyguardState.GONE && currentState != KeyguardState.GONE) {
+                if (transitioningToGone) {
                     if (notifAnimationRunning) {
                         // If the notification launch animation is running, leave the alpha at 0f.
                         // The ActivityLaunchAnimator will morph it from the notification at the
@@ -84,18 +94,43 @@ constructor(
                             animateFromTranslationY =
                                 SURFACE_TRANSLATION_Y_DISTANCE_DP.toPx(context).toFloat(),
                             translationY = 0f,
-                            startVelocity = swipeToDismissInteractor.dismissFling.value?.velocity
-                                    ?: 0f,
+                            startVelocity =
+                                swipeToDismissInteractor.dismissFling.value?.velocity ?: 0f,
                         )
                     }
                 }
 
                 // Default to the visibility of the current state, with no animations.
-                KeyguardSurfaceBehindModel(alpha = if (isSurfaceVisible(currentState)) 1f else 0f)
+                KeyguardSurfaceBehindModel(alpha = if (isOnGone) 1f else 0f)
             }
             .distinctUntilChanged()
 
-    val isAnimatingSurface = repository.isAnimatingSurface
+    /**
+     * Whether a notification launch animation is running when we're not already in the GONE state.
+     */
+    private val isNotificationLaunchAnimationRunningOnKeyguard =
+        notificationLaunchInteractor.isLaunchAnimationRunning
+            .sample(
+                transitionInteractor.isFinishedIn(
+                    scene = Scenes.Gone,
+                    stateWithoutSceneContainer = KeyguardState.GONE,
+                ),
+                ::Pair
+            )
+            .map { (animationRunning, isOnGone) -> animationRunning && !isOnGone }
+            .onStart { emit(false) }
+
+    /**
+     * Whether we're animating the surface, or a notification launch animation is running (which
+     * means we're going to animate the surface, even if animators aren't yet running).
+     */
+    val isAnimatingSurface =
+        combine(
+            repository.isAnimatingSurface,
+            isNotificationLaunchAnimationRunningOnKeyguard,
+        ) { animatingSurface, animatingLaunch ->
+            animatingSurface || animatingLaunch
+        }
 
     fun setAnimatingSurface(animating: Boolean) {
         repository.setAnimatingSurface(animating)

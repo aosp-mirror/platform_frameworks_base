@@ -19,7 +19,7 @@ package com.android.wm.shell.common;
 import android.content.Context;
 
 /**
- * An interface for controllers that can receive remote calls.
+ * An interface for controllers (of type T) that can receive remote calls.
  */
 public interface RemoteCallable<T> {
     /**

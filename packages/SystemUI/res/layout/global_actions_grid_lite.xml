@@ -19,6 +19,7 @@
     android:id="@+id/global_actions_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
     android:gravity="center"
     android:layout_gravity="center">
   <com.android.systemui.globalactions.GlobalActionsLayoutLite

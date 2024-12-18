@@ -56,6 +56,8 @@ import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DecorView;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Consumer;
@@ -568,6 +570,12 @@ public final class SplashScreenView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         releaseAnimationSurfaceHost();
+        if (mIconView instanceof ImageView imageView
+                && imageView.getDrawable() instanceof Closeable closeableDrawable) {
+            try {
+                closeableDrawable.close();
+            } catch (IOException ignore) { }
+        }
     }
 
     @Override

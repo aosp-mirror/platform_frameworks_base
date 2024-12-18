@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.shade.PanelState
 import com.android.systemui.shade.ShadeExpansionChangeEvent
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.phone.ScrimController
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -29,22 +30,26 @@ import javax.inject.Inject
 class ScrimShadeTransitionController
 @Inject
 constructor(
-    dumpManager: DumpManager,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
+    private val dumpManager: DumpManager,
     private val scrimController: ScrimController,
 ) {
-
     private var lastExpansionFraction: Float? = null
     private var lastExpansionEvent: ShadeExpansionChangeEvent? = null
     private var currentPanelState: Int? = null
 
-    init {
+    fun init() {
+        val currentState =
+            shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
+        onPanelExpansionChanged(currentState)
+        shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
         dumpManager.registerDumpable(
             ScrimShadeTransitionController::class.java.simpleName,
             this::dump
         )
     }
 
-    fun onPanelStateChanged(@PanelState state: Int) {
+    private fun onPanelStateChanged(@PanelState state: Int) {
         currentPanelState = state
         onStateChanged()
     }

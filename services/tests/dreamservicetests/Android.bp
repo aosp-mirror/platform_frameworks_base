@@ -18,7 +18,9 @@ android_test {
         "mockito-target-minus-junit4",
         "services.core",
         "mockingservicestests-utils-mockito",
+        "platform-test-annotations",
         "servicestests-utils",
+        "testables",
     ],
 
     defaults: [
@@ -39,4 +41,14 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+test_module_config {
+    name: "DreamServiceTests_server_dreams",
+    base: "DreamServiceTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.dreams"],
 }

@@ -21,57 +21,58 @@ import android.net.Uri
 import androidx.slice.Slice
 import androidx.slice.SliceViewManager
 import com.android.settingslib.bluetooth.BluetoothUtils
-import com.android.settingslib.media.BluetoothMediaDevice
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.slice.sliceForUri
-import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 
 /** Provides ANC slice data */
 interface AncSliceRepository {
 
     /**
-     * ANC slice with a given width. Emits null when there is no ANC slice available. This can mean
-     * that:
+     * ANC slice with a given width. [isCollapsed] slice shows a single button, and expanded shows a
+     * row buttons.
+     *
+     * Emits null when there is no ANC slice available. This can mean that:
      * - there is no supported device connected;
      * - there is no slice provider for the uri;
      */
-    fun ancSlice(width: Int): Flow<Slice?>
+    fun ancSlice(
+        device: BluetoothDevice,
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Flow<Slice?>
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class AncSliceRepositoryImpl
 @AssistedInject
 constructor(
-    mediaRepositoryFactory: LocalMediaRepositoryFactory,
-    @Background private val backgroundCoroutineContext: CoroutineContext,
+    @Main private val mainCoroutineContext: CoroutineContext,
     @Assisted private val sliceViewManager: SliceViewManager,
 ) : AncSliceRepository {
 
-    private val localMediaRepository = mediaRepositoryFactory.create(null)
-
-    override fun ancSlice(width: Int): Flow<Slice?> {
-        return localMediaRepository.currentConnectedDevice
-            .map { (it as? BluetoothMediaDevice)?.cachedDevice?.device?.getExtraControlUri(width) }
-            .distinctUntilChanged()
-            .flatMapLatest { sliceUri ->
-                sliceUri ?: return@flatMapLatest flowOf(null)
-                sliceViewManager.sliceForUri(sliceUri)
-            }
-            .flowOn(backgroundCoroutineContext)
+    override fun ancSlice(
+        device: BluetoothDevice,
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Flow<Slice?> {
+        val sliceUri =
+            device.getExtraControlUri(width, isCollapsed, hideLabel) ?: return flowOf(null)
+        return sliceViewManager.sliceForUri(sliceUri).flowOn(mainCoroutineContext)
     }
 
-    private fun BluetoothDevice.getExtraControlUri(width: Int): Uri? {
+    private fun BluetoothDevice.getExtraControlUri(
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Uri? {
         val uri: String? = BluetoothUtils.getControlUriMetaData(this)
         uri ?: return null
 
@@ -81,7 +82,8 @@ constructor(
             Uri.parse(
                 "$uri$width" +
                     "&version=${SliceParameters.VERSION}" +
-                    "&is_collapsed=${SliceParameters.IS_COLLAPSED}"
+                    "&is_collapsed=$isCollapsed" +
+                    "&hide_label=$hideLabel"
             )
         }
     }
@@ -98,11 +100,5 @@ constructor(
          * 2) new slice
          */
         const val VERSION = 2
-
-        /**
-         * Collapsed slice shows a single button, and expanded shows a row buttons. Supported since
-         * [VERSION]==2.
-         */
-        const val IS_COLLAPSED = false
     }
 }

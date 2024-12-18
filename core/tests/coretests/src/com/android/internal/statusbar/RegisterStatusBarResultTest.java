@@ -21,7 +21,6 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -48,7 +47,8 @@ public class RegisterStatusBarResultTest {
         final String dumyIconKey = "dummyIcon1";
         final ArrayMap<String, StatusBarIcon> iconMap = new ArrayMap<>();
         iconMap.put(dumyIconKey, new StatusBarIcon("com.android.internal.statusbar.test",
-                UserHandle.of(100), 123, 1, 2, "dummyIconDescription"));
+                UserHandle.of(100), 123, 1, 2, "dummyIconDescription",
+                StatusBarIcon.Type.SystemIcon));
         final LetterboxDetails letterboxDetails = new LetterboxDetails(
                 /* letterboxInnerBounds= */ new Rect(1, 2, 3, 4),
                 /* letterboxFullBounds= */ new Rect(5, 6, 7, 8),
@@ -62,7 +62,6 @@ public class RegisterStatusBarResultTest {
                 0x10 /* imeBackDisposition */,
                 false /* showImeSwitcher */,
                 0x20 /* disabledFlags2 */,
-                new Binder() /* imeToken */,
                 true /* navbarColorManagedByIme */,
                 BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
                 WindowInsets.Type.defaultVisible(),
@@ -84,7 +83,6 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeBackDisposition).isEqualTo(original.mImeBackDisposition);
         assertThat(copy.mShowImeSwitcher).isEqualTo(original.mShowImeSwitcher);
         assertThat(copy.mDisabledFlags2).isEqualTo(original.mDisabledFlags2);
-        assertThat(copy.mImeToken).isSameInstanceAs(original.mImeToken);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
         assertThat(copy.mBehavior).isEqualTo(original.mBehavior);
         assertThat(copy.mRequestedVisibleTypes).isEqualTo(original.mRequestedVisibleTypes);

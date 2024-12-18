@@ -3567,8 +3567,8 @@ public abstract class AccessibilityService extends Service {
      * @see #OVERLAY_RESULT_INVALID
      * @see #OVERLAY_RESULT_INTERNAL_ERROR
      */
-    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
-    public void attachAccessibilityOverlayToDisplay(
+    @FlaggedApi(android.view.accessibility.Flags.FLAG_A11Y_OVERLAY_CALLBACKS)
+    public final void attachAccessibilityOverlayToDisplay(
             int displayId,
             @NonNull SurfaceControl sc,
             @NonNull @CallbackExecutor Executor executor,
@@ -3640,8 +3640,8 @@ public abstract class AccessibilityService extends Service {
      * @see #OVERLAY_RESULT_INVALID
      * @see #OVERLAY_RESULT_INTERNAL_ERROR
      */
-    @FlaggedApi("android.view.accessibility.a11y_overlay_callbacks")
-    public void attachAccessibilityOverlayToWindow(
+    @FlaggedApi(android.view.accessibility.Flags.FLAG_A11Y_OVERLAY_CALLBACKS)
+    public final void attachAccessibilityOverlayToWindow(
             int accessibilityWindowId,
             @NonNull SurfaceControl sc,
             @NonNull @CallbackExecutor Executor executor,
@@ -3658,7 +3658,7 @@ public abstract class AccessibilityService extends Service {
      */
     @FlaggedApi(android.view.accessibility.Flags.FLAG_BRAILLE_DISPLAY_HID)
     @NonNull
-    public BrailleDisplayController getBrailleDisplayController() {
+    public final BrailleDisplayController getBrailleDisplayController() {
         BrailleDisplayController.checkApiFlagIsEnabled();
         synchronized (mLock) {
             if (mBrailleDisplayController == null) {

@@ -16,6 +16,7 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.Flags.removeNextWallpaperComponent;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
@@ -170,48 +171,9 @@ public class WallpaperDataParser {
             stream = new FileInputStream(file);
             TypedXmlPullParser parser = Xml.resolvePullParser(stream);
 
-            int type;
-            do {
-                type = parser.next();
-                if (type == XmlPullParser.START_TAG) {
-                    String tag = parser.getName();
-                    if (("wp".equals(tag) && loadSystem) || ("kwp".equals(tag) && loadLock)) {
-                        if ("kwp".equals(tag)) {
-                            lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
-                        }
-                        WallpaperData wallpaperToParse =
-                                "wp".equals(tag) ? wallpaper : lockWallpaper;
+            lockWallpaper = loadSettingsFromSerializer(parser, wallpaper, userId, loadSystem,
+                    loadLock, keepDimensionHints, wpdData);
 
-                        if (!multiCrop()) {
-                            parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
-                        }
-
-                        String comp = parser.getAttributeValue(null, "component");
-                        wallpaperToParse.nextWallpaperComponent = comp != null
-                                ? ComponentName.unflattenFromString(comp)
-                                : null;
-                        if (wallpaperToParse.nextWallpaperComponent == null
-                                || "android".equals(wallpaperToParse.nextWallpaperComponent
-                                .getPackageName())) {
-                            wallpaperToParse.nextWallpaperComponent = mImageWallpaper;
-                        }
-
-                        if (multiCrop()) {
-                            parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
-                        }
-
-                        if (DEBUG) {
-                            Slog.v(TAG, "mWidth:" + wpdData.mWidth);
-                            Slog.v(TAG, "mHeight:" + wpdData.mHeight);
-                            Slog.v(TAG, "cropRect:" + wallpaper.cropHint);
-                            Slog.v(TAG, "primaryColors:" + wallpaper.primaryColors);
-                            Slog.v(TAG, "mName:" + wallpaper.name);
-                            Slog.v(TAG, "mNextWallpaperComponent:"
-                                    + wallpaper.nextWallpaperComponent);
-                        }
-                    }
-                }
-            } while (type != XmlPullParser.END_DOCUMENT);
             success = true;
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "no current wallpaper -- first boot?");
@@ -257,6 +219,75 @@ public class WallpaperDataParser {
         }
 
         return new WallpaperLoadingResult(wallpaper, lockWallpaper, success);
+    }
+
+    // This method updates `wallpaper` in place, but returns `lockWallpaper`. This is because
+    // `wallpaper` already exists if it's being read per `loadSystem`, but `lockWallpaper` is
+    // created conditionally if there is lock screen wallpaper data to read.
+    @VisibleForTesting
+    WallpaperData loadSettingsFromSerializer(TypedXmlPullParser parser, WallpaperData wallpaper,
+            int userId, boolean loadSystem, boolean loadLock, boolean keepDimensionHints,
+            DisplayData wpdData) throws IOException, XmlPullParserException {
+        WallpaperData lockWallpaper = null;
+        int type;
+        do {
+            type = parser.next();
+            if (type == XmlPullParser.START_TAG) {
+                String tag = parser.getName();
+                if (("wp".equals(tag) && loadSystem) || ("kwp".equals(tag) && loadLock)) {
+                    if ("kwp".equals(tag)) {
+                        lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
+                    }
+                    WallpaperData wallpaperToParse =
+                            "wp".equals(tag) ? wallpaper : lockWallpaper;
+
+                    if (!multiCrop()) {
+                        parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
+                    }
+
+                    String comp = parser.getAttributeValue(null, "component");
+                    if (removeNextWallpaperComponent()) {
+                        wallpaperToParse.setComponent(comp != null
+                                ? ComponentName.unflattenFromString(comp)
+                                : null);
+                        if (wallpaperToParse.getComponent() == null
+                                || "android".equals(wallpaperToParse.getComponent()
+                                .getPackageName())) {
+                            wallpaperToParse.setComponent(mImageWallpaper);
+                        }
+                    } else {
+                        wallpaperToParse.nextWallpaperComponent = comp != null
+                                ? ComponentName.unflattenFromString(comp)
+                                : null;
+                        if (wallpaperToParse.nextWallpaperComponent == null
+                                || "android".equals(wallpaperToParse.nextWallpaperComponent
+                                .getPackageName())) {
+                            wallpaperToParse.nextWallpaperComponent = mImageWallpaper;
+                        }
+                    }
+
+                    if (multiCrop()) {
+                        parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
+                    }
+
+                    if (DEBUG) {
+                        Slog.v(TAG, "mWidth:" + wpdData.mWidth);
+                        Slog.v(TAG, "mHeight:" + wpdData.mHeight);
+                        Slog.v(TAG, "cropRect:" + wallpaper.cropHint);
+                        Slog.v(TAG, "primaryColors:" + wallpaper.primaryColors);
+                        Slog.v(TAG, "mName:" + wallpaper.name);
+                        if (removeNextWallpaperComponent()) {
+                            Slog.v(TAG, "mWallpaperComponent:" + wallpaper.getComponent());
+                        } else {
+                            Slog.v(TAG, "mNextWallpaperComponent:"
+                                    + wallpaper.nextWallpaperComponent);
+                        }
+                    }
+                }
+            }
+        } while (type != XmlPullParser.END_DOCUMENT);
+
+        return lockWallpaper;
     }
 
     private void ensureSaneWallpaperData(WallpaperData wallpaper) {
@@ -324,10 +355,9 @@ public class WallpaperDataParser {
                 getAttributeInt(parser, "totalCropTop", 0),
                 getAttributeInt(parser, "totalCropRight", 0),
                 getAttributeInt(parser, "totalCropBottom", 0));
-        wallpaper.mSupportsMultiCrop = multiCrop() && (
-                parser.getAttributeBoolean(null, "supportsMultiCrop", false)
-                || mImageWallpaper.equals(wallpaper.wallpaperComponent));
-        if (wallpaper.mSupportsMultiCrop) {
+        ComponentName componentName = removeNextWallpaperComponent() ? wallpaper.getComponent()
+                : wallpaper.nextWallpaperComponent;
+        if (multiCrop() && mImageWallpaper.equals(componentName)) {
             wallpaper.mCropHints = new SparseArray<>();
             for (Pair<Integer, String> pair: screenDimensionPairs()) {
                 Rect cropHint = new Rect(
@@ -336,18 +366,20 @@ public class WallpaperDataParser {
                         parser.getAttributeInt(null, "cropRight" + pair.second, 0),
                         parser.getAttributeInt(null, "cropBottom" + pair.second, 0));
                 if (!cropHint.isEmpty()) wallpaper.mCropHints.put(pair.first, cropHint);
+                if (!cropHint.isEmpty() && cropHint.equals(legacyCropHint)) {
+                    wallpaper.mOrientationWhenSet = pair.first;
+                }
             }
             if (wallpaper.mCropHints.size() == 0 && totalCropHint.isEmpty()) {
                 // migration case: the crops per screen orientation are not specified.
-                int orientation = legacyCropHint.width() < legacyCropHint.height()
-                        ? WallpaperManager.PORTRAIT : WallpaperManager.LANDSCAPE;
                 if (!legacyCropHint.isEmpty()) {
-                    wallpaper.mCropHints.put(orientation, legacyCropHint);
+                    wallpaper.cropHint.set(legacyCropHint);
                 }
             } else {
                 wallpaper.cropHint.set(totalCropHint);
             }
-        } else {
+            wallpaper.mSampleSize = parser.getAttributeFloat(null, "sampleSize", 1f);
+        } else if (!multiCrop()) {
             wallpaper.cropHint.set(legacyCropHint);
         }
         final DisplayData wpData = mWallpaperDisplayHelper
@@ -432,18 +464,7 @@ public class WallpaperDataParser {
         try {
             fstream = new FileOutputStream(journal.chooseForWrite(), false);
             TypedXmlSerializer out = Xml.resolveSerializer(fstream);
-            out.startDocument(null, true);
-
-            if (wallpaper != null) {
-                writeWallpaperAttributes(out, "wp", wallpaper);
-            }
-
-            if (lockWallpaper != null) {
-                writeWallpaperAttributes(out, "kwp", lockWallpaper);
-            }
-
-            out.endDocument();
-
+            saveSettingsToSerializer(out, wallpaper, lockWallpaper);
             fstream.flush();
             FileUtils.sync(fstream);
             fstream.close();
@@ -455,6 +476,22 @@ public class WallpaperDataParser {
     }
 
     @VisibleForTesting
+    void saveSettingsToSerializer(TypedXmlSerializer out, WallpaperData wallpaper,
+            WallpaperData lockWallpaper) throws IOException {
+        out.startDocument(null, true);
+
+        if (wallpaper != null) {
+            writeWallpaperAttributes(out, "wp", wallpaper);
+        }
+
+        if (lockWallpaper != null) {
+            writeWallpaperAttributes(out, "kwp", lockWallpaper);
+        }
+
+        out.endDocument();
+    }
+
+    @VisibleForTesting
     void writeWallpaperAttributes(TypedXmlSerializer out, String tag, WallpaperData wallpaper)
             throws IllegalArgumentException, IllegalStateException, IOException {
         if (DEBUG) {
@@ -463,13 +500,12 @@ public class WallpaperDataParser {
         out.startTag(null, tag);
         out.attributeInt(null, "id", wallpaper.wallpaperId);
 
-        out.attributeBoolean(null, "supportsMultiCrop", wallpaper.mSupportsMultiCrop);
-
-        if (multiCrop() && wallpaper.mSupportsMultiCrop) {
+        if (multiCrop() && mImageWallpaper.equals(wallpaper.getComponent())) {
             if (wallpaper.mCropHints == null) {
                 Slog.e(TAG, "cropHints should not be null when saved");
                 wallpaper.mCropHints = new SparseArray<>();
             }
+            Rect rectToPutInLegacyCrop = new Rect(wallpaper.cropHint);
             for (Pair<Integer, String> pair : screenDimensionPairs()) {
                 Rect cropHint = wallpaper.mCropHints.get(pair.first);
                 if (cropHint == null) continue;
@@ -489,16 +525,19 @@ public class WallpaperDataParser {
                     }
                 }
                 if (pair.first == orientationToPutInLegacyCrop) {
-                    out.attributeInt(null, "cropLeft", cropHint.left);
-                    out.attributeInt(null, "cropTop", cropHint.top);
-                    out.attributeInt(null, "cropRight", cropHint.right);
-                    out.attributeInt(null, "cropBottom", cropHint.bottom);
+                    rectToPutInLegacyCrop.set(cropHint);
                 }
             }
+            out.attributeInt(null, "cropLeft", rectToPutInLegacyCrop.left);
+            out.attributeInt(null, "cropTop", rectToPutInLegacyCrop.top);
+            out.attributeInt(null, "cropRight", rectToPutInLegacyCrop.right);
+            out.attributeInt(null, "cropBottom", rectToPutInLegacyCrop.bottom);
+
             out.attributeInt(null, "totalCropLeft", wallpaper.cropHint.left);
             out.attributeInt(null, "totalCropTop", wallpaper.cropHint.top);
             out.attributeInt(null, "totalCropRight", wallpaper.cropHint.right);
             out.attributeInt(null, "totalCropBottom", wallpaper.cropHint.bottom);
+            out.attributeFloat(null, "sampleSize", wallpaper.mSampleSize);
         } else if (!multiCrop()) {
             final DisplayData wpdData =
                     mWallpaperDisplayHelper.getDisplayDataOrCreate(DEFAULT_DISPLAY);
@@ -561,10 +600,10 @@ public class WallpaperDataParser {
         }
 
         out.attribute(null, "name", wallpaper.name);
-        if (wallpaper.wallpaperComponent != null
-                && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
+        if (wallpaper.getComponent() != null
+                && !wallpaper.getComponent().equals(mImageWallpaper)) {
             out.attribute(null, "component",
-                    wallpaper.wallpaperComponent.flattenToShortString());
+                    wallpaper.getComponent().flattenToShortString());
         }
 
         if (wallpaper.allowBackup) {

@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.IntegerPolicyValue;
-import android.app.admin.PolicyKey;
 import android.util.Log;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -37,8 +36,7 @@ final class IntegerPolicySerializer extends PolicySerializer<Integer> {
     private static final String ATTR_VALUE = "value";
 
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
-            @NonNull Integer value) throws IOException {
+    void saveToXml(TypedXmlSerializer serializer, @NonNull Integer value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attributeInt(/* namespace= */ null, ATTR_VALUE, value);
     }

@@ -123,6 +123,8 @@ import java.util.concurrent.TimeUnit;
  * <p> An app can check whether wallpapers are supported for the current user, by calling
  * {@link #isWallpaperSupported()}, and whether setting of wallpapers is allowed, by calling
  * {@link #isSetWallpaperAllowed()}.
+ * Any public APIs added to WallpaperManager should have a corresponding stub in
+ * {@link DisabledWallpaperManager}.
  */
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
@@ -260,13 +262,6 @@ public class WallpaperManager {
      * @hide
      */
     public static final String COMMAND_GOING_TO_SLEEP = "android.wallpaper.goingtosleep";
-
-    /**
-     * Command for {@link #sendWallpaperCommand}: reported when a physical display switch event
-     * happens, e.g. fold and unfold.
-     * @hide
-     */
-    public static final String COMMAND_DISPLAY_SWITCH = "android.wallpaper.displayswitch";
 
     /**
      * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already
@@ -1576,9 +1571,26 @@ public class WallpaperManager {
      */
     @Nullable
     public Rect peekBitmapDimensions(@SetWallpaperFlags int which, boolean returnDefault) {
+        if (multiCrop()) {
+            return peekBitmapDimensionsAsUser(which, returnDefault, mContext.getUserId());
+        }
         checkExactlyOneWallpaperFlagSet(which);
         return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which,
                 mContext.getUserId());
+    }
+
+    /**
+     * Overload of {@link #peekBitmapDimensions(int, boolean)} with a userId argument.
+     * TODO(b/360120606): remove the SuppressWarnings
+     * @hide
+     */
+    @SuppressWarnings("AndroidFrameworkContextUserId")
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @Nullable
+    public Rect peekBitmapDimensionsAsUser(@SetWallpaperFlags int which, boolean returnDefault,
+            int userId) {
+        checkExactlyOneWallpaperFlagSet(which);
+        return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which, userId);
     }
 
     /**
@@ -1603,8 +1615,18 @@ public class WallpaperManager {
             @SetWallpaperFlags int which, boolean originalBitmap) {
         checkExactlyOneWallpaperFlagSet(which);
         try {
-            return sGlobals.mService.getBitmapCrops(displaySizes, which, originalBitmap,
-                    mContext.getUserId());
+            List<Rect> result = sGlobals.mService.getBitmapCrops(
+                    displaySizes, which, originalBitmap, mContext.getUserId());
+            if (result != null) return result;
+            // mService.getBitmapCrops returns null if the requested wallpaper is an ImageWallpaper,
+            // but there are no crop hints and the bitmap size is unknown to the service (this
+            // mostly happens for the default wallpaper). In that case, fetch the bitmap dimensions
+            // and use the other getBitmapCrops API with no cropHints to figure out the crops.
+            Rect bitmapDimensions = peekBitmapDimensions(which, true);
+            if (bitmapDimensions == null) return List.of();
+            Point bitmapSize = new Point(bitmapDimensions.width(), bitmapDimensions.height());
+            return getBitmapCrops(bitmapSize, displaySizes, null);
+
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

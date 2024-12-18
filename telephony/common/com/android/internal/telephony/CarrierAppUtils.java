@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Utilities for handling carrier applications.
+ * Utilities to control the states of the system bundled (preinstalled) carrier applications.
  * @hide
  */
 public final class CarrierAppUtils {
@@ -246,9 +246,14 @@ public final class CarrierAppUtils {
                     // Always re-grant default permissions to carrier apps w/ privileges.
                     enabledCarrierPackages.add(ai.packageName);
                 } else {  // No carrier privileges
-                    // Only update enabled state for the app on /system. Once it has been
-                    // updated we shouldn't touch it.
-                    if (!isUpdatedSystemApp(ai) && enabledSetting
+                    // Only uninstall system carrier apps that fulfill ALL conditions below:
+                    // 1. It has no carrier privileges
+                    // 2. It has never been uninstalled before (i.e. we uninstall at most once)
+                    // 3. It has not been installed as an update from its system built-in version
+                    // 4. It is in default state (not explicitly DISABLED/DISABLED_BY_USER/ENABLED)
+                    // 5. It is currently installed for the calling user
+                    // TODO(b/329739019):Support user case that NEW carrier app is added during OTA
+                    if (!hasRunEver && !isUpdatedSystemApp(ai) && enabledSetting
                             == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                             && (ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
                         Log.i(TAG, "Update state (" + packageName
@@ -256,7 +261,8 @@ public final class CarrierAppUtils {
                         context.createContextAsUser(UserHandle.of(userId), 0)
                                 .getPackageManager()
                                 .setSystemAppState(
-                                        packageName, PackageManager.SYSTEM_APP_STATE_UNINSTALLED);
+                                        packageName,
+                                        PackageManager.SYSTEM_APP_STATE_UNINSTALLED);
                     }
 
                     // Associated apps are more brittle, because we can't rely on the distinction

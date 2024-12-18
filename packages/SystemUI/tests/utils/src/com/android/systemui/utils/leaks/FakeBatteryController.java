@@ -16,8 +16,8 @@ package com.android.systemui.utils.leaks;
 
 import android.os.Bundle;
 import android.testing.LeakCheck;
-import android.view.View;
 
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
@@ -30,6 +30,8 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
     private boolean mIsAodPowerSave = false;
     private boolean mWirelessCharging;
     private boolean mPowerSaveMode = false;
+    private boolean mIsPluggedIn = false;
+    private boolean mIsExtremePowerSave = false;
 
     private final List<BatteryStateChangeCallback> mCallbacks = new ArrayList<>();
 
@@ -59,13 +61,40 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
      * Note: this method ignores the View argument
      */
     @Override
-    public void setPowerSaveMode(boolean powerSave, View view) {
+    public void setPowerSaveMode(boolean powerSave, Expandable expandable) {
         setPowerSaveMode(powerSave);
     }
 
     @Override
+    public boolean isExtremeSaverOn() {
+        return mIsExtremePowerSave;
+    }
+
+    /**
+     * Note: this does not affect the regular power saver. Triggers all callbacks, only on change.
+     */
+    public void setExtremeSaverOn(Boolean extremePowerSave) {
+        if (extremePowerSave == mIsExtremePowerSave) return;
+
+        mIsExtremePowerSave = extremePowerSave;
+        for (BatteryStateChangeCallback callback: mCallbacks) {
+            callback.onExtremeBatterySaverChanged(extremePowerSave);
+        }
+    }
+
+    @Override
     public boolean isPluggedIn() {
-        return false;
+        return mIsPluggedIn;
+    }
+
+    /**
+     * Notifies all registered callbacks
+     */
+    public void setPluggedIn(boolean pluggedIn) {
+        mIsPluggedIn = pluggedIn;
+        for (BatteryStateChangeCallback cb : mCallbacks) {
+            cb.onBatteryLevelChanged(0, pluggedIn, false);
+        }
     }
 
     @Override

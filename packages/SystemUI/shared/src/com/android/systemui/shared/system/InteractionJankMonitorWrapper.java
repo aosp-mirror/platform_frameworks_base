@@ -85,4 +85,10 @@ public final class InteractionJankMonitorWrapper {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return;
         InteractionJankMonitor.getInstance().cancel(cujType);
     }
+
+    /** Return true if currently instrumenting a trace session. */
+    public static boolean isInstrumenting(@Cuj.CujType int cujType) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return false;
+        return InteractionJankMonitor.getInstance().isInstrumenting(cujType);
+    }
 }

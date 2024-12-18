@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.popup.ui.composable
 
 import android.view.Gravity
+import androidx.annotation.GravityInt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,13 +25,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.android.compose.PlatformIconButton
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.res.R
@@ -54,18 +62,19 @@ constructor(
      * @param content is the popup body
      */
     fun show(
-        expandable: Expandable,
+        expandable: Expandable?,
+        @GravityInt gravity: Int,
         title: @Composable (SystemUIDialog) -> Unit,
         content: @Composable (SystemUIDialog) -> Unit,
     ) {
         val dialog =
             dialogFactory.create(
-                theme = R.style.Theme_VolumePanelActivity_Popup,
-                dialogGravity = Gravity.BOTTOM,
+                theme = R.style.Theme_VolumePanel_Popup,
+                dialogGravity = gravity,
             ) {
                 PopupComposable(it, title, content)
             }
-        val controller = expandable.dialogTransitionController()
+        val controller = expandable?.dialogTransitionController()
         if (controller == null) {
             dialog.show()
         } else {
@@ -79,7 +88,8 @@ constructor(
         title: @Composable (SystemUIDialog) -> Unit,
         content: @Composable (SystemUIDialog) -> Unit,
     ) {
-        Box(Modifier.fillMaxWidth()) {
+        val paneTitle = stringResource(R.string.accessibility_volume_settings)
+        Box(Modifier.fillMaxWidth().semantics(properties = { this.paneTitle = paneTitle })) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -101,16 +111,38 @@ constructor(
                 }
             }
 
-            PlatformIconButton(
+            IconButton(
                 modifier = Modifier.align(Alignment.TopEnd).size(64.dp).padding(20.dp),
-                iconResource = R.drawable.ic_close,
-                contentDescription = null,
                 onClick = { dialog.dismiss() },
                 colors =
                     IconButtonDefaults.iconButtonColors(
                         contentColor = MaterialTheme.colorScheme.outline
                     )
-            )
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_close),
+                    contentDescription = stringResource(R.string.accessibility_desc_close),
+                )
+            }
+        }
+    }
+
+    companion object {
+
+        /**
+         * Returns absolute ([Gravity.LEFT], [Gravity.RIGHT] or [Gravity.CENTER_HORIZONTAL])
+         * [GravityInt] for the popup based on the [coordinates] global position relative to the
+         * [screenWidthPx].
+         */
+        @GravityInt
+        fun calculateGravity(coordinates: LayoutCoordinates, screenWidthPx: Float): Int {
+            val bottomCenter: Float = coordinates.boundsInRoot().bottomCenter.x
+            val rootBottomCenter: Float = screenWidthPx / 2
+            return when {
+                bottomCenter < rootBottomCenter -> Gravity.LEFT
+                bottomCenter > rootBottomCenter -> Gravity.RIGHT
+                else -> Gravity.CENTER_HORIZONTAL
+            }
         }
     }
 }

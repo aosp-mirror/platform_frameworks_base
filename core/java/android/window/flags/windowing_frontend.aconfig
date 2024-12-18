@@ -9,6 +9,36 @@ flag {
 }
 
 flag {
+    name: "wait_for_transition_on_display_switch"
+    namespace: "windowing_frontend"
+    description: "Waits for Shell transition to start before unblocking the screen after display switch"
+    bug: "301420598"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "apply_lifecycle_on_pip_change"
+    namespace: "windowing_frontend"
+    description: "Make pip activity lifecyle change with windowing mode"
+    bug: "333452456"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "blast_sync_notification_shade_on_display_switch"
+    namespace: "windowing_frontend"
+    description: "Make the buffer content of notification shade synchronize with display switch"
+    bug: "337154331"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "edge_to_edge_by_default"
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge by default when targeting SDK 35 or greater"
@@ -17,6 +47,7 @@ flag {
 
 flag {
   name: "enforce_edge_to_edge"
+  is_exported: true
   namespace: "windowing_frontend"
   description: "Make app go edge-to-edge when targeting SDK level 35 or greater"
   bug: "309578419"
@@ -24,11 +55,11 @@ flag {
 }
 
 flag {
-    name: "defer_display_updates"
-    namespace: "windowing_frontend"
-    description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
-    bug: "259220649"
-    is_fixed_read_only: true
+  name: "keyguard_going_away_timeout"
+  namespace: "windowing_frontend"
+  description: "Allow a maximum of 10 seconds with keyguardGoingAway=true before force-resetting"
+  bug: "343598832"
+  is_fixed_read_only: true
 }
 
 flag {
@@ -39,10 +70,21 @@ flag {
 }
 
 flag {
-  name: "introduce_smoother_dimmer"
+  name: "reduce_keyguard_transitions"
   namespace: "windowing_frontend"
-  description: "Refactor dim to fix flickers"
-  bug: "295291019"
+  description: "Avoid setting keyguard transitions ready unless there are no other changes"
+  bug: "354647472"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "transit_tracker_plumbing"
+  namespace: "windowing_frontend"
+  description: "Plumb and collect on transition tracking object instead of singleton"
+  bug: "325114242"
   is_fixed_read_only: true
 }
 
@@ -69,15 +111,8 @@ flag {
 }
 
 flag {
-    name: "activity_snapshot_by_default"
-    namespace: "systemui"
-    description: "Enable record activity snapshot by default"
-    bug: "259497289"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "supports_multi_instance_system_ui"
+    is_exported: true
     namespace: "multitasking"
     description: "Feature flag to enable a multi-instance system ui component property."
     bug: "262864589"
@@ -86,10 +121,40 @@ flag {
 
 flag {
   name: "delegate_unhandled_drags"
+  is_exported: true
   namespace: "multitasking"
   description: "Enables delegating unhandled drags to SystemUI"
   bug: "320797628"
   is_fixed_read_only: true
+}
+
+flag {
+  name: "fifo_priority_for_major_ui_processes"
+  namespace: "windowing_frontend"
+  description: "Use realtime priority for SystemUI and launcher"
+  bug: "288140556"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "process_priority_policy_for_multi_window_mode"
+  namespace: "windowing_frontend"
+  description: "Use higher priority for top-like processes"
+  bug: "200769420"
+}
+
+flag {
+  name: "universal_resizable_by_default"
+  namespace: "windowing_frontend"
+  description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
+  bug: "357141415"
+}
+
+flag {
+  name: "respect_non_top_visible_fixed_orientation"
+  namespace: "windowing_frontend"
+  description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
+  bug: "283514860"
 }
 
 flag {
@@ -98,4 +163,117 @@ flag {
   description: "Configuration decoupled from insets"
   bug: "151861875"
   is_fixed_read_only: true
+}
+
+flag {
+  name: "get_dimmer_on_closing"
+  namespace: "windowing_frontend"
+  description: "Change check for when to ignore a closing task's dim"
+  bug: "329233513"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "use_tasks_dim_only"
+  namespace: "windowing_frontend"
+  description: "Only use the task's dim and reparent it to the display area when needed instead of coordinating multiple dimmers"
+  bug: "352522056"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "update_dims_when_window_shown"
+  namespace: "windowing_frontend"
+  description: "Check if we need to update dim layers when a new window draws the first frame"
+  bug: "327332488"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "release_snapshot_aggressively"
+    namespace: "windowing_frontend"
+    description: "Actively release task snapshot memory"
+    bug: "238206323"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "draw_snapshot_aspect_ratio_match"
+  namespace: "windowing_frontend"
+  description: "The aspect ratio should always match when drawing snapshot"
+  bug: "341020277"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "system_ui_immersive_confirmation_dialog"
+  namespace: "windowing_frontend"
+  description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
+  bug: "359713629"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "ensure_wallpaper_in_transitions"
+  namespace: "windowing_frontend"
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions"
+  bug: "347593088"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "ensure_wallpaper_in_wear_transitions"
+  namespace: "windowing_frontend"
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions on Wear"
+  bug: "355596979"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "migrate_predictive_back_transition"
+  namespace: "windowing_frontend"
+  description: "Create transition when visibility change from predictive back"
+  bug: "347168362"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "always_capture_activity_snapshot"
+  namespace: "windowing_frontend"
+  description: "Always capture activity snapshot regardless predictive back status"
+  bug: "362183912"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "remove_starting_window_wait_for_multi_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid remove starting window too early when playing multiple transitions"
+  bug: "362347290"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

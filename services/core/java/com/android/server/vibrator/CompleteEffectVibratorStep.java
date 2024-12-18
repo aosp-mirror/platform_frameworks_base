@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
@@ -35,8 +36,7 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
 
     CompleteEffectVibratorStep(VibrationStepConductor conductor, long startTime, boolean cancelled,
             VibratorController controller, long pendingVibratorOffDeadline) {
-        super(conductor, startTime, controller, /* effect= */ null, /* index= */ -1,
-                pendingVibratorOffDeadline);
+        super(conductor, startTime, controller, pendingVibratorOffDeadline);
         mCancelled = cancelled;
     }
 
@@ -47,16 +47,18 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
         return mCancelled;
     }
 
+    @NonNull
     @Override
     public List<Step> cancel() {
         if (mCancelled) {
             // Double cancelling will just turn off the vibrator right away.
-            return Arrays.asList(
-                    new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(), controller));
+            return Arrays.asList(new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(),
+                    controller, /* isCleanUp= */ true));
         }
         return super.cancel();
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "CompleteEffectVibratorStep");
@@ -92,8 +94,8 @@ final class CompleteEffectVibratorStep extends AbstractVibratorStep {
                 } else {
                     // Vibration is completing normally, turn off after the deadline in case we
                     // don't receive the callback in time (callback also triggers it right away).
-                    return Arrays.asList(new TurnOffVibratorStep(
-                            conductor, mPendingVibratorOffDeadline, controller));
+                    return Arrays.asList(new TurnOffVibratorStep(conductor,
+                            mPendingVibratorOffDeadline, controller, /* isCleanUp= */ false));
                 }
             }
 

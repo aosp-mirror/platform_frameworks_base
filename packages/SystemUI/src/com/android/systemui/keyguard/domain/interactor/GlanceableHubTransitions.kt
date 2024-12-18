@@ -19,23 +19,20 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalTransitionProgress
+import com.android.systemui.communal.domain.model.CommunalTransitionProgressModel
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.flowOn
 
 class GlanceableHubTransitions
 @Inject
 constructor(
-    @Background private val bgDispatcher: CoroutineDispatcher,
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val transitionRepository: KeyguardTransitionRepository,
     private val communalInteractor: CommunalInteractor,
@@ -53,6 +50,7 @@ constructor(
         fromState: KeyguardState,
         toState: KeyguardState,
     ) {
+        if (SceneContainerFlag.isEnabled) return
         val toScene =
             if (fromState == KeyguardState.GLANCEABLE_HUB) {
                 CommunalScenes.Blank
@@ -64,7 +62,7 @@ constructor(
         communalInteractor
             .transitionProgressToScene(toScene)
             .sample(
-                transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher),
+                transitionInteractor.startedKeyguardTransitionStep,
                 ::Pair,
             )
             .collect { (transitionProgress, lastStartedStep) ->
@@ -72,7 +70,7 @@ constructor(
                 if (id == null) {
                     // No transition started.
                     if (
-                        transitionProgress is CommunalTransitionProgress.Transition &&
+                        transitionProgress is CommunalTransitionProgressModel.Transition &&
                             lastStartedStep.to == fromState
                     ) {
                         transitionId =
@@ -94,7 +92,7 @@ constructor(
                     val nextState: TransitionState
                     val progressFraction: Float
                     when (transitionProgress) {
-                        is CommunalTransitionProgress.Idle -> {
+                        is CommunalTransitionProgressModel.Idle -> {
                             if (transitionProgress.scene == toScene) {
                                 nextState = TransitionState.FINISHED
                                 progressFraction = 1f
@@ -103,11 +101,11 @@ constructor(
                                 progressFraction = 0f
                             }
                         }
-                        is CommunalTransitionProgress.Transition -> {
+                        is CommunalTransitionProgressModel.Transition -> {
                             nextState = TransitionState.RUNNING
                             progressFraction = transitionProgress.progress
                         }
-                        is CommunalTransitionProgress.OtherTransition -> {
+                        is CommunalTransitionProgressModel.OtherTransition -> {
                             // Shouldn't happen but if another transition starts during the
                             // current one, mark the current one as canceled.
                             nextState = TransitionState.CANCELED

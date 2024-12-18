@@ -16,17 +16,25 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.notificationLaunchAnimationInteractor
 
 val Kosmos.windowManagerLockscreenVisibilityInteractor by
     Kosmos.Fixture {
         WindowManagerLockscreenVisibilityInteractor(
             keyguardInteractor = keyguardInteractor,
+            transitionRepository = keyguardTransitionRepository,
             transitionInteractor = keyguardTransitionInteractor,
             surfaceBehindInteractor = keyguardSurfaceBehindInteractor,
             fromLockscreenInteractor = fromLockscreenTransitionInteractor,
             fromBouncerInteractor = fromPrimaryBouncerTransitionInteractor,
+            fromAlternateBouncerInteractor = fromAlternateBouncerTransitionInteractor,
             notificationLaunchAnimationInteractor = notificationLaunchAnimationInteractor,
+            sceneInteractor = { sceneInteractor },
+            deviceEntryInteractor = { deviceEntryInteractor },
+            wakeToGoneInteractor = keyguardWakeDirectlyToGoneInteractor,
         )
     }

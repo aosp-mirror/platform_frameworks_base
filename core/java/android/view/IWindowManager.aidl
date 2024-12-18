@@ -53,6 +53,7 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
+import android.view.KeyboardShortcutGroup;
 import android.view.KeyEvent;
 import android.view.InputEvent;
 import android.view.InsetsState;
@@ -62,7 +63,6 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
 import android.view.AppTransitionAnimationSpec;
-import android.view.TaskTransitionSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.SurfaceControl;
@@ -289,6 +289,15 @@ interface IWindowManager
      * @see android.view.Display#DEFAULT_DISPLAY
      */
     int getDefaultDisplayRotation();
+
+    /**
+     * Retrieve the display user rotation.
+     * @param displayId Id of the display
+     * @return Rotation one of {@link android.view.Surface#ROTATION_0},
+     *        {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
+     *        {@link android.view.Surface#ROTATION_270} or -1 if display is not found.
+     */
+    int getDisplayUserRotation(int displayId);
 
     /**
      * Watch the rotation of the specified screen.  Returns the current rotation,
@@ -953,19 +962,6 @@ interface IWindowManager
     void setTaskSnapshotEnabled(boolean enabled);
 
     /**
-     * Customized the task transition animation with a task transition spec.
-     *
-     * @param spec the spec that will be used to customize the task animations
-     */
-    void setTaskTransitionSpec(in TaskTransitionSpec spec);
-
-    /**
-     * Clears any task transition spec that has been previously set and
-     * reverts to using the default task transition with no spec changes.
-     */
-    void clearTaskTransitionSpec();
-
-    /**
      * Registers the frame rate per second count callback for one given task ID.
      * Each callback can only register for receiving FPS callback for one task id until unregister
      * is called. If there's no task associated with the given task id,
@@ -1100,4 +1096,11 @@ interface IWindowManager
 
     boolean transferTouchGesture(in InputTransferToken transferFromToken,
             in InputTransferToken transferToToken);
+
+    /**
+     * Request the application launch keyboard shortcuts the system has defined.
+     *
+     * @param deviceId The id of the {@link InputDevice} that will handle the shortcut.
+     */
+    KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId);
 }

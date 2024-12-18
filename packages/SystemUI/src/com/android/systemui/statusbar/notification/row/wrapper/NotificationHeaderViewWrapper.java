@@ -36,6 +36,7 @@ import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.widget.CachingIconView;
+import com.android.internal.widget.NotificationCloseButton;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.TransformableView;
@@ -60,6 +61,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
             = new PathInterpolator(0.4f, 0f, 0.7f, 1f);
     protected final ViewTransformationHelper mTransformationHelper;
     private CachingIconView mIcon;
+    private NotificationCloseButton mCloseButton;
     private NotificationExpandButton mExpandButton;
     private View mAltExpandTarget;
     private View mIconContainer;
@@ -112,6 +114,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
                 TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         addFeedbackOnClickListener(row);
+        addCloseButtonOnClickListener(row);
     }
 
     @Override
@@ -150,6 +153,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         mNotificationTopLine = mView.findViewById(com.android.internal.R.id.notification_top_line);
         mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
         mFeedbackIcon = mView.findViewById(com.android.internal.R.id.feedback);
+        mCloseButton = mView.findViewById(com.android.internal.R.id.close_button);
     }
 
     private void addFeedbackOnClickListener(ExpandableNotificationRow row) {
@@ -179,6 +183,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         }
     }
 
+    private void addCloseButtonOnClickListener(ExpandableNotificationRow row) {
+        View.OnClickListener listener = row.getCloseButtonOnClickListener(row);
+        if (mCloseButton != null && listener != null) {
+            mCloseButton.setOnClickListener(listener);
+        }
+    }
+
     @Override
     public void onContentUpdated(ExpandableNotificationRow row) {
         super.onContentUpdated(row);
@@ -191,8 +202,12 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
-        Notification notification = row.getEntry().getSbn().getNotification();
-        mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
+        Notification n = row.getEntry().getSbn().getNotification();
+        if (n.shouldUseAppIcon()) {
+            mIcon.setTag(ImageTransformState.ICON_TAG, n.getAppIcon());
+        } else {
+            mIcon.setTag(ImageTransformState.ICON_TAG, n.getSmallIcon());
+        }
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
@@ -354,11 +369,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
      * @param whenMillis
      */
     public void setNotificationWhen(long whenMillis) {
-        if (mNotificationHeader == null) {
-            return;
-        }
-
-        final View timeView = mNotificationHeader.findViewById(com.android.internal.R.id.time);
+        final View timeView = mView.findViewById(com.android.internal.R.id.time);
 
         if (timeView instanceof DateTimeView) {
             ((DateTimeView) timeView).setTime(whenMillis);

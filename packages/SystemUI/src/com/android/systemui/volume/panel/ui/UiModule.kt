@@ -49,6 +49,7 @@ interface UiModule {
         fun provideFooterComponents(): Collection<VolumePanelComponentKey> {
             return listOf(
                 VolumePanelComponents.ANC,
+                VolumePanelComponents.SPATIAL_AUDIO,
                 VolumePanelComponents.CAPTIONING,
             )
         }

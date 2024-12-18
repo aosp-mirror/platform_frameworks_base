@@ -10,6 +10,7 @@ package {
 filegroup {
     name: "services.accessibility-sources",
     srcs: ["java/**/*.java"],
+    exclude_srcs: ["java/**/a11ychecker/*.java"],
     path: "java",
     visibility: ["//frameworks/base/services"],
 }
@@ -19,11 +20,6 @@ java_library_static {
     defaults: [
         "platform_service_defaults",
     ],
-    lint: {
-        error_checks: ["MissingPermissionAnnotation"],
-        baseline_filename: "lint-baseline.xml",
-
-    },
     srcs: [
         ":services.accessibility-sources",
         "//frameworks/base/packages/SettingsLib/RestrictedLockUtils:SettingsLibRestrictedLockUtilsSrc",
@@ -34,6 +30,7 @@ java_library_static {
     ],
     static_libs: [
         "com_android_server_accessibility_flags_lib",
+        "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
     ],
 }
 

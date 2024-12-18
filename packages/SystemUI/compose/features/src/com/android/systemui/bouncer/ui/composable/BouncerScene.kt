@@ -22,27 +22,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
-import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerUserActionsViewModel
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.scene.ui.composable.Scene
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
 
 object Bouncer {
     object Elements {
         val Background = ElementKey("BouncerBackground")
         val Content = ElementKey("BouncerContent")
+    }
+
+    object TestTags {
+        const val Root = "bouncer_root"
     }
 }
 
@@ -51,29 +54,36 @@ object Bouncer {
 class BouncerScene
 @Inject
 constructor(
-    private val viewModel: BouncerViewModel,
+    private val actionsViewModelFactory: BouncerUserActionsViewModel.Factory,
+    private val contentViewModelFactory: BouncerSceneContentViewModel.Factory,
     private val dialogFactory: BouncerDialogFactory,
-) : ComposableScene {
+) : ExclusiveActivatable(), Scene {
     override val key = Scenes.Bouncer
 
-    override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow(
-                mapOf(
-                    Back to UserActionResult(Scenes.Lockscreen),
-                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.Lockscreen),
-                )
-            )
-            .asStateFlow()
+    private val actionsViewModel: BouncerUserActionsViewModel by lazy {
+        actionsViewModelFactory.create()
+    }
+
+    override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
+
+    override suspend fun onActivated(): Nothing {
+        actionsViewModel.activate()
+    }
 
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
-    ) = BouncerScene(viewModel, dialogFactory, modifier)
+    ) =
+        BouncerScene(
+            viewModel = rememberViewModel("BouncerScene") { contentViewModelFactory.create() },
+            dialogFactory = dialogFactory,
+            modifier = modifier,
+        )
 }
 
 @Composable
 private fun SceneScope.BouncerScene(
-    viewModel: BouncerViewModel,
+    viewModel: BouncerSceneContentViewModel,
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
 ) {
@@ -89,7 +99,9 @@ private fun SceneScope.BouncerScene(
         BouncerContent(
             viewModel,
             dialogFactory,
-            Modifier.element(Bouncer.Elements.Content).fillMaxSize()
+            Modifier.element(Bouncer.Elements.Content)
+                .sysuiResTag(Bouncer.TestTags.Root)
+                .fillMaxSize()
         )
     }
 }

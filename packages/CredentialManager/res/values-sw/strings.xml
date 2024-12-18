@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Tunavyoelekea katika enzi isiyo ya manenosiri, manenosiri yataendelea kupatikana pamoja na funguo za siri."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chagua ambako unahifadhi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Chagua kidhibiti cha manenosiri ili uhifadhi taarifa zako na uingie kwenye akaunti kwa urahisi wakati mwingine"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Ungependa kuunda ufunguo wa siri ili uingie katika <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Ungependa kuhifadhi nenosiri ili uingie katika <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Ungependa kuhifadhi maelezo ya kuingia katika akaunti kwa ajili ya <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Ungependa kubuni ufunguo wa siri wa kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Ungependa kuhifadhi nenosiri la kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Ungependa kuhifadhi maelezo ya kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ufunguo wa siri"</string>
     <string name="password" msgid="6738570945182936667">"nenosiri"</string>
     <string name="passkeys" msgid="5733880786866559847">"funguo za siri"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Rudi kwenye ukurasa uliotangulia"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Funga"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Ondoa"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Ungependa kutumia ufunguo wa siri uliohifadhiwa wa <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Je, ungependa kutumia nenosiri lako lililohifadhiwa kuingia katika <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Ungependa kutumia kitambulisho chako cha kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Je, ungependa kuona chaguo za kuingia katika <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Tumia ufunguo wako wa siri uliohifadhi wa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Tumia nenosiri lako ulilohifadhi la <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Tumia akaunti yako ya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Tumia mbinu yako ya kufunga skrini kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g> ukitumia <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Fungua chaguo za kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Chagua ufunguo wa siri uliohifadhiwa ambao ungependa kutumia kuingia katika <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Chagua nenosiri lililohifadhiwa ambalo ungependa kutumia kuingia katika <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Chagua vitambulisho vilivyohifadhiwa ambavyo ungependa kutumia kuingia katika <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Chagua kitambulisho cha kuingia katika akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Chagua akaunti ya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Ungependa kuteua chaguo la <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Ungependa kutumia maelezo haya kwenye <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ingia katika akaunti kwa kutumia njia nyingine"</string>

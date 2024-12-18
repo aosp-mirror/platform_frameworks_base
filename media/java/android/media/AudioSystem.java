@@ -542,6 +542,8 @@ public class AudioSystem
                 return "AUDIO_FORMAT_AAC_LATM_HE_V2"; // (AAC_LATM | AAC_SUB_HE_V2)
             case /* AUDIO_FORMAT_E_AC3_JOC         */ 0xA000001:
                 return "AUDIO_FORMAT_E_AC3_JOC";  // (E_AC3 | E_AC3_SUB_JOC)
+            case /* AUDIO_FORMAT_AC4_L4            */ 0x22000001:
+                return "AUDIO_FORMAT_AC4_L4";  // (AC4 | AC4_SUB_L4)
             case /* AUDIO_FORMAT_MAT_1_0           */ 0x24000001:
                 return "AUDIO_FORMAT_MAT_1_0"; // (MAT | MAT_SUB_1_0)
             case /* AUDIO_FORMAT_MAT_2_0           */ 0x24000002:
@@ -1766,6 +1768,10 @@ public class AudioSystem
     public static native int getForceUse(int usage);
     /** @hide */
     @UnsupportedAppUsage
+    public static native int setDeviceAbsoluteVolumeEnabled(int nativeDeviceType,
+            @NonNull String address, boolean enabled, int streamToDriveAbs);
+    /** @hide */
+    @UnsupportedAppUsage
     public static native int initStreamVolume(int stream, int indexMin, int indexMax);
     @UnsupportedAppUsage
     private static native int setStreamVolumeIndex(int stream, int index, int device);
@@ -2647,4 +2653,20 @@ public class AudioSystem
      * @hide
      */
     public static native boolean isBluetoothVariableLatencyEnabled();
+
+    /**
+     * Register a native listener for system property sysprop
+     * @param callback the listener which fires when the property changes
+     * @return a native handle for use in subsequent methods
+     * @hide
+     */
+    public static native long listenForSystemPropertyChange(String sysprop, Runnable callback);
+
+    /**
+     * Trigger a sysprop listener update, if the property has been updated: synchronously validating
+     * there are no pending sysprop changes.
+     * @param handle the handle returned by {@link listenForSystemPropertyChange}
+     * @hide
+     */
+    public static native void triggerSystemPropertyUpdate(long handle);
 }

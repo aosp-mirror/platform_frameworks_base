@@ -19,24 +19,23 @@
 
 //#define LOG_NDEBUG 0
 
-#include <inttypes.h>
-
-#include <nativehelper/JNIHelp.h>
-
 #include <android-base/stringprintf.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <input/InputConsumer.h>
 #include <input/InputTransport.h>
+#include <inttypes.h>
 #include <log/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <utils/Looper.h>
+
 #include <variant>
 #include <vector>
+
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"
 #include "android_view_MotionEvent.h"
-
-#include <nativehelper/ScopedLocalRef.h>
-
 #include "core_jni_helpers.h"
 
 namespace android {

@@ -17,7 +17,6 @@
 package com.android.settingslib.media;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2;
@@ -26,9 +25,11 @@ import android.media.MediaRouter2Manager;
 import android.media.RouteDiscoveryPreference;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
-import android.os.Process;
+import android.media.session.MediaController;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -41,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -65,22 +65,25 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
                 refreshDevices();
             };
 
-    private final AtomicReference<MediaRouter2.ScanToken> mScanToken = new AtomicReference<>();
+    @GuardedBy("this")
+    @Nullable
+    private MediaRouter2.ScanToken mScanToken;
 
     // TODO (b/321969740): Plumb target UserHandle between UMO and RouterInfoMediaManager.
     /* package */ RouterInfoMediaManager(
             Context context,
             @NonNull String packageName,
-            Notification notification,
-            LocalBluetoothManager localBluetoothManager)
+            @NonNull UserHandle userHandle,
+            LocalBluetoothManager localBluetoothManager,
+            @Nullable MediaController mediaController)
             throws PackageNotAvailableException {
-        super(context, packageName, notification, localBluetoothManager);
+        super(context, packageName, userHandle, localBluetoothManager, mediaController);
 
         MediaRouter2 router = null;
 
         if (Flags.enableCrossUserRoutingInMediaRouter2()) {
             try {
-                router = MediaRouter2.getInstance(context, packageName, Process.myUserHandle());
+                router = MediaRouter2.getInstance(context, packageName, userHandle);
             } catch (IllegalArgumentException ex) {
                 // Do nothing
             }
@@ -99,29 +102,44 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
 
     @Override
     protected void startScanOnRouter() {
-        mRouter.registerRouteCallback(mExecutor, mRouteCallback, RouteDiscoveryPreference.EMPTY);
-        mRouter.registerRouteListingPreferenceUpdatedCallback(
-                mExecutor, mRouteListingPreferenceCallback);
-        mRouter.registerTransferCallback(mExecutor, mTransferCallback);
-        mRouter.registerControllerCallback(mExecutor, mControllerCallback);
         if (Flags.enableScreenOffScanning()) {
-            MediaRouter2.ScanRequest request = new MediaRouter2.ScanRequest.Builder().build();
-            mScanToken.compareAndSet(null, mRouter.requestScan(request));
+            synchronized (this) {
+                if (mScanToken == null) {
+                    MediaRouter2.ScanRequest request =
+                            new MediaRouter2.ScanRequest.Builder().build();
+                    mScanToken = mRouter.requestScan(request);
+                }
+            }
         } else {
             mRouter.startScan();
         }
     }
 
     @Override
-    public void stopScan() {
+    protected void registerRouter() {
+        mRouter.registerRouteCallback(mExecutor, mRouteCallback, RouteDiscoveryPreference.EMPTY);
+        mRouter.registerRouteListingPreferenceUpdatedCallback(
+                mExecutor, mRouteListingPreferenceCallback);
+        mRouter.registerTransferCallback(mExecutor, mTransferCallback);
+        mRouter.registerControllerCallback(mExecutor, mControllerCallback);
+    }
+
+    @Override
+    protected void stopScanOnRouter() {
         if (Flags.enableScreenOffScanning()) {
-            MediaRouter2.ScanToken token = mScanToken.getAndSet(null);
-            if (token != null) {
-                mRouter.cancelScanRequest(token);
+            synchronized (this) {
+                if (mScanToken != null) {
+                    mRouter.cancelScanRequest(mScanToken);
+                    mScanToken = null;
+                }
             }
         } else {
             mRouter.stopScan();
         }
+    }
+
+    @Override
+    protected void unregisterRouter() {
         mRouter.unregisterControllerCallback(mControllerCallback);
         mRouter.unregisterTransferCallback(mTransferCallback);
         mRouter.unregisterRouteListingPreferenceUpdatedCallback(mRouteListingPreferenceCallback);

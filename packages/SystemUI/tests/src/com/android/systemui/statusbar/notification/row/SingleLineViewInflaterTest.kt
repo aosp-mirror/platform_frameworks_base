@@ -27,9 +27,9 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.platform.test.annotations.EnableFlags
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.core.graphics.drawable.toBitmap
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
@@ -48,7 +48,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableFlags(AsyncHybridViewInflation.FLAG_NAME)
 class SingleLineViewInflaterTest : SysuiTestCase() {
@@ -372,7 +372,7 @@ class SingleLineViewInflaterTest : SysuiTestCase() {
         }
 
         // Inflate the SingleLineViewModel
-        // Mock the behavior of NotificationContentInflater.doInBackground
+        // Mock the behavior of NotificationRowContentBinder.doInBackground
         val messagingStyle = builder.getMessagingStyle()
         val isConversation = type is OneToOneConversation || type is GroupConversation
         return SingleLineViewInflater.inflateSingleLineViewModel(

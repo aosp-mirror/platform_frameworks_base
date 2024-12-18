@@ -16,13 +16,20 @@
 
 package com.android.server;
 
+import static android.content.Intent.ACTION_REBOOT;
+import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
+
+import static com.android.server.crashrecovery.CrashRecoveryUtils.dumpCrashRecoveryEvents;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
@@ -39,6 +46,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.IndentingPrintWriter;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
@@ -46,7 +54,6 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -67,6 +74,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -291,7 +299,9 @@ public class PackageWatchdog {
                     this::onSyncRequestNotified);
             setPropertyChangedListenerLocked();
             updateConfigs();
-            registerConnectivityModuleHealthListener();
+            if (!Flags.refactorCrashrecovery()) {
+                registerConnectivityModuleHealthListener();
+            }
         }
     }
 
@@ -304,13 +314,14 @@ public class PackageWatchdog {
      */
     public void registerHealthObserver(PackageHealthObserver observer) {
         synchronized (mLock) {
-            ObserverInternal internalObserver = mAllObservers.get(observer.getName());
+            ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
                 internalObserver.registeredObserver = observer;
             } else {
-                internalObserver = new ObserverInternal(observer.getName(), new ArrayList<>());
+                internalObserver = new ObserverInternal(observer.getUniqueIdentifier(),
+                        new ArrayList<>());
                 internalObserver.registeredObserver = observer;
-                mAllObservers.put(observer.getName(), internalObserver);
+                mAllObservers.put(observer.getUniqueIdentifier(), internalObserver);
                 syncState("added new observer");
             }
         }
@@ -337,12 +348,12 @@ public class PackageWatchdog {
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
         if (packageNames.isEmpty()) {
-            Slog.wtf(TAG, "No packages to observe, " + observer.getName());
+            Slog.wtf(TAG, "No packages to observe, " + observer.getUniqueIdentifier());
             return;
         }
         if (durationMs < 1) {
             Slog.wtf(TAG, "Invalid duration " + durationMs + "ms for observer "
-                    + observer.getName() + ". Not observing packages " + packageNames);
+                    + observer.getUniqueIdentifier() + ". Not observing packages " + packageNames);
             durationMs = DEFAULT_OBSERVING_DURATION_MS;
         }
 
@@ -369,14 +380,14 @@ public class PackageWatchdog {
             syncState("observing new packages");
 
             synchronized (mLock) {
-                ObserverInternal oldObserver = mAllObservers.get(observer.getName());
+                ObserverInternal oldObserver = mAllObservers.get(observer.getUniqueIdentifier());
                 if (oldObserver == null) {
-                    Slog.d(TAG, observer.getName() + " started monitoring health "
+                    Slog.d(TAG, observer.getUniqueIdentifier() + " started monitoring health "
                             + "of packages " + packageNames);
-                    mAllObservers.put(observer.getName(),
-                            new ObserverInternal(observer.getName(), packages));
+                    mAllObservers.put(observer.getUniqueIdentifier(),
+                            new ObserverInternal(observer.getUniqueIdentifier(), packages));
                 } else {
-                    Slog.d(TAG, observer.getName() + " added the following "
+                    Slog.d(TAG, observer.getUniqueIdentifier() + " added the following "
                             + "packages to monitor " + packageNames);
                     oldObserver.updatePackagesLocked(packages);
                 }
@@ -400,9 +411,9 @@ public class PackageWatchdog {
     public void unregisterHealthObserver(PackageHealthObserver observer) {
         mLongTaskHandler.post(() -> {
             synchronized (mLock) {
-                mAllObservers.remove(observer.getName());
+                mAllObservers.remove(observer.getUniqueIdentifier());
             }
-            syncState("unregistering observer: " + observer.getName());
+            syncState("unregistering observer: " + observer.getUniqueIdentifier());
         });
     }
 
@@ -776,7 +787,7 @@ public class PackageWatchdog {
          * Identifier for the observer, should not change across device updates otherwise the
          * watchdog may drop observing packages with the old name.
          */
-        String getName();
+        String getUniqueIdentifier();
 
         /**
          * An observer will not be pruned if this is set, even if the observer is not explicitly
@@ -1257,18 +1268,21 @@ public class PackageWatchdog {
 
 
     /** Dump status of every observer in mAllObservers. */
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("Package Watchdog status");
-        pw.increaseIndent();
+    public void dump(PrintWriter pw) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.println("Package Watchdog status");
+        ipw.increaseIndent();
         synchronized (mLock) {
             for (String observerName : mAllObservers.keySet()) {
-                pw.println("Observer name: " + observerName);
-                pw.increaseIndent();
+                ipw.println("Observer name: " + observerName);
+                ipw.increaseIndent();
                 ObserverInternal observerInternal = mAllObservers.get(observerName);
-                observerInternal.dump(pw);
-                pw.decreaseIndent();
+                observerInternal.dump(ipw);
+                ipw.decreaseIndent();
             }
         }
+        ipw.decreaseIndent();
+        dumpCrashRecoveryEvents(ipw);
     }
 
     @VisibleForTesting
@@ -1849,15 +1863,19 @@ public class PackageWatchdog {
             bootMitigationCounts.put(observer.name, observer.getBootMitigationCount());
         }
 
+        FileOutputStream fileStream = null;
+        ObjectOutputStream objectStream = null;
         try {
-            FileOutputStream fileStream = new FileOutputStream(new File(filePath));
-            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            fileStream = new FileOutputStream(new File(filePath));
+            objectStream = new ObjectOutputStream(fileStream);
             objectStream.writeObject(bootMitigationCounts);
             objectStream.flush();
-            objectStream.close();
-            fileStream.close();
         } catch (Exception e) {
             Slog.i(TAG, "Could not save observers metadata to file: " + e);
+            return;
+        } finally {
+            IoUtils.closeQuietly(objectStream);
+            IoUtils.closeQuietly(fileStream);
         }
     }
 
@@ -2008,26 +2026,60 @@ public class PackageWatchdog {
         void readAllObserversBootMitigationCountIfNecessary(String filePath) {
             File metadataFile = new File(filePath);
             if (metadataFile.exists()) {
+                FileInputStream fileStream = null;
+                ObjectInputStream objectStream = null;
+                HashMap<String, Integer> bootMitigationCounts = null;
                 try {
-                    FileInputStream fileStream = new FileInputStream(metadataFile);
-                    ObjectInputStream objectStream = new ObjectInputStream(fileStream);
-                    HashMap<String, Integer> bootMitigationCounts =
+                    fileStream = new FileInputStream(metadataFile);
+                    objectStream = new ObjectInputStream(fileStream);
+                    bootMitigationCounts =
                             (HashMap<String, Integer>) objectStream.readObject();
-                    objectStream.close();
-                    fileStream.close();
-
-                    for (int i = 0; i < mAllObservers.size(); i++) {
-                        final ObserverInternal observer = mAllObservers.valueAt(i);
-                        if (bootMitigationCounts.containsKey(observer.name)) {
-                            observer.setBootMitigationCount(
-                                    bootMitigationCounts.get(observer.name));
-                        }
-                    }
                 } catch (Exception e) {
                     Slog.i(TAG, "Could not read observer metadata file: " + e);
+                    return;
+                } finally {
+                    IoUtils.closeQuietly(objectStream);
+                    IoUtils.closeQuietly(fileStream);
+                }
+
+                if (bootMitigationCounts == null || bootMitigationCounts.isEmpty()) {
+                    Slog.i(TAG, "No observer in metadata file");
+                    return;
+                }
+                for (int i = 0; i < mAllObservers.size(); i++) {
+                    final ObserverInternal observer = mAllObservers.valueAt(i);
+                    if (bootMitigationCounts.containsKey(observer.name)) {
+                        observer.setBootMitigationCount(
+                                bootMitigationCounts.get(observer.name));
+                    }
                 }
             }
         }
+    }
 
+    /**
+     * Register broadcast receiver for shutdown.
+     * We would save the observer state to persist across boots.
+     *
+     * @hide
+     */
+    public void registerShutdownBroadcastReceiver() {
+        BroadcastReceiver shutdownEventReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // Only write if intent is relevant to device reboot or shutdown.
+                String intentAction = intent.getAction();
+                if (ACTION_REBOOT.equals(intentAction)
+                        || ACTION_SHUTDOWN.equals(intentAction)) {
+                    writeNow();
+                }
+            }
+        };
+
+        // Setup receiver for device reboots or shutdowns.
+        IntentFilter filter = new IntentFilter(ACTION_REBOOT);
+        filter.addAction(ACTION_SHUTDOWN);
+        mContext.registerReceiverForAllUsers(shutdownEventReceiver, filter, null,
+                /* run on main thread */ null);
     }
 }

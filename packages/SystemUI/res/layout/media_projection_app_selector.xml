@@ -37,6 +37,7 @@
         android:background="@*android:drawable/bottomsheet_background">
 
         <ImageView
+            android:id="@+id/media_projection_app_selector_icon"
             android:layout_width="@dimen/media_projection_app_selector_icon_size"
             android:layout_height="@dimen/media_projection_app_selector_icon_size"
             android:layout_marginTop="@*android:dimen/chooser_edge_margin_normal"

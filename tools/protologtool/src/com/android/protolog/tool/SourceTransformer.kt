@@ -22,6 +22,7 @@ import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.ArrayAccessExpr
 import com.github.javaparser.ast.expr.CastExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
@@ -35,6 +36,8 @@ import com.github.javaparser.ast.expr.TypeExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.ExpressionStmt
+import com.github.javaparser.ast.stmt.IfStmt
+import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.ArrayType
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.PrimitiveType
@@ -74,6 +77,8 @@ class SourceTransformer(
 
     private val protoLogImplClassNode =
             StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogImplClassName)
+    private val protoLogImplCacheClassNode =
+        StaticJavaParser.parseExpression<FieldAccessExpr>("$protoLogImplClassName.Cache")
     private var processedCode: MutableList<String> = mutableListOf()
     private var offsets: IntArray = IntArray(0)
     /** The path of the file being processed, relative to $ANDROID_BUILD_TOP */
@@ -121,31 +126,31 @@ class SourceTransformer(
         group: LogGroup,
         level: LogLevel,
         messageString: String
-    ): BlockStmt {
+    ): Statement {
         val hash = CodeUtils.hash(packagePath, messageString, level, group)
+
         val newCall = call.clone()
-        if (!group.textEnabled) {
-            // Remove message string if text logging is not enabled by default.
-            // Out: ProtoLog.e(GROUP, null, arg)
-            newCall.arguments[1].replace(NameExpr("null"))
-        }
+        // Remove message string.
+        // Out: ProtoLog.e(GROUP, args)
+        newCall.arguments.removeAt(1)
         // Insert message string hash as a second argument.
-        // Out: ProtoLog.e(GROUP, 1234, null, arg)
+        // Out: ProtoLog.e(GROUP, 1234, args)
         newCall.arguments.add(1, LongLiteralExpr("" + hash + "L"))
         val argTypes = LogDataType.parseFormatString(messageString)
         val typeMask = LogDataType.logDataTypesToBitMask(argTypes)
         // Insert bitmap representing which Number parameters are to be considered as
         // floating point numbers.
-        // Out: ProtoLog.e(GROUP, 1234, 0, null, arg)
+        // Out: ProtoLog.e(GROUP, 1234, 0, args)
         newCall.arguments.add(2, IntegerLiteralExpr(typeMask))
         // Replace call to a stub method with an actual implementation.
-        // Out: ProtoLogImpl.e(GROUP, 1234, null, arg)
+        // Out: ProtoLogImpl.e(GROUP, 1234, 0, args)
         newCall.setScope(protoLogImplClassNode)
         if (argTypes.size != call.arguments.size - 2) {
             throw InvalidProtoLogCallException(
                 "Number of arguments (${argTypes.size} does not match format" +
                         " string in: $call", ParsingContext(path, call))
         }
+        val argsOffset = 3
         val blockStmt = BlockStmt()
         if (argTypes.isNotEmpty()) {
             // Assign every argument to a variable to check its type in compile time
@@ -154,9 +159,9 @@ class SourceTransformer(
             argTypes.forEachIndexed { idx, type ->
                 val varName = "protoLogParam$idx"
                 val declaration = VariableDeclarator(getASTTypeForDataType(type), varName,
-                    getConversionForType(type)(newCall.arguments[idx + 4].clone()))
+                    getConversionForType(type)(newCall.arguments[idx + argsOffset].clone()))
                 blockStmt.addStatement(ExpressionStmt(VariableDeclarationExpr(declaration)))
-                newCall.setArgument(idx + 4, NameExpr(SimpleName(varName)))
+                newCall.setArgument(idx + argsOffset, NameExpr(SimpleName(varName)))
             }
         } else {
             // Assign (Object[])null as the vararg parameter to prevent allocating an empty
@@ -166,11 +171,15 @@ class SourceTransformer(
         }
         blockStmt.addStatement(ExpressionStmt(newCall))
 
-        return blockStmt
+        val isLogEnabled = ArrayAccessExpr()
+            .setName(NameExpr("$protoLogImplCacheClassNode.${group.name}_enabled"))
+            .setIndex(IntegerLiteralExpr(level.ordinal))
+
+        return IfStmt(isLogEnabled, blockStmt, null)
     }
 
     private fun injectProcessedCallStatementInCode(
-        processedCallStatement: BlockStmt,
+        processedCallStatement: Statement,
         parentStmt: ExpressionStmt
     ) {
         // Inline the new statement.

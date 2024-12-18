@@ -19,6 +19,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Flags;
 import android.app.RemoteInput;
@@ -229,6 +230,7 @@ public final class NotificationStats implements Parcelable {
     /**
      * Records that the user has replied to a notification that has a smart reply at least once.
      */
+    @SuppressLint("GetterSetterNames")
     @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
     public void setSmartReplied() {
         mSmartReplied = true;

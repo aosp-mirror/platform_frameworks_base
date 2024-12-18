@@ -16,8 +16,6 @@
 
 package com.android.server.biometrics.sensors;
 
-import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.BiometricRequestConstants;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -52,21 +49,18 @@ public class SensorOverlaysTest {
     private static final long REQUEST_ID = 8;
 
     @Rule public final MockitoRule mockito = MockitoJUnit.rule();
-
     @Mock private IUdfpsOverlayController mUdfpsOverlayController;
-    @Mock private ISidefpsController mSidefpsController;
     @Mock private AcquisitionClient<?> mAcquisitionClient;
 
     @Before
     public void setup() {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         when(mAcquisitionClient.getRequestId()).thenReturn(REQUEST_ID);
         when(mAcquisitionClient.hasRequestId()).thenReturn(true);
     }
 
     @Test
     public void noopWhenBothNull() {
-        final SensorOverlays useless = new SensorOverlays(null, null);
+        final SensorOverlays useless = new SensorOverlays(null);
         useless.show(SENSOR_ID, 2, null);
         useless.hide(SENSOR_ID);
     }
@@ -74,34 +68,24 @@ public class SensorOverlaysTest {
     @Test
     public void testProvidesUdfps() {
         final List<IUdfpsOverlayController> udfps = new ArrayList<>();
-        SensorOverlays sensorOverlays = new SensorOverlays(null, mSidefpsController);
+        SensorOverlays sensorOverlays = new SensorOverlays(null);
 
         sensorOverlays.ifUdfps(udfps::add);
         assertThat(udfps).isEmpty();
 
-        sensorOverlays = new SensorOverlays(mUdfpsOverlayController, mSidefpsController);
+        sensorOverlays = new SensorOverlays(mUdfpsOverlayController);
         sensorOverlays.ifUdfps(udfps::add);
         assertThat(udfps).containsExactly(mUdfpsOverlayController);
     }
 
     @Test
-    public void testShow() throws Exception {
-        testShow(mUdfpsOverlayController, mSidefpsController);
-    }
-
-    @Test
     public void testShowUdfps() throws Exception {
-        testShow(mUdfpsOverlayController, null);
+        testShow(mUdfpsOverlayController);
     }
 
-    @Test
-    public void testShowSidefps() throws Exception {
-        testShow(null, mSidefpsController);
-    }
-
-    private void testShow(IUdfpsOverlayController udfps, ISidefpsController sidefps)
+    private void testShow(IUdfpsOverlayController udfps)
             throws Exception {
-        final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps);
+        final SensorOverlays sensorOverlays = new SensorOverlays(udfps);
         final int reason = BiometricRequestConstants.REASON_UNKNOWN;
         sensorOverlays.show(SENSOR_ID, reason, mAcquisitionClient);
 
@@ -109,36 +93,20 @@ public class SensorOverlaysTest {
             verify(mUdfpsOverlayController).showUdfpsOverlay(
                     eq(REQUEST_ID), eq(SENSOR_ID), eq(reason), any());
         }
-        if (sidefps != null) {
-            verify(mSidefpsController).show(eq(SENSOR_ID), eq(reason));
-        }
-    }
-
-    @Test
-    public void testHide() throws Exception {
-        testHide(mUdfpsOverlayController, mSidefpsController);
     }
 
     @Test
     public void testHideUdfps() throws Exception {
-        testHide(mUdfpsOverlayController, null);
+        testHide(mUdfpsOverlayController);
     }
 
-    @Test
-    public void testHideSidefps() throws Exception {
-        testHide(null, mSidefpsController);
-    }
-
-    private void testHide(IUdfpsOverlayController udfps, ISidefpsController sidefps)
+    private void testHide(IUdfpsOverlayController udfps)
             throws Exception {
-        final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps);
+        final SensorOverlays sensorOverlays = new SensorOverlays(udfps);
         sensorOverlays.hide(SENSOR_ID);
 
         if (udfps != null) {
             verify(mUdfpsOverlayController).hideUdfpsOverlay(eq(SENSOR_ID));
-        }
-        if (sidefps != null) {
-            verify(mSidefpsController).hide(eq(SENSOR_ID));
         }
     }
 }

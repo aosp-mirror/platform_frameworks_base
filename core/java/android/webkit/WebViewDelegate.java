@@ -137,9 +137,13 @@ public final class WebViewDelegate {
      */
     @Deprecated
     public void detachDrawGlFunctor(View containerView, long nativeDrawGLFunctor) {
-        ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
-        if (nativeDrawGLFunctor != 0 && viewRootImpl != null) {
-            viewRootImpl.detachFunctor(nativeDrawGLFunctor);
+        if (Flags.mainlineApis()) {
+            throw new UnsupportedOperationException();
+        } else {
+            ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
+            if (nativeDrawGLFunctor != 0 && viewRootImpl != null) {
+                viewRootImpl.detachFunctor(nativeDrawGLFunctor);
+            }
         }
     }
 
@@ -175,8 +179,16 @@ public final class WebViewDelegate {
 
     /**
      * Adds the WebView asset path to {@link android.content.res.AssetManager}.
+     * If {@link android.content.res.Flags#FLAG_REGISTER_RESOURCE_PATHS} is enabled, this function
+     * will be a no-op because the asset paths appending work will only be handled by
+     * {@link android.content.res.Resources#registerResourcePaths(String, ApplicationInfo)},
+     * otherwise it behaves the old way.
      */
     public void addWebViewAssetPath(Context context) {
+        if (android.content.res.Flags.registerResourcePaths()) {
+            return;
+        }
+
         final String[] newAssetPaths =
                 WebViewFactory.getLoadedPackageInfo().applicationInfo.getAllApkPaths();
         final ApplicationInfo appInfo = context.getApplicationInfo();

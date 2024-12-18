@@ -15,6 +15,8 @@
  */
 package com.android.systemui.qs.external;
 
+import static com.android.systemui.Flags.qsCustomTileClickGuaranteedBugFix;
+
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,7 +48,7 @@ import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepositor
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -222,9 +224,13 @@ public class TileServices extends IQSService.Stub {
                 return;
             }
             service.setBindRequested(true);
-            try {
-                service.getTileService().onStartListening();
-            } catch (RemoteException e) {
+            if (qsCustomTileClickGuaranteedBugFix()) {
+                service.onStartListeningFromRequest();
+            } else {
+                try {
+                    service.getTileService().onStartListening();
+                } catch (RemoteException e) {
+                }
             }
         }
     }
@@ -326,7 +332,7 @@ public class TileServices extends IQSService.Stub {
                 if (info.applicationInfo.isSystemApp()) {
                     final StatusBarIcon statusIcon = icon != null
                             ? new StatusBarIcon(userHandle, packageName, icon, 0, 0,
-                            contentDescription)
+                            contentDescription, StatusBarIcon.Type.SystemIcon)
                             : null;
                     final String slot = getStatusBarIconSlotName(componentName);
                     mMainHandler.post(new Runnable() {

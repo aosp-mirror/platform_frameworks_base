@@ -52,7 +52,10 @@ enum class CreateCredentialEvent(private val id: Int) : UiEventLogger.UiEventEnu
     CREDMAN_CREATE_CRED_EXTERNAL_ONLY_SELECTION(1327),
 
     @UiEvent(doc = "The more about passkeys intro card is visible on screen.")
-    CREDMAN_CREATE_CRED_MORE_ABOUT_PASSKEYS_INTRO(1328);
+    CREDMAN_CREATE_CRED_MORE_ABOUT_PASSKEYS_INTRO(1328),
+
+    @UiEvent(doc = "The single tap biometric flow is launched.")
+    CREDMAN_CREATE_CRED_BIOMETRIC_FLOW_LAUNCHED(1800);
 
     override fun getId(): Int {
         return this.id

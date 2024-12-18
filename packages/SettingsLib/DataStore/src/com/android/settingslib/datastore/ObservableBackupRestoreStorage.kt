@@ -21,5 +21,7 @@ package com.android.settingslib.datastore
  *
  * This class provides the [Observable] implementations on top of [DataObservable] by delegation.
  */
-abstract class ObservableBackupRestoreStorage :
-    BackupRestoreStorage(), Observable by DataObservable()
+abstract class ObservableBackupRestoreStorage : BackupRestoreStorage(), ObservableDelegation {
+
+    final override val observableDelegate: Observable = DataObservable(this)
+}

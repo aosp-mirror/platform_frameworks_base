@@ -43,10 +43,12 @@ oneway interface IInputMethodPrivilegedOperations {
     void switchToPreviousInputMethod(in AndroidFuture future /* T=Boolean */);
     void switchToNextInputMethod(boolean onlyCurrentIme, in AndroidFuture future /* T=Boolean */);
     void shouldOfferSwitchingToNextInputMethod(in AndroidFuture future /* T=Boolean */);
+    void onImeSwitchButtonClickFromClient(int displayId);
     void notifyUserActionAsync();
     void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible,
             in ImeTracker.Token statsToken);
     void onStylusHandwritingReady(int requestId, int pid);
     void resetStylusHandwriting(int requestId);
     void switchKeyboardLayoutAsync(int direction);
+    void setHandwritingSurfaceNotTouchable(boolean notTouchable);
 }

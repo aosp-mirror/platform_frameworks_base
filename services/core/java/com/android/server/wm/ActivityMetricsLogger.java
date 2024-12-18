@@ -4,10 +4,6 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.processStateAmToProto;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WaitResult.LAUNCH_STATE_COLD;
 import static android.app.WaitResult.LAUNCH_STATE_HOT;
@@ -69,11 +65,6 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
 import static com.android.internal.util.FrameworkStatsLog.APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
 import static com.android.internal.util.FrameworkStatsLog.APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
-import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT;
-import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_REVERT_TREATMENT;
-import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_APPLY_TREATMENT;
-import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_DISMISS;
-import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_REVERT_TREATMENT;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.ProcessList.INVALID_ADJ;
@@ -88,7 +79,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
-import android.app.AppCompatTaskInfo.CameraCompatControlState;
+import android.app.ApplicationStartInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.ComponentName;
@@ -148,6 +139,10 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_ASSISTANT = 3;
     private static final int WINDOW_STATE_MULTI_WINDOW = 4;
     private static final int WINDOW_STATE_INVALID = -1;
+
+    // These should match AppStartOccurred.MultiWindowLaunchType in the atoms.proto
+    private static final int MULTI_WINDOW_LAUNCH_TYPE_UNSPECIFIED = 0;
+    private static final int MULTI_WINDOW_LAUNCH_TYPE_APP_PAIR = 1;
 
     /**
      * If a launching activity isn't visible within this duration when the device is sleeping, e.g.
@@ -329,6 +324,8 @@ class ActivityMetricsLogger {
         @Nullable Runnable mPendingFullyDrawn;
         /** Non-null if the trace is active. */
         @Nullable String mLaunchTraceName;
+        /** Whether this transition info is for an activity that is a part of multi-window. */
+        int mMultiWindowLaunchType = MULTI_WINDOW_LAUNCH_TYPE_UNSPECIFIED;
 
         /** @return Non-null if there will be a window drawn event for the launch. */
         @Nullable
@@ -477,6 +474,7 @@ class ActivityMetricsLogger {
         final int activityRecordIdHashCode;
         final boolean relaunched;
         final long timestampNs;
+        final int multiWindowLaunchType;
 
         private TransitionInfoSnapshot(TransitionInfo info) {
             this(info, info.mLastLaunchedActivity, INVALID_DELAY);
@@ -507,6 +505,7 @@ class ActivityMetricsLogger {
             this.windowsFullyDrawnDelayMs = windowsFullyDrawnDelayMs;
             relaunched = info.mRelaunched;
             timestampNs = info.mLaunchingState.mStartRealtimeNs;
+            multiWindowLaunchType = info.mMultiWindowLaunchType;
         }
 
         @WaitResult.LaunchState int getLaunchState() {
@@ -744,6 +743,10 @@ class ActivityMetricsLogger {
             return;
         }
 
+        // Look at all other transition infos and mark them as a split pair if they belong to
+        // adjacent tasks
+        updateSplitPairLaunches(newInfo);
+
         if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched successful");
         // A new launch sequence has begun. Start tracking it.
         mTransitionInfoList.add(newInfo);
@@ -765,6 +768,36 @@ class ActivityMetricsLogger {
             final TransitionInfo prevInfo = mTransitionInfoList.get(i);
             if (prevInfo.mIsDrawn || !prevInfo.mLastLaunchedActivity.isVisibleRequested()) {
                 scheduleCheckActivityToBeDrawn(prevInfo.mLastLaunchedActivity, 0 /* delay */);
+            }
+        }
+    }
+
+    /**
+     * Updates all transition infos including the given {@param info} if they are a part of a
+     * split pair launch.
+     */
+    private void updateSplitPairLaunches(@NonNull TransitionInfo info) {
+        final Task launchedActivityTask = info.mLastLaunchedActivity.getTask();
+        final Task adjacentToLaunchedTask = launchedActivityTask.getAdjacentTask();
+        if (adjacentToLaunchedTask == null) {
+            // Not a part of a split pair
+            return;
+        }
+        for (int i = mTransitionInfoList.size() - 1; i >= 0; i--) {
+            final TransitionInfo otherInfo = mTransitionInfoList.get(i);
+            if (otherInfo == info) {
+                continue;
+            }
+            final Task otherTask = otherInfo.mLastLaunchedActivity.getTask();
+            // The adjacent task is the split root in which activities are started
+            if (otherTask.isDescendantOf(adjacentToLaunchedTask)) {
+                if (DEBUG_METRICS) {
+                    Slog.i(TAG, "Found adjacent tasks t1=" + launchedActivityTask.mTaskId
+                            + " t2=" + otherTask.mTaskId);
+                }
+                // These tasks are adjacent, so mark them as such
+                info.mMultiWindowLaunchType = MULTI_WINDOW_LAUNCH_TYPE_APP_PAIR;
+                otherInfo.mMultiWindowLaunchType = MULTI_WINDOW_LAUNCH_TYPE_APP_PAIR;
             }
         }
     }
@@ -803,6 +836,17 @@ class ActivityMetricsLogger {
                 && !r.mTransitionController.isCollecting(r))) {
             done(false /* abort */, info, "notifyWindowsDrawn", timestampNs);
         }
+
+        if (android.app.Flags.appStartInfoTimestamps()) {
+            final int pid = r.getPid();
+            // Log here to match StatsD for time to first frame.
+            mLoggerHandler.post(
+                    () -> mSupervisor.mService.mWindowManager.mAmInternal.addStartInfoTimestamp(
+                            ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME,
+                            timestampNs, infoSnapshot.applicationInfo.uid, pid,
+                            infoSnapshot.userId));
+        }
+
         return infoSnapshot;
     }
 
@@ -1133,10 +1177,12 @@ class ActivityMetricsLogger {
             isIncremental = true;
             isLoading = isIncrementalLoading(info.packageName, info.userId);
         }
-        final boolean stopped = (info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final boolean stopped = wasStoppedNeedsLogging(info);
         final int packageState = stopped
                 ? APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                 : APP_START_OCCURRED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+
+        final boolean firstLaunch = wasFirstLaunch(info);
         FrameworkStatsLog.write(
                 FrameworkStatsLog.APP_START_OCCURRED,
                 info.applicationInfo.uid,
@@ -1163,17 +1209,26 @@ class ActivityMetricsLogger {
                 TimeUnit.NANOSECONDS.toMillis(info.timestampNs),
                 processState,
                 processOomAdj,
-                packageState);
+                packageState,
+                false, // is_xr_activity
+                firstLaunch,
+                0L /* TODO: stoppedDuration */,
+                info.multiWindowLaunchType);
+        // Reset the stopped state to avoid reporting stopped again
+        if (info.processRecord != null) {
+            info.processRecord.setWasStoppedLogged(true);
+        }
 
         if (DEBUG_METRICS) {
-            Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
+            Slog.i(TAG, String.format(
+                    "APP_START_OCCURRED(%s, %s, %s, %s, %s, wasStopped=%b, firstLaunch=%b)",
                     info.applicationInfo.uid,
                     info.packageName,
                     getAppStartTransitionType(info.type, info.relaunched),
                     info.launchedActivityName,
-                    info.launchedActivityLaunchedFromPackage));
+                    info.launchedActivityLaunchedFromPackage,
+                    stopped, firstLaunch));
         }
-
 
         logAppStartMemoryStateCapture(info);
     }
@@ -1221,10 +1276,8 @@ class ActivityMetricsLogger {
         final ActivityRecord r = info.mLastLaunchedActivity;
         final long lastTopLossTime = r.topResumedStateLossTime;
         final WindowManagerService wm = mSupervisor.mService.mWindowManager;
-        final Object controller = wm.getRecentsAnimationController();
         mLoggerHandler.postDelayed(() -> {
-            if (lastTopLossTime != r.topResumedStateLossTime
-                    || controller != wm.getRecentsAnimationController()) {
+            if (lastTopLossTime != r.topResumedStateLossTime) {
                 // Skip if the animation was finished in a short time.
                 return;
             }
@@ -1558,7 +1611,8 @@ class ActivityMetricsLogger {
 
         int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
         if (isAppCompateStateChangedToLetterboxed(state)) {
-            positionToLog = activity.mLetterboxUiController.getLetterboxPositionForLogging();
+            positionToLog = activity.mAppCompatController.getAppCompatReachabilityOverrides()
+                    .getLetterboxPositionForLogging();
         }
         FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED,
                 packageUid, state, positionToLog);
@@ -1595,71 +1649,6 @@ class ActivityMetricsLogger {
         if (DEBUG_METRICS) {
             Slog.i(TAG, String.format("LETTERBOX_POSITION_CHANGED(%s, %s)",
                     packageUid, position));
-        }
-    }
-
-    /**
-     * Logs the Camera Compat Control appeared event that corresponds to the given {@code state}
-     * with the given {@code packageUid}.
-     */
-    void logCameraCompatControlAppearedEventReported(@CameraCompatControlState int state,
-            int packageUid) {
-        switch (state) {
-            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
-                logCameraCompatControlEventReported(
-                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT,
-                        packageUid);
-                break;
-            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
-                logCameraCompatControlEventReported(
-                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_REVERT_TREATMENT,
-                        packageUid);
-                break;
-            case CAMERA_COMPAT_CONTROL_HIDDEN:
-                // Nothing to log.
-                break;
-            default:
-                Slog.w(TAG, "Unexpected state in logCameraCompatControlAppearedEventReported: "
-                        + state);
-                break;
-        }
-    }
-
-    /**
-     * Logs the Camera Compat Control clicked event that corresponds to the given {@code state}
-     * with the given {@code packageUid}.
-     */
-    void logCameraCompatControlClickedEventReported(@CameraCompatControlState int state,
-            int packageUid) {
-        switch (state) {
-            case CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED:
-                logCameraCompatControlEventReported(
-                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_APPLY_TREATMENT,
-                        packageUid);
-                break;
-            case CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED:
-                logCameraCompatControlEventReported(
-                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_REVERT_TREATMENT,
-                        packageUid);
-                break;
-            case CAMERA_COMPAT_CONTROL_DISMISSED:
-                logCameraCompatControlEventReported(
-                        CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__CLICKED_DISMISS,
-                        packageUid);
-                break;
-            default:
-                Slog.w(TAG, "Unexpected state in logCameraCompatControlAppearedEventReported: "
-                        + state);
-                break;
-        }
-    }
-
-    private void logCameraCompatControlEventReported(int event, int packageUid) {
-        FrameworkStatsLog.write(FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED, packageUid,
-                event);
-        if (DEBUG_METRICS) {
-            Slog.i(TAG, String.format("CAMERA_COMPAT_CONTROL_EVENT_REPORTED(%s, %s)", packageUid,
-                    event));
         }
     }
 
@@ -1792,6 +1781,30 @@ class ActivityMetricsLogger {
                 return ActivityMetricsLaunchObserver.TEMPERATURE_COLD;
             default:
                 return -1;
+        }
+    }
+
+    private boolean wasStoppedNeedsLogging(TransitionInfoSnapshot info) {
+        if (info.processRecord != null) {
+            return (info.processRecord.wasForceStopped()
+                        || info.processRecord.wasFirstLaunch())
+                    && !info.processRecord.getWasStoppedLogged();
+        } else {
+            return (info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        }
+    }
+
+    private boolean wasFirstLaunch(TransitionInfoSnapshot info) {
+        if (info.processRecord != null) {
+            return info.processRecord.wasFirstLaunch()
+                    && !info.processRecord.getWasStoppedLogged();
+        }
+        try {
+            return !mSupervisor.mService.getPackageManagerInternalLocked()
+                    .wasPackageEverLaunched(info.packageName, info.userId);
+        } catch (Exception e) {
+            // Couldn't find the state record, so must be a newly installed app
+            return true;
         }
     }
 }

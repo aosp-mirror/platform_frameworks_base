@@ -18,11 +18,11 @@ package com.android.systemui.common.ui.compose.windowinsets
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 
 /** The bounds and [CutoutLocation] of the current display. */
@@ -37,11 +37,12 @@ fun ScreenDecorProvider(
     screenCornerRadius: Float,
     content: @Composable () -> Unit,
 ) {
-    val cutout by displayCutout.collectAsState()
+    val cutout by displayCutout.collectAsStateWithLifecycle()
     val screenCornerRadiusDp = with(LocalDensity.current) { screenCornerRadius.toDp() }
+
     CompositionLocalProvider(
         LocalScreenCornerRadius provides screenCornerRadiusDp,
-        LocalDisplayCutout provides cutout
+        LocalDisplayCutout provides cutout,
     ) {
         content()
     }

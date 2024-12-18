@@ -161,4 +161,20 @@ public class DisplayTransformManagerTest {
                 .isEqualTo(Integer.toString(testPropertyValue));
     }
 
+    @Test
+    public void daltonizer_defaultValues() {
+        synchronized (mDtm.mDaltonizerModeLock) {
+            assertThat(mDtm.mDaltonizerMode).isEqualTo(-1);
+            assertThat(mDtm.mDaltonizerLevel).isEqualTo(-1);
+        }
+    }
+
+    @Test
+    public void setDaltonizerMode_newValues_valuesUpdated() {
+        mDtm.setDaltonizerMode(0, 0);
+        synchronized (mDtm.mDaltonizerModeLock) {
+            assertThat(mDtm.mDaltonizerMode).isEqualTo(0);
+            assertThat(mDtm.mDaltonizerLevel).isEqualTo(0);
+        }
+    }
 }

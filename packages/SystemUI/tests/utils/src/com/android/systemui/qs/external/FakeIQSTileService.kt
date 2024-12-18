@@ -16,11 +16,11 @@
 
 package com.android.systemui.qs.external
 
-import android.os.Binder
 import android.os.IBinder
+import android.os.IInterface
 import android.service.quicksettings.IQSTileService
 
-class FakeIQSTileService : IQSTileService {
+class FakeIQSTileService : IQSTileService.Stub() {
 
     var isTileAdded: Boolean = false
         private set
@@ -31,9 +31,11 @@ class FakeIQSTileService : IQSTileService {
         get() = mutableClicks
 
     private val mutableClicks: MutableList<IBinder?> = mutableListOf()
-    private val binder = Binder()
+    override fun queryLocalInterface(descriptor: String): IInterface {
+        return this
+    }
 
-    override fun asBinder(): IBinder = binder
+    override fun asBinder(): IBinder = this
 
     override fun onTileAdded() {
         isTileAdded = true

@@ -18,11 +18,13 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
@@ -35,7 +37,8 @@ import java.util.function.Supplier;
  * Fingerprint-specific internal client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
+@VisibleForTesting
+public class FingerprintInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
     private static final String TAG = "FingerprintInternalEnumerateClient";
 
     protected FingerprintInternalEnumerateClient(@NonNull Context context,
@@ -55,5 +58,10 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<AidlSes
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    protected int getModality() {
+        return BiometricsProtoEnums.MODALITY_FINGERPRINT;
     }
 }

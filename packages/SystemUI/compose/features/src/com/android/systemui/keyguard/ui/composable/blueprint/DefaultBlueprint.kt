@@ -16,38 +16,40 @@
 
 package com.android.systemui.keyguard.ui.composable.blueprint
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.compose.modifiers.thenIf
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
-import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
-import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
-import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
+import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
 import java.util.Optional
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 /**
  * Renders the lockscreen scene when showing with the default layout (e.g. vertical phone form
@@ -56,82 +58,104 @@ import javax.inject.Inject
 class DefaultBlueprint
 @Inject
 constructor(
-    private val viewModel: LockscreenContentViewModel,
     private val statusBarSection: StatusBarSection,
-    private val clockSection: DefaultClockSection,
-    private val smartSpaceSection: SmartSpaceSection,
-    private val notificationSection: NotificationSection,
     private val lockSection: LockSection,
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
-    private val mediaCarouselSection: MediaCarouselSection,
-    private val clockInteractor: KeyguardClockInteractor,
+    private val topAreaSection: TopAreaSection,
+    private val notificationSection: NotificationSection,
 ) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "default"
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) {
+    override fun SceneScope.Content(
+        viewModel: LockscreenContentViewModel,
+        modifier: Modifier,
+    ) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
-        val burnIn = rememberBurnIn(clockInteractor)
-        val resources = LocalContext.current.resources
+        val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
+        val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
+        val areNotificationsVisible by
+            viewModel.areNotificationsVisible().collectAsStateWithLifecycle(initialValue = false)
+        val isBypassEnabled by viewModel.isBypassEnabled.collectAsStateWithLifecycle()
+
+        if (isBypassEnabled) {
+            with(notificationSection) { HeadsUpNotifications() }
+        }
 
         LockscreenLongPress(
-            viewModel = viewModel.longPress,
+            viewModel = viewModel.touchHandling,
             modifier = modifier,
         ) { onSettingsMenuPlaced ->
             Layout(
                 content = {
                     // Constrained to above the lock icon.
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                     ) {
-                        with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                        with(clockSection) {
-                            SmallClock(
-                                burnInParams = burnIn.parameters,
-                                onTopChanged = burnIn.onSmallClockTopChanged,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-                        with(smartSpaceSection) {
-                            SmartSpace(
-                                burnInParams = burnIn.parameters,
-                                onTopChanged = burnIn.onSmartspaceTopChanged,
+                        with(statusBarSection) {
+                            StatusBar(
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(
-                                            top = { viewModel.getSmartSpacePaddingTop(resources) },
+                                            horizontal = { unfoldTranslations.start.roundToInt() },
                                         )
-                                        .padding(
-                                            bottom =
-                                                dimensionResource(
-                                                    R.dimen.keyguard_status_view_bottom_margin
-                                                ),
-                                        ),
                             )
                         }
 
-                        if (viewModel.isLargeClockVisible) {
-                            Spacer(modifier = Modifier.weight(weight = 1f))
-                            with(clockSection) {
-                                LargeClock(
-                                    modifier = Modifier.fillMaxWidth(),
+                        Box {
+                            with(topAreaSection) {
+                                DefaultClockLayout(
+                                    smartSpacePaddingTop = viewModel::getSmartSpacePaddingTop,
+                                    modifier =
+                                        Modifier.thenIf(isShadeLayoutWide) {
+                                                Modifier.fillMaxWidth(0.5f)
+                                            }
+                                            .graphicsLayer {
+                                                translationX = unfoldTranslations.start
+                                            }
                                 )
+                            }
+                            if (isShadeLayoutWide && !isBypassEnabled) {
+                                with(notificationSection) {
+                                    Notifications(
+                                        areNotificationsVisible = areNotificationsVisible,
+                                        isShadeLayoutWide = true,
+                                        burnInParams = null,
+                                        modifier =
+                                            Modifier.fillMaxWidth(0.5f)
+                                                .fillMaxHeight()
+                                                .align(alignment = Alignment.TopEnd)
+                                    )
+                                }
                             }
                         }
 
-                        with(mediaCarouselSection) { MediaCarousel() }
+                        val aodIconPadding: Dp =
+                            dimensionResource(R.dimen.below_clock_padding_start_icons)
 
-                        if (viewModel.areNotificationsVisible(resources = resources)) {
-                            with(notificationSection) {
-                                Notifications(
-                                    modifier = Modifier.fillMaxWidth().weight(weight = 1f)
+                        with(notificationSection) {
+                            if (!isShadeLayoutWide && !isBypassEnabled) {
+                                Box(modifier = Modifier.weight(weight = 1f)) {
+                                    AodNotificationIcons(
+                                        modifier =
+                                            Modifier.align(alignment = Alignment.TopStart)
+                                                .padding(start = aodIconPadding),
+                                    )
+                                    Notifications(
+                                        areNotificationsVisible = areNotificationsVisible,
+                                        isShadeLayoutWide = false,
+                                        burnInParams = null,
+                                    )
+                                }
+                            } else {
+                                AodNotificationIcons(
+                                    modifier = Modifier.padding(start = aodIconPadding),
                                 )
                             }
                         }
-
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
                                 AmbientIndication(modifier = Modifier.fillMaxWidth())
@@ -142,7 +166,7 @@ constructor(
                     with(lockSection) { LockIcon() }
 
                     // Aligned to bottom and constrained to below the lock icon.
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth().sysuiResTag("keyguard_bottom_area")) {
                         if (isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
                                 AmbientIndication(modifier = Modifier.fillMaxWidth())
@@ -156,14 +180,24 @@ constructor(
 
                     // Aligned to bottom and NOT constrained by the lock icon.
                     with(bottomAreaSection) {
-                        Shortcut(isStart = true, applyPadding = true)
-                        Shortcut(isStart = false, applyPadding = true)
+                        Shortcut(
+                            isStart = true,
+                            applyPadding = true,
+                            modifier =
+                                Modifier.graphicsLayer { translationX = unfoldTranslations.start },
+                        )
+                        Shortcut(
+                            isStart = false,
+                            applyPadding = true,
+                            modifier =
+                                Modifier.graphicsLayer { translationX = unfoldTranslations.end },
+                        )
                     }
                     with(settingsMenuSection) { SettingsMenu(onSettingsMenuPlaced) }
                 },
                 modifier = Modifier.fillMaxSize(),
             ) { measurables, constraints ->
-                check(measurables.size == 6)
+                check(measurables.size == 6) { "Expected 6 measurables, got: ${measurables.size}" }
                 val aboveLockIconMeasurable = measurables[0]
                 val lockIconMeasurable = measurables[1]
                 val belowLockIconMeasurable = measurables[2]
@@ -229,9 +263,4 @@ constructor(
             }
         }
     }
-}
-
-@Module
-interface DefaultBlueprintModule {
-    @Binds @IntoSet fun blueprint(blueprint: DefaultBlueprint): ComposableLockscreenSceneBlueprint
 }

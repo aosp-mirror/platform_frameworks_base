@@ -1,34 +1,19 @@
 {
   "presubmit": [
     {
-      "name": "CtsAccessibilityServiceTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAccessibilityServiceTestCases"
     },
     {
-      "name": "CtsAccessibilityTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsAccessibilityTestCases"
     },
     {
-      "name": "CtsUiAutomationTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsUiAutomationTestCases"
     },
     {
-      "name": "FrameworksServicesTests_accessibility_Presubmit"
+      "name": "FrameworksServicesTests_accessibility"
     },
     {
-      "name": "FrameworksCoreTests_accessibility_NO_FLAKES"
+      "name": "FrameworksCoreTests_accessibility"
     }
   ],
   "postsubmit": [
@@ -45,12 +30,7 @@
       "name": "CtsUiAutomationTestCases"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.accessibility"
-        }
-      ]
+      "name": "FrameworksServicesTests_accessibility"
     },
     {
       "name": "FrameworksCoreTests_accessibility"

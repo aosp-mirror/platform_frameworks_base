@@ -140,10 +140,10 @@ public abstract class BrightnessMappingStrategy {
             builder.setShortTermModelLowerLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, brightnessRange,
-                    autoBrightnessAdjustmentMaxGamma, mode, displayWhiteBalanceController);
+                    autoBrightnessAdjustmentMaxGamma, mode, preset, displayWhiteBalanceController);
         } else if (isValidMapping(luxLevels, brightnessLevels)) {
             return new SimpleMappingStrategy(luxLevels, brightnessLevels,
-                    autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout, mode);
+                    autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout, mode, preset);
         } else {
             return null;
         }
@@ -394,6 +394,12 @@ public abstract class BrightnessMappingStrategy {
     abstract int getMode();
 
     /**
+     * @return The preset for this mapping strategy. Presets are used on devices that allow users
+     * to choose from a set of predefined options in display auto-brightness settings.
+     */
+    abstract int getPreset();
+
+    /**
      * Check if the short term model should be reset given the anchor lux the last
      * brightness change was made at and the current ambient lux.
      */
@@ -598,6 +604,8 @@ public abstract class BrightnessMappingStrategy {
         @AutomaticBrightnessController.AutomaticBrightnessMode
         private final int mMode;
 
+        private final int mPreset;
+
         private Spline mSpline;
         private float mMaxGamma;
         private float mAutoBrightnessAdjustment;
@@ -606,7 +614,8 @@ public abstract class BrightnessMappingStrategy {
         private long mShortTermModelTimeout;
 
         private SimpleMappingStrategy(float[] lux, float[] brightness, float maxGamma,
-                long timeout, @AutomaticBrightnessController.AutomaticBrightnessMode int mode) {
+                long timeout, @AutomaticBrightnessController.AutomaticBrightnessMode int mode,
+                int preset) {
             Preconditions.checkArgument(lux.length != 0 && brightness.length != 0,
                     "Lux and brightness arrays must not be empty!");
             Preconditions.checkArgument(lux.length == brightness.length,
@@ -633,6 +642,7 @@ public abstract class BrightnessMappingStrategy {
             computeSpline();
             mShortTermModelTimeout = timeout;
             mMode = mode;
+            mPreset = preset;
         }
 
         @Override
@@ -766,6 +776,11 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
+        int getPreset() {
+            return mPreset;
+        }
+
+        @Override
         float getUserLux() {
             return mUserLux;
         }
@@ -837,6 +852,8 @@ public abstract class BrightnessMappingStrategy {
         @AutomaticBrightnessController.AutomaticBrightnessMode
         private final int mMode;
 
+        private final int mPreset;
+
         // Previous short-term models and the times that they were computed stored for debugging
         // purposes
         private List<Spline> mPreviousBrightnessSplines = new ArrayList<>();
@@ -846,7 +863,7 @@ public abstract class BrightnessMappingStrategy {
 
         public PhysicalMappingStrategy(BrightnessConfiguration config, float[] nits,
                 float[] brightness, float maxGamma,
-                @AutomaticBrightnessController.AutomaticBrightnessMode int mode,
+                @AutomaticBrightnessController.AutomaticBrightnessMode int mode, int preset,
                 @Nullable DisplayWhiteBalanceController displayWhiteBalanceController) {
 
             Preconditions.checkArgument(nits.length != 0 && brightness.length != 0,
@@ -860,6 +877,7 @@ public abstract class BrightnessMappingStrategy {
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, "brightness");
 
             mMode = mode;
+            mPreset = preset;
             mMaxGamma = maxGamma;
             mAutoBrightnessAdjustment = 0;
             mUserLux = INVALID_LUX;
@@ -1055,7 +1073,9 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
             pw.println("  shortTermModelTimeout=" + getShortTermModelTimeout());
 
-            pw.println("  Previous short-term models (oldest to newest): ");
+            if (!mPreviousBrightnessSplines.isEmpty()) {
+                pw.println("  Previous short-term models (oldest to newest): ");
+            }
             for (int i = 0; i < mPreviousBrightnessSplines.size(); i++) {
                 pw.println("  Computed at "
                         + FORMAT.format(new Date(mBrightnessSplineChangeTimes.get(i))) + ": ");
@@ -1070,6 +1090,11 @@ public abstract class BrightnessMappingStrategy {
         @Override
         int getMode() {
             return mMode;
+        }
+
+        @Override
+        int getPreset() {
+            return mPreset;
         }
 
         @Override

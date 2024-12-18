@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.IBinder;
 import android.os.Parcel;
 
 import java.lang.annotation.Retention;
@@ -25,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Request for lifecycle state that an activity should reach.
+ *
  * @hide
  */
 public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
@@ -52,8 +54,13 @@ public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
     public static final int ON_DESTROY = 6;
     public static final int ON_RESTART = 7;
 
-    ActivityLifecycleItem() {}
+    ActivityLifecycleItem(@NonNull IBinder activityToken) {
+        super(activityToken);
+    }
 
+    // Parcelable implementation
+
+    /** Reads from Parcel. */
     ActivityLifecycleItem(@NonNull Parcel in) {
         super(in);
     }

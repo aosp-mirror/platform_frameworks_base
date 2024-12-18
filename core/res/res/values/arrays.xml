@@ -37,8 +37,7 @@
         <item>@drawable/fastscroll_label_right_material</item>
         <item>@drawable/fastscroll_thumb_material</item>
         <item>@drawable/fastscroll_track_material</item>
-        <item>@drawable/floating_popup_background_dark</item>
-        <item>@drawable/floating_popup_background_light</item>
+        <item>@drawable/floating_popup_background</item>
         <item>@drawable/ic_ab_back_material</item>
         <item>@drawable/ic_ab_back_material_dark</item>
         <item>@drawable/ic_ab_back_material_light</item>
@@ -135,11 +134,6 @@
        <item>@color/search_url_text_material_dark</item>
        <item>@color/search_url_text_material_light</item>
     </array>
-
-   <array name="preloaded_freeform_multi_window_drawables">
-      <item>@drawable/decor_maximize_button_dark</item>
-      <item>@drawable/decor_maximize_button_light</item>
-   </array>
 
     <!-- Used in LocalePicker -->
     <string-array translatable="false" name="special_locale_codes">

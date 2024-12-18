@@ -79,12 +79,12 @@ import android.view.WindowManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCapture;
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
-import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
@@ -96,6 +96,10 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import com.google.android.msdl.domain.MSDLPlayer;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -145,13 +149,9 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsController mUdfpsController;
     @Mock
-    private SideFpsController mSideFpsController;
-    @Mock
     private DisplayManager mDisplayManager;
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
-    @Mock
-    private AuthDialogPanelInteractionDetector mPanelInteractionDetector;
     @Mock
     private UserManager mUserManager;
     @Mock
@@ -163,8 +163,6 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
-    private PromptCredentialInteractor mBiometricPromptCredentialInteractor;
-    @Mock
     private PromptSelectorInteractor mPromptSelectionInteractor;
     @Mock
     private CredentialViewModel mCredentialViewModel;
@@ -172,6 +170,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private PromptViewModel mPromptViewModel;
     @Mock
     private UdfpsUtils mUdfpsUtils;
+    @Mock
+    private Lazy<ViewCapture> mLazyViewCapture;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
@@ -187,6 +187,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private VibratorHelper mVibratorHelper;
+    @Mock
+    private MSDLPlayer mMSDLPlayer;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -442,6 +444,17 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mReceiver).onDialogDismissed(
                 eq(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED),
                 AdditionalMatchers.aryEq(credentialAttestation));
+    }
+
+    @Test
+    public void testSendsReasonContentViewMoreOptions_whenButtonPressed() throws Exception {
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS,
+                null, /* credentialAttestation */
+                mAuthController.mCurrentDialog.getRequestId());
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS),
+                eq(null) /* credentialAttestation */);
     }
 
     // Statusbar tests
@@ -1048,19 +1061,16 @@ public class AuthControllerTest extends SysuiTestCase {
 
     private final class TestableAuthController extends AuthController {
         private int mBuildCount = 0;
-        private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context) {
             super(context, null /* applicationCoroutineScope */,
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
-                    mFingerprintManager, mFaceManager, () -> mUdfpsController,
-                    () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
-                    mPanelInteractionDetector, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
-                    () -> mLogContextInteractor,
-                    () -> mBiometricPromptCredentialInteractor,
-                    () -> mPromptSelectionInteractor, () -> mCredentialViewModel,
-                    () -> mPromptViewModel, mInteractionJankMonitor, mHandler, mBackgroundExecutor,
-                    mUdfpsUtils, mVibratorHelper);
+                    mFingerprintManager, mFaceManager, () -> mUdfpsController, mDisplayManager,
+                    mWakefulnessLifecycle, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
+                    () -> mLogContextInteractor, () -> mPromptSelectionInteractor,
+                    () -> mCredentialViewModel, () -> mPromptViewModel, mInteractionJankMonitor,
+                    mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper,
+                    mLazyViewCapture, mMSDLPlayer);
         }
 
         @Override
@@ -1068,11 +1078,8 @@ public class AuthControllerTest extends SysuiTestCase {
                 boolean requireConfirmation, int userId, int[] sensorIds,
                 String opPackageName, boolean skipIntro, long operationId, long requestId,
                 WakefulnessLifecycle wakefulnessLifecycle,
-                AuthDialogPanelInteractionDetector panelInteractionDetector,
                 UserManager userManager,
                 LockPatternUtils lockPatternUtils, PromptViewModel viewModel) {
-
-            mLastBiometricPromptInfo = promptInfo;
 
             AuthDialog dialog;
             if (mBuildCount == 0) {

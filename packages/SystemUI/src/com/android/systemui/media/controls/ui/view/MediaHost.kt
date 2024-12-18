@@ -23,6 +23,7 @@ import android.view.View.OnAttachStateChangeListener
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager
 import com.android.systemui.media.controls.ui.controller.MediaLocation
@@ -33,16 +34,17 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import java.util.Objects
 import javax.inject.Inject
 
-class MediaHost
-constructor(
+class MediaHost(
     private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val mediaDataManager: MediaDataManager,
-    private val mediaHostStatesManager: MediaHostStatesManager
+    private val mediaHostStatesManager: MediaHostStatesManager,
+    private val mediaCarouselController: MediaCarouselController,
 ) : MediaHostState by state {
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
         private set
+
     private var visibleChangedListeners: ArraySet<(Boolean) -> Unit> = ArraySet()
 
     private val tmpLocationOnScreen: IntArray = intArrayOf(0, 0)
@@ -104,7 +106,7 @@ constructor(
                 updateViewVisibility()
             }
 
-            override fun onMediaDataRemoved(key: String) {
+            override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
                 updateViewVisibility()
             }
 
@@ -202,7 +204,7 @@ constructor(
      */
     fun updateViewVisibility() {
         state.visible =
-            if (mediaHierarchyManager.isLockedAndHidden()) {
+            if (mediaCarouselController.isLockedAndHidden()) {
                 false
             } else if (showsOnlyActiveMedia) {
                 mediaDataManager.hasActiveMediaOrRecommendation()
@@ -286,6 +288,15 @@ constructor(
                 changedListener?.invoke()
             }
 
+        override var disablePagination: Boolean = false
+            set(value) {
+                if (field == value) {
+                    return
+                }
+                field = value
+                changedListener?.invoke()
+            }
+
         private var lastDisappearHash = disappearParameters.hashCode()
 
         /** A listener for all changes. This won't be copied over when invoking [copy] */
@@ -302,6 +313,7 @@ constructor(
             mediaHostState.visible = visible
             mediaHostState.disappearParameters = disappearParameters.deepCopy()
             mediaHostState.falsingProtectionNeeded = falsingProtectionNeeded
+            mediaHostState.disablePagination = disablePagination
             return mediaHostState
         }
 
@@ -330,6 +342,9 @@ constructor(
             if (!disappearParameters.equals(other.disappearParameters)) {
                 return false
             }
+            if (disablePagination != other.disablePagination) {
+                return false
+            }
             return true
         }
 
@@ -341,6 +356,7 @@ constructor(
             result = 31 * result + showsOnlyActiveMedia.hashCode()
             result = 31 * result + if (visible) 1 else 2
             result = 31 * result + disappearParameters.hashCode()
+            result = 31 * result + disablePagination.hashCode()
             return result
         }
     }
@@ -398,6 +414,12 @@ interface MediaHostState {
      * propagated
      */
     var disappearParameters: DisappearParameters
+
+    /**
+     * Whether pagination should be disabled for this host, meaning that when there are multiple
+     * media sessions, only the first one will appear.
+     */
+    var disablePagination: Boolean
 
     /** Get a copy of this view state, deepcopying all appropriate members */
     fun copy(): MediaHostState

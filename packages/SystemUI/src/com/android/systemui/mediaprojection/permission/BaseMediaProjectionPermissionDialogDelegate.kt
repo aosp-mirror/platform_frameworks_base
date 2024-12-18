@@ -47,25 +47,25 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @DrawableRes private val dialogIconDrawable: Int? = null,
     @ColorRes private val dialogIconTint: Int? = null,
+    @ScreenShareMode val defaultSelectedMode: Int = screenShareOptions.first().mode,
 ) : DialogDelegate<T>, AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
     private lateinit var cancelButton: TextView
     private lateinit var warning: TextView
     private lateinit var screenShareModeSpinner: Spinner
-    private var hasCancelBeenLogged: Boolean = false
     protected lateinit var dialog: AlertDialog
-    var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
+    private var shouldLogCancel: Boolean = true
+    var selectedScreenShareOption: ScreenShareOption =
+        screenShareOptions.first { it.mode == defaultSelectedMode }
 
     @CallSuper
     override fun onStop(dialog: T) {
         // onStop can be called multiple times and we only want to log once.
-        if (hasCancelBeenLogged) {
-            return
+        if (shouldLogCancel) {
+            mediaProjectionMetricsLogger.notifyProjectionRequestCancelled(hostUid)
+            shouldLogCancel = false
         }
-
-        mediaProjectionMetricsLogger.notifyProjectionRequestCancelled(hostUid)
-        hasCancelBeenLogged = true
     }
 
     @CallSuper
@@ -94,17 +94,20 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
     }
 
     private fun initScreenShareOptions() {
-        selectedScreenShareOption = screenShareOptions.first()
-        warning.text = warningText
+        selectedScreenShareOption = screenShareOptions.first { it.mode == defaultSelectedMode }
+        setOptionSpecificFields()
         initScreenShareSpinner()
     }
 
     private val warningText: String
         get() = dialog.context.getString(selectedScreenShareOption.warningText, appName)
 
+    private val startButtonText: String
+        get() = dialog.context.getString(selectedScreenShareOption.startButtonText)
+
     private fun initScreenShareSpinner() {
         val adapter = OptionsAdapter(dialog.context.applicationContext, screenShareOptions)
-        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_spinner)
+        screenShareModeSpinner = dialog.requireViewById(R.id.screen_share_mode_options)
         screenShareModeSpinner.adapter = adapter
         screenShareModeSpinner.onItemSelectedListener = this
 
@@ -120,11 +123,19 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
                 }
             }
         screenShareModeSpinner.isLongClickable = false
+        val defaultModePosition = screenShareOptions.indexOfFirst { it.mode == defaultSelectedMode }
+        screenShareModeSpinner.setSelection(defaultModePosition, /* animate= */ false)
     }
 
     override fun onItemSelected(adapterView: AdapterView<*>?, view: View, pos: Int, id: Long) {
         selectedScreenShareOption = screenShareOptions[pos]
+        setOptionSpecificFields()
+    }
+
+    /** Sets fields on the dialog that change based on which option is selected. */
+    private fun setOptionSpecificFields() {
         warning.text = warningText
+        startButton.text = startButtonText
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -135,12 +146,11 @@ abstract class BaseMediaProjectionPermissionDialogDelegate<T : AlertDialog>(
         dialogTitle.text = title
     }
 
-    protected fun setStartButtonText(@StringRes stringId: Int) {
-        startButton.setText(stringId)
-    }
-
     protected fun setStartButtonOnClickListener(listener: View.OnClickListener?) {
-        startButton.setOnClickListener(listener)
+        startButton.setOnClickListener { view ->
+            shouldLogCancel = false
+            listener?.onClick(view)
+        }
     }
 
     protected fun setCancelButtonOnClickListener(listener: View.OnClickListener?) {

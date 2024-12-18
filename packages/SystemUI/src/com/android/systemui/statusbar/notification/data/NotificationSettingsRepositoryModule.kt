@@ -16,17 +16,25 @@
 
 package com.android.systemui.statusbar.notification.data
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.settings.SecureSettingsRepositoryModule
+import com.android.systemui.settings.SystemSettingsRepositoryModule
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
 import com.android.systemui.shared.settings.data.repository.SecureSettingsRepository
+import com.android.systemui.shared.settings.data.repository.SystemSettingsRepository
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionLogger
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-@Module(includes = [SecureSettingsRepositoryModule::class])
+@Module(includes = [SecureSettingsRepositoryModule::class, SystemSettingsRepositoryModule::class])
 object NotificationSettingsRepositoryModule {
     @Provides
     @SysUISingleton
@@ -34,10 +42,25 @@ object NotificationSettingsRepositoryModule {
         @Background backgroundScope: CoroutineScope,
         @Background backgroundDispatcher: CoroutineDispatcher,
         secureSettingsRepository: SecureSettingsRepository,
+        systemSettingsRepository: SystemSettingsRepository,
     ): NotificationSettingsRepository =
         NotificationSettingsRepository(
             backgroundScope,
             backgroundDispatcher,
-            secureSettingsRepository
-        )
+            secureSettingsRepository,
+            systemSettingsRepository)
+
+    @Provides
+    @IntoMap
+    @ClassKey(NotificationSettingsRepository::class)
+    @SysUISingleton
+    fun provideCoreStartable(
+        @Application applicationScope: CoroutineScope,
+        repository: NotificationSettingsRepository,
+        logger: VisualInterruptionDecisionLogger
+    ) = CoreStartable {
+        applicationScope.launch {
+            repository.isCooldownEnabled.collect { value -> logger.logCooldownSetting(value) }
+        }
+    }
 }

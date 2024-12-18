@@ -55,8 +55,8 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
-
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import static android.view.inputmethod.Flags.ctrlShiftShortcut;
+import static android.view.inputmethod.Flags.predictiveBackIme;
 
 import android.annotation.AnyThread;
 import android.annotation.CallSuper;
@@ -399,9 +399,11 @@ public class InputMethodService extends AbstractInputMethodService {
     private long mStylusHwSessionsTimeout = STYLUS_HANDWRITING_IDLE_TIMEOUT_MS;
     private Runnable mStylusWindowIdleTimeoutRunnable;
     private long mStylusWindowIdleTimeoutForTest;
-    /** Tracks last {@link MotionEvent#getToolType(int)} used for {@link MotionEvent#ACTION_DOWN}.
+
+    /**
+     * Tracks the ctrl+shift shortcut
      **/
-    private int mLastUsedToolType;
+    private boolean mUsingCtrlShiftShortcut = false;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -496,43 +498,53 @@ public class InputMethodService extends AbstractInputMethodService {
     public static final int BACK_DISPOSITION_ADJUST_NOTHING = 3;
 
     /**
-     * Enum flag to be used for {@link #setBackDisposition(int)}.
+     * The disposition mode that indicates the expected affordance for the back button.
      *
      * @hide
      */
-    @Retention(SOURCE)
-    @IntDef(value = {BACK_DISPOSITION_DEFAULT, BACK_DISPOSITION_WILL_NOT_DISMISS,
-            BACK_DISPOSITION_WILL_DISMISS, BACK_DISPOSITION_ADJUST_NOTHING},
-            prefix = "BACK_DISPOSITION_")
+    @IntDef(prefix = { "BACK_DISPOSITION_" }, value = {
+            BACK_DISPOSITION_DEFAULT,
+            BACK_DISPOSITION_WILL_NOT_DISMISS,
+            BACK_DISPOSITION_WILL_DISMISS,
+            BACK_DISPOSITION_ADJUST_NOTHING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface BackDispositionMode {}
 
     /**
+     * The IME is active, and ready to accept touch/key events. It may or may not be visible.
+     *
      * @hide
-     * The IME is active.  It may or may not be visible.
      */
-    public static final int IME_ACTIVE = 0x1;
+    public static final int IME_ACTIVE = 1 << 0;
 
     /**
-     * @hide
      * The IME is perceptibly visible to the user.
+     *
+     * @hide
      */
-    public static final int IME_VISIBLE = 0x2;
+    public static final int IME_VISIBLE = 1 << 1;
 
     /**
-     * @hide
-     * The IME is active and ready with views but set invisible.
-     * This flag cannot be combined with {@link #IME_VISIBLE}.
-     */
-    public static final int IME_INVISIBLE = 0x4;
-
-    /**
-     * @hide
      * The IME is visible, but not yet perceptible to the user (e.g. fading in)
      * by {@link android.view.WindowInsetsController}.
      *
      * @see InputMethodManager#reportPerceptible
+     * @hide
      */
-    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 1 << 2;
+
+    /**
+     * The IME window visibility state.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "IME_" }, value = {
+            IME_ACTIVE,
+            IME_VISIBLE,
+            IME_VISIBLE_IMPERCEPTIBLE,
+    })
+    public @interface ImeWindowVisibility {}
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -652,8 +664,13 @@ public class InputMethodService extends AbstractInputMethodService {
     
     int mStatusIcon;
 
+    /** Latest reported value of back disposition mode. */
     @BackDispositionMode
     int mBackDisposition;
+
+    /** Latest reported value of IME window visibility state. */
+    @ImeWindowVisibility
+    private int mImeWindowVisibility;
 
     private Object mLock = new Object();
     @GuardedBy("mLock")
@@ -713,6 +730,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
+        mNavigationBarController.updateInsets(mTmpInsets);
         if (!mViewsCreated) {
             // The IME views are not ready, keep visible insets untouched.
             mTmpInsets.visibleTopInsets = 0;
@@ -758,6 +776,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
         private boolean mSystemCallingShowSoftInput;
         private boolean mSystemCallingHideSoftInput;
+        private boolean mSimultaneousStylusAndTouchEnabled;
 
         /**
          * {@inheritDoc}
@@ -968,6 +987,11 @@ public class InputMethodService extends AbstractInputMethodService {
                                 : InputMethodManager.RESULT_UNCHANGED_HIDDEN), null);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+            if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                // The hide request first finishes the animation and then proceeds to the server
+                // side, finally reaching here, marking this the end state.
+                ImeTracker.forLogging().onHidden(statsToken);
+            }
         }
 
         /**
@@ -1028,7 +1052,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
-            setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+            setImeWindowVisibility(computeImeWindowVis());
 
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
@@ -1122,9 +1146,11 @@ public class InputMethodService extends AbstractInputMethodService {
             mShowInputRequested = false;
 
             mInkWindow.show();
+            mSimultaneousStylusAndTouchEnabled =
+                    com.android.input.flags.Flags.enableMultiDeviceInput();
 
             // deliver previous @param stylusEvents
-            stylusEvents.forEach(InputMethodService.this::onStylusHandwritingMotionEvent);
+            stylusEvents.forEach(this::deliverStylusHandwritingMotionEvent);
 
             // create receiver for channel
             mHandwritingEventReceiver = new InputEventReceiver(channel, Looper.getMainLooper()) {
@@ -1132,10 +1158,15 @@ public class InputMethodService extends AbstractInputMethodService {
                 public void onInputEvent(InputEvent event) {
                     boolean handled = false;
                     try {
-                        if (!(event instanceof MotionEvent)) {
+                        if (!(event instanceof MotionEvent motionEvent)) {
                             return;
                         }
-                        onStylusHandwritingMotionEvent((MotionEvent) event);
+                        if (!motionEvent.isStylusPointer()) {
+                            // Handwriting surface is touchable, we don't want these touch events
+                            // to get to the IME.
+                            return;
+                        }
+                        deliverStylusHandwritingMotionEvent(motionEvent);
                         scheduleHandwritingSessionTimeout();
                         handled = true;
                     } finally {
@@ -1144,6 +1175,29 @@ public class InputMethodService extends AbstractInputMethodService {
                 }
             };
             scheduleHandwritingSessionTimeout();
+        }
+
+        private void deliverStylusHandwritingMotionEvent(MotionEvent motionEvent) {
+            onStylusHandwritingMotionEvent(motionEvent);
+            if (!mSimultaneousStylusAndTouchEnabled) {
+                return;
+            }
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    // Consume and ignore all touches while stylus is down to prevent
+                    // accidental touches from going to the app while writing.
+                    mPrivOps.setHandwritingSurfaceNotTouchable(false);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    // Go back to only consuming stylus events so that the user
+                    // can continue to interact with the app using touch
+                    // when the stylus is not down.
+                    mPrivOps.setHandwritingSurfaceNotTouchable(true);
+                    break;
+            }
         }
 
         /**
@@ -1308,8 +1362,22 @@ public class InputMethodService extends AbstractInputMethodService {
         mImeSurfaceRemoverRunnable = null;
     }
 
-    private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
-        mPrivOps.setImeWindowStatusAsync(visibilityFlags, backDisposition);
+    /**
+     * Sets the IME window visibility state.
+     *
+     * @param vis the IME window visibility state to be set.
+     */
+    private void setImeWindowVisibility(@ImeWindowVisibility int vis) {
+        if (vis == mImeWindowVisibility) {
+            return;
+        }
+        mImeWindowVisibility = vis;
+        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
+    }
+
+    private void setImeWindowStatus(@ImeWindowVisibility int vis,
+            @BackDispositionMode int backDisposition) {
+        mPrivOps.setImeWindowStatusAsync(vis, backDisposition);
     }
 
     /** Set region of the keyboard to be avoided from back gesture */
@@ -1331,7 +1399,6 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void updateEditorToolTypeInternal(int toolType) {
         if (Flags.useHandwritingListenerForTooltype()) {
-            mLastUsedToolType = toolType;
             if (mInputEditorInfo != null) {
                 mInputEditorInfo.setInitialToolType(toolType);
             }
@@ -1937,7 +2004,7 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            setImeWindowStatus(IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
+            setImeWindowVisibility(IME_ACTIVE | (showing ? IME_VISIBLE : 0));
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -2004,7 +2071,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mBackDisposition = disposition;
-        setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
+        setImeWindowStatus(mImeWindowVisibility, mBackDisposition);
     }
 
     /**
@@ -2756,6 +2823,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * <p>This dismisses the {@link #getStylusHandwritingWindow ink window} and stops intercepting
      * stylus {@code MotionEvent}s.
      *
+     * <p>Connectionless handwriting sessions should be finished using {@link
+     * #finishConnectionlessStylusHandwriting(CharSequence)}.
+     *
      * <p>Note for IME developers: Call this method at any time to finish the current handwriting
      * session. Generally, this should be invoked after a short timeout, giving the user enough time
      * to start the next stylus stroke, if any. By default, system will time-out after few seconds.
@@ -2763,9 +2833,6 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * <p>Handwriting session will be finished by framework on next {@link #onFinishInput()}.
      */
-    // TODO(b/300979854): Once connectionless APIs are finalised, update documentation to add:
-    // <p>Connectionless handwriting sessions should be finished using {@link
-    // #finishConnectionlessStylusHandwriting(CharSequence)}.
     public final void finishStylusHandwriting() {
         if (DEBUG) Log.v(TAG, "finishStylusHandwriting()");
         if (mInkWindow == null) {
@@ -3071,19 +3138,20 @@ public class InputMethodService extends AbstractInputMethodService {
 
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_SHOW_WINDOW);
 
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // The ImeInsetsSourceProvider need the statsToken when dispatching the control
+            // (whenever the IME has drawn and its window is visible). Therefore, sending the
+            // statsToken here first.
+            notifyPreImeWindowVisibilityChanged(true /* visible */, statsToken);
+        }
+
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", mDumper,
                 null /* icProto */);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showWindow");
         mDecorViewWasVisible = mDecorViewVisible;
         mInShowWindow = true;
-        final int previousImeWindowStatus =
-                (mDecorViewVisible ? IME_ACTIVE : 0) | (isInputViewShown()
-                        ? (!mWindowVisible ? IME_INVISIBLE : IME_VISIBLE) : 0);
         startViews(prepareWindow(showInput));
-        final int nextImeWindowStatus = mapToImeWindowStatus();
-        if (previousImeWindowStatus != nextImeWindowStatus) {
-            setImeWindowStatus(nextImeWindowStatus, mBackDisposition);
-        }
+        setImeWindowVisibility(computeImeWindowVis());
 
         mNavigationBarController.onWindowShown();
         // compute visibility
@@ -3094,11 +3162,13 @@ public class InputMethodService extends AbstractInputMethodService {
         if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
         mWindow.show();
         mDecorViewWasVisible = true;
-        applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */, statsToken);
+        if (!android.view.inputmethod.Flags.refactorInsetsController()) {
+            applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */, statsToken);
+        }
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        registerCompatOnBackInvokedCallback();
+        registerDefaultOnBackInvokedCallback();
     }
 
 
@@ -3107,18 +3177,27 @@ public class InputMethodService extends AbstractInputMethodService {
      *  back dispatching is enabled. We keep the {@link KeyEvent#KEYCODE_BACK} based legacy code
      *  around to handle back on older devices.
      */
-    private void registerCompatOnBackInvokedCallback() {
+    private void registerDefaultOnBackInvokedCallback() {
         if (mBackCallbackRegistered) {
             return;
         }
         if (mWindow != null) {
-            mWindow.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatBackCallback);
+            if (getApplicationInfo().isOnBackInvokedCallbackEnabled() && predictiveBackIme()) {
+                // Register the compat callback as system-callback if IME has opted in for
+                // predictive back (and predictiveBackIme feature flag is enabled). This indicates
+                // to the receiving process (application process) that a predictive IME dismiss
+                // animation may be played instead of invoking the callback.
+                mWindow.getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(
+                        mCompatBackCallback);
+            } else {
+                mWindow.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                        OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatBackCallback);
+            }
             mBackCallbackRegistered = true;
         }
     }
 
-    private void unregisterCompatOnBackInvokedCallback() {
+    private void unregisterDefaultOnBackInvokedCallback() {
         if (!mBackCallbackRegistered) {
             return;
         }
@@ -3196,6 +3275,20 @@ public class InputMethodService extends AbstractInputMethodService {
                 ? mCurShowInputToken : mCurHideInputToken, setVisible, statsToken);
     }
 
+    /**
+     * Notifies the ImeInsetsSourceProvider before the IME visibility changes.
+     *
+     * @param visible {@code true} if it became visible, {@code false} otherwise.
+     * @param statsToken the token tracking the current IME request.
+     */
+    private void notifyPreImeWindowVisibilityChanged(boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
+        final var viewRootImpl = getWindow().getWindow().getDecorView().getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.notifyImeVisibilityChanged(visible, statsToken);
+        }
+    }
+
     private void finishViews(boolean finishingInput) {
         if (mInputViewStarted) {
             if (DEBUG) Log.v(TAG, "CALL: onFinishInputView");
@@ -3236,8 +3329,14 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
-        setImeWindowStatus(0, mBackDisposition);
-        applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */, statsToken);
+        setImeWindowVisibility(0 /* vis */);
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            // The ImeInsetsSourceProvider need the statsToken when dispatching the control. We
+            // send the token here, so that another request in the provider can be cancelled.
+            notifyPreImeWindowVisibilityChanged(false /* visible */, statsToken);
+        } else {
+            applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */, statsToken);
+        }
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
@@ -3251,7 +3350,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mLastWasInFullscreenMode = mIsFullscreen;
         updateFullscreenMode();
-        unregisterCompatOnBackInvokedCallback();
+        unregisterDefaultOnBackInvokedCallback();
     }
 
     /**
@@ -3328,7 +3427,7 @@ public class InputMethodService extends AbstractInputMethodService {
         // Back callback is typically unregistered in {@link #hideWindow()}, but it's possible
         // for {@link #doFinishInput()} to be called without {@link #hideWindow()} so we also
         // unregister here.
-        unregisterCompatOnBackInvokedCallback();
+        unregisterDefaultOnBackInvokedCallback();
     }
 
     void doStartInput(InputConnection ic, EditorInfo editorInfo, boolean restarting) {
@@ -3339,9 +3438,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 null /* icProto */);
         mInputStarted = true;
         mStartedInputConnection = ic;
-        if (Flags.useHandwritingListenerForTooltype()) {
-            editorInfo.setInitialToolType(mLastUsedToolType);
-        }
         mInputEditorInfo = editorInfo;
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
@@ -3602,7 +3698,8 @@ public class InputMethodService extends AbstractInputMethodService {
             // any KeyEvent keyDown should reset last toolType.
             updateEditorToolTypeInternal(MotionEvent.TOOL_TYPE_UNKNOWN);
         }
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
                 return true;
@@ -3612,14 +3709,33 @@ public class InputMethodService extends AbstractInputMethodService {
                 return true;
             }
             return false;
-        } else if (event.getKeyCode() == KeyEvent.KEYCODE_SPACE && KeyEvent.metaStateHasModifiers(
+        } else if (keyCode == KeyEvent.KEYCODE_SPACE && KeyEvent.metaStateHasModifiers(
                 event.getMetaState() & ~KeyEvent.META_SHIFT_MASK, KeyEvent.META_CTRL_ON)) {
             if (mDecorViewVisible && mWindowVisible) {
                 int direction = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                 mPrivOps.switchKeyboardLayoutAsync(direction);
+                event.startTracking();
                 return true;
             }
         }
+
+        // Check if this may be a ctrl+shift shortcut
+        if (ctrlShiftShortcut()) {
+            if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                    || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) {
+                // Potentially Ctrl+Shift shortcut if Ctrl is currently pressed
+                mUsingCtrlShiftShortcut = KeyEvent.metaStateHasModifiers(
+                    event.getMetaState() & ~KeyEvent.META_SHIFT_MASK, KeyEvent.META_CTRL_ON);
+            } else if (keyCode == KeyEvent.KEYCODE_CTRL_LEFT
+                    || keyCode == KeyEvent.KEYCODE_CTRL_RIGHT) {
+                // Potentially Ctrl+Shift shortcut if Shift is currently pressed
+                mUsingCtrlShiftShortcut = KeyEvent.metaStateHasModifiers(
+                    event.getMetaState() & ~KeyEvent.META_CTRL_MASK, KeyEvent.META_SHIFT_ON);
+            } else {
+                mUsingCtrlShiftShortcut = false;
+            }
+        }
+
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
     }
 
@@ -3661,7 +3777,27 @@ public class InputMethodService extends AbstractInputMethodService {
      * them to perform navigation in the underlying application.
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+        if (ctrlShiftShortcut()) {
+            if (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                    || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT
+                    || keyCode == KeyEvent.KEYCODE_CTRL_LEFT
+                    || keyCode == KeyEvent.KEYCODE_CTRL_RIGHT) {
+                if (mUsingCtrlShiftShortcut
+                        && event.hasNoModifiers()) {
+                    mUsingCtrlShiftShortcut = false;
+                    if (mDecorViewVisible && mWindowVisible) {
+                        // Move to the next IME
+                        switchToNextInputMethod(false /* onlyCurrentIme */);
+                        // TODO(b/332937629): Make the event stream consistent again
+                        return true;
+                    }
+                }
+            } else {
+                mUsingCtrlShiftShortcut = false;
+            }
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
                 return true;
@@ -3669,7 +3805,12 @@ public class InputMethodService extends AbstractInputMethodService {
             if (event.isTracking() && !event.isCanceled()) {
                 return handleBack(true);
             }
+        } else if (keyCode == KeyEvent.KEYCODE_SPACE) {
+            if (event.isTracking() && !event.isCanceled()) {
+                return true;
+            }
         }
+
         return doMovementKey(keyCode, event, MOVEMENT_UP);
     }
 
@@ -4257,6 +4398,17 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * Called when the IME switch button was clicked from the client. Depending on the number of
+     * enabled IME subtypes, this will either switch to the next IME/subtype, or show the input
+     * method picker dialog.
+     *
+     * @hide
+     */
+    final void onImeSwitchButtonClickFromClient() {
+        mPrivOps.onImeSwitchButtonClickFromClient(getDisplayId());
+    }
+
+    /**
      * Used to inject custom {@link InputMethodServiceInternal}.
      *
      * @return the {@link InputMethodServiceInternal} to be used.
@@ -4352,9 +4504,10 @@ public class InputMethodService extends AbstractInputMethodService {
         };
     }
 
-    private int mapToImeWindowStatus() {
-        return IME_ACTIVE
-                | (isInputViewShown() ? IME_VISIBLE : 0);
+    /** Computes the IME window visibility state. */
+    @ImeWindowVisibility
+    private int computeImeWindowVis() {
+        return IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
     }
 
     /**
@@ -4473,7 +4626,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private void compatHandleBack() {
         if (!mDecorViewVisible) {
             Log.e(TAG, "Back callback invoked on a hidden IME. Removing the callback...");
-            unregisterCompatOnBackInvokedCallback();
+            unregisterDefaultOnBackInvokedCallback();
             return;
         }
         final KeyEvent downEvent = createBackKeyEvent(

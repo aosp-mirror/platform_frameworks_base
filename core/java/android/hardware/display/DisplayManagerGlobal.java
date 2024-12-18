@@ -21,6 +21,8 @@ import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,6 +40,7 @@ import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -138,6 +141,8 @@ public final class DisplayManagerGlobal {
 
     private int mWifiDisplayScanNestCount;
 
+    private final Binder mToken = new Binder();
+
     @VisibleForTesting
     public DisplayManagerGlobal(IDisplayManager dm) {
         mDm = dm;
@@ -170,10 +175,14 @@ public final class DisplayManagerGlobal {
     /**
      * Gets an instance of the display manager global singleton.
      *
+     * This method is actually unsupported on Ravenwood, however to support
+     * {@link android.app.ResourcesManager} we make this method always return null.
+     *
      * @return The display manager instance, may be null early in system startup
      * before the display manager has been fully initialized.
      */
     @UnsupportedAppUsage
+    // @RavenwoodIgnore(value = "null")
     public static DisplayManagerGlobal getInstance() {
         synchronized (DisplayManagerGlobal.class) {
             if (sInstance == null) {
@@ -545,6 +554,25 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Request to power a display OFF or reset it to a power state it supposed to have.
+     * @param displayId the id of the display
+     * @param state one of {@link android.view.Display#STATE_UNKNOWN} (to reset the state to
+     *  the one the display should have had now), {@link android.view.Display#STATE_OFF}.
+     * @return true if successful, false otherwise
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public boolean requestDisplayPower(int displayId, int state) {
+        try {
+            return mDm.requestDisplayPower(displayId, state);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to request display power:"
+                    + " state=" + state, ex);
+            return false;
+        }
+    }
+
     public void startWifiDisplayScan() {
         synchronized (mLock) {
             if (mWifiDisplayScanNestCount++ == 0) {
@@ -790,6 +818,14 @@ public final class DisplayManagerGlobal {
     void setVirtualDisplayState(IVirtualDisplayCallback token, boolean isOn) {
         try {
             mDm.setVirtualDisplayState(token, isOn);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    void setVirtualDisplayRotation(IVirtualDisplayCallback token, @Surface.Rotation int rotation) {
+        try {
+            mDm.setVirtualDisplayRotation(token, rotation);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -1182,6 +1218,60 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Sets allowed display mode ids
+     *
+     * @hide
+     */
+    @RequiresPermission("android.permission.RESTRICT_DISPLAY_MODES")
+    public void requestDisplayModes(int displayId, @Nullable int[] modeIds) {
+        try {
+            mDm.requestDisplayModes(mToken, displayId, modeIds);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @param displayId The ID of the display
+     * @return The highest HDR/SDR ratio of the ratios defined in Display Device Config. If no
+     * HDR/SDR map is defined, this always returns 1.
+     */
+    @FlaggedApi(com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio(int displayId) {
+        try {
+            return mDm.getHighestHdrSdrRatio(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDozeBrightnessSensorValueToBrightness
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @Nullable
+    public float[] getDozeBrightnessSensorValueToBrightness(int displayId) {
+        try {
+            return mDm.getDozeBrightnessSensorValueToBrightness(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see DisplayManager#getDefaultDozeBrightness
+     */
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
+    @FloatRange(from = 0f, to = 1f)
+    public float getDefaultDozeBrightness(int displayId) {
+        try {
+            return mDm.getDefaultDozeBrightness(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, @DisplayEvent int event) {
@@ -1355,7 +1445,7 @@ public final class DisplayManagerGlobal {
      * system's display configuration.
      */
     public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
-            "cache_key.display_info";
+            PropertyInvalidatedCache.createSystemCacheKey("display_info");
 
     /**
      * Invalidates the contents of the display info cache for all applications. Can only

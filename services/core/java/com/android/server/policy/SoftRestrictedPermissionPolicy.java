@@ -21,7 +21,6 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
@@ -148,7 +147,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                             pkg.hasPreserveLegacyExternalStorage();
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
 
-                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                    shouldApplyRestriction = !isWhiteListed;
                     isForcedScopedStorage = sForcedScopedStorageAppWhitelist
                             .contains(appInfo.packageName);
                 } else {

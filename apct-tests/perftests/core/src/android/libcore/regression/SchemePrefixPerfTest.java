@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class SchemePrefixPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     enum Strategy {
         JAVA() {
@@ -94,7 +94,7 @@ public final class SchemePrefixPerfTest {
     @Test
     @Parameters(method = "getData")
     public void timeSchemePrefix(Strategy strategy) {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             strategy.execute("http://android.com");
         }

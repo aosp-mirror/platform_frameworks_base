@@ -21,9 +21,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.PluginModule;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.plugins.PluginActionManager;
 import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInstance;
@@ -33,16 +33,16 @@ import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import dagger.Binds;
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * Dagger Module for code related to plugins.

@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -39,7 +39,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class BulkPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -120,7 +120,7 @@ public class BulkPerfTest {
             throws Exception {
         ByteBuffer src = BulkPerfTest.newBuffer(align, sBuf, size);
         ByteBuffer data = BulkPerfTest.newBuffer(align, dBuf, size);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(align ? 0 : 1);
             data.position(align ? 0 : 1);

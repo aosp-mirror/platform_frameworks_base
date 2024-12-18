@@ -16,18 +16,23 @@
 
 package com.android.systemui.volume.panel.component.bottombar.ui.viewmodel
 
+import android.app.ActivityManager
 import android.content.Intent
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLogger
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.volume.panel.volumePanelViewModel
+import com.android.systemui.volume.panel.data.repository.volumePanelGlobalStateRepository
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
+import com.android.systemui.volume.panel.ui.viewmodel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -49,12 +54,20 @@ class BottomBarViewModelTest : SysuiTestCase() {
 
     @Captor private lateinit var intentCaptor: ArgumentCaptor<Intent>
 
-    private val kosmos = testKosmos()
+    @Captor private lateinit var activityStartedCaptor: ArgumentCaptor<ActivityStarter.Callback>
+
+    private val kosmos =
+        testKosmos().apply {
+            volumePanelGlobalStateRepository.updateVolumePanelState { it.copy(isVisible = true) }
+        }
 
     private lateinit var underTest: BottomBarViewModel
 
     private fun initUnderTest() {
-        underTest = with(kosmos) { BottomBarViewModel(activityStarter, volumePanelViewModel) }
+        underTest =
+            with(kosmos) {
+                BottomBarViewModel(activityStarter, volumePanelViewModel, uiEventLogger)
+            }
     }
 
     @Test
@@ -65,8 +78,7 @@ class BottomBarViewModelTest : SysuiTestCase() {
                 underTest.onDoneClicked()
                 runCurrent()
 
-                val volumePanelState by collectLastValue(volumePanelViewModel.volumePanelState)
-                assertThat(volumePanelState!!.isVisible).isFalse()
+                assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
             }
         }
     }
@@ -80,10 +92,23 @@ class BottomBarViewModelTest : SysuiTestCase() {
 
                 runCurrent()
 
-                val volumePanelState by collectLastValue(volumePanelViewModel.volumePanelState)
-                assertThat(volumePanelState!!.isVisible).isFalse()
-                verify(activityStarter).startActivity(capture(intentCaptor), eq(true))
+                verify(activityStarter)
+                    .startActivityDismissingKeyguard(
+                        /* intent = */ capture(intentCaptor),
+                        /* onlyProvisioned = */ eq(false),
+                        /* dismissShade = */ eq(true),
+                        /* disallowEnterPictureInPictureWhileLaunching = */ eq(false),
+                        /* callback = */ capture(activityStartedCaptor),
+                        /* flags = */ eq(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+                        /* animationController = */ eq(null),
+                        /* userHandle = */ eq(null),
+                    )
                 assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SOUND_SETTINGS)
+                assertThat(uiEventLoggerFake.eventId(0))
+                    .isEqualTo(VolumePanelUiEvent.VOLUME_PANEL_SOUND_SETTINGS_CLICKED.id)
+
+                activityStartedCaptor.value.onActivityStarted(ActivityManager.START_SUCCESS)
+                assertThat(volumePanelGlobalStateRepository.globalState.value.isVisible).isFalse()
             }
         }
     }

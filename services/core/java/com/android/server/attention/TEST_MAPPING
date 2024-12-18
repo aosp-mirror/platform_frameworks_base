@@ -1,24 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsVoiceInteractionTestCases",
-      "options": [
-        {
-          "include-filter": "android.voiceinteraction.cts.AlwaysOnHotwordDetectorTest"
-        },
-        {
-          "include-filter": "android.voiceinteraction.cts.unittests.HotwordDetectedResultTest"
-        },
-        {
-          "include-filter": "android.voiceinteraction.cts.HotwordDetectionServiceBasicTest"
-        },
-        {
-          "include-filter": "android.voiceinteraction.cts.HotwordDetectionServiceProximityTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsVoiceInteractionTestCases_android_server_attention"
     }
   ]
 }

@@ -222,6 +222,18 @@ public class VibratorTest {
     }
 
     @Test
+    public void vibrate_withVibrationAttributesAndReason_usesGivenAttributesAndReason() {
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+        VibrationAttributes attributes = new VibrationAttributes.Builder().setUsage(
+                VibrationAttributes.USAGE_TOUCH).build();
+        String reason = "reason";
+
+        mVibratorSpy.vibrate(effect, attributes, reason);
+
+        verify(mVibratorSpy).vibrate(anyInt(), anyString(), eq(effect), eq(reason), eq(attributes));
+    }
+
+    @Test
     public void vibrate_withAudioAttributes_createsVibrationAttributesWithSameUsage() {
         VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(

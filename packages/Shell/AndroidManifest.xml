@@ -65,7 +65,6 @@
     <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL" />
     <uses-permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
     <uses-permission android:name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
-    <uses-permission android:name="android.permission.READ_DROPBOX_DATA" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -348,6 +347,7 @@
     <uses-permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
     <uses-permission android:name="android.permission.USE_COMPANION_TRANSPORTS" />
     <uses-permission android:name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE" />
+    <uses-permission android:name="android.permission.DELIVER_COMPANION_MESSAGES" />
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
@@ -565,7 +565,7 @@
     <uses-permission android:name="android.permission.TEST_BIOMETRIC" />
 
     <!-- Permission required for CTS test - android.server.biometrics -->
-    <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_LOGO" />
+    <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED" />
 
     <!-- Permissions required for CTS test - NotificationManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
@@ -701,6 +701,9 @@
     <!-- Permission required for CTS test - CtsWearableSensingServiceTestCases -->
     <uses-permission android:name="android.permission.MANAGE_WEARABLE_SENSING_SERVICE" />
 
+    <!-- Permission required for CTS test - OnDeviceIntelligenceManagerTest -->
+    <uses-permission android:name="android.permission.USE_ON_DEVICE_INTELLIGENCE" />
+
     <!-- Permission required for CTS test - CallAudioInterceptionTest -->
     <uses-permission android:name="android.permission.CALL_AUDIO_INTERCEPTION" />
 
@@ -710,6 +713,9 @@
     <!-- Permission required for CTS test - CtsUwbTestCases -->
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
     <uses-permission android:name="android.permission.UWB_RANGING" />
+
+    <!-- Permission required for CTS test - CtsRangingTestCases -->
+    <uses-permission android:name="android.permission.RANGING" />
 
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
@@ -896,7 +902,6 @@
 
     <!-- Permissions required for CTS test - CtsVoiceInteractionTestCases -->
     <uses-permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT" />
-    <uses-permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA" />
     <uses-permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
 
     <uses-permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE" />
@@ -931,6 +936,19 @@
     <!-- Permission required for Cts test - CtsInputTestCases -->
     <uses-permission
         android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
+
+    <!-- Permission required for Cts test - CtsSettingsTestCases -->
+    <uses-permission android:name="android.permission.PREPARE_FACTORY_RESET" />
+
+    <!-- Permission required for CTS test - FileIntegrityManagerTest -->
+    <uses-permission android:name="android.permission.SETUP_FSVERITY" />
+
+    <!-- Permissions required for CTS test - AppFunctionManagerTest -->
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS" />
+
+    <!-- Permission required for CTS test - CtsNfcTestCases -->
+    <uses-permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
 
     <application
         android:label="@string/app_label"

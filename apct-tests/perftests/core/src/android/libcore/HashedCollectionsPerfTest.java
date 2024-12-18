@@ -16,8 +16,8 @@
 
 package android.libcore;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,14 +35,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class HashedCollectionsPerfTest {
-    @Rule
-    public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeHashMapGet() {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("hello", "world");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             map.get("hello");
         }
@@ -54,7 +53,7 @@ public class HashedCollectionsPerfTest {
         synchronized (map) {
             map.put("hello", "world");
         }
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             synchronized (map) {
                 map.get("hello");
@@ -66,7 +65,7 @@ public class HashedCollectionsPerfTest {
     public void timeHashtableGet() {
         Hashtable<String, String> map = new Hashtable<String, String>();
         map.put("hello", "world");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             map.get("hello");
         }
@@ -76,7 +75,7 @@ public class HashedCollectionsPerfTest {
     public void timeLinkedHashMapGet() {
         LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
         map.put("hello", "world");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             map.get("hello");
         }
@@ -86,7 +85,7 @@ public class HashedCollectionsPerfTest {
     public void timeConcurrentHashMapGet() {
         ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
         map.put("hello", "world");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             map.get("hello");
         }

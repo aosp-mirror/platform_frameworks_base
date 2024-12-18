@@ -17,13 +17,14 @@
 package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
+import android.media.projection.StopReason;
 import android.os.IBinder;
 import android.app.ActivityOptions.LaunchCookie;
 
 /** {@hide} */
 interface IMediaProjection {
     void start(IMediaProjectionCallback callback);
-    void stop();
+    void stop(StopReason stopReason);
 
     boolean canProjectAudio();
     boolean canProjectVideo();
@@ -39,8 +40,8 @@ interface IMediaProjection {
     void unregisterCallback(IMediaProjectionCallback callback);
 
     /**
-     * Returns the {@link LaunchCookie} identifying the task to record, or {@code null} if
-     * there is none.
+     * Returns the {@link LaunchCookie} identifying the task to record. Will always be set
+     * regardless of starting a new task or recent task
      */
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
@@ -48,13 +49,30 @@ interface IMediaProjection {
     LaunchCookie getLaunchCookie();
 
     /**
-     * Updates the {@link LaunchCookie} identifying the task to record, or {@code null} if
-     * there is none.
+     * Returns the taskId identifying the task to record. Will only be set in the case of
+     * launching a recent task, otherwise set to -1.
+     */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    int getTaskId();
+
+    /**
+     * Updates the {@link LaunchCookie} identifying the task to record.
      */
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void setLaunchCookie(in LaunchCookie launchCookie);
+
+    /**
+     * Updates the taskId identifying the task to record.
+     */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void setTaskId(in int taskId);
+
 
     /**
      * Returns {@code true} if this token is still valid. A token is valid as long as the token

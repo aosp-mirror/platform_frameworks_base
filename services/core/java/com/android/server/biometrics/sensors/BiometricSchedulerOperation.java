@@ -20,18 +20,19 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.biometrics.BiometricConstants;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.expresslog.Counter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-import java.util.function.BooleanSupplier;
+
 
 /**
  * Contains all the necessary information for a HAL operation.
@@ -88,8 +89,6 @@ public class BiometricSchedulerOperation {
     private final BaseClientMonitor mClientMonitor;
     @Nullable
     private final ClientMonitorCallback mClientCallback;
-    @NonNull
-    private final BooleanSupplier mIsDebuggable;
     @Nullable
     private ClientMonitorCallback mOnStartCallback;
     @OperationState
@@ -98,6 +97,7 @@ public class BiometricSchedulerOperation {
     @NonNull
     final Runnable mCancelWatchdog;
 
+    @VisibleForTesting
     BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
             @Nullable ClientMonitorCallback callback
@@ -105,36 +105,25 @@ public class BiometricSchedulerOperation {
         this(clientMonitor, callback, STATE_WAITING_IN_QUEUE);
     }
 
-    @VisibleForTesting
-    BiometricSchedulerOperation(
-            @NonNull BaseClientMonitor clientMonitor,
-            @Nullable ClientMonitorCallback callback,
-            @NonNull BooleanSupplier isDebuggable
-    ) {
-        this(clientMonitor, callback, STATE_WAITING_IN_QUEUE, isDebuggable);
-    }
-
     protected BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
             @Nullable ClientMonitorCallback callback,
             @OperationState int state
     ) {
-        this(clientMonitor, callback, state, Build::isDebuggable);
-    }
-
-    private BiometricSchedulerOperation(
-            @NonNull BaseClientMonitor clientMonitor,
-            @Nullable ClientMonitorCallback callback,
-            @OperationState int state,
-            @NonNull BooleanSupplier isDebuggable
-    ) {
         mClientMonitor = clientMonitor;
         mClientCallback = callback;
         mState = state;
-        mIsDebuggable = isDebuggable;
         mCancelWatchdog = () -> {
             if (!isFinished()) {
                 Slog.e(TAG, "[Watchdog Triggered]: " + this);
+                try {
+                    mClientMonitor.getListener().onError(mClientMonitor.getSensorId(),
+                            mClientMonitor.getCookie(), BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                            0 /* vendorCode */);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception when trying to send error in cancel "
+                            + "watchdog.");
+                }
                 getWrappedCallback(mOnStartCallback)
                         .onClientFinished(mClientMonitor, false /* success */);
             }
@@ -178,9 +167,7 @@ public class BiometricSchedulerOperation {
 
         if (mClientMonitor.getCookie() != 0) {
             String err = "operation requires cookie";
-            if (mIsDebuggable.getAsBoolean()) {
-                throw new IllegalStateException(err);
-            }
+            Counter.logIncrement("biometric.value_biometric_scheduler_operation_state_error_count");
             Slog.e(TAG, err);
         }
 
@@ -447,10 +434,9 @@ public class BiometricSchedulerOperation {
     private boolean errorWhenOneOf(String op, @OperationState int... states) {
         final boolean isError = ArrayUtils.contains(states, mState);
         if (isError) {
-            String err = op + ": mState must not be " + mState;
-            if (mIsDebuggable.getAsBoolean()) {
-                throw new IllegalStateException(err);
-            }
+            Counter.logIncrement(
+                    "biometric.value_biometric_scheduler_operation_state_error_count");
+            final String err = op + ": mState must not be " + mState;
             Slog.e(TAG, err);
         }
         return isError;
@@ -459,10 +445,10 @@ public class BiometricSchedulerOperation {
     private boolean errorWhenNoneOf(String op, @OperationState int... states) {
         final boolean isError = !ArrayUtils.contains(states, mState);
         if (isError) {
-            String err = op + ": mState=" + mState + " must be one of " + Arrays.toString(states);
-            if (mIsDebuggable.getAsBoolean()) {
-                throw new IllegalStateException(err);
-            }
+            Counter.logIncrement(
+                    "biometric.value_biometric_scheduler_operation_state_error_count");
+            final String err = op + ": mState=" + mState + " must be one of "
+                    + Arrays.toString(states);
             Slog.e(TAG, err);
         }
         return isError;

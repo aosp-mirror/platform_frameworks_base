@@ -17,6 +17,10 @@ package android.os;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
+
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -122,20 +126,18 @@ import java.util.function.Consumer;
  * method:
  *
  * <pre>
- * public void onCreate() {
- *     StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
- *             .detectDiskReads()
- *             .detectDiskWrites()
- *             .detectNetwork()   // or .detectAll() for all detectable problems
- *             .penaltyLog()
- *             .build());
- *     StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
- *             .detectLeakedSqlLiteObjects()
- *             .detectLeakedClosableObjects()
- *             .penaltyLog()
- *             .penaltyDeath()
- *             .build());
- *     super.onCreate();
+ * override fun onCreate(savedInstanceState: Bundle?) {
+ *     super.onCreate(savedInstanceState)
+ *     StrictMode.setThreadPolicy(
+ *         StrictMode.ThreadPolicy.Builder()
+ *         .detectAll()
+ *         .build()
+ *     )
+ *     StrictMode.setVmPolicy(
+ *         StrictMode.VmPolicy.Builder()
+ *         .detectAll()
+ *         .build()
+ *     )
  * }
  * </pre>
  *
@@ -350,7 +352,7 @@ public final class StrictMode {
     public static final int NETWORK_POLICY_LOG = 1;
     /** {@hide} */
     public static final int NETWORK_POLICY_REJECT = 2;
-  
+
     /**
      * Detect explicit calls to {@link Runtime#gc()}.
      */
@@ -2135,27 +2137,26 @@ public final class StrictMode {
         }
     }
 
-    private static void registerIntentMatchingRestrictionCallback() {
-        try {
-            ActivityManager.getService().registerStrictModeCallback(
-                    new UnsafeIntentStrictModeCallback());
-        } catch (RemoteException e) {
-            /*
-            If exception is DeadObjectException it means system process is dead, so we can ignore
-             */
-            if (!(e instanceof DeadObjectException)) {
-                Log.e(TAG, "RemoteException handling StrictMode violation", e);
+    private static final class UnsafeIntentStrictModeCallback
+            extends IUnsafeIntentStrictModeCallback.Stub {
+        @Override
+        public void onUnsafeIntent(int type, Intent intent) {
+            if (StrictMode.vmUnsafeIntentLaunchEnabled()) {
+                StrictMode.onUnsafeIntentLaunch(type, intent);
             }
         }
     }
 
-    private static final class UnsafeIntentStrictModeCallback
-            extends IUnsafeIntentStrictModeCallback.Stub {
-        @Override
-        public void onImplicitIntentMatchedInternalComponent(Intent intent) {
-            if (StrictMode.vmUnsafeIntentLaunchEnabled()) {
-                StrictMode.onUnsafeIntentLaunch(intent,
-                        "Launch of unsafe implicit intent: " + intent);
+    /** Each process should only have one singleton callback */
+    private static volatile UnsafeIntentStrictModeCallback sUnsafeIntentCallback;
+
+    private static void registerIntentMatchingRestrictionCallback() {
+        if (sUnsafeIntentCallback == null) {
+            sUnsafeIntentCallback = new UnsafeIntentStrictModeCallback();
+            try {
+                ActivityManager.getService().registerStrictModeCallback(sUnsafeIntentCallback);
+            } catch (RemoteException e) {
+                // system_server should not throw
             }
         }
     }
@@ -2383,9 +2384,22 @@ public final class StrictMode {
         onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent));
     }
 
-    /** @hide */
-    public static void onUnsafeIntentLaunch(Intent intent, String message) {
-        onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent, message));
+    private static void onUnsafeIntentLaunch(int type, Intent intent) {
+        String msg;
+        switch (type) {
+            case UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH:
+                msg = "Launch of intent with null action: ";
+                break;
+            case UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH:
+                msg = "Implicit intent matching internal non-exported component: ";
+                break;
+            case UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH:
+                msg = "Intent mismatch target component intent filter: ";
+                break;
+            default:
+                return;
+        }
+        onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent, msg + intent));
     }
 
     /** Assume locked until we hear otherwise */
@@ -2591,8 +2605,13 @@ public final class StrictMode {
      * (Java) thread-local policy value.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodReplace
     private static void onBinderStrictModePolicyChange(@ThreadPolicyMask int newPolicy) {
         setBlockGuardPolicy(newPolicy);
+    }
+
+    private static void onBinderStrictModePolicyChange$ravenwood(@ThreadPolicyMask int newPolicy) {
+        /* no-op */
     }
 
     /**

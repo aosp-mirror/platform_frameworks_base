@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = NonInjectedMainThreadDetector()
@@ -46,7 +45,7 @@ class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
@@ -79,7 +78,7 @@ class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
@@ -104,7 +103,7 @@ class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
@@ -136,7 +135,7 @@ class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
                     )
                     .indented(),
-                *stubs
+                *androidStubs
             )
             .issues(NonInjectedMainThreadDetector.ISSUE)
             .run()
@@ -149,6 +148,4 @@ class NonInjectedMainThreadDetectorTest : SystemUILintDetectorTest() {
                 """
             )
     }
-
-    private val stubs = androidStubs
 }

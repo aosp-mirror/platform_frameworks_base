@@ -103,7 +103,10 @@ public class ActivityOptions extends ComponentOptions {
     @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
             MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
             MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
-            MODE_BACKGROUND_ACTIVITY_START_DENIED})
+            MODE_BACKGROUND_ACTIVITY_START_DENIED,
+            MODE_BACKGROUND_ACTIVITY_START_COMPAT,
+            MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS,
+            MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE})
     public @interface BackgroundActivityStartMode {}
     /**
      * No explicit value chosen. The system will decide whether to grant privileges.
@@ -117,6 +120,27 @@ public class ActivityOptions extends ComponentOptions {
      * Deny the {@link PendingIntent} to use the background activity start privileges.
      */
     public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
+    /**
+     * Allow the {@link PendingIntent} to use ALL background activity start privileges, including
+     * special permissions that will allow starts at any time.
+     *
+     * @hide
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS = 3;
+    /**
+     * Allow the {@link PendingIntent} to use background activity start privileges based on
+     * visibility of the app.
+     *
+     * @hide
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE = 4;
+    /**
+     * Special behavior for compatibility.
+     * Similar to {@link #MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED}
+     *
+     * @hide
+     */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_COMPAT = -1;
 
     /**
      * The package name that created the options.
@@ -1563,6 +1587,16 @@ public class ActivityOptions extends ComponentOptions {
         }
     }
 
+    /** @hide */
+    public static boolean hasLaunchTargetContainer(ActivityOptions options) {
+        return options.getLaunchDisplayId() != INVALID_DISPLAY
+                || options.getLaunchTaskDisplayArea() != null
+                || options.getLaunchTaskDisplayAreaFeatureId() != FEATURE_UNDEFINED
+                || options.getLaunchRootTask() != null
+                || options.getLaunchTaskId() != -1
+                || options.getLaunchTaskFragmentToken() != null;
+    }
+
     /**
      * Gets whether the activity is to be launched into LockTask mode.
      * @return {@code true} if the activity is to be launched into LockTask mode.
@@ -2202,19 +2236,6 @@ public class ActivityOptions extends ComponentOptions {
      */
     public boolean getDismissKeyguardIfInsecure() {
         return mDismissKeyguardIfInsecure;
-    }
-
-    /**
-     * Sets background activity launch logic won't use pending intent creator foreground state.
-     *
-     * @hide
-     * @deprecated use {@link #setPendingIntentCreatorBackgroundActivityStartMode(int)} instead
-     */
-    @Deprecated
-    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean ignore) {
-        mPendingIntentCreatorBackgroundActivityStartMode = ignore
-                ? MODE_BACKGROUND_ACTIVITY_START_DENIED : MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-        return this;
     }
 
     /**

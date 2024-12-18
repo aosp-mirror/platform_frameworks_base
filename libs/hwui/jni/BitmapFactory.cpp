@@ -688,8 +688,8 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
 
 static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fileDescriptor,
         jobject padding, jobject bitmapFactoryOptions, jlong inBitmapHandle, jlong colorSpaceHandle) {
-#ifndef __ANDROID__ // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
-      return nullObjectReturn("Not supported on Windows");
+#ifdef _WIN32  // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
+    return nullObjectReturn("Not supported on Windows");
 #else
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 

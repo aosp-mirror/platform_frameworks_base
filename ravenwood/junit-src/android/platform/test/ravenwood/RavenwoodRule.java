@@ -16,55 +16,41 @@
 
 package android.platform.test.ravenwood;
 
-import static android.os.Process.FIRST_APPLICATION_UID;
-import static android.os.Process.SYSTEM_UID;
-import static android.os.UserHandle.USER_SYSTEM;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.log;
 
-import static org.junit.Assert.fail;
-
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Instrumentation;
 import android.content.Context;
-import android.platform.test.annotations.DisabledOnNonRavenwood;
 import android.platform.test.annotations.DisabledOnRavenwood;
-import android.platform.test.annotations.EnabledOnRavenwood;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
-import android.util.ArraySet;
 
-import org.junit.Assume;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.android.ravenwood.common.RavenwoodCommonUtils;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
- * {@code @Rule} that configures the Ravenwood test environment. This rule has no effect when
- * tests are run on non-Ravenwood test environments.
- *
- * This rule initializes and resets the Ravenwood environment between each test method to offer a
- * hermetic testing environment.
- *
- * By default, all tests are executed on Ravenwood, but annotations such as
- * {@link DisabledOnRavenwood} and {@link EnabledOnRavenwood} can be used at both the method
- * and class level to "ignore" tests that may not be ready. When needed, a
- * {@link RavenwoodClassRule} can be used in addition to a {@link RavenwoodRule} to ignore tests
- * before a test class is fully initialized.
+ * Reach out to g/ravenwood if you need any features in it.
  */
-public class RavenwoodRule implements TestRule {
-    static final boolean IS_ON_RAVENWOOD = RavenwoodRuleImpl.isOnRavenwood();
+public final class RavenwoodRule implements TestRule {
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
+
+    static final boolean IS_ON_RAVENWOOD = RavenwoodCommonUtils.isOnRavenwood();
 
     /**
-     * When probing is enabled, all tests will be unconditionally run on Ravenwood to detect
-     * cases where a test is able to pass despite being marked as {@code IgnoreUnderRavenwood}.
+     * When this flag is enabled, all tests will be unconditionally run on Ravenwood to detect
+     * cases where a test is able to pass despite being marked as {@link DisabledOnRavenwood}.
      *
      * This is typically helpful for internal maintainers discovering tests that had previously
      * been ignored, but now have enough Ravenwood-supported functionality to be enabled.
      */
-    static final boolean ENABLE_PROBE_IGNORED = "1".equals(
+    private static final boolean RUN_DISABLED_TESTS = "1".equals(
             System.getenv("RAVENWOOD_RUN_DISABLED_TESTS"));
 
     /**
@@ -89,93 +75,59 @@ public class RavenwoodRule implements TestRule {
      *
      * Because we use a regex-find, setting "." would disable all tests.
      */
-    private static final Pattern REALLY_DISABLE_PATTERN = Pattern.compile(
-            Objects.requireNonNullElse(System.getenv("RAVENWOOD_REALLY_DISABLE"), ""));
+    private static final Pattern REALLY_DISABLED_PATTERN = Pattern.compile(
+            Objects.requireNonNullElse(System.getenv("RAVENWOOD_REALLY_DISABLED"), ""));
 
-    private static final boolean ENABLE_REALLY_DISABLE_PATTERN =
-            !REALLY_DISABLE_PATTERN.pattern().isEmpty();
-
-    /**
-     * If true, enable optional validation on running tests.
-     */
-    private static final boolean ENABLE_OPTIONAL_VALIDATION = "1".equals(
-            System.getenv("RAVENWOOD_OPTIONAL_VALIDATION"));
+    private static final boolean HAS_REALLY_DISABLE_PATTERN =
+            !REALLY_DISABLED_PATTERN.pattern().isEmpty();
 
     static {
-        if (ENABLE_PROBE_IGNORED) {
-            System.out.println("$RAVENWOOD_RUN_DISABLED_TESTS enabled: force running all tests");
-            if (ENABLE_REALLY_DISABLE_PATTERN) {
-                System.out.println("$RAVENWOOD_REALLY_DISABLE=" + REALLY_DISABLE_PATTERN.pattern());
+        if (RUN_DISABLED_TESTS) {
+            log(TAG, "$RAVENWOOD_RUN_DISABLED_TESTS enabled: force running all tests");
+            if (HAS_REALLY_DISABLE_PATTERN) {
+                log(TAG, "$RAVENWOOD_REALLY_DISABLED=" + REALLY_DISABLED_PATTERN.pattern());
             }
         }
     }
 
-    private static final int NOBODY_UID = 9999;
-
-    private static final AtomicInteger sNextPid = new AtomicInteger(100);
-
-    int mCurrentUser = USER_SYSTEM;
-
-    /**
-     * Unless the test author requests differently, run as "nobody", and give each collection of
-     * tests its own unique PID.
-     */
-    int mUid = NOBODY_UID;
-    int mPid = sNextPid.getAndIncrement();
-
-    String mPackageName;
-
-    boolean mProvideMainThread = false;
-
-    final RavenwoodSystemProperties mSystemProperties = new RavenwoodSystemProperties();
-
-    final List<Class<?>> mServicesRequired = new ArrayList<>();
-
-    volatile Context mContext;
-    volatile Instrumentation mInstrumentation;
-
-    public RavenwoodRule() {
-    }
+    final RavenwoodTestProperties mProperties = new RavenwoodTestProperties();
 
     public static class Builder {
-        private RavenwoodRule mRule = new RavenwoodRule();
+
+        private final RavenwoodRule mRule = new RavenwoodRule();
 
         public Builder() {
         }
 
         /**
-         * Configure the identity of this process to be the system UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessSystem() {
-            mRule.mUid = SYSTEM_UID;
             return this;
         }
 
         /**
-         * Configure the identity of this process to be an app UID for the duration of the
-         * test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. We always use an app UID.
          */
+        @Deprecated
         public Builder setProcessApp() {
-            mRule.mUid = FIRST_APPLICATION_UID;
             return this;
         }
 
         /**
-         * Configure the identity of this process to be the given package name for the duration
-         * of the test. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used.
          */
-        public Builder setPackageName(/* @NonNull */ String packageName) {
-            mRule.mPackageName = Objects.requireNonNull(packageName);
+        @Deprecated
+        public Builder setPackageName(@NonNull String packageName) {
             return this;
         }
 
         /**
-         * Configure a "main" thread to be available for the duration of the test, as defined
-         * by {@code Looper.getMainLooper()}. Has no effect on non-Ravenwood environments.
+         * @deprecated no longer used. Main thread is always available.
          */
+        @Deprecated
         public Builder setProvideMainThread(boolean provideMainThread) {
-            mRule.mProvideMainThread = provideMainThread;
             return this;
         }
 
@@ -189,10 +141,9 @@ public class RavenwoodRule implements TestRule {
          *
          * Has no effect on non-Ravenwood environments.
          */
-        public Builder setSystemPropertyImmutable(/* @NonNull */ String key,
-                /* @Nullable */ Object value) {
-            mRule.mSystemProperties.setValue(key, value);
-            mRule.mSystemProperties.setAccessReadOnly(key);
+        public Builder setSystemPropertyImmutable(@NonNull String key, @Nullable Object value) {
+            mRule.mProperties.setValue(key, value);
+            mRule.mProperties.setAccessReadOnly(key);
             return this;
         }
 
@@ -206,27 +157,17 @@ public class RavenwoodRule implements TestRule {
          *
          * Has no effect on non-Ravenwood environments.
          */
-        public Builder setSystemPropertyMutable(/* @NonNull */ String key,
-                /* @Nullable */ Object value) {
-            mRule.mSystemProperties.setValue(key, value);
-            mRule.mSystemProperties.setAccessReadWrite(key);
+        public Builder setSystemPropertyMutable(@NonNull String key, @Nullable Object value) {
+            mRule.mProperties.setValue(key, value);
+            mRule.mProperties.setAccessReadWrite(key);
             return this;
         }
 
         /**
-         * Configure the set of system services that are required for this test to operate.
-         *
-         * For example, passing {@code android.hardware.SerialManager.class} as an argument will
-         * ensure that the underlying service is created, initialized, and ready to use for the
-         * duration of the test. The {@code SerialManager} instance can be obtained via
-         * {@code RavenwoodRule.getContext()} and {@code Context.getSystemService()}, and
-         * {@code SerialManagerInternal} can be obtained via {@code LocalServices.getService()}.
+         * @deprecated no longer used. All supported services are available.
          */
-        public Builder setServicesRequired(Class<?>... services) {
-            mRule.mServicesRequired.clear();
-            for (Class<?> service : services) {
-                mRule.mServicesRequired.add(service);
-            }
+        @Deprecated
+        public Builder setServicesRequired(@NonNull Class<?>... services) {
             return this;
         }
 
@@ -250,173 +191,135 @@ public class RavenwoodRule implements TestRule {
         return IS_ON_RAVENWOOD;
     }
 
+    private static void ensureOnRavenwood(String featureName) {
+        if (!IS_ON_RAVENWOOD) {
+            throw new RuntimeException(featureName + " is only supported on Ravenwood.");
+        }
+    }
+
     /**
-     * Return a {@code Context} available for usage during the currently running test case.
-     *
-     * Each test should obtain needed information or references via this method;
-     * references must not be stored beyond the scope of a test case.
+     * @deprecated Use
+     * {@code androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getContext()}
+     * instead.
      */
+    @Deprecated
     public Context getContext() {
-        return Objects.requireNonNull(mContext,
-                "Context is only available during @Test execution");
+        return InstrumentationRegistry.getInstrumentation().getContext();
     }
 
     /**
-     * Return a {@code Instrumentation} available for usage during the currently running test case.
-     *
-     * Each test should obtain needed information or references via this method;
-     * references must not be stored beyond the scope of a test case.
+     * @deprecated Use
+     * {@code androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()}
+     * instead.
      */
+    @Deprecated
     public Instrumentation getInstrumentation() {
-        return Objects.requireNonNull(mInstrumentation,
-                "Instrumentation is only available during @Test execution");
-    }
-
-    static boolean shouldEnableOnDevice(Description description) {
-        if (description.isTest()) {
-            if (description.getAnnotation(DisabledOnNonRavenwood.class) != null) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Determine if the given {@link Description} should be enabled when running on the
-     * Ravenwood test environment.
-     *
-     * A more specific method-level annotation always takes precedence over any class-level
-     * annotation, and an {@link EnabledOnRavenwood} annotation always takes precedence over
-     * an {@link DisabledOnRavenwood} annotation.
-     */
-    static boolean shouldEnableOnRavenwood(Description description) {
-        // First, consult any method-level annotations
-        if (description.isTest()) {
-            // Stopgap for http://g/ravenwood/EPAD-N5ntxM
-            if (description.getMethodName().endsWith("$noRavenwood")) {
-                return false;
-            }
-            if (description.getAnnotation(EnabledOnRavenwood.class) != null) {
-                return true;
-            }
-            if (description.getAnnotation(DisabledOnRavenwood.class) != null) {
-                return false;
-            }
-            if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-                return false;
-            }
-        }
-
-        // Otherwise, consult any class-level annotations
-        if (description.getTestClass().getAnnotation(EnabledOnRavenwood.class) != null) {
-            return true;
-        }
-        if (description.getTestClass().getAnnotation(DisabledOnRavenwood.class) != null) {
-            return false;
-        }
-        if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
-            return false;
-        }
-
-        // When no annotations have been requested, assume test should be included
-        return true;
-    }
-
-    static boolean shouldStillIgnoreInProbeIgnoreMode(Description description) {
-        if (!ENABLE_REALLY_DISABLE_PATTERN) {
-            return false;
-        }
-
-        final var fullname = description.getTestClass().getName()
-                + (description.isTest() ? "#" + description.getMethodName() : "");
-
-        if (REALLY_DISABLE_PATTERN.matcher(fullname).find()) {
-            System.out.println("Still ignoring " + fullname);
-            return true;
-        }
-        return false;
+        return InstrumentationRegistry.getInstrumentation();
     }
 
     @Override
     public Statement apply(Statement base, Description description) {
-        // No special treatment when running outside Ravenwood; run tests as-is
         if (!IS_ON_RAVENWOOD) {
-            Assume.assumeTrue(shouldEnableOnDevice(description));
             return base;
         }
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                RavenwoodAwareTestRunner.onRavenwoodRuleEnter(description, RavenwoodRule.this);
+                try {
+                    base.evaluate();
+                } finally {
+                    RavenwoodAwareTestRunner.onRavenwoodRuleExit(description, RavenwoodRule.this);
+                }
+            }
+        };
+    }
 
-        if (ENABLE_PROBE_IGNORED) {
-            return applyProbeIgnored(base, description);
-        } else {
-            return applyDefault(base, description);
+    /**
+     * Returns the "real" result from {@link System#currentTimeMillis()}.
+     *
+     * Currently, it's the same thing as calling {@link System#currentTimeMillis()},
+     * but this one is guaranteeed to return the real value, even when Ravenwood supports
+     * injecting a time to{@link System#currentTimeMillis()}.
+     */
+    public long realCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    /**
+     * Equivalent to setting the ANDROID_LOG_TAGS environmental variable.
+     *
+     * See https://developer.android.com/tools/logcat#filteringOutput for the string format.
+     *
+     * NOTE: this works only on Ravenwood.
+     */
+    public static void setAndroidLogTags(@Nullable String androidLogTags) {
+        ensureOnRavenwood("RavenwoodRule.setAndroidLogTags()");
+        try {
+            Class<?> logRavenwoodClazz = Class.forName("android.util.Log_ravenwood");
+            var setter = logRavenwoodClazz.getMethod("setLogLevels", String.class);
+            setter.invoke(null, androidLogTags);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private void commonPrologue(Statement base, Description description) {
-        RavenwoodRuleImpl.logTestRunner("started", description);
-        RavenwoodRuleImpl.validate(base, description, ENABLE_OPTIONAL_VALIDATION);
-        RavenwoodRuleImpl.init(RavenwoodRule.this);
+    /**
+     * Set a log level for a given tag. Pass NULL to {@code tag} to change the default level.
+     *
+     * NOTE: this works only on Ravenwood.
+     */
+    public static void setLogLevel(@Nullable String tag, int level) {
+        ensureOnRavenwood("RavenwoodRule.setLogLevel()");
+        try {
+            Class<?> logRavenwoodClazz = Class.forName("android.util.Log_ravenwood");
+            var setter = logRavenwoodClazz.getMethod("setLogLevel", String.class, int.class);
+            setter.invoke(null, tag, level);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    /**
-     * Run the given {@link Statement} with no special treatment.
-     */
-    private Statement applyDefault(Statement base, Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                Assume.assumeTrue(shouldEnableOnRavenwood(description));
+    // Below are internal to ravenwood. Don't use them from normal tests...
 
-                commonPrologue(base, description);
-                try {
-                    base.evaluate();
-                    RavenwoodRuleImpl.logTestRunner("finished", description);
-                } catch (Throwable t) {
-                    RavenwoodRuleImpl.logTestRunner("failed", description);
-                    throw t;
-                } finally {
-                    RavenwoodRuleImpl.reset(RavenwoodRule.this);
-                }
+    public static class RavenwoodPrivate {
+        private RavenwoodPrivate() {
+        }
+
+        private volatile Boolean mRunDisabledTestsOverride = null;
+
+        private volatile Pattern mReallyDisabledPattern = null;
+
+        public boolean isRunningDisabledTests() {
+            if (mRunDisabledTestsOverride != null) {
+                return mRunDisabledTestsOverride;
             }
-        };
-    }
+            return RUN_DISABLED_TESTS;
+        }
 
-    /**
-     * Run the given {@link Statement} with probing enabled. All tests will be unconditionally
-     * run on Ravenwood to detect cases where a test is able to pass despite being marked as
-     * {@code IgnoreUnderRavenwood}.
-     */
-    private Statement applyProbeIgnored(Statement base, Description description) {
-        return new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                Assume.assumeFalse(shouldStillIgnoreInProbeIgnoreMode(description));
-
-                commonPrologue(base, description);
-                try {
-                    base.evaluate();
-                } catch (Throwable t) {
-                    // If the test isn't included, eat the exception and report the
-                    // assumption failure that test authors expect; otherwise throw
-                    Assume.assumeTrue(shouldEnableOnRavenwood(description));
-                    throw t;
-                } finally {
-                    RavenwoodRuleImpl.logTestRunner("finished", description);
-                    RavenwoodRuleImpl.reset(RavenwoodRule.this);
-                }
-
-                if (!shouldEnableOnRavenwood(description)) {
-                    fail("Test wasn't included under Ravenwood, but it actually "
-                            + "passed under Ravenwood; consider updating annotations");
-                }
+        public Pattern getReallyDisabledPattern() {
+            if (mReallyDisabledPattern != null) {
+                return mReallyDisabledPattern;
             }
-        };
+            return REALLY_DISABLED_PATTERN;
+        }
+
+        public void overrideRunDisabledTest(boolean runDisabledTests,
+                @Nullable String reallyDisabledPattern) {
+            mRunDisabledTestsOverride = runDisabledTests;
+            mReallyDisabledPattern =
+                    reallyDisabledPattern == null ? null : Pattern.compile(reallyDisabledPattern);
+        }
+
+        public void resetRunDisabledTest() {
+            mRunDisabledTestsOverride = null;
+            mReallyDisabledPattern = null;
+        }
     }
 
-    /**
-     * Do not use it outside ravenwood core classes.
-     */
-    public boolean _ravenwood_private$isOptionalValidationEnabled() {
-        return ENABLE_OPTIONAL_VALIDATION;
+    private static final RavenwoodPrivate sRavenwoodPrivate = new  RavenwoodPrivate();
+
+    public static RavenwoodPrivate private$ravenwood() {
+        return sRavenwoodPrivate;
     }
 }

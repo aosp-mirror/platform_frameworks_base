@@ -48,6 +48,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
@@ -110,6 +111,8 @@ public class HdmiCecControllerTest {
         doAnswer(__ -> mCecVersion).when(mHdmiControlServiceSpy).getCecVersion();
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
+        doNothing().when(mHdmiControlServiceSpy)
+                .sendBroadcastAsUser(any(Intent.class));
         mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();

@@ -18,26 +18,31 @@ package com.android.systemui.media.controls.ui.controller
 
 import android.graphics.Rect
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.domain.interactor.communalInteractor
-import com.android.systemui.communal.domain.interactor.setCommunalAvailable
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.view.MediaCarouselScrollHandler
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -50,7 +55,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.animation.UniqueObjectHostView
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
@@ -76,11 +80,16 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.lastValue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableSceneContainer
 class MediaHierarchyManagerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -101,7 +110,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var logger: MediaViewLogger
-    @Mock private lateinit var mediaFlags: MediaFlags
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -113,12 +121,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
     private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
+    private lateinit var shadeExpansion: MutableStateFlow<Float>
+    private lateinit var anyShadeExpanded: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
-    private val communalInteractor = kosmos.communalInteractor
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
 
     @Before
     fun setup() {
@@ -130,8 +141,11 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         fakeHandler = FakeHandler(testableLooper.looper)
         whenever(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         isQsBypassingShade = MutableStateFlow(false)
+        shadeExpansion = MutableStateFlow(0f)
+        anyShadeExpanded = MutableStateFlow(false)
         whenever(shadeInteractor.isQsBypassingShade).thenReturn(isQsBypassingShade)
-        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
+        whenever(shadeInteractor.shadeExpansion).thenReturn(shadeExpansion)
+        whenever(shadeInteractor.isAnyFullyExpanded).thenReturn(anyShadeExpanded)
         mediaHierarchyManager =
             MediaHierarchyManager(
                 context,
@@ -142,7 +156,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 mediaDataManager,
                 keyguardViewController,
                 dreamOverlayStateController,
-                communalInteractor,
+                kosmos.keyguardInteractor,
+                kosmos.communalTransitionViewModel,
                 configurationController,
                 wakefulnessLifecycle,
                 shadeInteractor,
@@ -151,12 +166,10 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 ResourcesSplitShadeStateController(),
                 logger,
-                mediaFlags,
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
         verify(dreamOverlayStateController).addCallback(dreamOverlayCallback.capture())
-        whenever(mediaCarouselController.updateHostVisibility).thenReturn({})
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN, LOCKSCREEN_TOP)
         setupHost(qsHost, MediaHierarchyManager.LOCATION_QS, QS_TOP)
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS, QQS_TOP)
@@ -193,7 +206,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -206,7 +219,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController, times(0))
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -220,7 +233,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -233,7 +246,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController, times(0))
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -247,7 +260,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -257,7 +270,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -271,7 +284,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -283,7 +296,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 ArgumentMatchers.anyInt(),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
                 anyLong()
@@ -299,7 +312,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_QQS),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 eq(false),
                 anyLong(),
                 anyLong()
@@ -311,7 +324,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_LOCKSCREEN),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 eq(false),
                 anyLong(),
                 anyLong()
@@ -484,6 +497,28 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun isCurrentlyInGuidedTransformation_desiredLocationIsHub_returnsFalse() =
+        testScope.runTest {
+            goToLockscreen()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            mediaHierarchyManager.qsExpansion = 0f
+            mediaHierarchyManager.setTransitionToFullShadeAmount(123f)
+
+            whenever(lockHost.visible).thenReturn(true)
+            whenever(qsHost.visible).thenReturn(true)
+            whenever(qqsHost.visible).thenReturn(true)
+            whenever(hubModeHost.visible).thenReturn(true)
+
+            assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+        }
+
+    @Test
     fun testDream() {
         goToDream()
         setMediaDreamComplicationEnabled(true)
@@ -501,7 +536,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         verify(mediaCarouselController)
             .onDesiredLocationChanged(
                 eq(MediaHierarchyManager.LOCATION_QQS),
-                any(MediaHostState::class.java),
+                any<MediaHostState>(),
                 eq(false),
                 anyLong(),
                 anyLong()
@@ -511,11 +546,12 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
-            kosmos.setCommunalAvailable(true)
-            runCurrent()
-
-            communalInteractor.onSceneChanged(CommunalScenes.Communal)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -527,12 +563,17 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 )
             clearInvocations(mediaCarouselController)
 
-            communalInteractor.onSceneChanged(CommunalScenes.Blank)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Blank)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_QQS),
-                    any(MediaHostState::class.java),
+                    any<MediaHostState>(),
                     eq(false),
                     anyLong(),
                     anyLong()
@@ -540,17 +581,84 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         }
 
     @Test
+    fun testCommunalLocationVisibilityWithShadeShowing() =
+        testScope.runTest {
+            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+
+            val captor = ArgumentCaptor.forClass(Boolean::class.java)
+            verify(mediaCarouselScrollHandler, atLeastOnce()).visibleToUser = captor.capture()
+
+            assertThat(captor.lastValue).isTrue()
+
+            clearInvocations(mediaCarouselScrollHandler)
+            anyShadeExpanded.value = true
+            runCurrent()
+            verify(mediaCarouselScrollHandler, atLeastOnce()).visibleToUser = captor.capture()
+
+            assertThat(captor.lastValue).isFalse()
+        }
+
+    @Test
+    fun testCommunalLocationVisibilityWithPrimaryBouncerShowing() =
+        testScope.runTest {
+            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    nullable(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+
+            val captor = ArgumentCaptor.forClass(Boolean::class.java)
+            verify(mediaCarouselScrollHandler, atLeastOnce()).visibleToUser = captor.capture()
+
+            assertThat(captor.lastValue).isTrue()
+
+            clearInvocations(mediaCarouselScrollHandler)
+            kosmos.keyguardBouncerRepository.setPrimaryShow(true)
+            runCurrent()
+            verify(mediaCarouselScrollHandler, atLeastOnce()).visibleToUser = captor.capture()
+
+            assertThat(captor.lastValue).isFalse()
+        }
+
+    @Test
     fun testCommunalLocation_showsOverLockscreen() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
-            kosmos.setCommunalAvailable(true)
-            runCurrent()
-
             // Device is on lock screen.
             whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
-            // UMO goes to communal even over the lock screen.
-            communalInteractor.onSceneChanged(CommunalScenes.Communal)
+            // UMO goes to communal from the lock screen.
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -565,14 +673,15 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Test
     fun testCommunalLocation_showsUntilQsExpands() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_COMMUNAL_HUB)
-            kosmos.setCommunalAvailable(true)
-            runCurrent()
-
             // Device is on lock screen.
             whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
-            communalInteractor.onSceneChanged(CommunalScenes.Communal)
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
             runCurrent()
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
@@ -592,7 +701,52 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
             verify(mediaCarouselController)
                 .onDesiredLocationChanged(
                     eq(MediaHierarchyManager.LOCATION_QS),
-                    any(MediaHostState::class.java),
+                    any<MediaHostState>(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+        }
+
+    @Test
+    fun testCommunalLocation_whenDreamingAndShadeExpanding() =
+        testScope.runTest {
+            keyguardRepository.setDreaming(true)
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.DREAMING,
+                to = KeyguardState.GLANCEABLE_HUB,
+                testScope = testScope,
+            )
+            kosmos.fakeCommunalSceneRepository.changeScene(CommunalScenes.Communal)
+            runCurrent()
+            // Mock the behavior for dreaming that pulling down shade will immediately set QS as
+            // expanded
+            expandQS()
+            // Starts opening the shade
+            shadeExpansion.value = 0.1f
+            runCurrent()
+
+            // UMO shows on hub
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_COMMUNAL_HUB),
+                    anyOrNull(),
+                    eq(false),
+                    anyLong(),
+                    anyLong()
+                )
+            clearInvocations(mediaCarouselController)
+
+            // The shade is opened enough to make QS elements visible
+            shadeExpansion.value = 0.5f
+            runCurrent()
+
+            // UMO shows on QS
+            verify(mediaCarouselController)
+                .onDesiredLocationChanged(
+                    eq(MediaHierarchyManager.LOCATION_QS),
+                    any<MediaHostState>(),
                     eq(false),
                     anyLong(),
                     anyLong()
@@ -612,55 +766,6 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         // Then the carousel is set to not visible
         verify(mediaCarouselScrollHandler).visibleToUser = false
         assertThat(mediaCarouselScrollHandler.visibleToUser).isFalse()
-    }
-
-    @Test
-    fun keyguardState_allowedOnLockscreen_updateVisibility() {
-        settings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
-        clearInvocations(mediaCarouselController)
-
-        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
-        statusBarCallback.value.onStateChanged(StatusBarState.KEYGUARD)
-
-        verify(mediaCarouselController).updateHostVisibility
-        assertThat(mediaHierarchyManager.isLockedAndHidden()).isFalse()
-    }
-
-    @Test
-    fun keyguardState_notAllowedOnLockscreen_updateVisibility() {
-        settings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
-        clearInvocations(mediaCarouselController)
-
-        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
-        statusBarCallback.value.onStateChanged(StatusBarState.KEYGUARD)
-
-        verify(mediaCarouselController).updateHostVisibility
-        assertThat(mediaHierarchyManager.isLockedAndHidden()).isTrue()
-    }
-
-    @Test
-    fun keyguardGone_updateVisibility() {
-        settings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
-        clearInvocations(mediaCarouselController)
-
-        statusBarCallback.value.onStatePreChange(StatusBarState.KEYGUARD, StatusBarState.SHADE)
-        statusBarCallback.value.onStateChanged(StatusBarState.SHADE)
-
-        verify(mediaCarouselController).updateHostVisibility
-        assertThat(mediaHierarchyManager.isLockedAndHidden()).isFalse()
-    }
-
-    @Test
-    fun lockscreenSettingChanged_updateVisibility() {
-        settings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, true)
-        statusBarCallback.value.onStatePreChange(StatusBarState.SHADE, StatusBarState.KEYGUARD)
-        statusBarCallback.value.onStateChanged(StatusBarState.KEYGUARD)
-        clearInvocations(mediaCarouselController)
-
-        settings.putBool(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, false)
-
-        verify(mediaCarouselController).updateHostVisibility
-        assertThat(mediaHierarchyManager.isLockedAndHidden()).isTrue()
     }
 
     private fun enableSplitShade() {

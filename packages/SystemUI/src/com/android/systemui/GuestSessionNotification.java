@@ -26,8 +26,8 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-import com.android.systemui.res.R;
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.res.R;
 import com.android.systemui.util.NotificationChannels;
 
 import javax.inject.Inject;

@@ -23,13 +23,13 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.InstallStage;
 import com.android.packageinstaller.v2.model.InstallSuccess;
 import com.android.packageinstaller.v2.ui.InstallActionListener;
 import java.util.List;
@@ -40,6 +40,7 @@ import java.util.List;
  */
 public class InstallSuccessFragment extends DialogFragment {
 
+    private static final String LOG_TAG = InstallSuccessFragment.class.getSimpleName();
     private final InstallSuccess mDialogData;
     private AlertDialog mDialog;
     private InstallActionListener mInstallActionListener;
@@ -59,13 +60,17 @@ public class InstallSuccessFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         View dialogView = getLayoutInflater().inflate(R.layout.install_content_view, null);
-        mDialog = new AlertDialog.Builder(requireContext()).setTitle(mDialogData.getAppLabel())
-            .setIcon(mDialogData.getAppIcon()).setView(dialogView).setNegativeButton(R.string.done,
+        mDialog = new AlertDialog.Builder(requireContext())
+            .setTitle(mDialogData.getAppLabel())
+            .setIcon(mDialogData.getAppIcon())
+            .setView(dialogView)
+            .setNegativeButton(R.string.done,
                 (dialog, which) -> mInstallActionListener.onNegativeResponse(
-                    InstallStage.STAGE_SUCCESS))
-            .setPositiveButton(R.string.launch, (dialog, which) -> {
-            }).create();
+                    mDialogData.getStageCode()))
+            .setPositiveButton(R.string.launch, (dialog, which) -> {})
+            .create();
 
         dialogView.requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
 
@@ -76,25 +81,28 @@ public class InstallSuccessFragment extends DialogFragment {
     public void onStart() {
         super.onStart();
         Button launchButton = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        boolean enabled = false;
+        boolean visible = false;
         if (mDialogData.getResultIntent() != null) {
             List<ResolveInfo> list = mPm.queryIntentActivities(mDialogData.getResultIntent(), 0);
             if (list.size() > 0) {
-                enabled = true;
+                visible = true;
             }
         }
-        if (enabled) {
+        if (visible) {
             launchButton.setOnClickListener(view -> {
+                Log.i(LOG_TAG, "Finished installing and launching " +
+                    mDialogData.getAppLabel());
                 mInstallActionListener.openInstalledApp(mDialogData.getResultIntent());
             });
         } else {
-            launchButton.setEnabled(false);
+            launchButton.setVisibility(View.GONE);
         }
     }
 
     @Override
     public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
+        Log.i(LOG_TAG, "Finished installing " + mDialogData.getAppLabel());
         mInstallActionListener.onNegativeResponse(mDialogData.getStageCode());
     }
 }

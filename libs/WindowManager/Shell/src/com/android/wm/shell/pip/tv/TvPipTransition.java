@@ -62,7 +62,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
@@ -233,6 +233,7 @@ public class TvPipTransition extends PipTransitionController {
                                 .setContainerLayer()
                                 .setHidden(false)
                                 .setParent(root.getLeash())
+                                .setCallsite("TvPipTransition.startAnimation")
                                 .build();
                         startTransaction.reparent(activitySurface, pipLeash);
                         // Put the activity at local position with offset in case it is letterboxed.

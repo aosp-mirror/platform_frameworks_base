@@ -315,6 +315,7 @@ public final class DisplayPowerProximityStateController {
     public void dumpLocal(PrintWriter pw) {
         pw.println();
         pw.println("DisplayPowerProximityStateController:");
+        pw.println("-------------------------------------");
         synchronized (mLock) {
             pw.println("  mPendingWaitForNegativeProximityLocked="
                     + mPendingWaitForNegativeProximityLocked);

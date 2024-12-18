@@ -45,7 +45,6 @@ public class TimeoutRecord {
             TimeoutKind.APP_REGISTERED,
             TimeoutKind.SHORT_FGS_TIMEOUT,
             TimeoutKind.JOB_SERVICE,
-            TimeoutKind.FGS_TIMEOUT,
     })
 
     @Retention(RetentionPolicy.SOURCE)
@@ -60,7 +59,6 @@ public class TimeoutRecord {
         int SHORT_FGS_TIMEOUT = 8;
         int JOB_SERVICE = 9;
         int APP_START = 10;
-        int FGS_TIMEOUT = 11;
     }
 
     /** Kind of timeout, e.g. BROADCAST_RECEIVER, etc. */
@@ -82,6 +80,9 @@ public class TimeoutRecord {
     /** Latency tracker associated with this instance. */
     public final AnrLatencyTracker mLatencyTracker;
 
+    /** A handle to the timer that expired.  A value of null means "no timer". */
+    private AutoCloseable mExpiredTimer;
+
     private TimeoutRecord(@TimeoutKind int kind, @NonNull String reason, long endUptimeMillis,
             boolean endTakenBeforeLocks) {
         this.mKind = kind;
@@ -89,6 +90,7 @@ public class TimeoutRecord {
         this.mEndUptimeMillis = endUptimeMillis;
         this.mEndTakenBeforeLocks = endTakenBeforeLocks;
         this.mLatencyTracker = new AnrLatencyTracker(kind, endUptimeMillis);
+        this.mExpiredTimer = null;
     }
 
     private static TimeoutRecord endingNow(@TimeoutKind int kind, String reason) {
@@ -188,12 +190,6 @@ public class TimeoutRecord {
         return TimeoutRecord.endingNow(TimeoutKind.SHORT_FGS_TIMEOUT, reason);
     }
 
-    /** Record for a "foreground service" timeout. */
-    @NonNull
-    public static TimeoutRecord forFgsTimeout(String reason) {
-        return TimeoutRecord.endingNow(TimeoutKind.FGS_TIMEOUT, reason);
-    }
-
     /** Record for a job related timeout. */
     @NonNull
     public static TimeoutRecord forJobService(String reason) {
@@ -204,5 +200,23 @@ public class TimeoutRecord {
     @NonNull
     public static TimeoutRecord forAppStart(String reason) {
         return TimeoutRecord.endingNow(TimeoutKind.APP_START, reason);
+    }
+
+    /** Record the ID of the timer that expired. */
+    @NonNull
+    public TimeoutRecord setExpiredTimer(@Nullable AutoCloseable handle) {
+        mExpiredTimer = handle;
+        return this;
+    }
+
+    /** Close the ExpiredTimer, if one is present. */
+    public void closeExpiredTimer() {
+        try {
+            if (mExpiredTimer != null) mExpiredTimer.close();
+        } catch (Exception e) {
+            // mExpiredTimer.close() should never, ever throw.  If it does, just rethrow as a
+            // RuntimeException.
+            throw new RuntimeException(e);
+        }
     }
 }

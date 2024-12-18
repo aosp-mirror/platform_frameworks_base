@@ -78,10 +78,13 @@ class WallpaperData {
     /**
      * The component name of the currently set live wallpaper.
      */
-    ComponentName wallpaperComponent;
+    private ComponentName mWallpaperComponent;
 
+    // TODO(b/347235611) Remove this field
     /**
      * The component name of the wallpaper that should be set next.
+     *
+     * @deprecated
      */
     ComponentName nextWallpaperComponent;
 
@@ -172,11 +175,6 @@ class WallpaperData {
     SparseArray<Rect> mCropHints = new SparseArray<>();
 
     /**
-     * cropHints will be ignored if this flag is false
-     */
-    boolean mSupportsMultiCrop;
-
-    /**
      * The phone orientation when the wallpaper was set. Only relevant for image wallpapers
      */
     int mOrientationWhenSet = ORIENTATION_UNKNOWN;
@@ -197,14 +195,13 @@ class WallpaperData {
      */
     WallpaperData(WallpaperData source) {
         this.userId = source.userId;
-        this.wallpaperComponent = source.wallpaperComponent;
+        this.mWallpaperComponent = source.mWallpaperComponent;
         this.mWhich = source.mWhich;
         this.wallpaperId = source.wallpaperId;
         this.cropHint.set(source.cropHint);
         if (source.mCropHints != null) {
             this.mCropHints = source.mCropHints.clone();
         }
-        this.mSupportsMultiCrop = source.mSupportsMultiCrop;
         this.allowBackup = source.allowBackup;
         this.primaryColors = source.primaryColors;
         this.mWallpaperDimAmount = source.mWallpaperDimAmount;
@@ -231,6 +228,14 @@ class WallpaperData {
             map.put(userId, result);
         }
         return result;
+    }
+
+    ComponentName getComponent() {
+        return mWallpaperComponent;
+    }
+
+    void setComponent(ComponentName componentName) {
+        this.mWallpaperComponent = componentName;
     }
 
     @Override

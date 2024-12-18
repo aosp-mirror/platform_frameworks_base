@@ -20,8 +20,10 @@ import static android.provider.Settings.Config.SYNC_DISABLED_MODE_NONE;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_PERSISTENT;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
 
-import android.aconfig.Aconfig.parsed_flag;
-import android.aconfig.Aconfig.parsed_flags;
+import android.aconfig.DeviceProtos;
+import android.aconfig.nano.Aconfig;
+import android.aconfig.nano.Aconfig.parsed_flag;
+import android.aconfig.nano.Aconfig.parsed_flags;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.AttributionSource;
@@ -66,7 +68,6 @@ import java.util.Map;
 public final class DeviceConfigService extends Binder {
     private static final List<String> sAconfigTextProtoFilesOnDevice = List.of(
             "/system/etc/aconfig_flags.pb",
-            "/system_ext/etc/aconfig_flags.pb",
             "/product/etc/aconfig_flags.pb",
             "/vendor/etc/aconfig_flags.pb");
 
@@ -97,32 +98,28 @@ public final class DeviceConfigService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        final IContentProvider iprovider = mProvider.getIContentProvider();
+        if (android.provider.flags.Flags.dumpImprovements()) {
+            pw.print("SyncDisabledForTests: ");
+            MyShellCommand.getSyncDisabledForTests(pw, pw);
+
+            pw.print("UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService(): ");
+            pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
+
+            pw.println("DeviceConfig provider: ");
+            try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
+                DeviceConfig.dump(pfd, pw, /* prefix= */ "  ", args);
+            } catch (IOException e) {
+                pw.print("IOException creating ParcelFileDescriptor: ");
+                pw.println(e);
+            }
+        }
+
+        IContentProvider iprovider = mProvider.getIContentProvider();
         pw.println("DeviceConfig flags:");
         for (String line : MyShellCommand.listAll(iprovider)) {
             pw.println(line);
         }
-
-        ArrayList<String> missingFiles = new ArrayList<String>();
-        for (String fileName : sAconfigTextProtoFilesOnDevice) {
-            File aconfigFile = new File(fileName);
-            if (!aconfigFile.exists()) {
-                missingFiles.add(fileName);
-            }
-        }
-
-        if (missingFiles.isEmpty()) {
-            pw.println("\nAconfig flags:");
-            for (String name : MyShellCommand.listAllAconfigFlags(iprovider)) {
-                pw.println(name);
-            }
-        } else {
-            pw.println("\nFailed to dump aconfig flags due to missing files:");
-            for (String fileName : missingFiles) {
-                pw.println(fileName);
-            }
-        }
-    }
+   }
 
     private static HashSet<String> getAconfigFlagNamesInDeviceConfig() {
         HashSet<String> nameSet = new HashSet<String>();
@@ -135,11 +132,8 @@ public final class DeviceConfigService extends Binder {
                     continue;
                 }
 
-                for (parsed_flag flag : parsedFlags.getParsedFlagList()) {
-                    String namespace = flag.getNamespace();
-                    String packageName = flag.getPackage();
-                    String name = flag.getName();
-                    nameSet.add(namespace + "/" + packageName + "." + name);
+                for (parsed_flag flag : parsedFlags.parsedFlag) {
+                    nameSet.add(flag.namespace + "/" + flag.package_ + "." + flag.name);
                 }
             }
         } catch (IOException e) {
@@ -168,6 +162,7 @@ public final class DeviceConfigService extends Binder {
 
     static final class MyShellCommand extends ShellCommand {
         final SettingsProvider mProvider;
+        private HashMap<String, parsed_flag> mAconfigParsedFlags;
 
         enum CommandVerb {
             GET,
@@ -185,26 +180,73 @@ public final class DeviceConfigService extends Binder {
 
         MyShellCommand(SettingsProvider provider) {
             mProvider = provider;
+
+            if (Flags.checkRootAndReadOnly()) {
+                List<parsed_flag> parsedFlags;
+                try {
+                    parsedFlags = DeviceProtos.loadAndParseFlagProtos();
+                } catch (IOException e) {
+                    throw new IllegalStateException("failed to parse aconfig protos");
+                }
+
+                mAconfigParsedFlags = new HashMap();
+                for (parsed_flag flag : parsedFlags) {
+                    mAconfigParsedFlags.put(flag.package_ + "." + flag.name, flag);
+                }
+            }
+        }
+
+        /**
+         * Return true if a flag is aconfig.
+         */
+        private boolean isAconfigFlag(String name) {
+            return mAconfigParsedFlags.get(name) != null;
+        }
+
+        /**
+         * Return true if a flag is both aconfig and read-only.
+         *
+         * @return true if a flag is both aconfig and read-only
+         */
+        private boolean isReadOnly(String name) {
+            parsed_flag flag = mAconfigParsedFlags.get(name);
+            if (flag != null) {
+                if (flag.permission == Aconfig.READ_ONLY) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Return true if the calling process is root.
+         *
+         * @return true if a flag is aconfig, and the calling process is root
+         */
+        private boolean isRoot() {
+            return Binder.getCallingUid() == Process.ROOT_UID;
+        }
+
+        private static int getSyncDisabledForTests(PrintWriter pOut, PrintWriter pErr) {
+            int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
+            String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
+            if (syncDisabledModeString == null) {
+                pErr.println("Unknown mode: " + syncDisabledModeInt);
+                return -1;
+            }
+            pOut.println(syncDisabledModeString);
+            return 0;
         }
 
       public static HashMap<String, String> getAllFlags(IContentProvider provider) {
         HashMap<String, String> allFlags = new HashMap<String, String>();
-        try {
-            Bundle args = new Bundle();
-            args.putInt(Settings.CALL_METHOD_USER_KEY,
-                ActivityManager.getService().getCurrentUser().id);
-            Bundle b = provider.call(new AttributionSource(Process.myUid(),
-                    resolveCallingPackage(), null), Settings.AUTHORITY,
-                    Settings.CALL_METHOD_LIST_CONFIG, null, args);
-            if (b != null) {
-                Map<String, String> flagsToValues =
-                    (HashMap) b.getSerializable(Settings.NameValueTable.VALUE);
-                allFlags.putAll(flagsToValues);
+        for (DeviceConfig.Properties properties : DeviceConfig.getAllProperties()) {
+            List<String> keys = new ArrayList<>(properties.getKeyset());
+            for (String flagName : properties.getKeyset()) {
+                String fullName = properties.getNamespace() + "/" + flagName;
+                allFlags.put(fullName, properties.getString(flagName, null));
             }
-        } catch (RemoteException e) {
-            throw new RuntimeException("Failed in IPC", e);
         }
-
         return allFlags;
       }
 
@@ -422,15 +464,71 @@ public final class DeviceConfigService extends Binder {
                     pout.println(DeviceConfig.getProperty(namespace, key));
                     break;
                 case PUT:
+                    if (Flags.checkRootAndReadOnly()) {
+                        if (isAconfigFlag(key)) {
+                            if (!isRoot()) {
+                                pout.println("Error: must be root to write aconfig flag");
+                                break;
+                            }
+
+                            if (isReadOnly(key)) {
+                                pout.println("Error: cannot write read-only flag");
+                                break;
+                            }
+                        }
+                    }
+
                     DeviceConfig.setProperty(namespace, key, value, makeDefault);
                     break;
                 case OVERRIDE:
+                    if (Flags.checkRootAndReadOnly()) {
+                        if (isAconfigFlag(key)) {
+                            if (!isRoot()) {
+                                pout.println("Error: must be root to write aconfig flag");
+                                break;
+                            }
+
+                            if (isReadOnly(key)) {
+                                pout.println("Error: cannot write read-only flag");
+                                break;
+                            }
+                        }
+                    }
+
                     DeviceConfig.setLocalOverride(namespace, key, value);
                     break;
                 case CLEAR_OVERRIDE:
+                    if (Flags.checkRootAndReadOnly()) {
+                        if (isAconfigFlag(key)) {
+                            if (!isRoot()) {
+                                pout.println("Error: must be root to write aconfig flag");
+                                break;
+                            }
+
+                            if (isReadOnly(key)) {
+                                pout.println("Error: cannot write read-only flag");
+                                break;
+                            }
+                        }
+                    }
+
                     DeviceConfig.clearLocalOverride(namespace, key);
                     break;
                 case DELETE:
+                    if (Flags.checkRootAndReadOnly()) {
+                        if (isAconfigFlag(key)) {
+                            if (!isRoot()) {
+                                pout.println("Error: must be root to write aconfig flag");
+                                break;
+                            }
+
+                            if (isReadOnly(key)) {
+                                pout.println("Error: cannot write read-only flag");
+                                break;
+                            }
+                        }
+                    }
+
                     pout.println(delete(iprovider, namespace, key)
                             ? "Successfully deleted " + key + " from " + namespace
                             : "Failed to delete " + key + " from " + namespace);
@@ -505,14 +603,7 @@ public final class DeviceConfigService extends Binder {
                     DeviceConfig.setSyncDisabledMode(syncDisabledModeArg);
                     break;
                 case GET_SYNC_DISABLED_FOR_TESTS:
-                    int syncDisabledModeInt = DeviceConfig.getSyncDisabledMode();
-                    String syncDisabledModeString = formatSyncDisabledMode(syncDisabledModeInt);
-                    if (syncDisabledModeString == null) {
-                        perr.println("Unknown mode: " + syncDisabledModeInt);
-                        return -1;
-                    }
-                    pout.println(syncDisabledModeString);
-                    break;
+                    return getSyncDisabledForTests(pout, perr);
                 default:
                     perr.println("Unspecified command");
                     return -1;
@@ -531,13 +622,22 @@ public final class DeviceConfigService extends Binder {
             pw.println("  put NAMESPACE KEY VALUE [default]");
             pw.println("      Change the contents of KEY to VALUE for the given NAMESPACE.");
             pw.println("      {default} to set as the default value.");
+            pw.println("  override NAMESPACE KEY VALUE");
+            pw.println("      Set flag NAMESPACE/KEY to the given VALUE, and ignores "
+                    + "server-updates for");
+            pw.println("      this flag. This can still be called even if there is no underlying "
+                    + "value set.");
             pw.println("  delete NAMESPACE KEY");
             pw.println("      Delete the entry for KEY for the given NAMESPACE.");
+            pw.println("  clear_override NAMESPACE KEY");
+            pw.println("      Clear local sticky flag override for KEY in the given NAMESPACE.");
             pw.println("  list_namespaces [--public]");
             pw.println("      Prints the name of all (or just the public) namespaces.");
             pw.println("  list [NAMESPACE]");
             pw.println("      Print all keys and values defined, optionally for the given "
                     + "NAMESPACE.");
+            pw.println("  list_local_overrides");
+            pw.println("      Print all flags that have been overridden.");
             pw.println("  reset RESET_MODE [NAMESPACE]");
             pw.println("      Reset all flag values, optionally for a NAMESPACE, according to "
                     + "RESET_MODE.");
@@ -547,8 +647,9 @@ public final class DeviceConfigService extends Binder {
                     + "flags are reset");
             pw.println("  set_sync_disabled_for_tests SYNC_DISABLED_MODE");
             pw.println("      Modifies bulk property setting behavior for tests. When in one of the"
-                    + " disabled modes this ensures that config isn't overwritten.");
-            pw.println("      SYNC_DISABLED_MODE is one of:");
+                    + " disabled modes");
+            pw.println("      this ensures that config isn't overwritten. SYNC_DISABLED_MODE is "
+                    + "one of:");
             pw.println("        none: Sync is not disabled. A reboot may be required to restart"
                     + " syncing.");
             pw.println("        persistent: Sync is disabled, this state will survive a reboot.");

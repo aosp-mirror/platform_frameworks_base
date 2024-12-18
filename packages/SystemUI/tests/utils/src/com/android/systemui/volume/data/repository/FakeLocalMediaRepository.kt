@@ -17,7 +17,6 @@
 package com.android.systemui.volume.data.repository
 
 import com.android.settingslib.media.MediaDevice
-import com.android.settingslib.volume.data.model.RoutingSession
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,35 +24,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class FakeLocalMediaRepository : LocalMediaRepository {
 
-    private val volumeBySession: MutableMap<String?, Int> = mutableMapOf()
-
-    private val mutableMediaDevices = MutableStateFlow<List<MediaDevice>>(emptyList())
-    override val mediaDevices: StateFlow<List<MediaDevice>>
-        get() = mutableMediaDevices.asStateFlow()
-
     private val mutableCurrentConnectedDevice = MutableStateFlow<MediaDevice?>(null)
     override val currentConnectedDevice: StateFlow<MediaDevice?>
         get() = mutableCurrentConnectedDevice.asStateFlow()
 
-    private val mutableRemoteRoutingSessions = MutableStateFlow<List<RoutingSession>>(emptyList())
-    override val remoteRoutingSessions: StateFlow<List<RoutingSession>>
-        get() = mutableRemoteRoutingSessions.asStateFlow()
-
-    fun updateMediaDevices(devices: List<MediaDevice>) {
-        mutableMediaDevices.value = devices
-    }
-
     fun updateCurrentConnectedDevice(device: MediaDevice?) {
         mutableCurrentConnectedDevice.value = device
-    }
-
-    fun updateRemoteRoutingSessions(sessions: List<RoutingSession>) {
-        mutableRemoteRoutingSessions.value = sessions
-    }
-
-    fun getSessionVolume(sessionId: String?): Int = volumeBySession.getOrDefault(sessionId, 0)
-
-    override suspend fun adjustSessionVolume(sessionId: String?, volume: Int) {
-        volumeBySession[sessionId] = volume
     }
 }

@@ -29,6 +29,9 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 
+import androidx.annotation.VisibleForTesting;
+
+import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ScreenDecorations;
@@ -37,8 +40,8 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -67,7 +70,10 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
-    private boolean mIsSceneContainerVisible = false;
+    // Whether the scene container has no UI to render, i.e. is in idle state on the Gone scene and
+    // without any overlays to display.
+    private boolean mIsSceneContainerUiEmpty = true;
+    private boolean mIsRemoteUserInteractionOngoing = false;
     private boolean mShouldAdjustInsets = false;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
@@ -87,11 +93,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             NotificationShadeWindowController notificationShadeWindowController,
             ConfigurationController configurationController,
             HeadsUpManager headsUpManager,
-            ShadeExpansionStateManager shadeExpansionStateManager,
             ShadeInteractor shadeInteractor,
             Provider<SceneInteractor> sceneInteractor,
             JavaAdapter javaAdapter,
-            SceneContainerFlags sceneContainerFlags,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             PrimaryBouncerInteractor primaryBouncerInteractor,
             AlternateBouncerInteractor alternateBouncerInteractor
@@ -121,7 +125,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                         updateTouchableRegion();
                     }
                 });
-        mHeadsUpManager.addHeadsUpPhoneListener(this::onHeadsUpGoingAwayStateChanged);
+        mHeadsUpManager.addHeadsUpPhoneListener(this::onHeadsUpAnimatingAwayStateChanged);
 
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationShadeWindowController.setForcePluginOpenListener((forceOpen) -> {
@@ -130,10 +134,13 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
 
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             javaAdapter.alwaysCollectFlow(
-                    sceneInteractor.get().isVisible(),
-                    this::onSceneContainerVisibilityChanged);
+                    sceneInteractor.get().getTransitionState(),
+                    this::onSceneContainerTransition);
+            javaAdapter.alwaysCollectFlow(
+                    sceneInteractor.get().isRemoteUserInteractionOngoing(),
+                    this::onRemoteUserInteractionOngoingChanged);
         } else {
             javaAdapter.alwaysCollectFlow(
                     shadeInteractor.isAnyExpanded(),
@@ -168,13 +175,23 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         }
     }
 
-    private void onSceneContainerVisibilityChanged(Boolean isVisible) {
-        if (isVisible != mIsSceneContainerVisible) {
-            mIsSceneContainerVisible = isVisible;
-            if (isVisible) {
+    private void onSceneContainerTransition(ObservableTransitionState transitionState) {
+        boolean isSceneContainerUiEmpty = transitionState.isIdle(Scenes.Gone)
+                && ((ObservableTransitionState.Idle) transitionState).getCurrentOverlays()
+                .isEmpty();
+        if (isSceneContainerUiEmpty != mIsSceneContainerUiEmpty) {
+            mIsSceneContainerUiEmpty = isSceneContainerUiEmpty;
+            if (!isSceneContainerUiEmpty) {
                 // make sure our state is sensible
                 mForceCollapsedUntilLayout = false;
             }
+            updateTouchableRegion();
+        }
+    }
+
+    private void onRemoteUserInteractionOngoingChanged(Boolean ongoing) {
+        if (ongoing != mIsRemoteUserInteractionOngoing) {
+            mIsRemoteUserInteractionOngoing = ongoing;
             updateTouchableRegion();
         }
     }
@@ -214,7 +231,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
                 && (mNotificationShadeWindowView.getRootWindowInsets() != null)
                 && (mNotificationShadeWindowView.getRootWindowInsets().getDisplayCutout() != null);
         boolean shouldObserve = mHeadsUpManager.hasPinnedHeadsUp()
-                        || mHeadsUpManager.isHeadsUpGoingAway()
+                        || mHeadsUpManager.isHeadsUpAnimatingAwayValue()
                         || mForceCollapsedUntilLayout
                         || hasCutoutInset
                         || mNotificationShadeWindowController.getForcePluginOpen();
@@ -276,20 +293,22 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
      * Helper to let us know when calculating the region is not needed because we know the entire
      * screen needs to be touchable.
      */
-    private boolean shouldMakeEntireScreenTouchable() {
+    @VisibleForTesting
+    boolean shouldMakeEntireScreenTouchable() {
         // The touchable region is always the full area when expanded, whether we're showing the
         // shade or the bouncer. It's also fully touchable when the screen off animation is playing
         // since we don't want stray touches to go through the light reveal scrim to whatever is
         // underneath.
         return mIsStatusBarExpanded
-                || mIsSceneContainerVisible
+                || (SceneContainerFlag.isEnabled()
+                && (!mIsSceneContainerUiEmpty || mIsRemoteUserInteractionOngoing))
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();
     }
 
-    private void onHeadsUpGoingAwayStateChanged(boolean headsUpGoingAway) {
-        if (!headsUpGoingAway) {
+    private void onHeadsUpAnimatingAwayStateChanged(boolean headsUpAnimatingAway) {
+        if (!headsUpAnimatingAway) {
             updateTouchableRegionAfterLayout();
         } else {
             updateTouchableRegion();

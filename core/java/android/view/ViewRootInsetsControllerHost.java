@@ -17,16 +17,16 @@
 package android.view;
 
 import static android.view.InsetsController.DEBUG;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
 import java.util.List;
@@ -153,10 +153,17 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateRequestedVisibleTypes(@WindowInsets.Type.InsetsType int types) {
+    public void updateRequestedVisibleTypes(@WindowInsets.Type.InsetsType int types,
+            @Nullable ImeTracker.Token statsToken) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.updateRequestedVisibleTypes(mViewRoot.mWindow, types);
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES);
+                mViewRoot.mWindowSession.updateRequestedVisibleTypes(mViewRoot.mWindow, types,
+                        statsToken);
+            } else {
+                ImeTracker.forLogging().onFailed(statsToken,
+                        ImeTracker.PHASE_CLIENT_UPDATE_REQUESTED_VISIBLE_TYPES);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);
@@ -173,7 +180,6 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
 
     @Override
     public void setSystemBarsAppearance(int appearance, int mask) {
-        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
         final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
         final int newAppearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
         if (insetsFlags.appearance != newAppearance) {
@@ -189,13 +195,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public boolean isSystemBarsAppearanceControlled() {
-        return (mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) != 0;
-    }
-
-    @Override
     public void setSystemBarsBehavior(int behavior) {
-        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
         if (mViewRoot.mWindowAttributes.insetsFlags.behavior != behavior) {
             mViewRoot.mWindowAttributes.insetsFlags.behavior = behavior;
             mViewRoot.mWindowAttributesChanged = true;
@@ -206,11 +206,6 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public int getSystemBarsBehavior() {
         return mViewRoot.mWindowAttributes.insetsFlags.behavior;
-    }
-
-    @Override
-    public boolean isSystemBarsBehaviorControlled() {
-        return (mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) != 0;
     }
 
     @Override

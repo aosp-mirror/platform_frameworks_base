@@ -20,12 +20,11 @@
 #if !defined(VK_USE_PLATFORM_ANDROID_KHR)
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
-#include <GrContextOptions.h>
 #include <SkSurface.h>
 #include <android-base/unique_fd.h>
+#include <include/gpu/ganesh/GrContextOptions.h>
 #include <utils/StrongPointer.h>
-#include <vk/GrVkBackendContext.h>
-#include <vk/GrVkExtensions.h>
+#include <vk/VulkanExtensions.h>
 #include <vulkan/vulkan.h>
 
 // VK_ANDROID_frame_boundary is a bespoke extension defined by AGI
@@ -127,7 +126,7 @@ private:
 
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
     // VkPhysicalDeviceFeatures struct.
-    void setupDevice(GrVkExtensions&, VkPhysicalDeviceFeatures2&);
+    void setupDevice(skgpu::VulkanExtensions&, VkPhysicalDeviceFeatures2&);
 
     // simple wrapper class that exists only to initialize a pointer to NULL
     template <typename FNPTR_TYPE>
@@ -206,7 +205,7 @@ private:
         BufferAge,
     };
     SwapBehavior mSwapBehavior = SwapBehavior::Discard;
-    GrVkExtensions mExtensions;
+    skgpu::VulkanExtensions mExtensions;
     uint32_t mDriverVersion = 0;
 
     std::once_flag mInitFlag;

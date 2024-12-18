@@ -49,7 +49,7 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
             @NonNull IInvalidationCallback callback) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId,
                 context.getOpPackageName(), 0 /* cookie */, sensorId,
-                logger, biometricContext);
+                logger, biometricContext, false /* isMandatoryBiometrics */);
         mAuthenticatorIds = authenticatorIds;
         mInvalidationCallback = callback;
     }
@@ -74,6 +74,16 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     @Override
     public void unableToStart() {
 
+    }
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        try {
+            mInvalidationCallback.onCompleted();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to complete invalidation client due to exception: " + e);
+        }
     }
 
     @Override

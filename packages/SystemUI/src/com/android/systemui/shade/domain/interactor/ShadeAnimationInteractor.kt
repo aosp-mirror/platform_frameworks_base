@@ -38,5 +38,8 @@ abstract class ShadeAnimationInteractor(
      * completes the close. Important: if QS is collapsing back to shade, this will be false because
      * that is not considered "closing".
      */
-    abstract val isAnyCloseAnimationRunning: Flow<Boolean>
+    abstract val isAnyCloseAnimationRunning: StateFlow<Boolean>
+
+    /** Whether a short animation to expand or collapse is running after user input has ended. */
+    abstract val isAnyFlingAnimationRunning: Flow<Boolean>
 }

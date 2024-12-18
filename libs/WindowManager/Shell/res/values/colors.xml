@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 -->
-<resources>
+<resources
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <color name="docked_divider_handle">#ffffff</color>
     <color name="split_divider_background">@color/taskbar_background_dark</color>
     <drawable name="forced_resizable_background">#59000000</drawable>
@@ -42,7 +43,7 @@
     <color name="compat_controls_text">@android:color/system_neutral1_50</color>
 
     <!-- Letterbox Education -->
-    <color name="letterbox_education_text_secondary">@android:color/system_neutral2_200</color>
+    <color name="letterbox_education_text_secondary">?androidprv:attr/materialColorSecondary</color>
 
     <!-- Letterbox Dialog -->
     <color name="letterbox_dialog_background">@android:color/system_neutral1_900</color>
@@ -62,10 +63,6 @@
     <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
     <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
     <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
-    <color name="desktop_mode_maximize_menu_button">#DDDACD</color>
-    <color name="desktop_mode_maximize_menu_button_outline">#797869</color>
-    <color name="desktop_mode_maximize_menu_button_outline_on_hover">#606219</color>
-    <color name="desktop_mode_maximize_menu_button_on_hover">#E7E790</color>
     <color name="desktop_mode_maximize_menu_progress_light">#33000000</color>
     <color name="desktop_mode_maximize_menu_progress_dark">#33FFFFFF</color>
     <color name="desktop_mode_caption_button_on_hover_light">#11000000</color>

@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.animation.ValueAnimator;
@@ -25,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.HardwareRenderer;
 import android.os.Binder;
 import android.os.Build;
@@ -44,6 +48,7 @@ import android.window.ITrustedPresentationListener;
 import android.window.InputTransferToken;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FastPrintWriter;
 
@@ -355,17 +360,25 @@ public final class WindowManagerGlobal {
         }
 
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+        final Context context = view.getContext();
         if (parentWindow != null) {
             parentWindow.adjustLayoutParamsForSubWindow(wparams);
         } else {
             // If there's no parent, then hardware acceleration for this view is
             // set from the application's hardware acceleration setting.
-            final Context context = view.getContext();
             if (context != null
                     && (context.getApplicationInfo().flags
                     & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
+        }
+
+        if (context != null && wparams.type > LAST_APPLICATION_WINDOW) {
+            final TypedArray styles = context.obtainStyledAttributes(R.styleable.Window);
+            if (styles.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false)) {
+                wparams.privateFlags |= PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
+            }
+            styles.recycle();
         }
 
         ViewRootImpl root;
@@ -839,20 +852,40 @@ public final class WindowManagerGlobal {
         mTrustedPresentationListener.removeListener(listener);
     }
 
-    InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
+    private static InputChannel createInputChannel(@NonNull IBinder clientToken,
             @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
-            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
-        IBinder clientToken = new Binder();
-        InputTransferToken inputTransferToken = new InputTransferToken();
+            @Nullable InputTransferToken inputTransferToken) {
         InputChannel inputChannel = new InputChannel();
         try {
-            WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
-                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, inputTransferToken,
-                    surfaceControl.getName(), inputChannel);
+            // TODO (b/329860681): Use INVALID_DISPLAY for now because the displayId will be
+            // selected in  SurfaceFlinger. This should be cleaned up so grantInputChannel doesn't
+            // take in a displayId at all
+            WindowManagerGlobal.getWindowSession().grantInputChannel(INVALID_DISPLAY,
+                    surfaceControl, clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null,
+                    inputTransferToken, surfaceControl.getName(), inputChannel);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create input channel", e);
             e.rethrowAsRuntimeException();
         }
+        return inputChannel;
+    }
+
+    private static void removeInputChannel(IBinder clientToken) {
+        try {
+            WindowManagerGlobal.getWindowSession().remove(clientToken);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    InputTransferToken registerBatchedSurfaceControlInputReceiver(
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+        IBinder clientToken = new Binder();
+        InputTransferToken inputTransferToken = new InputTransferToken();
+        InputChannel inputChannel = createInputChannel(clientToken, hostToken,
+                surfaceControl, inputTransferToken);
 
         synchronized (mSurfaceControlInputReceivers) {
             mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
@@ -869,20 +902,13 @@ public final class WindowManagerGlobal {
         return inputTransferToken;
     }
 
-    InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    InputTransferToken registerUnbatchedSurfaceControlInputReceiver(
             @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
         InputTransferToken inputTransferToken = new InputTransferToken();
-        InputChannel inputChannel = new InputChannel();
-        try {
-            WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
-                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, inputTransferToken,
-                    surfaceControl.getName(), inputChannel);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to create input channel", e);
-            e.rethrowAsRuntimeException();
-        }
+        InputChannel inputChannel = createInputChannel(clientToken, hostToken,
+                surfaceControl, inputTransferToken);
 
         synchronized (mSurfaceControlInputReceivers) {
             mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
@@ -909,13 +935,7 @@ public final class WindowManagerGlobal {
             Log.w(TAG, "No registered input event receiver with sc: " + surfaceControl);
             return;
         }
-        try {
-            WindowManagerGlobal.getWindowSession().remove(
-                    surfaceControlInputReceiverInfo.mClientToken);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to remove input channel", e);
-            e.rethrowAsRuntimeException();
-        }
+        removeInputChannel(surfaceControlInputReceiverInfo.mClientToken);
 
         surfaceControlInputReceiverInfo.mInputEventReceiver.dispose();
     }

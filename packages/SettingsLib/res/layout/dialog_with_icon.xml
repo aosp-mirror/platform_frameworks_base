@@ -35,12 +35,14 @@
             android:id="@+id/dialog_with_icon_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hyphenationFrequency="fullFast"
             android:gravity="center"
             style="@style/DialogWithIconTitle"/>
         <TextView
             android:id="@+id/dialog_with_icon_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hyphenationFrequency="fullFast"
             android:gravity="center"
             style="@style/TextAppearanceSmall"/>
 

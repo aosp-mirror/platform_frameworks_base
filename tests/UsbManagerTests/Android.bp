@@ -43,6 +43,9 @@ android_test {
         "libmultiplejvmtiagentsinterferenceagent",
         "libstaticjvmtiagent",
     ],
+    libs: [
+        "android.test.mock.stubs.system",
+    ],
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],

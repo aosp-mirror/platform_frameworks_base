@@ -16,11 +16,11 @@
 
 package com.android.server.broadcastradio.hal2;
 
-import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -33,7 +33,10 @@ import android.hardware.radio.ICloseHandle;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -55,6 +58,9 @@ public final class AnnouncementAggregatorHidlTest {
     private AnnouncementAggregator mAnnouncementAggregator;
     private IBinder.DeathRecipient mDeathRecipient;
 
+    @Rule
+    public final Expect mExpect = Expect.create();
+
     @Mock
     private IAnnouncementListener mListenerMock;
     @Mock
@@ -73,6 +79,19 @@ public final class AnnouncementAggregatorHidlTest {
 
         verify(mBinderMock).linkToDeath(deathRecipientCaptor.capture(), eq(0));
         mDeathRecipient = deathRecipientCaptor.getValue();
+    }
+
+    @Test
+    public void constructor_withBinderDied() throws Exception {
+        RemoteException remoteException = new RemoteException("Binder is died");
+        doThrow(remoteException).when(mBinderMock).linkToDeath(any(), anyInt());
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> new com.android.server.broadcastradio.aidl.AnnouncementAggregator(
+                        mListenerMock, mLock));
+
+        mExpect.withMessage("Exception for dead binder").that(thrown).hasMessageThat()
+                .contains(remoteException.getMessage());
     }
 
     @Test
@@ -104,7 +123,7 @@ public final class AnnouncementAggregatorHidlTest {
             moduleWatcherCaptor.getValue().onListUpdated(Arrays.asList(mAnnouncementMocks[index]));
 
             verify(mListenerMock, times(index + 1)).onListUpdated(announcementsCaptor.capture());
-            assertWithMessage("Number of announcements %s after %s announcements were updated",
+            mExpect.withMessage("Number of announcements %s after %s announcements were updated",
                     announcementsCaptor.getValue(), index + 1)
                     .that(announcementsCaptor.getValue().size()).isEqualTo(index + 1);
         }
@@ -132,7 +151,7 @@ public final class AnnouncementAggregatorHidlTest {
                 () -> mAnnouncementAggregator.watchModule(mRadioModuleMocks[0],
                         TEST_ENABLED_TYPES));
 
-        assertWithMessage("Exception for watching module after aggregator has been closed")
+        mExpect.withMessage("Exception for watching module after aggregator has been closed")
                 .that(thrown).hasMessageThat()
                 .contains("announcement aggregator has already been closed");
     }

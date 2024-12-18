@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.os.SystemClock;
 import android.os.Trace;
 
@@ -32,20 +33,24 @@ import java.util.List;
  */
 final class TurnOffVibratorStep extends AbstractVibratorStep {
 
+    private final boolean mIsCleanUp;
+
     TurnOffVibratorStep(VibrationStepConductor conductor, long startTime,
-            VibratorController controller) {
-        super(conductor, startTime, controller, /* effect= */ null, /* index= */ -1, startTime);
+            VibratorController controller, boolean isCleanUp) {
+        super(conductor, startTime, controller, startTime);
+        mIsCleanUp = isCleanUp;
     }
 
     @Override
     public boolean isCleanUp() {
-        return true;
+        return mIsCleanUp;
     }
 
+    @NonNull
     @Override
     public List<Step> cancel() {
-        return Arrays.asList(
-                new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(), controller));
+        return Arrays.asList(new TurnOffVibratorStep(conductor, SystemClock.uptimeMillis(),
+                controller, /* isCleanUp= */ true));
     }
 
     @Override
@@ -53,6 +58,7 @@ final class TurnOffVibratorStep extends AbstractVibratorStep {
         stopVibrating();
     }
 
+    @NonNull
     @Override
     public List<Step> play() {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "TurnOffVibratorStep");

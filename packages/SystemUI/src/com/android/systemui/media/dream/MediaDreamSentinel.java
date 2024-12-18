@@ -48,7 +48,7 @@ public class MediaDreamSentinel implements CoreStartable {
         }
 
         @Override
-        public void onMediaDataRemoved(@NonNull String key) {
+        public void onMediaDataRemoved(@NonNull String key, boolean userInitiated) {
             final boolean hasActiveMedia = mMediaDataManager.hasActiveMedia();
             if (DEBUG) {
                 Log.d(TAG, "onMediaDataRemoved(" + key + "), mAdded=" + mAdded + ", hasActiveMedia="

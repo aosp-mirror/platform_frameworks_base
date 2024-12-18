@@ -15,14 +15,12 @@
   -->
 
 <!-- Color palette -->
-<resources>
-    <!-- These colors are used for Remote Views. -->
-    <color name="text_primary">#1A1B20</color>
-    <color name="text_secondary">#44474F</color>
-    <color name="dropdown_container">#F3F3FA</color>
-    <color name="sign_in_options_container">#DADADA</color>
-    <color name="sign_in_options_icon_color">#1B1B1B</color>
+<resources
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
-    <!-- These colors are used for Inline Suggestions. -->
-    <color name="inline_background">#FFFFFF</color>
+    <!-- These colors are used for Remote Views. -->
+    <color name="onSurface">?androidprv:attr/materialColorOnSurface</color>
+    <color name="onSurfaceVariant">?androidprv:attr/materialColorOnSurfaceVariant</color>
+    <color name="surfaceDim">?androidprv:attr/materialColorSurfaceDim</color>
+    <color name="surfaceContainer">?androidprv:attr/materialColorSurfaceContainer</color>
 </resources>

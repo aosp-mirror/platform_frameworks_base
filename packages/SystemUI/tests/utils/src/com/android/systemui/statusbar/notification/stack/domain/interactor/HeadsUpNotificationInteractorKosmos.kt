@@ -16,11 +16,20 @@
 
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 
 val Kosmos.headsUpNotificationInteractor by Fixture {
-    HeadsUpNotificationInteractor(headsUpNotificationRepository)
+    HeadsUpNotificationInteractor(
+        headsUpNotificationRepository,
+        deviceEntryFaceAuthInteractor,
+        keyguardTransitionInteractor,
+        notificationsKeyguardInteractor,
+        shadeInteractor,
+    )
 }

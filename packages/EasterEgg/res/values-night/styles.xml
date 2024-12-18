@@ -15,7 +15,7 @@
 -->
 <resources>
     <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
         <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

@@ -167,6 +167,16 @@ public final class AppTarget implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        int hashCode = Objects.hash(mId, mPackageName, mClassName, mUser);
+        if (mShortcutInfo != null) {
+            hashCode = 31 * hashCode + mShortcutInfo.getId().hashCode();
+        }
+        hashCode = 31 * hashCode + mRank;
+        return hashCode;
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

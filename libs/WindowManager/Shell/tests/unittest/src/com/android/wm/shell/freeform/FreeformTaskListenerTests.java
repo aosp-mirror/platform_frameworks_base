@@ -19,13 +19,15 @@ package com.android.wm.shell.freeform;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -34,8 +36,9 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
-import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -64,7 +67,11 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
     @Mock
+    private SurfaceControl mMockSurfaceControl;
+    @Mock
     private DesktopModeTaskRepository mDesktopModeTaskRepository;
+    @Mock
+    private LaunchAdjacentController mLaunchAdjacentController;
     private FreeformTaskListener mFreeformTaskListener;
     private StaticMockitoSession mMockitoSession;
 
@@ -72,11 +79,14 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     public void setup() {
         mMockitoSession = mockitoSession().initMocks(this)
                 .strictness(Strictness.LENIENT).mockStatic(DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
+        doReturn(true).when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
+
         mFreeformTaskListener = new FreeformTaskListener(
+                mContext,
                 mShellInit,
                 mTaskOrganizer,
                 Optional.of(mDesktopModeTaskRepository),
+                mLaunchAdjacentController,
                 mWindowDecorViewModel);
     }
 
@@ -88,7 +98,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onFocusTaskChanged(task);
 
-        verify(mDesktopModeTaskRepository).addOrMoveFreeformTaskToTop(task.taskId);
+        verify(mDesktopModeTaskRepository)
+            .addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
     }
 
     @Test
@@ -100,7 +111,32 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onFocusTaskChanged(fullscreenTask);
 
         verify(mDesktopModeTaskRepository, never())
-                .addOrMoveFreeformTaskToTop(fullscreenTask.taskId);
+                .addOrMoveFreeformTaskToTop(fullscreenTask.displayId, fullscreenTask.taskId);
+    }
+
+    @Test
+    public void testVisibilityTaskChanged_visible_setLaunchAdjacentDisabled() {
+        ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isVisible = true;
+
+        mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
+
+        verify(mLaunchAdjacentController).setLaunchAdjacentEnabled(false);
+    }
+
+    @Test
+    public void testVisibilityTaskChanged_NotVisible_setLaunchAdjacentEnabled() {
+        ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isVisible = true;
+
+        mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
+
+        task.isVisible = false;
+        mFreeformTaskListener.onTaskInfoChanged(task);
+
+        verify(mLaunchAdjacentController).setLaunchAdjacentEnabled(true);
     }
 
     @After

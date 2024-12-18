@@ -37,6 +37,7 @@ import android.provider.Settings.Secure;
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.display.feature.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -533,11 +534,15 @@ public final class ColorDisplayManager {
 
     /**
      * Returns {@code true} if reduce bright colors is supported by the device.
+     * Will return false if even dimmer is enabled - since this is the successor to RBC and cannot
+     * be run concurrently.
      *
      * @hide
      */
     public static boolean isReduceBrightColorsAvailable(Context context) {
-        return context.getResources().getBoolean(R.bool.config_reduceBrightColorsAvailable);
+        return context.getResources().getBoolean(R.bool.config_reduceBrightColorsAvailable)
+                && !(Flags.evenDimmer() && context.getResources().getBoolean(
+                com.android.internal.R.bool.config_evenDimmerEnabled));
     }
 
     /**

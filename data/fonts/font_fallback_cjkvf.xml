@@ -304,7 +304,7 @@
         <font postScriptName="NotoSansBengali-Regular" supportedAxes="wght">
             NotoSansBengali-VF.ttf
         </font>
-        <font fallbackFor="serif" postScriptName="NotoSerifBengali-Regular">
+        <font fallbackFor="serif" postScriptName="NotoSerifBengali-Regular" supportedAxes="wght">
             NotoSerifBengali-VF.ttf
         </font>
     </family>
@@ -354,7 +354,7 @@
         <font postScriptName="NotoSansSinhala-Regular" supportedAxes="wght">
             NotoSansSinhala-VF.ttf
         </font>
-        <font fallbackFor="serif" postScriptName="NotoSerifSinhala-Regular">
+        <font fallbackFor="serif" postScriptName="NotoSerifSinhala-Regular" supportedAxes="wght">
             NotoSerifSinhala-VF.ttf
         </font>
     </family>
@@ -768,7 +768,7 @@
         <font weight="400" style="normal">NotoSansSymbols-Regular-Subsetted.ttf</font>
     </family>
     <family lang="zh-Hans">
-        <font weight="400" style="normal" index="2" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="2" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -780,7 +780,7 @@
         </font>
     </family>
     <family lang="zh-Hant,zh-Bopo">
-        <font weight="400" style="normal" index="3" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="3" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -792,7 +792,7 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal" index="0" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="0" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -804,17 +804,13 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal">
-            NotoSerifHentaigana-EL.ttf
+        <font postScriptName="NotoSerifHentaigana-ExtraLight" supportedAxes="wght">
+            NotoSerifHentaigana.ttf
             <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="700" style="normal">
-            NotoSerifHentaigana-EL.ttf
-            <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="ko">
-        <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKjp-Thin"
+        <font weight="400" style="normal" index="1" postScriptName="NotoSansCJKJP-Regular"
             supportedAxes="wght">
             NotoSansCJK-Regular.ttc
             <!-- The default instance of NotoSansCJK-Regular.ttc is wght=100, so specify wght=400
@@ -947,23 +943,23 @@
             NotoSansMedefaidrin-VF.ttf
         </font>
     </family>
-    <family lang="und-Soyo" supportedAxes="wght">
-        <font postScriptName="NotoSansSoyombo-Regular">
+    <family lang="und-Soyo">
+        <font postScriptName="NotoSansSoyombo-Regular" supportedAxes="wght">
             NotoSansSoyombo-VF.ttf
         </font>
     </family>
-    <family lang="und-Takr" supportedAxes="wght">
-        <font postScriptName="NotoSansTakri-Regular">
+    <family lang="und-Takr">
+        <font postScriptName="NotoSansTakri-Regular" supportedAxes="wght">
             NotoSansTakri-VF.ttf
         </font>
     </family>
-    <family lang="und-Hmnp" supportedAxes="wght">
-        <font postScriptName="NotoSerifHmongNyiakeng-Regular">
+    <family lang="und-Hmnp">
+        <font postScriptName="NotoSerifHmongNyiakeng-Regular" supportedAxes="wght">
             NotoSerifNyiakengPuachueHmong-VF.ttf
         </font>
     </family>
-    <family lang="und-Yezi" supportedAxes="wght">
-        <font postScriptName="NotoSerifYezidi-Regular">
+    <family lang="und-Yezi">
+        <font postScriptName="NotoSerifYezidi-Regular" supportedAxes="wght">
             NotoSerifYezidi-VF.ttf
         </font>
     </family>

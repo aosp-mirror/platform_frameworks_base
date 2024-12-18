@@ -25,6 +25,12 @@ interface IDesktopTaskListener {
     /** Desktop tasks visibility has changed. Visible if at least 1 task is visible. */
     oneway void onTasksVisibilityChanged(int displayId, int visibleTasksCount);
 
-    /** Desktop task stashed status has changed. */
+    /** @deprecated this is no longer supported. */
     oneway void onStashedChanged(int displayId, boolean stashed);
+
+    /**
+     * Shows taskbar corner radius when running desktop tasks are updated if
+     * [hasTasksRequiringTaskbarRounding] is true.
+     */
+    oneway void onTaskbarCornerRoundingUpdate(boolean hasTasksRequiringTaskbarRounding);
 }

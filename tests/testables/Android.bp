@@ -27,8 +27,8 @@ java_library {
     name: "testables",
     srcs: ["src/**/*.java"],
     libs: [
-        "android.test.runner",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.mock.stubs.system",
         "androidx.test.rules",
         "mockito-target-inline-minus-junit4",
     ],

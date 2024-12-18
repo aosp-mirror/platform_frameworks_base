@@ -11,7 +11,6 @@ cc_library_static {
     name: "libservices.core",
     defaults: ["libservices.core-libs"],
 
-    cpp_std: "c++2a",
     cflags: [
         "-Wall",
         "-Werror",
@@ -38,8 +37,8 @@ cc_library_static {
         "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
-        "com_android_server_ConsumerIrService.cpp",
         "com_android_server_companion_virtual_InputController.cpp",
+        "com_android_server_companion_virtual_VirtualDeviceImpl.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_display_DisplayControl.cpp",
         "com_android_server_display_SmallAreaDetectionController.cpp",
@@ -54,7 +53,6 @@ cc_library_static {
         "com_android_server_powerstats_PowerStatsService.cpp",
         "com_android_server_power_stats_CpuPowerStatsCollector.cpp",
         "com_android_server_hint_HintManagerService.cpp",
-        "com_android_server_SerialService.cpp",
         "com_android_server_soundtrigger_middleware_AudioSessionProviderImpl.cpp",
         "com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker.cpp",
         "com_android_server_stats_pull_StatsPullAtomService.cpp",
@@ -63,7 +61,6 @@ cc_library_static {
         "com_android_server_SystemServer.cpp",
         "com_android_server_tv_TvUinputBridge.cpp",
         "com_android_server_tv_TvInputHal.cpp",
-        "com_android_server_vr_VrManagerService.cpp",
         "com_android_server_UsbAlsaJackDetector.cpp",
         "com_android_server_UsbAlsaMidiDevice.cpp",
         "com_android_server_UsbDeviceManager.cpp",
@@ -78,9 +75,10 @@ cc_library_static {
         "com_android_server_wm_TaskFpsCallbackController.cpp",
         "onload.cpp",
         ":lib_cachedAppOptimizer_native",
-        ":lib_gameManagerService_native",
+        ":lib_freezer_native",
         ":lib_oomConnection_native",
         ":lib_anrTimer_native",
+        ":lib_lazilyRegisteredServices_native",
     ],
 
     include_dirs: [
@@ -192,7 +190,7 @@ cc_defaults {
         "android.hardware.thermal-V2-ndk",
         "android.hardware.tv.input@1.0",
         "android.hardware.tv.input-V2-ndk",
-        "android.hardware.vibrator-V2-cpp",
+        "android.hardware.vibrator-V3-ndk",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
@@ -214,6 +212,7 @@ cc_defaults {
     static_libs: [
         "android.hardware.broadcastradio@common-utils-1x-lib",
         "libaidlcommonsupport",
+        "libvirtualdevicebuildflags",
     ],
 
     product_variables: {
@@ -238,9 +237,9 @@ filegroup {
 }
 
 filegroup {
-    name: "lib_gameManagerService_native",
+    name: "lib_freezer_native",
     srcs: [
-        "com_android_server_app_GameManagerService.cpp",
+        "com_android_server_am_Freezer.cpp",
     ],
 }
 
@@ -253,5 +252,15 @@ filegroup {
     name: "lib_anrTimer_native",
     srcs: [
         "com_android_server_utils_AnrTimer.cpp",
+    ],
+}
+
+filegroup {
+    name: "lib_lazilyRegisteredServices_native",
+    srcs: [
+        "com_android_server_ConsumerIrService.cpp",
+        "com_android_server_app_GameManagerService.cpp",
+        "com_android_server_utils_LazyJniRegistrar.cpp",
+        "com_android_server_vr_VrManagerService.cpp",
     ],
 }

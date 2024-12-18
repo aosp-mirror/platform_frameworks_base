@@ -53,6 +53,27 @@ constructor(
         )
     }
 
+    fun logTopLevelServiceStateBroadcastEmergencyOnly(subId: Int, serviceState: ServiceState) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            {
+                int1 = subId
+                bool1 = serviceState.isEmergencyOnly
+            },
+            { "ACTION_SERVICE_STATE for subId=$int1. ServiceState.isEmergencyOnly=$bool1" }
+        )
+    }
+
+    fun logTopLevelServiceStateBroadcastMissingExtras(subId: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { int1 = subId },
+            { "ACTION_SERVICE_STATE for subId=$int1. Intent is missing extras. Ignoring" }
+        )
+    }
+
     fun logOnSignalStrengthsChanged(signalStrength: SignalStrength, subId: Int) {
         buffer.log(
             TAG,
@@ -99,6 +120,15 @@ constructor(
                 bool1 = active
             },
             { "onCarrierNetworkChange: subId=$int1 active=$bool1" },
+        )
+    }
+
+    fun logOnCarrierRoamingNtnModeChanged(active: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { bool1 = active },
+            { "onCarrierRoamingNtnModeChanged: $bool1" }
         )
     }
 
@@ -168,7 +198,8 @@ constructor(
 
     fun logServiceProvidersUpdatedBroadcast(intent: Intent) {
         val showSpn = intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_SPN, false)
-        val spn = intent.getStringExtra(TelephonyManager.EXTRA_DATA_SPN)
+        val spn = intent.getStringExtra(TelephonyManager.EXTRA_SPN)
+        val dataSpn = intent.getStringExtra(TelephonyManager.EXTRA_DATA_SPN)
         val showPlmn = intent.getBooleanExtra(TelephonyManager.EXTRA_SHOW_PLMN, false)
         val plmn = intent.getStringExtra(TelephonyManager.EXTRA_PLMN)
 
@@ -178,12 +209,13 @@ constructor(
             {
                 bool1 = showSpn
                 str1 = spn
+                str2 = dataSpn
                 bool2 = showPlmn
-                str2 = plmn
+                str3 = plmn
             },
             {
                 "Intent: ACTION_SERVICE_PROVIDERS_UPDATED." +
-                    " showSpn=$bool1 spn=$str1 showPlmn=$bool2 plmn=$str2"
+                    " showSpn=$bool1 spn=$str1 dataSpn=$str2 showPlmn=$bool2 plmn=$str3"
             }
         )
     }

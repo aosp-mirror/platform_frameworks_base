@@ -21,6 +21,7 @@ package {
 
 phony {
     name: "frameworks-base-overlays",
+    product_specific: true,
     required: [
         "DisplayCutoutEmulationCornerOverlay",
         "DisplayCutoutEmulationDoubleOverlay",
@@ -30,9 +31,6 @@ phony {
         "FontNotoSerifSourceOverlay",
         "NavigationBarMode3ButtonOverlay",
         "NavigationBarModeGesturalOverlay",
-        "NavigationBarModeGesturalOverlayNarrowBack",
-        "NavigationBarModeGesturalOverlayWideBack",
-        "NavigationBarModeGesturalOverlayExtraWideBack",
         "TransparentNavigationBarOverlay",
         "NotesRoleEnabledOverlay",
         "preinstalled-packages-platform-overlays.xml",

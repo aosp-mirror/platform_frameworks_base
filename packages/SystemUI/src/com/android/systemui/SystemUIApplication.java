@@ -24,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Process;
@@ -38,22 +37,21 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.res.R;
-import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
@@ -82,6 +80,9 @@ public class SystemUIApplication extends Application implements
 
     public SystemUIApplication() {
         super();
+        if (!isSubprocess()) {
+            Trace.registerWithPerfetto();
+        }
         Log.v(TAG, "SystemUIApplication constructed.");
         // SysUI may be building without protolog preprocessing in some cases
         ProtoLog.REQUIRE_PROTOLOGTOOL = false;
@@ -182,9 +183,7 @@ public class SystemUIApplication extends Application implements
         } else {
             // We don't need to startServices for sub-process that is doing some tasks.
             // (screenshots, sweetsweetdesserts or tuner ..)
-            String processName = ActivityThread.currentProcessName();
-            ApplicationInfo info = getApplicationInfo();
-            if (processName != null && processName.startsWith(info.processName + ":")) {
+            if (isSubprocess()) {
                 return;
             }
             // For a secondary user, boot-completed will never be called because it has already
@@ -195,6 +194,12 @@ public class SystemUIApplication extends Application implements
         }
     }
 
+    /** Returns whether this is a subprocess (e.g. com.android.systemui:screenshot) */
+    private boolean isSubprocess() {
+        String processName = ActivityThread.currentProcessName();
+        return processName != null && processName.contains(":");
+    }
+
     /**
      * Makes sure that all the CoreStartables are running. If they are already running, this is a
      * no-op. This is needed to conditionally start all the services, as we only need to have it in
@@ -203,7 +208,7 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startSystemUserServicesIfNeeded() {
-        if (!mProcessWrapper.isSystemUser()) {
+        if (!shouldStartSystemUserServices()) {
             Log.wtf(TAG, "Tried starting SystemUser services on non-SystemUser");
             return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
         }
@@ -226,7 +231,7 @@ public class SystemUIApplication extends Application implements
      * <p>This method must only be called from the main thread.</p>
      */
     void startSecondaryUserServicesIfNeeded() {
-        if (mProcessWrapper.isSystemUser()) {
+        if (!shouldStartSecondaryUserServices()) {
             return;  // Per-user startables are handled in #startSystemUserServicesIfNeeded.
         }
         // Sort the startables so that we get a deterministic ordering.
@@ -235,6 +240,14 @@ public class SystemUIApplication extends Application implements
         sortedStartables.putAll(mSysUIComponent.getPerUserStartables());
         startServicesIfNeeded(
                 sortedStartables, "StartSecondaryServices", null);
+    }
+
+    protected boolean shouldStartSystemUserServices() {
+        return mProcessWrapper.isSystemUser();
+    }
+
+    protected boolean shouldStartSecondaryUserServices() {
+        return !mProcessWrapper.isSystemUser();
     }
 
     private void startServicesIfNeeded(
@@ -291,6 +304,7 @@ public class SystemUIApplication extends Application implements
         int serviceIndex = 0;
 
         do {
+            startedAny = false;
             queue = nextQueue;
             nextQueue = new ArrayDeque<>(startables.size());
 
@@ -298,9 +312,9 @@ public class SystemUIApplication extends Application implements
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = queue.removeFirst();
 
                 Class<?> cls = entry.getKey();
-                Dependencies dep = cls.getAnnotation(Dependencies.class);
-                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
-                if (deps == null || startedStartables.containsAll(Arrays.asList(deps))) {
+                Set<Class<? extends CoreStartable>> deps =
+                        mSysUIComponent.getStartableDependencies().get(cls);
+                if (deps == null || startedStartables.containsAll(deps)) {
                     String clsName = cls.getName();
                     int i = serviceIndex;  // Copied to make lambda happy.
                     timeInitialization(
@@ -322,12 +336,12 @@ public class SystemUIApplication extends Application implements
             while (!nextQueue.isEmpty()) {
                 Map.Entry<Class<?>, Provider<CoreStartable>> entry = nextQueue.removeFirst();
                 Class<?> cls = entry.getKey();
-                Dependencies dep = cls.getAnnotation(Dependencies.class);
-                Class<? extends CoreStartable>[] deps = (dep == null ? null : dep.value());
+                Set<Class<? extends CoreStartable>> deps =
+                        mSysUIComponent.getStartableDependencies().get(cls);
                 StringJoiner stringJoiner = new StringJoiner(", ");
-                for (int i = 0; deps != null && i < deps.length; i++) {
-                    if (!startedStartables.contains(deps[i])) {
-                        stringJoiner.add(deps[i].getName());
+                for (Class<? extends CoreStartable> c : deps) {
+                    if (!startedStartables.contains(c)) {
+                        stringJoiner.add(c.getName());
                     }
                 }
                 Log.e(TAG, "Failed to start " + cls.getName()

@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"‏4K (ایمن)"</item>
     <item msgid="7322156123728520872">"‏4K (ارتقا یافته)"</item>
     <item msgid="7735692090314849188">"‏4K (ارتقا یافته، ایمن)"</item>
-    <item msgid="7346816300608639624">"‫720p، ‫1080p ‫(Dual Screen)"</item>
+    <item msgid="7346816300608639624">"‏‫‫720p، ‫1080p ‫(صفحه‌نمایش دوگانه)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"خالی"</item>

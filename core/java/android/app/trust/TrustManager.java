@@ -18,6 +18,7 @@ package android.app.trust;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -30,6 +31,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 
+import com.android.internal.policy.IDeviceLockedStateListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +42,15 @@ import java.util.List;
  */
 @SystemService(Context.TRUST_SERVICE)
 public class TrustManager {
+
+    /**
+     * Intent action used to identify services that can serve as significant providers.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_BIND_SIGNIFICANT_PLACE_PROVIDER =
+            "com.android.trust.provider.SignificantPlaceProvider.BIND";
 
     private static final int MSG_TRUST_CHANGED = 1;
     private static final int MSG_TRUST_MANAGED_CHANGED = 2;
@@ -249,6 +261,35 @@ public class TrustManager {
     }
 
     /**
+     * Registers a listener for device lock state events.
+     *
+     * Requires the {@link android.Manifest.permission#SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE}
+     * permission.
+     */
+    public void registerDeviceLockedStateListener(final IDeviceLockedStateListener listener,
+            int deviceId) {
+        try {
+            mService.registerDeviceLockedStateListener(listener, deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a listener for device lock state events.
+     *
+     * Requires the {@link android.Manifest.permission#SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE}
+     * permission.
+     */
+    public void unregisterDeviceLockedStateListener(final IDeviceLockedStateListener listener) {
+        try {
+            mService.unregisterDeviceLockedStateListener(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @return whether {@param userId} has enabled and configured trust agents. Ignores short-term
      * unavailability of trust due to {@link LockPatternUtils.StrongAuthTracker}.
      */
@@ -284,6 +325,20 @@ public class TrustManager {
     public void clearAllBiometricRecognized(BiometricSourceType source, int unlockedUser) {
         try {
             mService.clearAllBiometricRecognized(source, unlockedUser);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the device is currently in a significant place, and false in all other
+     * circumstances.
+     *
+     * @hide
+     */
+    public boolean isInSignificantPlace() {
+        try {
+            return mService.isInSignificantPlace();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

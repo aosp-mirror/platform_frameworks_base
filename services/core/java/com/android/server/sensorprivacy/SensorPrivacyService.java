@@ -45,23 +45,20 @@ import static android.hardware.SensorPrivacyManager.Sources.OTHER;
 import static android.hardware.SensorPrivacyManager.Sources.QS_TILE;
 import static android.hardware.SensorPrivacyManager.Sources.SETTINGS;
 import static android.hardware.SensorPrivacyManager.Sources.SHELL;
-import static android.hardware.SensorPrivacyManager.StateTypes.AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
-import static android.hardware.SensorPrivacyManager.StateTypes.AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
-import static android.hardware.SensorPrivacyManager.StateTypes.AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
 import static android.hardware.SensorPrivacyManager.StateTypes.DISABLED;
 import static android.hardware.SensorPrivacyManager.StateTypes.ENABLED;
+import static android.hardware.SensorPrivacyManager.StateTypes.ENABLED_EXCEPT_ALLOWLISTED_APPS;
 import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_HARDWARE;
 import static android.hardware.SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE;
 import static android.os.UserHandle.USER_NULL;
+import static android.os.UserHandle.getCallingUserId;
 import static android.service.SensorPrivacyIndividualEnabledSensorProto.UNKNOWN;
 
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__ACTION_UNKNOWN;
-import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
-import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
-import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
+import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON_EXCEPT_ALLOWLISTED_APPS;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__CAMERA;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__MICROPHONE;
 import static com.android.internal.util.FrameworkStatsLog.PRIVACY_SENSOR_TOGGLE_INTERACTION__SENSOR__SENSOR_UNKNOWN;
@@ -98,7 +95,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
-import android.hardware.CameraPrivacyAllowlistEntry;
 import android.hardware.ISensorPrivacyListener;
 import android.hardware.ISensorPrivacyManager;
 import android.hardware.SensorPrivacyManager;
@@ -154,7 +150,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -171,17 +166,11 @@ public final class SensorPrivacyService extends SystemService {
 
     public static final int REMINDER_DIALOG_DELAY_MILLIS = 500;
     @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-    private static final int ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS =
-            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
-    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-    private static final int ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS =
-            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
-    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
-    private static final int ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS =
-            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
-    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
     private static final int ACTION__TOGGLE_ON =
             PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON;
+    @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
+    private static final int ACTION__TOGGLE_ON_EXCEPT_ALLOWLISTED_APPS =
+            PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_ON_EXCEPT_ALLOWLISTED_APPS;
     @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
     private static final int ACTION__TOGGLE_OFF =
             PRIVACY_SENSOR_TOGGLE_INTERACTION__ACTION__TOGGLE_OFF;
@@ -199,6 +188,7 @@ public final class SensorPrivacyService extends SystemService {
     private final TelephonyManager mTelephonyManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final NotificationManager mNotificationManager;
+    private final UserManager mUserManager;
 
     private CameraPrivacyLightController mCameraPrivacyLightController;
 
@@ -209,8 +199,7 @@ public final class SensorPrivacyService extends SystemService {
     private CallStateHelper mCallStateHelper;
     private KeyguardManager mKeyguardManager;
 
-    List<CameraPrivacyAllowlistEntry> mCameraPrivacyAllowlist =
-            new ArrayList<CameraPrivacyAllowlistEntry>();
+    List<String> mCameraPrivacyAllowlist = new ArrayList<String>();
 
     private int mCurrentUser = USER_NULL;
 
@@ -227,15 +216,10 @@ public final class SensorPrivacyService extends SystemService {
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
+        mUserManager = context.getSystemService(UserManager.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
-        ArrayMap<String, Boolean> cameraPrivacyAllowlist =
-                SystemConfig.getInstance().getCameraPrivacyAllowlist();
-
-        for (Map.Entry<String, Boolean> entry : cameraPrivacyAllowlist.entrySet()) {
-            CameraPrivacyAllowlistEntry ent = new CameraPrivacyAllowlistEntry();
-            ent.packageName = entry.getKey();
-            ent.isMandatory =  entry.getValue();
-            mCameraPrivacyAllowlist.add(ent);
+        for (String entry : SystemConfig.getInstance().getCameraPrivacyAllowlist()) {
+            mCameraPrivacyAllowlist.add(entry);
         }
     }
 
@@ -398,14 +382,23 @@ public final class SensorPrivacyService extends SystemService {
         public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
                 Bundle prevRestrictions) {
             // Reset sensor privacy when restriction is added
+            // Note: isValidCallingUser needs to be called before resetting sensor privacy
+            // because DISALLOW_CAMERA_TOGGLE and DISALLOW_MICROPHONE_TOGGLE are applied on
+            // visible background users in Automotive's Multi Display configuration but we don't
+            // allow sensor privacy to be set on a visible background user.
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_CAMERA_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, CAMERA, false);
+                if (isValidCallingUser(userId)) {
+                    setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, CAMERA,
+                            false);
+                }
             }
             if (!prevRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)
                     && newRestrictions.getBoolean(UserManager.DISALLOW_MICROPHONE_TOGGLE)) {
-                setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, MICROPHONE,
-                        false);
+                if (isValidCallingUser(userId)) {
+                    setToggleSensorPrivacyUnchecked(TOGGLE_TYPE_SOFTWARE, userId, OTHER, MICROPHONE,
+                            false);
+                }
             }
         }
 
@@ -798,6 +791,10 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         public void setSensorPrivacy(boolean enable) {
             enforceManageSensorPrivacyPermission();
+
+            // Enforce valid calling user on devices that enable visible background users.
+            enforceValidCallingUser(getCallingUserId());
+
             mSensorPrivacyStateController.setAllSensorState(enable);
         }
 
@@ -814,10 +811,14 @@ public final class SensorPrivacyService extends SystemService {
                         + " enable=" + enable
                         + ")");
             }
+
             enforceManageSensorPrivacyPermission();
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
             }
+
+            // Enforce valid calling user on devices that enable visible background users.
+            enforceValidCallingUser(userId);
 
             if (!canChangeToggleSensorPrivacy(userId, sensor)) {
                 return;
@@ -849,6 +850,9 @@ public final class SensorPrivacyService extends SystemService {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
             }
+
+            // Enforce valid calling user on devices that enable visible background users.
+            enforceValidCallingUser(userId);
 
             if (!canChangeToggleSensorPrivacy(userId, sensor)) {
                 return;
@@ -909,14 +913,8 @@ public final class SensorPrivacyService extends SystemService {
                     case DISABLED :
                         logAction = ACTION__TOGGLE_ON;
                         break;
-                    case AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS :
-                        logAction = ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS;
-                        break;
-                    case AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS :
-                        logAction = ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS;
-                        break;
-                    case AUTOMOTIVE_DRIVER_ASSISTANCE_APPS :
-                        logAction = ACTION__AUTOMOTIVE_DRIVER_ASSISTANCE_APPS;
+                    case ENABLED_EXCEPT_ALLOWLISTED_APPS :
+                        logAction = ACTION__TOGGLE_ON_EXCEPT_ALLOWLISTED_APPS;
                         break;
                     default :
                         logAction = ACTION__ACTION_UNKNOWN;
@@ -982,9 +980,21 @@ public final class SensorPrivacyService extends SystemService {
         @Override
         @FlaggedApi(Flags.FLAG_CAMERA_PRIVACY_ALLOWLIST)
         @RequiresPermission(Manifest.permission.OBSERVE_SENSOR_PRIVACY)
-        public List<CameraPrivacyAllowlistEntry> getCameraPrivacyAllowlist() {
+        public List<String> getCameraPrivacyAllowlist() {
             enforceObserveSensorPrivacyPermission();
             return mCameraPrivacyAllowlist;
+        }
+
+        /**
+         * Sets camera privacy allowlist.
+         * @param allowlist List of automotive driver assistance packages for
+         * privacy allowlisting.
+         * @hide
+         */
+        @Override
+        public void setCameraPrivacyAllowlist(List<String> allowlist) {
+            enforceManageSensorPrivacyPermission();
+            mCameraPrivacyAllowlist =  new ArrayList<>(allowlist);
         }
 
         @Override
@@ -1006,23 +1016,9 @@ public final class SensorPrivacyService extends SystemService {
                 return true;
             } else if (state == DISABLED) {
                 return false;
-            } else if (state == AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS) {
-                for (CameraPrivacyAllowlistEntry entry : mCameraPrivacyAllowlist) {
-                    if ((packageName.equals(entry.packageName)) && !entry.isMandatory) {
-                        return false;
-                    }
-                }
-                return true;
-            } else if (state == AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS) {
-                for (CameraPrivacyAllowlistEntry entry : mCameraPrivacyAllowlist) {
-                    if ((packageName.equals(entry.packageName)) && entry.isMandatory) {
-                        return false;
-                    }
-                }
-                return true;
-            } else if (state == AUTOMOTIVE_DRIVER_ASSISTANCE_APPS) {
-                for (CameraPrivacyAllowlistEntry entry : mCameraPrivacyAllowlist) {
-                    if (packageName.equals(entry.packageName)) {
+            } else if (state == ENABLED_EXCEPT_ALLOWLISTED_APPS) {
+                for (String entry : mCameraPrivacyAllowlist) {
+                    if (packageName.equals(entry)) {
                         return false;
                     }
                 }
@@ -1176,6 +1172,42 @@ public final class SensorPrivacyService extends SystemService {
                     setToggleSensorPrivacy(userId2, source, sensor, enable);
                 }
             });
+        }
+
+        // This method enforces valid calling user on devices that enable visible background users.
+        // Only system user or current user or the user that belongs to the same profile group
+        // as the current user is permitted to toggle sensor privacy.
+        // Visible background users are not permitted to toggle sensor privacy.
+        private void enforceValidCallingUser(@UserIdInt int userId) {
+            if (!isValidCallingUser(userId)) {
+                throw new SecurityException("User " + userId
+                        + " is not permitted to toggle sensor privacy");
+            }
+        }
+
+        private boolean isValidCallingUser(@UserIdInt int userId) {
+            // Check whether visible background users are enabled.
+            // Visible background users are non current but can have UI access.
+            // The main use case for visible background users is the passenger in Automotive's
+            // Multi-Display configuration.
+            if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+                return true;
+            }
+
+            if (userId == UserHandle.USER_SYSTEM || userId == mCurrentUser) {
+                return true;
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (mUserManager.isSameProfileGroup(userId, mCurrentUser)) {
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+
+            return false;
         }
 
         /**
@@ -1617,7 +1649,7 @@ public final class SensorPrivacyService extends SystemService {
                             setToggleSensorPrivacy(userId, SHELL, sensor, false);
                         }
                         break;
-                        case "automotive_driver_assistance_apps" : {
+                        case "enable_except_allowlisted_apps" : {
                             if (Flags.cameraPrivacyAllowlist()) {
                                 int sensor = sensorStrToId(getNextArgRequired());
                                 if ((!isAutomotive(mContext)) || (sensor != CAMERA)) {
@@ -1626,33 +1658,7 @@ public final class SensorPrivacyService extends SystemService {
                                 }
 
                                 setToggleSensorPrivacyState(userId, SHELL, sensor,
-                                        AUTOMOTIVE_DRIVER_ASSISTANCE_APPS);
-                            }
-                        }
-                        break;
-                        case "automotive_driver_assistance_helpful_apps" : {
-                            if (Flags.cameraPrivacyAllowlist()) {
-                                int sensor = sensorStrToId(getNextArgRequired());
-                                if ((!isAutomotive(mContext)) || (sensor != CAMERA)) {
-                                    pw.println("Command not valid for this sensor");
-                                    return -1;
-                                }
-
-                                setToggleSensorPrivacyState(userId, SHELL, sensor,
-                                        AUTOMOTIVE_DRIVER_ASSISTANCE_HELPFUL_APPS);
-                            }
-                        }
-                        break;
-                        case "automotive_driver_assistance_required_apps" : {
-                            if (Flags.cameraPrivacyAllowlist()) {
-                                int sensor = sensorStrToId(getNextArgRequired());
-                                if ((!isAutomotive(mContext)) || (sensor != CAMERA)) {
-                                    pw.println("Command not valid for this sensor");
-                                    return -1;
-                                }
-
-                                setToggleSensorPrivacyState(userId, SHELL, sensor,
-                                        AUTOMOTIVE_DRIVER_ASSISTANCE_REQUIRED_APPS);
+                                        ENABLED_EXCEPT_ALLOWLISTED_APPS);
                             }
                         }
                         break;
@@ -1680,18 +1686,9 @@ public final class SensorPrivacyService extends SystemService {
                     pw.println("");
                     if (Flags.cameraPrivacyAllowlist()) {
                         if (isAutomotive(mContext)) {
-                            pw.println("  automotive_driver_assistance_apps USER_ID SENSOR");
-                            pw.println("    Disable privacy for automotive apps which help you"
-                                    + " drive and apps which are required by OEM");
-                            pw.println("");
-                            pw.println("  automotive_driver_assistance_helpful_apps "
+                            pw.println("  enable_except_allowlisted_apps "
                                     + "USER_ID SENSOR");
-                            pw.println("    Disable privacy for automotive apps which "
-                                    + "help you drive.");
-                            pw.println("");
-                            pw.println("  automotive_driver_assistance_required_apps "
-                                    + "USER_ID SENSOR");
-                            pw.println("    Disable privacy for automotive apps which are "
+                            pw.println("    Enable privacy except for automotive apps which are "
                                     + "required by OEM.");
                             pw.println("");
                         }

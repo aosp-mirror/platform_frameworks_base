@@ -152,11 +152,10 @@ public class DragDropControllerTests extends WindowTestsBase {
         // Use a new TestIWindow so we don't collect events for other windows
         final WindowState window = createWindow(
                 null, TYPE_BASE_APPLICATION, activity, name, ownerId, false, new TestIWindow());
-        window.mInputChannel = new InputChannel();
-        window.mInputChannelToken = window.mInputChannel.getToken();
+        InputChannel channel = new InputChannel();
+        window.openInputChannel(channel);
         window.mHasSurface = true;
         mWm.mWindowMap.put(window.mClient.asBinder(), window);
-        mWm.mInputToWindowMap.put(window.mInputChannelToken, window);
         return window;
     }
 
@@ -178,8 +177,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 TEST_PID, TEST_UID);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
-        when(mWm.mInputManager.startDragAndDrop(any(InputChannel.class),
-                any(InputChannel.class))).thenReturn(true);
+        when(mWm.mInputManager.startDragAndDrop(any(IBinder.class),
+                any(IBinder.class))).thenReturn(true);
 
         mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
     }
@@ -216,16 +215,6 @@ public class DragDropControllerTests extends WindowTestsBase {
     @Test
     public void testPerformDrag_NullDataWithGrantUri() {
         doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
-    }
-
-    @Test
-    public void testPerformDrag_NullDataToOtherUser() {
-        final WindowState otherUsersWindow =
-                createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
-        doReturn(otherUsersWindow).when(mDisplayContent).getTouchableWinAtPointLocked(10, 10);
-
-        doDragAndDrop(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 10, 10);
-        mToken = otherUsersWindow.mClient.asBinder();
     }
 
     @Test
@@ -321,6 +310,44 @@ public class DragDropControllerTests extends WindowTestsBase {
                     assertNull(last(localWindowDragEvents).getClipData());
                     assertFalse(last(globalInterceptWindowDragEvents).getClipData()
                             .willParcelWithActivityInfo());
+                });
+    }
+
+    @Test
+    public void testPrivateInterceptGlobalDragDropGetsDragFlags() {
+        mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+        mWindow.setViewVisibility(View.GONE);
+
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG,
+                ClipData.newPlainText("label", "text"), () -> {
+                    // Verify the start-drag event has the drag flags
+                    final DragEvent dragEvent = dragEvents.get(0);
+                    assertTrue(dragEvent.getAction() == ACTION_DRAG_STARTED);
+                    assertTrue(dragEvent.getDragFlags() ==
+                            (View.DRAG_FLAG_GLOBAL
+                                    | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
+
+                    try {
+                        mTarget.mDeferDragStateClosed = true;
+                        mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
+                        // // Verify the drop event does not have the drag flags
+                        mTarget.handleMotionEvent(false, 0, 0);
+                        final DragEvent dropEvent = dragEvents.get(dragEvents.size() - 1);
+                        assertTrue(dropEvent.getDragFlags() ==
+                                (View.DRAG_FLAG_GLOBAL
+                                        | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
+
+                        mTarget.reportDropResult(iwindow, true);
+                    } finally {
+                        mTarget.mDeferDragStateClosed = false;
+                    }
                 });
     }
 
@@ -459,7 +486,8 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateFlags() {
         final Session session = getTestSession();
         try {
-            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    0 /* callingUid */);
             fail("Expected failure without permission");
         } catch (SecurityException e) {
             // Expected failure
@@ -472,7 +500,8 @@ public class DragDropControllerTests extends WindowTestsBase {
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
         final Session session = createTestSession(mAtm);
         try {
-            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
+            session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION,
+                    0 /* callingUid */);
             // Expected pass
         } catch (SecurityException e) {
             fail("Expected no failure with permission");
@@ -667,8 +696,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
-            assertTrue(mWm.mInputManager.startDragAndDrop(new InputChannel(),
-                    new InputChannel()));
+            assertTrue(mWm.mInputManager.startDragAndDrop(new Binder(), new Binder()));
             mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient,
                     flag, surface, 0, 0, 0, 0, 0, 0, 0, data);
             assertNotNull(mToken);

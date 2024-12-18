@@ -31,7 +31,7 @@ import android.view.SurfaceControl;
 import android.window.ScreenCapture;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 
 /**
  * This class handles "freezing" of an Animatable. The Animatable in question should implement

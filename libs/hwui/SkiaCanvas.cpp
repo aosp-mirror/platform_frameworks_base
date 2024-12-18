@@ -596,8 +596,8 @@ void SkiaCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Pain
     if (recordingContext) {
         context = recordingContext->asDirectContext();
     }
-    mesh.updateSkMesh(context);
-    mCanvas->drawMesh(mesh.getSkMesh(), blender, paint);
+    mesh.refBufferData()->updateBuffers(context);
+    mCanvas->drawMesh(mesh.takeSnapshot().getSkMesh(), blender, paint);
 }
 
 // ----------------------------------------------------------------------------
@@ -841,9 +841,6 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& pai
     sk_sp<SkTextBlob> textBlob(builder.make());
 
     applyLooper(&paintCopy, [&](const SkPaint& p) { mCanvas->drawTextBlob(textBlob, 0, 0, p); });
-    if (!text_feature::fix_double_underline()) {
-        drawTextDecorations(x, y, totalAdvance, paintCopy);
-    }
 }
 
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,

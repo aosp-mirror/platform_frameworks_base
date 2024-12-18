@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.settingslib.satellite.SatelliteDialogUtils.TYPE_IS_BLUETOOTH;
 import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.annotation.Nullable;
@@ -31,14 +32,18 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.widget.Switch;
+import android.widget.Button;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.satellite.SatelliteDialogUtils;
+import com.android.systemui.animation.Expandable;
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogViewModel;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -51,7 +56,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialogViewModel;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
@@ -59,6 +63,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.Job;
 
 /** Quick settings tile: Bluetooth **/
 public class BluetoothTile extends QSTileImpl<BooleanState> {
@@ -78,6 +84,9 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     private final BluetoothTileDialogViewModel mDialogViewModel;
 
     private final FeatureFlags mFeatureFlags;
+    @Nullable
+    @VisibleForTesting
+    Job mClickJob;
 
     @Inject
     public BluetoothTile(
@@ -105,21 +114,40 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
 
     @Override
     public BooleanState newTileState() {
-        return new BooleanState();
+        BooleanState s = new BooleanState();
+        s.handlesSecondaryClick = true;
+        return s;
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
+        if (com.android.internal.telephony.flags.Flags.oemEnabledSatelliteFlag()) {
+            if (mClickJob != null && !mClickJob.isCompleted()) {
+                return;
+            }
+            mClickJob = SatelliteDialogUtils.mayStartSatelliteWarningDialog(
+                    mContext, this, TYPE_IS_BLUETOOTH, isAllowClick -> {
+                        if (!isAllowClick) {
+                            return null;
+                        }
+                        handleClickEvent(expandable);
+                        return null;
+                    });
+            return;
+        }
+        handleClickEvent(expandable);
+    }
+
+    private void handleClickEvent(@Nullable Expandable expandable) {
         if (mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG)) {
-            mDialogViewModel.showDialog(mContext, view);
+            mDialogViewModel.showDialog(expandable);
         } else {
             // Secondary clicks are header clicks, just toggle.
-            final boolean isEnabled = mState.value;
-            // Immediately enter transient enabling state when turning bluetooth on.
-            refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
-            mController.setBluetoothEnabled(!isEnabled);
+            toggleBluetooth();
         }
     }
+
+
 
     @Override
     public Intent getLongClickIntent() {
@@ -127,15 +155,13 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    protected void handleSecondaryClick(@Nullable View view) {
+    protected void handleSecondaryClick(@Nullable Expandable expandable) {
         if (!mController.canConfigBluetooth()) {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Settings.ACTION_BLUETOOTH_SETTINGS), 0);
             return;
         }
-        if (!mState.value) {
-            mController.setBluetoothEnabled(true);
-        }
+        toggleBluetooth();
     }
 
     @Override
@@ -197,8 +223,15 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.expandedAccessibilityClassName = Switch.class.getName();
+        state.expandedAccessibilityClassName = Button.class.getName();
         state.forceExpandIcon = mFeatureFlags.isEnabled(Flags.BLUETOOTH_QS_TILE_DIALOG);
+    }
+
+    private void toggleBluetooth() {
+        final boolean isEnabled = mState.value;
+        // Immediately enter transient enabling state when turning bluetooth on.
+        refreshState(isEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
+        mController.setBluetoothEnabled(!isEnabled);
     }
 
     /**

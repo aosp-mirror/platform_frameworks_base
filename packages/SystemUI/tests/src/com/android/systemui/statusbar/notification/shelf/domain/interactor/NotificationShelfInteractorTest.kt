@@ -19,7 +19,7 @@
 package com.android.systemui.statusbar.notification.shelf.domain.interactor
 
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -41,7 +41,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class NotificationShelfInteractorTest : SysuiTestCase() {
 

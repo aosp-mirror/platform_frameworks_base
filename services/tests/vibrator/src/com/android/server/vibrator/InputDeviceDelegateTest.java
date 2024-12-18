@@ -45,6 +45,8 @@ import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.vibrator.VibrationSession.CallerInfo;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -262,7 +264,7 @@ public class InputDeviceDelegateTest {
     public void vibrateIfAvailable_withNoInputDevice_returnsFalse() {
         assertFalse(mInputDeviceDelegate.isAvailable());
         assertFalse(mInputDeviceDelegate.vibrateIfAvailable(
-                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                new CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
                 SYNCED_EFFECT));
     }
 
@@ -277,7 +279,7 @@ public class InputDeviceDelegateTest {
         mInputDeviceDelegate.updateInputDeviceVibrators(/* vibrateInputDevices= */ true);
 
         assertTrue(mInputDeviceDelegate.vibrateIfAvailable(
-                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                new CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
                 SYNCED_EFFECT));
         verify(mIInputManagerMock).vibrateCombined(eq(1), same(SYNCED_EFFECT), any());
         verify(mIInputManagerMock).vibrateCombined(eq(2), same(SYNCED_EFFECT), any());

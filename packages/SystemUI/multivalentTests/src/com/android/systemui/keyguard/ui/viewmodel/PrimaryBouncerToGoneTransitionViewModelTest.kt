@@ -44,10 +44,7 @@ import org.junit.runner.RunWith
 class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
     val testScope = kosmos.testScope
 
@@ -162,8 +159,9 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             )
 
             assertThat(values[0]).isEqualTo(1f)
-            // Should fade to zero between here
             assertThat(values[1]).isEqualTo(0f)
+            // Should always finish with 1f to show HUNs
+            assertThat(values[2]).isEqualTo(1f)
         }
 
     @Test
@@ -180,7 +178,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values.size).isEqualTo(2)
+            assertThat(values.size).isEqualTo(3)
             // Shade stays open, and alpha should remain visible
             values.forEach { assertThat(it).isEqualTo(1f) }
         }

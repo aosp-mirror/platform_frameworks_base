@@ -27,9 +27,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.WakeReason;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.os.IBinder;
@@ -37,8 +43,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Vibrator;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.TestableContext;
@@ -46,10 +50,11 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.server.biometrics.Flags;
+import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
@@ -96,12 +101,20 @@ public class FaceDetectClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private AidlResponseHandler mAidlResponseHandler;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mStartHalCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
+    @Captor
+    private ArgumentCaptor<AuthenticationErrorInfo> mAuthenticationErrorCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStartedInfo> mAuthenticationStartedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStoppedInfo> mAuthenticationStoppedCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -109,7 +122,8 @@ public class FaceDetectClientTest {
     @Before
     public void setup() {
         mContext.addMockSystemService(Vibrator.class, mVibrator);
-
+        mContext.getOrCreateTestableResources().addOverride(R.string.face_error_hw_not_available,
+                "hw not available");
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
     }
@@ -124,49 +138,6 @@ public class FaceDetectClientTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
-    public void detectWithContext_v2() throws RemoteException {
-        final FaceDetectClient client = createClient(2);
-        client.start(mCallback);
-
-        InOrder order = inOrder(mHal, mBiometricContext);
-        order.verify(mBiometricContext).updateContext(
-                mOperationContextCaptor.capture(), anyBoolean());
-
-        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
-        order.verify(mHal).detectInteractionWithContext(same(aidlContext));
-        assertThat(aidlContext.wakeReason).isEqualTo(WAKE_REASON);
-        assertThat(aidlContext.authenticateReason.getFaceAuthenticateReason())
-                .isEqualTo(AUTH_REASON);
-
-        verify(mHal, never()).detectInteraction();
-    }
-
-    @Test
-    @RequiresFlagsDisabled(Flags.FLAG_DE_HIDL)
-    public void notifyHalWhenContextChanges() throws RemoteException {
-        final FaceDetectClient client = createClient();
-        client.start(mCallback);
-
-        final ArgumentCaptor<OperationContext> captor =
-                ArgumentCaptor.forClass(OperationContext.class);
-        verify(mHal).detectInteractionWithContext(captor.capture());
-        OperationContext opContext = captor.getValue();
-
-        // fake an update to the context
-        verify(mBiometricContext).subscribe(
-                mOperationContextCaptor.capture(), mContextInjector.capture());
-        assertThat(opContext).isSameInstanceAs(
-                mOperationContextCaptor.getValue().toAidlContext());
-        mContextInjector.getValue().accept(opContext);
-        verify(mHal).onContextChanged(same(opContext));
-
-        client.stopHalOperation();
-        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
     public void subscribeContextAndStartHal() throws RemoteException {
         final FaceDetectClient client = createClient();
         client.start(mCallback);
@@ -222,7 +193,55 @@ public class FaceDetectClientTest {
                         .setAuthenticateReason(
                                 FaceAuthenticateOptions.AUTHENTICATE_REASON_OCCLUDING_APP_REQUESTED)
                         .build(),
-                mBiometricLogger, mBiometricContext,
+                mBiometricLogger, mBiometricContext, mAuthenticationStateListeners,
                 false /* isStrongBiometric */, null /* sensorPrivacyManager */);
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onDetectionStartedAndStopped()
+            throws RemoteException {
+        final FaceDetectClient client = createClient();
+        client.start(mCallback);
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(
+                mAuthenticationStartedCaptor.capture());
+
+        assertThat(mAuthenticationStartedCaptor.getValue()).isEqualTo(
+                new AuthenticationStartedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
+        client.stopHalOperation();
+
+        verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onDetectionError()
+            throws RemoteException {
+        final FaceDetectClient client = createClient();
+        client.start(mCallback);
+        client.onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0);
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationError(
+                mAuthenticationErrorCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationErrorCaptor.getValue()).isEqualTo(
+                new AuthenticationErrorInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD,
+                        mContext.getString(R.string.face_error_hw_not_available),
+                        BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE).build()
+        );
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FACE,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
     }
 }

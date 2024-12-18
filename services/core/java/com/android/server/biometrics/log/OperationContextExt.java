@@ -50,21 +50,33 @@ public class OperationContextExt {
     @Surface.Rotation private int mOrientation = Surface.ROTATION_0;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
     private final boolean mIsBP;
+    private final boolean mIsMandatoryBiometrics;
 
     /** Create a context. */
     public OperationContextExt(boolean isBP) {
         this(new OperationContext(), isBP, BiometricAuthenticator.TYPE_NONE);
     }
 
-    public OperationContextExt(boolean isBP, @BiometricAuthenticator.Modality int modality) {
-        this(new OperationContext(), isBP, modality);
+    public OperationContextExt(boolean isBP, boolean isMandatoryBiometrics) {
+        this(new OperationContext(), isBP, BiometricAuthenticator.TYPE_NONE, isMandatoryBiometrics);
+    }
+
+    public OperationContextExt(boolean isBP, @BiometricAuthenticator.Modality int modality,
+            boolean isMandatoryBiometrics) {
+        this(new OperationContext(), isBP, modality, isMandatoryBiometrics);
     }
 
     /** Create a wrapped context. */
     public OperationContextExt(@NonNull OperationContext context, boolean isBP,
             @BiometricAuthenticator.Modality int modality) {
+        this(context, isBP, modality, false /* isMandatoryBiometrics */);
+    }
+
+    public OperationContextExt(@NonNull OperationContext context, boolean isBP,
+            @BiometricAuthenticator.Modality int modality, boolean isMandatoryBiometrics) {
         mAidlContext = context;
         mIsBP = isBP;
+        mIsMandatoryBiometrics = isMandatoryBiometrics;
 
         if (modality == BiometricAuthenticator.TYPE_FINGERPRINT) {
             mAidlContext.operationState = OperationState.fingerprintOperationState(
@@ -283,6 +295,11 @@ public class OperationContextExt {
     /** The current operation state  */
     public OperationState getOperationState() {
         return mAidlContext.operationState;
+    }
+
+    /** If mandatory biometrics is active. */
+    public boolean getIsMandatoryBiometrics() {
+        return mIsMandatoryBiometrics;
     }
 
     /** Update this object with the latest values from the given context. */

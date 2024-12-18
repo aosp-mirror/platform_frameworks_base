@@ -16,19 +16,24 @@
 package com.android.keyguard
 
 import android.content.BroadcastReceiver
-import android.testing.AndroidTestingRunner
+import android.platform.test.annotations.DisableFlags
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.core.LogLevel
@@ -68,10 +73,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import com.android.systemui.Flags as AConfigFlags
+import org.mockito.Mockito.`when` as whenever
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class ClockEventControllerTest : SysuiTestCase() {
 
@@ -258,9 +264,9 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun keyguardCallback_visibilityChanged_clockDozeCalled() =
         runBlocking(IMMEDIATE) {
-            mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
             val captor = argumentCaptor<KeyguardUpdateMonitorCallback>()
             verify(keyguardUpdateMonitor).registerCallback(capture(captor))
 
@@ -319,17 +325,18 @@ class ClockEventControllerTest : SysuiTestCase() {
     fun listenForDozeAmountTransition_updatesClockDozeAmount() =
         runBlocking(IMMEDIATE) {
             val transitionStep = MutableStateFlow(TransitionStep())
-            whenever(keyguardTransitionInteractor.lockscreenToAodTransition)
+            whenever(keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, AOD)))
                 .thenReturn(transitionStep)
-            whenever(keyguardTransitionInteractor.aodToLockscreenTransition)
+            whenever(keyguardTransitionInteractor.transition(Edge.create(AOD, LOCKSCREEN)))
                 .thenReturn(transitionStep)
 
             val job = underTest.listenForDozeAmountTransition(this)
             transitionStep.value =
                 TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
-                    value = 0.4f
+                    from = LOCKSCREEN,
+                    to = AOD,
+                    value = 0.4f,
+                    transitionState = TransitionState.RUNNING,
                 )
             yield()
 
@@ -342,14 +349,15 @@ class ClockEventControllerTest : SysuiTestCase() {
     fun listenForTransitionToAodFromGone_updatesClockDozeAmountToOne() =
         runBlocking(IMMEDIATE) {
             val transitionStep = MutableStateFlow(TransitionStep())
-            whenever(keyguardTransitionInteractor.transitionStepsToState(KeyguardState.AOD))
+            whenever(keyguardTransitionInteractor
+                .transition(Edge.create(to = AOD)))
                 .thenReturn(transitionStep)
 
             val job = underTest.listenForAnyStateToAodTransition(this)
             transitionStep.value =
                 TransitionStep(
-                    from = KeyguardState.GONE,
-                    to = KeyguardState.AOD,
+                    from = GONE,
+                    to = AOD,
                     transitionState = TransitionState.STARTED,
                 )
             yield()
@@ -360,22 +368,89 @@ class ClockEventControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun listenForTransitionToLSFromOccluded_updatesClockDozeAmountToZero() =
+        runBlocking(IMMEDIATE) {
+            val transitionStep = MutableStateFlow(TransitionStep())
+            whenever(keyguardTransitionInteractor
+                .transition(Edge.create(to = LOCKSCREEN)))
+                .thenReturn(transitionStep)
+
+            val job = underTest.listenForAnyStateToLockscreenTransition(this)
+            transitionStep.value =
+                TransitionStep(
+                    from = OCCLUDED,
+                    to = LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            yield()
+
+            verify(animations, times(2)).doze(0f)
+
+            job.cancel()
+        }
+
+    @Test
     fun listenForTransitionToAodFromLockscreen_neverUpdatesClockDozeAmount() =
         runBlocking(IMMEDIATE) {
             val transitionStep = MutableStateFlow(TransitionStep())
-            whenever(keyguardTransitionInteractor.transitionStepsToState(KeyguardState.AOD))
+            whenever(keyguardTransitionInteractor
+                .transition(Edge.create(to = AOD)))
                 .thenReturn(transitionStep)
 
             val job = underTest.listenForAnyStateToAodTransition(this)
             transitionStep.value =
                 TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.AOD,
+                    from = LOCKSCREEN,
+                    to = AOD,
                     transitionState = TransitionState.STARTED,
                 )
             yield()
 
             verify(animations, never()).doze(1f)
+
+            job.cancel()
+        }
+
+    @Test
+    fun listenForAnyStateToLockscreenTransition_neverUpdatesClockDozeAmount() =
+        runBlocking(IMMEDIATE) {
+            val transitionStep = MutableStateFlow(TransitionStep())
+            whenever(keyguardTransitionInteractor
+                .transition(Edge.create(to = LOCKSCREEN)))
+                .thenReturn(transitionStep)
+
+            val job = underTest.listenForAnyStateToLockscreenTransition(this)
+            transitionStep.value =
+                TransitionStep(
+                    from = AOD,
+                    to = LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            yield()
+
+            verify(animations, never()).doze(0f)
+
+            job.cancel()
+        }
+
+    @Test
+    fun listenForAnyStateToDozingTransition_UpdatesClockDozeAmountToOne() =
+        runBlocking(IMMEDIATE) {
+            val transitionStep = MutableStateFlow(TransitionStep())
+            whenever(keyguardTransitionInteractor
+                .transition(Edge.create(to = DOZING)))
+                .thenReturn(transitionStep)
+
+            val job = underTest.listenForAnyStateToDozingTransition(this)
+            transitionStep.value =
+                TransitionStep(
+                    from = LOCKSCREEN,
+                    to = DOZING,
+                    transitionState = TransitionState.STARTED,
+                )
+            yield()
+
+            verify(animations, times(2)).doze(1f)
 
             job.cancel()
         }

@@ -578,6 +578,8 @@ public final class AudioAttributes implements Parcelable {
     });
 
     private AudioAttributes() {
+        mBundle = null;
+        mFormattedTags = "";
     }
 
     /**
@@ -1687,6 +1689,18 @@ public final class AudioAttributes implements Parcelable {
      */
     public static boolean isSdkUsage(@AttributeSdkUsage int usage) {
         return SDK_USAGES.contains(usage);
+    }
+
+    /**
+     * Query if the usage is a hidden (neither sdk nor SystemApi) usage
+     *
+     * @param usage the {@link android.media.AudioAttributes usage}
+     * @return {@code true} if the usage is {@link AudioAttributes#USAGE_VIRTUAL_SOURCE} or
+     *     {@code false} otherwise
+     * @hide
+     */
+    public static boolean isHiddenUsage(@AttributeUsage int usage) {
+        return usage == USAGE_VIRTUAL_SOURCE;
     }
 
     /**

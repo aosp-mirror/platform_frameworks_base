@@ -99,18 +99,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Subscription manager provides the mobile subscription information that are associated with the
- * calling user profile {@link UserHandle} for Android SDK 35(V) and above, while Android SDK 34(U)
- * and below can see all subscriptions as it does today.
- *
- * <p>For example, if we have
- * <ul>
- *     <li> Subscription 1 associated with personal profile.
- *     <li> Subscription 2 associated with work profile.
- * </ul>
- * Then for SDK 35+, if the caller identity is personal profile, then
- * {@link #getActiveSubscriptionInfoList} will return subscription 1 only and vice versa.
- *
+ * Subscription manager provides the mobile subscription information.
  */
 @SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -1138,7 +1127,7 @@ public class SubscriptionManager {
      * <P>Type: INTEGER (int)</P>
      * @hide
      */
-    public static final String IS_NTN = SimInfo.COLUMN_IS_NTN;
+    public static final String IS_ONLY_NTN = SimInfo.COLUMN_IS_ONLY_NTN;
 
     /**
      * TelephonyProvider column name to identify service capabilities.
@@ -1177,6 +1166,26 @@ public class SubscriptionManager {
      */
     public static final String SATELLITE_ENTITLEMENT_PLMNS =
             SimInfo.COLUMN_SATELLITE_ENTITLEMENT_PLMNS;
+
+    /**
+     * TelephonyProvider column name to indicate the satellite ESOS supported. The value of this
+     * column is set based on {@link CarrierConfigManager#KEY_SATELLITE_ESOS_SUPPORTED_BOOL}.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     *
+     * @hide
+     */
+    public static final String SATELLITE_ESOS_SUPPORTED = SimInfo.COLUMN_SATELLITE_ESOS_SUPPORTED;
+
+    /**
+     * TelephonyProvider column name for satellite provisioned status. The value of this
+     * column is set based on whether carrier roaming NB-IOT satellite service is provisioned or
+     * not. By default, it's disabled.
+     *
+     * @hide
+     */
+    public static final String IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM =
+            SimInfo.COLUMN_IS_SATELLITE_PROVISIONED_FOR_NON_IP_DATAGRAM;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -1447,21 +1456,21 @@ public class SubscriptionManager {
     public static final int SERVICE_CAPABILITY_MAX = SERVICE_CAPABILITY_DATA;
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_VOICE}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_VOICE}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_VOICE_BITMASK =
             serviceCapabilityToBitmask(SERVICE_CAPABILITY_VOICE);
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_SMS}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_SMS}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_SMS_BITMASK =
             serviceCapabilityToBitmask(SERVICE_CAPABILITY_SMS);
 
     /**
-     * Bitmask for {@code SERVICE_CAPABILITY_DATA}.
+     * Bitmask for {@link #SERVICE_CAPABILITY_DATA}.
      * @hide
      */
     public static final int SERVICE_CAPABILITY_DATA_BITMASK =
@@ -1980,17 +1989,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the SubscriptionInfo(s) of the currently active SIM(s) associated with the current caller
-     * user profile {@link UserHandle} for Android SDK 35(V) and above, while Android SDK 34(U)
-     * and below can see all subscriptions as it does today.
-     *
-     * <p>For example, if we have
-     * <ul>
-     *     <li> Subscription 1 associated with personal profile.
-     *     <li> Subscription 2 associated with work profile.
-     * </ul>
-     * Then for SDK 35+, if the caller identity is personal profile, then this will return
-     * subscription 1 only and vice versa.
+     * Get the SubscriptionInfo(s) of the currently active SIM(s).
      *
      * <p> Returned records will be sorted by {@link SubscriptionInfo#getSimSlotIndex} then by
      * {@link SubscriptionInfo#getSubscriptionId}. Beginning with Android SDK 35, this method will
@@ -2259,9 +2258,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the active subscription count associated with the current caller user profile for
-     * Android SDK 35(V) and above, while Android SDK 34(U) and below can see all subscriptions as
-     * it does today.
+     * Get the active subscription count.
      *
      * @return The current number of active subscriptions.
      *
@@ -2806,17 +2803,17 @@ public class SubscriptionManager {
         return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getActiveModemCount();
     }
 
-    /** @hide */
+    /**
+     * Puts phone ID and subscription ID into the {@code intent}.
+     *
+     * <p>If the subscription ID is not valid, only puts phone ID into the {@code intent}.
+     *
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         int subId = SubscriptionManager.getSubscriptionId(phoneId);
-        if (isValidSubscriptionId(subId)) {
-            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
-        } else {
-            logd("putPhoneIdAndSubIdExtra: no valid subs");
-            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-            intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
-        }
+        putPhoneIdAndMaybeSubIdExtra(intent, phoneId, subId);
     }
 
     /** @hide */
@@ -2826,6 +2823,23 @@ public class SubscriptionManager {
         intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
         putSubscriptionIdExtra(intent, subId);
+    }
+
+    /**
+     * Puts phone ID and subscription ID into the {@code intent}.
+     *
+     * <p>If the subscription ID is not valid, only puts phone ID into the {@code intent}.
+     *
+     * @hide
+     */
+    public static void putPhoneIdAndMaybeSubIdExtra(Intent intent, int phoneId, int subId) {
+        if (isValidSubscriptionId(subId)) {
+            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
+        } else {
+            if (VDBG) logd("putPhoneIdAndMaybeSubIdExtra: invalid subId");
+            intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
+            intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
+        }
     }
 
     /**
@@ -3137,7 +3151,7 @@ public class SubscriptionManager {
             if (useRootLocale) {
                 configurationKey.setLocale(Locale.ROOT);
             }
-            cacheKey = Pair.create(context.getPackageName(), configurationKey);
+            cacheKey = Pair.create(context.getPackageName() + ", subid=" + subId, configurationKey);
             synchronized (sResourcesCache) {
                 Resources cached = sResourcesCache.get(cacheKey);
                 if (cached != null) {
@@ -3771,7 +3785,7 @@ public class SubscriptionManager {
     }
 
     private boolean isSystemProcess() {
-        return Process.myUid() == Process.SYSTEM_UID;
+        return UserHandle.isSameApp(Process.myUid(), Process.SYSTEM_UID);
     }
 
     /**
@@ -4610,6 +4624,31 @@ public class SubscriptionManager {
             case SubscriptionManager.USAGE_SETTING_DATA_CENTRIC: return "DATA_CENTRIC";
             default:
                 return "UNKNOWN(" + usageSetting + ")";
+        }
+    }
+
+    /**
+     * Set owner for this subscription.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param groupOwner The group owner to assign to the subscription
+     *
+     * @throws SecurityException if caller is not authorized.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setGroupOwner(int subscriptionId, @NonNull String groupOwner) {
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setGroupOwner(subscriptionId, groupOwner);
+            } else {
+                throw new IllegalStateException("[setGroupOwner]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
         }
     }
 

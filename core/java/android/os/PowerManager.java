@@ -184,6 +184,22 @@ public final class PowerManager {
     public static final int DRAW_WAKE_LOCK = OsProtoEnums.DRAW_WAKE_LOCK; // 0x00000080
 
     /**
+     * Wake lock level: Override the current screen timeout.
+     * <p>
+     *  This is used by the system to allow {@code PowerManagerService} to override the current
+     *  screen timeout by config value.
+     *
+     *  config_screenTimeoutOverride in config.xml determines the screen timeout override value.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#SCREEN_TIMEOUT_OVERRIDE} permission.
+     * </p>
+     *
+     * @hide
+     */
+    public static final int SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK =
+            OsProtoEnums.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK; // 0x00000100
+
+    /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
      * @hide
@@ -548,8 +564,7 @@ public final class PowerManager {
             BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM,
             BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM,
             BRIGHTNESS_CONSTRAINT_TYPE_DEFAULT,
-            BRIGHTNESS_CONSTRAINT_TYPE_DIM,
-            BRIGHTNESS_CONSTRAINT_TYPE_DOZE
+            BRIGHTNESS_CONSTRAINT_TYPE_DIM
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BrightnessConstraint{}
@@ -576,12 +591,6 @@ public final class PowerManager {
      * @hide
      */
     public static final int BRIGHTNESS_CONSTRAINT_TYPE_DIM = 3;
-
-    /**
-     * Brightness constraint type: minimum allowed value.
-     * @hide
-     */
-    public static final int BRIGHTNESS_CONSTRAINT_TYPE_DOZE = 4;
 
     /**
      * @hide
@@ -1135,9 +1144,10 @@ public final class PowerManager {
     }
 
     private static final String CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY =
-            "cache_key.is_power_save_mode";
+            PropertyInvalidatedCache.createSystemCacheKey("is_power_save_mode");
 
-    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY = "cache_key.is_interactive";
+    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY =
+            PropertyInvalidatedCache.createSystemCacheKey("is_interactive");
 
     private static final int MAX_CACHE_ENTRIES = 1;
 
@@ -1369,6 +1379,7 @@ public final class PowerManager {
             case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
             case DOZE_WAKE_LOCK:
             case DRAW_WAKE_LOCK:
+            case SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException("Must specify a valid wake lock level.");

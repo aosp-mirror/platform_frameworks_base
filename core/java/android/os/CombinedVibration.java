@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.os.vibrator.Flags;
 import android.util.SparseArray;
 
 import com.android.internal.util.Preconditions;
@@ -151,6 +152,9 @@ public abstract class CombinedVibration implements Parcelable {
 
     /** @hide */
     public abstract boolean hasVibrator(int vibratorId);
+
+    /** @hide */
+    public abstract boolean hasVendorEffects();
 
     /**
      * Returns a compact version of the {@link #toString()} result for debugging purposes.
@@ -424,6 +428,15 @@ public abstract class CombinedVibration implements Parcelable {
             return true;
         }
 
+        /** @hide */
+        @Override
+        public boolean hasVendorEffects() {
+            if (!Flags.vendorVibrationEffects()) {
+                return false;
+            }
+            return mEffect instanceof VibrationEffect.VendorEffect;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -603,6 +616,20 @@ public abstract class CombinedVibration implements Parcelable {
         @Override
         public boolean hasVibrator(int vibratorId) {
             return mEffects.indexOfKey(vibratorId) >= 0;
+        }
+
+        /** @hide */
+        @Override
+        public boolean hasVendorEffects() {
+            if (!Flags.vendorVibrationEffects()) {
+                return false;
+            }
+            for (int i = 0; i < mEffects.size(); i++) {
+                if (mEffects.get(i) instanceof VibrationEffect.VendorEffect) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override
@@ -832,6 +859,17 @@ public abstract class CombinedVibration implements Parcelable {
             final int effectCount = mEffects.size();
             for (int i = 0; i < effectCount; i++) {
                 if (mEffects.get(i).hasVibrator(vibratorId)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /** @hide */
+        @Override
+        public boolean hasVendorEffects() {
+            for (int i = 0; i < mEffects.size(); i++) {
+                if (mEffects.get(i).hasVendorEffects()) {
                     return true;
                 }
             }

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.dagger;
 import static com.android.systemui.Flags.predictiveBackAnimateDialogs;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -31,13 +32,17 @@ import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeSurface;
+import com.android.systemui.shade.ShadeSurfaceImpl;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -53,10 +58,10 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
-import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconControllerImpl;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconList;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import dagger.Binds;
@@ -65,6 +70,10 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+
+import java.util.concurrent.Executor;
+
+import javax.inject.Provider;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -90,14 +99,18 @@ public interface CentralSurfacesDependenciesModule {
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             MediaDataManager mediaDataManager,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @Background Executor backgroundExecutor,
+            @Main Handler handler) {
         return new NotificationMediaManager(
                 context,
                 visibilityProvider,
                 notifPipeline,
                 notifCollection,
                 mediaDataManager,
-                dumpManager);
+                dumpManager,
+                backgroundExecutor,
+                handler);
     }
 
     /** */
@@ -178,9 +191,19 @@ public interface CentralSurfacesDependenciesModule {
      * The {@link com.android.systemui.shade.ShadeViewController} interface is bound in
      * {@link com.android.systemui.shade.ShadeModule} so others can access it.
      */
-    @Binds
+    @Provides
     @SysUISingleton
-    ShadeSurface provideShadeSurface(NotificationPanelViewController impl);
+    static ShadeSurface provideShadeSurface(
+            Provider<ShadeSurfaceImpl> sceneContainerOn,
+            Provider<NotificationPanelViewController> sceneContainerOff) {
+        if (SceneContainerFlag.isEnabled()) {
+            return sceneContainerOn.get();
+        } else {
+            return sceneContainerOff.get();
+        }
+
+    }
+
 
     /** */
     @Binds
@@ -190,14 +213,16 @@ public interface CentralSurfacesDependenciesModule {
     /** */
     @Provides
     @SysUISingleton
-    static ActivityTransitionAnimator provideActivityTransitionAnimator() {
-        return new ActivityTransitionAnimator();
+    static ActivityTransitionAnimator provideActivityTransitionAnimator(
+            @Main Executor mainExecutor) {
+        return new ActivityTransitionAnimator(mainExecutor);
     }
 
     /** */
     @Provides
     @SysUISingleton
-    static DialogTransitionAnimator provideDialogTransitionAnimator(IDreamManager dreamManager,
+    static DialogTransitionAnimator provideDialogTransitionAnimator(@Main Executor mainExecutor,
+            IDreamManager dreamManager,
             KeyguardStateController keyguardStateController,
             Lazy<AlternateBouncerInteractor> alternateBouncerInteractor,
             InteractionJankMonitor interactionJankMonitor,
@@ -224,7 +249,7 @@ public interface CentralSurfacesDependenciesModule {
             }
         };
         return new DialogTransitionAnimator(
-                callback, interactionJankMonitor, animationFeatureFlags);
+                mainExecutor, callback, interactionJankMonitor, animationFeatureFlags);
     }
 
     /** */

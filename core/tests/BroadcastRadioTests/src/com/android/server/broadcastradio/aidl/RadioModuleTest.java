@@ -16,13 +16,12 @@
 
 package com.android.server.broadcastradio.aidl;
 
-import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +31,15 @@ import android.hardware.radio.Announcement;
 import android.hardware.radio.IAnnouncementListener;
 import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.RadioManager;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 
+import com.android.server.broadcastradio.RadioServiceUserController;
+
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -50,6 +55,9 @@ public final class RadioModuleTest {
     private static final RadioManager.ModuleProperties TEST_MODULE_PROPERTIES =
             AidlTestUtils.makeDefaultModuleProperties();
 
+    @Rule
+    public final Expect mExpect = Expect.create();
+
     // Mocks
     @Mock
     private IBroadcastRadio mBroadcastRadioMock;
@@ -57,6 +65,8 @@ public final class RadioModuleTest {
     private IAnnouncementListener mListenerMock;
     @Mock
     private android.hardware.broadcastradio.ICloseHandle mHalCloseHandleMock;
+    @Mock
+    private RadioServiceUserController mUserControllerMock;
 
     // RadioModule under test
     private RadioModule mRadioModule;
@@ -64,7 +74,8 @@ public final class RadioModuleTest {
 
     @Before
     public void setup() throws RemoteException {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES);
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES,
+                mUserControllerMock);
 
         // TODO(b/241118988): test non-null image for getImage method
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(null);
@@ -77,21 +88,14 @@ public final class RadioModuleTest {
 
     @Test
     public void getService() {
-        assertWithMessage("Service of radio module")
+        mExpect.withMessage("Service of radio module")
                 .that(mRadioModule.getService()).isEqualTo(mBroadcastRadioMock);
     }
 
     @Test
     public void getProperties() {
-        assertWithMessage("Module properties of radio module")
+        mExpect.withMessage("Module properties of radio module")
                 .that(mRadioModule.getProperties()).isEqualTo(TEST_MODULE_PROPERTIES);
-    }
-
-    @Test
-    public void setInternalHalCallback_callbackSetInHal() throws Exception {
-        mRadioModule.setInternalHalCallback();
-
-        verify(mBroadcastRadioMock).setTunerCallback(any());
     }
 
     @Test
@@ -100,7 +104,7 @@ public final class RadioModuleTest {
 
         Bitmap imageTest = mRadioModule.getImage(imageId);
 
-        assertWithMessage("Image from radio module").that(imageTest).isNull();
+        mExpect.withMessage("Image from radio module").that(imageTest).isNull();
     }
 
     @Test
@@ -111,7 +115,7 @@ public final class RadioModuleTest {
             mRadioModule.getImage(invalidImageId);
         });
 
-        assertWithMessage("Exception for getting image with invalid ID")
+        mExpect.withMessage("Exception for getting image with invalid ID")
                 .that(thrown).hasMessageThat().contains("Image ID is missing");
     }
 
@@ -121,6 +125,18 @@ public final class RadioModuleTest {
 
         verify(mBroadcastRadioMock)
                 .registerAnnouncementListener(any(), eq(new byte[]{TEST_ENABLED_TYPE}));
+    }
+
+    @Test
+    public void addAnnouncementListener_whenHalThrowsRemoteException() throws Exception {
+        doThrow(new RuntimeException("HAL service died")).when(mBroadcastRadioMock)
+                .registerAnnouncementListener(any(), any());
+
+        ParcelableException thrown = assertThrows(ParcelableException.class, () ->
+                mRadioModule.addAnnouncementListener(mListenerMock, new int[]{TEST_ENABLED_TYPE}));
+
+        mExpect.withMessage("Exception for adding announcement listener when HAL service died")
+                .that(thrown).hasMessageThat().contains("unknown error");
     }
 
     @Test

@@ -24,7 +24,8 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -34,15 +35,19 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Business logic about the visibility of various parts of the window root view. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class WindowRootViewVisibilityInteractor
 @Inject
@@ -51,9 +56,8 @@ constructor(
     private val windowRootViewVisibilityRepository: WindowRootViewVisibilityRepository,
     private val keyguardRepository: KeyguardRepository,
     private val headsUpManager: HeadsUpManager,
-    private val powerInteractor: PowerInteractor,
+    powerInteractor: PowerInteractor,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
-    sceneContainerFlags: SceneContainerFlags,
     sceneInteractorProvider: Provider<SceneInteractor>,
 ) : CoreStartable {
 
@@ -68,21 +72,40 @@ constructor(
      * false if the bouncer is visible.
      */
     val isLockscreenOrShadeVisible: StateFlow<Boolean> =
-        if (!sceneContainerFlags.isEnabled()) {
+        if (!SceneContainerFlag.isEnabled) {
             windowRootViewVisibilityRepository.isLockscreenOrShadeVisible
         } else {
             sceneInteractorProvider
                 .get()
                 .transitionState
-                .map { state ->
+                .flatMapConcat { state ->
                     when (state) {
                         is ObservableTransitionState.Idle ->
-                            state.scene == Scenes.Shade || state.scene == Scenes.Lockscreen
+                            flowOf(
+                                state.currentScene == Scenes.Shade ||
+                                    state.currentScene == Scenes.Lockscreen ||
+                                    Overlays.NotificationsShade in state.currentOverlays ||
+                                    Overlays.QuickSettingsShade in state.currentOverlays
+                            )
                         is ObservableTransitionState.Transition ->
-                            state.toScene == Scenes.Shade ||
-                                state.toScene == Scenes.Lockscreen ||
-                                state.fromScene == Scenes.Shade ||
-                                state.fromScene == Scenes.Lockscreen
+                            if (
+                                state.fromContent == Scenes.Bouncer &&
+                                    state.toContent == Scenes.Lockscreen
+                            ) {
+                                // Lockscreen is not visible during preview stage of predictive back
+                                state.isInPreviewStage.map { !it }
+                            } else {
+                                flowOf(
+                                    state.toContent == Scenes.Shade ||
+                                        state.toContent == Overlays.NotificationsShade ||
+                                        state.toContent == Overlays.QuickSettingsShade ||
+                                        state.toContent == Scenes.Lockscreen ||
+                                        state.fromContent == Scenes.Shade ||
+                                        state.fromContent == Overlays.NotificationsShade ||
+                                        state.fromContent == Overlays.QuickSettingsShade ||
+                                        state.fromContent == Scenes.Lockscreen
+                                )
+                            }
                     }
                 }
                 .distinctUntilChanged()
@@ -95,10 +118,9 @@ constructor(
      * false if the device is asleep.
      */
     val isLockscreenOrShadeVisibleAndInteractive: StateFlow<Boolean> =
-        combine(
-                isLockscreenOrShadeVisible,
-                powerInteractor.isAwake,
-            ) { isKeyguardAodOrShadeVisible, isAwake ->
+        combine(isLockscreenOrShadeVisible, powerInteractor.isAwake) {
+                isKeyguardAodOrShadeVisible,
+                isAwake ->
                 isKeyguardAodOrShadeVisible && isAwake
             }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)

@@ -21,10 +21,11 @@ import android.app.Notification
 import android.net.Uri
 import android.os.UserHandle
 import android.os.UserHandle.USER_ALL
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
@@ -71,7 +72,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ExpandableNotificationRowControllerTest : SysuiTestCase() {
 
@@ -108,6 +109,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val dragController: ExpandableNotificationRowDragController = mock()
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
     private val statusBarService: IStatusBarService = mock()
+    private val uiEventLogger: UiEventLogger = mock()
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -147,7 +149,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 settingsController,
                 dragController,
                 dismissibilityProvider,
-                statusBarService
+                statusBarService,
+                uiEventLogger
             )
         whenever(view.childrenContainer).thenReturn(childrenContainer)
 

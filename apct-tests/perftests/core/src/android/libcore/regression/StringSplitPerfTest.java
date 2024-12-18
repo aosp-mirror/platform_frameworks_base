@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -31,11 +31,11 @@ import java.util.regex.Pattern;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StringSplitPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeStringSplitComma() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             "this,is,a,simple,example".split(",");
         }
@@ -43,7 +43,7 @@ public class StringSplitPerfTest {
 
     @Test
     public void timeStringSplitLiteralDot() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             "this.is.a.simple.example".split("\\.");
         }
@@ -51,7 +51,7 @@ public class StringSplitPerfTest {
 
     @Test
     public void timeStringSplitNewline() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             "this\nis\na\nsimple\nexample\n".split("\n");
         }
@@ -60,7 +60,7 @@ public class StringSplitPerfTest {
     @Test
     public void timePatternSplitComma() {
         Pattern p = Pattern.compile(",");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             p.split("this,is,a,simple,example");
         }
@@ -69,7 +69,7 @@ public class StringSplitPerfTest {
     @Test
     public void timePatternSplitLiteralDot() {
         Pattern p = Pattern.compile("\\.");
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             p.split("this.is.a.simple.example");
         }
@@ -77,7 +77,7 @@ public class StringSplitPerfTest {
 
     @Test
     public void timeStringSplitHard() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             "this,is,a,harder,example".split("[,]");
         }

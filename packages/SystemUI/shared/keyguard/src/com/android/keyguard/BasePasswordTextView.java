@@ -231,7 +231,7 @@ public abstract class BasePasswordTextView extends FrameLayout {
         info.setClassName(EditText.class.getName());
         info.setPassword(true);
         info.setText(getTransformedText());
-
+        info.setSelected(false);
         info.setEditable(true);
 
         info.setInputType(InputType.TYPE_NUMBER_VARIATION_PASSWORD);

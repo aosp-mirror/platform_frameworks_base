@@ -46,7 +46,7 @@
             android:layout_marginTop="@dimen/screenrecord_title_margin_top"
             android:gravity="center"/>
         <Spinner
-            android:id="@+id/screen_share_mode_spinner"
+            android:id="@+id/screen_share_mode_options"
             android:layout_width="match_parent"
             android:layout_height="@dimen/screenrecord_spinner_height"
             android:layout_marginTop="@dimen/screenrecord_spinner_margin"
@@ -64,30 +64,27 @@
             android:layout_height="wrap_content"
             android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
             style="@style/TextAppearance.Dialog.Body.Message"
-            android:gravity="start"/>
+            android:gravity="start"
+            android:textAlignment="gravity"/>
 
         <!-- Buttons -->
         <com.android.internal.widget.ButtonBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="@dimen/screenrecord_buttons_margin_top">
+            android:layout_marginTop="@dimen/screenrecord_buttons_margin_top"
+            android:gravity="end">
             <Button
                 android:id="@android:id/button2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
                 android:text="@string/cancel"
                 style="@style/Widget.Dialog.Button.BorderButton" />
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
             <Button
                 android:id="@android:id/button1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
+                android:layout_marginStart="@dimen/dialog_button_side_margin"
                 android:text="@string/screenrecord_continue"
                 style="@style/Widget.Dialog.Button" />
         </com.android.internal.widget.ButtonBarLayout>

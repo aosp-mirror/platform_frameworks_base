@@ -27,14 +27,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.log.TableLogBufferBase;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,10 +50,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import kotlinx.coroutines.CoroutineScope;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ConditionMonitorTest extends SysuiTestCase {
     private FakeCondition mCondition1;
     private FakeCondition mCondition2;

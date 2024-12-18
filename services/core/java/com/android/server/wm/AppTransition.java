@@ -96,7 +96,6 @@ import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
-import static com.android.server.wm.WindowManagerInternal.KeyguardExitAnimationStartListener;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
@@ -105,7 +104,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -117,7 +115,6 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
@@ -137,7 +134,8 @@ import android.view.animation.TranslateAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
@@ -228,10 +226,7 @@ public class AppTransition implements Dump {
     private int mAppTransitionState = APP_STATE_IDLE;
 
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
-    private KeyguardExitAnimationStartListener mKeyguardExitAnimationStartListener;
     private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
-
-    private final boolean mGridLayoutRecentsEnabled;
 
     private final int mDefaultWindowAnimationStyleResId;
     private boolean mOverrideTaskTransition;
@@ -247,9 +242,7 @@ public class AppTransition implements Dump {
         mHandler = new Handler(service.mH.getLooper());
         mDisplayContent = displayContent;
         mTransitionAnimation = new TransitionAnimation(
-                context, ProtoLog.isEnabled(WM_DEBUG_ANIM), TAG);
-
-        mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
+                context, ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.DEBUG), TAG);
 
         final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
                 com.android.internal.R.styleable.Window);
@@ -409,8 +402,7 @@ public class AppTransition implements Dump {
             mRemoteAnimationController.goodToGo(transit);
         } else if ((isTaskOpenTransitOld(transit) || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
                 && topOpeningAnim != null) {
-            if (mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
-                    && mService.getRecentsAnimationController() == null) {
+            if (mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()) {
                 final NavBarFadeAnimationController controller =
                         new NavBarFadeAnimationController(mDisplayContent);
                 // For remote animation case, the nav bar fades out and in is controlled by the
@@ -478,11 +470,9 @@ public class AppTransition implements Dump {
     }
 
     private boolean needsBoosting() {
-        final boolean recentsAnimRunning = mService.getRecentsAnimationController() != null;
         return !mNextAppTransitionRequests.isEmpty()
                 || mAppTransitionState == APP_STATE_READY
-                || mAppTransitionState == APP_STATE_RUNNING
-                || recentsAnimRunning;
+                || mAppTransitionState == APP_STATE_RUNNING;
     }
 
     void registerListenerLocked(AppTransitionListener listener) {
@@ -491,11 +481,6 @@ public class AppTransition implements Dump {
 
     void unregisterListener(AppTransitionListener listener) {
         mListeners.remove(listener);
-    }
-
-    void registerKeygaurdExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener) {
-        mKeyguardExitAnimationStartListener = listener;
     }
 
     public void notifyAppTransitionFinishedLocked(IBinder token) {
@@ -1593,14 +1578,6 @@ public class AppTransition implements Dump {
 
     boolean containsTransitRequest(@TransitionType int transit) {
         return mNextAppTransitionRequests.contains(transit);
-    }
-
-    /**
-     * @return whether the transition should show the thumbnail being scaled down.
-     */
-    private boolean shouldScaleDownThumbnailTransition(int uiMode, int orientation) {
-        return mGridLayoutRecentsEnabled
-                || orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     private void handleAppTransitionTimeout() {

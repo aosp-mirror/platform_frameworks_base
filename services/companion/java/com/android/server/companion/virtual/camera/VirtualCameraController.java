@@ -58,19 +58,21 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     @Nullable private IVirtualCameraService mVirtualCameraService;
     @DevicePolicy
     private final int mCameraPolicy;
+    private final int mDeviceId;
 
     @GuardedBy("mCameras")
     private final Map<IBinder, CameraDescriptor> mCameras = new ArrayMap<>();
 
-    public VirtualCameraController(@DevicePolicy int cameraPolicy) {
-        this(/* virtualCameraService= */ null, cameraPolicy);
+    public VirtualCameraController(@DevicePolicy int cameraPolicy, int deviceId) {
+        this(/* virtualCameraService= */ null, cameraPolicy, deviceId);
     }
 
     @VisibleForTesting
     VirtualCameraController(IVirtualCameraService virtualCameraService,
-            @DevicePolicy int cameraPolicy) {
+            @DevicePolicy int cameraPolicy, int deviceId) {
         mVirtualCameraService = virtualCameraService;
         mCameraPolicy = cameraPolicy;
+        mDeviceId = deviceId;
     }
 
     /**
@@ -100,11 +102,9 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-        if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
-            Counter.logIncrementWithUid(
-                    "virtual_devices.value_virtual_camera_created_count",
-                    attributionSource.getUid());
-        }
+        Counter.logIncrementWithUid(
+                "virtual_devices.value_virtual_camera_created_count",
+                attributionSource.getUid());
     }
 
     /**
@@ -133,7 +133,7 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     }
 
     /** Return the id of the virtual camera with the given config. */
-    public int getCameraId(@NonNull VirtualCameraConfig cameraConfig) {
+    public String getCameraId(@NonNull VirtualCameraConfig cameraConfig) {
         connectVirtualCameraServiceIfNeeded();
 
         try {
@@ -185,9 +185,9 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         fout.println(indent + "VirtualCameraController:");
         indent += indent;
         synchronized (mCameras) {
-            fout.printf("%sRegistered cameras:%d%n\n", indent, mCameras.size());
+            fout.println(indent + "Registered cameras: " + mCameras.size());
             for (CameraDescriptor descriptor : mCameras.values()) {
-                fout.printf("%s token: %s\n", indent, descriptor.mConfig);
+                fout.println(indent + " token: " +  descriptor.mConfig);
             }
         }
     }
@@ -251,7 +251,7 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         VirtualCameraConfiguration serviceConfiguration = getServiceCameraConfiguration(config);
         synchronized (mServiceLock) {
             return mVirtualCameraService.registerCamera(config.getCallback().asBinder(),
-                    serviceConfiguration);
+                    serviceConfiguration, mDeviceId);
         }
     }
 

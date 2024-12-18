@@ -47,12 +47,10 @@ import kotlinx.coroutines.launch
 class QSHostAdapter
 @Inject
 constructor(
-    private val qsTileHost: QSTileHost,
     private val interactor: CurrentTilesInteractor,
     private val context: Context,
     private val tileServiceRequestControllerBuilder: TileServiceRequestController.Builder,
     @Application private val scope: CoroutineScope,
-    flags: QSPipelineFlagsRepository,
     dumpManager: DumpManager,
 ) : QSHost {
 
@@ -60,123 +58,69 @@ constructor(
         private const val TAG = "QSTileHost"
     }
 
-    private val useNewHost = flags.pipelineEnabled
-
     @GuardedBy("callbacksMap") private val callbacksMap = mutableMapOf<QSHost.Callback, Job>()
 
     init {
         scope.launch { tileServiceRequestControllerBuilder.create(this@QSHostAdapter).init() }
         // Redirect dump to the correct host (needed for CTS tests)
-        dumpManager.registerCriticalDumpable(TAG, if (useNewHost) interactor else qsTileHost)
+        dumpManager.registerCriticalDumpable(TAG, interactor)
     }
 
     override fun getTiles(): Collection<QSTile> {
-        return if (useNewHost) {
-            interactor.currentQSTiles
-        } else {
-            qsTileHost.getTiles()
-        }
+        return interactor.currentQSTiles
     }
 
     override fun getSpecs(): List<String> {
-        return if (useNewHost) {
-            interactor.currentTilesSpecs.map { it.spec }
-        } else {
-            qsTileHost.getSpecs()
-        }
+        return interactor.currentTilesSpecs.map { it.spec }
     }
 
     override fun removeTile(spec: String) {
-        if (useNewHost) {
-            interactor.removeTiles(listOf(TileSpec.create(spec)))
-        } else {
-            qsTileHost.removeTile(spec)
-        }
+        interactor.removeTiles(listOf(TileSpec.create(spec)))
     }
 
     override fun addCallback(callback: QSHost.Callback) {
-        if (useNewHost) {
-            val job = scope.launch { interactor.currentTiles.collect { callback.onTilesChanged() } }
-            synchronized(callbacksMap) { callbacksMap.put(callback, job) }
-        } else {
-            qsTileHost.addCallback(callback)
-        }
+        val job = scope.launch { interactor.currentTiles.collect { callback.onTilesChanged() } }
+        synchronized(callbacksMap) { callbacksMap.put(callback, job) }
     }
 
     override fun removeCallback(callback: QSHost.Callback) {
-        if (useNewHost) {
-            synchronized(callbacksMap) { callbacksMap.remove(callback)?.cancel() }
-        } else {
-            qsTileHost.removeCallback(callback)
-        }
+        synchronized(callbacksMap) { callbacksMap.remove(callback)?.cancel() }
     }
 
     override fun removeTiles(specs: Collection<String>) {
-        if (useNewHost) {
-            interactor.removeTiles(specs.map(TileSpec::create))
-        } else {
-            qsTileHost.removeTiles(specs)
-        }
+        interactor.removeTiles(specs.map(TileSpec::create))
     }
 
     override fun removeTileByUser(component: ComponentName) {
-        if (useNewHost) {
-            interactor.removeTiles(listOf(TileSpec.create(component)))
-        } else {
-            qsTileHost.removeTileByUser(component)
-        }
+        interactor.removeTiles(listOf(TileSpec.create(component)))
     }
 
     override fun addTile(spec: String, position: Int) {
-        if (useNewHost) {
-            interactor.addTile(TileSpec.create(spec), position)
-        } else {
-            qsTileHost.addTile(spec, position)
-        }
+        interactor.addTile(TileSpec.create(spec), position)
     }
 
     override fun addTile(component: ComponentName, end: Boolean) {
-        if (useNewHost) {
-            interactor.addTile(TileSpec.create(component), if (end) POSITION_AT_END else 0)
-        } else {
-            qsTileHost.addTile(component, end)
-        }
+        interactor.addTile(TileSpec.create(component), if (end) POSITION_AT_END else 0)
     }
 
     override fun changeTilesByUser(previousTiles: List<String>, newTiles: List<String>) {
-        if (useNewHost) {
-            interactor.setTiles(newTiles.map(TileSpec::create))
-        } else {
-            qsTileHost.changeTilesByUser(previousTiles, newTiles)
-        }
+        interactor.setTiles(newTiles.map(TileSpec::create))
     }
 
     override fun getContext(): Context {
-        return if (useNewHost) {
-            context
-        } else {
-            qsTileHost.context
-        }
+        return context
     }
 
     override fun getUserContext(): Context {
-        return if (useNewHost) {
-            interactor.userContext.value
-        } else {
-            qsTileHost.userContext
-        }
+        return interactor.userContext.value
     }
 
     override fun getUserId(): Int {
-        return if (useNewHost) {
-            interactor.userId.value
-        } else {
-            qsTileHost.userId
-        }
+        return interactor.userId.value
     }
 
     override fun createTile(tileSpec: String): QSTile? {
-        return qsTileHost.createTile(tileSpec)
+        return interactor.createTileSync(TileSpec.create(tileSpec))
     }
 
     override fun addTile(spec: String) {

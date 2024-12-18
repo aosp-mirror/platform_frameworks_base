@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.content.res.Configuration
+import android.util.LayoutDirection
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -33,6 +35,8 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -73,6 +77,9 @@ class DreamingToGlanceableHubTransitionViewModelTest : SysuiTestCase() {
                 R.dimen.dreaming_to_hub_transition_dream_overlay_translation_x,
                 -100
             )
+            val configuration: Configuration = mock()
+            whenever(configuration.layoutDirection).thenReturn(LayoutDirection.LTR)
+            configurationRepository.onConfigurationChange(configuration)
 
             val values by collectValues(underTest.dreamOverlayTranslationX)
             assertThat(values).isEmpty()

@@ -16,6 +16,10 @@
 
 package com.android.server.inputmethod;
 
+import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_INDEX;
+
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -23,13 +27,17 @@ import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
-import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.InlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.server.LocalServices;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +45,16 @@ import java.util.List;
  * Input method manager local system service interface.
  */
 public abstract class InputMethodManagerInternal {
+    /**
+     * Indicates that the method is guaranteed to not require {@link ImfLock}.
+     *
+     * <p>You can call this method without worrying about system_server lock layering.</p>
+     */
+    @Retention(SOURCE)
+    @Target({ElementType.METHOD})
+    public @interface ImfLockFree {
+    }
+
     /**
      * Listener for input method list changed events.
      */
@@ -53,15 +71,17 @@ public abstract class InputMethodManagerInternal {
      *
      * @param interactive the interactive mode parameter
      */
+    @ImfLockFree
     public abstract void setInteractive(boolean interactive);
 
     /**
-     * Hides the input methods for all the users, if visible.
+     * Hides the input method for the specified {@code originatingDisplayId}, if visible.
      *
      * @param reason               the reason for hiding the current input method
      * @param originatingDisplayId the display ID the request is originated
      */
-    public abstract void hideAllInputMethods(@SoftInputShowHideReason int reason,
+    @ImfLockFree
+    public abstract void hideInputMethod(@SoftInputShowHideReason int reason,
             int originatingDisplayId);
 
     /**
@@ -70,6 +90,8 @@ public abstract class InputMethodManagerInternal {
      * @param userId the user ID to be queried
      * @return a list of {@link InputMethodInfo}. VR-only IMEs are already excluded
      */
+    @ImfLockFree
+    @NonNull
     public abstract List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId);
 
     /**
@@ -78,7 +100,22 @@ public abstract class InputMethodManagerInternal {
      * @param userId the user ID to be queried
      * @return a list of {@link InputMethodInfo} that are enabled for {@code userId}
      */
+    @ImfLockFree
+    @NonNull
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
+
+    /**
+     * Returns the list of installed input methods that are enabled for the specified user.
+     *
+     * @param imiId                           IME ID to be queried about
+     * @param allowsImplicitlyEnabledSubtypes {@code true} to return the implicitly enabled subtypes
+     * @param userId                          the user ID to be queried about
+     * @return a list of {@link InputMethodSubtype} that are enabled for {@code userId}
+     */
+    @ImfLockFree
+    @NonNull
+    public abstract List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
+            String imiId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId);
 
     /**
      * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
@@ -86,14 +123,14 @@ public abstract class InputMethodManagerInternal {
      *
      * @param userId      the user ID to be queried
      * @param requestInfo information needed to create an {@link InlineSuggestionsRequest}.
-     * @param cb          {@link IInlineSuggestionsRequestCallback} used to pass back the request
+     * @param cb          {@link InlineSuggestionsRequestCallback} used to pass back the request
      *                    object
      */
     public abstract void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb);
+            InlineSuggestionsRequestInfo requestInfo, InlineSuggestionsRequestCallback cb);
 
     /**
-     * Force switch to the enabled input method by {@code imeId} for current user. If the input
+     * Force switch to the enabled input method by {@code imeId} for the current user. If the input
      * method with {@code imeId} is not enabled or not installed, do nothing.
      *
      * @param imeId  the input method ID to be switched to
@@ -102,7 +139,28 @@ public abstract class InputMethodManagerInternal {
      * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
      * to be switched.
      */
-    public abstract boolean switchToInputMethod(String imeId, @UserIdInt int userId);
+    public boolean switchToInputMethod(@NonNull String imeId, @UserIdInt int userId) {
+        return switchToInputMethod(imeId, NOT_A_SUBTYPE_INDEX, userId);
+    }
+
+    /**
+     * Force switch to the enabled input method by {@code imeId} for the current user. If the input
+     * method with {@code imeId} is not enabled or not installed, do nothing. If
+     * {@code subtypeIndex} is also supplied (not {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX}) and
+     * valid, also switches to it, otherwise the system decides the most sensible default subtype to
+     * use.
+     *
+     * @param imeId        the input method ID to be switched to
+     * @param subtypeIndex the subtype to be switched to, as an index in the input method's array of
+     *                     subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if the system
+     *                     should decide the most sensible subtype
+     * @param userId       the user ID to be queried
+     * @return {@code true} if the current input method was successfully switched to the input
+     * method by {@code imeId}; {@code false} the input method with {@code imeId} is not available
+     * to be switched.
+     */
+    public abstract boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
+            @UserIdInt int userId);
 
     /**
      * Force enable or disable the input method associated with {@code imeId} for given user. If
@@ -143,6 +201,7 @@ public abstract class InputMethodManagerInternal {
      *
      * @param listener the listener to add
      */
+    @ImfLockFree
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
 
     /**
@@ -150,10 +209,11 @@ public abstract class InputMethodManagerInternal {
      *
      * @param sourceInputToken the source token.
      * @param displayId        the display hosting the IME window
+     * @param userId           the user ID this request is about
      * @return {@code true} if the transfer is successful
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-            int displayId);
+            int displayId, @UserIdInt int userId);
 
     /**
      * Reports that IME control has transferred to the given window token, or if null that
@@ -177,7 +237,35 @@ public abstract class InputMethodManagerInternal {
      *
      * @param displayId the display hosting the IME window
      */
+    @ImfLockFree
     public abstract void removeImeSurface(int displayId);
+
+    /**
+     * Called when a non-IME-focusable overlay window being the IME layering target (e.g. a
+     * window with {@link android.view.WindowManager.LayoutParams#FLAG_NOT_FOCUSABLE} and
+     * {@link android.view.WindowManager.LayoutParams#FLAG_ALT_FOCUSABLE_IM} flags)
+     * has changed its window visibility.
+     *
+     * @param hasVisibleOverlay  whether such an overlay window exists or not
+     * @param displayId          the display ID where the overlay window exists
+     */
+    public abstract void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay, int displayId);
+
+    /**
+     * Called when the visibility of IME input target window has changed.
+     *
+     * @param imeInputTarget        the window token of the IME input target window
+     * @param visibleAndNotRemoved  {@code true} when the new window is made visible by
+     *                              {@code imeInputTarget} and the IME input target window has not
+     *                              been removed. The new window is considered to be visible when
+     *                              switching to the new visible IME input target window and
+     *                              starting input, or the existing input target becomes visible.
+     *                              In contrast, {@code false} when closing the input target, or the
+     *                              existing input target becomes invisible
+     * @param displayId             the display for which to update the IME window status
+     */
+    public abstract void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+            boolean visibleAndNotRemoved, int displayId);
 
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
@@ -187,12 +275,23 @@ public abstract class InputMethodManagerInternal {
      * @param disableImeIcon indicates whether IME icon should be enabled or not
      * @param displayId      the display for which to update the IME window status
      */
+    @ImfLockFree
     public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
+
+    /**
+     * Updates and reports whether the IME switcher button should be shown, regardless whether
+     * SystemUI or the IME is responsible for drawing it and the corresponding navigation bar.
+     *
+     * @param displayId the display for which to update the IME switcher button visibility.
+     * @param userId    the user for which to update the IME switcher button visibility.
+     */
+    public abstract void updateShouldShowImeSwitcher(int displayId, @UserIdInt int userId);
 
     /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
      * there is an ongoing handwriting session.
      */
+    @ImfLockFree
     public abstract void maybeFinishStylusHandwriting();
 
     /**
@@ -235,44 +334,53 @@ public abstract class InputMethodManagerInternal {
             IBinder targetWindowToken);
 
     /**
-     * Returns true if any InputConnection is currently active.
-     * {@hide}
-     */
-    public abstract boolean isAnyInputConnectionActive();
-
-    /**
      * Fake implementation of {@link InputMethodManagerInternal}. All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
             new InputMethodManagerInternal() {
+                @ImfLockFree
                 @Override
                 public void setInteractive(boolean interactive) {
                 }
 
+                @ImfLockFree
                 @Override
-                public void hideAllInputMethods(@SoftInputShowHideReason int reason,
+                public void hideInputMethod(@SoftInputShowHideReason int reason,
                         int originatingDisplayId) {
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
                 public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
                 public List<InputMethodInfo> getEnabledInputMethodListAsUser(
                         @UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
+                @ImfLockFree
+                @NonNull
                 @Override
-                public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
-                        InlineSuggestionsRequestInfo requestInfo,
-                        IInlineSuggestionsRequestCallback cb) {
+                public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(String imiId,
+                        boolean allowsImplicitlyEnabledSubtypes, int userId) {
+                    return Collections.emptyList();
                 }
 
                 @Override
-                public boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
+                public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
+                        InlineSuggestionsRequestInfo requestInfo,
+                        InlineSuggestionsRequestCallback cb) {
+                }
+
+                @Override
+                public boolean switchToInputMethod(@NonNull String imeId, int subtypeIndex,
+                        @UserIdInt int userId) {
                     return false;
                 }
 
@@ -287,13 +395,14 @@ public abstract class InputMethodManagerInternal {
                         int deviceId, @Nullable String imeId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void registerInputMethodListListener(InputMethodListListener listener) {
                 }
 
                 @Override
                 public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-                        int displayId) {
+                        int displayId, @UserIdInt int userId) {
                     return false;
                 }
 
@@ -305,12 +414,28 @@ public abstract class InputMethodManagerInternal {
                 public void onImeParentChanged(int displayId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void removeImeSurface(int displayId) {
                 }
 
                 @Override
+                public void setHasVisibleImeLayeringOverlay(boolean hasVisibleOverlay,
+                        int displayId) {
+                }
+
+                @Override
+                public void onImeInputTargetVisibilityChanged(@NonNull IBinder imeInputTarget,
+                        boolean visibleAndNotRemoved, int displayId) {
+                }
+
+                @ImfLockFree
+                @Override
                 public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
+                }
+
+                @Override
+                public void updateShouldShowImeSwitcher(int displayId, @UserIdInt int userId) {
                 }
 
                 @Override
@@ -323,6 +448,7 @@ public abstract class InputMethodManagerInternal {
                         @UserIdInt int userId) {
                 }
 
+                @ImfLockFree
                 @Override
                 public void maybeFinishStylusHandwriting() {
                 }
@@ -330,11 +456,6 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public void onSwitchKeyboardLayoutShortcut(int direction, int displayId,
                         IBinder targetWindowToken) {
-                }
-
-                @Override
-                public boolean isAnyInputConnectionActive() {
-                    return false;
                 }
             };
 

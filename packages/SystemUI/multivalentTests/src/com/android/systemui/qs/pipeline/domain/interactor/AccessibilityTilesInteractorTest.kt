@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.data.repository.FakeAccessibilityQsShortcutsRepository
 import com.android.systemui.qs.FakeQSFactory
+import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.pipeline.domain.model.TileModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.ColorCorrectionTile

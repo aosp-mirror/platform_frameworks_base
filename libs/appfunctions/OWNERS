@@ -1,0 +1,3 @@
+set noparent
+
+include /core/java/android/app/appfunctions/OWNERS

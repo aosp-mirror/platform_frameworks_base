@@ -35,8 +35,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.flags.FeatureFlags;
-import com.android.internal.telephony.flags.FeatureFlagsImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,8 +46,7 @@ public final class TelephonyPermissions {
     private static final String LOG_TAG = "TelephonyPermissions";
 
     private static final boolean DBG = false;
-    /** Feature flags */
-    private static final FeatureFlags sFeatureFlag = new FeatureFlagsImpl();
+
     /**
      * Whether to disable the new device identifier access restrictions.
      */
@@ -719,14 +716,15 @@ public final class TelephonyPermissions {
     }
 
     private static int getCarrierPrivilegeStatus(Context context, int subId, int uid) {
-        if (uid == Process.SYSTEM_UID || uid == Process.PHONE_UID) {
+        if (isSystemOrPhone(uid)) {
             // Skip the check if it's one of these special uids
             return TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
         }
+
         final long identity = Binder.clearCallingIdentity();
         try {
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE);
+                    Context.TELEPHONY_SERVICE);
             return telephonyManager.createForSubscriptionId(subId).getCarrierPrivilegeStatus(uid);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -793,7 +791,7 @@ public final class TelephonyPermissions {
         if (isGranted) return;
 
         if (allowCarrierPrivilegeOnAnySub) {
-            if (checkCarrierPrivilegeForAnySubId(context, Binder.getCallingUid())) return;
+            if (checkCarrierPrivilegeForAnySubId(context, uid)) return;
         } else {
             if (checkCarrierPrivilegeForSubId(context, subId)) return;
         }
@@ -818,7 +816,8 @@ public final class TelephonyPermissions {
      * @param callingUid pass Binder.callingUid().
      */
     public static void enforceShellOnly(int callingUid, String message) {
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+        if (UserHandle.isSameApp(callingUid, Process.SHELL_UID)
+                || UserHandle.isSameApp(callingUid, Process.ROOT_UID)) {
             return; // okay
         }
 
@@ -886,12 +885,6 @@ public final class TelephonyPermissions {
      */
     public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
             @NonNull UserHandle callerUserHandle) {
-        if (!sFeatureFlag.rejectBadSubIdInteraction()
-                && !SubscriptionManager.isValidSubscriptionId(subId)) {
-            // Return true for invalid sub Id.
-            return true;
-        }
-
         SubscriptionManager subManager = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         final long token = Binder.clearCallingIdentity();
@@ -906,7 +899,7 @@ public final class TelephonyPermissions {
         } catch (IllegalArgumentException e) {
             // Found no record of this sub Id.
             Log.e(LOG_TAG, "Subscription[Subscription ID:" + subId + "] has no records on device");
-            return !sFeatureFlag.rejectBadSubIdInteraction();
+            return false;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -934,5 +927,23 @@ public final class TelephonyPermissions {
                 Manifest.permission.READ_PRIVILEGED_PHONE_STATE) == PERMISSION_GRANTED
                 || checkCallingOrSelfReadPhoneNumber(context, subId, callingPackage,
                 callingFeatureId, message));
+    }
+
+    /**
+     * @return true if the specified {@code uid} is for a system or phone process, no matter if runs
+     * as system user or not.
+     */
+    public static boolean isSystemOrPhone(int uid) {
+        return UserHandle.isSameApp(uid, Process.SYSTEM_UID) || UserHandle.isSameApp(uid,
+                Process.PHONE_UID);
+    }
+
+    /**
+     * @return true if the specified {@code uid} is for a ROOT or SHELL process, no matter if runs
+     * as system user or not.
+     */
+    public static boolean isRootOrShell(int uid) {
+        return UserHandle.isSameApp(uid, Process.ROOT_UID) || UserHandle.isSameApp(uid,
+                Process.SHELL_UID);
     }
 }

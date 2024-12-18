@@ -17,10 +17,28 @@
 package com.android.systemui.communal.shared.model
 
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
+import android.graphics.Bitmap
+import android.os.UserHandle
 
 /** Encapsulates data for a communal widget. */
-data class CommunalWidgetContentModel(
-    val appWidgetId: Int,
-    val providerInfo: AppWidgetProviderInfo,
-    val priority: Int,
-)
+sealed interface CommunalWidgetContentModel {
+    val appWidgetId: Int
+    val rank: Int
+
+    /** Widget is ready to display */
+    data class Available(
+        override val appWidgetId: Int,
+        val providerInfo: AppWidgetProviderInfo,
+        override val rank: Int,
+    ) : CommunalWidgetContentModel
+
+    /** Widget is pending installation */
+    data class Pending(
+        override val appWidgetId: Int,
+        override val rank: Int,
+        val componentName: ComponentName,
+        val icon: Bitmap?,
+        val user: UserHandle,
+    ) : CommunalWidgetContentModel
+}

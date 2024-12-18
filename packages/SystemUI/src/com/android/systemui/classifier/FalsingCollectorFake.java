@@ -16,12 +16,16 @@
 
 package com.android.systemui.classifier;
 
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import javax.inject.Inject;
 
 /** */
 public class FalsingCollectorFake implements FalsingCollector {
+
+    public KeyEvent lastKeyEvent = null;
+    public boolean avoidGestureInvoked = false;
 
     @Override
     public void init() {
@@ -70,6 +74,11 @@ public class FalsingCollectorFake implements FalsingCollector {
     }
 
     @Override
+    public void onKeyEvent(KeyEvent ev) {
+        lastKeyEvent = ev;
+    }
+
+    @Override
     public void onTouchEvent(MotionEvent ev) {
     }
 
@@ -79,6 +88,16 @@ public class FalsingCollectorFake implements FalsingCollector {
 
     @Override
     public void avoidGesture() {
+        avoidGestureInvoked = true;
+    }
+
+    /**
+     * @return whether {@link #avoidGesture()} was invoked.
+     */
+    public boolean wasLastGestureAvoided() {
+        boolean wasLastGestureAvoided = avoidGestureInvoked;
+        avoidGestureInvoked = false;
+        return wasLastGestureAvoided;
     }
 
     @Override

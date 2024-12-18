@@ -158,9 +158,11 @@ final class SendKeyAction extends HdmiCecFeatureAction {
                 mTargetAddress, cecKeycodeAndParams), new SendMessageCallback() {
                 @Override
                 public void onSendCompleted(int error) {
-                    if (error != SendMessageResult.SUCCESS) {
+                    // Disable System Audio Mode, if the AVR doesn't acknowledge
+                    // a <User Control Pressed> message.
+                    if (error == SendMessageResult.NACK) {
                         HdmiLogger.debug(
-                            "AVR did not respond to <User Control Pressed>");
+                            "AVR did not acknowledge <User Control Pressed>");
                         localDevice().mService.setSystemAudioActivated(false);
                     }
                 }
@@ -178,13 +180,20 @@ final class SendKeyAction extends HdmiCecFeatureAction {
                 && localDevice().getService().isAbsoluteVolumeBehaviorEnabled()) {
             sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
                     mTargetAddress),
-                    __ -> sendCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
-                            getSourceAddress(),
-                            localDevice().findAudioReceiverAddress())));
+                    __ -> queryAvrAudioStatus());
         } else {
             sendCommand(HdmiCecMessageBuilder.buildUserControlReleased(getSourceAddress(),
                     mTargetAddress));
         }
+    }
+
+    private void queryAvrAudioStatus() {
+        localDevice().mService.runOnServiceThreadDelayed(
+                () -> sendCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
+                        getSourceAddress(),
+                        localDevice().findAudioReceiverAddress())),
+                DELAY_GIVE_AUDIO_STATUS);
+
     }
 
     @Override

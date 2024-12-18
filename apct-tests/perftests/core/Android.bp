@@ -52,7 +52,7 @@ android_test {
         "guava",
     ],
 
-    libs: ["android.test.base"],
+    libs: ["android.test.base.stubs.system"],
 
     java_resources: [":GoogleFontDancingScript"],
 

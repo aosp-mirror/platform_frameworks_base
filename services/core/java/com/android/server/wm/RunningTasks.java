@@ -157,7 +157,7 @@ class RunningTasks implements Consumer<Task> {
             // home & recent tasks
             return;
         }
-        if (task.isVisible()) {
+        if (task.isVisibleRequested()) {
             mTmpVisibleTasks.add(task);
         } else {
             mTmpInvisibleTasks.add(task);

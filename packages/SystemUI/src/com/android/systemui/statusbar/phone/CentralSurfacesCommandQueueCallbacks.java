@@ -46,19 +46,24 @@ import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.emergency.EmergencyGesture;
+import com.android.systemui.emergency.EmergencyGestureModule.EmergencyGestureIntentFactory;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.ShadeHeaderController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -80,7 +85,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final ScreenPinningRequest mScreenPinningRequest;
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
-    private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
+    private final ShadeHeaderController mShadeHeaderController;
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -95,7 +102,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final PowerManager mPowerManager;
     private final Optional<Vibrator> mVibratorOptional;
-    private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
     private final UserTracker mUserTracker;
     private final boolean mVibrateOnOpening;
@@ -104,11 +110,14 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final QuickSettingsController mQsController;
     private final QSHost mQSHost;
+    private final KeyguardInteractor mKeyguardInteractor;
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     private int mDisabled1;
     private int mDisabled2;
+
+    private final EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
     @Inject
     CentralSurfacesCommandQueueCallbacks(
@@ -119,7 +128,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             ScreenPinningRequest screenPinningRequest,
             ShadeController shadeController,
             CommandQueue commandQueue,
-            ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
+            Lazy<ShadeInteractor> shadeInteractorLazy,
+            ShadeHeaderController shadeHeaderController,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             MetricsLogger metricsLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -134,19 +145,22 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             PowerManager powerManager,
             Optional<Vibrator> vibratorOptional,
-            DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId,
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker,
             QSHost qsHost,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            KeyguardInteractor keyguardInteractor,
+            EmergencyGestureIntentFactory emergencyGestureIntentFactory) {
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
         mScreenPinningRequest = screenPinningRequest;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
-        mShadeViewController = shadeViewController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
+        mShadeInteractorLazy = shadeInteractorLazy;
+        mShadeHeaderController = shadeHeaderController;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
         mMetricsLogger = metricsLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -161,16 +175,16 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mPowerManager = powerManager;
         mVibratorOptional = vibratorOptional;
-        mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
         mUserTracker = userTracker;
         mQSHost = qsHost;
-
+        mKeyguardInteractor = keyguardInteractor;
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
                 mVibratorOptional, resources);
         mActivityStarter = activityStarter;
+        mEmergencyGestureIntentFactory = emergencyGestureIntentFactory;
     }
 
     @Override
@@ -279,7 +293,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             }
         }
 
-        mShadeViewController.disableHeader(state1, state2, animate);
+        if (!SceneContainerFlag.isEnabled()) {
+            mShadeHeaderController.disable(state1, state2, animate);
+        }
     }
 
     /**
@@ -301,11 +317,10 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
         if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_UP);
-            mShadeViewController.collapse(
-                    false /* delayed */, 1.0f /* speedUpFactor */);
+            mShadeController.animateCollapseShade();
         } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
-            if (mShadeViewController.isFullyCollapsed()) {
+            if (mPanelExpansionInteractor.isFullyCollapsed()) {
                 if (mVibrateOnOpening) {
                     vibrateOnNavigationKeyDown();
                 }
@@ -314,9 +329,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);
             } else if (!mQsController.getExpanded()
-                    && !mShadeViewController.isExpandingOrCollapsing()) {
-                mQsController.flingQs(0 /* velocity */,
-                        ShadeViewController.FLING_EXPAND);
+                    && !mShadeController.isExpandingOrCollapsing()) {
+                mShadeController.animateExpandQs();
                 mMetricsLogger.count("panel_open_qs", 1);
             }
         }
@@ -334,12 +348,14 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
         if (!mCameraLauncherLazy.get().canCameraGestureBeLaunched(
-                mShadeViewController.getBarState())) {
+                mPanelExpansionInteractor.getBarState())) {
             if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
                 Slog.d(CentralSurfaces.TAG, "Can't launch camera right now");
             }
             return;
         }
+        mKeyguardInteractor.onCameraLaunchDetected(source);
+
         if (!mCentralSurfaces.isDeviceInteractive()) {
             mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                     "com.android.systemui:CAMERA_GESTURE");
@@ -372,8 +388,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                     mStatusBarKeyguardViewManager.reset(true /* hide */);
                 }
+                mCentralSurfaces.startLaunchTransitionTimeout();
                 mCameraLauncherLazy.get().launchCamera(source,
-                        mShadeViewController.isFullyCollapsed());
+                        mPanelExpansionInteractor.isFullyCollapsed());
                 mCentralSurfaces.updateScrimController();
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
@@ -390,7 +407,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void onEmergencyActionLaunchGestureDetected() {
-        Intent emergencyIntent = mCentralSurfaces.getEmergencyActionIntent();
+        Intent emergencyIntent = mEmergencyGestureIntentFactory.invoke(
+                EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
 
         if (emergencyIntent == null) {
             Log.wtf(CentralSurfaces.TAG, "Couldn't find an app to process the emergency intent.");
@@ -486,11 +504,20 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void togglePanel() {
-        if (mShadeViewController.isPanelExpanded()) {
+    public void toggleNotificationsPanel() {
+        if (mShadeInteractorLazy.get().isAnyExpanded().getValue()) {
             mShadeController.animateCollapseShade();
         } else {
             mShadeController.animateExpandShade();
+        }
+    }
+
+    @Override
+    public void toggleQuickSettingsPanel() {
+        if (mShadeInteractorLazy.get().isQsExpanded().getValue()) {
+            mShadeController.animateCollapseShade();
+        } else {
+            mShadeController.animateExpandQs();
         }
     }
 
@@ -539,7 +566,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @VisibleForTesting
     void vibrateOnNavigationKeyDown() {
-        mShadeViewController.performHapticFeedback(
+        mShadeController.performHapticFeedback(
                 HapticFeedbackConstants.GESTURE_START
         );
     }

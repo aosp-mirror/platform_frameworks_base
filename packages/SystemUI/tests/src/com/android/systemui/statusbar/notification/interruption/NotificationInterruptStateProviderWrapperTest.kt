@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import android.platform.test.annotations.DisableFlags
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.DecisionImpl
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
+import java.util.Optional
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -34,7 +35,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @DisableFlags(VisualInterruptionRefactor.FLAG_NAME)
 class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecisionProviderTestBase() {
     override val provider by lazy {
@@ -55,7 +56,8 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
                 deviceProvisionedController,
                 systemClock,
                 globalSettings,
-                eventLog
+                eventLog,
+                Optional.of(bubbles)
             )
         )
     }

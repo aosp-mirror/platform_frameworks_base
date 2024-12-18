@@ -186,4 +186,9 @@
     <item msgid="2478289035899842865">"முடக்கப்பட்டுள்ளது"</item>
     <item msgid="5137565285664080143">"இயக்கப்பட்டுள்ளது"</item>
   </string-array>
+  <string-array name="tile_states_hearing_devices">
+    <item msgid="1235334096484287173">"கிடைக்கவில்லை"</item>
+    <item msgid="3079622119444911877">"முடக்கப்பட்டுள்ளது"</item>
+    <item msgid="3028994095749238254">"இயக்கப்பட்டுள்ளது"</item>
+  </string-array>
 </resources>

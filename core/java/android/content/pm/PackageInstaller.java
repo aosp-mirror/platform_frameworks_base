@@ -177,6 +177,10 @@ public class PackageInstaller {
      * Broadcast Action: Explicit broadcast sent to the last known default launcher when a session
      * for a new install is committed. For managed profile, this is sent to the default launcher
      * of the primary profile.
+     * For user-profiles that have items restricted on home screen, this broadcast is sent to
+     * the default launcher of the primary profile, only if it has either
+     * {@link Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL} or
+     * {@link Manifest.permission.ACCESS_HIDDEN_PROFILES} permission.
      * <p>
      * The associated session is defined in {@link #EXTRA_SESSION} and the user for which this
      * session was created in {@link Intent#EXTRA_USER}.
@@ -2793,6 +2797,8 @@ public class PackageInstaller {
         public int developmentInstallFlags = 0;
         /** {@hide} */
         public int unarchiveId = -1;
+        /** {@hide} */
+        public @Nullable String dexoptCompilerFilter = null;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2846,6 +2852,7 @@ public class PackageInstaller {
             applicationEnabledSettingPersistent = source.readBoolean();
             developmentInstallFlags = source.readInt();
             unarchiveId = source.readInt();
+            dexoptCompilerFilter = source.readString();
         }
 
         /** {@hide} */
@@ -2881,6 +2888,7 @@ public class PackageInstaller {
             ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
             ret.developmentInstallFlags = developmentInstallFlags;
             ret.unarchiveId = unarchiveId;
+            ret.dexoptCompilerFilter = dexoptCompilerFilter;
             return ret;
         }
 
@@ -3464,8 +3472,12 @@ public class PackageInstaller {
          *              Android S  ({@link android.os.Build.VERSION_CODES#S API 31})</li>
          *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher on
          *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
-         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher <b>after</b>
-         *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher on
+         *              Android U ({@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE API 34})
+         *              </li>
+         *              <li>{@link android.os.Build.VERSION_CODES#TIRAMISU API 33} or higher on
+         *              Android V ({@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM API 35})
+         *              </li>
          *          </ul>
          *     </li>
          *     <li>The installer is:
@@ -3556,6 +3568,11 @@ public class PackageInstaller {
         }
 
         /** @hide */
+        public void setDexoptCompilerFilter(@Nullable String dexoptCompilerFilter) {
+            this.dexoptCompilerFilter = dexoptCompilerFilter;
+        }
+
+        /** @hide */
         @NonNull
         public ArrayMap<String, Integer> getPermissionStates() {
             return mPermissionStates;
@@ -3614,6 +3631,7 @@ public class PackageInstaller {
                     applicationEnabledSettingPersistent);
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.printPair("unarchiveId", unarchiveId);
+            pw.printPair("dexoptCompilerFilter", dexoptCompilerFilter);
             pw.println();
         }
 
@@ -3659,6 +3677,7 @@ public class PackageInstaller {
             dest.writeBoolean(applicationEnabledSettingPersistent);
             dest.writeInt(developmentInstallFlags);
             dest.writeInt(unarchiveId);
+            dest.writeString(dexoptCompilerFilter);
         }
 
         public static final Parcelable.Creator<SessionParams>

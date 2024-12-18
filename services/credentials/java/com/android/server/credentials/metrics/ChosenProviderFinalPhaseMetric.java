@@ -67,6 +67,10 @@ public class ChosenProviderFinalPhaseMetric {
 
     // Other General Information, such as final api status, provider status, entry info, etc...
 
+    private int mOemUiUid = -1;
+    private int mFallbackUiUid = -1;
+    private OemUiUsageStatus mOemUiUsageStatus = OemUiUsageStatus.UNKNOWN;
+
     private int mChosenProviderStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
@@ -301,5 +305,29 @@ public class ChosenProviderFinalPhaseMetric {
 
     public boolean isPrimary() {
         return mIsPrimary;
+    }
+
+    public void setOemUiUid(int oemUiUid) {
+        mOemUiUid = oemUiUid;
+    }
+
+    public int getOemUiUid() {
+        return mOemUiUid;
+    }
+
+    public void setFallbackUiUid(int fallbackUiUid) {
+        mFallbackUiUid = fallbackUiUid;
+    }
+
+    public int getFallbackUiUid() {
+        return mFallbackUiUid;
+    }
+
+    public void setOemUiUsageStatus(OemUiUsageStatus oemUiUsageStatus) {
+        mOemUiUsageStatus = oemUiUsageStatus;
+    }
+
+    public int getOemUiUsageStatus() {
+        return mOemUiUsageStatus.getLoggingInt();
     }
 }

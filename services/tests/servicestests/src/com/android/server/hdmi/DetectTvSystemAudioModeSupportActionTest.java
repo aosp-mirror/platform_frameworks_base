@@ -18,6 +18,8 @@ package com.android.server.hdmi;
 import static org.junit.Assert.assertEquals;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
@@ -102,6 +104,11 @@ public class DetectTvSystemAudioModeSupportActionTest {
                     @Override
                     protected Looper getServiceLooper() {
                         return mTestLooper.getLooper();
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
         mHdmiCecLocalDeviceAudioSystem =

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-#include "SkiaVulkanPipeline.h"
+#include "pipeline/skia/SkiaVulkanPipeline.h"
 
-#include <GrDirectContext.h>
-#include <GrTypes.h>
 #include <SkSurface.h>
 #include <SkTypes.h>
 #include <cutils/properties.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrTypes.h>
+#include <include/gpu/ganesh/vk/GrVkTypes.h>
 #include <strings.h>
-#include <vk/GrVkTypes.h>
 
 #include "DeferredLayerUpdater.h"
 #include "LightingInfo.h"
 #include "Readback.h"
-#include "ShaderCache.h"
-#include "SkiaPipeline.h"
-#include "SkiaProfileRenderer.h"
-#include "VkInteropFunctorDrawable.h"
+#include "pipeline/skia/ShaderCache.h"
+#include "pipeline/skia/SkiaGpuPipeline.h"
+#include "pipeline/skia/SkiaProfileRenderer.h"
+#include "pipeline/skia/VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
 #include "renderthread/IRenderPipeline.h"
@@ -42,7 +42,8 @@ namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread) : SkiaPipeline(thread) {
+SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
+        : SkiaGpuPipeline(thread) {
     thread.renderState().registerContextCallback(this);
 }
 

@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
@@ -38,6 +39,14 @@ public abstract class ContentCaptureManagerInternal {
      * the given {@code userId}.
      */
     public abstract boolean isContentCaptureServiceForUser(int uid, @UserIdInt int userId);
+
+    /**
+     * Notifies the intelligence service of new intent data associated with an activity start event.
+     *
+     * @return {@code false} if there was no service set for the given user
+     */
+    public abstract boolean sendActivityStartAssistData(@UserIdInt int userId,
+            @NonNull IBinder activityToken, @NonNull Intent intentData);
 
     /**
      * Notifies the intelligence service of new assist data for the given activity.

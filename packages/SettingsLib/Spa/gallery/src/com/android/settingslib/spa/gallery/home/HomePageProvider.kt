@@ -28,7 +28,7 @@ import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
-import com.android.settingslib.spa.gallery.card.CardPageProvider
+import com.android.settingslib.spa.gallery.banner.BannerPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
@@ -39,9 +39,9 @@ import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
-import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
+import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SuwScaffoldPageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
@@ -63,7 +63,7 @@ object HomePageProvider : SettingsPageProvider {
             SuwScaffoldPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SpinnerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SettingsPagerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            PagerMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             FooterPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
@@ -73,7 +73,7 @@ object HomePageProvider : SettingsPageProvider {
             ChartPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             DialogMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             EditorMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            CardPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            BannerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             CopyablePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }

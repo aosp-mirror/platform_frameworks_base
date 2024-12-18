@@ -98,6 +98,17 @@ LIBANDROID {
     AInputQueue_getEvent;
     AInputQueue_hasEvents;
     AInputQueue_preDispatchEvent;
+    AInputReceiver_createBatchedInputReceiver; # introduced=35
+    AInputReceiver_createUnbatchedInputReceiver; # introduced=35
+    AInputReceiver_release; # introduced=35
+    AInputReceiver_getInputTransferToken; # introduced=35
+    AInputReceiverCallbacks_create; # introduced=35
+    AInputReceiverCallbacks_release; # introduced=35
+    AInputReceiverCallbacks_setKeyEventCallback; # introduced=35
+    AInputReceiverCallbacks_setMotionEventCallback; # introduced=35
+    AInputTransferToken_fromJava; # introduced=35
+    AInputTransferToken_release; # introduced=35
+    AInputTransferToken_toJava; # introduced=35
     AKeyEvent_getAction;
     AKeyEvent_getDownTime;
     AKeyEvent_getEventTime;
@@ -262,6 +273,7 @@ LIBANDROID {
     ASurfaceTransaction_fromJava; # introduced=34
     ASurfaceTransaction_reparent; # introduced=29
     ASurfaceTransaction_setBuffer; # introduced=29
+    ASurfaceTransaction_setBufferWithRelease; # introduced=36
     ASurfaceTransaction_setBufferAlpha; # introduced=29
     ASurfaceTransaction_setBufferDataSpace; # introduced=29
     ASurfaceTransaction_setBufferTransparency; # introduced=29
@@ -355,6 +367,8 @@ LIBANDROID_PLATFORM {
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
+    APerformanceHint_createSessionInternal;
+    APerformanceHint_setUseFMQForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

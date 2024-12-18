@@ -43,6 +43,7 @@ import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.LayoutDirection;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 
@@ -138,6 +139,9 @@ public class BitmapDrawable extends Drawable {
      */
     @Deprecated
     public BitmapDrawable(Bitmap bitmap) {
+        if (bitmap == null) {
+            Log.w(TAG, "BitmapDrawable created with null Bitmap");
+        }
         init(new BitmapState(bitmap), null);
     }
 
@@ -146,6 +150,9 @@ public class BitmapDrawable extends Drawable {
      * the display metrics of the resources.
      */
     public BitmapDrawable(Resources res, Bitmap bitmap) {
+        if (bitmap == null) {
+            Log.w(TAG, "BitmapDrawable created with null Bitmap");
+        }
         init(new BitmapState(bitmap), res);
     }
 
@@ -177,7 +184,7 @@ public class BitmapDrawable extends Drawable {
         } finally {
             init(new BitmapState(bitmap), res);
             if (mBitmapState.mBitmap == null) {
-                android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
+                Log.w(TAG, "BitmapDrawable cannot decode " + filepath);
             }
         }
     }
@@ -210,7 +217,7 @@ public class BitmapDrawable extends Drawable {
         } finally {
             init(new BitmapState(bitmap), res);
             if (mBitmapState.mBitmap == null) {
-                android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
+                Log.w(TAG, "BitmapDrawable cannot decode " + is);
             }
         }
     }
@@ -1073,4 +1080,6 @@ public class BitmapDrawable extends Drawable {
                 mBitmapState.mBlendMode);
         computeBitmapSize();
     }
+
+    private static final String TAG = "BitmapDrawable";
 }

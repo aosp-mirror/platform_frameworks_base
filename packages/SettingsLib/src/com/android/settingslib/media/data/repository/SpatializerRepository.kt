@@ -18,23 +18,18 @@ package com.android.settingslib.media.data.repository
 
 import android.media.AudioDeviceAttributes
 import android.media.Spatializer
-import androidx.concurrent.futures.DirectExecutor
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 interface SpatializerRepository {
 
-    /** Returns true when head tracking is enabled and false the otherwise. */
-    val isHeadTrackingAvailable: StateFlow<Boolean>
+    /**
+     * Returns true when head tracking is available for the [audioDeviceAttributes] and false the
+     * otherwise.
+     */
+    suspend fun isHeadTrackingAvailableForDevice(
+        audioDeviceAttributes: AudioDeviceAttributes
+    ): Boolean
 
     /**
      * Returns true when Spatial audio feature is supported for the [audioDeviceAttributes] and
@@ -65,22 +60,14 @@ interface SpatializerRepository {
 
 class SpatializerRepositoryImpl(
     private val spatializer: Spatializer,
-    coroutineScope: CoroutineScope,
     private val backgroundContext: CoroutineContext,
 ) : SpatializerRepository {
 
-    override val isHeadTrackingAvailable: StateFlow<Boolean> =
-        callbackFlow {
-                val listener =
-                    Spatializer.OnHeadTrackerAvailableListener { _, available ->
-                        launch { send(available) }
-                    }
-                spatializer.addOnHeadTrackerAvailableListener(DirectExecutor.INSTANCE, listener)
-                awaitClose { spatializer.removeOnHeadTrackerAvailableListener(listener) }
-            }
-            .onStart { emit(spatializer.isHeadTrackerAvailable) }
-            .flowOn(backgroundContext)
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), false)
+    override suspend fun isHeadTrackingAvailableForDevice(
+        audioDeviceAttributes: AudioDeviceAttributes
+    ): Boolean {
+        return withContext(backgroundContext) { spatializer.hasHeadTracker(audioDeviceAttributes) }
+    }
 
     override suspend fun isSpatialAudioAvailableForDevice(
         audioDeviceAttributes: AudioDeviceAttributes

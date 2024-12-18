@@ -87,12 +87,6 @@ public class FeatureFlagUtils {
             "settings_need_connected_ble_device_for_broadcast";
 
     /**
-     * Enable new language and keyboard settings UI
-     * @hide
-     */
-    public static final String SETTINGS_NEW_KEYBOARD_UI = "settings_new_keyboard_ui";
-
-    /**
      * Enable new modifier key settings UI
      * @hide
      */
@@ -144,12 +138,6 @@ public class FeatureFlagUtils {
             "settings_show_stylus_preferences";
 
     /**
-     * Flag to enable/disable biometrics enrollment v2
-     * @hide
-     */
-    public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
-
-    /**
      * Flag to enable/disable FingerprintSettings v2
      * @hide
      */
@@ -194,13 +182,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION =
             "settings_remote_device_credential_validation";
 
-    /**
-     * Flag to enable/disable to start treating any calls to "suspend" an app as "quarantine".
-     * @hide
-     */
-    public static final String SETTINGS_TREAT_PAUSE_AS_QUARANTINE =
-            "settings_treat_pause_as_quarantine";
-
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -228,16 +209,14 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
-        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_PHASE2, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
-        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");
@@ -246,7 +225,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS, "false");
         // TODO: b/298454866 Replace with Trunk Stable Feature Flag
         DEFAULT_FLAGS.put(SETTINGS_REMOTEAUTH_ENROLLMENT_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SETTINGS_TREAT_PAUSE_AS_QUARANTINE, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -257,14 +235,12 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
-        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA_PHASE2);
         PERSISTENT_FLAGS.add(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM);
-        PERSISTENT_FLAGS.add(SETTINGS_TREAT_PAUSE_AS_QUARANTINE);
     }
 
     /**

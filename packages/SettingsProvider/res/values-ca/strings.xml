@@ -20,6 +20,4 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"Configuració de l\'emmagatzematge"</string>
-    <string name="wifi_softap_config_change" msgid="5688373762357941645">"La configuració del punt d\'accés Wi‑Fi ha canviat"</string>
-    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"Toca per veure\'n els detalls"</string>
 </resources>

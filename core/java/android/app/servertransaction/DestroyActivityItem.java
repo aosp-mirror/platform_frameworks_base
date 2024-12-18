@@ -28,12 +28,17 @@ import android.os.Trace;
 
 /**
  * Request to destroy an activity.
+ *
  * @hide
  */
 public class DestroyActivityItem extends ActivityLifecycleItem {
 
-    private boolean mFinished;
-    private int mConfigChanges;
+    private final boolean mFinished;
+
+    public DestroyActivityItem(@NonNull IBinder activityToken, boolean finished) {
+        super(activityToken);
+        mFinished = finished;
+    }
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
@@ -44,7 +49,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
-        client.handleDestroyActivity(r, mFinished, mConfigChanges,
+        client.handleDestroyActivity(r, mFinished,
                 false /* getNonConfigInstance */, "DestroyActivityItem");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -61,48 +66,19 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         return ON_DESTROY;
     }
 
-    // ObjectPoolItem implementation
-
-    private DestroyActivityItem() {}
-
-    /** Obtain an instance initialized with provided params. */
-    @NonNull
-    public static DestroyActivityItem obtain(@NonNull IBinder activityToken, boolean finished,
-            int configChanges) {
-        DestroyActivityItem instance = ObjectPool.obtain(DestroyActivityItem.class);
-        if (instance == null) {
-            instance = new DestroyActivityItem();
-        }
-        instance.setActivityToken(activityToken);
-        instance.mFinished = finished;
-        instance.mConfigChanges = configChanges;
-
-        return instance;
-    }
-
-    @Override
-    public void recycle() {
-        super.recycle();
-        mFinished = false;
-        mConfigChanges = 0;
-        ObjectPool.recycle(this);
-    }
-
     // Parcelable implementation
 
-    /** Write to Parcel. */
+    /** Writes to Parcel. */
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
-        dest.writeInt(mConfigChanges);
     }
 
-    /** Read from Parcel. */
+    /** Reads from Parcel. */
     private DestroyActivityItem(@NonNull Parcel in) {
         super(in);
         mFinished = in.readBoolean();
-        mConfigChanges = in.readInt();
     }
 
     public static final @NonNull Creator<DestroyActivityItem> CREATOR = new Creator<>() {
@@ -124,7 +100,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
             return false;
         }
         final DestroyActivityItem other = (DestroyActivityItem) o;
-        return mFinished == other.mFinished && mConfigChanges == other.mConfigChanges;
+        return mFinished == other.mFinished;
     }
 
     @Override
@@ -132,14 +108,12 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         int result = 17;
         result = 31 * result + super.hashCode();
         result = 31 * result + (mFinished ? 1 : 0);
-        result = 31 * result + mConfigChanges;
         return result;
     }
 
     @Override
     public String toString() {
         return "DestroyActivityItem{" + super.toString()
-                + ",finished=" + mFinished
-                + ",mConfigChanges=" + mConfigChanges + "}";
+                + ",finished=" + mFinished + "}";
     }
 }

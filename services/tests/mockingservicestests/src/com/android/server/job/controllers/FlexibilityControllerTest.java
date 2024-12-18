@@ -60,10 +60,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
@@ -71,12 +74,15 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.net.NetworkRequest;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.telephony.TelephonyManager;
+import android.telephony.UiccSlotMapping;
 import android.util.ArraySet;
 import android.util.EmptyArray;
 import android.util.SparseArray;
@@ -104,6 +110,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 public class FlexibilityControllerTest {
@@ -113,6 +122,9 @@ public class FlexibilityControllerTest {
 
     private MockitoSession mMockingSession;
     private BroadcastReceiver mBroadcastReceiver;
+    private final SparseArray<ArraySet<String>> mCarrierPrivilegedApps = new SparseArray<>();
+    private final SparseArray<TelephonyManager.CarrierPrivilegesCallback>
+            mCarrierPrivilegedCallbacks = new SparseArray<>();
     private FlexibilityController mFlexibilityController;
     private DeviceConfig.Properties.Builder mDeviceConfigPropertiesBuilder;
     private JobStore mJobStore;
@@ -130,6 +142,10 @@ public class FlexibilityControllerTest {
     @Mock
     private PrefetchController mPrefetchController;
     @Mock
+    private TelephonyManager mTelephonyManager;
+    @Mock
+    private IPackageManager mIPackageManager;
+    @Mock
     private PackageManager mPackageManager;
 
     @Before
@@ -138,6 +154,7 @@ public class FlexibilityControllerTest {
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
                 .spyStatic(DeviceConfig.class)
+                .mockStatic(AppGlobals.class)
                 .mockStatic(LocalServices.class)
                 .startMocking();
         // Called in StateController constructor.
@@ -167,17 +184,23 @@ public class FlexibilityControllerTest {
                         -> mDeviceConfigPropertiesBuilder.build())
                 .when(() -> DeviceConfig.getProperties(
                         eq(DeviceConfig.NAMESPACE_JOB_SCHEDULER), ArgumentMatchers.<String>any()));
+        // Used in FlexibilityController.SpecialAppTracker.
+        when(mContext.getSystemService(TelephonyManager.class)).thenReturn(mTelephonyManager);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION))
+                .thenReturn(true);
         //used to get jobs by UID
         mJobStore = JobStore.initAndGetForTesting(mContext, mContext.getFilesDir());
         doReturn(mJobStore).when(mJobSchedulerService).getJobStore();
         // Used in JobStatus.
-        doReturn(mock(PackageManagerInternal.class))
-                .when(() -> LocalServices.getService(PackageManagerInternal.class));
+        doReturn(mIPackageManager).when(AppGlobals::getPackageManager);
         // Freeze the clocks at a moment in time
         JobSchedulerService.sSystemClock =
                 Clock.fixed(Instant.ofEpochMilli(FROZEN_TIME), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(FROZEN_TIME), ZoneOffset.UTC);
+        // Set empty set of privileged apps.
+        setSimSlotMappings(null);
+        setPowerWhitelistExceptIdle();
         // Initialize real objects.
         doReturn(Long.MAX_VALUE).when(mPrefetchController).getNextEstimatedLaunchTimeLocked(any());
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
@@ -249,9 +272,13 @@ public class FlexibilityControllerTest {
     }
 
     private JobStatus createJobStatus(String testTag, JobInfo.Builder job) {
+        return createJobStatus(testTag, job, SOURCE_PACKAGE);
+    }
+
+    private JobStatus createJobStatus(String testTag, JobInfo.Builder job, String sourcePackage) {
         JobInfo jobInfo = job.build();
         JobStatus js = JobStatus.createFromJobInfo(
-                jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, "FCTest", testTag);
+                jobInfo, 1000, sourcePackage, SOURCE_USER_ID, "FCTest", testTag);
         js.enqueueTime = FROZEN_TIME;
         js.setStandbyBucket(ACTIVE_INDEX);
         if (js.hasFlexibilityConstraint()) {
@@ -1084,7 +1111,6 @@ public class FlexibilityControllerTest {
 
     @Test
     public void testAllowlistedAppBypass() {
-        setPowerWhitelistExceptIdle();
         mFlexibilityController.onSystemServicesReady();
 
         JobStatus jsHigh = createJobStatus("testAllowlistedAppBypass",
@@ -1114,6 +1140,148 @@ public class FlexibilityControllerTest {
             assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefault));
             assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLow));
             assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMin));
+        }
+    }
+
+    @Test
+    public void testCarrierPrivilegedAppBypass() throws Exception {
+        mFlexibilityController.onSystemServicesReady();
+
+        final String carrier1Pkg1 = "com.test.carrier.1.pkg.1";
+        final String carrier1Pkg2 = "com.test.carrier.1.pkg.2";
+        final String carrier2Pkg = "com.test.carrier.2.pkg";
+        final String nonCarrierPkg = "com.test.normal.pkg";
+
+        setPackageUid(carrier1Pkg1, 1);
+        setPackageUid(carrier1Pkg2, 11);
+        setPackageUid(carrier2Pkg, 2);
+        setPackageUid(nonCarrierPkg, 3);
+
+        // Set the second carrier's privileged list before SIM configuration is sent to test
+        // initialization.
+        setCarrierPrivilegedAppList(2, carrier2Pkg);
+
+        UiccSlotMapping sim1 = mock(UiccSlotMapping.class);
+        UiccSlotMapping sim2 = mock(UiccSlotMapping.class);
+        doReturn(1).when(sim1).getLogicalSlotIndex();
+        doReturn(2).when(sim2).getLogicalSlotIndex();
+        setSimSlotMappings(List.of(sim1, sim2));
+
+        JobStatus jsHighC1P1 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_HIGH), carrier1Pkg1);
+        JobStatus jsDefaultC1P1 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT), carrier1Pkg1);
+        JobStatus jsLowC1P1 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_LOW), carrier1Pkg1);
+        JobStatus jsMinC1P1 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_MIN), carrier1Pkg1);
+        JobStatus jsHighC1P2 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_HIGH), carrier1Pkg2);
+        JobStatus jsDefaultC1P2 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT), carrier1Pkg2);
+        JobStatus jsLowC1P2 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_LOW), carrier1Pkg2);
+        JobStatus jsMinC1P2 = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_MIN), carrier1Pkg2);
+        JobStatus jsHighC2P = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_HIGH), carrier2Pkg);
+        JobStatus jsDefaultC2P = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT), carrier2Pkg);
+        JobStatus jsLowC2P = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_LOW), carrier2Pkg);
+        JobStatus jsMinC2P = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_MIN), carrier2Pkg);
+        JobStatus jsHighNCP = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_HIGH), nonCarrierPkg);
+        JobStatus jsDefaultNCP = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_DEFAULT), nonCarrierPkg);
+        JobStatus jsLowNCP = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_LOW), nonCarrierPkg);
+        JobStatus jsMinNCP = createJobStatus("testCarrierPrivilegedAppBypass",
+                createJob(0).setPriority(JobInfo.PRIORITY_MIN), nonCarrierPkg);
+
+        setCarrierPrivilegedAppList(1);
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P2));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC2P));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinNCP));
+        }
+
+        // Only mark the first package of carrier 1 as privileged. Only that app's jobs should
+        // be exempted.
+        setCarrierPrivilegedAppList(1, carrier1Pkg1);
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P1));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P2));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC2P));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinNCP));
+        }
+
+        // Add the second package of carrier 1. Both apps' jobs should be exempted.
+        setCarrierPrivilegedAppList(1, carrier1Pkg1, carrier1Pkg2);
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P1));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P1));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P2));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P2));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC2P));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinNCP));
+        }
+
+        // Remove a SIM slot. The relevant app's should no longer have exempted jobs.
+        setSimSlotMappings(List.of(sim1));
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P1));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P1));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P1));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC1P2));
+            assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC1P2));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinC2P));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsHighNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsDefaultNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsLowNCP));
+            assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(jsMinNCP));
         }
     }
 
@@ -1753,12 +1921,71 @@ public class FlexibilityControllerTest {
         }
     }
 
+    private void setCarrierPrivilegedAppList(int logicalIndex, String... packages) {
+        final ArraySet<String> packageSet = packages == null
+                ? new ArraySet<>() : new ArraySet<>(packages);
+        mCarrierPrivilegedApps.put(logicalIndex, packageSet);
+
+        TelephonyManager.CarrierPrivilegesCallback callback =
+                mCarrierPrivilegedCallbacks.get(logicalIndex);
+        if (callback != null) {
+            callback.onCarrierPrivilegesChanged(packageSet, Collections.emptySet());
+            waitForQuietModuleThread();
+        }
+    }
+
+    private void setPackageUid(final String pkgName, final int uid) throws Exception {
+        doReturn(uid).when(mIPackageManager)
+                .getPackageUid(eq(pkgName), anyLong(), eq(UserHandle.getUserId(uid)));
+    }
+
     private void setPowerWhitelistExceptIdle(String... packages) {
         doReturn(packages == null ? EmptyArray.STRING : packages)
                 .when(mDeviceIdleInternal).getFullPowerWhitelistExceptIdle();
         if (mBroadcastReceiver != null) {
             mBroadcastReceiver.onReceive(mContext,
                     new Intent(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED));
+            waitForQuietModuleThread();
+        }
+    }
+
+    private void setSimSlotMappings(@Nullable Collection<UiccSlotMapping> simSlotMapping) {
+        clearInvocations(mTelephonyManager);
+        final Collection<UiccSlotMapping> returnedMapping = simSlotMapping == null
+                ? Collections.emptyList() : simSlotMapping;
+        doReturn(returnedMapping).when(mTelephonyManager).getSimSlotMapping();
+        if (mBroadcastReceiver != null) {
+            final Intent intent = new Intent(TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED);
+            mBroadcastReceiver.onReceive(mContext, intent);
+            waitForQuietModuleThread();
+        }
+        if (returnedMapping.size() > 0) {
+            ArgumentCaptor<TelephonyManager.CarrierPrivilegesCallback> callbackCaptor =
+                    ArgumentCaptor.forClass(TelephonyManager.CarrierPrivilegesCallback.class);
+            ArgumentCaptor<Integer> logicalIndexCaptor = ArgumentCaptor.forClass(Integer.class);
+
+            final int minExpectedNewRegistrations = Math.max(0,
+                    returnedMapping.size() - mCarrierPrivilegedCallbacks.size());
+            verify(mTelephonyManager, atLeast(minExpectedNewRegistrations))
+                    .registerCarrierPrivilegesCallback(
+                            logicalIndexCaptor.capture(), any(), callbackCaptor.capture());
+
+            final List<Integer> registeredIndices = logicalIndexCaptor.getAllValues();
+            final List<TelephonyManager.CarrierPrivilegesCallback> registeredCallbacks =
+                    callbackCaptor.getAllValues();
+            for (int i = 0; i < registeredIndices.size(); ++i) {
+                final int logicalIndex = registeredIndices.get(i);
+                final TelephonyManager.CarrierPrivilegesCallback callback =
+                        registeredCallbacks.get(i);
+
+                mCarrierPrivilegedCallbacks.put(logicalIndex, callback);
+
+                // The API contract promises a callback upon registration with the current list.
+                final ArraySet<String> cpApps = mCarrierPrivilegedApps.get(logicalIndex);
+                callback.onCarrierPrivilegesChanged(
+                        cpApps == null ? Collections.emptySet() : cpApps,
+                        Collections.emptySet());
+            }
             waitForQuietModuleThread();
         }
     }

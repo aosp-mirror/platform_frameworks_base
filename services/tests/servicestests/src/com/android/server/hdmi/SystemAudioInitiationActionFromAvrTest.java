@@ -15,13 +15,17 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.HdmiConfig.TIMEOUT_MS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
@@ -60,6 +64,7 @@ public class SystemAudioInitiationActionFromAvrTest {
     private boolean mArcEnabled;
     private boolean mIsPlaybackDevice;
     private boolean mBroadcastActiveSource;
+    private boolean mStandbyMessageReceived;
 
     @Before
     public void SetUp() {
@@ -134,6 +139,16 @@ public class SystemAudioInitiationActionFromAvrTest {
                     @Override
                     int pathToPortId(int path) {
                         return -1;
+                    }
+
+                    @Override
+                    protected boolean isStandbyMessageReceived() {
+                        return mStandbyMessageReceived;
+                    }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
                     }
                 };
 
@@ -286,6 +301,22 @@ public class SystemAudioInitiationActionFromAvrTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isTrue();
     }
 
+    @Test
+    public void onActionStarted_deviceGoesToSleep_noActiveSourceAfterTimeout() {
+        resetTestVariables();
+
+        mStandbyMessageReceived = true;
+        mHdmiCecLocalDeviceAudioSystem.addAndStartAction(
+                new SystemAudioInitiationActionFromAvr(
+                mHdmiCecLocalDeviceAudioSystem));
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mBroadcastActiveSource).isFalse();
+    }
+
     private void resetTestVariables() {
         mMsgRequestActiveSourceCount = 0;
         mMsgSetSystemAudioModeCount = 0;
@@ -295,5 +326,6 @@ public class SystemAudioInitiationActionFromAvrTest {
         mBroadcastActiveSource = false;
         mHdmiCecLocalDeviceAudioSystem.getActiveSource().physicalAddress =
                 Constants.INVALID_PHYSICAL_ADDRESS;
+        mStandbyMessageReceived = false;
     }
 }

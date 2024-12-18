@@ -18,7 +18,7 @@ package com.android.wm.shell.transition;
 
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.transition.DefaultMixedHandler.handoverTransitionLeashes;
 import static com.android.wm.shell.transition.MixedTransitionHelper.animateEnterPipFromSplit;
 import static com.android.wm.shell.transition.MixedTransitionHelper.animateKeyguard;
@@ -30,7 +30,7 @@ import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerTransaction;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -43,7 +43,7 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
     private final DesktopTasksController mDesktopTasksController;
 
     RecentsMixedTransition(int type, IBinder transition, Transitions player,
-            DefaultMixedHandler mixedHandler, PipTransitionController pipHandler,
+            MixedTransitionHandler mixedHandler, PipTransitionController pipHandler,
             StageCoordinator splitHandler, KeyguardTransitionHandler keyguardHandler,
             RecentsTransitionHandler recentsHandler,
             DesktopTasksController desktopTasksController) {
@@ -142,7 +142,8 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
                     && mSplitHandler.getSplitItemPosition(change.getLastParent())
                     != SPLIT_POSITION_UNDEFINED) {
                 return animateEnterPipFromSplit(this, info, startTransaction, finishTransaction,
-                        finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler);
+                        finishCallback, mPlayer, mMixedHandler, mPipHandler, mSplitHandler,
+                        /*replacingPip*/ false);
             }
         }
 
@@ -212,6 +213,7 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
         switch (mType) {
             case TYPE_RECENTS_DURING_DESKTOP:
             case TYPE_RECENTS_DURING_SPLIT:
+            case TYPE_RECENTS_DURING_KEYGUARD:
                 mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
                 break;
             default:

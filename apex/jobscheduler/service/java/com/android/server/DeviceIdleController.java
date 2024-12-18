@@ -109,6 +109,7 @@ import com.android.modules.expresslog.Counter;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.deviceidle.ConstraintController;
 import com.android.server.deviceidle.DeviceIdleConstraintTracker;
+import com.android.server.deviceidle.Flags;
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 import com.android.server.deviceidle.TvConstraintController;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -665,7 +666,12 @@ public class DeviceIdleController extends SystemService
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
+            final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
+            switch (action) {
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
                     updateConnectivityState(intent);
                 } break;
@@ -2559,7 +2565,7 @@ public class DeviceIdleController extends SystemService
         }
 
         boolean isLocationPrefetchEnabled() {
-            return mContext.getResources().getBoolean(
+            return !Flags.removeIdleLocation() && mContext.getResources().getBoolean(
                    com.android.internal.R.bool.config_autoPowerModePrefetchLocation);
         }
 
@@ -3567,7 +3573,7 @@ public class DeviceIdleController extends SystemService
             Slog.i(TAG, "becomeActiveLocked, reason=" + activeReason
                     + ", changeLightIdle=" + changeLightIdle);
         }
-        if (mState != STATE_ACTIVE || mLightState != STATE_ACTIVE) {
+        if (mState != STATE_ACTIVE || mLightState != LIGHT_STATE_ACTIVE) {
             moveToStateLocked(STATE_ACTIVE, activeReason);
             mInactiveTimeout = newInactiveTimeout;
             resetIdleManagementLocked();

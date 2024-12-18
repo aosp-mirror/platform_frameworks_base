@@ -35,7 +35,6 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="48dip"
-        android:layout_marginStart="12dip"
         android:layout_marginEnd="12dip"
         android:duplicateParentState="true" >
 
@@ -46,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="6dip"
+            android:layout_marginStart="18dip"
             android:textAppearance="?attr/textAppearanceLargePopupMenu"
             android:singleLine="true"
             android:duplicateParentState="true"

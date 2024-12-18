@@ -15,14 +15,29 @@
  */
 package com.android.internal.ravenwood;
 
+import static android.os.Build.VERSION_CODES.S;
+import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+
 /**
  * Class to interact with the Ravenwood environment.
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-public class RavenwoodEnvironment {
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass("RavenwoodEnvironment_host")
+public final class RavenwoodEnvironment {
+    public static final String TAG = "RavenwoodEnvironment";
+
     private static RavenwoodEnvironment sInstance = new RavenwoodEnvironment();
 
-    private RavenwoodEnvironment() {
+    private static RuntimeException notSupportedOnDevice() {
+        return new UnsupportedOperationException("This method can only be used on Ravenwood");
     }
 
     /**
@@ -44,12 +59,49 @@ public class RavenwoodEnvironment {
      * <p>If someone needs it without having access to the SDK, the following hack would work too.
      * <code>System.getProperty("java.class.path").contains("ravenwood")</code>
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodReplace
     public boolean isRunningOnRavenwood() {
         return false;
     }
 
-    public boolean isRunningOnRavenwood$ravenwood() {
+    private boolean isRunningOnRavenwood$ravenwood() {
         return true;
+    }
+
+    /**
+     * Get the object back from the address obtained from
+     * {@link dalvik.system.VMRuntime#addressOf(Object)}.
+     */
+    @RavenwoodRedirect
+    public <T> T fromAddress(long address) {
+        throw notSupportedOnDevice();
+    }
+
+    /**
+     * @return the "ravenwood-runtime" directory.
+     */
+    @RavenwoodRedirect
+    public String getRavenwoodRuntimePath() {
+        throw notSupportedOnDevice();
+    }
+
+    /** @hide */
+    public static class CompatIdsForTest {
+        // Enabled by default
+        /** Used for testing */
+        @ChangeId
+        public static final long TEST_COMPAT_ID_1 = 368131859L;
+
+        /** Used for testing */
+        @Disabled
+        @ChangeId public static final long TEST_COMPAT_ID_2 = 368131701L;
+
+        /** Used for testing */
+        @EnabledAfter(targetSdkVersion = S)
+        @ChangeId public static final long TEST_COMPAT_ID_3 = 368131659L;
+
+        /** Used for testing */
+        @EnabledAfter(targetSdkVersion = UPSIDE_DOWN_CAKE)
+        @ChangeId public static final long TEST_COMPAT_ID_4 = 368132057L;
     }
 }

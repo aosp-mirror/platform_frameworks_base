@@ -33,7 +33,6 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -46,10 +45,10 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.IdleScreenRefreshRateConfig;
 import android.view.SurfaceControl.RefreshRateRange;
 import android.view.SurfaceControl.RefreshRateRanges;
 
@@ -82,7 +81,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -120,13 +118,13 @@ public class LocalDisplayAdapterTest {
     @Mock
     private DisplayManagerFlags mFlags;
     @Mock
-    private DisplayPowerControllerInterface mMockedDisplayPowerController;
+    private DisplayPowerController mMockedDisplayPowerController;
 
     private Handler mHandler;
 
     private DisplayOffloadSessionImpl mDisplayOffloadSession;
 
-    private DisplayOffloader mDisplayOffloader;
+    @Mock DisplayOffloader mDisplayOffloader;
 
     private TestListener mListener = new TestListener();
 
@@ -831,18 +829,20 @@ public class LocalDisplayAdapterTest {
                 .get()
                 .getModeId();
 
+        IdleScreenRefreshRateConfig
+                idleScreenRefreshRateConfig = new SurfaceControl.IdleScreenRefreshRateConfig(500);
         displayDevice.setDesiredDisplayModeSpecsLocked(
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         verify(mSurfaceControlProxy).setDesiredDisplayModeSpecs(display.token,
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 0,
                         /* allowGroupSwitching */ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
 
         // Change the display
@@ -863,12 +863,13 @@ public class LocalDisplayAdapterTest {
 
         baseModeId = displayDevice.getDisplayDeviceInfoLocked().supportedModes[0].getModeId();
 
+        idleScreenRefreshRateConfig = new SurfaceControl.IdleScreenRefreshRateConfig(600);
         // The traversal request will call setDesiredDisplayModeSpecsLocked on the display device
         displayDevice.setDesiredDisplayModeSpecsLocked(
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
 
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
@@ -878,7 +879,7 @@ public class LocalDisplayAdapterTest {
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 2,
                         /* allowGroupSwitching */ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
     }
 
@@ -1139,6 +1140,20 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
+    public void test_createLocalExternalDisplay_displayManagementEnabled_doesNotCrash()
+            throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        display.info.isInternal = false;
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        when(mSurfaceControlProxy.getDesiredDisplayModeSpecs(display.token)).thenReturn(null);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+    }
+
+    @Test
     public void test_createLocalExternalDisplay_displayManagementEnabled_shouldHaveDefaultGroup()
             throws Exception {
         FakeDisplay display = new FakeDisplay(PORT_A);
@@ -1229,24 +1244,11 @@ public class LocalDisplayAdapterTest {
 
         verify(mDisplayOffloader).stopOffload();
         assertFalse(mDisplayOffloadSession.isActive());
-        verify(mMockedDisplayPowerController).setBrightnessFromOffload(
-                PowerManager.BRIGHTNESS_INVALID_FLOAT);
     }
 
     private void initDisplayOffloadSession() {
-        mDisplayOffloader = spy(new DisplayOffloader() {
-            @Override
-            public boolean startOffload() {
-                return true;
-            }
-
-            @Override
-            public void stopOffload() {}
-
-            @Override
-            public void onBlockingScreenOn(Runnable unblocker) {}
-        });
-
+        when(mDisplayOffloader.startOffload()).thenReturn(true);
+        when(mDisplayOffloader.allowAutoBrightnessInDoze()).thenReturn(true);
         mDisplayOffloadSession = new DisplayOffloadSessionImpl(mDisplayOffloader,
                 mMockedDisplayPowerController);
     }
@@ -1322,7 +1324,8 @@ public class LocalDisplayAdapterTest {
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* defaultMode */ 0,
                         /* allowGroupSwitching */ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES,
+                        new IdleScreenRefreshRateConfig(100)
                 );
 
         private FakeDisplay(int port) {

@@ -20,19 +20,21 @@ import android.content.ComponentName
 import android.content.pm.UserInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.FakeQSFactory
+import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.data.repository.FakeDefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.MinimumTilesFixedRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeDefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeMinimumTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeRestoreRepository
+import com.android.systemui.qs.pipeline.data.repository.fakeRetailModeRepository
+import com.android.systemui.qs.pipeline.data.repository.fakeTileSpecRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.qsTileFactory
 import com.android.systemui.settings.fakeUserTracker
@@ -95,8 +97,6 @@ class NoLowNumberOfTilesTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_QS_NEW_PIPELINE)
-
         with(kosmos) {
             restoreReconciliationInteractor.start()
             autoAddInteractor.init(kosmos.currentTilesInteractor)
@@ -134,6 +134,19 @@ class NoLowNumberOfTilesTest : SysuiTestCase() {
                 runCurrent()
 
                 assertThat(tiles!!.map { it.spec }).isEqualTo(defaultTiles)
+            }
+        }
+
+    @Test
+    fun inRetailMode_onlyOneTile_noPrependDefault() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeRetailModeRepository.setRetailMode(true)
+                fakeTileSpecRepository.setTiles(0, listOf(goodTile))
+                val tiles by collectLastValue(currentTilesInteractor.currentTiles)
+                runCurrent()
+
+                assertThat(tiles!!.map { it.spec }).isEqualTo(listOf(goodTile))
             }
         }
 

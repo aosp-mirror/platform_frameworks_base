@@ -124,6 +124,22 @@ public class FaceUtils implements BiometricUtils<Face> {
         return getStateForUser(context, userId).isInvalidationInProgress();
     }
 
+    @Override
+    public boolean hasValidBiometricUserState(Context context, int userId) {
+        return getStateForUser(context, userId).isInvalidBiometricState();
+    }
+
+    @Override
+    public void deleteStateForUser(int userId) {
+        synchronized (this) {
+            FaceUserState state = mUserStates.get(userId);
+            if (state != null) {
+                state.deleteBiometricFile();
+                mUserStates.delete(userId);
+            }
+        }
+    }
+
     private FaceUserState getStateForUser(Context ctx, int userId) {
         synchronized (this) {
             FaceUserState state = mUserStates.get(userId);

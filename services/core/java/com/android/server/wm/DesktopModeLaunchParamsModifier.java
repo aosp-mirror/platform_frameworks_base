@@ -18,39 +18,39 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.DesktopModeHelper.canEnterDesktopMode;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
-import com.android.window.flags.Flags;
 /**
  * The class that defines default launch params for tasks in desktop mode
  */
-public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
+class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     private static final String TAG =
             TAG_WITH_CLASS_NAME ? "DesktopModeLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
 
-    private static final boolean DESKTOP_MODE_PROTO2_SUPPORTED =
-            SystemProperties.getBoolean("persist.wm.debug.desktop_mode_2", false);
-    public static final float DESKTOP_MODE_INITIAL_BOUNDS_SCALE =
-            SystemProperties
-                    .getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f;
-
     private StringBuilder mLogBuilder;
+
+    @NonNull private final Context mContext;
+
+    DesktopModeLaunchParamsModifier(@NonNull Context context) {
+        mContext = context;
+    }
 
     @Override
     public int onCalculate(@Nullable Task task, @Nullable ActivityInfo.WindowLayout layout,
             @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
             @Nullable ActivityOptions options, @Nullable ActivityStarter.Request request, int phase,
-            LaunchParamsController.LaunchParams currentParams,
-            LaunchParamsController.LaunchParams outParams) {
+            @NonNull LaunchParamsController.LaunchParams currentParams,
+            @NonNull LaunchParamsController.LaunchParams outParams) {
 
         initLogBuilder(task, activity);
         int result = calculate(task, layout, activity, source, options, request, phase,
@@ -62,15 +62,15 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     private int calculate(@Nullable Task task, @Nullable ActivityInfo.WindowLayout layout,
             @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
             @Nullable ActivityOptions options, @Nullable ActivityStarter.Request request, int phase,
-            LaunchParamsController.LaunchParams currentParams,
-            LaunchParamsController.LaunchParams outParams) {
+            @NonNull LaunchParamsController.LaunchParams currentParams,
+            @NonNull LaunchParamsController.LaunchParams outParams) {
 
-        if (!isDesktopModeEnabled()) {
-            appendLog("desktop mode is not enabled, continuing");
-            return RESULT_CONTINUE;
+        if (!canEnterDesktopMode(mContext)) {
+            appendLog("desktop mode is not enabled, skipping");
+            return RESULT_SKIP;
         }
 
-        if (task == null) {
+        if (task == null || !task.isAttached()) {
             appendLog("task null, skipping");
             return RESULT_SKIP;
         }
@@ -90,14 +90,14 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         // previous windowing mode to be restored even if the desktop mode state has changed.
         // Let task launches inherit the windowing mode from the source task if available, which
         // should have the desired windowing mode set by WM Shell. See b/286929122.
-        if (isDesktopModeEnabled() && source != null && source.getTask() != null) {
+        if (source != null && source.getTask() != null) {
             final Task sourceTask = source.getTask();
             outParams.mWindowingMode = sourceTask.getWindowingMode();
             appendLog("inherit-from-source=" + outParams.mWindowingMode);
         }
 
         if (phase == PHASE_WINDOWING_MODE) {
-            return RESULT_DONE;
+            return RESULT_CONTINUE;
         }
 
         if (!currentParams.mBounds.isEmpty()) {
@@ -105,27 +105,10 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_SKIP;
         }
 
-        calculateAndCentreInitialBounds(task, outParams);
-
-        appendLog("setting desktop mode task bounds to %s", outParams.mBounds);
-
-        return RESULT_DONE;
-    }
-
-    /**
-     * Calculates the initial height and width of a task in desktop mode and centers it within the
-     * window bounds.
-     */
-    private void calculateAndCentreInitialBounds(Task task,
-            LaunchParamsController.LaunchParams outParams) {
-        // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
-        final Rect windowBounds = task.getDisplayArea().getBounds();
-        final int width = (int) (windowBounds.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        final int height = (int) (windowBounds.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        outParams.mBounds.right = width;
-        outParams.mBounds.bottom = height;
-        outParams.mBounds.offset(windowBounds.centerX() - outParams.mBounds.centerX(),
-                windowBounds.centerY() - outParams.mBounds.centerY());
+        DesktopModeBoundsCalculator.updateInitialBounds(task, layout, activity, options,
+                outParams.mBounds, this::appendLog);
+        appendLog("final desktop mode task bounds set to %s", outParams.mBounds);
+        return RESULT_CONTINUE;
     }
 
     private void initLogBuilder(Task task, ActivityRecord activity) {
@@ -141,10 +124,5 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     private void outputLog() {
         if (DEBUG) Slog.d(TAG, mLogBuilder.toString());
-    }
-
-    /** Whether desktop mode is enabled. */
-    static boolean isDesktopModeEnabled() {
-        return Flags.enableDesktopWindowingMode();
     }
 }

@@ -26,8 +26,8 @@ import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -64,7 +64,7 @@ class ProximitySensorImpl implements ProximitySensor {
     ThresholdSensor mSecondaryThresholdSensor;
     private final DelayableExecutor mDelayableExecutor;
     private final Execution mExecution;
-    private final List<ThresholdSensor.Listener> mListeners = new ArrayList<>();
+    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private String mTag = null;
     @VisibleForTesting protected boolean mPaused;
     private ThresholdSensorEvent mLastPrimaryEvent;
@@ -246,7 +246,7 @@ class ProximitySensorImpl implements ProximitySensor {
     public void unregister(ThresholdSensor.Listener listener) {
         mExecution.assertIsMainThread();
         mListeners.remove(listener);
-        if (mListeners.size() == 0) {
+        if (mListeners.isEmpty()) {
             unregisterInternal();
         }
     }
@@ -296,8 +296,7 @@ class ProximitySensorImpl implements ProximitySensor {
         }
         if (mLastEvent != null) {
             ThresholdSensorEvent lastEvent = mLastEvent;  // Listeners can null out mLastEvent.
-            List<ThresholdSensor.Listener> listeners = new ArrayList<>(mListeners);
-            listeners.forEach(proximitySensorListener ->
+            mListeners.forEach(proximitySensorListener ->
                     proximitySensorListener.onThresholdCrossed(lastEvent));
         }
 

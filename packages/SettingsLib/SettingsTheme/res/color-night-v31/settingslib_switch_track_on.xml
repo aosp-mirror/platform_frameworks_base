@@ -14,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
   -->
-
+<!--Deprecated. After sdk 35 don't use it.-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:color="@android:color/system_accent2_500" android:lStar="51" />
 </selector>

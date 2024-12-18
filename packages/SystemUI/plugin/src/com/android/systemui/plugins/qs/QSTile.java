@@ -21,11 +21,11 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.qs.QSTile.Callback;
@@ -58,23 +58,23 @@ public interface QSTile {
     /**
      * The tile was clicked.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    void click(@Nullable View view);
+    void click(@Nullable Expandable expandable);
 
     /**
      * The tile secondary click was triggered.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    void secondaryClick(@Nullable View view);
+    void secondaryClick(@Nullable Expandable expandable);
 
     /**
      * The tile was long clicked.
      *
-     * @param view The view that was clicked.
+     * @param expandable {@link Expandable} that was clicked.
      */
-    void longClick(@Nullable View view);
+    void longClick(@Nullable Expandable expandable);
 
     void userSwitch(int currentUser);
 
@@ -169,6 +169,7 @@ public interface QSTile {
         public boolean isTransient = false;
         public String expandedAccessibilityClassName;
         public boolean handlesLongClick = true;
+        public boolean handlesSecondaryClick = false;
         @Nullable
         public Drawable sideViewCustomDrawable;
         public String spec;
@@ -212,6 +213,7 @@ public interface QSTile {
                     || !Objects.equals(other.isTransient, isTransient)
                     || !Objects.equals(other.dualTarget, dualTarget)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
+                    || !Objects.equals(other.handlesSecondaryClick, handlesSecondaryClick)
                     || !Objects.equals(other.sideViewCustomDrawable, sideViewCustomDrawable);
             other.spec = spec;
             other.icon = icon;
@@ -227,6 +229,7 @@ public interface QSTile {
             other.dualTarget = dualTarget;
             other.isTransient = isTransient;
             other.handlesLongClick = handlesLongClick;
+            other.handlesSecondaryClick = handlesSecondaryClick;
             other.sideViewCustomDrawable = sideViewCustomDrawable;
             return changed;
         }
@@ -252,6 +255,7 @@ public interface QSTile {
             sb.append(",disabledByPolicy=").append(disabledByPolicy);
             sb.append(",dualTarget=").append(dualTarget);
             sb.append(",isTransient=").append(isTransient);
+            sb.append(",handlesSecondaryClick=").append(handlesSecondaryClick);
             sb.append(",state=").append(state);
             sb.append(",sideViewCustomDrawable=").append(sideViewCustomDrawable);
             return sb.append(']');

@@ -35,6 +35,8 @@ public class BiometricNotificationBroadcastReceiver extends BroadcastReceiver {
     static final String ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG =
             "fingerprint_action_show_reenroll_dialog";
 
+    static final String EXTRA_IS_REENROLL_FORCED = "is_reenroll_forced";
+
     private static final String TAG = "BiometricNotificationBroadcastReceiver";
 
     private final Context mContext;
@@ -56,14 +58,16 @@ public class BiometricNotificationBroadcastReceiver extends BroadcastReceiver {
                 mNotificationDialogFactory.createReenrollDialog(
                         mContext.getUserId(),
                         mContext::startActivity,
-                        BiometricSourceType.FACE)
+                        BiometricSourceType.FACE,
+                        false)
                         .show();
                 break;
             case ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG:
                 mNotificationDialogFactory.createReenrollDialog(
                         mContext.getUserId(),
                         mContext::startActivity,
-                        BiometricSourceType.FINGERPRINT)
+                        BiometricSourceType.FINGERPRINT,
+                        intent.getBooleanExtra(EXTRA_IS_REENROLL_FORCED, false))
                         .show();
                 break;
             default:

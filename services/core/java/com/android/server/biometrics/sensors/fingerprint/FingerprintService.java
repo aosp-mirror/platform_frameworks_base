@@ -26,6 +26,7 @@ import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPR
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR;
 import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
+import static android.hardware.fingerprint.FingerprintSensorConfigurations.getIFingerprint;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -57,7 +58,6 @@ import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
@@ -72,7 +72,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Pair;
 import android.util.Slog;
@@ -80,10 +79,10 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
@@ -94,11 +93,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.fingerprint.aidl.FingerprintProvider;
-import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21;
-import com.android.server.biometrics.sensors.fingerprint.hidl.Fingerprint21UdfpsMock;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
-
-import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -886,38 +881,14 @@ public class FingerprintService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
-        public void registerAuthenticatorsLegacy(
+        public void registerAuthenticators(
                 @NonNull FingerprintSensorConfigurations fingerprintSensorConfigurations) {
-            super.registerAuthenticatorsLegacy_enforcePermission();
+            super.registerAuthenticators_enforcePermission();
             if (!fingerprintSensorConfigurations.hasSensorConfigurations()) {
                 Slog.d(TAG, "No fingerprint sensors available.");
                 return;
             }
             mRegistry.registerAll(() -> getProviders(fingerprintSensorConfigurations));
-        }
-
-        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
-        @Override // Binder call
-        public void registerAuthenticators(
-                @NonNull List<FingerprintSensorPropertiesInternal> hidlSensors) {
-            super.registerAuthenticators_enforcePermission();
-
-            mRegistry.registerAll(() -> {
-                List<String> aidlSensors = new ArrayList<>();
-                final String[] instances = mAidlInstanceNameSupplier.get();
-                if (instances != null) {
-                    aidlSensors.addAll(Lists.newArrayList(instances));
-                }
-
-                final Pair<List<FingerprintSensorPropertiesInternal>, List<String>>
-                        filteredInstances = filterAvailableHalInstances(hidlSensors, aidlSensors);
-
-                final List<ServiceProvider> providers = new ArrayList<>();
-                providers.addAll(getHidlProviders(filteredInstances.first));
-                providers.addAll(getAidlProviders(filteredInstances.second));
-
-                return providers;
-            });
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
@@ -993,6 +964,19 @@ public class FingerprintService extends SystemService {
             provider.onUdfpsUiEvent(event, requestId, sensorId);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        @Override
+        public void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches) {
+            super.setIgnoreDisplayTouches_enforcePermission();
+
+            final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG,
+                        "No matching provider for setIgnoreDisplayTouches, sensorId: " + sensorId);
+                return;
+            }
+            provider.setIgnoreDisplayTouches(requestId, sensorId, ignoreTouches);
+        }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
@@ -1001,17 +985,6 @@ public class FingerprintService extends SystemService {
 
             for (ServiceProvider provider : mRegistry.getProviders()) {
                 provider.setUdfpsOverlayController(controller);
-            }
-        }
-
-        // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
-        @Override
-        public void setSidefpsController(@NonNull ISidefpsController controller) {
-            super.setSidefpsController_enforcePermission();
-
-            for (ServiceProvider provider : mRegistry.getProviders()) {
-                provider.setSidefpsController(controller);
             }
         }
 
@@ -1044,7 +1017,7 @@ public class FingerprintService extends SystemService {
         this(context, BiometricContext.getInstance(context),
                 () -> IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE)),
-                () -> ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR),
+                () -> getDeclaredInstances(),
                 null /* fingerprintProvider */,
                 null /* fingerprintProviderFunction */);
     }
@@ -1068,8 +1041,7 @@ public class FingerprintService extends SystemService {
         mFingerprintProvider = fingerprintProvider != null ? fingerprintProvider :
                 (name) -> {
                     final String fqName = IFingerprint.DESCRIPTOR + "/" + name;
-                    final IFingerprint fp = IFingerprint.Stub.asInterface(
-                            Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName)));
+                    final IFingerprint fp = getIFingerprint(fqName);
                     if (fp != null) {
                         try {
                             return new FingerprintProvider(getContext(),
@@ -1086,22 +1058,15 @@ public class FingerprintService extends SystemService {
 
                     return null;
                 };
-        if (Flags.deHidl()) {
-            mFingerprintProviderFunction = fingerprintProviderFunction == null
-                    ? (filteredSensorProps, resetLockoutRequiresHardwareAuthToken) ->
-                            new FingerprintProvider(
-                                    getContext(), mBiometricStateCallback,
-                                    mAuthenticationStateListeners,
-                                    filteredSensorProps.second,
-                                    filteredSensorProps.first, mLockoutResetDispatcher,
-                                    mGestureAvailabilityDispatcher,
-                                    mBiometricContext,
-                                    resetLockoutRequiresHardwareAuthToken)
-                    : fingerprintProviderFunction;
-        } else {
-            mFingerprintProviderFunction =
-                    (filteredSensorProps, resetLockoutRequiresHardwareAuthToken) -> null;
-        }
+        mFingerprintProviderFunction = fingerprintProviderFunction != null
+                ? fingerprintProviderFunction :
+                        (filteredSensorProps, resetLockoutRequiresHardwareAuthToken) ->
+                                new FingerprintProvider(getContext(), mBiometricStateCallback,
+                                        mAuthenticationStateListeners, filteredSensorProps.second,
+                                        filteredSensorProps.first, mLockoutResetDispatcher,
+                                        mGestureAvailabilityDispatcher, mBiometricContext,
+                                        resetLockoutRequiresHardwareAuthToken);
+
         mHandler = new Handler(Looper.getMainLooper());
         mRegistry = new FingerprintServiceRegistry(mServiceWrapper, biometricServiceSupplier);
         mRegistry.addAllRegisteredCallback(new IFingerprintAuthenticatorsRegisteredCallback.Stub() {
@@ -1128,100 +1093,59 @@ public class FingerprintService extends SystemService {
     @NonNull
     private Pair<String, SensorProps[]> filterAvailableHalInstances(
             FingerprintSensorConfigurations fingerprintSensorConfigurations) {
-        Pair<String, SensorProps[]> finalSensorPair =
-                fingerprintSensorConfigurations.getSensorPair();
+        final String finalSensorInstance = fingerprintSensorConfigurations.getSensorInstance();
         if (fingerprintSensorConfigurations.isSingleSensorConfigurationPresent()) {
-            return finalSensorPair;
+            return new Pair<>(finalSensorInstance,
+                    fingerprintSensorConfigurations.getSensorPropForInstance(finalSensorInstance));
         }
-
-        final Pair<String, SensorProps[]> virtualSensorPropsPair = fingerprintSensorConfigurations
-                .getSensorPairForInstance("virtual");
-        if (Utils.isVirtualEnabled(getContext())) {
-            if (virtualSensorPropsPair != null) {
-                return virtualSensorPropsPair;
+        final String virtualInstance = "virtual";
+        final boolean isVirtualHalPresent =
+                fingerprintSensorConfigurations.doesInstanceExist(virtualInstance);
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
+            if (isVirtualHalPresent) {
+                return new Pair<>(virtualInstance,
+                        fingerprintSensorConfigurations.getSensorPropForInstance(virtualInstance));
             } else {
                 Slog.e(TAG, "Could not find virtual interface while it is enabled");
-                return finalSensorPair;
+                return new Pair<>(finalSensorInstance,
+                        fingerprintSensorConfigurations.getSensorPropForInstance(
+                                finalSensorInstance));
             }
         } else {
-            if (virtualSensorPropsPair != null) {
-                return fingerprintSensorConfigurations.getSensorPairNotForInstance("virtual");
+            if (isVirtualHalPresent) {
+                final String notAVirtualInstance = fingerprintSensorConfigurations
+                        .getSensorNameNotForInstance(virtualInstance);
+                if (notAVirtualInstance != null) {
+                    return new Pair<>(notAVirtualInstance, fingerprintSensorConfigurations
+                            .getSensorPropForInstance(notAVirtualInstance));
+                }
             }
         }
-        return finalSensorPair;
-    }
-
-    private Pair<List<FingerprintSensorPropertiesInternal>, List<String>>
-                filterAvailableHalInstances(
-            @NonNull List<FingerprintSensorPropertiesInternal> hidlInstances,
-            @NonNull List<String> aidlInstances) {
-        if ((hidlInstances.size() + aidlInstances.size()) <= 1) {
-            return new Pair(hidlInstances, aidlInstances);
-        }
-
-        final int virtualAt = aidlInstances.indexOf("virtual");
-        if (Utils.isVirtualEnabled(getContext())) {
-            if (virtualAt != -1) {
-                //only virtual instance should be returned
-                Slog.i(TAG, "virtual hal is used");
-                return new Pair(new ArrayList<>(), List.of(aidlInstances.get(virtualAt)));
-            } else {
-                Slog.e(TAG, "Could not find virtual interface while it is enabled");
-                return new Pair(hidlInstances, aidlInstances);
-            }
-        } else {
-            //remove virtual instance
-            aidlInstances = new ArrayList<>(aidlInstances);
-            if (virtualAt != -1) {
-                aidlInstances.remove(virtualAt);
-            }
-            return new Pair(hidlInstances, aidlInstances);
-        }
-    }
-
-    @NonNull
-    private List<ServiceProvider> getHidlProviders(
-            @NonNull List<FingerprintSensorPropertiesInternal> hidlSensors) {
-        final List<ServiceProvider> providers = new ArrayList<>();
-
-        for (FingerprintSensorPropertiesInternal hidlSensor : hidlSensors) {
-            final Fingerprint21 fingerprint21;
-            if ((Build.IS_USERDEBUG || Build.IS_ENG)
-                    && getContext().getResources().getBoolean(R.bool.allow_test_udfps)
-                    && Settings.Secure.getIntForUser(getContext().getContentResolver(),
-                    Fingerprint21UdfpsMock.CONFIG_ENABLE_TEST_UDFPS, 0 /* default */,
-                    UserHandle.USER_CURRENT) != 0) {
-                fingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(),
-                        mBiometricStateCallback, mAuthenticationStateListeners,
-                        hidlSensor, mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
-                        BiometricContext.getInstance(getContext()));
-            } else {
-                fingerprint21 = Fingerprint21.newInstance(getContext(),
-                        mBiometricStateCallback, mAuthenticationStateListeners, hidlSensor,
-                        mHandler, mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
-            }
-            providers.add(fingerprint21);
-        }
-
-        return providers;
-    }
-
-    @NonNull
-    private List<ServiceProvider> getAidlProviders(@NonNull List<String> instances) {
-        final List<ServiceProvider> providers = new ArrayList<>();
-
-        for (String instance : instances) {
-            final FingerprintProvider provider = mFingerprintProvider.apply(instance);
-            Slog.i(TAG, "Adding AIDL provider: " + instance);
-            providers.add(provider);
-        }
-
-        return providers;
+        return new Pair<>(finalSensorInstance, fingerprintSensorConfigurations
+                .getSensorPropForInstance(finalSensorInstance));
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.FINGERPRINT_SERVICE, mServiceWrapper);
+    }
+
+    /**
+     * Get all fingerprint hal instances declared in manifest
+     * @return instance names
+     */
+    public static String[] getDeclaredInstances() {
+        String[] a = ServiceManager.getDeclaredInstances(IFingerprint.DESCRIPTOR);
+        Slog.i(TAG, "Before:getDeclaredInstances: IFingerprint instance found, a.length="
+                + a.length);
+        if (!ArrayUtils.contains(a, "virtual")) {
+            // Now, the virtual hal is registered with IVirtualHal interface and it is also
+            //   moved from vendor to system_ext partition without a device manifest. So
+            //   if the old vhal is not declared, add here.
+            a = ArrayUtils.appendElement(String.class, a, "virtual");
+        }
+        Slog.i(TAG, "After:getDeclaredInstances: a.length=" + a.length);
+        return a;
     }
 
     @NonNull
@@ -1286,7 +1210,7 @@ public class FingerprintService extends SystemService {
 
     void syncEnrollmentsNow() {
         Utils.checkPermissionOrShell(getContext(), MANAGE_FINGERPRINT);
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
             Slog.i(TAG, "Sync virtual enrollments");
             final int userId = ActivityManager.getCurrentUser();
             final CountDownLatch latch = new CountDownLatch(mRegistry.getProviders().size());
@@ -1315,7 +1239,7 @@ public class FingerprintService extends SystemService {
     }
 
     void simulateVhalFingerDown() {
-        if (Utils.isVirtualEnabled(getContext())) {
+        if (Utils.isFingerprintVirtualEnabled(getContext())) {
             Slog.i(TAG, "Simulate virtual HAL finger down event");
             final Pair<Integer, ServiceProvider> provider = mRegistry.getSingleProvider();
             if (provider != null) {

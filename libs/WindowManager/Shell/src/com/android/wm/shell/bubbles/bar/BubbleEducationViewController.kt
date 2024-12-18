@@ -28,15 +28,15 @@ import androidx.core.view.doOnLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.wm.shell.R
-import com.android.wm.shell.animation.PhysicsAnimator
 import com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_USER_EDUCATION
 import com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES
 import com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import com.android.wm.shell.bubbles.BubbleEducationController
 import com.android.wm.shell.bubbles.BubbleViewProvider
 import com.android.wm.shell.bubbles.setup
-import com.android.wm.shell.common.bubbles.BubblePopupDrawable
-import com.android.wm.shell.common.bubbles.BubblePopupView
+import com.android.wm.shell.shared.animation.PhysicsAnimator
+import com.android.wm.shell.shared.bubbles.BubblePopupDrawable
+import com.android.wm.shell.shared.bubbles.BubblePopupView
 import kotlin.math.roundToInt
 
 /** Manages bubble education presentation and animation */

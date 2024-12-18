@@ -22,6 +22,7 @@ import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import static com.android.wm.shell.transition.DefaultTransitionHandler.isSupportedOverrideAnimation;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE;
 
 import static java.util.Objects.requireNonNull;
 
@@ -31,6 +32,7 @@ import android.os.IBinder;
 import android.util.ArrayMap;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
+import android.window.TransitionInfo.AnimationOptions;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
@@ -38,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -90,6 +93,12 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
 
     /** Whether ActivityEmbeddingController should animate this transition. */
     public boolean shouldAnimate(@NonNull TransitionInfo info) {
+        if (info.getType() == TRANSIT_TASK_FRAGMENT_DRAG_RESIZE) {
+            // The TRANSIT_TASK_FRAGMENT_DRAG_RESIZE type happens when the user drags the
+            // interactive divider to resize the split containers. The content is veiled, so we will
+            // handle the transition with a jump cut.
+            return true;
+        }
         boolean containsEmbeddingChange = false;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (!change.hasFlags(FLAG_FILLS_TASK) && change.hasFlags(
@@ -110,22 +119,37 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
             return false;
         }
 
-        final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
-        if (options != null) {
-            // Scene-transition should be handled by app side.
-            if (options.getType() == ANIM_SCENE_TRANSITION) {
+        return shouldAnimateAnimationOptions(info);
+    }
+
+    private boolean shouldAnimateAnimationOptions(@NonNull TransitionInfo info) {
+        if (!Flags.moveAnimationOptionsToChange()) {
+            return shouldAnimateAnimationOptions(info.getAnimationOptions());
+        }
+        for (TransitionInfo.Change change : info.getChanges()) {
+            if (!shouldAnimateAnimationOptions(change.getAnimationOptions())) {
+                // If any of override animation is not supported, don't animate the transition.
                 return false;
             }
-            // The case of ActivityOptions#makeCustomAnimation, Activity#overridePendingTransition,
-            // and Activity#overrideActivityTransition are supported.
-            if (options.getType() == ANIM_CUSTOM) {
-                return true;
-            }
-            // Use default transition handler to animate other override animation.
-            return !isSupportedOverrideAnimation(options);
         }
-
         return true;
+    }
+
+    private boolean shouldAnimateAnimationOptions(@Nullable AnimationOptions options) {
+        if (options == null) {
+            return true;
+        }
+        // Scene-transition should be handled by app side.
+        if (options.getType() == ANIM_SCENE_TRANSITION) {
+            return false;
+        }
+        // The case of ActivityOptions#makeCustomAnimation, Activity#overridePendingTransition,
+        // and Activity#overrideActivityTransition are supported.
+        if (options.getType() == ANIM_CUSTOM) {
+            return true;
+        }
+        // Use default transition handler to animate other override animation.
+        return !isSupportedOverrideAnimation(options);
     }
 
     @Override

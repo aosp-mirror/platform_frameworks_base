@@ -19,12 +19,16 @@ package com.android.systemui.biometrics.data.repository
 
 import android.util.Size
 import com.android.systemui.biometrics.shared.model.DisplayRotation
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeDisplayStateRepository : DisplayStateRepository {
+@SysUISingleton
+class FakeDisplayStateRepository @Inject constructor() : DisplayStateRepository {
     private val _isInRearDisplayMode = MutableStateFlow<Boolean>(false)
     override val isInRearDisplayMode: StateFlow<Boolean> = _isInRearDisplayMode.asStateFlow()
 
@@ -35,7 +39,7 @@ class FakeDisplayStateRepository : DisplayStateRepository {
     override val currentDisplaySize: StateFlow<Size> = _currentDisplaySize.asStateFlow()
 
     private val _isLargeScreen = MutableStateFlow<Boolean>(false)
-    override val isLargeScreen: Flow<Boolean> = _isLargeScreen.asStateFlow()
+    override val isLargeScreen: StateFlow<Boolean> = _isLargeScreen.asStateFlow()
 
     override val isReverseDefaultRotation = false
 
@@ -50,4 +54,13 @@ class FakeDisplayStateRepository : DisplayStateRepository {
     fun setCurrentDisplaySize(size: Size) {
         _currentDisplaySize.value = size
     }
+
+    fun setIsLargeScreen(isLargeScreen: Boolean) {
+        _isLargeScreen.value = isLargeScreen
+    }
+}
+
+@Module
+interface FakeDisplayStateRepositoryModule {
+    @Binds fun bindFake(fake: FakeDisplayStateRepository): DisplayStateRepository
 }

@@ -16,8 +16,13 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
+
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
 import android.os.Handler;
@@ -28,15 +33,21 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.ravenwood.example.BlueManager;
 import android.ravenwood.example.RedManager;
-import android.test.mock.MockContext;
 import android.util.ArrayMap;
 import android.util.Singleton;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
-public class RavenwoodContext extends MockContext {
+public class RavenwoodContext extends RavenwoodBaseContext {
+    private static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
+
+    private final Object mLock = new Object();
     private final String mPackageName;
     private final HandlerThread mMainThread;
 
@@ -45,15 +56,31 @@ public class RavenwoodContext extends MockContext {
     private final ArrayMap<Class<?>, String> mClassToName = new ArrayMap<>();
     private final ArrayMap<String, Supplier<?>> mNameToFactory = new ArrayMap<>();
 
+    private final File mFilesDir;
+    private final File mCacheDir;
+    private final Supplier<Resources> mResourcesSupplier;
+
+    private RavenwoodContext mAppContext;
+
+    @GuardedBy("mLock")
+    private Resources mResources;
+
+    @GuardedBy("mLock")
+    private Resources.Theme mTheme;
+
     private void registerService(Class<?> serviceClass, String serviceName,
             Supplier<?> serviceSupplier) {
         mClassToName.put(serviceClass, serviceName);
         mNameToFactory.put(serviceName, serviceSupplier);
     }
 
-    public RavenwoodContext(String packageName, HandlerThread mainThread) {
+    public RavenwoodContext(String packageName, HandlerThread mainThread,
+            Supplier<Resources> resourcesSupplier) throws IOException {
         mPackageName = packageName;
         mMainThread = mainThread;
+        mResourcesSupplier = resourcesSupplier;
+        mFilesDir = createTempDir(packageName + "_files-dir");
+        mCacheDir = createTempDir(packageName + "_cache-dir");
 
         // Services provided by a typical shipping device
         registerService(ClipboardManager.class,
@@ -86,6 +113,11 @@ public class RavenwoodContext extends MockContext {
         }
     }
 
+    void cleanUp() {
+        deleteDir(mFilesDir);
+        deleteDir(mCacheDir);
+    }
+
     @Override
     public String getSystemServiceName(Class<?> serviceClass) {
         // TODO: pivot to using SystemServiceRegistry
@@ -100,35 +132,27 @@ public class RavenwoodContext extends MockContext {
 
     @Override
     public Looper getMainLooper() {
-        Objects.requireNonNull(mMainThread,
-                "Test must request setProvideMainThread() via RavenwoodRule");
         return mMainThread.getLooper();
     }
 
     @Override
     public Handler getMainThreadHandler() {
-        Objects.requireNonNull(mMainThread,
-                "Test must request setProvideMainThread() via RavenwoodRule");
         return mMainThread.getThreadHandler();
     }
 
     @Override
     public Executor getMainExecutor() {
-        Objects.requireNonNull(mMainThread,
-                "Test must request setProvideMainThread() via RavenwoodRule");
         return mMainThread.getThreadExecutor();
     }
 
     @Override
     public String getPackageName() {
-        return Objects.requireNonNull(mPackageName,
-                "Test must request setPackageName() via RavenwoodRule");
+        return mPackageName;
     }
 
     @Override
     public String getOpPackageName() {
-        return Objects.requireNonNull(mPackageName,
-                "Test must request setPackageName() via RavenwoodRule");
+        return mPackageName;
     }
 
     @Override
@@ -149,6 +173,61 @@ public class RavenwoodContext extends MockContext {
     @Override
     public int getDeviceId() {
         return Context.DEVICE_ID_DEFAULT;
+    }
+
+    @Override
+    public File getFilesDir() {
+        return mFilesDir;
+    }
+
+    @Override
+    public File getCacheDir() {
+        return mCacheDir;
+    }
+
+    @Override
+    public boolean deleteFile(String name) {
+        File f = new File(name);
+        return f.delete();
+    }
+
+    @Override
+    public Resources getResources() {
+        synchronized (mLock) {
+            if (mResources == null) {
+                mResources = mResourcesSupplier.get();
+            }
+            return mResources;
+        }
+    }
+
+    @Override
+    public AssetManager getAssets() {
+        return getResources().getAssets();
+    }
+
+    @Override
+    public Theme getTheme() {
+        synchronized (mLock) {
+            if (mTheme == null) {
+                mTheme = getResources().newTheme();
+            }
+            return mTheme;
+        }
+    }
+
+    @Override
+    public String getPackageResourcePath() {
+        return new File(RAVENWOOD_RESOURCE_APK).getAbsolutePath();
+    }
+
+    public void setApplicationContext(RavenwoodContext appContext) {
+        mAppContext = appContext;
+    }
+
+    @Override
+    public Context getApplicationContext() {
+        return mAppContext;
     }
 
     /**
@@ -175,5 +254,27 @@ public class RavenwoodContext extends MockContext {
 
     public interface ThrowingSupplier<T> {
         T get() throws Exception;
+    }
+
+
+    static File createTempDir(String prefix) throws IOException {
+        // Create a temp file, delete it and recreate it as a directory.
+        final File dir = File.createTempFile(prefix + "-", "");
+        dir.delete();
+        dir.mkdirs();
+        return dir;
+    }
+
+    static void deleteDir(File dir) {
+        File[] children = dir.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                if (child.isDirectory()) {
+                    deleteDir(child);
+                } else {
+                    child.delete();
+                }
+            }
+        }
     }
 }

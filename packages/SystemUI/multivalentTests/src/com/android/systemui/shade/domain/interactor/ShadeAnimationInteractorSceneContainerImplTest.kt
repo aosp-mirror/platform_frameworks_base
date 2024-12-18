@@ -55,6 +55,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -78,6 +79,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Gone,
+                        currentScene = flowOf(Scenes.Gone),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -101,6 +103,7 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Gone,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(true),
@@ -120,5 +123,37 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
 
             underTest.setIsLaunchingActivity(true)
             Truth.assertThat(underTest.isLaunchingActivity.value).isEqualTo(true)
+        }
+
+    @Test
+    fun isAnyFlingAnimationRunning() =
+        testScope.runTest() {
+            val actual by collectLastValue(underTest.isAnyFlingAnimationRunning)
+
+            // WHEN transitioning from QS to Gone with user input ongoing
+            val userInputOngoing = MutableStateFlow(true)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = Scenes.QuickSettings,
+                        toScene = Scenes.Gone,
+                        currentScene = flowOf(Scenes.QuickSettings),
+                        progress = MutableStateFlow(.1f),
+                        isInitiatedByUserInput = true,
+                        isUserInputOngoing = userInputOngoing,
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN qs is not flinging
+            Truth.assertThat(actual).isFalse()
+
+            // WHEN user input ends
+            userInputOngoing.value = false
+            runCurrent()
+
+            // THEN qs is flinging
+            Truth.assertThat(actual).isTrue()
         }
 }

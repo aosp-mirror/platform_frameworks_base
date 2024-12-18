@@ -54,7 +54,7 @@ class QSTileLoggerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        whenever(logBufferFactory.create(any(), any(), any())).thenReturn(logBuffer)
+        whenever(logBufferFactory.create(any(), any(), any(), any())).thenReturn(logBuffer)
         val tileSpec: TileSpec = TileSpec.create("chatty_tile")
         underTest =
             QSTileLogger(mapOf(tileSpec to chattyLogBuffer), logBufferFactory, statusBarController)
@@ -104,6 +104,7 @@ class QSTileLoggerTest : SysuiTestCase() {
         underTest.logUserActionRejectedByPolicy(
             QSTileUserAction.Click(null),
             TileSpec.create("test_spec"),
+            "test_restriction",
         )
 
         assertThat(logBuffer.getStringBuffer()).contains("tile click: rejected by policy")

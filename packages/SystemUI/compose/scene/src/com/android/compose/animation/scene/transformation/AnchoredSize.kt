@@ -17,13 +17,12 @@
 package com.android.compose.animation.scene.transformation
 
 import androidx.compose.ui.unit.IntSize
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.Scene
-import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** Anchor the size of an element to the size of another element. */
 internal class AnchoredSize(
@@ -34,31 +33,36 @@ internal class AnchoredSize(
 ) : PropertyTransformation<IntSize> {
     override fun transform(
         layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
+        content: ContentKey,
         element: Element,
-        sceneState: Element.SceneState,
+        stateInContent: Element.State,
         transition: TransitionState.Transition,
         value: IntSize,
     ): IntSize {
-        fun anchorSizeIn(scene: SceneKey): IntSize {
-            val size = layoutImpl.elements[anchor]?.sceneStates?.get(scene)?.targetSize
-            return if (size != null && size != Element.SizeUnspecified) {
-                IntSize(
-                    width = if (anchorWidth) size.width else value.width,
-                    height = if (anchorHeight) size.height else value.height,
-                )
-            } else {
-                value
-            }
+        fun anchorSizeIn(content: ContentKey): IntSize {
+            val size =
+                layoutImpl.elements[anchor]?.stateByContent?.get(content)?.targetSize?.takeIf {
+                    it != Element.SizeUnspecified
+                }
+                    ?: throwMissingAnchorException(
+                        transformation = "AnchoredSize",
+                        anchor = anchor,
+                        content = content,
+                    )
+
+            return IntSize(
+                width = if (anchorWidth) size.width else value.width,
+                height = if (anchorHeight) size.height else value.height,
+            )
         }
 
         // This simple implementation assumes that the size of [element] is the same as the size of
         // the [anchor] in [scene], so simply transform to the size of the anchor in the other
         // scene.
-        return if (scene.key == transition.fromScene) {
-            anchorSizeIn(transition.toScene)
+        return if (content == transition.fromContent) {
+            anchorSizeIn(transition.toContent)
         } else {
-            anchorSizeIn(transition.fromScene)
+            anchorSizeIn(transition.fromContent)
         }
     }
 }

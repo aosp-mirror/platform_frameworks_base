@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
 import androidx.annotation.DimenRes
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.doze.util.BurnInHelperWrapper
@@ -47,13 +47,15 @@ constructor(
     private val context: Context,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     @Application private val scope: CoroutineScope,
-    private val configurationRepository: ConfigurationRepository,
+    private val configurationInteractor: ConfigurationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
 ) {
     val deviceEntryIconXOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_x, isXAxis = true)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
     val deviceEntryIconYOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_y, isXAxis = false)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
     val udfpsProgress: StateFlow<Float> =
         keyguardInteractor.dozeTimeTick
             .mapLatest { burnInHelperWrapper.burnInProgressOffset() }
@@ -74,7 +76,6 @@ constructor(
                 BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
             }
             .distinctUntilChanged()
-            .stateIn(scope, SharingStarted.Lazily, BurnInModel())
     }
 
     /**
@@ -85,23 +86,14 @@ constructor(
     private fun burnInOffset(
         @DimenRes maxBurnInOffsetResourceId: Int,
         isXAxis: Boolean,
-    ): StateFlow<Int> {
-        return configurationRepository.onAnyConfigurationChange
-            .flatMapLatest {
-                val maxBurnInOffsetPixels =
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
-                keyguardInteractor.dozeTimeTick.mapLatest {
-                    calculateOffset(maxBurnInOffsetPixels, isXAxis)
-                }
+    ): Flow<Int> {
+        return configurationInteractor.onAnyConfigurationChange.flatMapLatest {
+            val maxBurnInOffsetPixels =
+                context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
+            keyguardInteractor.dozeTimeTick.mapLatest {
+                calculateOffset(maxBurnInOffsetPixels, isXAxis)
             }
-            .stateIn(
-                scope,
-                SharingStarted.Lazily,
-                calculateOffset(
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId),
-                    isXAxis,
-                )
-            )
+        }
     }
 
     /**
@@ -112,24 +104,14 @@ constructor(
     private fun burnInOffsetDefinedInPixels(
         @DimenRes maxBurnInOffsetResourceId: Int,
         isXAxis: Boolean,
-    ): StateFlow<Int> {
-        return configurationRepository.scaleForResolution
-            .flatMapLatest { scale ->
-                val maxBurnInOffsetPixels =
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
-                keyguardInteractor.dozeTimeTick.mapLatest {
-                    calculateOffset(maxBurnInOffsetPixels, isXAxis, scale)
-                }
+    ): Flow<Int> {
+        return configurationInteractor.scaleForResolution.flatMapLatest { scale ->
+            val maxBurnInOffsetPixels =
+                context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId)
+            keyguardInteractor.dozeTimeTick.mapLatest {
+                calculateOffset(maxBurnInOffsetPixels, isXAxis, scale)
             }
-            .stateIn(
-                scope,
-                SharingStarted.WhileSubscribed(),
-                calculateOffset(
-                    context.resources.getDimensionPixelSize(maxBurnInOffsetResourceId),
-                    isXAxis,
-                    configurationRepository.getResolutionScale(),
-                )
-            )
+        }
     }
 
     private fun calculateOffset(

@@ -18,6 +18,8 @@
 
 type OVERLAY
 
+map key 86 PLUS
+
 ### ROW 1
 
 key GRAVE {
@@ -42,13 +44,14 @@ key 2 {
 key 3 {
     label:                              '3'
     base:                               '3'
-    shift:                              '\u2166'
+    shift:                              '\u2116'
 }
 
 key 4 {
     label:                              '4'
     base:                               '4'
     shift:                              ';'
+    ralt:                               '\u20bc'
 }
 
 key 5 {
@@ -61,14 +64,12 @@ key 6 {
     label:                              '6'
     base:                               '6'
     shift:                              ':'
-    shift+ralt:                         '^'
 }
 
 key 7 {
     label:                              '7'
     base:                               '7'
     shift:                              '?'
-    ralt:                               '&'
 }
 
 key 8 {
@@ -176,21 +177,21 @@ key P {
 key LEFT_BRACKET {
     label:                              '\u00d6'
     base:                               '\u00f6'
-    shift:                              '\u00d6'
+    shift, capslock:                    '\u00d6'
     shift+capslock:                     '\u00f6'
 }
 
 key RIGHT_BRACKET {
     label:                              '\u011e'
     base:                               '\u011f'
-    shift:                              '\u011e'
+    shift, capslock:                    '\u011e'
     shift+capslock:                     '\u011f'
 }
 
 key BACKSLASH {
     label:                              '\\'
     base:                               '\\'
-    shift:                              '|'
+    shift:                              '/'
 }
 
 ### ROW 3
@@ -261,18 +262,24 @@ key L {
 key SEMICOLON {
     label:                              'I'
     base:                               '\u0131'
-    shift:                              'I'
+    shift, capslock:                    'I'
     shift+capslock:                     '\u0131'
 }
 
 key APOSTROPHE {
     label:                              '\u018f'
     base:                               '\u0259'
-    shift:                              '\u018f'
+    shift, capslock:                    '\u018f'
     shift+capslock:                     '\u0259'
 }
 
 ### ROW 4
+
+key PLUS {
+    label:                              '\\'
+    base:                               '\\'
+    shift:                              '/'
+}
 
 key Z {
     label:                              'Z'
@@ -326,14 +333,14 @@ key M {
 key COMMA {
     label:                              '\u00c7'
     base:                               '\u00e7'
-    shift:                              '\u00c7'
+    shift, capslock:                    '\u00c7'
     shift+capslock:                     '\u00e7'
 }
 
 key PERIOD {
     label:                              '\u015e'
     base:                               '\u015f'
-    shift:                              '\u015e'
+    shift, capslock:                    '\u015e'
     shift+capslock:                     '\u015f'
 }
 

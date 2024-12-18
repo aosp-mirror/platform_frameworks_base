@@ -57,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"தவறான பின்"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"தவறு. மீண்டும் முயலவும்."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"இல்லையெனில் கைரேகை மூலம் அன்லாக் செய்யவும்"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"கைரேகை அடையாளம் இல்லை"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"கைரேகையை அடையாளம் காண முடியவில்லை"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"முகம் கண்டறிய முடியவில்லை"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"மீண்டும் முயலவும் அல்லது பின்னை உள்ளிடவும்"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"மீண்டும் முயலவும் அல்லது கடவுச்சொல்லை உள்ளிடவும்"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"கூடுதல் பாதுகாப்பிற்குப் பேட்டர்னைப் பயன்படுத்தவும்"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"கூடுதல் பாதுகாப்பிற்குப் பின்னை (PIN) பயன்படுத்தவும்"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"கூடுதல் பாதுகாப்பிற்குக் கடவுச்சொல்லைப் பயன்படுத்தவும்"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"கூடுதல் பாதுகாப்பிற்குப் பின் தேவை"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"கூடுதல் பாதுகாப்பிற்குப் பேட்டர்ன் தேவை"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"கூடுதல் பாதுகாப்பிற்குக் கடவுச்சொல் தேவை"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"நிர்வாகி சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"பயனர் சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"அடையாளங்காணபடவில்லை"</string>

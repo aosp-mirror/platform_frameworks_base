@@ -32,7 +32,6 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -57,7 +56,6 @@ public class ExpandHelperTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mFeatureFlags.setDefault(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(NotificationMediaManager.class);
         allowTestableLooperAsMainThread();

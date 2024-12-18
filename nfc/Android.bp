@@ -9,37 +9,30 @@ package {
 }
 
 filegroup {
-    name: "framework-nfc-non-updatable-sources",
-    path: "java",
-    srcs: [
-        "java/android/nfc/NfcServiceManager.java",
-        "java/android/nfc/cardemulation/ApduServiceInfo.aidl",
-        "java/android/nfc/cardemulation/ApduServiceInfo.java",
-        "java/android/nfc/cardemulation/NfcFServiceInfo.aidl",
-        "java/android/nfc/cardemulation/NfcFServiceInfo.java",
-        "java/android/nfc/cardemulation/AidGroup.aidl",
-        "java/android/nfc/cardemulation/AidGroup.java",
-    ],
-}
-
-filegroup {
     name: "framework-nfc-updatable-sources",
     path: "java",
     srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
     ],
-    exclude_srcs: [
-        ":framework-nfc-non-updatable-sources",
+    visibility: [
+        "//frameworks/base:__subpackages__",
+        "//packages/apps/Nfc:__subpackages__",
+        "//packages/modules/Nfc:__subpackages__",
     ],
 }
 
 java_sdk_library {
     name: "framework-nfc",
     libs: [
+        "androidx.annotation_annotation",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
-        "framework-permission-s",
-        "framework-permission",
+        "framework-permission-s.stubs.module_lib",
+        "framework-permission.stubs.module_lib",
+    ],
+    stub_only_libs: [
+        // Needed for javadoc references.
+        "framework-permission-s.stubs.module_lib",
     ],
     static_libs: [
         "android.nfc.flags-aconfig-java",
@@ -51,7 +44,7 @@ java_sdk_library {
     ],
     defaults: ["framework-module-defaults"],
     sdk_version: "module_current",
-    min_sdk_version: "current",
+    min_sdk_version: "35", // Make it 36 once available.
     installable: true,
     optimize: {
         enabled: false,
@@ -63,9 +56,9 @@ java_sdk_library {
     ],
     impl_library_visibility: [
         "//frameworks/base:__subpackages__",
-        "//cts/hostsidetests/multidevices/nfc:__subpackages__",
-        "//cts/tests/tests/nfc",
+        "//cts:__subpackages__",
         "//packages/apps/Nfc:__subpackages__",
+        "//packages/modules/Nfc:__subpackages__",
     ],
     jarjar_rules: ":nfc-jarjar-rules",
     lint: {

@@ -38,8 +38,9 @@ import org.junit.runners.Parameterized
 
 /**
  * Test IME window layer will become visible when switching from the fixed orientation activity
- * (e.g. Launcher activity). To run this test: `atest
- * FlickerTests:ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest`
+ * (e.g. Launcher activity).
+ * To run this test:
+ * `atest FlickerTestsIme2:ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest`
  */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
@@ -115,7 +116,10 @@ class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyF
                 .isEqual(true)
 
             imeLayerSubjects.forEach { imeLayerSubject ->
-                imeLayerSubject.check { "alpha" }.that(imeLayerSubject.layer.color.a).isEqual(1.0f)
+                imeLayerSubject
+                    .check { "alpha" }
+                    .that(imeLayerSubject.layer.color.alpha())
+                    .isEqual(1.0f)
             }
         }
     }

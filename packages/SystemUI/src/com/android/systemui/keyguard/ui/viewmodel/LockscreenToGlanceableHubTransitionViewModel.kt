@@ -16,14 +16,18 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.LayoutDirection
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +35,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 /**
  * Breaks down LOCKSCREEN->GLANCEABLE_HUB transition into discrete steps for corresponding views to
@@ -46,32 +49,40 @@ constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.GLANCEABLE_HUB,
-        )
+        animationFlow
+            .setup(
+                duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
+                edge = Edge.create(from = LOCKSCREEN, to = Scenes.Communal),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = LOCKSCREEN, to = GLANCEABLE_HUB),
+            )
 
     val keyguardAlpha: Flow<Float> =
-        transitionAnimation
-            .sharedFlow(
-                duration = 167.milliseconds,
-                onStep = { 1f - it },
-                onFinish = { 0f },
-                onCancel = { 1f },
-                name = "LOCKSCREEN->GLANCEABLE_HUB: keyguardAlpha",
-            )
-            .onStart { emit(1f) }
+        transitionAnimation.sharedFlow(
+            duration = 167.milliseconds,
+            onStep = { 1f - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
+            name = "LOCKSCREEN->GLANCEABLE_HUB: keyguardAlpha",
+        )
+
+    // Show UMO as long as keyguard is not visible.
+    val showUmo: Flow<Boolean> = keyguardAlpha.map { alpha -> alpha == 0f }
 
     val keyguardTranslationX: Flow<StateToValue> =
         configurationInteractor
-            .dimensionPixelSize(R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x)
+            .directionalDimensionPixelSize(
+                LayoutDirection.LTR,
+                R.dimen.lockscreen_to_hub_transition_lockscreen_translation_x
+            )
             .flatMapLatest { translatePx: Int ->
                 transitionAnimation.sharedFlowWithState(
                     duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
                     onStep = { value -> value * translatePx },
                     // Move notifications back to their original position since they can be
-                    // accessed from the shade.
+                    // accessed from the shade, and also keyguard elements in case the animation
+                    // is cancelled.
                     onFinish = { 0f },
                     onCancel = { 0f },
                     interpolator = EMPHASIZED,
@@ -80,6 +91,8 @@ constructor(
             }
 
     val notificationAlpha: Flow<Float> = keyguardAlpha
+
+    val shortcutsAlpha: Flow<Float> = keyguardAlpha
 
     val notificationTranslationX: Flow<Float> =
         keyguardTranslationX.map { it.value }.filterNotNull()

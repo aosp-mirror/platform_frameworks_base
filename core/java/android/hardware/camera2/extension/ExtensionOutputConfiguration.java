@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 
 import com.android.internal.camera.flags.Flags;
 
@@ -34,7 +35,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public class ExtensionOutputConfiguration {
     private final List<CameraOutputSurface> mSurfaces;
     private final String mPhysicalCameraId;
@@ -56,7 +56,6 @@ public class ExtensionOutputConfiguration {
      * @param surfaceGroupId    In case of surface group, this field must
      *                          contain the surface group id
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public ExtensionOutputConfiguration(@NonNull List<CameraOutputSurface> outputs,
             int outputConfigId, @Nullable String physicalCameraId, int surfaceGroupId) {
         mSurfaces = outputs;
@@ -79,6 +78,7 @@ public class ExtensionOutputConfiguration {
         config.outputId = new OutputConfigId();
         config.outputId.id = mOutputConfigId;
         config.surfaceGroupId = mSurfaceGroupId;
+        config.dynamicRangeProfile = surface.getDynamicRangeProfile();
     }
 
     @Nullable CameraOutputConfig getOutputConfig() {

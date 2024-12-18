@@ -21,7 +21,6 @@ import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIO
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -37,20 +36,22 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.RemoteAnimationRunnerCompat;
 import com.android.systemui.display.data.repository.DisplayMetricsRepository;
-import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.navigationbar.views.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.shared.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
 
 import java.io.PrintWriter;
 
 /** */
-public interface CentralSurfaces extends Dumpable, LifecycleOwner {
+public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable {
     boolean MULTIUSER_DEBUG = false;
     // Should match the values in PhoneWindowManager
     String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -103,8 +104,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /**
      * Returns an ActivityOptions bundle created using the given parameters.
      *
-     * @param displayId The ID of the display to launch the activity in. Typically this would
-     *                  be the display the status bar is on.
+     * @param displayId        The ID of the display to launch the activity in. Typically this would
+     *                         be the display the status bar is on.
      * @param animationAdapter The animation adapter used to start this activity, or {@code null}
      *                         for the default animation.
      */
@@ -182,6 +183,9 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         return contextForUser.getPackageManager();
     }
 
+    /** Default impl for CoreStartable. */
+    default void start() {}
+
     boolean updateIsKeyguard();
 
     boolean updateIsKeyguard(boolean forceStateChange);
@@ -195,9 +199,14 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isLaunchingActivityOverLockscreen();
 
+    /**
+     * Whether an activity launch over lockscreen is causing the shade to be dismissed.
+     */
+    boolean isDismissingShadeForActivityLaunch();
+
     void onKeyguardViewManagerStatesUpdated();
 
-    /** */
+    /**  */
     boolean getCommandQueuePanelsEnabled();
 
     void showWirelessChargingAnimation(int batteryLevel);
@@ -252,11 +261,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isScreenFullyOff();
 
-    @Nullable
-    Intent getEmergencyActionIntent();
-
-    boolean isCameraAllowedByAdmin();
-
     boolean isGoingToSleep();
 
     void notifyBiometricAuthModeChanged();
@@ -279,11 +283,12 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void awakenDreams();
 
     /**
-     * Handle a touch event while dreaming when the touch was initiated within a prescribed
-     * swipeable area. This method is provided for cases where swiping in certain areas of a dream
-     * should be handled by CentralSurfaces instead (e.g. swiping communal hub open).
+     * Handle a touch event while dreaming or on the glanceable hub when the touch was initiated
+     * within a prescribed swipeable area. This method is provided for cases where swiping in
+     * certain areas should be handled by CentralSurfaces instead (e.g. swiping hub open, opening
+     * the notification shade over dream or hub).
      */
-    void handleDreamTouch(MotionEvent event);
+    void handleExternalShadeWindowTouch(MotionEvent event);
 
     boolean isBouncerShowing();
 
@@ -318,6 +323,11 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Deprecated
     float getDisplayDensity();
 
+    /**
+     * Forwards touch events to communal hub
+     */
+    void handleCommunalHubTouch(MotionEvent event);
+
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
 
@@ -329,7 +339,8 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /**
      * Sets launching activity over LS state in central surfaces.
      */
-    void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen);
+    void setIsLaunchingActivityOverLockscreen(
+            boolean isLaunchingActivityOverLockscreen, boolean dismissShade);
 
     /**
      * Gets an animation controller from a notification row.

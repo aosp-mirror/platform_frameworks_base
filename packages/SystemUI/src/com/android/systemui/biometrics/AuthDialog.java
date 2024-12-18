@@ -94,6 +94,12 @@ public interface AuthDialog extends Dumpable {
      */
     String getOpPackageName();
 
+    /**
+     * Get the class name of ConfirmDeviceCredentialActivity. Returns null if the direct caller is
+     * not ConfirmDeviceCredentialActivity.
+     */
+    String getClassNameIfItIsConfirmDeviceCredentialActivity();
+
     /** The requestId of the underlying operation within the framework. */
     long getRequestId();
 

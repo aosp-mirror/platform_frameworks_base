@@ -19,7 +19,7 @@ package com.android.systemui.controls.controller
 import android.app.job.JobParameters
 import android.content.Context
 import android.os.PersistableBundle
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper.DeletionJobService.Companion.USER
@@ -37,7 +37,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DeletionJobServiceTest : SysuiTestCase() {
 
     @Mock private lateinit var context: Context

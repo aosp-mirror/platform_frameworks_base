@@ -21,13 +21,13 @@ import static org.junit.Assert.assertNull;
 import android.app.Notification;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 //@DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
 public class NotificationChildrenContainerTest extends SysuiTestCase {
@@ -67,7 +67,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testGetMaxAllowedVisibleChildren_lowPriority() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
                 NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
     }
@@ -81,7 +81,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testGetMaxAllowedVisibleChildren_lowPriority_expandedChildren() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         mChildrenContainer.setChildrenExpanded(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
                 NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
@@ -89,7 +89,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testGetMaxAllowedVisibleChildren_lowPriority_userLocked() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         mChildrenContainer.setUserLocked(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
                 NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
@@ -118,7 +118,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testShowingAsLowPriority_lowPriority() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         Assert.assertTrue(mChildrenContainer.showingAsLowPriority());
     }
 
@@ -129,7 +129,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
 
     @Test
     public void testShowingAsLowPriority_lowPriority_expanded() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         mGroup.setExpandable(true);
         mGroup.setUserExpanded(true, false);
         Assert.assertFalse(mChildrenContainer.showingAsLowPriority());
@@ -140,7 +140,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         mGroup.setUserLocked(true);
         mGroup.setExpandable(true);
         mGroup.setUserExpanded(true);
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
                 NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
     }
@@ -148,14 +148,14 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     @Test
     @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void testLowPriorityHeaderCleared() {
-        mGroup.setIsLowPriority(true);
+        mGroup.setIsMinimized(true);
         NotificationHeaderView lowPriorityHeaderView =
-                mChildrenContainer.getLowPriorityViewWrapper().getNotificationHeader();
+                mChildrenContainer.getMinimizedGroupHeaderWrapper().getNotificationHeader();
         Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
         Assert.assertSame(mChildrenContainer, lowPriorityHeaderView.getParent());
-        mGroup.setIsLowPriority(false);
+        mGroup.setIsMinimized(false);
         assertNull(lowPriorityHeaderView.getParent());
-        assertNull(mChildrenContainer.getLowPriorityViewWrapper());
+        assertNull(mChildrenContainer.getMinimizedGroupHeaderWrapper());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     @Test
     @EnableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void testSetLowPriorityWithAsyncInflation_noHeaderReInflation() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
         assertNull("We don't inflate header from the main thread with Async "
                 + "Inflation enabled", mChildrenContainer.getCurrentHeaderView());
     }
@@ -179,21 +179,21 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     public void setLowPriorityBeforeLowPriorityHeaderSet() {
 
         //Given: the children container does not have a low-priority header, and is not low-priority
-        assertNull(mChildrenContainer.getLowPriorityViewWrapper());
-        mGroup.setIsLowPriority(false);
+        assertNull(mChildrenContainer.getMinimizedGroupHeaderWrapper());
+        mGroup.setIsMinimized(false);
 
         //When: set the children container to be low-priority and set the low-priority header
-        mGroup.setIsLowPriority(true);
-        mGroup.setLowPriorityGroupHeader(createHeaderView(/* lowPriorityHeader= */ true));
+        mGroup.setIsMinimized(true);
+        mGroup.setMinimizedGroupHeader(createHeaderView(/* lowPriorityHeader= */ true));
 
         //Then: the low-priority group header should be visible
         NotificationHeaderView lowPriorityHeaderView =
-                mChildrenContainer.getLowPriorityViewWrapper().getNotificationHeader();
+                mChildrenContainer.getMinimizedGroupHeaderWrapper().getNotificationHeader();
         Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
         Assert.assertSame(mChildrenContainer, lowPriorityHeaderView.getParent());
 
         //When: set the children container to be not low-priority and set the normal header
-        mGroup.setIsLowPriority(false);
+        mGroup.setIsMinimized(false);
         mGroup.setGroupHeader(createHeaderView(/* lowPriorityHeader= */ false));
 
         //Then: the low-priority group header should not be visible , normal header should be
@@ -211,9 +211,9 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     public void changeLowPriorityAfterHeaderSet() {
 
         //Given: the children container does not have headers, and is not low-priority
-        assertNull(mChildrenContainer.getLowPriorityViewWrapper());
+        assertNull(mChildrenContainer.getMinimizedGroupHeaderWrapper());
         assertNull(mChildrenContainer.getNotificationHeaderWrapper());
-        mGroup.setIsLowPriority(false);
+        mGroup.setIsMinimized(false);
 
         //When: set the set the normal header
         mGroup.setGroupHeader(createHeaderView(/* lowPriorityHeader= */ false));
@@ -225,14 +225,14 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         Assert.assertSame(mChildrenContainer, headerView.getParent());
 
         //When: set the set the row to be low priority, and set the low-priority header
-        mGroup.setIsLowPriority(true);
-        mGroup.setLowPriorityGroupHeader(createHeaderView(/* lowPriorityHeader= */ true));
+        mGroup.setIsMinimized(true);
+        mGroup.setMinimizedGroupHeader(createHeaderView(/* lowPriorityHeader= */ true));
 
         //Then: the header view should not be visible, the low-priority group header should be
         // visible
         Assert.assertEquals(View.INVISIBLE, headerView.getVisibility());
         NotificationHeaderView lowPriorityHeaderView =
-                mChildrenContainer.getLowPriorityViewWrapper().getNotificationHeader();
+                mChildrenContainer.getMinimizedGroupHeaderWrapper().getNotificationHeader();
         Assert.assertEquals(View.VISIBLE, lowPriorityHeaderView.getVisibility());
     }
 
@@ -263,7 +263,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     @Test
     @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_headerLowPriority() {
-        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setIsMinimized(true);
 
         NotificationHeaderViewWrapper header = mChildrenContainer.getNotificationHeaderWrapper();
         Assert.assertEquals(0f, header.getTopRoundness(), 0.001f);

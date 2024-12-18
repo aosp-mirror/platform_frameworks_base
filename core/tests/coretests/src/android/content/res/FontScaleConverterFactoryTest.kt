@@ -18,7 +18,6 @@ package android.content.res
 
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresFlagsEnabled
-import android.platform.test.flag.junit.CheckFlagsRule
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.util.SparseArray
 import androidx.core.util.forEach
@@ -27,15 +26,14 @@ import androidx.test.filters.LargeTest
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.random.Random.Default.nextFloat
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
-import kotlin.math.ceil
-import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.IllegalStateException
-import kotlin.random.Random.Default.nextFloat
 
 /**
  * Unit tests for FontScaleConverterFactory. Note that some similar tests are in
@@ -46,7 +44,7 @@ import kotlin.random.Random.Default.nextFloat
 class FontScaleConverterFactoryTest {
 
     @get:Rule
-    val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+    val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
     private var defaultLookupTables: SparseArray<FontScaleConverter>? = null
 
@@ -175,10 +173,12 @@ class FontScaleConverterFactoryTest {
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(-1f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0.85f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.02f)).isFalse()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.05f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.10f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.15f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.1499999f))
                 .isTrue()
+        assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.2f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1.5f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(2f)).isTrue()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(3f)).isTrue()

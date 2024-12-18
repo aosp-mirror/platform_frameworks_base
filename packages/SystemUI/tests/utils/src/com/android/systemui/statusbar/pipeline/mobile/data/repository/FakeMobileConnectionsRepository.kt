@@ -26,14 +26,13 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
-import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionsRepository
 class FakeMobileConnectionsRepository(
     mobileMappings: MobileMappingsProxy = FakeMobileMappingsProxy(),
-    val tableLogBuffer: TableLogBuffer = mock<TableLogBuffer> {},
+    val tableLogBuffer: TableLogBuffer,
 ) : MobileConnectionsRepository {
 
     val GSM_KEY = mobileMappings.toIconKey(GSM)
@@ -93,7 +92,10 @@ class FakeMobileConnectionsRepository(
     private val _defaultMobileIconGroup = MutableStateFlow(DEFAULT_ICON)
     override val defaultMobileIconGroup = _defaultMobileIconGroup
 
+    override val isDeviceEmergencyCallCapable = MutableStateFlow(false)
+
     override val isAnySimSecure = MutableStateFlow(false)
+
     override fun getIsAnySimSecure(): Boolean = isAnySimSecure.value
 
     private var isInEcmMode: Boolean = false

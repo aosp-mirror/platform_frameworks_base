@@ -389,7 +389,11 @@ public interface ActivityInterceptorCallback {
             return mCheckedOptions;
         }
 
-        /** Returns the {@link Runnable} object to clear options Animation. */
+        /**
+         * Returns the {@link Runnable} object to clear options Animation. Note that the runnable
+         * should not be executed inside a lock because the implementation of runnable holds window
+         * manager's lock.
+         */
         @Nullable
         public Runnable getClearOptionsAnimationRunnable() {
             return mClearOptionsAnimation;

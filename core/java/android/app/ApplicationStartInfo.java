@@ -60,6 +60,16 @@ import java.util.Objects;
  * start times, throttling, and other useful diagnostic data can be obtained from
  * {@link ApplicationStartInfo} records.
  * </p>
+ *
+ * <p>
+*  ApplicationStartInfo objects can be retrieved via:
+*  - {@link ActivityManager#getHistoricalProcessStartReasons}, which can be called during or after
+ *      a application's startup. Using this method, an app can retrieve information about an
+ *      in-progress app start.
+*  - {@link ActivityManager#addApplicationStartInfoCompletionListener}, which returns an
+ *      ApplicationStartInfo object via a callback when the startup is complete, or immediately
+ *      if requested after the startup is complete.
+ * </p>
  */
 @FlaggedApi(Flags.FLAG_APP_START_INFO)
 public final class ApplicationStartInfo implements Parcelable {
@@ -198,6 +208,11 @@ public final class ApplicationStartInfo implements Parcelable {
 
     /** Clock monotonic timestamp of surfaceflinger composition complete. */
     public static final int START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE = 7;
+
+    /**
+     * @see #getMonoticCreationTimeMs
+     */
+    private long mMonoticCreationTimeMs;
 
     /**
      * @see #getStartupState
@@ -416,11 +431,34 @@ public final class ApplicationStartInfo implements Parcelable {
 
     /**
      * @see #getStartIntent
+     *
+     * <p class="note"> Note: This method will clone the provided intent and ensure that the cloned
+     * intent doesn't contain any large objects like bitmaps in its extras by stripping it in the
+     * least aggressive acceptable way for the individual intent.</p>
+     *
      * @hide
      */
     public void setIntent(Intent startIntent) {
         if (startIntent != null) {
-            mStartIntent = startIntent.maybeStripForHistory();
+            if (startIntent.canStripForHistory()) {
+                // If maybeStripForHistory will return a lightened version, do that.
+                mStartIntent = startIntent.maybeStripForHistory();
+            } else if (startIntent.getExtras() != null) {
+                // If maybeStripForHistory would not return a lightened version and extras is
+                // non-null then extras contains un-parcelled data. Use cloneFilter to strip data
+                // more aggressively.
+                mStartIntent = startIntent.cloneFilter();
+            } else {
+                // Finally, if maybeStripForHistory would not return a lightened version and extras
+                // is null then do a regular clone so we don't leak the intent.
+                mStartIntent = new Intent(startIntent);
+            }
+
+            // If the newly cloned intent has an original intent, clear that as we don't need it and
+            // can't guarantee it doesn't need to be stripped as well.
+            if (mStartIntent.getOriginalIntent() != null) {
+                mStartIntent.setOriginalIntent(null);
+            }
         }
     }
 
@@ -451,6 +489,15 @@ public final class ApplicationStartInfo implements Parcelable {
      */
     public @StartupState int getStartupState() {
         return mStartupState;
+    }
+
+    /**
+     * Monotonic elapsed time persisted across reboots.
+     *
+     * @hide
+     */
+    public long getMonoticCreationTimeMs() {
+        return mMonoticCreationTimeMs;
     }
 
     /**
@@ -633,10 +680,13 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeParcelable(mStartIntent, flags);
         dest.writeInt(mLaunchMode);
         dest.writeBoolean(mWasForceStopped);
+        dest.writeLong(mMonoticCreationTimeMs);
     }
 
     /** @hide */
-    public ApplicationStartInfo() {}
+    public ApplicationStartInfo(long monotonicCreationTimeMs) {
+        mMonoticCreationTimeMs = monotonicCreationTimeMs;
+    }
 
     /** @hide */
     public ApplicationStartInfo(ApplicationStartInfo other) {
@@ -653,6 +703,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mStartIntent = other.mStartIntent;
         mLaunchMode = other.mLaunchMode;
         mWasForceStopped = other.mWasForceStopped;
+        mMonoticCreationTimeMs = other.mMonoticCreationTimeMs;
     }
 
     private ApplicationStartInfo(@NonNull Parcel in) {
@@ -675,6 +726,7 @@ public final class ApplicationStartInfo implements Parcelable {
                 in.readParcelable(Intent.class.getClassLoader(), android.content.Intent.class);
         mLaunchMode = in.readInt();
         mWasForceStopped = in.readBoolean();
+        mMonoticCreationTimeMs = in.readLong();
     }
 
     private static String intern(@Nullable String source) {
@@ -753,6 +805,7 @@ public final class ApplicationStartInfo implements Parcelable {
         }
         proto.write(ApplicationStartInfoProto.LAUNCH_MODE, mLaunchMode);
         proto.write(ApplicationStartInfoProto.WAS_FORCE_STOPPED, mWasForceStopped);
+        proto.write(ApplicationStartInfoProto.MONOTONIC_CREATION_TIME_MS, mMonoticCreationTimeMs);
         proto.end(token);
     }
 
@@ -836,6 +889,10 @@ public final class ApplicationStartInfo implements Parcelable {
                     mWasForceStopped = proto.readBoolean(
                             ApplicationStartInfoProto.WAS_FORCE_STOPPED);
                     break;
+                case (int) ApplicationStartInfoProto.MONOTONIC_CREATION_TIME_MS:
+                    mMonoticCreationTimeMs = proto.readLong(
+                            ApplicationStartInfoProto.MONOTONIC_CREATION_TIME_MS);
+                    break;
             }
         }
         proto.end(token);
@@ -847,6 +904,8 @@ public final class ApplicationStartInfo implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append(prefix)
                 .append("ApplicationStartInfo ").append(seqSuffix).append(':')
+                .append('\n')
+                .append(" monotonicCreationTimeMs=").append(mMonoticCreationTimeMs)
                 .append('\n')
                 .append(" pid=").append(mPid)
                 .append(" realUid=").append(mRealUid)
@@ -916,14 +975,15 @@ public final class ApplicationStartInfo implements Parcelable {
             && mDefiningUid == o.mDefiningUid && mReason == o.mReason
             && mStartupState == o.mStartupState && mStartType == o.mStartType
             && mLaunchMode == o.mLaunchMode && TextUtils.equals(mProcessName, o.mProcessName)
-            && timestampsEquals(o) && mWasForceStopped == o.mWasForceStopped;
+            && timestampsEquals(o) && mWasForceStopped == o.mWasForceStopped
+            && mMonoticCreationTimeMs == o.mMonoticCreationTimeMs;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mPid, mRealUid, mPackageUid, mDefiningUid, mReason, mStartupState,
-                mStartType, mLaunchMode, mProcessName,
-                mStartupTimestampsNs);
+                mStartType, mLaunchMode, mProcessName, mStartupTimestampsNs,
+                mMonoticCreationTimeMs);
     }
 
     private boolean timestampsEquals(@NonNull ApplicationStartInfo other) {

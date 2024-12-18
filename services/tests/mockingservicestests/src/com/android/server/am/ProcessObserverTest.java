@@ -56,6 +56,7 @@ import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -193,14 +194,14 @@ public class ProcessObserverTest {
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai)
             throws Exception {
-        final IApplicationThread thread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred thread = mock(ApplicationThreadDeferred.class);
         final IBinder threadBinder = new Binder();
         doReturn(threadBinder).when(thread).asBinder();
         doAnswer((invocation) -> {
             Log.v(TAG, "Intercepting bindApplication() for "
                     + Arrays.toString(invocation.getArguments()));
             if (mRealAms.mConstants.mEnableWaitForFinishAttachApplication) {
-                mRealAms.finishAttachApplication(0);
+                mRealAms.finishAttachApplication(0, 0);
             }
             return null;
         }).when(thread).bindApplication(
@@ -215,7 +216,7 @@ public class ProcessObserverTest {
                 any(), any(), any(),
                 any(), any(),
                 any(), any(),
-                any(),
+                any(), any(),
                 anyLong(), anyLong());
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, ai.processName, ai.uid));
         r.setPid(myPid());
@@ -238,6 +239,7 @@ public class ProcessObserverTest {
     /**
      * Verify that a process start event is dispatched to process observers.
      */
+    @Ignore("b/323959187")
     @Test
     public void testNormal() throws Exception {
         ProcessRecord app = startProcess();
@@ -263,7 +265,7 @@ public class ProcessObserverTest {
                 null, null,
                 null,
                 null, null, null,
-                null, null,
+                null, null, null,
                 0, 0);
         return app;
     }

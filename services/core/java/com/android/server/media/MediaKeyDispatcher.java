@@ -44,7 +44,6 @@ import java.util.Map;
  * Note: When instantiating this class, {@link MediaSessionService} will only use the constructor
  * without any parameters.
  */
-// TODO: Move this class to apex/media/
 public abstract class MediaKeyDispatcher {
     @IntDef(flag = true, value = {
             KEY_EVENT_SINGLE_TAP,

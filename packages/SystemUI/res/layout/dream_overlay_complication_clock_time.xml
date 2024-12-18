@@ -37,4 +37,6 @@
     app:ambientShadowOffsetY="@dimen/dream_overlay_clock_ambient_text_shadow_dy"
     app:ambientShadowAlpha="0.3"
     app:removeTextDescent="true"
-    app:textDescentExtraPadding="@dimen/dream_overlay_clock_text_descent_extra_padding" />
+    app:textDescentExtraPadding="@dimen/dream_overlay_clock_text_descent_extra_padding"
+    android:clickable="false"
+/>

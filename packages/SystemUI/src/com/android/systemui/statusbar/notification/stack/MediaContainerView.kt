@@ -70,13 +70,14 @@ class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableVie
     }
 
     override fun performRemoveAnimation(
-        duration: Long,
-        delay: Long,
-        translationDirection: Float,
-        isHeadsUpAnimation: Boolean,
-        onStartedRunnable: Runnable?,
-        onFinishedRunnable: Runnable?,
-        animationListener: AnimatorListenerAdapter?
+            duration: Long,
+            delay: Long,
+            translationDirection: Float,
+            isHeadsUpAnimation: Boolean,
+            onStartedRunnable: Runnable?,
+            onFinishedRunnable: Runnable?,
+            animationListener: AnimatorListenerAdapter?,
+            clipSide: ClipSide
     ): Long {
         return 0
     }

@@ -62,14 +62,19 @@
     <com.android.systemui.keyguard.ui.view.KeyguardRootView
         android:id="@id/keyguard_root_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        />
 
     <!-- Shared container for the notification stack. Can be positioned by either
          the keyguard_root_view or notification_panel -->
     <com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
         android:id="@+id/shared_notification_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        />
 
     <include layout="@layout/brightness_mirror_container" />
 
@@ -116,10 +121,6 @@
         android:layout_height="match_parent"
         android:inflatedId="@+id/multi_shade"
         android:layout="@layout/multi_shade" />
-
-    <include layout="@layout/alternate_bouncer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
     <com.android.systemui.biometrics.AuthRippleView
         android:id="@+id/auth_ripple"

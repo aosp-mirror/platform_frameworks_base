@@ -28,7 +28,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.android.settingslib.notification.ZenRadioLayout
+        <com.android.settingslib.notification.modes.ZenRadioLayout
             android:id="@+id/zen_conditions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:orientation="vertical"/>
-        </com.android.settingslib.notification.ZenRadioLayout>
+        </com.android.settingslib.notification.modes.ZenRadioLayout>
 
         <TextView
             android:id="@+id/zen_alarm_warning"

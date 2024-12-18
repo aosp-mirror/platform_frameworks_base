@@ -17,7 +17,8 @@
 package android.test;
 
 import android.test.mock.MockContext;
-import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;

@@ -17,13 +17,10 @@
 package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetHostView
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.os.Looper
-import android.widget.RemoteViews
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
+import javax.annotation.concurrent.GuardedBy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,11 +32,8 @@ class CommunalAppWidgetHost(
     context: Context,
     private val backgroundScope: CoroutineScope,
     hostId: Int,
-    interactionHandler: RemoteViews.InteractionHandler,
-    looper: Looper,
     logBuffer: LogBuffer,
-) : AppWidgetHost(context, hostId, interactionHandler, looper) {
-
+) : AppWidgetHost(context, hostId) {
     private val logger = Logger(logBuffer, TAG)
 
     private val _appWidgetIdToRemove = MutableSharedFlow<Int>()
@@ -47,34 +41,80 @@ class CommunalAppWidgetHost(
     /** App widget ids that have been removed and no longer available. */
     val appWidgetIdToRemove: SharedFlow<Int> = _appWidgetIdToRemove.asSharedFlow()
 
-    override fun onCreateView(
-        context: Context,
-        appWidgetId: Int,
-        appWidget: AppWidgetProviderInfo?
-    ): AppWidgetHostView {
-        return CommunalAppWidgetHostView(context)
-    }
-
-    /**
-     * Creates and returns a [CommunalAppWidgetHostView]. This method does the same thing as
-     * `createView`. The only difference is that the returned value will be casted to
-     * [CommunalAppWidgetHostView].
-     */
-    fun createViewForCommunal(
-        context: Context?,
-        appWidgetId: Int,
-        appWidget: AppWidgetProviderInfo?
-    ): CommunalAppWidgetHostView {
-        // `createView` internally calls `onCreateView` to create the view. We cannot override
-        // `createView`, but we are sure that the hostView is `CommunalAppWidgetHostView`
-        return createView(context, appWidgetId, appWidget) as CommunalAppWidgetHostView
-    }
+    @GuardedBy("observers") private val observers = mutableSetOf<Observer>()
 
     override fun onAppWidgetRemoved(appWidgetId: Int) {
         backgroundScope.launch {
             logger.i({ "App widget removed from system: $int1" }) { int1 = appWidgetId }
             _appWidgetIdToRemove.emit(appWidgetId)
         }
+    }
+
+    override fun allocateAppWidgetId(): Int {
+        return super.allocateAppWidgetId().also { appWidgetId ->
+            backgroundScope.launch {
+                synchronized(observers) {
+                    observers.forEach { observer -> observer.onAllocateAppWidgetId(appWidgetId) }
+                }
+            }
+        }
+    }
+
+    override fun deleteAppWidgetId(appWidgetId: Int) {
+        super.deleteAppWidgetId(appWidgetId)
+        backgroundScope.launch {
+            synchronized(observers) {
+                observers.forEach { observer -> observer.onDeleteAppWidgetId(appWidgetId) }
+            }
+        }
+    }
+
+    override fun startListening() {
+        super.startListening()
+        backgroundScope.launch {
+            synchronized(observers) {
+                observers.forEach { observer -> observer.onHostStartListening() }
+            }
+        }
+    }
+
+    override fun stopListening() {
+        super.stopListening()
+        backgroundScope.launch {
+            synchronized(observers) {
+                observers.forEach { observer -> observer.onHostStopListening() }
+            }
+        }
+    }
+
+    fun addObserver(observer: Observer) {
+        synchronized(observers) { observers.add(observer) }
+    }
+
+    fun removeObserver(observer: Observer) {
+        synchronized(observers) { observers.remove(observer) }
+    }
+
+    /**
+     * Allows another class to observe the [CommunalAppWidgetHost] and handle any logic there.
+     *
+     * This is mainly for testability as it is difficult to test a real instance of [AppWidgetHost]
+     * which communicates with framework services.
+     *
+     * Note: all the callbacks are launched from the background scope.
+     */
+    interface Observer {
+        /** Called immediately after the host has started listening for widget updates. */
+        fun onHostStartListening() {}
+
+        /** Called immediately after the host has stopped listening for widget updates. */
+        fun onHostStopListening() {}
+
+        /** Called immediately after a new app widget id has been allocated. */
+        fun onAllocateAppWidgetId(appWidgetId: Int) {}
+
+        /** Called immediately after an app widget id is to be deleted. */
+        fun onDeleteAppWidgetId(appWidgetId: Int) {}
     }
 
     companion object {

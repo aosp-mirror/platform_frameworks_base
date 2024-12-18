@@ -44,13 +44,11 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Handler;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
-import android.view.SurfaceSession;
 import android.view.ViewTreeObserver;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -96,7 +94,6 @@ public class TaskViewTest extends ShellTestCase {
     Looper mViewLooper;
     TestHandler mViewHandler;
 
-    SurfaceSession mSession;
     SurfaceControl mLeash;
 
     Context mContext;
@@ -107,7 +104,7 @@ public class TaskViewTest extends ShellTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mLeash = new SurfaceControl.Builder(mSession)
+        mLeash = new SurfaceControl.Builder()
                 .setName("test")
                 .build();
 
@@ -295,16 +292,6 @@ public class TaskViewTest extends ShellTestCase {
     }
 
     @Test
-    public void testUnsetOnBackPressedOnTaskRoot_legacyTransitions() {
-        assumeFalse(Transitions.ENABLE_SHELL_TRANSITIONS);
-        mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
-
-        mTaskViewTaskController.onTaskVanished(mTaskInfo);
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(false));
-    }
-
-    @Test
     public void testOnNewTask_noSurface() {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -444,19 +431,6 @@ public class TaskViewTest extends ShellTestCase {
     }
 
     @Test
-    public void testUnsetOnBackPressedOnTaskRoot() {
-        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
-                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
-                mLeash, wct);
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(true));
-
-        mTaskViewTaskController.prepareCloseAnimation();
-        verify(mOrganizer).setInterceptBackPressedOnTaskRoot(eq(mTaskInfo.token), eq(false));
-    }
-
-    @Test
     public void testSetObscuredTouchRect() {
         mTaskView.setObscuredTouchRect(
                 new Rect(/* left= */ 0, /* top= */ 10, /* right= */ 100, /* bottom= */ 120));
@@ -495,6 +469,31 @@ public class TaskViewTest extends ShellTestCase {
         assertThat(insetsInfo.touchableRegion.contains(10, 10)).isFalse();
         assertThat(insetsInfo.touchableRegion.contains(20, 20)).isFalse();
         assertThat(insetsInfo.touchableRegion.contains(30, 30)).isFalse();
+    }
+
+    @Test
+    public void testStartRootTask_setsBoundsAndVisibility() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        TaskViewBase taskViewBase = mock(TaskViewBase.class);
+        Rect bounds = new Rect(0, 0, 100, 100);
+        when(taskViewBase.getCurrentBoundsOnScreen()).thenReturn(bounds);
+        mTaskViewTaskController.setTaskViewBase(taskViewBase);
+
+        // Surface created, but task not available so bounds / visibility isn't set
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        verify(mTaskViewTransitions, never()).updateVisibilityState(
+                eq(mTaskViewTaskController), eq(true));
+
+        // Make the task available
+        WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
+        mTaskViewTaskController.startRootTask(mTaskInfo, mLeash, wct);
+
+        // Bounds got set
+        verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
+        // Visibility & bounds state got set
+        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(true));
+        verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
     }
 
     @Test
@@ -688,5 +687,27 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.setResizeBgColor(tx, Color.BLUE);
         verify(mViewHandler).post(any());
         verify(mTaskView).setResizeBackgroundColor(eq(Color.BLUE));
+    }
+
+    @Test
+    public void testOnAppeared_setsTrimmableTask() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+
+        assertThat(wct.getHierarchyOps().get(0).isTrimmableFromRecents()).isFalse();
+    }
+
+    @Test
+    public void testMoveToFullscreen_callsTaskRemovalStarted() {
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        mTaskViewTaskController.moveToFullscreen();
+
+        verify(mViewListener).onTaskRemovalStarted(eq(mTaskInfo.taskId));
     }
 }

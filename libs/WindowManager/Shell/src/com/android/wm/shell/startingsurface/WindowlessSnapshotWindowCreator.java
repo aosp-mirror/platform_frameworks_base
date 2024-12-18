@@ -23,7 +23,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
@@ -37,7 +36,7 @@ import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 
 class WindowlessSnapshotWindowCreator {
     private static final int DEFAULT_FADEOUT_DURATION = 233;
@@ -74,18 +73,16 @@ class WindowlessSnapshotWindowCreator {
         final Display display = mDisplayManager.getDisplay(runningTaskInfo.displayId);
         final StartingSurfaceDrawer.WindowlessStartingWindow wlw =
                 new StartingSurfaceDrawer.WindowlessStartingWindow(
-                runningTaskInfo.configuration, rootSurface);
+                        mContext.getResources().getConfiguration(), rootSurface);
         final SurfaceControlViewHost mViewHost = new SurfaceControlViewHost(
                 mContext, display, wlw, "WindowlessSnapshotWindowCreator");
-        final Point taskSize = snapshot.getTaskSize();
-        final Rect snapshotBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final Rect windowBounds = runningTaskInfo.configuration.windowConfiguration.getBounds();
         final InsetsState topWindowInsetsState = info.topOpaqueWindowInsetsState;
         final FrameLayout rootLayout = new FrameLayout(
                 mSplashscreenContentDrawer.createViewContextWrapper(mContext));
         mViewHost.setView(rootLayout, lp);
         SnapshotDrawerUtils.drawSnapshotOnSurface(info, lp, wlw.mChildSurface, snapshot,
-                snapshotBounds, windowBounds, topWindowInsetsState, false /* releaseAfterDraw */);
+                windowBounds, topWindowInsetsState, false /* releaseAfterDraw */);
 
         final ActivityManager.TaskDescription taskDescription =
                 SnapshotDrawerUtils.getOrCreateTaskDescription(runningTaskInfo);

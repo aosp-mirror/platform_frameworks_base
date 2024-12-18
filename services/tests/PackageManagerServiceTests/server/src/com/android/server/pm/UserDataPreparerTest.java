@@ -71,7 +71,7 @@ public class UserDataPreparerTest {
     @Mock
     private Installer mInstaller;
 
-    private Object mInstallLock;
+    private PackageManagerTracedLock mInstallLock;
 
     @Before
     public void setup() {
@@ -79,7 +79,7 @@ public class UserDataPreparerTest {
         TEST_USER.serialNumber = TEST_USER_SERIAL;
         Context ctx = InstrumentationRegistry.getContext();
         FileUtils.deleteContents(ctx.getCacheDir());
-        mInstallLock = new Object();
+        mInstallLock = new PackageManagerTracedLock();
         MockitoAnnotations.initMocks(this);
         mUserDataPreparer = new TestUserDataPreparer(mInstaller, mInstallLock, mContextMock,
                 ctx.getCacheDir());
@@ -238,8 +238,8 @@ public class UserDataPreparerTest {
     private static class TestUserDataPreparer extends UserDataPreparer {
         File testDir;
 
-        TestUserDataPreparer(Installer installer, Object installLock, Context context,
-                File testDir) {
+        TestUserDataPreparer(Installer installer, PackageManagerTracedLock installLock,
+                Context context, File testDir) {
             super(installer, installLock, context);
             this.testDir = testDir;
         }

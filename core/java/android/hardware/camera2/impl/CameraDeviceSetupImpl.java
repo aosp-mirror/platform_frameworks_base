@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.hardware.camera2.impl;
 
 import android.annotation.CallbackExecutor;
@@ -70,8 +71,12 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                CameraMetadataNative defaultRequest = cameraService.createDefaultRequest(mCameraId,
-                        templateType);
+                CameraMetadataNative defaultRequest =
+                        cameraService.createDefaultRequest(
+                                mCameraId,
+                                templateType,
+                                mCameraManager.getClientAttribution(),
+                                mCameraManager.getDevicePolicyFromContext(mContext));
                 CameraDeviceImpl.disableZslIfNeeded(defaultRequest, mTargetSdkVersion,
                         templateType);
 
@@ -90,7 +95,6 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
     @Override
     public boolean isSessionConfigurationSupported(@NonNull SessionConfiguration config)
             throws CameraAccessException {
-        // TODO(b/298033056): restructure the OutputConfiguration API for better usability
         synchronized (mInterfaceLock) {
             if (mCameraManager.isCameraServiceDisabled()) {
                 throw new IllegalArgumentException("No cameras available on device");
@@ -104,7 +108,11 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
 
             try {
                 return cameraService.isSessionConfigurationWithParametersSupported(
-                        mCameraId, config);
+                        mCameraId,
+                        mTargetSdkVersion,
+                        config,
+                        mCameraManager.getClientAttribution(),
+                        mCameraManager.getDevicePolicyFromContext(mContext));
             } catch (ServiceSpecificException e) {
                 throw ExceptionUtils.throwAsPublicException(e);
             } catch (RemoteException e) {
@@ -130,11 +138,17 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             }
 
             try {
-                CameraMetadataNative metadataNative = cameraService.getSessionCharacteristics(
-                        mCameraId, mTargetSdkVersion,
-                        CameraManager.shouldOverrideToPortrait(mContext), sessionConfig);
+                CameraMetadataNative metadata =
+                        cameraService.getSessionCharacteristics(
+                                mCameraId,
+                                mTargetSdkVersion,
+                                CameraManager.getRotationOverride(mContext),
+                                sessionConfig,
+                                mCameraManager.getClientAttribution(),
+                                mCameraManager.getDevicePolicyFromContext(mContext));
 
-                return new CameraCharacteristics(metadataNative);
+                return mCameraManager.prepareCameraCharacteristics(mCameraId, metadata,
+                        cameraService);
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
                     case ICameraService.ERROR_INVALID_OPERATION ->
@@ -191,10 +205,6 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
      */
     @SuppressWarnings("AndroidFrameworkCompatChange")
     public static boolean isCameraDeviceSetupSupported(CameraCharacteristics chars) {
-        if (!Flags.featureCombinationQuery()) {
-            return false;
-        }
-
         Integer queryVersion = chars.get(
                 CameraCharacteristics.INFO_SESSION_CONFIGURATION_QUERY_VERSION);
         return queryVersion != null && queryVersion > Build.VERSION_CODES.UPSIDE_DOWN_CAKE;

@@ -56,10 +56,11 @@ interface NotifInflater {
 
     /** A class holding parameters used when inflating the notification row */
     class Params(
-        val isLowPriority: Boolean,
+        val isMinimized: Boolean,
         val reason: String,
         val showSnooze: Boolean,
         val isChildInGroup: Boolean = false,
         val isGroupSummary: Boolean = false,
+        val needsRedaction: Boolean,
     )
 }

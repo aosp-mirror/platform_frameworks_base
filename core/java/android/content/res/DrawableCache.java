@@ -19,13 +19,17 @@ package android.content.res;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.ravenwood.annotation.RavenwoodKeep;
+import android.ravenwood.annotation.RavenwoodKeepPartialClass;
 
 /**
  * Class which can be used to cache Drawable resources against a theme.
  */
+@RavenwoodKeepPartialClass
 class DrawableCache extends ThemedResourceCache<Drawable.ConstantState> {
 
     @UnsupportedAppUsage
+    @RavenwoodKeep
     DrawableCache() {
     }
 

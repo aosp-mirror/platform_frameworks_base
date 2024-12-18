@@ -73,8 +73,8 @@ object SettingsDropdownCheckBoxProvider : SettingsPageProvider {
                 label = "With disabled item",
                 options = remember {
                     listOf(
-                        SettingsDropdownCheckOption("Item 1"),
-                        SettingsDropdownCheckOption("Item 2"),
+                        SettingsDropdownCheckOption("Enabled item 1"),
+                        SettingsDropdownCheckOption("Enabled item 2"),
                         SettingsDropdownCheckOption(
                             text = "Disabled item 1",
                             changeable = false,
@@ -101,8 +101,8 @@ object SettingsDropdownCheckBoxProvider : SettingsPageProvider {
                 remember {
                     listOf(
                         SettingsDropdownCheckOption("All", isSelectAll = true, changeable = false),
-                        SettingsDropdownCheckOption("Item 1"),
-                        SettingsDropdownCheckOption("Item 2"),
+                        SettingsDropdownCheckOption("Enabled item 1"),
+                        SettingsDropdownCheckOption("Enabled item 2"),
                         SettingsDropdownCheckOption(
                             text = "Disabled item 1",
                             changeable = false,

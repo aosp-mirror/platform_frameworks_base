@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 
 import static com.android.server.pm.PackageManagerService.TAG;
 
-import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IStagedApexObserver;
@@ -184,14 +183,8 @@ final class PackageManagerNative extends IPackageManagerNative.Stub {
     }
 
     @Override
-    public String[] getStagedApexModuleNames() {
-        return mPm.mInstallerService.getStagingManager()
-                .getStagedApexModuleNames().toArray(new String[0]);
-    }
-
-    @Override
-    @Nullable
-    public StagedApexInfo getStagedApexInfo(String moduleName) {
-        return mPm.mInstallerService.getStagingManager().getStagedApexInfo(moduleName);
+    public StagedApexInfo[] getStagedApexInfos() {
+        return mPm.mInstallerService.getStagingManager().getStagedApexInfos().toArray(
+                new StagedApexInfo[0]);
     }
 }

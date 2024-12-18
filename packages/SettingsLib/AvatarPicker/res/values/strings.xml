@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License
+  -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- An option in a photo selection dialog to choose a pre-existing image [CHAR LIMIT=50] -->
+    <string name="user_image_choose_photo">Choose an image</string>
+
+    <!-- An option in a photo selection dialog to take a new photo [CHAR LIMIT=50] -->
+    <string name="user_image_take_photo">Take a photo</string>
+
+    <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
+    <string name="avatar_picker_title">Choose a profile picture</string>
+
+    <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
+    <string name="default_user_icon_description">Default user icon</string>
+
+    <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
+    <string name="done">Done</string>
+</resources>

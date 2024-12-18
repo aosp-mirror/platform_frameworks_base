@@ -25,11 +25,13 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,10 +39,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import kotlinx.coroutines.CoroutineScope;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ConditionTest extends SysuiTestCase {
     @Mock
     CoroutineScope mScope;

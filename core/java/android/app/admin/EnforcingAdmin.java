@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -60,6 +61,7 @@ public final class EnforcingAdmin implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public EnforcingAdmin(
             @NonNull String packageName, @NonNull Authority authority,
             @NonNull UserHandle userHandle, @Nullable ComponentName componentName) {
@@ -99,6 +101,16 @@ public final class EnforcingAdmin implements Parcelable {
     @NonNull
     public UserHandle getUserHandle() {
         return mUserHandle;
+    }
+
+    /**
+     * Returns the {@link ComponentName} of the admin if applicable.
+     *
+     * @hide
+     */
+    @Nullable
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     @Override

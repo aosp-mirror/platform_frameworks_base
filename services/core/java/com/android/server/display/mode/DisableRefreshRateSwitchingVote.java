@@ -16,6 +16,8 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
+
 import java.util.Objects;
 
 class DisableRefreshRateSwitchingVote implements Vote {
@@ -31,7 +33,7 @@ class DisableRefreshRateSwitchingVote implements Vote {
     }
 
     @Override
-    public void updateSummary(VoteSummary summary) {
+    public void updateSummary(@NonNull VoteSummary summary) {
         summary.disableRefreshRateSwitching =
                 summary.disableRefreshRateSwitching || mDisableRefreshRateSwitching;
     }

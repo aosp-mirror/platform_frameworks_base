@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -38,7 +38,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CharacterPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public static Collection<Object[]> getData() {
         return Arrays.asList(
@@ -84,7 +84,7 @@ public class CharacterPerfTest {
     public void timeIsSpace(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
         boolean fake = false;
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -104,7 +104,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeDigit(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -124,7 +124,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeGetNumericValue(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -144,7 +144,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsDigit(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -164,7 +164,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsIdentifierIgnorable(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -184,7 +184,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsJavaIdentifierPart(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -204,7 +204,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsJavaIdentifierStart(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -224,7 +224,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsLetter(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -244,7 +244,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsLetterOrDigit(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -264,7 +264,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsLowerCase(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -284,7 +284,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsSpaceChar(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -304,7 +304,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsUpperCase(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -324,7 +324,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeIsWhitespace(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -344,7 +344,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeToLowerCase(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {
@@ -364,7 +364,7 @@ public class CharacterPerfTest {
     @Parameters(method = "getData")
     public void timeToUpperCase(CharacterSet characterSet, Overload overload) {
         setUp(characterSet);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         if (overload == Overload.CHAR) {
             while (state.keepRunning()) {
                 for (int ch = 0; ch < 65536; ++ch) {

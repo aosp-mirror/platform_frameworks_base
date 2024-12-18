@@ -36,11 +36,16 @@ import libcore.util.NativeAllocationRegistry;
  * (based on the paint's Style), or it can be used for clipping or to draw
  * text on a path.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodClassLoadHook(
+        android.ravenwood.annotation.RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public class Path {
-
-    private static final NativeAllocationRegistry sRegistry =
-            NativeAllocationRegistry.createMalloced(
-                Path.class.getClassLoader(), nGetFinalizer());
+    // See b/337329128 for why we need an inner class here.
+    private static class NoImagePreloadHolder {
+        static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        Path.class.getClassLoader(), nGetFinalizer());
+    }
 
     /**
      * @hide
@@ -52,7 +57,7 @@ public class Path {
      */
     public Path() {
         mNativePath = nInit();
-        sRegistry.registerNativeAllocation(this, mNativePath);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativePath);
     }
 
     /**
@@ -62,7 +67,7 @@ public class Path {
      */
     public Path(@Nullable Path src) {
         mNativePath = nInit(src != null ? src.mNativePath : 0);
-        sRegistry.registerNativeAllocation(this, mNativePath);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativePath);
     }
 
     /**
@@ -296,10 +301,7 @@ public class Path {
      *
      * @param bounds Returns the computed bounds of the path's control points.
      * @param exact This parameter is no longer used.
-     *
-     * @deprecated use computeBounds(RectF) instead
      */
-    @Deprecated
     @SuppressWarnings({"UnusedDeclaration"})
     public void computeBounds(@NonNull RectF bounds, boolean exact) {
         computeBounds(bounds);

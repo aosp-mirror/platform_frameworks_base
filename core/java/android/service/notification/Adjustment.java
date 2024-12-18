@@ -15,11 +15,14 @@
  */
 package android.service.notification;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.app.Notification;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,7 +64,8 @@ public final class Adjustment implements Parcelable {
             KEY_IMPORTANCE_PROPOSAL,
             KEY_SENSITIVE_CONTENT,
             KEY_RANKING_SCORE,
-            KEY_NOT_CONVERSATION
+            KEY_NOT_CONVERSATION,
+            KEY_TYPE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Keys {}
@@ -146,8 +150,13 @@ public final class Adjustment implements Parcelable {
 
     /**
      * Data type: boolean, when true it suggests that the content text of this notification is
-     * sensitive. A notification listener can use this information to redact notifications on locked
-     * devices.
+     * sensitive. The system uses this information to improve privacy around the notification
+     * content. In {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, sensitive notification content is
+     * redacted from updates to most {@link NotificationListenerService
+     * NotificationListenerServices}. Also if an app posts a sensitive notification while
+     * {@link android.media.projection.MediaProjection screen-sharing} is active, that app's windows
+     * are blocked from screen-sharing and a {@link android.widget.Toast Toast} is shown to inform
+     * the user about this.
      */
     public static final String KEY_SENSITIVE_CONTENT = "key_sensitive_content";
 
@@ -164,6 +173,54 @@ public final class Adjustment implements Parcelable {
      */
     @SystemApi
     public static final String KEY_NOT_CONVERSATION = "key_not_conversation";
+
+    /**
+     * Data type: int, the classification type of this notification. The OS may display
+     * notifications differently depending on the type, and may change the alerting level of the
+     * notification.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final String KEY_TYPE = "key_type";
+
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_OTHER,
+            TYPE_PROMOTION,
+            TYPE_SOCIAL_MEDIA,
+            TYPE_NEWS,
+            TYPE_CONTENT_RECOMMENDATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Types {}
+
+    /**
+     * This notification can be categorized, but not into one of the other categories known to the
+     * OS at a given version.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final int TYPE_OTHER = 0;
+    /**
+     * The type of this notification is a promotion/deal.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final int TYPE_PROMOTION = 1;
+    /**
+     * The type of this notification is social media content that isn't a
+     * {@link Notification.Builder#setShortcutId(String) conversation}.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final int TYPE_SOCIAL_MEDIA = 2;
+    /**
+     * The type of this notification is news.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final int TYPE_NEWS = 3;
+    /**
+     * The type of this notification is content recommendation, for example new videos or books the
+     * user may be interested in.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public static final int TYPE_CONTENT_RECOMMENDATION = 4;
 
     /**
      * Create a notification adjustment.

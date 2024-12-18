@@ -18,6 +18,8 @@ package android.credentials;
 
 import android.annotation.Hide;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.credentials.selection.GetCredentialProviderData;
 import android.os.Parcel;
@@ -39,6 +41,9 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
     @NonNull
     private final List<GetCredentialProviderData> mCandidateProviderDataList;
 
+    @Nullable
+    private final ComponentName mPrimaryProviderComponentName;
+
     @NonNull
     private final Intent mIntent;
 
@@ -48,13 +53,15 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
     @Hide
     public GetCandidateCredentialsResponse(
             @NonNull List<GetCredentialProviderData> candidateProviderDataList,
-            @NonNull Intent intent
+            @NonNull Intent intent,
+            @Nullable ComponentName primaryProviderComponentName
     ) {
         Preconditions.checkCollectionNotEmpty(
                 candidateProviderDataList,
                 /*valueName=*/ "candidateProviderDataList");
         mCandidateProviderDataList = new ArrayList<>(candidateProviderDataList);
         mIntent = intent;
+        mPrimaryProviderComponentName = primaryProviderComponentName;
     }
 
     /**
@@ -64,6 +71,16 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
      */
     public List<GetCredentialProviderData> getCandidateProviderDataList() {
         return mCandidateProviderDataList;
+    }
+
+    /**
+     * Returns the primary provider component name.
+     *
+     * @hide
+     */
+    @Nullable
+    public ComponentName getPrimaryProviderComponentName() {
+        return mPrimaryProviderComponentName;
     }
 
     /**
@@ -83,12 +100,15 @@ public final class GetCandidateCredentialsResponse implements Parcelable {
 
         AnnotationValidations.validate(NonNull.class, null, mCandidateProviderDataList);
         mIntent = in.readTypedObject(Intent.CREATOR);
+
+        mPrimaryProviderComponentName = in.readTypedObject(ComponentName.CREATOR);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mCandidateProviderDataList);
         dest.writeTypedObject(mIntent, flags);
+        dest.writeTypedObject(mPrimaryProviderComponentName, flags);
     }
 
     @Override

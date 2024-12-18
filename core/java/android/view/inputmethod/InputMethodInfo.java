@@ -54,6 +54,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -91,7 +92,7 @@ public final class InputMethodInfo implements Parcelable {
      *
      * @see #createImeLanguageSettingsActivityIntent()
      */
-    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP)
+    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API)
     public static final String ACTION_IME_LANGUAGE_SETTINGS =
             "android.view.inputmethod.action.IME_LANGUAGE_SETTINGS";
 
@@ -297,7 +298,7 @@ public final class InputMethodInfo implements Parcelable {
                     com.android.internal.R.styleable.InputMethod);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.InputMethod_settingsActivity);
-            if (Flags.imeSwitcherRevamp()) {
+            if (Flags.imeSwitcherRevampApi()) {
                 languageSettingsActivityComponent = sa.getString(
                         com.android.internal.R.styleable.InputMethod_languageSettingsActivity);
             }
@@ -431,6 +432,14 @@ public final class InputMethodInfo implements Parcelable {
      * @hide
      */
     public InputMethodInfo(InputMethodInfo source) {
+        this(source, Collections.emptyList());
+    }
+
+    /**
+     * @hide
+     */
+    public InputMethodInfo(@NonNull InputMethodInfo source,
+            @NonNull List<InputMethodSubtype> additionalSubtypes) {
         mId = source.mId;
         mSettingsActivityName = source.mSettingsActivityName;
         mLanguageSettingsActivityName = source.mLanguageSettingsActivityName;
@@ -445,7 +454,19 @@ public final class InputMethodInfo implements Parcelable {
         mIsVrOnly = source.mIsVrOnly;
         mIsVirtualDeviceOnly = source.mIsVirtualDeviceOnly;
         mService = source.mService;
-        mSubtypes = source.mSubtypes;
+        if (additionalSubtypes.isEmpty()) {
+            mSubtypes = source.mSubtypes;
+        } else {
+            final ArrayList<InputMethodSubtype> subtypes = source.mSubtypes.toList();
+            final int additionalSubtypeCount = additionalSubtypes.size();
+            for (int i = 0; i < additionalSubtypeCount; ++i) {
+                final InputMethodSubtype additionalSubtype = additionalSubtypes.get(i);
+                if (!subtypes.contains(additionalSubtype)) {
+                    subtypes.add(additionalSubtype);
+                }
+            }
+            mSubtypes = new InputMethodSubtypeArray(subtypes);
+        }
         mHandledConfigChanges = source.mHandledConfigChanges;
         mSupportsStylusHandwriting = source.mSupportsStylusHandwriting;
         mSupportsConnectionlessStylusHandwriting = source.mSupportsConnectionlessStylusHandwriting;
@@ -839,7 +860,7 @@ public final class InputMethodInfo implements Parcelable {
      * <p>e.g.<pre><code>startActivity(createStylusHandwritingSettingsActivityIntent());</code>
      * </pre></p>
      *
-     * @attr ref R.styleable#InputMethod_stylusHandwritingSettingsActivity
+     * @attr ref android.R.styleable#InputMethod_stylusHandwritingSettingsActivity
      * @see #getSettingsActivity()
      * @see #supportsStylusHandwriting()
      */
@@ -857,25 +878,29 @@ public final class InputMethodInfo implements Parcelable {
 
     /**
      * Returns {@link Intent} for IME language settings activity with
-     * {@link Intent#getAction() Intent action} {@link #ACTION_IME_LANGUAGE_SETTINGS},
-     * else <code>null</code> if
-     * {@link android.R.styleable#InputMethod_languageSettingsActivity} is not defined.
+     * {@link Intent#getAction() Intent action} {@link #ACTION_IME_LANGUAGE_SETTINGS}. If
+     * {@link android.R.styleable#InputMethod_languageSettingsActivity} is not defined, tries to
+     * fall back to the IME general settings activity. If
+     * {@link android.R.styleable#InputMethod_settingsActivity} is also not defined,
+     * returns {code null}.
      *
      * <p>To launch IME language settings, use this method to get the {@link Intent} to launch
      * the IME language settings activity.</p>
      * <p>e.g.<pre><code>startActivity(createImeLanguageSettingsActivityIntent());</code></pre></p>
      *
-     * @attr ref R.styleable#InputMethod_languageSettingsActivity
+     * @attr ref android.R.styleable#InputMethod_languageSettingsActivity
+     * @attr ref android.R.styleable#InputMethod_settingsActivity
      */
-    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP)
+    @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API)
     @Nullable
     public Intent createImeLanguageSettingsActivityIntent() {
-        if (TextUtils.isEmpty(mLanguageSettingsActivityName)) {
+        final var activityName = !TextUtils.isEmpty(mLanguageSettingsActivityName)
+                ? mLanguageSettingsActivityName : mSettingsActivityName;
+        if (TextUtils.isEmpty(activityName)) {
             return null;
         }
         return new Intent(ACTION_IME_LANGUAGE_SETTINGS).setComponent(
-                new ComponentName(getServiceInfo().packageName,
-                        mLanguageSettingsActivityName)
+                new ComponentName(getServiceInfo().packageName, activityName)
         );
     }
 
@@ -900,6 +925,8 @@ public final class InputMethodInfo implements Parcelable {
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
         mService.dump(pw, prefix + "  ");
+        pw.println(prefix + "InputMethodSubtype array: count=" + mSubtypes.getCount());
+        mSubtypes.dump(pw, prefix + "  ");
     }
 
     @Override

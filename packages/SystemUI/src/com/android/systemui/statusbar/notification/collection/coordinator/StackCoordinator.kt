@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import com.android.app.tracing.traceSection
+import com.android.server.notification.Flags.screenshareNotificationHiding
+import com.android.systemui.Flags.screenshareNotificationHidingBugFix
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
@@ -26,9 +28,8 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import javax.inject.Inject
 
 /**
@@ -40,9 +41,10 @@ class StackCoordinator
 @Inject
 internal constructor(
     private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
-    private val notificationIconAreaController: NotificationIconAreaController,
     private val renderListInteractor: RenderNotificationListInteractor,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
+    private val sensitiveNotificationProtectionController:
+        SensitiveNotificationProtectionController,
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
@@ -58,12 +60,7 @@ internal constructor(
             } else {
                 controller.setNotifStats(notifStats)
             }
-            if (NotificationIconContainerRefactor.isEnabled || FooterViewRefactor.isEnabled) {
-                renderListInteractor.setRenderedList(entries)
-            }
-            if (!NotificationIconContainerRefactor.isEnabled) {
-                notificationIconAreaController.updateNotificationIcons(entries)
-            }
+            renderListInteractor.setRenderedList(entries)
         }
 
     private fun calculateNotifStats(entries: List<ListEntry>): NotifStats {
@@ -71,13 +68,18 @@ internal constructor(
         var hasClearableAlertingNotifs = false
         var hasNonClearableSilentNotifs = false
         var hasClearableSilentNotifs = false
+        val isSensitiveContentProtectionActive =
+            screenshareNotificationHiding() &&
+                screenshareNotificationHidingBugFix() &&
+                sensitiveNotificationProtectionController.isSensitiveStateActive
         entries.forEach {
             val section = checkNotNull(it.section) { "Null section for ${it.key}" }
             val entry = checkNotNull(it.representativeEntry) { "Null notif entry for ${it.key}" }
             val isSilent = section.bucket == BUCKET_SILENT
             // NOTE: NotificationEntry.isClearable will internally check group children to ensure
             //  the group itself definitively clearable.
-            val isClearable = entry.isClearable
+            val isClearable = !isSensitiveContentProtectionActive && entry.isClearable
+                    && !entry.isSensitive.value
             when {
                 isSilent && isClearable -> hasClearableSilentNotifs = true
                 isSilent && !isClearable -> hasNonClearableSilentNotifs = true

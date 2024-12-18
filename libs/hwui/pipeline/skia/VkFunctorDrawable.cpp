@@ -16,15 +16,15 @@
 
 #include "VkFunctorDrawable.h"
 
-#include <GrBackendDrawableInfo.h>
 #include <SkAndroidFrameworkUtils.h>
 #include <SkImage.h>
 #include <SkM44.h>
 #include <gui/TraceUtils.h>
+#include <include/gpu/ganesh/vk/GrBackendDrawableInfo.h>
+#include <include/gpu/ganesh/vk/GrVkTypes.h>
 #include <private/hwui/DrawVkInfo.h>
 #include <utils/Color.h>
 #include <utils/Trace.h>
-#include <vk/GrVkTypes.h>
 
 #include <thread>
 

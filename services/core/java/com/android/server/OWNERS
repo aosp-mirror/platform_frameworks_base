@@ -1,5 +1,5 @@
 # BootReceiver / Watchdog
-per-file BootReceiver.java,Watchdog.java = gaillard@google.com
+per-file BootReceiver.java,Watchdog.java = benmiles@google.com
 
 # Connectivity / Networking
 per-file ConnectivityService.java,ConnectivityServiceInitializer.java,NetworkManagementService.java,NsdService.java,VpnManagerService.java = file:/services/core/java/com/android/server/net/OWNERS
@@ -48,3 +48,6 @@ per-file SystemConfig.java = file:/PACKAGE_MANAGER_OWNERS
 
 # CertBlocklister
 per-file Cert*.java = tweek@google.com, brambonne@google.com, prb@google.com, miguelaranda@google.com
+
+# TradeInMode
+per-file TradeInModeService.java = dvander@google.com, paullawrence@google.com

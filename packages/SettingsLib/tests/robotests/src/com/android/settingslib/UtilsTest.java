@@ -16,9 +16,6 @@
 package com.android.settingslib;
 
 import static com.android.settingslib.Utils.STORAGE_MANAGER_ENABLED_PROPERTY;
-import static com.android.settingslib.Utils.WIRELESS_CHARGING_DEFAULT_TIMESTAMP;
-import static com.android.settingslib.Utils.shouldShowWirelessChargingWarningTip;
-import static com.android.settingslib.Utils.updateWirelessChargingNotificationTimestamp;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -62,7 +59,6 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSettings;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +72,6 @@ public class UtilsTest {
     private static final String PERCENTAGE_49 = "49%";
     private static final String PERCENTAGE_50 = "50%";
     private static final String PERCENTAGE_100 = "100%";
-    private static final long CURRENT_TIMESTAMP = System.currentTimeMillis();
 
     private AudioManager mAudioManager;
     private Context mContext;
@@ -546,91 +541,6 @@ public class UtilsTest {
         assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
-    @Test
-    public void shouldShowWirelessChargingNotification_neverSendNotification_returnTrue() {
-        updateWirelessChargingNotificationTimestamp(
-                mContext, WIRELESS_CHARGING_DEFAULT_TIMESTAMP, TAG);
-
-        assertThat(Utils.shouldShowWirelessChargingNotification(mContext, TAG)).isTrue();
-    }
-
-    @Test
-    public void shouldShowNotification_neverSendNotification_updateTimestampAndEnabledState() {
-        updateWirelessChargingNotificationTimestamp(
-                mContext, WIRELESS_CHARGING_DEFAULT_TIMESTAMP, TAG);
-
-        Utils.shouldShowWirelessChargingNotification(mContext, TAG);
-
-        assertThat(getWirelessChargingNotificationTimestamp())
-                .isNotEqualTo(WIRELESS_CHARGING_DEFAULT_TIMESTAMP);
-        assertThat(shouldShowWirelessChargingWarningTip(mContext, TAG)).isTrue();
-    }
-
-    @Test
-    public void shouldShowWirelessChargingNotification_notificationDisabled_returnFalse() {
-        updateWirelessChargingNotificationTimestamp(mContext, CURRENT_TIMESTAMP, TAG);
-
-        assertThat(Utils.shouldShowWirelessChargingNotification(mContext, TAG)).isFalse();
-    }
-
-    @Test
-    public void shouldShowWirelessChargingNotification_withinTimeThreshold_returnFalse() {
-        updateWirelessChargingNotificationTimestamp(mContext, CURRENT_TIMESTAMP, TAG);
-
-        assertThat(Utils.shouldShowWirelessChargingNotification(mContext, TAG)).isFalse();
-    }
-
-    @Test
-    public void shouldShowWirelessChargingNotification_exceedTimeThreshold_returnTrue() {
-        final long monthAgo = Duration.ofDays(31).toMillis();
-        final long timestamp = CURRENT_TIMESTAMP - monthAgo;
-        updateWirelessChargingNotificationTimestamp(mContext, timestamp, TAG);
-
-        assertThat(Utils.shouldShowWirelessChargingNotification(mContext, TAG)).isTrue();
-    }
-
-    @Test
-    public void shouldShowNotification_exceedTimeThreshold_updateTimestampAndEnabledState() {
-        final long monthAgo = Duration.ofDays(31).toMillis();
-        final long timestamp = CURRENT_TIMESTAMP - monthAgo;
-        updateWirelessChargingNotificationTimestamp(mContext, timestamp, TAG);
-
-        Utils.shouldShowWirelessChargingNotification(mContext, TAG);
-
-        assertThat(getWirelessChargingNotificationTimestamp()).isNotEqualTo(timestamp);
-        assertThat(shouldShowWirelessChargingWarningTip(mContext, TAG)).isTrue();
-    }
-
-    @Test
-    public void updateWirelessChargingNotificationTimestamp_dismissForever_setMinValue() {
-        updateWirelessChargingNotificationTimestamp(mContext, Long.MIN_VALUE, TAG);
-
-        assertThat(getWirelessChargingNotificationTimestamp()).isEqualTo(Long.MIN_VALUE);
-    }
-
-    @Test
-    public void updateWirelessChargingNotificationTimestamp_notDismissForever_setTimestamp() {
-        updateWirelessChargingNotificationTimestamp(mContext, CURRENT_TIMESTAMP, TAG);
-
-        assertThat(getWirelessChargingNotificationTimestamp())
-                .isNotEqualTo(WIRELESS_CHARGING_DEFAULT_TIMESTAMP);
-        assertThat(getWirelessChargingNotificationTimestamp()).isNotEqualTo(Long.MIN_VALUE);
-    }
-
-    @Test
-    public void shouldShowWirelessChargingWarningTip_enabled_returnTrue() {
-        Utils.updateWirelessChargingWarningEnabled(mContext, true, TAG);
-
-        assertThat(shouldShowWirelessChargingWarningTip(mContext, TAG)).isTrue();
-    }
-
-    @Test
-    public void shouldShowWirelessChargingWarningTip_disabled_returnFalse() {
-        Utils.updateWirelessChargingWarningEnabled(mContext, false, TAG);
-
-        assertThat(shouldShowWirelessChargingWarningTip(mContext, TAG)).isFalse();
-    }
-
     private void setupIncompatibleCharging() {
         setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY);
     }
@@ -643,12 +553,5 @@ public class UtilsTest {
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
         when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[] {complianceWarningType});
-    }
-
-    private long getWirelessChargingNotificationTimestamp() {
-        return Settings.Secure.getLong(
-                mContext.getContentResolver(),
-                Utils.WIRELESS_CHARGING_NOTIFICATION_TIMESTAMP,
-                WIRELESS_CHARGING_DEFAULT_TIMESTAMP);
     }
 }

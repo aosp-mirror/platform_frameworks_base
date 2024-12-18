@@ -18,11 +18,11 @@ package com.android.wm.shell.flicker.pip.apps
 
 import android.Manifest
 import android.platform.test.annotations.Postsubmit
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.YouTubeAppHelper
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.filters.RequiresDevice
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -65,7 +65,7 @@ open class YouTubeEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransit
         setup {
             standardAppHelper.launchViaIntent(
                 wmHelper,
-                YouTubeAppHelper.getYoutubeVideoIntent("HPcEAtoXXLA"),
+                YouTubeAppHelper.getYoutubeVideoIntent("3KtWfp0UopM"),
                 ComponentNameMatcher(YouTubeAppHelper.PACKAGE_NAME, "")
             )
             standardAppHelper.waitForVideoPlaying()

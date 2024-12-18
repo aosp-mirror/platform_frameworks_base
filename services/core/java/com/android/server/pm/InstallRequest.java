@@ -49,6 +49,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
@@ -57,6 +58,7 @@ import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -130,6 +132,12 @@ final class InstallRequest {
     @Nullable
     private String mApexModuleName;
 
+    /**
+     * The title of the responsible installer for the archive behavior used
+     */
+    @Nullable
+    private SparseArray<String> mResponsibleInstallerTitles;
+
     @Nullable
     private ScanResult mScanResult;
 
@@ -158,29 +166,34 @@ final class InstallRequest {
     @Nullable
     private DomainSet mPreVerifiedDomains;
 
+    private int mInstallerUidForInstallExisting = INVALID_UID;
+
+    private final boolean mHasAppMetadataFileFromInstaller;
+
     // New install
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
         mInstallArgs = new InstallArgs(params.mOriginInfo, params.mMoveInfo, params.mObserver,
                 params.mInstallFlags, params.mDevelopmentInstallFlags, params.mInstallSource,
-                params.mVolumeUuid,  params.getUser(), null /*instructionSets*/,
+                params.mVolumeUuid, params.getUser(), null /*instructionSets*/,
                 params.mPackageAbiOverride, params.mPermissionStates,
                 params.mAllowlistedRestrictedPermissions, params.mAutoRevokePermissionsMode,
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
-                params.mApplicationEnabledSettingPersistent);
+                params.mApplicationEnabledSettingPersistent, params.mDexoptCompilerFilter);
         mPackageLite = params.mPackageLite;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
         mRequireUserAction = params.mRequireUserAction;
         mPreVerifiedDomains = params.mPreVerifiedDomains;
+        mHasAppMetadataFileFromInstaller = params.mHasAppMetadataFile;
     }
 
     // Install existing package as user
     InstallRequest(int userId, int returnCode, AndroidPackage pkg, int[] newUsers,
-            Runnable runnable) {
+            Runnable runnable, int appId, int installerUid, boolean isSystem) {
         mUserId = userId;
         mInstallArgs = null;
         mReturnCode = returnCode;
@@ -191,6 +204,10 @@ final class InstallRequest {
         mIsInstallForUsers = true;
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
+        mAppId = appId;
+        mInstallerUidForInstallExisting = installerUid;
+        mSystem = isSystem;
+        mHasAppMetadataFileFromInstaller = false;
     }
 
     // addForInit
@@ -212,6 +229,7 @@ final class InstallRequest {
         mSessionId = -1;
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mDisabledPs = disabledPs;
+        mHasAppMetadataFileFromInstaller = false;
     }
 
     @Nullable
@@ -359,6 +377,10 @@ final class InstallRequest {
         return PackageInstallerSession.isArchivedInstallation(getInstallFlags());
     }
 
+    public boolean hasAppMetadataFile() {
+        return mHasAppMetadataFileFromInstaller;
+    }
+
     @Nullable
     public String getRemovedPackage() {
         return mRemovedInfo != null ? mRemovedInfo.mRemovedPackage : null;
@@ -381,7 +403,8 @@ final class InstallRequest {
 
     public int getInstallerPackageUid() {
         return (mInstallArgs != null && mInstallArgs.mInstallSource != null)
-                ? mInstallArgs.mInstallSource.mInstallerPackageUid : INVALID_UID;
+                ? mInstallArgs.mInstallSource.mInstallerPackageUid
+                : mInstallerUidForInstallExisting;
     }
 
     public int getDataLoaderType() {
@@ -412,6 +435,12 @@ final class InstallRequest {
     public String getApexModuleName() {
         return mApexModuleName;
     }
+
+    @Nullable
+    public SparseArray<String> getResponsibleInstallerTitles() {
+        return mResponsibleInstallerTitles;
+    }
+
     public boolean isRollback() {
         return mInstallArgs != null
                 && mInstallArgs.mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK;
@@ -681,6 +710,11 @@ final class InstallRequest {
         return mWarnings;
     }
 
+    @Nullable
+    public String getDexoptCompilerFilter() {
+        return mInstallArgs != null ? mInstallArgs.mDexoptCompilerFilter : null;
+    }
+
     public void setScanFlags(int scanFlags) {
         mScanFlags = scanFlags;
     }
@@ -748,6 +782,11 @@ final class InstallRequest {
 
     public void setApexModuleName(@Nullable String apexModuleName) {
         mApexModuleName = apexModuleName;
+    }
+
+    public void setResponsibleInstallerTitles(
+            @NonNull SparseArray<String> responsibleInstallerTitles) {
+        mResponsibleInstallerTitles = responsibleInstallerTitles;
     }
 
     public void setPkg(AndroidPackage pkg) {
@@ -827,6 +866,14 @@ final class InstallRequest {
     public void setScannedPackageSettingLastUpdateTime(long lastUpdateTim) {
         assertScanResultExists();
         mScanResult.mPkgSetting.setLastUpdateTime(lastUpdateTim);
+    }
+
+    public void setScannedPackageSettingFirstInstallTime(long firstInstallTime) {
+        assertScanResultExists();
+        PackageUserStateInternal userState = mScanResult.mPkgSetting.getUserStates().get(mUserId);
+        if (userState != null && userState.getFirstInstallTimeMillis() == 0) {
+            mScanResult.mPkgSetting.setFirstInstallTime(firstInstallTime, mUserId);
+        }
     }
 
     public void setRemovedAppId(int appId) {

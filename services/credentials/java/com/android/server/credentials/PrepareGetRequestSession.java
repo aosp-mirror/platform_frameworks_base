@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IGetCredentialCallback;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
  * responses from providers, and the UX app, and updates the provider(s) state.
  */
 public class PrepareGetRequestSession extends GetRequestSession {
-    private static final String TAG = "PrepareGetRequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     private final IPrepareGetCredentialCallback mPrepareGetCredentialCallback;
 
@@ -193,7 +194,8 @@ public class PrepareGetRequestSession extends GetRequestSession {
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
                             /*isShowAllOptionsRequested=*/ false),
-                    providerDataList);
+                    providerDataList,
+                    mRequestSessionMetric);
         } else {
             return null;
         }

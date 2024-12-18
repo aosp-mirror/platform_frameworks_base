@@ -26,6 +26,11 @@ import java.util.Set;
  * @hide
  */
 public class CasResource {
+    /**
+     * Handle of the current resource. Should not be changed and should be aligned with the driver
+     * level implementation.
+     */
+    final int mHandle;
 
     private final int mSystemId;
 
@@ -39,9 +44,14 @@ public class CasResource {
     private Map<Integer, Integer> mOwnerClientIdsToSessionNum = new HashMap<>();
 
     CasResource(Builder builder) {
+        this.mHandle = builder.mHandle;
         this.mSystemId = builder.mSystemId;
         this.mMaxSessionNum = builder.mMaxSessionNum;
         this.mAvailableSessionNum = builder.mMaxSessionNum;
+    }
+
+    public int getHandle() {
+        return mHandle;
     }
 
     public int getSystemId() {
@@ -136,10 +146,12 @@ public class CasResource {
      */
     public static class Builder {
 
+        private final int mHandle;
         private int mSystemId;
         protected int mMaxSessionNum;
 
-        Builder(int systemId) {
+        Builder(int handle, int systemId) {
+            this.mHandle = handle;
             this.mSystemId = systemId;
         }
 

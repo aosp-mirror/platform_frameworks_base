@@ -52,7 +52,7 @@ data class TurbulenceNoiseAnimationConfig(
     /** Color of the effect. */
     val color: Int = DEFAULT_COLOR,
     /** Background color of the effect. */
-    val backgroundColor: Int = DEFAULT_BACKGROUND_COLOR,
+    val screenColor: Int = DEFAULT_SCREEN_COLOR,
     val width: Float = 0f,
     val height: Float = 0f,
     val maxDuration: Float = DEFAULT_MAX_DURATION_IN_MILLIS,
@@ -72,7 +72,7 @@ data class TurbulenceNoiseAnimationConfig(
      */
     val lumaMatteOverallBrightness: Float = DEFAULT_LUMA_MATTE_OVERALL_BRIGHTNESS,
     /** Whether to flip the luma mask. */
-    val shouldInverseNoiseLuminosity: Boolean = false
+    val shouldInverseNoiseLuminosity: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_MAX_DURATION_IN_MILLIS = 30_000f // Max 30 sec
@@ -83,7 +83,7 @@ data class TurbulenceNoiseAnimationConfig(
         const val DEFAULT_COLOR = Color.WHITE
         const val DEFAULT_LUMA_MATTE_BLEND_FACTOR = 1f
         const val DEFAULT_LUMA_MATTE_OVERALL_BRIGHTNESS = 0f
-        const val DEFAULT_BACKGROUND_COLOR = Color.BLACK
+        const val DEFAULT_SCREEN_COLOR = Color.BLACK
         private val random = Random()
     }
 }

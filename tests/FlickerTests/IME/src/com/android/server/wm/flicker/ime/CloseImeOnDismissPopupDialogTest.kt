@@ -32,6 +32,9 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
+/**
+ * To run this test: `atest FlickerTestsIme1:CloseImeOnDismissPopupDialogTest`
+ */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -83,11 +86,12 @@ class CloseImeOnDismissPopupDialogTest(flicker: LegacyFlickerTest) : BaseTest(fl
                     }
                 if (imeSnapshotLayers.isNotEmpty()) {
                     val visibleAreas =
-                        imeSnapshotLayers
-                            .mapNotNull { imeSnapshotLayer -> imeSnapshotLayer.layer.visibleRegion }
+                        imeSnapshotLayers.mapNotNull { imeSnapshotLayer ->
+                            imeSnapshotLayer.layer.visibleRegion
+                        }
                     val imeVisibleRegion = RegionSubject(visibleAreas, timestamp)
                     val appVisibleRegion = it.visibleRegion(imeTestApp)
-                    if (imeVisibleRegion.region.isNotEmpty) {
+                    if (!imeVisibleRegion.region.isEmpty) {
                         imeVisibleRegion.coversAtMost(appVisibleRegion.region)
                     }
                 }

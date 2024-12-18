@@ -40,7 +40,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
@@ -293,6 +293,32 @@ public class UnfoldTransitionHandlerTest {
                 mock(SurfaceControl.Transaction.class),
                 finishCallback
         );
+
+        verify(finishCallback).onTransitionFinished(any());
+    }
+
+    @Test
+    public void fold_animationInProgress_finishesTransition() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        // Unfold
+        mShellUnfoldProgressProvider.onFoldStateChanged(/* isFolded= */ false);
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        // Start animation but don't finish it
+        mShellUnfoldProgressProvider.onStateChangeStarted();
+        mShellUnfoldProgressProvider.onStateChangeProgress(0.5f);
+
+        // Fold
+        mShellUnfoldProgressProvider.onFoldStateChanged(/* isFolded= */ true);
 
         verify(finishCallback).onTransitionFinished(any());
     }

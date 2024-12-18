@@ -35,16 +35,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class SystemPropertiesTest {
+    private static final String KEY = "sys.testkey";
+    private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
+    private static final String PERSIST_KEY = "persist.sys.testkey";
+    private static final String NONEXIST_KEY = "doesnotexist_2341431";
+
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
             .setSystemPropertyMutable(KEY, null)
             .setSystemPropertyMutable(UNSET_KEY, null)
             .setSystemPropertyMutable(PERSIST_KEY, null)
+            .setSystemPropertyImmutable(NONEXIST_KEY, null)
             .build();
-
-    private static final String KEY = "sys.testkey";
-    private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
-    private static final String PERSIST_KEY = "persist.sys.testkey";
 
     @Test
     @SmallTest
@@ -117,7 +119,7 @@ public class SystemPropertiesTest {
     @SmallTest
     public void testHandle() throws Exception {
         String value;
-        SystemProperties.Handle handle = SystemProperties.find("doesnotexist_2341431");
+        SystemProperties.Handle handle = SystemProperties.find(NONEXIST_KEY);
         assertNull(handle);
         SystemProperties.set(KEY, "abc");
         handle = SystemProperties.find(KEY);

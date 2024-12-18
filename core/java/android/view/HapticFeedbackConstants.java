@@ -16,11 +16,30 @@
 
 package android.view;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Constants to be used to perform haptic feedback effects via
  * {@link View#performHapticFeedback(int)} 
  */
 public class HapticFeedbackConstants {
+    /** @hide **/
+    @IntDef(flag = true, prefix = "FLAG_", value = {
+            FLAG_IGNORE_VIEW_SETTING,
+            FLAG_IGNORE_GLOBAL_SETTING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
+    /** @hide **/
+    @IntDef(flag = true, prefix = "PRIVATE_FLAG_", value = {
+            PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrivateFlags {}
 
     private HapticFeedbackConstants() {}
 
@@ -83,11 +102,7 @@ public class HapticFeedbackConstants {
      */
     public static final int TEXT_HANDLE_MOVE = 9;
 
-    /**
-     * The user unlocked the device
-     * @hide
-     */
-    public static final int ENTRY_BUMP = 10;
+    // REMOVED: ENTRY_BUMP = 10
 
     /**
      * The user has moved the dragged object within a droppable area.
@@ -161,7 +176,7 @@ public class HapticFeedbackConstants {
 
     /**
      * The user is executing a swipe/drag-style gesture, such as pull-to-refresh, where the
-     * gesture action is “eligible” at a certain threshold of movement, and can be cancelled by
+     * gesture action is "eligible" at a certain threshold of movement, and can be cancelled by
      * moving back past the threshold. This constant indicates that the user's motion has just
      * passed the threshold for the action to be activated on release.
      *
@@ -171,7 +186,7 @@ public class HapticFeedbackConstants {
 
     /**
      * The user is executing a swipe/drag-style gesture, such as pull-to-refresh, where the
-     * gesture action is “eligible” at a certain threshold of movement, and can be cancelled by
+     * gesture action is "eligible" at a certain threshold of movement, and can be cancelled by
      * moving back past the threshold. This constant indicates that the user's motion has just
      * re-crossed back "under" the threshold for the action to be activated, meaning the gesture is
      * currently in a cancelled state.
@@ -230,6 +245,22 @@ public class HapticFeedbackConstants {
     public static final int LONG_PRESS_POWER_BUTTON = 10003;
 
     /**
+     * A haptic effect to signal the confirmation of a user biometric authentication
+     * (e.g. fingerprint reading).
+     * This is a private constant to be used only by system apps.
+     * @hide
+     */
+    public static final int BIOMETRIC_CONFIRM = 10004;
+
+    /**
+     * A haptic effect to signal the rejection of a user biometric authentication attempt
+     * (e.g. fingerprint reading).
+     * This is a private constant to be used only by system apps.
+     * @hide
+     */
+    public static final int BIOMETRIC_REJECT = 10005;
+
+    /**
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the setting in the
      * view for whether to perform haptic feedback, do it always.
@@ -246,4 +277,14 @@ public class HapticFeedbackConstants {
      */
     @Deprecated
     public static final int FLAG_IGNORE_GLOBAL_SETTING = 0x0002;
+
+    /**
+     * Flag for {@link android.os.Vibrator#performHapticFeedback(int, boolean, String, int, int)} or
+     * {@link ViewRootImpl#performHapticFeedback(int, boolean, int, int)}: Perform the haptic
+     * feedback with the input method vibration settings, e.g. applying the keyboard vibration
+     * user settings to the KEYBOARD_* constants.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_APPLY_INPUT_METHOD_SETTINGS = 0x0001;
 }

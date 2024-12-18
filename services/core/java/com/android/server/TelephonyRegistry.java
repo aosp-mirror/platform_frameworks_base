@@ -55,6 +55,7 @@ import android.telephony.Annotation.SrvccState;
 import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
 import android.telephony.CallState;
+import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.CellSignalStrength;
@@ -425,6 +426,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int[] mSCBMReason;
     private boolean[] mSCBMStarted;
 
+    private boolean[] mCarrierRoamingNtnMode = null;
+    private boolean[] mCarrierRoamingNtnEligible = null;
+
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
      * type and APN setting. This is the cache to prevent redundant callbacks to the listeners.
@@ -723,6 +727,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mECBMStarted = copyOf(mECBMStarted, mNumPhones);
             mSCBMReason = copyOf(mSCBMReason, mNumPhones);
             mSCBMStarted = copyOf(mSCBMStarted, mNumPhones);
+            mCarrierRoamingNtnMode = copyOf(mCarrierRoamingNtnMode, mNumPhones);
+            mCarrierRoamingNtnEligible = copyOf(mCarrierRoamingNtnEligible, mNumPhones);
             // ds -> ss switch.
             if (mNumPhones < oldNumPhones) {
                 cutListToSize(mCellInfo, mNumPhones);
@@ -781,6 +787,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mECBMStarted[i] = false;
                 mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
                 mSCBMStarted[i] = false;
+                mCarrierRoamingNtnMode[i] = false;
+                mCarrierRoamingNtnEligible[i] = false;
             }
         }
     }
@@ -854,6 +862,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mECBMStarted = new boolean[numPhones];
         mSCBMReason = new int[numPhones];
         mSCBMStarted = new boolean[numPhones];
+        mCarrierRoamingNtnMode = new boolean[numPhones];
+        mCarrierRoamingNtnEligible = new boolean[numPhones];
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -897,6 +907,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mECBMStarted[i] = false;
             mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
             mSCBMStarted[i] = false;
+            mCarrierRoamingNtnMode[i] = false;
+            mCarrierRoamingNtnEligible[i] = false;
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -915,8 +927,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     //helper function to determine if limit on num listeners applies to callingUid
     private boolean doesLimitApplyForListeners(int callingUid, int exemptUid) {
-        return (callingUid != Process.SYSTEM_UID
-                && callingUid != Process.PHONE_UID
+        return (!TelephonyPermissions.isSystemOrPhone(callingUid)
                 && callingUid != exemptUid);
     }
 
@@ -1126,20 +1137,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        int phoneId = -1;
         int subscriptionId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-        if(Flags.preventSystemServerAndPhoneDeadlock()) {
-            // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
-            // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
-            if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-                if (DBG) {
-                    log("invalid subscription id, use default id");
-                }
-            } else { //APP specify subID
-                subscriptionId = subId;
+        // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
+        // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            if (DBG) {
+                log("invalid subscription id, use default id");
             }
-            phoneId = getPhoneIdFromSubId(subscriptionId);
+        } else { //APP specify subID
+            subscriptionId = subId;
         }
+        int phoneId = getPhoneIdFromSubId(subscriptionId);
 
         synchronized (mRecords) {
             // register
@@ -1160,23 +1168,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             r.renounceFineLocationAccess = renounceFineLocationAccess;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
-
-            if(!Flags.preventSystemServerAndPhoneDeadlock()) {
-                // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
-                // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
-                if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-                    if (DBG) {
-                        log("invalid subscription id, use default id");
-                    }
-                    r.subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-                } else {//APP specify subID
-                    r.subId = subId;
-                }
-                r.phoneId = getPhoneIdFromSubId(r.subId);
-            } else {
-                r.subId = subscriptionId;
-                r.phoneId = phoneId;
-            }
+            r.subId = subscriptionId;
+            r.phoneId = phoneId;
             r.eventList = events;
 
             if (DBG) {
@@ -1523,6 +1516,23 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         remove(r.binder);
                     }
                 }
+                if (events.contains(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnModeChanged(
+                                mCarrierRoamingNtnMode[r.phoneId]);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnEligibleStateChanged(
+                                mCarrierRoamingNtnEligible[r.phoneId]);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
             }
         }
     }
@@ -1722,41 +1732,47 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 // In the future, we can remove this logic for every notification here and add a
                 // callback so listeners know when their PhoneStateListener's subId becomes invalid,
                 // but for now we use the simplest fix.
-                if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
+                if (validatePhoneId(phoneId)) {
                     mServiceState[phoneId] = state;
 
-                    for (Record r : mRecords) {
-                        if (VDBG) {
-                            log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
-                                    + " phoneId=" + phoneId + " state=" + state);
-                        }
-                        if (r.matchTelephonyCallbackEvent(
-                                TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
-                                && idMatch(r, subId, phoneId)) {
+                    if (SubscriptionManager.isValidSubscriptionId(subId)) {
 
-                            try {
-                                ServiceState stateToSend;
-                                if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                    stateToSend = new ServiceState(state);
-                                } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                    stateToSend = state.createLocationInfoSanitizedCopy(false);
-                                } else {
-                                    stateToSend = state.createLocationInfoSanitizedCopy(true);
+                        for (Record r : mRecords) {
+                            if (VDBG) {
+                                log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
+                                        + " phoneId=" + phoneId + " state=" + state);
+                            }
+                            if (r.matchTelephonyCallbackEvent(
+                                    TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
+                                    && idMatch(r, subId, phoneId)) {
+
+                                try {
+                                    ServiceState stateToSend;
+                                    if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                        stateToSend = new ServiceState(state);
+                                    } else if(checkCoarseLocationAccess(
+                                            r, Build.VERSION_CODES.Q)) {
+                                        stateToSend = state.createLocationInfoSanitizedCopy(false);
+                                    } else {
+                                        stateToSend = state.createLocationInfoSanitizedCopy(true);
+                                    }
+                                    if (DBG) {
+                                        log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
+                                                + " subId=" + subId + " phoneId=" + phoneId
+                                                + " state=" + stateToSend);
+                                    }
+                                    r.callback.onServiceStateChanged(stateToSend);
+                                } catch (RemoteException ex) {
+                                    mRemoveList.add(r.binder);
                                 }
-                                if (DBG) {
-                                    log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
-                                            + " subId=" + subId + " phoneId=" + phoneId
-                                            + " state=" + stateToSend);
-                                }
-                                r.callback.onServiceStateChanged(stateToSend);
-                            } catch (RemoteException ex) {
-                                mRemoveList.add(r.binder);
                             }
                         }
                     }
+                    else {
+                        log("notifyServiceStateForSubscriber: INVALID subId=" +subId);
+                    }
                 } else {
-                    log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
-                            + " or subId=" + subId);
+                    log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId);
                 }
                 handleRemoveListLocked();
             }
@@ -1914,14 +1930,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private void notifyCarrierNetworkChangeWithPermission(int subId, boolean active) {
-        int phoneId = -1;
-        if(Flags.preventSystemServerAndPhoneDeadlock()) {
-            phoneId = getPhoneIdFromSubId(subId);
-        }
+        int phoneId = getPhoneIdFromSubId(subId);
         synchronized (mRecords) {
-            if(!Flags.preventSystemServerAndPhoneDeadlock()) {
-                phoneId = getPhoneIdFromSubId(subId);
-            }
             mCarrierNetworkChangeState[phoneId] = active;
 
             if (VDBG) {
@@ -2225,7 +2235,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     for (Record r : mRecords) {
                         if (r.matchTelephonyCallbackEvent(
                                 TelephonyCallback.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED)
-                                && idMatch(r, subId, phoneId)) {
+                                && idMatchRelaxed(r, subId, phoneId)) {
                             try {
                                 r.callback.onPreciseDataConnectionStateChanged(preciseState);
                             } catch (RemoteException ex) {
@@ -2701,7 +2711,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_RADIO_POWER_STATE_CHANGED)
-                            && idMatch(r, subId, phoneId)) {
+                            && idMatchRelaxed(r, subId, phoneId)) {
                         try {
                             r.callback.onRadioPowerStateChanged(state);
                         } catch (RemoteException ex) {
@@ -3000,7 +3010,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // Always redact location info from PhysicalChannelConfig if the registrant is from neither
         // PHONE nor SYSTEM process. There is no user case that the registrant needs the location
         // info (e.g. physicalCellId). This also remove the need for the location permissions check.
-        return record.callerUid != Process.PHONE_UID && record.callerUid != Process.SYSTEM_UID;
+        return !TelephonyPermissions.isSystemOrPhone(record.callerUid);
     }
 
     /**
@@ -3512,6 +3522,96 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         handleRemoveListLocked();
     }
 
+    /**
+     * Notify external listeners that carrier roaming non-terrestrial network mode changed.
+     * @param subId subscription ID.
+     * @param active {@code true} If the device is connected to carrier roaming
+     *                           non-terrestrial network or was connected within the
+     *                           {CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT}
+     *                           duration, {code false} otherwise.
+     */
+    public void notifyCarrierRoamingNtnModeChanged(int subId, boolean active) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnModeChanged")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnModeChanged: subId=" + subId + " active=" + active);
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            if (!validatePhoneId(phoneId)) {
+                loge("Invalid phone ID " + phoneId + " for " + subId);
+                return;
+            }
+            mCarrierRoamingNtnMode[phoneId] = active;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnModeChanged(active);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    /**
+     * Notify external listeners that device eligibility to connect to carrier roaming
+     * non-terrestrial network changed.
+     *
+     * @param subId subscription ID.
+     * @param eligible {@code true} when the device is eligible for satellite
+     * communication if all the following conditions are met:
+     * <ul>
+     * <li>Any subscription on the device supports P2P satellite messaging which is defined by
+     * {@link CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} </li>
+     * <li>{@link CarrierConfigManager#KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT} set to
+     * {@link CarrierConfigManager#CARRIER_ROAMING_NTN_CONNECT_MANUAL} </li>
+     * <li>The device is in {@link ServiceState#STATE_OUT_OF_SERVICE}, not connected to Wi-Fi,
+     * and the hysteresis timer defined by {@link CarrierConfigManager
+     * #KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT} is expired. </li>
+     * </ul>
+     */
+    public void notifyCarrierRoamingNtnEligibleStateChanged(int subId, boolean eligible) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnEligibleStateChanged")) {
+            log("notifyCarrierRoamingNtnEligibleStateChanged: caller does not have required "
+                    + "permissions.");
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnEligibleStateChanged: "
+                    + "subId=" + subId + " eligible" + eligible);
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            if (!validatePhoneId(phoneId)) {
+                loge("Invalid phone ID " + phoneId + " for " + subId);
+                return;
+            }
+            mCarrierRoamingNtnEligible[phoneId] = eligible;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnEligibleStateChanged(eligible);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -3565,6 +3665,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mECBMStarted=" + mECBMStarted[i]);
                 pw.println("mSCBMReason=" + mSCBMReason[i]);
                 pw.println("mSCBMStarted=" + mSCBMStarted[i]);
+                pw.println("mCarrierRoamingNtnMode=" + mCarrierRoamingNtnMode[i]);
+                pw.println("mCarrierRoamingNtnEligible=" + mCarrierRoamingNtnEligible[i]);
 
                 // We need to obfuscate package names, and primitive arrays' native toString is ugly
                 Pair<List<String>, int[]> carrierPrivilegeState = mCarrierPrivilegeStates.get(i);
@@ -4058,6 +4160,45 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return (r.phoneId == phoneId);
         }
         if (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
+            return (subId == mDefaultSubId);
+        } else {
+            return (r.subId == subId);
+        }
+    }
+
+    /**
+     * Match the sub id or phone id of the event to the record with relaxed rules
+     *
+     * We follow the rules below:
+     * 1) If sub id of the event is invalid, phone id should be used.
+     * 2) If record's phoneId is also invalid then allow phone 0 notifications
+     * 3) The event on default sub should be notified to the records
+     * which register the default sub id.
+     * 4) Sub id should be exactly matched for all other cases.
+     * TODO: b/337878785 for longterm fix
+     */
+    boolean idMatchRelaxed(Record r, int subId, int phoneId) {
+        if (!Flags.useRelaxedIdMatch()) {
+            return idMatch(r, subId, phoneId);
+        }
+
+        if (subId < 0) {
+            // Invalid case, we need compare phoneId.
+            // If the record does not have a valid phone Id send phone 0 notifications.
+            // A record's phoneId can get invalid if there is no SIM or modem was restarting
+            // when caller registered.
+            if (r.phoneId == INVALID_SIM_SLOT_INDEX) {
+                return (phoneId == 0);
+            } else {
+                return (r.phoneId == phoneId);
+            }
+        }
+
+        if (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
+            // if the registered record does not have a valid phoneId then use the phone 0
+            if (r.phoneId == INVALID_SIM_SLOT_INDEX) {
+                return (phoneId == 0);
+            }
             return (subId == mDefaultSubId);
         } else {
             return (r.subId == subId);

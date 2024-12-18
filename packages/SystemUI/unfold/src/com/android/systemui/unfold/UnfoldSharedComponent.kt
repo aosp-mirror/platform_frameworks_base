@@ -87,6 +87,7 @@ interface RemoteUnfoldSharedComponent {
             @BindsInstance @UnfoldMain executor: Executor,
             @BindsInstance @UnfoldMain handler: Handler,
             @BindsInstance @UnfoldSingleThreadBg singleThreadBgExecutor: Executor,
+            @BindsInstance @UnfoldBg bgHandler: Handler,
             @BindsInstance displayManager: DisplayManager,
             @BindsInstance @UnfoldTransitionATracePrefix tracingTagPrefix: String,
         ): RemoteUnfoldSharedComponent

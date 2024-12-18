@@ -47,6 +47,8 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -82,6 +84,7 @@ import java.util.Locale;
  *
  * @hide
  */
+@RavenwoodKeepWholeClass
 public class ResourcesImpl {
     static final String TAG = "Resources";
 
@@ -144,6 +147,10 @@ public class ResourcesImpl {
 
     // Cyclical cache used for recently-accessed XML files.
     private int mLastCachedXmlBlockIndex = -1;
+
+    // The hash that allows to detect when the shared libraries applied to this object have changed,
+    // and it is outdated and needs to be replaced.
+    private final int mAppliedSharedLibsHash;
     private final int[] mCachedXmlBlockCookies = new int[XML_BLOCK_CACHE_SIZE];
     private final String[] mCachedXmlBlockFiles = new String[XML_BLOCK_CACHE_SIZE];
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[XML_BLOCK_CACHE_SIZE];
@@ -197,6 +204,8 @@ public class ResourcesImpl {
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
+        mAppliedSharedLibsHash =
+                ResourcesManager.getInstance().updateResourceImplWithRegisteredLibs(this);
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
@@ -212,6 +221,11 @@ public class ResourcesImpl {
         return mAssets;
     }
 
+    @UnsupportedAppUsage
+    public DisplayMetrics getMetrics() {
+        return mMetrics;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     DisplayMetrics getDisplayMetrics() {
         if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
@@ -219,7 +233,8 @@ public class ResourcesImpl {
         return mMetrics;
     }
 
-    Configuration getConfiguration() {
+    @UnsupportedAppUsage
+    public Configuration getConfiguration() {
         return mConfiguration;
     }
 
@@ -677,6 +692,7 @@ public class ResourcesImpl {
     }
 
     @Nullable
+    @RavenwoodThrow(blockedBy = Drawable.class)
     Drawable loadDrawable(@NonNull Resources wrapper, @NonNull TypedValue value, int id,
             int density, @Nullable Resources.Theme theme)
             throws NotFoundException {
@@ -1023,6 +1039,7 @@ public class ResourcesImpl {
      * Loads a font from XML or resources stream.
      */
     @Nullable
+    @RavenwoodThrow(blockedBy = Typeface.class)
     public Typeface loadFont(Resources wrapper, TypedValue value, int id) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
@@ -1591,5 +1608,9 @@ public class ResourcesImpl {
         public void pop() {
             mSize--;
         }
+    }
+
+    public int getAppliedSharedLibsHash() {
+        return mAppliedSharedLibsHash;
     }
 }

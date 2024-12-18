@@ -18,6 +18,7 @@
     package="com.android.systemui.accessibility.accessibilitymenu">
 
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
+    <uses-permission android:name="android.permission.MANAGE_USERS"/>
 
     <application android:supportsRtl="true">
         <service
@@ -40,7 +41,7 @@
             android:exported="true"
             android:label="@string/accessibility_menu_settings_name"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.SettingsBase">
+            android:theme="@style/SettingsTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

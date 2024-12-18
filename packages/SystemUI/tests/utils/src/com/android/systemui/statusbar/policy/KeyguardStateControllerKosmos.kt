@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import org.mockito.Mockito.mock
 
-var Kosmos.keyguardStateController by Kosmos.Fixture { mock<KeyguardStateController>() }
+var Kosmos.keyguardStateController: KeyguardStateController by
+    Kosmos.Fixture { mock(KeyguardStateController::class.java) }

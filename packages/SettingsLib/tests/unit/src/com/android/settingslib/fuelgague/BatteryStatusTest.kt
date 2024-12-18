@@ -38,6 +38,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_REGULAR
 import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_SLOWLY
 import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_UNKNOWN
 import com.android.settingslib.fuelgauge.BatteryStatus.isBatteryDefender
+import com.android.settingslib.fuelgauge.BatteryUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import java.util.Optional
@@ -253,12 +254,17 @@ open class BatteryStatusTest {
         private val maxChargingCurrent: Optional<Int>,
         private val maxChargingVoltage: Optional<Int>,
         private val expectedChargingSpeed: Int,
+        private val chargingStringV2Enabled: Boolean,
     ) {
 
         val context: Context = ApplicationProvider.getApplicationContext()
 
         @Test
         fun getChargingSpeed_() {
+            BatteryUtils.setChargingStringV2Enabled(
+                chargingStringV2Enabled,
+                false /* updateProperty */
+            )
             val batteryChangedIntent =
                 Intent(Intent.ACTION_BATTERY_CHANGED).apply {
                     maxChargingCurrent.ifPresent { putExtra(EXTRA_MAX_CHARGING_CURRENT, it) }
@@ -278,37 +284,57 @@ open class BatteryStatusTest {
                         "maxCurrent=n/a, maxVoltage=n/a -> UNKNOWN",
                         Optional.empty<Int>(),
                         Optional.empty<Int>(),
-                        CHARGING_UNKNOWN
+                        CHARGING_UNKNOWN,
+                        false /* chargingStringV2Enabled */
                     ),
                     arrayOf(
                         "maxCurrent=0, maxVoltage=9000000 -> UNKNOWN",
                         Optional.of(0),
                         Optional.of(0),
-                        CHARGING_UNKNOWN
+                        CHARGING_UNKNOWN,
+                        false /* chargingStringV2Enabled */
                     ),
                     arrayOf(
                         "maxCurrent=1500000, maxVoltage=5000000 -> CHARGING_REGULAR",
                         Optional.of(1500000),
                         Optional.of(5000000),
-                        CHARGING_REGULAR
+                        CHARGING_REGULAR,
+                        false /* chargingStringV2Enabled */
                     ),
                     arrayOf(
                         "maxCurrent=1000000, maxVoltage=5000000 -> CHARGING_REGULAR",
                         Optional.of(1000000),
                         Optional.of(5000000),
-                        CHARGING_REGULAR
+                        CHARGING_REGULAR,
+                        false /* chargingStringV2Enabled */
                     ),
                     arrayOf(
                         "maxCurrent=1500001, maxVoltage=5000000 -> CHARGING_FAST",
                         Optional.of(1501000),
                         Optional.of(5000000),
-                        CHARGING_FAST
+                        CHARGING_FAST,
+                        false /* chargingStringV2Enabled */
                     ),
                     arrayOf(
                         "maxCurrent=999999, maxVoltage=5000000 -> CHARGING_SLOWLY",
                         Optional.of(999999),
                         Optional.of(5000000),
-                        CHARGING_SLOWLY
+                        CHARGING_SLOWLY,
+                        false /* chargingStringV2Enabled */
+                    ),
+                    arrayOf(
+                        "maxCurrent=3000000, maxVoltage=9000000 -> CHARGING_FAST",
+                        Optional.of(3000000),
+                        Optional.of(9000000),
+                        CHARGING_FAST,
+                        true /* chargingStringV2Enabled */
+                    ),
+                    arrayOf(
+                        "maxCurrent=2200000, maxVoltage=9000000 -> CHARGING_REGULAR",
+                        Optional.of(2200000),
+                        Optional.of(9000000),
+                        CHARGING_REGULAR,
+                        true /* chargingStringV2Enabled */
                     ),
                 )
         }

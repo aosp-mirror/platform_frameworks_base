@@ -28,6 +28,8 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,8 +44,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
-
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -57,12 +57,12 @@ import android.os.Handler;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
@@ -96,8 +96,9 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
-import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wmshell.BubblesManager;
+
+import kotlinx.coroutines.test.TestScope;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -110,13 +111,11 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
 
-import kotlinx.coroutines.test.TestScope;
-
 /**
  * Tests for {@link NotificationGutsManager}.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationGutsManagerTest extends SysuiTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
@@ -124,12 +123,11 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
 
-    private KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
-    private TestScope mTestScope = mKosmos.getTestScope();
-    private JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
-    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
-    private TestableLooper mTestableLooper;
-    private Handler mHandler;
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
+    private final FakeExecutor mExecutor = mKosmos.getFakeExecutor();
+    private final Handler mHandler = mKosmos.getFakeExecutorHandler();
     private NotificationTestHelper mHelper;
     private NotificationGutsManager mGutsManager;
 
@@ -171,10 +169,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
-        mHandler = Handler.createAsync(mTestableLooper.getLooper());
-        mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
+        mHelper = new NotificationTestHelper(mContext, mDependency);
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mWindowRootViewVisibilityInteractor = new WindowRootViewVisibilityInteractor(
@@ -184,7 +180,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 PowerInteractorFactory.create().getPowerInteractor(),
                 mActiveNotificationsInteractor,
-                mKosmos.getFakeSceneContainerFlags(),
                 () -> mKosmos.getSceneInteractor()
         );
 
@@ -248,7 +243,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         assertTrue(mGutsManager.openGutsInternal(row, 0, 0, menuItem));
         assertEquals(View.INVISIBLE, guts.getVisibility());
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         verify(guts).openControls(
                 anyInt(),
                 anyInt(),
@@ -261,7 +256,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
         verify(row, times(1)).setGutsView(any());
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         verify(mHeadsUpManager).setGutsShown(realRow.getEntry(), false);
     }
 
@@ -352,7 +347,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(entry.getGuts()).thenReturn(guts);
 
         assertTrue(mGutsManager.openGutsInternal(row, 0, 0, menuItem));
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         verify(guts).openControls(
                 anyInt(),
                 anyInt(),
@@ -365,7 +360,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         row.onDensityOrFontScaleChanged();
         mGutsManager.onDensityOrFontScaleChanged(entry);
 
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
 
         mGutsManager.closeAndSaveGuts(false, false, false, 0, 0, false);
 

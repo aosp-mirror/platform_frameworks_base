@@ -35,6 +35,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeRea
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.os.KernelSingleUidTimeReader;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 
@@ -52,6 +53,8 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
     private DummyExternalStatsSync mExternalStatsSync = new DummyExternalStatsSync();
+    public static final BatteryStatsConfig DEFAULT_CONFIG =
+            new BatteryStatsConfig.Builder().build();
 
     MockBatteryStatsImpl() {
         this(new MockClock());
@@ -66,15 +69,23 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler) {
-        this(clock, historyDirectory, handler, new PowerStatsUidResolver());
+        this(DEFAULT_CONFIG, clock, historyDirectory, handler, new PowerStatsUidResolver());
     }
 
-    MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler,
-            PowerStatsUidResolver powerStatsUidResolver) {
-        super(clock, historyDirectory, handler, powerStatsUidResolver,
-                mock(FrameworkStatsLogger.class), mock(BatteryStatsHistory.TraceDelegate.class),
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory) {
+        this(config, clock, historyDirectory, new Handler(Looper.getMainLooper()),
+                new PowerStatsUidResolver());
+    }
+
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
+            Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+        super(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+                mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
+                mock(UserInfoProvider.class), mock(PowerProfile.class),
+                new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),
+                powerStatsUidResolver, mock(FrameworkStatsLogger.class),
+                mock(BatteryStatsHistory.TraceDelegate.class),
                 mock(BatteryStatsHistory.EventLogger.class));
-        initTimersAndCounters();
         setMaxHistoryBuffer(128 * 1024);
 
         setExternalStatsSyncLocked(mExternalStatsSync);
@@ -129,13 +140,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public long getMobileRadioPowerStateUpdateRateLimit() {
         return MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS;
-    }
-
-    public MockBatteryStatsImpl setBatteryStatsConfig(BatteryStatsConfig config) {
-        synchronized (this) {
-            mBatteryStatsConfig = config;
-        }
-        return this;
     }
 
     public MockBatteryStatsImpl setNetworkStats(NetworkStats networkStats) {
@@ -274,10 +278,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     @Override
     public void writeSyncLocked() {
-    }
-
-    public void setHandler(Handler handler) {
-        mHandler = handler;
     }
 
     @Override

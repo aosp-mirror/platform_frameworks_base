@@ -20,7 +20,6 @@ import android.app.backup.BackupAgent
 import android.app.backup.BackupDataOutput
 import android.app.backup.BackupHelper
 import android.os.Build
-import android.os.ParcelFileDescriptor
 import androidx.annotation.RequiresApi
 
 /**
@@ -31,23 +30,8 @@ import androidx.annotation.RequiresApi
  */
 class BackupContext
 internal constructor(
-    /**
-     * An open, read-only file descriptor pointing to the last backup state provided by the
-     * application. May be null, in which case no prior state is being provided and the application
-     * should perform a full backup.
-     *
-     * TODO: the state should support marshall/unmarshall for incremental back up.
-     */
-    val oldState: ParcelFileDescriptor?,
-
     /** An open, read/write BackupDataOutput pointing to the backup data destination. */
     private val data: BackupDataOutput,
-
-    /**
-     * An open, read/write file descriptor pointing to an empty file. The application should record
-     * the final backup.
-     */
-    val newState: ParcelFileDescriptor,
 ) {
     /**
      * The quota in bytes for the application's current backup operation.
@@ -68,5 +52,9 @@ internal constructor(
         @RequiresApi(Build.VERSION_CODES.P) get() = data.transportFlags
 }
 
-/** Context for restore. */
-class RestoreContext(val key: String)
+/**
+ * Context for restore.
+ *
+ * @param key Entity key
+ */
+class RestoreContext internal constructor(val key: String)

@@ -56,23 +56,29 @@ final class EnforcingAdmin {
     static final String TAG = "EnforcingAdmin";
 
     static final String ROLE_AUTHORITY_PREFIX = "role:";
+    static final String SYSTEM_AUTHORITY_PREFIX = "system:";
     static final String DPC_AUTHORITY = "enterprise";
     static final String DEVICE_ADMIN_AUTHORITY = "device_admin";
     static final String DEFAULT_AUTHORITY = "default";
 
     private static final String ATTR_PACKAGE_NAME = "package-name";
+    private static final String ATTR_SYSTEM_ENTITY = "system-entity";
     private static final String ATTR_CLASS_NAME = "class-name";
     private static final String ATTR_AUTHORITIES = "authorities";
     private static final String ATTR_AUTHORITIES_SEPARATOR = ";";
     private static final String ATTR_USER_ID = "user-id";
     private static final String ATTR_IS_ROLE = "is-role";
+    private static final String ATTR_IS_SYSTEM = "is-system";
 
     private final String mPackageName;
+    // Name of the system entity. Only used when mIsSystemAuthority is true.
+    private final String mSystemEntity;
     // This is needed for DPCs and active admins
     private final ComponentName mComponentName;
     private Set<String> mAuthorities;
     private final int mUserId;
     private final boolean mIsRoleAuthority;
+    private final boolean mIsSystemAuthority;
     private final ActiveAdmin mActiveAdmin;
 
     static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId,
@@ -105,6 +111,38 @@ final class EnforcingAdmin {
                 userId, activeAdmin);
     }
 
+    static EnforcingAdmin createSystemEnforcingAdmin(@NonNull String systemEntity) {
+        Objects.requireNonNull(systemEntity);
+        return new EnforcingAdmin(systemEntity);
+    }
+
+    static EnforcingAdmin createEnforcingAdmin(android.app.admin.EnforcingAdmin admin) {
+        Objects.requireNonNull(admin);
+        Authority authority = admin.getAuthority();
+        Set<String> internalAuthorities = new HashSet<>();
+        if (DpcAuthority.DPC_AUTHORITY.equals(authority)) {
+            return new EnforcingAdmin(
+                    admin.getPackageName(), admin.getComponentName(),
+                    Set.of(DPC_AUTHORITY), admin.getUserHandle().getIdentifier(),
+                    /* activeAdmin = */ null);
+        } else if (DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY.equals(authority)) {
+            return new EnforcingAdmin(
+                    admin.getPackageName(), admin.getComponentName(),
+                    Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier(),
+                    /* activeAdmin = */ null);
+        } else if (authority instanceof RoleAuthority roleAuthority) {
+            return new EnforcingAdmin(
+                    admin.getPackageName(), admin.getComponentName(),
+                    Set.of(DEVICE_ADMIN_AUTHORITY), admin.getUserHandle().getIdentifier(),
+                    /* activeAdmin = */ null,
+                    /* isRoleAuthority = */ true);
+        }
+        // TODO(b/324899199): Consider supporting android.app.admin.SystemAuthority.
+        return new EnforcingAdmin(admin.getPackageName(), admin.getComponentName(),
+                Set.of(), admin.getUserHandle().getIdentifier(),
+                /* activeAdmin = */ null);
+    }
+
     static String getRoleAuthorityOf(String roleName) {
         return ROLE_AUTHORITY_PREFIX + roleName;
     }
@@ -132,9 +170,11 @@ final class EnforcingAdmin {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(authorities);
 
-        // Role authorities should not be using this constructor
+        // Role/System authorities should not be using this constructor
         mIsRoleAuthority = false;
+        mIsSystemAuthority = false;
         mPackageName = packageName;
+        mSystemEntity = null;
         mComponentName = componentName;
         mAuthorities = new HashSet<>(authorities);
         mUserId = userId;
@@ -146,11 +186,45 @@ final class EnforcingAdmin {
 
         // Only role authorities use this constructor.
         mIsRoleAuthority = true;
+        mIsSystemAuthority = false;
         mPackageName = packageName;
+        mSystemEntity = null;
         mUserId = userId;
         mComponentName = null;
         // authorities will be loaded when needed
         mAuthorities = null;
+        mActiveAdmin = activeAdmin;
+    }
+
+    /** Constructor for System authorities. */
+    private EnforcingAdmin(@NonNull String systemEntity) {
+        Objects.requireNonNull(systemEntity);
+
+        // Only system authorities use this constructor.
+        mIsSystemAuthority = true;
+        mIsRoleAuthority = false;
+        // Package name is not used for a system enforcing admin, so an empty string is fine.
+        mPackageName = "";
+        mSystemEntity = systemEntity;
+        mUserId = UserHandle.USER_SYSTEM;
+        mComponentName = null;
+        mAuthorities = getSystemAuthority(systemEntity);
+        mActiveAdmin = null;
+    }
+
+    private EnforcingAdmin(
+            String packageName, @Nullable ComponentName componentName, Set<String> authorities,
+            int userId, @Nullable ActiveAdmin activeAdmin, boolean isRoleAuthority) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(authorities);
+
+        mIsRoleAuthority = isRoleAuthority;
+        mIsSystemAuthority = false;
+        mPackageName = packageName;
+        mSystemEntity = null;
+        mComponentName = componentName;
+        mAuthorities = new HashSet<>(authorities);
+        mUserId = userId;
         mActiveAdmin = activeAdmin;
     }
 
@@ -161,6 +235,18 @@ final class EnforcingAdmin {
             authorities.add(ROLE_AUTHORITY_PREFIX + role);
         }
         return authorities.isEmpty() ? Set.of(DEFAULT_AUTHORITY) : authorities;
+    }
+
+    /**
+     * Returns a set of authorities for system authority.
+     *
+     * <p>Note that a system authority enforcing admin has only one authority that has the package
+     * name of the calling system service. Therefore, the returned set always contains one element.
+     */
+    private static Set<String> getSystemAuthority(String systemEntity) {
+        Set<String> authorities = new HashSet<>();
+        authorities.add(SYSTEM_AUTHORITY_PREFIX + systemEntity);
+        return authorities;
     }
 
     // TODO(b/259042794): move this logic to RoleManagerLocal
@@ -223,6 +309,7 @@ final class EnforcingAdmin {
         } else if (mAuthorities.contains(DEVICE_ADMIN_AUTHORITY)) {
             authority = DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY;
         } else {
+            // For now, System Authority returns UNKNOWN_AUTHORITY.
             authority = UnknownAuthority.UNKNOWN_AUTHORITY;
         }
         return new android.app.admin.EnforcingAdmin(
@@ -250,8 +337,10 @@ final class EnforcingAdmin {
         if (o == null || getClass() != o.getClass()) return false;
         EnforcingAdmin other = (EnforcingAdmin) o;
         return Objects.equals(mPackageName, other.mPackageName)
+                && Objects.equals(mSystemEntity, other.mSystemEntity)
                 && Objects.equals(mComponentName, other.mComponentName)
                 && Objects.equals(mIsRoleAuthority, other.mIsRoleAuthority)
+                && (mIsSystemAuthority == other.mIsSystemAuthority)
                 && hasMatchingAuthorities(this, other);
     }
 
@@ -266,6 +355,8 @@ final class EnforcingAdmin {
     public int hashCode() {
         if (mIsRoleAuthority) {
             return Objects.hash(mPackageName, mUserId);
+        } else if (mIsSystemAuthority) {
+            return Objects.hash(mSystemEntity);
         } else {
             return Objects.hash(
                     mComponentName == null ? mPackageName : mComponentName,
@@ -277,8 +368,12 @@ final class EnforcingAdmin {
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(/* namespace= */ null, ATTR_PACKAGE_NAME, mPackageName);
         serializer.attributeBoolean(/* namespace= */ null, ATTR_IS_ROLE, mIsRoleAuthority);
+        serializer.attributeBoolean(/* namespace= */ null, ATTR_IS_SYSTEM, mIsSystemAuthority);
         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, mUserId);
-        if (!mIsRoleAuthority) {
+        if (mIsSystemAuthority) {
+            serializer.attribute(/* namespace= */ null, ATTR_SYSTEM_ENTITY, mSystemEntity);
+        }
+        if (!mIsRoleAuthority && !mIsSystemAuthority) {
             if (mComponentName != null) {
                 serializer.attribute(
                         /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
@@ -295,7 +390,10 @@ final class EnforcingAdmin {
     static EnforcingAdmin readFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException {
         String packageName = parser.getAttributeValue(/* namespace= */ null, ATTR_PACKAGE_NAME);
+        String systemEntity = parser.getAttributeValue(/* namespace= */ null, ATTR_SYSTEM_ENTITY);
         boolean isRoleAuthority = parser.getAttributeBoolean(/* namespace= */ null, ATTR_IS_ROLE);
+        boolean isSystemAuthority = parser.getAttributeBoolean(
+                /* namespace= */ null, ATTR_IS_SYSTEM, /* defaultValue= */ false);
         String authoritiesStr = parser.getAttributeValue(/* namespace= */ null, ATTR_AUTHORITIES);
         int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
 
@@ -307,6 +405,13 @@ final class EnforcingAdmin {
             }
             // TODO(b/281697976): load active admin
             return new EnforcingAdmin(packageName, userId, null);
+        } else if (isSystemAuthority) {
+            if (systemEntity == null) {
+                Slogf.wtf(TAG, "Error parsing EnforcingAdmin with SystemAuthority, "
+                        + "systemEntity is null.");
+                return null;
+            }
+            return new EnforcingAdmin(systemEntity);
         } else {
             if (packageName == null || authoritiesStr == null) {
                 Slogf.wtf(TAG, "Error parsing EnforcingAdmin, packageName is "
@@ -325,8 +430,26 @@ final class EnforcingAdmin {
 
     @Override
     public String toString() {
-        return "EnforcingAdmin { mPackageName= " + mPackageName + ", mComponentName= "
-                + mComponentName + ", mAuthorities= " + mAuthorities + ", mUserId= "
-                + mUserId + ", mIsRoleAuthority= " + mIsRoleAuthority + " }\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("EnforcingAdmin { mPackageName= ");
+        sb.append(mPackageName);
+        if (mComponentName != null) {
+            sb.append(", mComponentName= ");
+            sb.append(mComponentName);
+        }
+        if (mAuthorities != null) {
+            sb.append(", mAuthorities= ");
+            sb.append(mAuthorities);
+        }
+        sb.append(", mUserId= ");
+        sb.append(mUserId);
+        sb.append(", mIsRoleAuthority= ");
+        sb.append(mIsRoleAuthority);
+        sb.append(", mIsSystemAuthority= ");
+        sb.append(mIsSystemAuthority);
+        sb.append(", mSystemEntity = ");
+        sb.append(mSystemEntity);
+        sb.append(" }");
+        return sb.toString();
     }
 }

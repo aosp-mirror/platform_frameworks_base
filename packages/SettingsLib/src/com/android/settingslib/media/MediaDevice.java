@@ -49,6 +49,8 @@ import static android.media.RouteListingPreference.Item.SUBTEXT_UNAUTHORIZED;
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -123,9 +125,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     protected final RouteListingPreference.Item mItem;
 
     MediaDevice(
-            Context context,
-            MediaRoute2Info info,
-            RouteListingPreference.Item item) {
+            @NonNull Context context,
+            @Nullable MediaRoute2Info info,
+            @Nullable RouteListingPreference.Item item) {
         mContext = context;
         mRouteInfo = info;
         mItem = item;

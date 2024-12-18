@@ -16,18 +16,26 @@
 
 package android.hardware.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.assertTrue;
 
+import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Unit tests for {@link android.hardware.devicestate.DeviceState}.
@@ -39,33 +47,68 @@ import org.junit.runners.JUnit4;
 public final class DeviceStateTest {
     @Test
     public void testConstruct() {
-        final DeviceState state = new DeviceState(MINIMUM_DEVICE_STATE_IDENTIFIER /* identifier */,
-                "TEST_CLOSED" /* name */, DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS /* flags */);
+        DeviceState.Configuration config = new DeviceState.Configuration.Builder(
+                MINIMUM_DEVICE_STATE_IDENTIFIER, "TEST_CLOSED")
+                .setSystemProperties(
+                        new HashSet<>(List.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS)))
+                .build();
+        final DeviceState state = new DeviceState(config);
         assertEquals(state.getIdentifier(), MINIMUM_DEVICE_STATE_IDENTIFIER);
         assertEquals(state.getName(), "TEST_CLOSED");
-        assertEquals(state.getFlags(), DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS);
+        assertTrue(state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS));
     }
 
     @Test
-    public void testConstruct_nullName() {
-        final DeviceState state = new DeviceState(MAXIMUM_DEVICE_STATE_IDENTIFIER /* identifier */,
-                null /* name */, 0/* flags */);
-        assertEquals(state.getIdentifier(), MAXIMUM_DEVICE_STATE_IDENTIFIER);
-        assertNull(state.getName());
-        assertEquals(state.getFlags(), 0);
+    public void testHasProperties() {
+        DeviceState.Configuration config = new DeviceState.Configuration.Builder(
+                MINIMUM_DEVICE_STATE_IDENTIFIER, "TEST")
+                .setSystemProperties(new HashSet<>(List.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                        PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST)))
+                .build();
+
+        final DeviceState state = new DeviceState(config);
+
+        assertTrue(state.hasProperty(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS));
+        assertTrue(state.hasProperty(PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST));
+        assertTrue(state.hasProperties(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST));
     }
 
     @Test
-    public void testConstruct_tooLargeIdentifier() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new DeviceState(MAXIMUM_DEVICE_STATE_IDENTIFIER + 1 /* identifier */,
-                        null /* name */, 0 /* flags */));
+    public void writeToParcel() {
+        final DeviceState originalState = new DeviceState(
+                new DeviceState.Configuration.Builder(0, "TEST_STATE")
+                        .setSystemProperties(Set.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                                PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST))
+                        .setPhysicalProperties(
+                                Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))
+                        .build());
+
+        final Parcel parcel = Parcel.obtain();
+        originalState.getConfiguration().writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+
+        final DeviceState.Configuration stateConfiguration =
+                DeviceState.Configuration.CREATOR.createFromParcel(parcel);
+
+        Assert.assertEquals(originalState, new DeviceState(stateConfiguration));
     }
 
     @Test
-    public void testConstruct_tooSmallIdentifier() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new DeviceState(MINIMUM_DEVICE_STATE_IDENTIFIER - 1 /* identifier */,
-                        null /* name */, 0 /* flags */));
+    public void writeToParcel_noPhysicalProperties() {
+        final DeviceState originalState = new DeviceState(
+                new DeviceState.Configuration.Builder(0, "TEST_STATE")
+                        .setSystemProperties(Set.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                                PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST))
+                        .build());
+
+        final Parcel parcel = Parcel.obtain();
+        originalState.getConfiguration().writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+
+        final DeviceState.Configuration stateConfiguration =
+                DeviceState.Configuration.CREATOR.createFromParcel(parcel);
+
+        Assert.assertEquals(originalState, new DeviceState(stateConfiguration));
     }
 }

@@ -70,6 +70,13 @@ public final class AccessibilityUtils {
     public @interface A11yTextChangeType {
     }
 
+    /** Denotes the accessibility enabled status */
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {
+        int OFF = 0;
+        int ON = 1;
+    }
+
     /** Specifies no content has been changed for accessibility. */
     public static final int NONE = 0;
     /** Specifies some readable sequence has been changed. */
@@ -119,7 +126,7 @@ public final class AccessibilityUtils {
     }
 
     /**
-     * Changes an accessibility component's state.
+     * Changes an accessibility component's state for the calling process userId
      */
     public static void setAccessibilityServiceState(Context context, ComponentName componentName,
             boolean enabled) {

@@ -25,7 +25,6 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.RemoteException;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
@@ -57,8 +56,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-@RequiresFlagsEnabled(
-        android.view.accessibility.Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
 public class AccessibilityServiceWarningTest {
     private static final String A11Y_SERVICE_PACKAGE_LABEL = "TestA11yService";
     private static final String A11Y_SERVICE_SUMMARY = "TestA11yService summary";

@@ -207,20 +207,6 @@ public class WifiUtilsTest {
     }
 
     @Test
-    public void getHotspotIconResource_deviceTypeExists_shouldNotNull() {
-        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_PHONE))
-                .isNotNull();
-        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_TABLET))
-                .isNotNull();
-        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_LAPTOP))
-                .isNotNull();
-        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_WATCH))
-                .isNotNull();
-        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_AUTO))
-                .isNotNull();
-    }
-
-    @Test
     public void testInternetIconInjector_getIcon_returnsCorrectValues() {
         WifiUtils.InternetIconInjector iconInjector = new WifiUtils.InternetIconInjector(mContext);
 

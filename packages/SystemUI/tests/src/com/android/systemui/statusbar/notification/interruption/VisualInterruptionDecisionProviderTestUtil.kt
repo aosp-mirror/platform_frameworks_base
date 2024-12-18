@@ -15,14 +15,17 @@
  */
 package com.android.systemui.statusbar.notification.interruption
 
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -30,7 +33,10 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
+import com.android.wm.shell.bubbles.Bubbles
+import java.util.Optional
 
 object VisualInterruptionDecisionProviderTestUtil {
     fun createProviderByFlag(
@@ -51,7 +57,13 @@ object VisualInterruptionDecisionProviderTestUtil {
         systemClock: SystemClock,
         uiEventLogger: UiEventLogger,
         userTracker: UserTracker,
-        avalancheProvider: AvalancheProvider
+        avalancheProvider: AvalancheProvider,
+        systemSettings: SystemSettings,
+        packageManager: PackageManager,
+        bubbles: Optional<Bubbles>,
+        context: Context,
+        notificationManager: NotificationManager,
+        settingsInteractor: NotificationSettingsInteractor
     ): VisualInterruptionDecisionProvider {
         return if (VisualInterruptionRefactor.isEnabled) {
             VisualInterruptionDecisionProviderImpl(
@@ -70,7 +82,13 @@ object VisualInterruptionDecisionProviderTestUtil {
                 systemClock,
                 uiEventLogger,
                 userTracker,
-                avalancheProvider
+                avalancheProvider,
+                systemSettings,
+                packageManager,
+                bubbles,
+                context,
+                notificationManager,
+                settingsInteractor
             )
         } else {
             NotificationInterruptStateProviderWrapper(
@@ -90,7 +108,8 @@ object VisualInterruptionDecisionProviderTestUtil {
                     deviceProvisionedController,
                     systemClock,
                     globalSettings,
-                    eventLog
+                    eventLog,
+                    bubbles
                 )
             )
         }

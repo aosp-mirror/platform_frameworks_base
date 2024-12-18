@@ -22,12 +22,21 @@ java_library_host {
 
     static_libs: [
         "annotations",
+        "jsr305",
         "framework-annotations-lib",
         "//external/error_prone:error_prone_core",
     ],
 
     libs: [
         "//external/auto:auto_service_annotations",
+    ],
+
+    javacflags: [
+        // These exports are needed because this errorprone plugin access some private classes
+        // of the java compiler.
+        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
     ],
 
     plugins: [

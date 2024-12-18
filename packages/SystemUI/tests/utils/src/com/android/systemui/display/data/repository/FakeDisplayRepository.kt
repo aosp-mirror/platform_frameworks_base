@@ -16,9 +16,15 @@
 package com.android.systemui.display.data.repository
 
 import android.view.Display
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.mockito.mock
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.mockito.Mockito.`when` as whenever
 
 /** Creates a mock display. */
@@ -42,8 +48,9 @@ fun display(
 fun createPendingDisplay(id: Int = 0): DisplayRepository.PendingDisplay =
     mock<DisplayRepository.PendingDisplay> { whenever(this.id).thenReturn(id) }
 
+@SysUISingleton
 /** Fake [DisplayRepository] implementation for testing. */
-class FakeDisplayRepository : DisplayRepository {
+class FakeDisplayRepository @Inject constructor() : DisplayRepository {
     private val flow = MutableSharedFlow<Set<Display>>(replay = 1)
     private val pendingDisplayFlow =
         MutableSharedFlow<DisplayRepository.PendingDisplay?>(replay = 1)
@@ -64,10 +71,23 @@ class FakeDisplayRepository : DisplayRepository {
     override val pendingDisplay: Flow<DisplayRepository.PendingDisplay?>
         get() = pendingDisplayFlow
 
+    val _defaultDisplayOff: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val defaultDisplayOff: Flow<Boolean>
+        get() = _defaultDisplayOff.asStateFlow()
+
     override val displayAdditionEvent: Flow<Display?>
         get() = displayAdditionEventFlow
 
     private val _displayChangeEvent = MutableSharedFlow<Int>(replay = 1)
     override val displayChangeEvent: Flow<Int> = _displayChangeEvent
     suspend fun emitDisplayChangeEvent(displayId: Int) = _displayChangeEvent.emit(displayId)
+
+    fun setDefaultDisplayOff(defaultDisplayOff: Boolean) {
+        _defaultDisplayOff.value = defaultDisplayOff
+    }
+}
+
+@Module
+interface FakeDisplayRepositoryModule {
+    @Binds fun bindFake(fake: FakeDisplayRepository): DisplayRepository
 }

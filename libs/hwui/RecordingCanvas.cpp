@@ -16,9 +16,12 @@
 
 #include "RecordingCanvas.h"
 
-#include <GrRecordingContext.h>
 #include <SkMesh.h>
 #include <hwui/Paint.h>
+#include <include/gpu/GpuTypes.h>
+#include <include/gpu/ganesh/GrDirectContext.h>
+#include <include/gpu/ganesh/GrRecordingContext.h>
+#include <include/gpu/ganesh/SkMeshGanesh.h>
 #include <log/log.h>
 
 #include <experimental/type_traits>
@@ -48,9 +51,6 @@
 #include "Tonemapper.h"
 #include "VectorDrawable.h"
 #include "effects/GainmapRenderer.h"
-#include "include/gpu/GpuTypes.h"  // from Skia
-#include "include/gpu/GrDirectContext.h"
-#include "include/gpu/ganesh/SkMeshGanesh.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 #ifdef __ANDROID__
@@ -573,9 +573,9 @@ struct DrawSkMesh final : Op {
 struct DrawMesh final : Op {
     static const auto kType = Type::DrawMesh;
     DrawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint)
-            : mesh(mesh), blender(std::move(blender)), paint(paint) {}
+            : mesh(mesh.takeSnapshot()), blender(std::move(blender)), paint(paint) {}
 
-    const Mesh& mesh;
+    Mesh::Snapshot mesh;
     sk_sp<SkBlender> blender;
     SkPaint paint;
 
@@ -1294,15 +1294,6 @@ void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 
 void RecordingCanvas::drawWebView(skiapipeline::FunctorDrawable* drawable) {
     fDL->drawWebView(drawable);
-}
-
-[[nodiscard]] const SkMesh& DrawMeshPayload::getSkMesh() const {
-    LOG_FATAL_IF(!meshWrapper && !mesh, "One of Mesh or Mesh must be non-null");
-    if (meshWrapper) {
-        return meshWrapper->getSkMesh();
-    } else {
-        return *mesh;
-    }
 }
 
 }  // namespace uirenderer

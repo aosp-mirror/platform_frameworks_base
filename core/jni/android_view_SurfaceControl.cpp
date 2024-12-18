@@ -22,6 +22,8 @@
 #include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnWindowInfosReportedListener.h>
+#include <android/gui/EdgeExtensionParameters.h>
+#include <android/gui/JankData.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
 #include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
@@ -208,10 +210,17 @@ static struct {
 static struct {
     jclass clazz;
     jmethodID ctor;
+    jfieldID timeoutMillis;
+} gIdleScreenRefreshRateConfigClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID defaultMode;
     jfieldID allowGroupSwitching;
     jfieldID primaryRanges;
     jfieldID appRequestRanges;
+    jfieldID idleScreenRefreshRateConfig;
 } gDesiredDisplayModeSpecsClassInfo;
 
 static struct {
@@ -254,6 +263,8 @@ static struct {
 static struct {
     jclass clazz;
     jfieldID mNativeObject;
+    jfieldID mName;
+    jmethodID ctor;
     jmethodID invokeReleaseCallback;
 } gSurfaceControlClassInfo;
 
@@ -349,7 +360,8 @@ public:
 
         jobject stats =
                 env->NewObject(gTransactionStatsClassInfo.clazz, gTransactionStatsClassInfo.ctor,
-                               latchTime, presentFence.get());
+                               latchTime,
+                               static_cast<jlong>(reinterpret_cast<uintptr_t>(presentFence.get())));
         env->CallVoidMethod(mTransactionCompletedListenerObject, gConsumerClassInfo.accept, stats);
         env->DeleteLocalRef(stats);
         DieIfException(env, "Uncaught exception in TransactionCompletedListener.");
@@ -788,6 +800,20 @@ static void nativeSetStretchEffect(JNIEnv* env, jclass clazz, jlong transactionO
     transaction->setStretchEffect(ctrl, stretch);
 }
 
+static void nativeSetEdgeExtensionEffect(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                         jlong nativeObj, jboolean leftEdge, jboolean rightEdge,
+                                         jboolean topEdge, jboolean bottomEdge) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    auto* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObj);
+
+    auto effect = gui::EdgeExtensionParameters();
+    effect.extendLeft = leftEdge;
+    effect.extendRight = rightEdge;
+    effect.extendTop = topEdge;
+    effect.extendBottom = bottomEdge;
+    transaction->setEdgeExtensionEffect(ctrl, effect);
+}
+
 static void nativeSetFlags(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint flags, jint mask) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -999,11 +1025,11 @@ static void nativeSetShadowRadius(JNIEnv* env, jclass clazz, jlong transactionOb
 }
 
 static void nativeSetTrustedOverlay(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                    jlong nativeObject, jboolean isTrustedOverlay) {
+                                    jlong nativeObject, jint trustedOverlay) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    transaction->setTrustedOverlay(ctrl, isTrustedOverlay);
+    transaction->setTrustedOverlay(ctrl, static_cast<gui::TrustedOverlay>(trustedOverlay));
 }
 
 static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
@@ -1405,6 +1431,18 @@ static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobj
         return ranges;
     };
 
+    const auto makeIdleScreenRefreshRateConfig = [env](jobject obj)
+            -> std::optional<gui::DisplayModeSpecs::IdleScreenRefreshRateConfig> {
+        if (obj == NULL) {
+            return std::nullopt;
+        }
+        gui::DisplayModeSpecs::IdleScreenRefreshRateConfig idleScreenRefreshRateConfig;
+        idleScreenRefreshRateConfig.timeoutMillis =
+                env->GetIntField(obj, gIdleScreenRefreshRateConfigClassInfo.timeoutMillis);
+
+        return idleScreenRefreshRateConfig;
+    };
+
     gui::DisplayModeSpecs specs;
     specs.defaultMode = env->GetIntField(DesiredDisplayModeSpecs,
                                          gDesiredDisplayModeSpecsClassInfo.defaultMode);
@@ -1418,6 +1456,10 @@ static jboolean nativeSetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobj
     specs.appRequestRanges =
             makeRanges(env->GetObjectField(DesiredDisplayModeSpecs,
                                            gDesiredDisplayModeSpecsClassInfo.appRequestRanges));
+
+    specs.idleScreenRefreshRateConfig = makeIdleScreenRefreshRateConfig(
+            env->GetObjectField(DesiredDisplayModeSpecs,
+                                gDesiredDisplayModeSpecsClassInfo.idleScreenRefreshRateConfig));
 
     size_t result = SurfaceComposerClient::setDesiredDisplayModeSpecs(token, specs);
     return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
@@ -1438,6 +1480,17 @@ static jobject nativeGetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobje
                               rangeToJava(ranges.physical), rangeToJava(ranges.render));
     };
 
+    const auto idleScreenRefreshRateConfigToJava =
+            [env](const std::optional<gui::DisplayModeSpecs::IdleScreenRefreshRateConfig>&
+                          idleScreenRefreshRateConfig) -> jobject {
+        if (!idleScreenRefreshRateConfig.has_value()) {
+            return NULL; // Return null if input config is null
+        }
+        return env->NewObject(gIdleScreenRefreshRateConfigClassInfo.clazz,
+                              gIdleScreenRefreshRateConfigClassInfo.ctor,
+                              idleScreenRefreshRateConfig->timeoutMillis);
+    };
+
     gui::DisplayModeSpecs specs;
     if (SurfaceComposerClient::getDesiredDisplayModeSpecs(token, &specs) != NO_ERROR) {
         return nullptr;
@@ -1446,7 +1499,8 @@ static jobject nativeGetDesiredDisplayModeSpecs(JNIEnv* env, jclass clazz, jobje
     return env->NewObject(gDesiredDisplayModeSpecsClassInfo.clazz,
                           gDesiredDisplayModeSpecsClassInfo.ctor, specs.defaultMode,
                           specs.allowGroupSwitching, rangesToJava(specs.primaryRanges),
-                          rangesToJava(specs.appRequestRanges));
+                          rangesToJava(specs.appRequestRanges),
+                          idleScreenRefreshRateConfigToJava(specs.idleScreenRefreshRateConfig));
 }
 
 static jobject nativeGetDisplayNativePrimaries(JNIEnv* env, jclass, jobject tokenObj) {
@@ -2024,18 +2078,22 @@ public:
         env->DeleteWeakGlobalRef(mOnJankDataListenerWeak);
     }
 
-    void onJankDataAvailable(const std::vector<JankData>& jankData) {
+    bool onJankDataAvailable(const std::vector<gui::JankData>& jankData) override {
         JNIEnv* env = getEnv();
 
         jobject target = env->NewLocalRef(mOnJankDataListenerWeak);
-        if (target == nullptr) return;
+        if (target == nullptr) {
+            return false;
+        }
 
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
         for (size_t i = 0; i < jankData.size(); i++) {
-            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
-                                               jankData[i].frameVsyncId, jankData[i].jankType,
-                                               jankData[i].frameIntervalNs);
+            jobject jJankData =
+                    env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
+                                   jankData[i].frameVsyncId, jankData[i].jankType,
+                                   jankData[i].frameIntervalNs, jankData[i].scheduledAppFrameTimeNs,
+                                   jankData[i].actualAppFrameTimeNs);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
@@ -2044,6 +2102,8 @@ public:
                 jJankDataArray);
         env->DeleteLocalRef(jJankDataArray);
         env->DeleteLocalRef(target);
+
+        return true;
     }
 
 private:
@@ -2058,29 +2118,49 @@ private:
     jobject mOnJankDataListenerWeak;
 };
 
-static void nativeAddJankDataListener(JNIEnv* env, jclass clazz,
-                                       jlong jankDataCallbackListenerPtr,
-                                       jlong nativeSurfaceControl) {
+static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
+                                                 jlong nativeSurfaceControl, jobject listener) {
     sp<SurfaceControl> surface(reinterpret_cast<SurfaceControl *>(nativeSurfaceControl));
     if (surface == nullptr) {
+        return 0;
+    }
+
+    sp<JankDataListenerWrapper> wrapper = sp<JankDataListenerWrapper>::make(env, listener);
+    if (wrapper->addListener(std::move(surface)) != OK) {
+        return 0;
+    }
+
+    wrapper->incStrong((void*)nativeCreateJankDataListenerWrapper);
+    return reinterpret_cast<jlong>(wrapper.get());
+}
+
+static void destroyJankDatalistenerWrapper(void* ptr) {
+    JankDataListenerWrapper* wrapper = reinterpret_cast<JankDataListenerWrapper*>(ptr);
+    if (wrapper == nullptr) {
         return;
     }
-    sp<JankDataListenerWrapper> wrapper =
-            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
-    TransactionCompletedListener::getInstance()->addJankListener(wrapper, surface);
+    wrapper->decStrong((void*)nativeCreateJankDataListenerWrapper);
 }
 
-static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz,
-                                          jlong jankDataCallbackListenerPtr) {
-    sp<JankDataListenerWrapper> wrapper =
-            reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
-    TransactionCompletedListener::getInstance()->removeJankListener(wrapper);
+static jlong nativeGetJankDataListenerWrapperFinalizer() {
+    return reinterpret_cast<jlong>(&destroyJankDatalistenerWrapper);
 }
 
-static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
-                                                 jobject jankDataListenerObject) {
-    return reinterpret_cast<jlong>(
-            new JankDataListenerWrapper(env, jankDataListenerObject));
+static void nativeFlushJankData(JNIEnv* env, jclass clazz, jlong listener) {
+    sp<JankDataListenerWrapper> wrapper = reinterpret_cast<JankDataListenerWrapper*>(listener);
+    if (wrapper == nullptr) {
+        return;
+    }
+    wrapper->flushJankData();
+}
+
+static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz, jlong listener,
+                                         jlong afterVsync) {
+    sp<JankDataListenerWrapper> wrapper = reinterpret_cast<JankDataListenerWrapper*>(listener);
+    if (wrapper == nullptr) {
+        return;
+    }
+    wrapper->removeListener(afterVsync);
 }
 
 static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
@@ -2164,6 +2244,10 @@ static jobject nativeGetStalledTransactionInfo(JNIEnv* env, jclass clazz, jint p
     return jStalledTransactionInfo;
 }
 
+static void nativeNotifyShutdown() {
+    SurfaceComposerClient::notifyShutdown();
+}
+
 // ----------------------------------------------------------------------------
 
 SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
@@ -2175,6 +2259,20 @@ SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
     } else {
         return nullptr;
     }
+}
+
+jobject android_view_SurfaceControl_getJavaSurfaceControl(JNIEnv* env,
+                                                          const SurfaceControl& surfaceControl) {
+    jobject surfaceControlObj =
+            env->NewObject(gSurfaceControlClassInfo.clazz, gSurfaceControlClassInfo.ctor);
+    env->SetLongField(surfaceControlObj, gSurfaceControlClassInfo.mNativeObject,
+                      reinterpret_cast<jlong>(&surfaceControl));
+    env->SetObjectField(surfaceControlObj, gSurfaceControlClassInfo.mName,
+                        ScopedLocalRef<jobject>(env,
+                                                env->NewStringUTF(surfaceControl.getName().c_str()))
+                                .get());
+    surfaceControl.incStrong((void*)nativeCreate);
+    return surfaceControlObj;
 }
 
 SurfaceComposerClient::Transaction* android_view_SurfaceTransaction_getNativeSurfaceTransaction(
@@ -2259,6 +2357,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetBlurRegions },
     {"nativeSetStretchEffect", "(JJFFFFFFFFFF)V",
             (void*) nativeSetStretchEffect },
+    {"nativeSetEdgeExtensionEffect", "(JJZZZZ)V",
+            (void*) nativeSetEdgeExtensionEffect },
     {"nativeSetShadowRadius", "(JJF)V",
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFII)V",
@@ -2380,19 +2480,21 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRemoveCurrentInputFocus},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },
-    {"nativeAddJankDataListener", "(JJ)V",
-            (void*)nativeAddJankDataListener },
-    {"nativeRemoveJankDataListener", "(J)V",
+    {"nativeFlushJankData", "(J)V",
+            (void*)nativeFlushJankData },
+    {"nativeRemoveJankDataListener", "(JJ)V",
             (void*)nativeRemoveJankDataListener },
-    {"nativeCreateJankDataListenerWrapper", "(Landroid/view/SurfaceControl$OnJankDataListener;)J",
+    {"nativeCreateJankDataListenerWrapper", "(JLandroid/view/SurfaceControl$OnJankDataListener;)J",
             (void*)nativeCreateJankDataListenerWrapper },
+    {"nativeGetJankDataListenerWrapperFinalizer", "()J",
+            (void*)nativeGetJankDataListenerWrapperFinalizer },
     {"nativeGetGPUContextPriority", "()I",
             (void*)nativeGetGPUContextPriority },
     {"nativeSetTransformHint", "(JI)V",
             (void*)nativeSetTransformHint },
     {"nativeGetTransformHint", "(J)I",
             (void*)nativeGetTransformHint },
-    {"nativeSetTrustedOverlay", "(JJZ)V",
+    {"nativeSetTrustedOverlay", "(JJI)V",
             (void*)nativeSetTrustedOverlay },
     {"nativeGetLayerId", "(J)I",
             (void*)nativeGetLayerId },
@@ -2425,6 +2527,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*) nativeGetStalledTransactionInfo },
     {"nativeSetDesiredPresentTimeNanos", "(JJ)V",
             (void*) nativeSetDesiredPresentTimeNanos },
+    {"nativeNotifyShutdown", "()V",
+            (void*)nativeNotifyShutdown },
         // clang-format on
 };
 
@@ -2591,13 +2695,23 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             GetFieldIDOrDie(env, RefreshRateRangesClazz, "render",
                             "Landroid/view/SurfaceControl$RefreshRateRange;");
 
+    jclass IdleScreenRefreshRateConfigClazz =
+            FindClassOrDie(env, "android/view/SurfaceControl$IdleScreenRefreshRateConfig");
+    gIdleScreenRefreshRateConfigClassInfo.clazz =
+            MakeGlobalRefOrDie(env, IdleScreenRefreshRateConfigClazz);
+    gIdleScreenRefreshRateConfigClassInfo.ctor =
+            GetMethodIDOrDie(env, gIdleScreenRefreshRateConfigClassInfo.clazz, "<init>", "(I)V");
+    gIdleScreenRefreshRateConfigClassInfo.timeoutMillis =
+            GetFieldIDOrDie(env, gIdleScreenRefreshRateConfigClassInfo.clazz, "timeoutMillis", "I");
+
     jclass DesiredDisplayModeSpecsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$DesiredDisplayModeSpecs");
     gDesiredDisplayModeSpecsClassInfo.clazz = MakeGlobalRefOrDie(env, DesiredDisplayModeSpecsClazz);
     gDesiredDisplayModeSpecsClassInfo.ctor =
             GetMethodIDOrDie(env, gDesiredDisplayModeSpecsClassInfo.clazz, "<init>",
                              "(IZLandroid/view/SurfaceControl$RefreshRateRanges;Landroid/view/"
-                             "SurfaceControl$RefreshRateRanges;)V");
+                             "SurfaceControl$RefreshRateRanges;Landroid/view/"
+                             "SurfaceControl$IdleScreenRefreshRateConfig;)V");
     gDesiredDisplayModeSpecsClassInfo.defaultMode =
             GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "defaultMode", "I");
     gDesiredDisplayModeSpecsClassInfo.allowGroupSwitching =
@@ -2608,11 +2722,14 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gDesiredDisplayModeSpecsClassInfo.appRequestRanges =
             GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "appRequestRanges",
                             "Landroid/view/SurfaceControl$RefreshRateRanges;");
+    gDesiredDisplayModeSpecsClassInfo.idleScreenRefreshRateConfig =
+            GetFieldIDOrDie(env, DesiredDisplayModeSpecsClazz, "idleScreenRefreshRateConfig",
+                            "Landroid/view/SurfaceControl$IdleScreenRefreshRateConfig;");
 
     jclass jankDataClazz =
                 FindClassOrDie(env, "android/view/SurfaceControl$JankData");
     gJankDataClassInfo.clazz = MakeGlobalRefOrDie(env, jankDataClazz);
-    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJ)V");
+    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJJJ)V");
     jclass onJankDataListenerClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$OnJankDataListener");
     gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);
@@ -2652,6 +2769,9 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gSurfaceControlClassInfo.clazz = MakeGlobalRefOrDie(env, surfaceControlClazz);
     gSurfaceControlClassInfo.mNativeObject =
             GetFieldIDOrDie(env, gSurfaceControlClassInfo.clazz, "mNativeObject", "J");
+    gSurfaceControlClassInfo.mName =
+            GetFieldIDOrDie(env, gSurfaceControlClassInfo.clazz, "mName", "Ljava/lang/String;");
+    gSurfaceControlClassInfo.ctor = GetMethodIDOrDie(env, surfaceControlClazz, "<init>", "()V");
     gSurfaceControlClassInfo.invokeReleaseCallback =
             GetStaticMethodIDOrDie(env, surfaceControlClazz, "invokeReleaseCallback",
                                    "(Ljava/util/function/Consumer;J)V");

@@ -170,6 +170,7 @@ final class ScanPackageUtils {
             }
         }
 
+        boolean isPendingRestoreBefore = false;
         if (pkgSetting != null && oldSharedUserSetting != sharedUserSetting) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Package " + parsedPackage.getPackageName() + " shared user changed from "
@@ -178,6 +179,9 @@ final class ScanPackageUtils {
                             + " to "
                             + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
                             + "; replacing with new");
+            // Preserve the value of isPendingRestore. We need to set it to the new PackageSetting
+            // if the value is true to restore the app
+            isPendingRestoreBefore = pkgSetting.isPendingRestore();
             pkgSetting = null;
         }
 
@@ -224,6 +228,11 @@ final class ScanPackageUtils {
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
                     newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
+
+            // If isPendingRestore is true before, set the value true to the PackageSetting
+            if (isPendingRestoreBefore) {
+                pkgSetting.setPendingRestore(true);
+            }
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
@@ -428,19 +437,22 @@ final class ScanPackageUtils {
             pkgSetting.setIsOrphaned(true);
         }
 
+        // update debuggable and BaseRevisionCode to packageSetting
+        pkgSetting.setDebuggable(parsedPackage.isDebuggable());
+        pkgSetting.setBaseRevisionCode(parsedPackage.getBaseRevisionCode());
+
         // Take care of first install / last update times.
         final long scanFileTime = getLastModifiedTime(parsedPackage);
-        final long existingFirstInstallTime = userId == UserHandle.USER_ALL
-                ? PackageStateUtils.getEarliestFirstInstallTime(pkgSetting.getUserStates())
-                : pkgSetting.readUserState(userId).getFirstInstallTimeMillis();
+        final long earliestFirstInstallTime =
+                PackageStateUtils.getEarliestFirstInstallTime((pkgSetting.getUserStates()));
         if (currentTime != 0) {
-            if (existingFirstInstallTime == 0) {
+            if (earliestFirstInstallTime == 0) {
                 pkgSetting.setFirstInstallTime(currentTime, userId)
                         .setLastUpdateTime(currentTime);
             } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
                 pkgSetting.setLastUpdateTime(currentTime);
             }
-        } else if (existingFirstInstallTime == 0) {
+        } else if (earliestFirstInstallTime == 0) {
             // We need *something*.  Take time stamp of the file.
             pkgSetting.setFirstInstallTime(scanFileTime, userId)
                     .setLastUpdateTime(scanFileTime);
@@ -469,6 +481,7 @@ final class ScanPackageUtils {
                             + " to " + volumeUuid);
             pkgSetting.setVolumeUuid(volumeUuid);
         }
+        pkgSetting.setLeavingSharedUser(parsedPackage.isLeavingSharedUser());
 
         SharedLibraryInfo sdkLibraryInfo = null;
         if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {

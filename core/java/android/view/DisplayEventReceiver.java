@@ -24,6 +24,7 @@ import android.os.MessageQueue;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.WeaklyReferencedCallback;
 
 import dalvik.annotation.optimization.FastNative;
 
@@ -40,6 +41,7 @@ import java.lang.ref.WeakReference;
  *
  * @hide
  */
+@WeaklyReferencedCallback
 public abstract class DisplayEventReceiver {
 
     /**

@@ -69,7 +69,7 @@ java_test_host {
         "compatibility-host-util",
         "compatibility-tradefed",
     ],
-    data: [
+    device_common_data: [
         ":embedded_native_libs_test_app",
         ":extract_native_libs_test_app",
     ],

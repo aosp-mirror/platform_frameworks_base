@@ -120,7 +120,9 @@ filegroup {
         ":services.backup-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
+        ":services.appfunctions-sources",
         ":services.contentsuggestions-sources",
+        ":services.contextualsearch-sources",
         ":services.coverage-sources",
         ":services.credentials-sources",
         ":services.devicepolicy-sources",
@@ -134,6 +136,7 @@ filegroup {
         ":services.searchui-sources",
         ":services.smartspace-sources",
         ":services.soundtrigger-sources",
+        ":services.supervision-sources",
         ":services.systemcaptions-sources",
         ":services.translation-sources",
         ":services.texttospeech-sources",
@@ -187,7 +190,25 @@ art_profile_java_defaults {
 
 // merge all required services into one jar
 // ============================================================
-java_library {
+soong_config_module_type {
+    name: "system_java_library",
+    module_type: "java_library",
+    config_namespace: "system_services",
+    bool_variables: ["without_vibrator"],
+    properties: ["vintf_fragment_modules"],
+}
+
+vintf_fragment {
+    name: "manifest_services.xml",
+    src: "manifest_services.xml",
+}
+
+vintf_fragment {
+    name: "manifest_services_android.frameworks.vibrator.xml",
+    src: "manifest_services_android.frameworks.vibrator.xml",
+}
+
+system_java_library {
     name: "services",
     defaults: [
         "services_java_defaults",
@@ -208,8 +229,10 @@ java_library {
         "services.autofill",
         "services.backup",
         "services.companion",
+        "services.appfunctions",
         "services.contentcapture",
         "services.contentsuggestions",
+        "services.contextualsearch",
         "services.coverage",
         "services.credentials",
         "services.devicepolicy",
@@ -225,6 +248,7 @@ java_library {
         "services.searchui",
         "services.smartspace",
         "services.soundtrigger",
+        "services.supervision",
         "services.systemcaptions",
         "services.translation",
         "services.texttospeech",
@@ -236,7 +260,10 @@ java_library {
         "service-blobstore",
         "service-jobscheduler",
         "android.hidl.base-V1.0-java",
-    ],
+    ] + select(release_flag("RELEASE_MOVE_VCN_TO_MAINLINE"), {
+        true: [],
+        default: ["service-connectivity-b-platform"],
+    }),
 
     libs: [
         "android.hidl.manager-V1.0-java",
@@ -248,13 +275,24 @@ java_library {
         "service-sdksandbox.stubs.system_server",
     ],
 
-    vintf_fragments: [
-        "manifest_services.xml",
-    ],
+    soong_config_variables: {
+        without_vibrator: {
+            vintf_fragment_modules: [
+                "manifest_services.xml",
+            ],
+            conditions_default: {
+                vintf_fragment_modules: [
+                    "manifest_services.xml",
+                    "manifest_services_android.frameworks.vibrator.xml",
+                ],
+            },
+        },
+    },
 
     required: [
         "libukey2_jni_shared",
         "protolog.conf.json.gz",
+        "core.protolog.pb",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",

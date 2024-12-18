@@ -165,6 +165,16 @@ public class InteractionJankMonitor {
     @Deprecated public static final int CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY = Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY;
     @Deprecated public static final int CUJ_PREDICTIVE_BACK_CROSS_TASK = Cuj.CUJ_PREDICTIVE_BACK_CROSS_TASK;
     @Deprecated public static final int CUJ_PREDICTIVE_BACK_HOME = Cuj.CUJ_PREDICTIVE_BACK_HOME;
+    @Deprecated public static final int CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE = Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_WORKSPACE;
+    @Deprecated public static final int CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_TASKBAR = Cuj.CUJ_LAUNCHER_LAUNCH_APP_PAIR_FROM_TASKBAR;
+    @Deprecated public static final int CUJ_LAUNCHER_SAVE_APP_PAIR = Cuj.CUJ_LAUNCHER_SAVE_APP_PAIR;
+    @Deprecated public static final int CUJ_LAUNCHER_ALL_APPS_SEARCH_BACK = Cuj.CUJ_LAUNCHER_ALL_APPS_SEARCH_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_TASKBAR_ALL_APPS_CLOSE_BACK = Cuj.CUJ_LAUNCHER_TASKBAR_ALL_APPS_CLOSE_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_TASKBAR_ALL_APPS_SEARCH_BACK = Cuj.CUJ_LAUNCHER_TASKBAR_ALL_APPS_SEARCH_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_PICKER_CLOSE_BACK = Cuj.CUJ_LAUNCHER_WIDGET_PICKER_CLOSE_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_PICKER_SEARCH_BACK = Cuj.CUJ_LAUNCHER_WIDGET_PICKER_SEARCH_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_BOTTOM_SHEET_CLOSE_BACK = Cuj.CUJ_LAUNCHER_WIDGET_BOTTOM_SHEET_CLOSE_BACK;
+    @Deprecated public static final int CUJ_LAUNCHER_WIDGET_EDU_SHEET_CLOSE_BACK = Cuj.CUJ_LAUNCHER_WIDGET_EDU_SHEET_CLOSE_BACK;
 
     private static class InstanceHolder {
         public static final InteractionJankMonitor INSTANCE =
@@ -315,6 +325,50 @@ public class InteractionJankMonitor {
     /**
      * Begins a trace session.
      *
+     * @param surface a handle for the surface to begin tracing for.
+     * @param context context to provide display and handler information.
+     * @param cujType the specific {@link Cuj.CujType}.
+     * @return boolean true if the tracker is started successfully, false otherwise.
+     */
+    public boolean begin(SurfaceControl surface, Context context, Handler handler,
+            @Cuj.CujType int cujType) {
+        try {
+            return begin(Configuration.Builder.withSurface(cujType, context, surface, handler));
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "Build configuration failed!", ex);
+            return false;
+        }
+    }
+
+    /**
+     * Begins a trace session.
+     *
+     * @param surface a handle for the surface to begin tracing for.
+     * @param context context to provide display and handler information.
+     * @param cujType the specific {@link Cuj.CujType}.
+     * @param tag a tag containing extra information about the interaction.
+     * @return boolean true if the tracker is started successfully, false otherwise.
+     */
+    public boolean begin(SurfaceControl surface, Context context, Handler handler,
+            @Cuj.CujType int cujType,
+            String tag) {
+        try {
+            final Configuration.Builder builder =
+                    Configuration.Builder.withSurface(cujType, context, surface, handler);
+            if (!TextUtils.isEmpty(tag)) {
+                builder.setTag(tag);
+            }
+            return begin(builder);
+        } catch (IllegalArgumentException ex) {
+            Log.d(TAG, "Build configuration failed!", ex);
+            return false;
+        }
+    }
+
+
+    /**
+     * Begins a trace session.
+     *
      * @param builder the builder of the configurations for instrumenting the CUJ.
      * @return boolean true if the tracker is begun successfully, false otherwise.
      */
@@ -343,6 +397,9 @@ public class InteractionJankMonitor {
     private boolean beginInternal(@NonNull Configuration conf) {
         int cujType = conf.mCujType;
         if (!shouldMonitor()) {
+            return false;
+        } else if (!conf.hasValidView()) {
+            Log.w(TAG, "The view has since become invalid, aborting the CUJ.");
             return false;
         }
 
@@ -634,20 +691,23 @@ public class InteractionJankMonitor {
             private SurfaceControl mAttrSurfaceControl;
             private final @Cuj.CujType int mAttrCujType;
             private boolean mAttrDeferMonitor = true;
+            private Handler mHandler = null;
 
             /**
              * Creates a builder which instruments only surface.
              * @param cuj The enum defined in {@link Cuj.CujType}.
              * @param context context
              * @param surfaceControl surface control
+             * @param uiThreadHandler UI thread for that surface
              * @return builder
              */
             public static Builder withSurface(@Cuj.CujType int cuj, @NonNull Context context,
-                    @NonNull SurfaceControl surfaceControl) {
+                    @NonNull SurfaceControl surfaceControl, @NonNull Handler uiThreadHandler) {
                 return new Builder(cuj)
                         .setContext(context)
                         .setSurfaceControl(surfaceControl)
-                        .setSurfaceOnly(true);
+                        .setSurfaceOnly(true)
+                        .setHandler(uiThreadHandler);
             }
 
             /**
@@ -664,6 +724,18 @@ public class InteractionJankMonitor {
 
             private Builder(@Cuj.CujType int cuj) {
                 mAttrCujType = cuj;
+            }
+
+            /**
+             * Specifies the UI thread handler. If not provided, the View's one will be used.
+             * If only a surface is provided without handler, the app main thread will be used.
+             *
+             * @param uiThreadHandler handler associated to the cuj UI thread
+             * @return builder
+             */
+            public Builder setHandler(Handler uiThreadHandler) {
+                mHandler = uiThreadHandler;
+                return this;
             }
 
             /**
@@ -743,13 +815,13 @@ public class InteractionJankMonitor {
                 return new Configuration(
                         mAttrCujType, mAttrView, mAttrTag, mAttrTimeout,
                         mAttrSurfaceOnly, mAttrContext, mAttrSurfaceControl,
-                        mAttrDeferMonitor);
+                        mAttrDeferMonitor, mHandler);
             }
         }
 
         private Configuration(@Cuj.CujType int cuj, View view, @NonNull String tag, long timeout,
                 boolean surfaceOnly, Context context, SurfaceControl surfaceControl,
-                boolean deferMonitor) {
+                boolean deferMonitor, Handler handler) {
             mCujType = cuj;
             mTag = tag;
             mSessionName = generateSessionName(Cuj.getNameOfCuj(cuj), tag);
@@ -761,8 +833,16 @@ public class InteractionJankMonitor {
                     : (view != null ? view.getContext().getApplicationContext() : null);
             mSurfaceControl = surfaceControl;
             mDeferMonitor = deferMonitor;
+            if (handler != null) {
+                mHandler = handler;
+            } else if (mSurfaceOnly) {
+                Log.w(TAG, "No UIThread provided for " + mSessionName
+                        + " (surface only). Defaulting to app main thread.");
+                mHandler = mContext.getMainThreadHandler();
+            } else {
+                mHandler = mView.getHandler();
+            }
             validate();
-            mHandler = mSurfaceOnly ? mContext.getMainThreadHandler() : mView.getHandler();
         }
 
         @VisibleForTesting
@@ -802,6 +882,12 @@ public class InteractionJankMonitor {
                 if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
                     shouldThrow = true;
                     msg.append("Must pass in a valid surface control if only instrument surface; ");
+                }
+                if (mHandler == null) {
+                    shouldThrow = true;
+                    msg.append(
+                            "Must pass a UI thread handler when only a surface control is "
+                                    + "provided.");
                 }
             } else {
                 if (!hasValidView()) {

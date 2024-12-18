@@ -16,6 +16,8 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
+
 import java.util.Objects;
 
 
@@ -64,7 +66,7 @@ abstract class RefreshRateVote implements Vote {
          *  Vote: min(ignored)     min(applied)  min(applied+physical)  max(applied)  max(ignored)
          */
         @Override
-        public void updateSummary(VoteSummary summary) {
+        public void updateSummary(@NonNull VoteSummary summary) {
             summary.minRenderFrameRate = Math.max(summary.minRenderFrameRate, mMinRefreshRate);
             summary.maxRenderFrameRate = Math.min(summary.maxRenderFrameRate, mMaxRefreshRate);
             // Physical refresh rate cannot be lower than the minimal render frame rate.
@@ -97,7 +99,7 @@ abstract class RefreshRateVote implements Vote {
          *  Vote: min(ignored) min(applied)  max(applied+render)     max(applied)  max(ignored)
          */
         @Override
-        public void updateSummary(VoteSummary summary) {
+        public void updateSummary(@NonNull VoteSummary summary) {
             summary.minPhysicalRefreshRate = Math.max(summary.minPhysicalRefreshRate,
                     mMinRefreshRate);
             summary.maxPhysicalRefreshRate = Math.min(summary.maxPhysicalRefreshRate,

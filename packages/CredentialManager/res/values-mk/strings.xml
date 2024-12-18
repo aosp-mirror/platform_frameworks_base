@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Како што се движиме кон иднина без лозинки, лозинките сепак ќе бидат достапни покрај криптографските клучеви."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Изберете каде да ги зачувате вашите <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Изберете управник со лозинки за да ги зачувате вашите податоци и да се најавите побрзо следниот пат"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Да се создаде криптографски клуч за најавување на <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Да се зачува лозинката за најавување на <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Да се зачуваат податоците за најавување за <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Да се создаде криптографски клуч за најавување на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Да се зачува лозинката за најавување на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Да се зачуваат податоците за најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"криптографски клуч"</string>
     <string name="password" msgid="6738570945182936667">"лозинка"</string>
     <string name="passkeys" msgid="5733880786866559847">"криптографски клучеви"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Врати се на претходната страница"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Затвори"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Отфрли"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се користи вашиот зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Да се користат зачуваните лозинки за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Да се користи вашето најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Да се отклучат опциите за најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Користете го зачуваниот криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Користете ја зачуваната лозинка за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Користете ја вашата сметка за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Користете го заклучувањето екран за да се најавувате на <xliff:g id="APP_NAME">%1$s</xliff:g> со <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Отклучете ги опциите за најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Изберете зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Изберете зачувана лозинка за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Изберете зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Изберете најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Изберете сметка за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Избери опција за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Да се користат овие информации на <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Најавете се на друг начин"</string>

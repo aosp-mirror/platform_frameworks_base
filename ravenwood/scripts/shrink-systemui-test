@@ -1,0 +1,131 @@
+#!/bin/bash
+# Copyright (C) 2024 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -e
+
+SCRIPT_NAME="${0##*/}"
+
+usage() {
+    cat <<"EOF"
+
+$SCRIPT_NAME: Shrink / unshrink SystemUiRavenTests.
+
+    SystemUiRavenTests has a lot of kotlin source files, so it's slow to build,
+    which is painful when you want to run it after updating ravenwood code
+    that SystemUiRavenTests depends on. (example: junit-src/)
+
+    This script basically removes the test files in SystemUI/multivalentTests
+    that don't have @EnabledOnRavenwood. But if we actaully remove them,
+    soong would re-generate the ninja file, which will take a long time,
+    so instead it'll truncate them.
+
+    This script will also tell git to ignore these files, so they won't shw up
+    in `git status`.
+    (Use `git ls-files -v | sed -ne "s/^[a-zS] //p"` to show ignored filse.)
+
+Usage:
+    $SCRIPT_NAME -s # Shrink the test files.
+
+    $SCRIPT_NAME -u # Undo it.
+
+EOF
+}
+
+TEST_PATH=${ANDROID_BUILD_TOP}/frameworks/base/packages/SystemUI/multivalentTests
+cd "$TEST_PATH"
+
+command=""
+case "$1" in
+    "-s") command=shrink ;;
+    "-u") command=unshrink ;;
+    *) usage ; exit 1 ;;
+esac
+
+
+echo "Listing test files...."
+files=( $(find . -name '*Test.kt' -o -name '*Test.java') )
+
+exemption='(BaseHeadsUpManagerTest)'
+
+shrink() {
+    local target=()
+    for file in ${files[@]}; do
+        # Check for exemption
+        if echo $file | egrep -q "$exemption"; then
+            echo "  Skip exempted file"
+            continue
+        fi
+
+        echo "Checking $file"
+        if ! [[ -f $file ]] ; then
+            echo "  Skip non regular file"
+            continue
+        fi
+
+        if ! [[ -s $file ]] ; then
+            echo "  Skip empty file"
+            continue
+        fi
+
+        if grep -q '@EnabledOnRavenwood' $file ; then
+            echo "  Skip ravenwood test file".
+            continue
+        fi
+
+        # It's a non ravenwood test file. Empty it.
+        : > $file
+
+        # Tell git to ignore the file
+
+        target+=($file)
+
+        echo "  Emptied"
+
+    done
+    if (( ${#target[@]} == 0 )) ; then
+        echo "No files emptied."
+        return 0
+    fi
+
+    git update-index --skip-worktree ${target[@]}
+
+    echo "Emptied ${#target[@]} files"
+    return 0
+}
+
+unshrink() {
+    local target=()
+
+    # Collect empty files
+    for file in ${files[@]}; do
+        if [[ -s $file ]] ; then
+            continue
+        fi
+
+        target+=($file)
+        : > $file
+    done
+    if (( ${#target[@]} == 0 )) ; then
+        echo "No files to restore."
+        return 0
+    fi
+    # Un-ignore the files, and check out the original files
+    echo "Restoring ${#target[@]} files..."
+    git update-index --no-skip-worktree ${target[@]}
+    git checkout goog/main ${target[@]}
+    return 0
+}
+
+$command

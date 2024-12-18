@@ -63,7 +63,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.CellBroadcastUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -659,7 +659,7 @@ public class LockTaskController {
                 StatusBarManagerInternal statusBarManager = LocalServices.getService(
                         StatusBarManagerInternal.class);
                 if (statusBarManager != null) {
-                    statusBarManager.showScreenPinningRequest(task.mTaskId);
+                    statusBarManager.showScreenPinningRequest(task.mTaskId, task.mUserId);
                 }
                 return;
             } else if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {

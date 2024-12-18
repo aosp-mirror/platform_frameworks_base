@@ -27,7 +27,7 @@ class MockSpriteController : public SpriteController {
 
 public:
     MockSpriteController(sp<Looper> looper)
-          : SpriteController(looper, 0, [](int) { return nullptr; }) {}
+          : SpriteController(looper, 0, [](ui::LogicalDisplayId) { return nullptr; }) {}
     ~MockSpriteController() {}
 
     MOCK_METHOD(sp<Sprite>, createSprite, (), (override));

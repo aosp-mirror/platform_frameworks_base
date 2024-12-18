@@ -16,10 +16,16 @@
 
 package com.android.internal.telephony.tests;
 
+import static android.telephony.NetworkRegistrationInfo.FIRST_SERVICE_TYPE;
+import static android.telephony.NetworkRegistrationInfo.LAST_SERVICE_TYPE;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -71,6 +77,37 @@ public class TelephonyUtilsTest {
 
         // getSubscriptionUserHandle should be called if subID is active.
         verify(mSubscriptionManager, times(1)).getSubscriptionUserHandle(eq(activeSubId));
+    }
+
+    @Test
+    public void testIsValidPlmn() {
+        assertTrue(TelephonyUtils.isValidPlmn("310260"));
+        assertTrue(TelephonyUtils.isValidPlmn("45006"));
+        assertFalse(TelephonyUtils.isValidPlmn("1234567"));
+        assertFalse(TelephonyUtils.isValidPlmn("1234"));
+        assertFalse(TelephonyUtils.isValidPlmn(""));
+        assertFalse(TelephonyUtils.isValidPlmn(null));
+    }
+
+    @Test
+    public void testIsValidService() {
+        assertTrue(TelephonyUtils.isValidService(FIRST_SERVICE_TYPE));
+        assertTrue(TelephonyUtils.isValidService(LAST_SERVICE_TYPE));
+        assertFalse(TelephonyUtils.isValidService(FIRST_SERVICE_TYPE - 1));
+        assertFalse(TelephonyUtils.isValidService(LAST_SERVICE_TYPE + 1));
+    }
+
+    @Test
+    public void testIsValidCountryCode() {
+        assertTrue(TelephonyUtils.isValidCountryCode("US"));
+        assertTrue(TelephonyUtils.isValidCountryCode("cn"));
+        assertFalse(TelephonyUtils.isValidCountryCode("11"));
+        assertFalse(TelephonyUtils.isValidCountryCode("USA"));
+        assertFalse(TelephonyUtils.isValidCountryCode("chn"));
+        assertFalse(TelephonyUtils.isValidCountryCode("U"));
+        assertFalse(TelephonyUtils.isValidCountryCode("G7"));
+        assertFalse(TelephonyUtils.isValidCountryCode(""));
+        assertFalse(TelephonyUtils.isValidCountryCode(null));
     }
 }
 

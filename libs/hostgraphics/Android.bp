@@ -7,6 +7,17 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+cc_library_headers {
+    name: "libhostgraphics_headers",
+    host_supported: true,
+    export_include_dirs: ["include"],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    },
+}
+
 cc_library_host_static {
     name: "libhostgraphics",
 
@@ -17,33 +28,26 @@ cc_library_host_static {
     static_libs: [
         "libbase",
         "libmath",
+        "libui-types",
         "libutils",
     ],
 
     srcs: [
-        ":libui_host_common",
         "ADisplay.cpp",
+        "ANativeWindow.cpp",
         "Fence.cpp",
         "HostBufferQueue.cpp",
         "PublicFormat.cpp",
     ],
 
-    include_dirs: [
-        // Here we override all the headers automatically included with frameworks/native/include.
-        // When frameworks/native/include will be removed from the list of automatic includes.
-        // We will have to copy necessary headers with a pre-build step (generated headers).
-        ".",
-        "frameworks/native/libs/arect/include",
-        "frameworks/native/libs/ui/include_private",
-    ],
-
     header_libs: [
+        "libhostgraphics_headers",
         "libnativebase_headers",
         "libnativedisplay_headers",
         "libnativewindow_headers",
     ],
 
-    export_include_dirs: ["."],
+    export_include_dirs: ["include"],
 
     target: {
         windows: {

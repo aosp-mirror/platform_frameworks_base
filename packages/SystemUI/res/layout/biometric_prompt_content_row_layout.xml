@@ -16,6 +16,6 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/biometric_prompt_content_list_row_height"
+    android:layout_height="wrap_content"
     android:gravity="center_vertical|start"
     android:orientation="horizontal" />

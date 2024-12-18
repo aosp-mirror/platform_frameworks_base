@@ -30,6 +30,8 @@ import android.graphics.fonts.SystemFonts;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.system.Os;
 import android.text.FontConfig;
 import android.util.Xml;
@@ -40,6 +42,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
@@ -68,6 +71,9 @@ import java.util.stream.Collectors;
 public final class UpdatableFontDirTest {
 
     private static final String LEGACY_FONTS_XML = "/system/etc/fonts.xml";
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     /**
      * A {@link UpdatableFontDir.FontFileParser} for testing. Instead of using real font files,

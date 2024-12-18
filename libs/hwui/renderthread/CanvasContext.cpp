@@ -35,8 +35,9 @@
 #include "Properties.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"
+#include "pipeline/skia/SkiaCpuPipeline.h"
+#include "pipeline/skia/SkiaGpuPipeline.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
-#include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "thread/CommonPool.h"
 #include "utils/GLUtils.h"
@@ -72,7 +73,7 @@ CanvasContext* ScopedActiveContext::sActiveContext = nullptr;
 
 CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
                                      RenderNode* rootRenderNode, IContextFactory* contextFactory,
-                                     int32_t uiThreadId, int32_t renderThreadId) {
+                                     pid_t uiThreadId, pid_t renderThreadId) {
     auto renderType = Properties::getRenderPipelineType();
 
     switch (renderType) {
@@ -84,6 +85,12 @@ CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
                                      std::make_unique<skiapipeline::SkiaVulkanPipeline>(thread),
                                      uiThreadId, renderThreadId);
+#ifndef __ANDROID__
+        case RenderPipelineType::SkiaCpu:
+            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
+                                     std::make_unique<skiapipeline::SkiaCpuPipeline>(thread),
+                                     uiThreadId, renderThreadId);
+#endif
         default:
             LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
             break;
@@ -108,7 +115,7 @@ void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) 
 }
 
 void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
-    skiapipeline::SkiaPipeline::prepareToDraw(thread, bitmap);
+    skiapipeline::SkiaGpuPipeline::prepareToDraw(thread, bitmap);
 }
 
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
@@ -182,6 +189,7 @@ static void setBufferCount(ANativeWindow* window) {
 }
 
 void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
+#ifdef __ANDROID__
     if (mHardwareBuffer) {
         AHardwareBuffer_release(mHardwareBuffer);
         mHardwareBuffer = nullptr;
@@ -192,6 +200,7 @@ void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
         mHardwareBuffer = buffer;
     }
     mRenderPipeline->setHardwareBuffer(mHardwareBuffer);
+#endif
 }
 
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
@@ -411,7 +420,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     // If the previous frame was dropped we don't need to hold onto it, so
     // just keep using the previous frame's structure instead
-    if (const auto reason = wasSkipped(mCurrentFrameInfo)) {
+    const auto reason = wasSkipped(mCurrentFrameInfo);
+    if (reason.has_value()) {
         // Use the oldest skipped frame in case we skip more than a single frame
         if (!mSkippedFrameInfo) {
             switch (*reason) {
@@ -560,6 +570,7 @@ Frame CanvasContext::getFrame() {
 }
 
 void CanvasContext::draw(bool solelyTextureViewUpdates) {
+#ifdef __ANDROID__
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
             if (grContext->isDeviceLost()) {
@@ -570,6 +581,7 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
             return;
         }
     }
+#endif
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
@@ -593,11 +605,13 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     if (skippedFrameReason) {
         mCurrentFrameInfo->setSkippedFrameReason(*skippedFrameReason);
 
+#ifdef __ANDROID__
         if (auto grContext = getGrContext()) {
             // Submit to ensure that any texture uploads complete and Skia can
             // free its staging buffers.
             grContext->flushAndSubmit();
         }
+#endif
 
         // Notify the callbacks, even if there's nothing to draw so they aren't waiting
         // indefinitely
@@ -640,6 +654,9 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
         if (vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
             const auto inputEventId =
                     static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
+            ATRACE_FORMAT(
+                "frameTimelineInfo(frameNumber=%llu, vsyncId=%lld, inputEventId=0x%" PRIx32 ")",
+                frameCompleteNr, vsyncId, inputEventId);
             const ANativeWindowFrameTimelineInfo ftl = {
                     .frameNumber = frameCompleteNr,
                     .frameTimelineVsyncId = vsyncId,
@@ -747,8 +764,8 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
         if (mExpectSurfaceStats) {
             reportMetricsWithPresentTime();
             {  // acquire lock
-                std::lock_guard lock(mLast4FrameMetricsInfosMutex);
-                FrameMetricsInfo& next = mLast4FrameMetricsInfos.next();
+                std::lock_guard lock(mLastFrameMetricsInfosMutex);
+                FrameMetricsInfo& next = mLastFrameMetricsInfos.next();
                 next.frameInfo = mCurrentFrameInfo;
                 next.frameNumber = frameCompleteNr;
                 next.surfaceId = mSurfaceControlGenerationId;
@@ -776,6 +793,8 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
                                  (std::min(syncDelayDuration, mLastDequeueBufferDuration)) -
                                  dequeueBufferDuration - idleDuration;
         mHintSessionWrapper->reportActualWorkDuration(actualDuration);
+        mHintSessionWrapper->setActiveFunctorThreads(
+                WebViewFunctorManager::instance().getRenderingThreadsForActiveFunctors());
     }
 
     mLastDequeueBufferDuration = dequeueBufferDuration;
@@ -800,12 +819,12 @@ void CanvasContext::reportMetricsWithPresentTime() {
     int32_t surfaceControlId;
 
     {  // acquire lock
-        std::scoped_lock lock(mLast4FrameMetricsInfosMutex);
-        if (mLast4FrameMetricsInfos.size() != mLast4FrameMetricsInfos.capacity()) {
+        std::scoped_lock lock(mLastFrameMetricsInfosMutex);
+        if (mLastFrameMetricsInfos.size() != mLastFrameMetricsInfos.capacity()) {
             // Not enough frames yet
             return;
         }
-        auto frameMetricsInfo = mLast4FrameMetricsInfos.front();
+        auto frameMetricsInfo = mLastFrameMetricsInfos.front();
         forthBehind = frameMetricsInfo.frameInfo;
         frameNumber = frameMetricsInfo.frameNumber;
         surfaceControlId = frameMetricsInfo.surfaceId;
@@ -853,12 +872,12 @@ void CanvasContext::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
     }
 }
 
-FrameInfo* CanvasContext::getFrameInfoFromLast4(uint64_t frameNumber, uint32_t surfaceControlId) {
-    std::scoped_lock lock(mLast4FrameMetricsInfosMutex);
-    for (size_t i = 0; i < mLast4FrameMetricsInfos.size(); i++) {
-        if (mLast4FrameMetricsInfos[i].frameNumber == frameNumber &&
-            mLast4FrameMetricsInfos[i].surfaceId == surfaceControlId) {
-            return mLast4FrameMetricsInfos[i].frameInfo;
+FrameInfo* CanvasContext::getFrameInfoFromLastFew(uint64_t frameNumber, uint32_t surfaceControlId) {
+    std::scoped_lock lock(mLastFrameMetricsInfosMutex);
+    for (size_t i = 0; i < mLastFrameMetricsInfos.size(); i++) {
+        if (mLastFrameMetricsInfos[i].frameNumber == frameNumber &&
+            mLastFrameMetricsInfos[i].surfaceId == surfaceControlId) {
+            return mLastFrameMetricsInfos[i].frameInfo;
         }
     }
 
@@ -878,7 +897,7 @@ void CanvasContext::onSurfaceStatsAvailable(void* context, int32_t surfaceContro
     }
     uint64_t frameNumber = functions.getFrameNumberFunc(stats);
 
-    FrameInfo* frameInfo = instance->getFrameInfoFromLast4(frameNumber, surfaceControlId);
+    FrameInfo* frameInfo = instance->getFrameInfoFromLastFew(frameNumber, surfaceControlId);
 
     if (frameInfo != nullptr) {
         std::scoped_lock lock(instance->mFrameInfoMutex);
@@ -994,7 +1013,15 @@ void CanvasContext::destroyHardwareResources() {
 }
 
 void CanvasContext::onContextDestroyed() {
-    destroyHardwareResources();
+    // We don't want to destroyHardwareResources as that will invalidate display lists which
+    // the client may not be expecting. Instead just purge all scratch resources
+    if (mRenderPipeline->isContextReady()) {
+        freePrefetchedLayers();
+        for (const sp<RenderNode>& node : mRenderNodes) {
+            node->destroyLayers();
+        }
+        mRenderPipeline->onDestroyHardwareResources();
+    }
 }
 
 DeferredLayerUpdater* CanvasContext::createTextureLayer() {

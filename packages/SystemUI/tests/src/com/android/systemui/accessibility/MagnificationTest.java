@@ -27,6 +27,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_M
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
@@ -39,15 +40,17 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IMagnificationConnectionCallback;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
@@ -63,7 +66,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class MagnificationTest extends SysuiTestCase {
 
@@ -82,7 +85,7 @@ public class MagnificationTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
 
     private CommandQueue mCommandQueue;
-    private Magnification mMagnification;
+    private MagnificationImpl mMagnification;
     private OverviewProxyListener mOverviewProxyListener;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
@@ -92,6 +95,10 @@ public class MagnificationTest extends SysuiTestCase {
     private MagnificationSettingsController mMagnificationSettingsController;
     @Mock
     private AccessibilityLogger mA11yLogger;
+    @Mock
+    private IWindowManager mIWindowManager;
+    @Mock
+    private ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
 
     @Before
     public void setUp() throws Exception {
@@ -104,7 +111,7 @@ public class MagnificationTest extends SysuiTestCase {
         }).when(mAccessibilityManager).setMagnificationConnection(
                 any(IMagnificationConnection.class));
 
-        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
+        when(mSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mSysUiState);
 
         doAnswer(invocation -> {
             mMagnification.mMagnificationSettingsControllerCallback
@@ -120,10 +127,13 @@ public class MagnificationTest extends SysuiTestCase {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
 
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
-        mMagnification = new Magnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
+        mMagnification = new MagnificationImpl(getContext(),
+                getContext().getMainThreadHandler(), mContext.getMainExecutor(),
+                mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
-                getContext().getSystemService(DisplayManager.class), mA11yLogger);
+                getContext().getSystemService(DisplayManager.class), mA11yLogger, mIWindowManager,
+                getContext().getSystemService(AccessibilityManager.class),
+                mViewCaptureAwareWindowManager);
         mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
@@ -207,6 +217,16 @@ public class MagnificationTest extends SysuiTestCase {
                 eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED),
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW)
         );
+    }
+
+    @Test
+    public void onRestoreWindowSize_updateSettingsButtonStatusOnRestore() {
+        mMagnification.mWindowMagnifierCallback
+                .onWindowMagnifierBoundsRestored(TEST_DISPLAY, MagnificationSize.SMALL);
+        waitForIdleSync();
+
+        verify(mMagnificationSettingsController)
+                .updateSettingsButtonStatusOnRestore(MagnificationSize.SMALL);
     }
 
     @Test

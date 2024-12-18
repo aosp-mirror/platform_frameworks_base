@@ -23,6 +23,7 @@ import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRe
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -114,6 +115,24 @@ class AlternateBouncerToAodTransitionViewModelTest : SysuiTestCase() {
             )
 
             values.forEach { assertThat(it).isEqualTo(0f) }
+        }
+
+    @Test
+    fun lockscreenAlphaStartsFromViewStateAccessorAlpha() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor(alpha = { 0.5f })
+            val alpha by collectLastValue(underTest.lockscreenAlpha(viewState))
+
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+
+            keyguardTransitionRepository.sendTransitionStep(step(0f))
+            assertThat(alpha).isEqualTo(0.5f)
+
+            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
+            assertThat(alpha).isEqualTo(0.75f)
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test

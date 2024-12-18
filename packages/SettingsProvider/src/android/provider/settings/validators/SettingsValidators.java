@@ -239,6 +239,18 @@ public class SettingsValidators {
         }
     };
 
+    static final Validator ANY_LONG_VALIDATOR = value -> {
+        if (value == null) {
+            return true;
+        }
+        try {
+            Long.parseLong(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    };
+
     static final Validator CREDENTIAL_SERVICE_VALIDATOR = new Validator() {
         @Override
         public boolean validate(String value) {

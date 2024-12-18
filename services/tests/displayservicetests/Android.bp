@@ -16,12 +16,13 @@ android_test {
     ],
 
     libs: [
-        "android.test.mock",
+        "android.test.mock.stubs.system",
     ],
 
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "compatibility-device-util-axt",
         "flag-junit",
         "frameworks-base-testutils",
         "junit",
@@ -48,6 +49,10 @@ android_test {
         "automotive-tests",
     ],
 
+    data: [
+        ":DisplayManagerTestApp",
+    ],
+
     certificate: "platform",
 
     dxflags: ["--multi-dex"],
@@ -55,4 +60,14 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+test_module_config {
+    name: "DisplayServiceTests_server_display",
+    base: "DisplayServiceTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.display"],
 }

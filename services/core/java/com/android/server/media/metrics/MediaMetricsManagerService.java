@@ -374,6 +374,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     event.getInputMediaItemInfos().isEmpty()
                             ? EMPTY_MEDIA_ITEM_INFO
                             : event.getInputMediaItemInfos().get(0);
+            @MediaItemInfo.DataType long inputDataTypes = inputMediaItemInfo.getDataTypes();
             String inputAudioSampleMimeType =
                     getFilteredFirstMimeType(
                             inputMediaItemInfo.getSampleMimeTypes(), AUDIO_MIME_TYPE_PREFIX);
@@ -396,6 +397,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     event.getOutputMediaItemInfo() == null
                             ? EMPTY_MEDIA_ITEM_INFO
                             : event.getOutputMediaItemInfo();
+            @MediaItemInfo.DataType long outputDataTypes = outputMediaItemInfo.getDataTypes();
             String outputAudioSampleMimeType =
                     getFilteredFirstMimeType(
                             outputMediaItemInfo.getSampleMimeTypes(), AUDIO_MIME_TYPE_PREFIX);
@@ -415,6 +417,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     !outputCodecNames.isEmpty() ? outputCodecNames.get(0) : "";
             String outputSecondCodecName =
                     outputCodecNames.size() > 1 ? outputCodecNames.get(1) : "";
+            @EditingEndedEvent.OperationType long operationTypes = event.getOperationTypes();
             StatsEvent statsEvent =
                     StatsEvent.newBuilder()
                             .setAtomId(798)
@@ -423,11 +426,63 @@ public final class MediaMetricsManagerService extends SystemService {
                             .writeFloat(event.getFinalProgressPercent())
                             .writeInt(event.getErrorCode())
                             .writeLong(event.getTimeSinceCreatedMillis())
+                            .writeBoolean(
+                                    (operationTypes
+                                                    & EditingEndedEvent
+                                                            .OPERATION_TYPE_VIDEO_TRANSCODE)
+                                            != 0)
+                            .writeBoolean(
+                                    (operationTypes
+                                                    & EditingEndedEvent
+                                                            .OPERATION_TYPE_AUDIO_TRANSCODE)
+                                            != 0)
+                            .writeBoolean(
+                                    (operationTypes & EditingEndedEvent.OPERATION_TYPE_VIDEO_EDIT)
+                                            != 0)
+                            .writeBoolean(
+                                    (operationTypes & EditingEndedEvent.OPERATION_TYPE_AUDIO_EDIT)
+                                            != 0)
+                            .writeBoolean(
+                                    (operationTypes
+                                                    & EditingEndedEvent
+                                                            .OPERATION_TYPE_VIDEO_TRANSMUX)
+                                            != 0)
+                            .writeBoolean(
+                                    (operationTypes
+                                                    & EditingEndedEvent
+                                                            .OPERATION_TYPE_AUDIO_TRANSMUX)
+                                            != 0)
+                            .writeBoolean(
+                                    (operationTypes & EditingEndedEvent.OPERATION_TYPE_PAUSED) != 0)
+                            .writeBoolean(
+                                    (operationTypes & EditingEndedEvent.OPERATION_TYPE_RESUMED)
+                                            != 0)
                             .writeString(getFilteredLibraryName(event.getExporterName()))
                             .writeString(getFilteredLibraryName(event.getMuxerName()))
                             .writeInt(getThroughputFps(event))
                             .writeInt(event.getInputMediaItemInfos().size())
                             .writeInt(inputMediaItemInfo.getSourceType())
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_IMAGE) != 0)
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_VIDEO) != 0)
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_AUDIO) != 0)
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_METADATA) != 0)
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_DEPTH) != 0)
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_GAIN_MAP) != 0)
+                            .writeBoolean(
+                                    (inputDataTypes & MediaItemInfo.DATA_TYPE_HIGH_FRAME_RATE) != 0)
+                            .writeBoolean(
+                                    (inputDataTypes
+                                                    & MediaItemInfo
+                                                            .DATA_TYPE_SPEED_SETTING_CUE_POINTS)
+                                            != 0)
+                            .writeBoolean((inputDataTypes & MediaItemInfo.DATA_TYPE_GAPLESS) != 0)
+                            .writeBoolean(
+                                    (inputDataTypes & MediaItemInfo.DATA_TYPE_SPATIAL_AUDIO) != 0)
+                            .writeBoolean(
+                                    (inputDataTypes
+                                                    & MediaItemInfo
+                                                            .DATA_TYPE_HIGH_DYNAMIC_RANGE_VIDEO)
+                                            != 0)
                             .writeLong(
                                     getBucketedDurationMillis(
                                             inputMediaItemInfo.getDurationMillis()))
@@ -443,6 +498,7 @@ public final class MediaMetricsManagerService extends SystemService {
                                     getFilteredAudioSampleRateHz(
                                             inputMediaItemInfo.getAudioSampleRateHz()))
                             .writeInt(inputMediaItemInfo.getAudioChannelCount())
+                            .writeLong(inputMediaItemInfo.getAudioSampleCount())
                             .writeInt(inputVideoSize.getWidth())
                             .writeInt(inputVideoSize.getHeight())
                             .writeInt(inputVideoResolution)
@@ -456,6 +512,28 @@ public final class MediaMetricsManagerService extends SystemService {
                             .writeInt(getVideoFrameRateEnum(inputMediaItemInfo.getVideoFrameRate()))
                             .writeString(inputFirstCodecName)
                             .writeString(inputSecondCodecName)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_IMAGE) != 0)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_VIDEO) != 0)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_AUDIO) != 0)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_METADATA) != 0)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_DEPTH) != 0)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_GAIN_MAP) != 0)
+                            .writeBoolean(
+                                    (outputDataTypes & MediaItemInfo.DATA_TYPE_HIGH_FRAME_RATE)
+                                            != 0)
+                            .writeBoolean(
+                                    (outputDataTypes
+                                                    & MediaItemInfo
+                                                            .DATA_TYPE_SPEED_SETTING_CUE_POINTS)
+                                            != 0)
+                            .writeBoolean((outputDataTypes & MediaItemInfo.DATA_TYPE_GAPLESS) != 0)
+                            .writeBoolean(
+                                    (outputDataTypes & MediaItemInfo.DATA_TYPE_SPATIAL_AUDIO) != 0)
+                            .writeBoolean(
+                                    (outputDataTypes
+                                                    & MediaItemInfo
+                                                            .DATA_TYPE_HIGH_DYNAMIC_RANGE_VIDEO)
+                                            != 0)
                             .writeLong(
                                     getBucketedDurationMillis(
                                             outputMediaItemInfo.getDurationMillis()))
@@ -471,6 +549,7 @@ public final class MediaMetricsManagerService extends SystemService {
                                     getFilteredAudioSampleRateHz(
                                             outputMediaItemInfo.getAudioSampleRateHz()))
                             .writeInt(outputMediaItemInfo.getAudioChannelCount())
+                            .writeLong(outputMediaItemInfo.getAudioSampleCount())
                             .writeInt(outputVideoSize.getWidth())
                             .writeInt(outputVideoSize.getHeight())
                             .writeInt(outputVideoResolution)

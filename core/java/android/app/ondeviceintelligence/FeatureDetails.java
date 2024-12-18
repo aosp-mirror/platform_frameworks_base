@@ -41,7 +41,7 @@ import java.text.MessageFormat;
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public final class FeatureDetails implements Parcelable {
     @Status
-    private final int mStatus;
+    private final int mFeatureStatus;
     @NonNull
     private final PersistableBundle mFeatureDetailParams;
 
@@ -60,6 +60,9 @@ public final class FeatureDetails implements Parcelable {
     /** Underlying service is unavailable and feature status cannot be fetched. */
     public static final int FEATURE_STATUS_SERVICE_UNAVAILABLE = 4;
 
+    /**
+     * @hide
+     */
     @IntDef(value = {
             FEATURE_STATUS_UNAVAILABLE,
             FEATURE_STATUS_DOWNLOADABLE,
@@ -73,21 +76,21 @@ public final class FeatureDetails implements Parcelable {
     }
 
     public FeatureDetails(
-            @Status int status,
+            @Status int featureStatus,
             @NonNull PersistableBundle featureDetailParams) {
-        this.mStatus = status;
+        this.mFeatureStatus = featureStatus;
         com.android.internal.util.AnnotationValidations.validate(
-                Status.class, null, mStatus);
+                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = featureDetailParams;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mFeatureDetailParams);
     }
 
     public FeatureDetails(
-            @Status int status) {
-        this.mStatus = status;
+            @Status int featureStatus) {
+        this.mFeatureStatus = featureStatus;
         com.android.internal.util.AnnotationValidations.validate(
-                Status.class, null, mStatus);
+                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = new PersistableBundle();
     }
 
@@ -95,8 +98,8 @@ public final class FeatureDetails implements Parcelable {
     /**
      * Returns an integer value associated with the feature status.
      */
-    public @Status int getStatus() {
-        return mStatus;
+    public @Status int getFeatureStatus() {
+        return mFeatureStatus;
     }
 
 
@@ -111,7 +114,7 @@ public final class FeatureDetails implements Parcelable {
     public String toString() {
         return MessageFormat.format("FeatureDetails '{' status = {0}, "
                         + "persistableBundle = {1} '}'",
-                mStatus,
+                mFeatureStatus,
                 mFeatureDetailParams);
     }
 
@@ -121,21 +124,21 @@ public final class FeatureDetails implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         @SuppressWarnings("unchecked")
         FeatureDetails that = (FeatureDetails) o;
-        return mStatus == that.mStatus
+        return mFeatureStatus == that.mFeatureStatus
                 && java.util.Objects.equals(mFeatureDetailParams, that.mFeatureDetailParams);
     }
 
     @Override
     public int hashCode() {
         int _hash = 1;
-        _hash = 31 * _hash + mStatus;
+        _hash = 31 * _hash + mFeatureStatus;
         _hash = 31 * _hash + java.util.Objects.hashCode(mFeatureDetailParams);
         return _hash;
     }
 
     @Override
     public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
-        dest.writeInt(mStatus);
+        dest.writeInt(mFeatureStatus);
         dest.writeTypedObject(mFeatureDetailParams, flags);
     }
 
@@ -151,9 +154,9 @@ public final class FeatureDetails implements Parcelable {
         PersistableBundle persistableBundle = (PersistableBundle) in.readTypedObject(
                 PersistableBundle.CREATOR);
 
-        this.mStatus = status;
+        this.mFeatureStatus = status;
         com.android.internal.util.AnnotationValidations.validate(
-                Status.class, null, mStatus);
+                Status.class, null, mFeatureStatus);
         this.mFeatureDetailParams = persistableBundle;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mFeatureDetailParams);

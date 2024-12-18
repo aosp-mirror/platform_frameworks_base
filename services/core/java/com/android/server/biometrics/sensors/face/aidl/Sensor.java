@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.face.FaceSensorConfigurations.remapFqName;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,7 +31,6 @@ import android.hardware.biometrics.common.ComponentInfo;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
-import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Handler;
@@ -42,7 +44,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
@@ -57,7 +58,6 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
 import com.android.server.biometrics.sensors.UserSwitchProvider;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
@@ -89,7 +89,6 @@ public class Sensor {
     @Nullable AidlSession mCurrentSession;
     @NonNull BiometricContext mBiometricContext;
 
-
     Sensor(@NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
             @NonNull BiometricContext biometricContext) {
@@ -116,11 +115,7 @@ public class Sensor {
      */
     public void init(@NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull FaceProvider provider) {
-        if (Flags.deHidl()) {
-            setScheduler(getBiometricSchedulerForInit(lockoutResetDispatcher, provider));
-        } else {
-            setScheduler(getUserAwareBiometricSchedulerForInit(lockoutResetDispatcher, provider));
-        }
+        setScheduler(getBiometricSchedulerForInit(lockoutResetDispatcher, provider));
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
         mLockoutTracker = new LockoutCache();
     }
@@ -149,8 +144,7 @@ public class Sensor {
                         final AidlResponseHandler resultController = new AidlResponseHandler(
                                 mContext, mScheduler, sensorId, newUserId,
                                 mLockoutTracker, lockoutResetDispatcher,
-                                mBiometricContext.getAuthSessionCoordinator(), () -> {
-                        },
+                                mBiometricContext.getAuthSessionCoordinator(),
                                 new AidlResponseHandler.AidlResponseHandlerCallback() {
                                     @Override
                                     public void onEnrollSuccess() {
@@ -165,41 +159,7 @@ public class Sensor {
                                         Slog.e(TAG, "Face sensor hardware unavailable.");
                                         mCurrentSession = null;
                                     }
-                                });
-
-                        return Sensor.this.getStartUserClient(resultController, sensorId,
-                                newUserId, provider);
-                    }
-                });
-    }
-
-    private UserAwareBiometricScheduler<IFace, ISession> getUserAwareBiometricSchedulerForInit(
-            LockoutResetDispatcher lockoutResetDispatcher,
-            FaceProvider provider) {
-        return new UserAwareBiometricScheduler<>(TAG,
-                BiometricScheduler.SENSOR_TYPE_FACE, null /* gestureAvailabilityDispatcher */,
-                () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
-                new UserAwareBiometricScheduler.UserSwitchCallback() {
-                    @NonNull
-                    @Override
-                    public StopUserClient<ISession> getStopUserClient(int userId) {
-                        return new FaceStopUserClient(mContext,
-                                () -> mLazySession.get().getSession(), mToken, userId,
-                                mSensorProperties.sensorId, BiometricLogger.ofUnknown(mContext),
-                                mBiometricContext, () -> mCurrentSession = null);
-                    }
-
-                    @NonNull
-                    @Override
-                    public StartUserClient<IFace, ISession> getStartUserClient(int newUserId) {
-                        final int sensorId = mSensorProperties.sensorId;
-                        final AidlResponseHandler resultController = new AidlResponseHandler(
-                                mContext, mScheduler, sensorId, newUserId,
-                                mLockoutTracker, lockoutResetDispatcher,
-                                mBiometricContext.getAuthSessionCoordinator(), () -> {
-                                    Slog.e(TAG, "Face sensor hardware unavailable.");
-                                    mCurrentSession = null;
-                                });
+                                }, getFaceUtilsInstance());
 
                         return Sensor.this.getStartUserClient(resultController, sensorId,
                                 newUserId, provider);
@@ -259,6 +219,7 @@ public class Sensor {
     }
 
     @VisibleForTesting @Nullable protected AidlSession getSessionForUser(int userId) {
+        Slog.d(TAG, "getSessionForUser: mCurrentSession: " + mCurrentSession);
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -320,8 +281,7 @@ public class Sensor {
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
             proto.write(UserStateProto.NUM_ENROLLED,
-                    FaceUtils.getInstance(mSensorProperties.sensorId)
-                            .getBiometricsForUser(mContext, userId).size());
+                    getFaceUtilsInstance().getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
 
@@ -338,7 +298,7 @@ public class Sensor {
         if (client != null && client.isInterruptable()) {
             Slog.e(TAG, "Sending face hardware unavailable error for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-            errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
+            errorConsumer.onError(FACE_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
 
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
@@ -378,7 +338,8 @@ public class Sensor {
         if (mTestHalEnabled) {
             return true;
         }
-        return ServiceManager.checkService(IFace.DESCRIPTOR + "/" + halInstanceName) != null;
+        return ServiceManager.checkService(
+                remapFqName(IFace.DESCRIPTOR + "/" + halInstanceName)) != null;
     }
 
     /**
@@ -397,5 +358,9 @@ public class Sensor {
     public void setLazySession(
             Supplier<AidlSession> lazySession) {
         mLazySession = lazySession;
+    }
+
+    public FaceUtils getFaceUtilsInstance() {
+        return FaceUtils.getInstance(mSensorProperties.sensorId);
     }
 }

@@ -22,6 +22,7 @@ import static android.provider.Settings.Secure.NOTIFICATION_BUBBLES;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
@@ -51,7 +52,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
@@ -115,7 +116,6 @@ public class BubblesManager {
     private final Executor mSysuiUiBgExecutor;
 
     private final Bubbles.SysuiProxy mSysuiProxy;
-    // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
     private final StatusBarWindowCallback mStatusBarWindowCallback;
     private final Runnable mSensitiveStateChangedListener;
@@ -261,7 +261,7 @@ public class BubblesManager {
         // Store callback in a field so it won't get GC'd
         mStatusBarWindowCallback =
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, isDozing,
-                        panelExpanded, isDreaming) -> {
+                        panelExpanded, isDreaming, communalShowing) -> {
                     if (panelExpanded != mPanelExpanded) {
                         mPanelExpanded = panelExpanded;
                         mBubbles.onNotificationPanelExpandedChanged(panelExpanded);
@@ -450,7 +450,8 @@ public class BubblesManager {
             @Override
             public void onEntryRemoved(NotificationEntry entry,
                     @NotifCollection.CancellationReason int reason) {
-                if (reason == REASON_APP_CANCEL || reason == REASON_APP_CANCEL_ALL) {
+                if (reason == REASON_APP_CANCEL || reason == REASON_APP_CANCEL_ALL
+                        || reason == REASON_PACKAGE_BANNED) {
                     BubblesManager.this.onEntryRemoved(entry);
                 }
             }

@@ -14,12 +14,7 @@
        "file_patterns": ["permission_manager.cpp"]
     },
     {
-       "name": "CtsOsTestCases",
-       "options": [
-           {
-              "include-filter": "android.os.cts.PerformanceHintManagerTest"
-           }
-       ],
+       "name": "CtsOsTestCases_cts_performancehintmanagertest",
        "file_patterns": ["performance_hint.cpp"]
     }
   ],

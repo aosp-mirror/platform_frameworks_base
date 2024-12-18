@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.pipeline.shared.ui.view
 
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.StatusBarIconView
@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
  * method.
  */
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class SingleBindableStatusBarIconViewTest : SysuiTestCase() {
     private lateinit var binding: SingleBindableStatusBarIconViewBinding

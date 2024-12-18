@@ -140,6 +140,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         PropertyInvalidatedCache.disableForTestMode()
         val apply = ExtendedMockito.mockitoSession()
                 .strictness(Strictness.LENIENT)
+                .mockStatic(SaferIntentUtils::class.java)
                 .mockStatic(SystemProperties::class.java)
                 .mockStatic(SystemConfig::class.java)
                 .mockStatic(SELinuxMMAC::class.java, Mockito.CALLS_REAL_METHODS)
@@ -166,7 +167,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             null
         }
         whenever(mocks.settings.addPackageLPw(nullable(), nullable(), nullable(), nullable(),
-                nullable(), nullable(), nullable())) {
+                nullable(), nullable(), nullable(), nullable())) {
             val name: String = getArgument(0)
             val pendingAdd = mPendingPackageAdds.firstOrNull { it.first == name }
                     ?: return@whenever null
@@ -186,7 +187,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
 
     class Mocks {
         val lock = PackageManagerTracedLock()
-        val installLock = Any()
+        val installLock = PackageManagerTracedLock()
         val injector: PackageManagerServiceInjector = mock()
         val systemWrapper: PackageManagerServiceInjector.SystemWrapper = mock()
         val context: Context = mock()

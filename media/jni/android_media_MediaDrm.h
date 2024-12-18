@@ -19,6 +19,8 @@
 
 #include "jni.h"
 
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 #include <media/stagefright/foundation/ABase.h>
 #include <mediadrm/IDrm.h>
 #include <mediadrm/IDrmClient.h>

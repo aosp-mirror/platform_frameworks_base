@@ -52,17 +52,17 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.UserHandle;
-import android.testing.AndroidTestingRunner;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleTileKey;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +73,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.Duration;
 import java.util.Arrays;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PeopleTileViewHelperTest extends SysuiTestCase {
 

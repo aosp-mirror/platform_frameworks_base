@@ -181,14 +181,14 @@ public class CreateUserDialogController {
      * admin status.
      */
     public Dialog createDialog(Activity activity,
-            ActivityStarter activityStarter, boolean isMultipleAdminEnabled,
+            @NonNull ActivityStarter activityStarter, boolean canCreateAdminUser,
             NewUserData successCallback, Runnable cancelCallback) {
         mActivity = activity;
         mCustomDialogHelper = new CustomDialogHelper(activity);
         mSuccessCallback = successCallback;
         mCancelCallback = cancelCallback;
         mActivityStarter = activityStarter;
-        addCustomViews(isMultipleAdminEnabled);
+        addCustomViews(canCreateAdminUser);
         mUserCreationDialog = mCustomDialogHelper.getDialog();
         updateLayout();
         mUserCreationDialog.setOnDismissListener(view -> finish());
@@ -197,19 +197,19 @@ public class CreateUserDialogController {
         return mUserCreationDialog;
     }
 
-    private void addCustomViews(boolean isMultipleAdminEnabled) {
+    private void addCustomViews(boolean canCreateAdminUser) {
         addGrantAdminView();
         addUserInfoEditView();
         mCustomDialogHelper.setPositiveButton(R.string.next, view -> {
             mCurrentState++;
-            if (mCurrentState == GRANT_ADMIN_DIALOG && !isMultipleAdminEnabled) {
+            if (mCurrentState == GRANT_ADMIN_DIALOG && !canCreateAdminUser) {
                 mCurrentState++;
             }
             updateLayout();
         });
         mCustomDialogHelper.setNegativeButton(R.string.back, view -> {
             mCurrentState--;
-            if (mCurrentState == GRANT_ADMIN_DIALOG && !isMultipleAdminEnabled) {
+            if (mCurrentState == GRANT_ADMIN_DIALOG && !canCreateAdminUser) {
                 mCurrentState--;
             }
             updateLayout();
@@ -242,6 +242,7 @@ public class CreateUserDialogController {
                         .setMessage(messageResId)
                         .setNegativeButtonText(R.string.cancel)
                         .setPositiveButtonText(R.string.next);
+                mCustomDialogHelper.requestFocusOnTitle();
                 break;
             case GRANT_ADMIN_DIALOG:
                 mEditUserInfoView.setVisibility(View.GONE);
@@ -254,6 +255,7 @@ public class CreateUserDialogController {
                         .setMessage(R.string.user_grant_admin_message)
                         .setNegativeButtonText(R.string.back)
                         .setPositiveButtonText(R.string.next);
+                mCustomDialogHelper.requestFocusOnTitle();
                 if (mIsAdmin == null) {
                     mCustomDialogHelper.setButtonEnabled(false);
                 }
@@ -265,6 +267,7 @@ public class CreateUserDialogController {
                         .setTitle(R.string.user_info_settings_title)
                         .setNegativeButtonText(R.string.back)
                         .setPositiveButtonText(R.string.done);
+                mCustomDialogHelper.requestFocusOnTitle();
                 mEditUserInfoView.setVisibility(View.VISIBLE);
                 mGrantAdminView.setVisibility(View.GONE);
                 break;
@@ -273,7 +276,6 @@ public class CreateUserDialogController {
                         && mEditUserPhotoController.getNewUserPhotoDrawable() != null)
                         ? mEditUserPhotoController.getNewUserPhotoDrawable()
                         : mSavedDrawable;
-
                 String newName = mUserNameView.getText().toString().trim();
                 String defaultName = mActivity.getString(R.string.user_new_user_name);
                 mUserName = !newName.isEmpty() ? newName : defaultName;

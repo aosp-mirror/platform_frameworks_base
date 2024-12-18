@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import static android.os.Build.IS_USER;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.util.Log;
@@ -116,7 +117,7 @@ class ImeTracingServerImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerManagerServiceDump(String where) {
+    public void triggerManagerServiceDump(String where, @NonNull ServiceDumper dumper) {
         if (!isEnabled() || !isAvailable()) {
             return;
         }

@@ -45,13 +45,7 @@ constructor(
         require(gameView != null) { "Mock game app view not found." }
 
         val bound = gameView.getVisibleBounds()
-        return uiDevice.swipe(
-            bound.centerX(),
-            bound.top,
-            bound.centerX(),
-            bound.centerY(),
-            SWIPE_STEPS
-        )
+        return uiDevice.swipe(bound.centerX(), 0, bound.centerX(), bound.centerY(), SWIPE_STEPS)
     }
 
     /**

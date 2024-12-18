@@ -40,7 +40,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -275,15 +274,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return getHeight();
     }
 
-    /**
-     * Sets the notification as dimmed. The default implementation does nothing.
-     *
-     * @param dimmed Whether the notification should be dimmed.
-     * @param fade Whether an animation should be played to change the state.
-     */
-    public void setDimmed(boolean dimmed, boolean fade) {
-    }
-
     public boolean isRemoved() {
         return false;
     }
@@ -371,17 +361,17 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     /**
      * Perform a remove animation on this view.
-     * @param duration The duration of the remove animation.
-     * @param delay The delay of the animation
+     *
+     * @param duration             The duration of the remove animation.
+     * @param delay                The delay of the animation
      * @param translationDirection The direction value from [-1 ... 1] indicating in which the
      *                             animation should be performed. A value of -1 means that The
      *                             remove animation should be performed upwards,
      *                             such that the  child appears to be going away to the top. 1
      *                             Should mean the opposite.
-     * @param isHeadsUpAnimation Is this a headsUp animation.
-     * @param onFinishedRunnable A runnable which should be run when the animation is finished.
-     * @param animationListener An animation listener to add to the animation.
-     *
+     * @param isHeadsUpAnimation   Is this a headsUp animation.
+     * @param onFinishedRunnable   A runnable which should be run when the animation is finished.
+     * @param animationListener    An animation listener to add to the animation.
      * @return The additional delay, in milliseconds, that this view needs to add before the
      * animation starts.
      */
@@ -389,7 +379,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
             long delay, float translationDirection, boolean isHeadsUpAnimation,
             Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
-            AnimatorListenerAdapter animationListener);
+            AnimatorListenerAdapter animationListener, ClipSide clipSide);
+
+    public enum ClipSide {
+        TOP,
+        BOTTOM
+    }
 
     public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         performAddAnimation(delay, duration, isHeadsUpAppear, null);
@@ -397,14 +392,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public abstract void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
             Runnable onEndRunnable);
-
-    /**
-     * Set the notification appearance to be below the speed bump.
-     * @param below true if it is below.
-     */
-    public void setBelowSpeedBump(boolean below) {
-        NotificationIconContainerRefactor.assertInLegacyMode();
-    }
 
     public int getPinnedHeadsUpHeight() {
         return getIntrinsicHeight();
@@ -641,7 +628,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return false;
     }
 
-    public void setHeadsUpIsVisible() {
+    /**
+     * Called, when the notification has been seen by the user in the heads up state.
+     */
+    public void markHeadsUpSeen() {
     }
 
     public boolean showingPulsing() {

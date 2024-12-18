@@ -21,7 +21,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -109,7 +109,7 @@ public abstract class LeakCheckedTest extends SysuiTestCase {
                 } else if (cls == ZenModeController.class) {
                     obj = new FakeZenModeController(this);
                 } else if (cls == CastController.class) {
-                    obj = new FakeCastController(this);
+                    obj = new LeakCheckerCastController(this);
                 } else if (cls == HotspotController.class) {
                     obj = new FakeHotspotController(this);
                 } else if (cls == FlashlightController.class) {

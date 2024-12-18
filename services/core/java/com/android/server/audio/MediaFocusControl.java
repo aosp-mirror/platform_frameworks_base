@@ -280,6 +280,37 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     /**
+     * Like {@link #sendFocusLoss(AudioFocusInfo)} but if the loser was at the top of stack,
+     * make the next entry gain focus with {@link AudioManager#AUDIOFOCUS_GAIN}.
+     * @param focusInfo the focus owner to discard
+     * @see AudioPolicy#sendFocusLossAndUpdate(AudioFocusInfo)
+     */
+    protected void sendFocusLossAndUpdate(@NonNull AudioFocusInfo focusInfo) {
+        synchronized (mAudioFocusLock) {
+            if (mFocusStack.isEmpty()) {
+                return;
+            }
+            final FocusRequester currentFocusOwner = mFocusStack.peek();
+            if (currentFocusOwner.toAudioFocusInfo().equals(focusInfo)) {
+                // focus loss is for the top of the stack
+                currentFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS, null,
+                            false /*forceDuck*/);
+                currentFocusOwner.release();
+
+                mFocusStack.pop();
+                // is there a new focus owner?
+                if (!mFocusStack.isEmpty()) {
+                    mFocusStack.peek().handleFocusGain(AudioManager.AUDIOFOCUS_GAIN);
+                }
+            } else {
+                // focus loss if for another entry that's not at the top of the stack,
+                // just remove it from the stack and make it lose focus
+                sendFocusLoss(focusInfo);
+            }
+        }
+    }
+
+    /**
      * Return a copy of the focus stack for external consumption (composed of AudioFocusInfo
      * instead of FocusRequester instances)
      * @return a SystemApi-friendly version of the focus stack, in the same order (last entry
@@ -1082,7 +1113,6 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param fd
      * @param clientId
      * @param callingPackageName
-     * @param attributionTag
      * @param flags
      * @param sdk
      * @param forceDuck only true if
@@ -1096,7 +1126,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      */
     protected int requestAudioFocus(@NonNull AudioAttributes aa, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, @NonNull String clientId, @NonNull String callingPackageName,
-            String attributionTag, int flags, int sdk, boolean forceDuck, int testUid,
+            int flags, int sdk, boolean forceDuck, int testUid,
             boolean permissionOverridesCheck) {
         new MediaMetrics.Item(mMetricsId)
                 .setUid(Binder.getCallingUid())
@@ -1126,12 +1156,6 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         // we need a valid binder callback for clients
         if (!cb.pingBinder()) {
             Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
-            return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
-        }
-
-        final int res = mAppOps.noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, Binder.getCallingUid(),
-                callingPackageName, attributionTag, null);
-        if (!permissionOverridesCheck && res != AppOpsManager.MODE_ALLOWED) {
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
@@ -1309,7 +1333,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         mEventLogger.enqueue((new EventLogger.StringEvent(
                 "abandonAudioFocus() from uid/pid " + Binder.getCallingUid()
                     + "/" + Binder.getCallingPid()
-                    + " clientId=" + clientId))
+                    + " clientId=" + clientId + " callingPack=" + callingPackageName))
                 .printLog(TAG));
         try {
             // this will take care of notifying the new focus owner if needed

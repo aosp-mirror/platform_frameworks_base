@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -493,6 +494,11 @@ public final class BinderProxy implements IBinder {
     public native boolean pingBinder();
 
     /**
+     * Check to see if the process that the binder is in is still alive.
+     *
+     * Note, this only reflects the last known death state, if the object
+     * is linked to death or has made a transactions since the death occurs.
+     *
      * @return false if the hosting process is gone
      */
     public native boolean isBinderAlive();
@@ -646,6 +652,48 @@ public final class BinderProxy implements IBinder {
     private native boolean unlinkToDeathNative(DeathRecipient recipient, int flags);
 
     /**
+     * This map is to hold strong reference to the frozen state callbacks.
+     *
+     * The callbacks are only weakly referenced by JNI so the strong references here are needed to
+     * keep the callbacks around until the proxy is GC'ed.
+     *
+     * The key is the original callback passed into {@link #addFrozenStateChangeCallback}. The value
+     * is the wrapped callback created in {@link #addFrozenStateChangeCallback} to dispatch the
+     * calls on the desired executor.
+     */
+    private Map<FrozenStateChangeCallback, FrozenStateChangeCallback> mFrozenStateChangeCallbacks =
+            Collections.synchronizedMap(new HashMap<>());
+
+    /**
+     * See {@link IBinder#addFrozenStateChangeCallback(FrozenStateChangeCallback)}
+     */
+    public void addFrozenStateChangeCallback(Executor executor, FrozenStateChangeCallback callback)
+            throws RemoteException {
+        FrozenStateChangeCallback wrappedCallback = (who, state) ->
+                executor.execute(() -> callback.onFrozenStateChanged(who, state));
+        addFrozenStateChangeCallbackNative(wrappedCallback);
+        mFrozenStateChangeCallbacks.put(callback, wrappedCallback);
+    }
+
+    /**
+     * See {@link IBinder#removeFrozenStateChangeCallback}
+     */
+    public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback)
+            throws IllegalArgumentException {
+        FrozenStateChangeCallback wrappedCallback = mFrozenStateChangeCallbacks.remove(callback);
+        if (wrappedCallback == null) {
+            throw new IllegalArgumentException("callback not found");
+        }
+        return removeFrozenStateChangeCallbackNative(wrappedCallback);
+    }
+
+    private native void addFrozenStateChangeCallbackNative(FrozenStateChangeCallback callback)
+            throws RemoteException;
+
+    private native boolean removeFrozenStateChangeCallbackNative(
+            FrozenStateChangeCallback callback);
+
+    /**
      * Perform a dump on the remote object
      *
      * @param fd The raw file descriptor that the dump is being sent to.
@@ -726,6 +774,16 @@ public final class BinderProxy implements IBinder {
             recipient.binderDied(binderProxy);
         } catch (RuntimeException exc) {
             Log.w("BinderNative", "Uncaught exception from death notification",
+                    exc);
+        }
+    }
+
+    private static void invokeFrozenStateChangeCallback(
+            FrozenStateChangeCallback callback, IBinder binderProxy, int stateIndex) {
+        try {
+            callback.onFrozenStateChanged(binderProxy, stateIndex);
+        } catch (RuntimeException exc) {
+            Log.w("BinderNative", "Uncaught exception from frozen state change callback",
                     exc);
         }
     }

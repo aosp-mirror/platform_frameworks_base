@@ -15,42 +15,10 @@
  */
 package com.android.platform.test.ravenwood.runtimehelper;
 
-import android.platform.test.ravenwood.RavenwoodUtils;
-
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-
 /**
  * Standard class loader hook.
- *
- * Currently, we use this class to load libandroid_runtime (if needed). In the future, we may
- * load other JNI or do other set up here.
  */
 public class ClassLoadHook {
-    /**
-     * If true, we won't load `libandroid_runtime`
-     *
-     * <p>Looks like there's some complexity in running a host test with JNI with `atest`,
-     * so we need a way to remove the dependency.
-     */
-    private static final boolean SKIP_LOADING_LIBANDROID = "1".equals(System.getenv(
-            "RAVENWOOD_SKIP_LOADING_LIBANDROID"));
-
-    public static final String CORE_NATIVE_CLASSES = "core_native_classes";
-    public static final String ICU_DATA_PATH = "icu.data.path";
-    public static final String KEYBOARD_PATHS = "keyboard_paths";
-    public static final String GRAPHICS_NATIVE_CLASSES = "graphics_native_classes";
-
-    public static final String VALUE_N_A = "**n/a**";
-    public static final String LIBANDROID_RUNTIME_NAME = "android_runtime";
-
-    private static String sInitialDir = new File("").getAbsolutePath();
-
-    static {
-        log("Initialized. Current dir=" + sInitialDir);
-    }
-
     private ClassLoadHook() {
     }
 
@@ -63,118 +31,12 @@ public class ClassLoadHook {
     public static void onClassLoaded(Class<?> clazz) {
         System.out.println("Framework class loaded: " + clazz.getCanonicalName());
 
-        loadFrameworkNativeCode();
-    }
-
-    private static void log(String message) {
-        System.out.println("ClassLoadHook: " + message);
-    }
-
-    private static void log(String fmt, Object... args) {
-        log(String.format(fmt, args));
-    }
-
-    private static void ensurePropertyNotSet(String key) {
-        if (System.getProperty(key) != null) {
-            throw new RuntimeException("System property \"" + key + "\" is set unexpectedly");
+        // Always try to initialize the environment in case classes are loaded before
+        // RavenwoodAwareTestRunner is initialized
+        try {
+            Class.forName("android.platform.test.ravenwood.RavenwoodRuntimeEnvironmentController")
+                    .getMethod("globalInitOnce").invoke(null);
+        } catch (ReflectiveOperationException ignored) {
         }
-    }
-
-    private static void setProperty(String key, String value) {
-        System.setProperty(key, value);
-        log("Property set: %s=\"%s\"", key, value);
-    }
-
-    private static void dumpSystemProperties() {
-        for (var prop : System.getProperties().entrySet()) {
-            log("  %s=\"%s\"", prop.getKey(), prop.getValue());
-        }
-    }
-
-    private static boolean sLoadFrameworkNativeCodeCalled = false;
-
-    /**
-     * Load `libandroid_runtime` if needed.
-     */
-    private static void loadFrameworkNativeCode() {
-        // This is called from class-initializers, so no synchronization is needed.
-        if (sLoadFrameworkNativeCodeCalled) {
-            // This method has already been called before.s
-            return;
-        }
-        sLoadFrameworkNativeCodeCalled = true;
-
-        // libandroid_runtime uses Java's system properties to decide what JNI methods to set up.
-        // Set up these properties for host-side tests.
-
-        if ("1".equals(System.getenv("RAVENWOOD_DUMP_PROPERTIES"))) {
-            log("Java system properties:");
-            dumpSystemProperties();
-        }
-
-        if (SKIP_LOADING_LIBANDROID) {
-            log("Skip loading " + LIBANDROID_RUNTIME_NAME);
-        }
-
-        // Make sure these properties are not set.
-        ensurePropertyNotSet(CORE_NATIVE_CLASSES);
-        ensurePropertyNotSet(ICU_DATA_PATH);
-        ensurePropertyNotSet(KEYBOARD_PATHS);
-        ensurePropertyNotSet(GRAPHICS_NATIVE_CLASSES);
-
-        // Tell libandroid what JNI to use.
-        final var jniClasses = getCoreNativeClassesToUse();
-        if (jniClasses.isEmpty()) {
-            log("No classes require JNI methods, skip loading " + LIBANDROID_RUNTIME_NAME);
-            return;
-        }
-        setProperty(CORE_NATIVE_CLASSES, jniClasses);
-        setProperty(GRAPHICS_NATIVE_CLASSES, "");
-        setProperty(ICU_DATA_PATH, VALUE_N_A);
-        setProperty(KEYBOARD_PATHS, VALUE_N_A);
-
-        RavenwoodUtils.loadJniLibrary(LIBANDROID_RUNTIME_NAME);
-    }
-
-    /**
-     * Classes with native methods that are backed by `libandroid_runtime`.
-     *
-     * At runtime, we check if these classes have any methods, and if so, we'll have
-     * `libandroid_runtime` register the native functions.
-     */
-    private static final Class<?>[] sClassesWithLibandroidNativeMethods = {
-            android.util.Log.class,
-            android.os.Parcel.class,
-    };
-
-    /**
-     * @return if a given class has any native method or not.
-     */
-    private static boolean hasNativeMethod(Class<?> clazz) {
-        for (var method : clazz.getDeclaredMethods()) {
-            if (Modifier.isNative(method.getModifiers())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Create a list of classes as comma-separated that require JNI methods to be set up.
-     *
-     * <p>This list is used by frameworks/base/core/jni/LayoutlibLoader.cpp to decide
-     * what JNI methods to set up.
-     */
-    private static String getCoreNativeClassesToUse() {
-        final var coreNativeClassesToLoad = new ArrayList<String>();
-
-        for (var clazz : sClassesWithLibandroidNativeMethods) {
-            if (hasNativeMethod(clazz)) {
-                log("Class %s has native methods", clazz);
-                coreNativeClassesToLoad.add(clazz.getName());
-            }
-        }
-
-        return String.join(",", coreNativeClassesToLoad);
     }
 }

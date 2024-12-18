@@ -30,10 +30,13 @@ android_test {
 
     libs: [
         "android.test.runner.impl",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
     ],
-    static_libs: ["junit"],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+    ],
 
     // Include all test java files.
     srcs: ["src/**/*.java"],

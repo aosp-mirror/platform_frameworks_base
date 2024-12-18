@@ -30,17 +30,19 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.util.FakeSharedPreferences;
+
+import kotlin.Unit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,11 +53,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import kotlin.Unit;
-
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class WorkProfileMessageControllerTest extends SysuiTestCase {
     private static final String FILES_APP_COMPONENT = "com.android.test/.FilesComponent";
     private static final String FILES_APP_LABEL = "Custom Files App";
@@ -88,7 +87,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         when(mMockContext.getSharedPreferences(
                 eq(WorkProfileMessageController.SHARED_PREFERENCES_NAME),
                 eq(Context.MODE_PRIVATE))).thenReturn(mSharedPreferences);
-        when(mMockContext.getString(R.string.config_sceenshotWorkProfileFilesApp))
+        when(mMockContext.getString(R.string.config_screenshotFilesApp))
                 .thenReturn(FILES_APP_COMPONENT);
         when(mMockContext.getString(R.string.screenshot_default_files_app_name))
                 .thenReturn(DEFAULT_FILES_APP_LABEL);
@@ -150,7 +149,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnScreenshotTaken_noFilesAppComponentDefined() {
-        when(mMockContext.getString(R.string.config_sceenshotWorkProfileFilesApp))
+        when(mMockContext.getString(R.string.config_screenshotFilesApp))
                 .thenReturn("");
 
         WorkProfileMessageController.WorkProfileFirstRunData data =

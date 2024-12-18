@@ -38,6 +38,8 @@ public class GlobalSettings {
      * NOTE: All settings which are backed up should have a corresponding validator.
      */
     public static final String[] SETTINGS_TO_BACKUP = {
+        Settings.Global.CONNECTED_APPS_ALLOWED_PACKAGES,
+        Settings.Global.CONNECTED_APPS_DISALLOWED_PACKAGES,
         Settings.Global.APPLY_RAMPING_RINGER,
         Settings.Global.BUGREPORT_IN_POWER_MENU,                        // moved to secure
         Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
@@ -99,7 +101,6 @@ public class GlobalSettings {
         Settings.Global.Wearable.AMBIENT_TILT_TO_WAKE,
         Settings.Global.Wearable.AMBIENT_TOUCH_TO_WAKE,
         Settings.Global.Wearable.GESTURE_TOUCH_AND_HOLD_WATCH_FACE_ENABLED,
-        Settings.Global.Wearable.BATTERY_SAVER_MODE,
         Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
         Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER,
         Settings.Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED,
@@ -115,6 +116,13 @@ public class GlobalSettings {
         Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
         Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
         Settings.Global.Wearable.WRIST_DETECTION_AUTO_LOCKING_ENABLED,
+        Settings.Global.Wearable.AUTO_BEDTIME_MODE,
         Settings.Global.FORCE_ENABLE_PSS_PROFILING,
+        Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
+        Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
+        Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
+        Settings.Global.ADD_USERS_WHEN_LOCKED,
+        Settings.Global.REMOVE_GUEST_ON_EXIT,
+        Settings.Global.USER_SWITCHER_ENABLED,
     };
 }

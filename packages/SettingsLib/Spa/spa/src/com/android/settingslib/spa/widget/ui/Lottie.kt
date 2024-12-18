@@ -49,6 +49,7 @@ fun Lottie(
 
 object LottieColorUtils {
     private val DARK_TO_LIGHT_THEME_COLOR_MAP = mapOf(
+        ".grey200" to R.color.settingslib_color_grey800,
         ".grey600" to R.color.settingslib_color_grey400,
         ".grey800" to R.color.settingslib_color_grey300,
         ".grey900" to R.color.settingslib_color_grey50,
@@ -58,6 +59,7 @@ object LottieColorUtils {
         ".green400" to R.color.settingslib_color_green600,
         ".green200" to R.color.settingslib_color_green500,
         ".red200" to R.color.settingslib_color_red500,
+        ".cream" to R.color.settingslib_color_charcoal
     )
 
     @Composable

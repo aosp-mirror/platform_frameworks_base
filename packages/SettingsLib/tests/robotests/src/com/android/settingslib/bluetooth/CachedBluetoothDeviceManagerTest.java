@@ -35,6 +35,7 @@ import android.os.Parcel;
 import android.os.ParcelUuid;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -545,6 +546,7 @@ public class CachedBluetoothDeviceManagerTest {
      * Test to verify OnDeviceUnpaired() for csip device unpair.
      */
     @Test
+    @Ignore("b/359066481")
     public void onDeviceUnpaired_unpairCsipSubDevice() {
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);

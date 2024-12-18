@@ -27,15 +27,19 @@
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/Log.h>
+#ifdef __ANDROID__
 #include <private/android/AHardwareBufferHelpers.h>
 
 #include "android_os_Parcel.h"
 #include <binder/Parcel.h>
 
 #include <gui/BLASTBufferQueue.h>
+#endif
 #include <gui/Surface.h>
+#ifdef __ANDROID__
 #include <gui/SurfaceControl.h>
 #include <gui/view/Surface.h>
+#endif
 
 #include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
@@ -67,6 +71,7 @@ static struct {
     jfieldID bottom;
 } gRectClassInfo;
 
+#ifdef __ANDROID__
 class JNamedColorSpace {
 public:
     // ColorSpace.Named.SRGB.ordinal() = 0;
@@ -84,6 +89,7 @@ constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpac
             return ui::Dataspace::V0_SRGB;
     }
 }
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -144,6 +150,7 @@ static inline bool isSurfaceValid(const sp<Surface>& sur) {
 
 // ----------------------------------------------------------------------------
 
+#ifdef __ANDROID__
 static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
@@ -162,6 +169,7 @@ static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
     surface->incStrong(&sRefBaseOwner);
     return jlong(surface.get());
 }
+#endif
 
 static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
     sp<Surface> sur(reinterpret_cast<Surface *>(nativeObject));
@@ -269,7 +277,7 @@ static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
 }
 
 // ----------------------------------------------------------------------------
-
+#ifdef __ANDROID__
 static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
         jlong surfaceControlNativeObj) {
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
@@ -380,6 +388,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     // to the Parcel
     surfaceShim.writeToParcel(parcel, /*nameAlreadyWritten*/true);
 }
+#endif
 
 static jint nativeGetWidth(JNIEnv* env, jclass clazz, jlong nativeObject) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
@@ -412,6 +421,7 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
     return surface->disconnect(-1, IGraphicBufferProducer::DisconnectMode::AllLocal);
 }
 
+#ifdef __ANDROID__
 static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv* env, jclass clazz, jlong nativeObject,
                                                      jobject hardwareBuffer, jint colorSpaceId) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
@@ -422,6 +432,7 @@ static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv* env, jclass clazz, 
             fromNamedColorSpaceValueToDataspace(colorSpaceId));
     return err;
 }
+#endif
 
 static jint nativeSetSharedBufferModeEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
         jboolean enabled) {
@@ -457,8 +468,10 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gSurfaceMethods[] = {
+#ifdef __ANDROID__
         {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
          (void*)nativeCreateFromSurfaceTexture},
+#endif
         {"nativeRelease", "(J)V", (void*)nativeRelease},
         {"nativeIsValid", "(J)Z", (void*)nativeIsValid},
         {"nativeIsConsumerRunningBehind", "(J)Z", (void*)nativeIsConsumerRunningBehind},
@@ -467,21 +480,27 @@ static const JNINativeMethod gSurfaceMethods[] = {
         {"nativeUnlockCanvasAndPost", "(JLandroid/graphics/Canvas;)V",
          (void*)nativeUnlockCanvasAndPost},
         {"nativeAllocateBuffers", "(J)V", (void*)nativeAllocateBuffers},
+#ifdef __ANDROID__
         {"nativeCreateFromSurfaceControl", "(J)J", (void*)nativeCreateFromSurfaceControl},
         {"nativeGetFromSurfaceControl", "(JJ)J", (void*)nativeGetFromSurfaceControl},
         {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J", (void*)nativeReadFromParcel},
         {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteToParcel},
+#endif
         {"nativeGetWidth", "(J)I", (void*)nativeGetWidth},
         {"nativeGetHeight", "(J)I", (void*)nativeGetHeight},
         {"nativeGetNextFrameNumber", "(J)J", (void*)nativeGetNextFrameNumber},
         {"nativeSetScalingMode", "(JI)I", (void*)nativeSetScalingMode},
         {"nativeForceScopedDisconnect", "(J)I", (void*)nativeForceScopedDisconnect},
+#ifdef __ANDROID__
         {"nativeAttachAndQueueBufferWithColorSpace", "(JLandroid/hardware/HardwareBuffer;I)I",
          (void*)nativeAttachAndQueueBufferWithColorSpace},
+#endif
         {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
         {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
         {"nativeSetFrameRate", "(JFII)I", (void*)nativeSetFrameRate},
+#ifdef __ANDROID__
         {"nativeGetFromBlastBufferQueue", "(JJ)J", (void*)nativeGetFromBlastBufferQueue},
+#endif
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
 };
 

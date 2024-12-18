@@ -271,7 +271,7 @@ class TestUtils {
 
         @NonNull
         LaunchActivityItem build() {
-            return LaunchActivityItem.obtain(mActivityToken, mIntent, mIdent, mInfo,
+            return new LaunchActivityItem(mActivityToken, mIntent, mIdent, mInfo,
                     mCurConfig, mOverrideConfig, mDeviceId, mReferrer, mVoiceInteractor,
                     mProcState, mState, mPersistentState, mPendingResults, mPendingNewIntents,
                     mActivityOptions != null ? mActivityOptions.getSceneTransitionInfo() : null,

@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.service
 
 import android.app.Instrumentation
+import android.platform.test.rule.DisableNotificationCooldownSettingRule
 import android.platform.test.rule.NavigationModeRule
 import android.platform.test.rule.PressHomeRule
 import android.platform.test.rule.UnlockScreenRule
@@ -48,6 +49,7 @@ object Utils {
                     clearCacheAfterParsing = false
                 )
             )
+            .around(DisableNotificationCooldownSettingRule())
             .around(PressHomeRule())
     }
 }

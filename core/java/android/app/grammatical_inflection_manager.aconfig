@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "system_terms_of_address_enabled"
+    is_exported: true
     namespace: "globalintl"
     description: "Feature flag for System Terms of Address"
     bug: "297798866"

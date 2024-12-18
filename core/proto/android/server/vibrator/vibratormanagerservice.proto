@@ -116,7 +116,7 @@ message VibrationProto {
     reserved 6; // prev int32 status
 
     // Also used by VibrationReported from frameworks/proto_logging/stats/atoms.proto.
-    // Next Tag: 26
+    // Next Tag: 29
     enum Status {
         UNKNOWN = 0;
         RUNNING = 1;
@@ -135,7 +135,6 @@ message VibrationProto {
         IGNORED_ERROR_TOKEN= 14;
         IGNORED_APP_OPS = 15;
         IGNORED_BACKGROUND = 16;
-        IGNORED_UNKNOWN_VIBRATION = 17;
         IGNORED_UNSUPPORTED = 18;
         IGNORED_FOR_EXTERNAL = 19;
         IGNORED_FOR_HIGHER_IMPORTANCE = 20;
@@ -146,6 +145,10 @@ message VibrationProto {
         IGNORED_SUPERSEDED = 25;
         IGNORED_FROM_VIRTUAL_DEVICE = 26;
         IGNORED_ON_WIRELESS_CHARGER = 27;
+        IGNORED_MISSING_PERMISSION = 28;
+        CANCELLED_BY_APP_OPS = 29;
+        CANCELLED_BY_FOREGROUND_USER = 30;
+        reserved 17; // prev IGNORED_UNKNOWN_VIBRATION
     }
 }
 
@@ -160,7 +163,7 @@ message VibratorManagerServiceDumpProto {
     optional bool vibrator_under_external_control = 5;
     optional bool low_power_mode = 6;
     optional bool vibrate_on = 24;
-    optional bool keyboard_vibration_on = 25;
+    reserved 25; // prev keyboard_vibration_on
     optional int32 default_vibration_amplitude = 26;
     optional int32 alarm_intensity = 18;
     optional int32 alarm_default_intensity = 19;

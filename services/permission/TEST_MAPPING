@@ -103,6 +103,12 @@
                     "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"
                 }
             ]
+        },
+        {
+            "name": "CtsVirtualDevicesAudioTestCases_audio_virtualaudiopermissiontest"
+        },
+        {
+            "name": "CtsVirtualDevicesAppLaunchTestCases_applaunch_virtualdevicepermissiontest"
         }
     ],
     "imports": [

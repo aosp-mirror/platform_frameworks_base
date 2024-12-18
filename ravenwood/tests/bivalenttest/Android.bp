@@ -1,0 +1,103 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+cc_library_shared {
+    name: "libravenwoodbivalenttest_jni",
+    host_supported: true,
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+
+    srcs: [
+        "jni/*.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+        "libcutils",
+    ],
+}
+
+java_defaults {
+    name: "ravenwood-bivalent-defaults",
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+
+        "junit-params",
+        "platform-parametric-runner-lib",
+
+        // To make sure it won't cause VerifyError (b/324063814)
+        "platformprotosnano",
+
+        "com.android.internal.os.flags-aconfig-java",
+    ],
+    srcs: [
+        "test/**/*.java",
+        "test/**/*.kt",
+    ],
+    jni_libs: [
+        "libravenwoodbivalenttest_jni",
+    ],
+}
+
+java_defaults {
+    name: "ravenwood-bivalent-device-defaults",
+    defaults: ["ravenwood-bivalent-defaults"],
+
+    target_sdk_version: "34", // For compat-framework tests
+
+    // TODO(b/371215487): migrate bivalenttest.ravenizer tests to another architecture
+    exclude_srcs: [
+        "test/**/ravenizer/*.java",
+        "test/**/ravenizer/*.kt",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+        "flag-junit",
+        "ravenwood-junit",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    optimize: {
+        enabled: false,
+    },
+    test_config_template: "AndroidTestTemplate.xml",
+}
+
+android_ravenwood_test {
+    name: "RavenwoodBivalentTest",
+    defaults: ["ravenwood-bivalent-defaults"],
+    target_sdk_version: "34",
+    package_name: "com.android.ravenwoodtest.bivalenttest",
+    auto_gen_config: true,
+}
+
+android_test {
+    name: "RavenwoodBivalentTest_device",
+    defaults: ["ravenwood-bivalent-device-defaults"],
+}
+
+android_test {
+    name: "RavenwoodBivalentTest_device_ravenizer",
+    defaults: ["ravenwood-bivalent-device-defaults"],
+    ravenizer: {
+        enabled: true,
+    },
+}

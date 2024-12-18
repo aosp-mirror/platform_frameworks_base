@@ -18,10 +18,12 @@ package com.android.server.selinux;
 import android.util.EventLog;
 import android.util.EventLog.Event;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.selinux.SelinuxAuditLogBuilder.SelinuxAuditLog;
+import com.android.server.utils.Slogf;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -37,6 +39,7 @@ import java.util.regex.Pattern;
 class SelinuxAuditLogsCollector {
 
     private static final String TAG = "SelinuxAuditLogs";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String SELINUX_PATTERN = "^.*\\bavc:\\s+(?<denial>.*)$";
 
@@ -48,11 +51,15 @@ class SelinuxAuditLogsCollector {
 
     @VisibleForTesting Instant mLastWrite = Instant.MIN;
 
-    final AtomicBoolean mStopRequested = new AtomicBoolean(false);
+    AtomicBoolean mStopRequested = new AtomicBoolean(false);
 
     SelinuxAuditLogsCollector(RateLimiter rateLimiter, QuotaLimiter quotaLimiter) {
         mRateLimiter = rateLimiter;
         mQuotaLimiter = quotaLimiter;
+    }
+
+    public void setStopRequested(boolean stopRequested) {
+        mStopRequested.set(stopRequested);
     }
 
     /**
@@ -66,7 +73,7 @@ class SelinuxAuditLogsCollector {
 
         boolean quotaExceeded = writeAuditLogs(logLines);
         if (quotaExceeded) {
-            Log.w(TAG, "Too many SELinux logs in the queue, I am giving up.");
+            Slog.w(TAG, "Too many SELinux logs in the queue, I am giving up.");
             mLastWrite = latestTimestamp; // next run we will ignore all these logs.
             logLines.clear();
         }
@@ -79,7 +86,7 @@ class SelinuxAuditLogsCollector {
         try {
             EventLog.readEvents(new int[] {tagCode}, events);
         } catch (IOException e) {
-            Log.e(TAG, "Error reading event logs", e);
+            Slog.e(TAG, "Error reading event logs", e);
         }
 
         Instant latestTimestamp = mLastWrite;
@@ -102,6 +109,7 @@ class SelinuxAuditLogsCollector {
 
     private boolean writeAuditLogs(Queue<Event> logLines) {
         final SelinuxAuditLogBuilder auditLogBuilder = new SelinuxAuditLogBuilder();
+        int auditsWritten = 0;
 
         while (!mStopRequested.get() && !logLines.isEmpty()) {
             Event event = logLines.poll();
@@ -118,6 +126,9 @@ class SelinuxAuditLogsCollector {
             }
 
             if (!mQuotaLimiter.acquire()) {
+                if (DEBUG) {
+                    Slogf.d(TAG, "Running out of quota after %d logs.", auditsWritten);
+                }
                 return true;
             }
             mRateLimiter.acquire();
@@ -133,12 +144,16 @@ class SelinuxAuditLogsCollector {
                     auditLog.mTClass,
                     auditLog.mPath,
                     auditLog.mPermissive);
+            auditsWritten++;
 
             if (logTime.isAfter(mLastWrite)) {
                 mLastWrite = logTime;
             }
         }
 
+        if (DEBUG) {
+            Slogf.d(TAG, "Written %d logs", auditsWritten);
+        }
         return false;
     }
 }

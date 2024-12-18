@@ -22,8 +22,8 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

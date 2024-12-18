@@ -16,7 +16,6 @@
 
 package android.view;
 
-import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
@@ -49,14 +48,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.service.autofill.Flags;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimation.Callback.DispatchMode;
 import android.view.accessibility.AccessibilityEvent;
@@ -719,10 +716,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= FLAG_ANIMATION_DONE;
         mGroupFlags |= FLAG_ANIMATION_CACHE;
         mGroupFlags |= FLAG_ALWAYS_DRAWN_WITH_CACHE;
-
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
-            mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
-        }
+        mGroupFlags |= FLAG_SPLIT_MOTION_EVENTS;
 
         setDescendantFocusability(FOCUS_BEFORE_DESCENDANTS);
 
@@ -1504,6 +1498,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         return null;
+    }
+
+    /** @hide */
+    @Override
+    public void findAutofillableViewsByTraversal(@NonNull List<View> autofillableViews) {
+        super.findAutofillableViewsByTraversal(autofillableViews);
+
+        final int childrenCount = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < childrenCount; i++) {
+            View child = children[i];
+            child.findAutofillableViewsByTraversal(autofillableViews);
+        }
     }
 
     @Override
@@ -2652,10 +2659,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
-            if (actionMasked == MotionEvent.ACTION_DOWN
-                    || mFirstTouchTarget != null) {
+            ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
                 final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-                if (!disallowIntercept) {
+                final boolean isBackGestureInProgress = (viewRootImpl != null
+                        && viewRootImpl.getOnBackInvokedDispatcher().isBackGestureInProgress());
+                if (!disallowIntercept || isBackGestureInProgress) {
+                    // Allow back to intercept touch
                     intercepted = onInterceptTouchEvent(ev);
                     ev.setAction(action); // restore action in case it was changed
                 } else {
@@ -2801,9 +2811,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (alreadyDispatchedToNewTouchTarget && target == newTouchTarget) {
                         handled = true;
                     } else {
-                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
-                                || intercepted;
-                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                        final boolean cancelChild =
+                                (target.child != null && resetCancelNextUpFlag(target.child))
+                                        || intercepted;
+                        if (target.child != null && dispatchTransformedTouchEvent(ev, cancelChild,
                                 target.child, target.pointerIdBits)) {
                             handled = true;
                         }
@@ -3082,74 +3093,74 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
             View child, int desiredPointerIdBits) {
-        final boolean handled;
-
-        // Canceling motions is a special case.  We don't need to perform any transformations
-        // or filtering.  The important part is the action, not the contents.
         final int oldAction = event.getAction();
-        if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
-            event.setAction(MotionEvent.ACTION_CANCEL);
-            if (child == null) {
-                handled = super.dispatchTouchEvent(event);
-            } else {
-                handled = child.dispatchTouchEvent(event);
+        try {
+            final boolean handled;
+            if (cancel) {
+                event.setAction(MotionEvent.ACTION_CANCEL);
             }
-            event.setAction(oldAction);
-            return handled;
-        }
 
-        // Calculate the number of pointers to deliver.
-        final int oldPointerIdBits = event.getPointerIdBits();
-        final int newPointerIdBits = oldPointerIdBits & desiredPointerIdBits;
+            // Calculate the number of pointers to deliver.
+            final int oldPointerIdBits = event.getPointerIdBits();
+            int newPointerIdBits = oldPointerIdBits & desiredPointerIdBits;
 
-        // If for some reason we ended up in an inconsistent state where it looks like we
-        // might produce a motion event with no pointers in it, then drop the event.
-        if (newPointerIdBits == 0) {
-            return false;
-        }
-
-        // If the number of pointers is the same and we don't need to perform any fancy
-        // irreversible transformations, then we can reuse the motion event for this
-        // dispatch as long as we are careful to revert any changes we make.
-        // Otherwise we need to make a copy.
-        final MotionEvent transformedEvent;
-        if (newPointerIdBits == oldPointerIdBits) {
-            if (child == null || child.hasIdentityMatrix()) {
-                if (child == null) {
-                    handled = super.dispatchTouchEvent(event);
+            // If for some reason we ended up in an inconsistent state where it looks like we
+            // might produce a non-cancel motion event with no pointers in it, then drop the event.
+            // Make sure that we don't drop any cancel events.
+            if (newPointerIdBits == 0) {
+                if (event.getAction() != MotionEvent.ACTION_CANCEL) {
+                    return false;
                 } else {
-                    final float offsetX = mScrollX - child.mLeft;
-                    final float offsetY = mScrollY - child.mTop;
-                    event.offsetLocation(offsetX, offsetY);
-
-                    handled = child.dispatchTouchEvent(event);
-
-                    event.offsetLocation(-offsetX, -offsetY);
+                    newPointerIdBits = oldPointerIdBits;
                 }
-                return handled;
-            }
-            transformedEvent = MotionEvent.obtain(event);
-        } else {
-            transformedEvent = event.split(newPointerIdBits);
-        }
-
-        // Perform any necessary transformations and dispatch.
-        if (child == null) {
-            handled = super.dispatchTouchEvent(transformedEvent);
-        } else {
-            final float offsetX = mScrollX - child.mLeft;
-            final float offsetY = mScrollY - child.mTop;
-            transformedEvent.offsetLocation(offsetX, offsetY);
-            if (! child.hasIdentityMatrix()) {
-                transformedEvent.transform(child.getInverseMatrix());
             }
 
-            handled = child.dispatchTouchEvent(transformedEvent);
-        }
+            // If the number of pointers is the same and we don't need to perform any fancy
+            // irreversible transformations, then we can reuse the motion event for this
+            // dispatch as long as we are careful to revert any changes we make.
+            // Otherwise we need to make a copy.
+            final MotionEvent transformedEvent;
+            if (newPointerIdBits == oldPointerIdBits) {
+                if (child == null || child.hasIdentityMatrix()) {
+                    if (child == null) {
+                        handled = super.dispatchTouchEvent(event);
+                    } else {
+                        final float offsetX = mScrollX - child.mLeft;
+                        final float offsetY = mScrollY - child.mTop;
+                        event.offsetLocation(offsetX, offsetY);
 
-        // Done.
-        transformedEvent.recycle();
-        return handled;
+                        handled = child.dispatchTouchEvent(event);
+
+                        event.offsetLocation(-offsetX, -offsetY);
+                    }
+                    return handled;
+                }
+                transformedEvent = MotionEvent.obtain(event);
+            } else {
+                transformedEvent = event.split(newPointerIdBits);
+            }
+
+            // Perform any necessary transformations and dispatch.
+            if (child == null) {
+                handled = super.dispatchTouchEvent(transformedEvent);
+            } else {
+                final float offsetX = mScrollX - child.mLeft;
+                final float offsetY = mScrollY - child.mTop;
+                transformedEvent.offsetLocation(offsetX, offsetY);
+                if (!child.hasIdentityMatrix()) {
+                    transformedEvent.transform(child.getInverseMatrix());
+                }
+
+                handled = child.dispatchTouchEvent(transformedEvent);
+            }
+
+            // Done.
+            transformedEvent.recycle();
+            return handled;
+
+        } finally {
+            event.setAction(oldAction);
+        }
     }
 
     /**
@@ -3597,48 +3608,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
             } catch (IndexOutOfBoundsException e) {
                 childIndex = i;
-                if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.M) {
-                    Log.w(TAG, "Bad getChildDrawingOrder while collecting assist @ "
-                            + i + " of " + childrenCount, e);
-                    // At least one app is failing when we call getChildDrawingOrder
-                    // at this point, so deal semi-gracefully with it by falling back
-                    // on the basic order.
-                    customOrder = false;
-                    if (i > 0) {
-                        // If we failed at the first index, there really isn't
-                        // anything to do -- we will just proceed with the simple
-                        // sequence order.
-                        // Otherwise, we failed in the middle, so need to come up
-                        // with an order for the remaining indices and use that.
-                        // Failed at the first one, easy peasy.
-                        int[] permutation = new int[childrenCount];
-                        SparseBooleanArray usedIndices = new SparseBooleanArray();
-                        // Go back and collected the indices we have done so far.
-                        for (int j = 0; j < i; j++) {
-                            permutation[j] = getChildDrawingOrder(childrenCount, j);
-                            usedIndices.put(permutation[j], true);
-                        }
-                        // Fill in the remaining indices with indices that have not
-                        // yet been used.
-                        int nextIndex = 0;
-                        for (int j = i; j < childrenCount; j++) {
-                            while (usedIndices.get(nextIndex, false)) {
-                                nextIndex++;
-                            }
-                            permutation[j] = nextIndex;
-                            nextIndex++;
-                        }
-                        // Build the final view list.
-                        preorderedList = new ArrayList<>(childrenCount);
-                        for (int j = 0; j < childrenCount; j++) {
-                            final int index = permutation[j];
-                            final View child = mChildren[index];
-                            preorderedList.add(child);
-                        }
-                    }
-                } else {
-                    throw e;
-                }
+                throw e;
             }
             final View child = getAndVerifyPreorderedView(preorderedList, mChildren,
                     childIndex);
@@ -3732,6 +3702,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return afm.shouldAlwaysIncludeWebviewInAssistStructure();
     }
 
+    private boolean shouldIncludeInvisibleView(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldIncludeInvisibleViewInAssistStructure();
+    }
+
     /** @hide */
     private void populateChildrenForAutofill(ArrayList<View> list, @AutofillFlags int flags) {
         final int childrenCount = mChildrenCount;
@@ -3754,7 +3729,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
                         && child.getAutofillType() != AUTOFILL_TYPE_NONE)
                     || shouldIncludeAllChildrenViews(afm)
-                    || (Flags.includeInvisibleViewGroupInAssistStructure()
+                    || (shouldIncludeInvisibleView(afm)
                     && child instanceof ViewGroup && child.getVisibility() != View.VISIBLE)) {
                 // If the child is a ViewGroup object and its visibility is not visible, include
                 // it as part of the assist structure. The children of these invisible ViewGroup
@@ -4529,6 +4504,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
+            if (child == null) {
+                throw new IllegalStateException(getClass().getSimpleName() + " contains null " +
+                        "child at index " + i + " when traversal in dispatchGetDisplayList," +
+                        " the view may have been removed.");
+            }
             if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null)) {
                 recreateChildDisplayList(child);
             }
@@ -7102,12 +7082,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             } else if (childDimension == LayoutParams.MATCH_PARENT) {
                 // Child wants to be our size... find out how big it should
                 // be
-                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultSize = size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             } else if (childDimension == LayoutParams.WRAP_CONTENT) {
                 // Child wants to determine its own size.... find out how
                 // big it should be
-                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultSize = size;
                 resultMode = MeasureSpec.UNSPECIFIED;
             }
             break;
@@ -8655,8 +8635,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
 
             final boolean hasRtlSupport = c.getApplicationInfo().hasRtlSupport();
-            final int targetSdkVersion = c.getApplicationInfo().targetSdkVersion;
-            if (targetSdkVersion < JELLY_BEAN_MR1 || !hasRtlSupport) {
+            if (!hasRtlSupport) {
                 mMarginFlags |= RTL_COMPATIBILITY_MODE_MASK;
             }
 

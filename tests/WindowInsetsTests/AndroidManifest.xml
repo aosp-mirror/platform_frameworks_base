@@ -18,7 +18,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.test.windowinsetstests">
 
-    <application android:label="@string/application_title">
+    <application android:label="@string/application_title"
+                 android:theme="@style/base">
         <activity android:name=".WindowInsetsTestsMainActivity"
                   android:exported="true">
             <intent-filter>
@@ -29,11 +30,9 @@
 
         <activity android:name=".ChatActivity"
                   android:label="@string/chat_activity_title"
-                  android:theme="@style/chat"
                   android:windowSoftInputMode="adjustResize" />
 
         <activity android:name=".ControllerActivity"
-                  android:label="@string/controller_activity_title"
-                  android:theme="@style/controller" />
+                  android:label="@string/controller_activity_title" />
     </application>
 </manifest>

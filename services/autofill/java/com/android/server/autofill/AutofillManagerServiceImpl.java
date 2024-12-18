@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -91,11 +92,13 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.infra.AbstractPerUserSystemService;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
@@ -190,6 +193,8 @@ final class AutofillManagerServiceImpl
 
     private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
 
+    private final UserManagerInternal mUserManagerInternal;
+
     private final DisabledInfoCache mDisabledInfoCache;
 
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
@@ -206,6 +211,7 @@ final class AutofillManagerServiceImpl
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mContentCaptureManagerInternal = LocalServices.getService(
                 ContentCaptureManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mDisabledInfoCache = disableCache;
         updateLocked(disabled);
     }
@@ -293,19 +299,31 @@ final class AutofillManagerServiceImpl
      * @return {@code 0} if disabled, {@code FLAG_ADD_CLIENT_ENABLED} if enabled (it might be
      * OR'ed with {@code FLAG_AUGMENTED_AUTOFILL_REQUEST}).
      */
-    @GuardedBy("mLock")
-    int addClientLocked(IAutoFillManagerClient client, ComponentName componentName) {
-        if (mClients == null) {
-            mClients = new RemoteCallbackList<>();
-        }
-        mClients.register(client);
+    int addClientLocked(IAutoFillManagerClient client, ComponentName componentName,
+            boolean credmanRequested) {
+        synchronized (mLock) {
+            ComponentName credComponentName = getCredentialAutofillService(getContext());
 
-        if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
+            if (!credmanRequested
+                    && Objects.equals(credComponentName,
+                    mInfo == null ? null : mInfo.getServiceInfo().getComponentName())) {
+                // If the service component name corresponds to cred component name, then it means
+                // no autofill provider is selected by the user. Cred Autofill Service should only
+                // be active if there is a credman request.
+                return 0;
+            }
+            if (mClients == null) {
+                mClients = new RemoteCallbackList<>();
+            }
+            mClients.register(client);
 
-        // Check if it's enabled for augmented autofill
-        if (componentName != null && isAugmentedAutofillServiceAvailableLocked()
-                && isWhitelistedForAugmentedAutofillLocked(componentName)) {
-            return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
+            if (isEnabledLocked()) return FLAG_ADD_CLIENT_ENABLED;
+
+            // Check if it's enabled for augmented autofill
+            if (componentName != null && isAugmentedAutofillServiceAvailableLocked()
+                    && isWhitelistedForAugmentedAutofillLocked(componentName)) {
+                return FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
+            }
         }
 
         // No flags / disabled
@@ -362,6 +380,13 @@ final class AutofillManagerServiceImpl
         boolean forAugmentedAutofillOnly = (flags
                 & FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY) != 0;
         if (!isEnabledLocked() && !forAugmentedAutofillOnly) {
+            return 0;
+        }
+
+        // TODO(b/376482880): remove this check once autofill service supports visible
+        // background users.
+        if (mUserManagerInternal.isVisibleBackgroundFullUser(mUserId)) {
+            Slog.d(TAG, "Currently, autofill service does not support visible background users.");
             return 0;
         }
 
@@ -450,8 +475,10 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    void setAutofillFailureLocked(int sessionId, int uid, @NonNull List<AutofillId> ids) {
+    void setAutofillFailureLocked(
+            int sessionId, int uid, @NonNull List<AutofillId> ids, boolean isRefill) {
         if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
             return;
         }
         final Session session = mSessions.get(sessionId);
@@ -459,12 +486,73 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setAutofillFailure(): no session for " + sessionId + "(" + uid + ")");
             return;
         }
-        session.setAutofillFailureLocked(ids);
+        session.setAutofillFailureLocked(ids, isRefill);
+    }
+
+    @GuardedBy("mLock")
+    void setViewAutofilledLocked(int sessionId, int uid, @NonNull AutofillId id) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setViewAutofilled(): no session for " + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setViewAutofilledLocked(id);
+    }
+
+    @GuardedBy("mLock")
+    void notifyNotExpiringResponseDuringAuth(int sessionId, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyNotExpiringResponseDuringAuth(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setNotifyNotExpiringResponseDuringAuth();
+    }
+
+    @GuardedBy("mLock")
+    void notifyViewEnteredIgnoredDuringAuthCount(int sessionId, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyViewEnteredIgnoredDuringAuthCount(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setLogViewEnteredIgnoredDuringAuth();
+    }
+
+    @GuardedBy("mLock")
+    public void setAutofillIdsAttemptedForRefill(
+            int sessionId, @NonNull List<AutofillId> ids, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setAutofillIdsAttemptedForRefill(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setAutofillIdsAttemptedForRefillLocked(ids);
     }
 
     @GuardedBy("mLock")
     void finishSessionLocked(int sessionId, int uid, @AutofillCommitReason int commitReason) {
         if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
             return;
         }
 
@@ -485,7 +573,10 @@ final class AutofillManagerServiceImpl
         }
 
         final boolean finished = saveResult.isRemoveSession();
-        if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
+        if (sVerbose) {
+            Slog.v(TAG, "finishSessionLocked(): session finished? " + finished
+                    + ", showing save UI? " + saveResult.isLogSaveShown());
+        }
 
         if (finished) {
             session.removeFromServiceLocked();
@@ -762,10 +853,9 @@ final class AutofillManagerServiceImpl
      * Initializes the last fill selection after an autofill service returned a new
      * {@link FillResponse}.
      */
-    void setLastResponse(int sessionId, @NonNull FillResponse response) {
-        synchronized (mLock) {
+    @GuardedBy("mLock")
+    void setLastResponseLocked(int sessionId, @NonNull FillResponse response) {
             mEventHistory = new FillEventHistory(sessionId, response.getClientState());
-        }
     }
 
     void setLastAugmentedAutofillResponse(int sessionId) {
@@ -1291,7 +1381,8 @@ final class AutofillManagerServiceImpl
         RemoteFillService remoteService =
                 new RemoteFillService(
                         getContext(), mInfo.getServiceInfo().getComponentName(), mUserId,
-                        /* callbacks= */ null, mMaster.isInstantServiceAllowed());
+                        /* callbacks= */ null, mMaster.isInstantServiceAllowed(),
+                        mMaster.mCredentialAutofillService);
         remoteService.onSavedPasswordCountRequest(receiver);
     }
 
@@ -1483,6 +1574,22 @@ final class AutofillManagerServiceImpl
             return false;
         }
         return true;
+    }
+
+    @Nullable
+    private ComponentName getCredentialAutofillService(Context context) {
+        ComponentName componentName = null;
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null
+                && !credentialManagerAutofillCompName.isEmpty()) {
+            componentName = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        }
+        if (componentName == null) {
+            Slog.w(TAG, "Invalid CredentialAutofillService");
+        }
+        return componentName;
     }
 
     @GuardedBy("mLock")
@@ -1699,9 +1806,10 @@ final class AutofillManagerServiceImpl
 
         @Override // from InlineSuggestionRenderCallbacksImpl
         public void onServiceDied(@NonNull RemoteInlineSuggestionRenderService service) {
-            // Don't do anything; eventually the system will bind to it again...
             Slog.w(TAG, "remote service died: " + service);
-            mRemoteInlineSuggestionRenderService = null;
+            synchronized (mLock) {
+                resetExtServiceLocked();
+            }
         }
     }
 

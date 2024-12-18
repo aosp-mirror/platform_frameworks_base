@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -64,19 +65,20 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -101,7 +103,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationConversationInfoTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test_package";
@@ -183,8 +185,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .thenReturn(packageInfo);
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = TEST_UID;  // non-zero
-        when(mMockPackageManager.getApplicationInfo(eq(TEST_PACKAGE_NAME), anyInt())).thenReturn(
-                applicationInfo);
         final PackageInfo systemPackageInfo = new PackageInfo();
         systemPackageInfo.packageName = TEST_SYSTEM_PACKAGE_NAME;
         when(mMockPackageManager.getPackageInfo(eq(TEST_SYSTEM_PACKAGE_NAME), anyInt()))
@@ -207,6 +207,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                         .addMessage(new Notification.MessagingStyle.Message(
                                 "hello!", 1000, new Person.Builder().setName("other").build())))
                 .build();
+        notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, applicationInfo);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 notification, UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).setShortcutInfo(mShortcutInfo).build();

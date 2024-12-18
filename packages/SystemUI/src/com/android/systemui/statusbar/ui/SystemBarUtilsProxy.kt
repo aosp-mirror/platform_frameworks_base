@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.ui
 import android.content.Context
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.res.R
 import dagger.Binds
 import javax.inject.Inject
+import kotlin.math.max
 
 /**
  * Proxy interface to [SystemBarUtils], allowing injection of different logic for testing.
@@ -29,6 +31,7 @@ import javax.inject.Inject
  */
 interface SystemBarUtilsProxy {
     fun getStatusBarHeight(): Int
+    fun getStatusBarHeaderHeightKeyguard(): Int
 }
 
 class SystemBarUtilsProxyImpl
@@ -37,6 +40,13 @@ constructor(
     @Application private val context: Context,
 ) : SystemBarUtilsProxy {
     override fun getStatusBarHeight(): Int = SystemBarUtils.getStatusBarHeight(context)
+    override fun getStatusBarHeaderHeightKeyguard(): Int {
+        val cutout = context.display.cutout
+        val waterfallInsetTop = if (cutout == null) 0 else cutout.waterfallInsets.top
+        val statusBarHeaderHeightKeyguard =
+            context.resources.getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard)
+        return max(getStatusBarHeight(), statusBarHeaderHeightKeyguard + waterfallInsetTop)
+    }
 
     @dagger.Module
     interface Module {

@@ -16,7 +16,6 @@
 
 package com.android.systemui.dreams.dagger;
 
-import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -25,26 +24,22 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.util.Preconditions;
-import com.android.systemui.res.R;
+import com.android.systemui.ambient.statusbar.dagger.AmbientStatusBarComponent;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarView;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
-import com.android.systemui.dreams.DreamOverlayStatusBarView;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
+import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ElementsIntoSet;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.inject.Named;
 
 /** Dagger module for {@link DreamOverlayComponent}. */
 @Module
 public abstract class DreamOverlayModule {
-    public static final String DREAM_TOUCH_HANDLERS = "dream_touch_handlers";
     public static final String DREAM_OVERLAY_CONTENT_VIEW = "dream_overlay_content_view";
     public static final String MAX_BURN_IN_OFFSET = "max_burn_in_offset";
     public static final String BURN_IN_PROTECTION_UPDATE_INTERVAL =
@@ -65,7 +60,7 @@ public abstract class DreamOverlayModule {
     public static DreamOverlayContainerView providesDreamOverlayContainerView(
             LayoutInflater layoutInflater) {
         return Preconditions.checkNotNull((DreamOverlayContainerView)
-                layoutInflater.inflate(R.layout.dream_overlay_container, null),
+                        layoutInflater.inflate(R.layout.dream_overlay_container, null),
                 "R.layout.dream_layout_container could not be properly inflated");
     }
 
@@ -88,13 +83,23 @@ public abstract class DreamOverlayModule {
     /** */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
-    public static DreamOverlayStatusBarView providesDreamOverlayStatusBarView(
+    public static AmbientStatusBarView providesDreamOverlayStatusBarView(
             DreamOverlayContainerView view) {
         return Preconditions.checkNotNull(view.findViewById(R.id.dream_overlay_status_bar),
                 "R.id.status_bar must not be null");
     }
 
-    /** */
+    /**
+     * Provides the view controller for the {@link AmbientStatusBarView}
+     */
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    public static AmbientStatusBarViewController providesStatusBarViewController(
+            AmbientStatusBarView view, AmbientStatusBarComponent.Factory factory) {
+        return factory.create(view).getController();
+    }
+
+    /**  */
     @Provides
     @DreamOverlayComponent.DreamOverlayScope
     @Named(MAX_BURN_IN_OFFSET)
@@ -168,12 +173,5 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static Lifecycle providesLifecycle(LifecycleOwner lifecycleOwner) {
         return lifecycleOwner.getLifecycle();
-    }
-
-    @Provides
-    @ElementsIntoSet
-    static Set<DreamTouchHandler> providesDreamTouchHandlers(
-            @Named(DREAM_TOUCH_HANDLERS) @Nullable Set<DreamTouchHandler> touchHandlers) {
-        return touchHandlers != null ? touchHandlers : new HashSet<>();
     }
 }

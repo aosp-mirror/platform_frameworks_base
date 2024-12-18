@@ -348,13 +348,13 @@ key COMMA {
     label:                              ','
     base:                               ','
     shift:                              '\''
-    ralt:                               '_'
+    ralt:                               '\u00af'
 }
 
 key PERIOD {
     label:                              '.'
     base:                               '.'
-    ralt:                               '-'
+    ralt:                               '\u00ad'
 }
 
 key SLASH {

@@ -18,11 +18,14 @@ package com.android.server.power.stats;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.KernelSingleProcessCpuThreadReader;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,7 +33,10 @@ import java.io.IOException;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@android.platform.test.annotations.DisabledOnRavenwood(reason = "Kernel dependency")
 public class SystemServerCpuThreadReaderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
     public void testReadDelta() throws IOException {

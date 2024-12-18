@@ -36,7 +36,6 @@ import static com.android.server.am.ProcessList.SERVICE_ADJ;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -185,9 +184,9 @@ public final class ServiceBindingOomAdjPolicyTest {
         doReturn(false).when(mAms.mAtmInternal).hasSystemAlertWindowPermission(anyInt(), anyInt(),
                 any());
         doReturn(true).when(mAms.mOomAdjuster.mCachedAppOptimizer).useFreezer();
-        doNothing().when(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncInternalLSP(
-                any(), anyLong(), anyBoolean());
-        doReturn(false).when(mAms.mAppProfiler).updateLowMemStateLSP(anyInt(), anyInt(),
+        doNothing().when(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncAtEarliestLSP(
+                any());
+        doNothing().when(mAms.mAppProfiler).updateLowMemStateLSP(anyInt(), anyInt(),
                 anyInt(), anyLong());
 
         mCurrentCallingUid = TEST_APP1_UID;
@@ -503,7 +502,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         if (clientApp.isFreezable()) {
             verify(mAms.mOomAdjuster.mCachedAppOptimizer,
                     times(Flags.serviceBindingOomAdjPolicy() ? 1 : 0))
-                    .freezeAppAsyncInternalLSP(eq(clientApp), eq(0L), anyBoolean());
+                    .freezeAppAsyncAtEarliestLSP(eq(clientApp));
             clearInvocations(mAms.mOomAdjuster.mCachedAppOptimizer);
         }
 
@@ -530,7 +529,7 @@ public final class ServiceBindingOomAdjPolicyTest {
     @SuppressWarnings("GuardedBy")
     private ProcessRecord addProcessRecord(int pid, int uid, int procState, int adj, int cap,
                 String packageName) {
-        final IApplicationThread appThread = mock(IApplicationThread.class);
+        final ApplicationThreadDeferred appThread = mock(ApplicationThreadDeferred.class);
         final IBinder threadBinder = mock(IBinder.class);
         final ProcessRecord app = makeProcessRecord(pid, uid, uid, null, 0,
                 procState, adj, cap, 0L, 0L, packageName, packageName, mAms);
@@ -557,7 +556,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         rInfo.serviceInfo = makeServiceInfo(compName.getClassName(), compName.getPackageName(),
                 serviceUid);
         doReturn(rInfo).when(mPackageManagerInt).resolveService(any(Intent.class), any(),
-                anyLong(), anyInt(), anyInt());
+                anyLong(), anyInt(), anyInt(), anyInt());
 
         return serviceIntent;
     }

@@ -18,13 +18,18 @@ package android.graphics;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.graphics.hwui.flags.Flags;
 
 import libcore.util.NativeAllocationRegistry;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Gainmap represents a mechanism for augmenting an SDR image to produce an HDR one with variable
@@ -82,6 +87,27 @@ import libcore.util.NativeAllocationRegistry;
  * if preferred.
  */
 public final class Gainmap implements Parcelable {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"GAINMAP_DIRECTION_"},
+            value = {GAINMAP_DIRECTION_SDR_TO_HDR,
+                     GAINMAP_DIRECTION_HDR_TO_SDR})
+    public @interface GainmapDirection {}
+
+    /**
+     * The gainmap will be applied as if the base image were SDR, and fully applying the gainmap
+     * results in an HDR image.
+     */
+    @FlaggedApi(Flags.FLAG_ISO_GAINMAP_APIS)
+    public static final int GAINMAP_DIRECTION_SDR_TO_HDR = 0;
+
+    /**
+     * The gainmap will be applied as if the base image were HDR, and fully applying the gainmap
+     * results in an SDR image.
+     */
+    @FlaggedApi(Flags.FLAG_ISO_GAINMAP_APIS)
+    public static final int GAINMAP_DIRECTION_HDR_TO_SDR = 1;
 
     // Use a Holder to allow static initialization of Gainmap in the boot image.
     private static class NoImagePreloadHolder {
@@ -252,8 +278,9 @@ public final class Gainmap implements Parcelable {
     }
 
     /**
-     * Sets the hdr/sdr ratio at which point the gainmap is fully applied.
-     * @param max The hdr/sdr ratio at which the gainmap is fully applied. Must be >= 1.0f
+     * Sets the hdr/sdr ratio at which point applying the gainmap results in an HDR rendition.
+     * @param max The hdr/sdr ratio at which point applying the gainmap results in an HDR rendition.
+     * Must be >= 1.0f
      */
     public void setDisplayRatioForFullHdr(@FloatRange(from = 1.0f) float max) {
         if (!Float.isFinite(max) || max < 1f) {
@@ -264,7 +291,7 @@ public final class Gainmap implements Parcelable {
     }
 
     /**
-     * Gets the hdr/sdr ratio at which point the gainmap is fully applied.
+     * Gets the hdr/sdr ratio at which point applying the gainmap results in an HDR rendition
      */
     @NonNull
     public float getDisplayRatioForFullHdr() {
@@ -272,8 +299,9 @@ public final class Gainmap implements Parcelable {
     }
 
     /**
-     * Sets the hdr/sdr ratio below which only the SDR image is displayed.
-     * @param min The minimum hdr/sdr ratio at which to begin applying the gainmap. Must be >= 1.0f
+     * Sets the hdr/sdr ratio below which applying the gainmap results in an SDR rendition.
+     * @param min The minimum hdr/sdr ratio at which point applying the gainmap results in an SDR
+     * rendition. Must be >= 1.0f
      */
     public void setMinDisplayRatioForHdrTransition(@FloatRange(from = 1.0f) float min) {
         if (!Float.isFinite(min) || min < 1f) {
@@ -284,12 +312,61 @@ public final class Gainmap implements Parcelable {
     }
 
     /**
-     * Gets the hdr/sdr ratio below which only the SDR image is displayed.
+     * Gets the hdr/sdr ratio below which applying the gainmap results in an SDR rendition.
      */
     @NonNull
     public float getMinDisplayRatioForHdrTransition() {
         return nGetDisplayRatioSdr(mNativePtr);
     }
+
+    /**
+     * Sets the colorspace that the gainmap math should be applied in.
+     * Only the primaries are what is relevant for applying the gainmap. The transfer and range
+     * characteritics are ignored.
+     *
+     * If the supplied ColorSpace is null, then applying the gainmap will be done using the color
+     * gamut of the base image.
+     */
+    @FlaggedApi(Flags.FLAG_ISO_GAINMAP_APIS)
+    public void setAlternativeImagePrimaries(@Nullable ColorSpace colorSpace) {
+        long colorSpaceInstance = colorSpace == null ? 0 : colorSpace.getNativeInstance();
+        nSetAlternativeColorSpace(mNativePtr, colorSpaceInstance);
+    }
+
+    /**
+     * Gets the colorspace that the gainmap math should be applied in.
+     * Only the primaries are what is relevant for applying the gainmap. The transfer and range
+     * characteritics are ignored.
+     *
+     * If the returned ColorSpace is null, then applying the gainmap will be done using the color
+     * gamut of the base image.
+     */
+    @FlaggedApi(Flags.FLAG_ISO_GAINMAP_APIS)
+    @Nullable
+    public ColorSpace getAlternativeImagePrimaries() {
+        return nGetAlternativeColorSpace(mNativePtr);
+    }
+
+    /**
+     * Sets the direction that the gainmap math should be applied in.
+     */
+    @FlaggedApi(Flags.FLAG_ISO_GAINMAP_APIS)
+    public void setGainmapDirection(@GainmapDirection int direction) {
+        if (direction != GAINMAP_DIRECTION_SDR_TO_HDR
+                && direction != GAINMAP_DIRECTION_HDR_TO_SDR) {
+            throw new IllegalArgumentException("Invalid gainmap direction: " + direction);
+        }
+        nSetDirection(mNativePtr, direction);
+    }
+
+    /**
+     * Gets the direction that the gainmap math should be applied in.
+     */
+    @FlaggedApi(Flags.FLAG_ISO_GAINMAP_APIS)
+    public @GainmapDirection int getGainmapDirection() {
+        return nGetDirection(mNativePtr);
+    }
+
 
     /**
      * No special parcel contents.
@@ -361,6 +438,10 @@ public final class Gainmap implements Parcelable {
 
     private static native void nSetDisplayRatioSdr(long ptr, float min);
     private static native float nGetDisplayRatioSdr(long ptr);
+    private static native void nSetAlternativeColorSpace(long ptr, long colorSpacePtr);
+    private static native ColorSpace nGetAlternativeColorSpace(long ptr);
+    private static native void nSetDirection(long ptr, int direction);
+    private static native int nGetDirection(long ptr);
     private static native void nWriteGainmapToParcel(long ptr, Parcel dest);
     private static native void nReadGainmapFromParcel(long ptr, Parcel src);
 }

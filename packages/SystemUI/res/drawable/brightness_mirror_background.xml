@@ -14,7 +14,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="?attr/underSurface" />
-    <corners android:radius="@dimen/rounded_slider_background_rounded_corner" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:left="@dimen/rounded_slider_boundary_offset"
+        android:right="@dimen/rounded_slider_boundary_offset"
+        android:top="@dimen/rounded_slider_boundary_offset"
+        android:bottom="@dimen/rounded_slider_boundary_offset">
+        <shape>
+            <solid android:color="?attr/underSurface" />
+            <corners android:radius="@dimen/rounded_slider_background_rounded_corner" />
+        </shape>
+    </item>
+</layer-list>

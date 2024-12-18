@@ -310,6 +310,7 @@ public class DynamicLayout extends Layout {
          * @see Layout#getUseBoundsForWidth()
          * @see Layout.Builder#setUseBoundsForWidth(boolean)
          */
+        @SuppressLint("MissingGetterMatchingBuilder")  // The base class `Layout` has a getter.
         @NonNull
         @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
         public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
@@ -1319,7 +1320,11 @@ public class DynamicLayout extends Layout {
                         // It's possible that a Span is removed when the text covering it is
                         // deleted, in this case, the original start and end of the span might be
                         // OOB. So it'll reflow the entire string instead.
-                        reflow(s, 0, 0, s.length());
+                        if (Flags.insertModeCrashUpdateLayoutSpan()) {
+                            transformAndReflow(s, 0, s.length());
+                        } else {
+                            reflow(s, 0, 0, s.length());
+                        }
                     } else {
                         reflow(s, start, end - start, end - start);
                     }
@@ -1342,7 +1347,11 @@ public class DynamicLayout extends Layout {
                         // When text is changed, it'll also trigger onSpanChanged. In this case we
                         // can't determine the updated range in the transformed text. So it'll
                         // reflow the entire range instead.
-                        reflow(s, 0, 0, s.length());
+                        if (Flags.insertModeCrashUpdateLayoutSpan()) {
+                            transformAndReflow(s, 0, s.length());
+                        } else {
+                            reflow(s, 0, 0, s.length());
+                        }
                     } else {
                         reflow(s, start, end - start, end - start);
                         reflow(s, nstart, nend - nstart, nend - nstart);

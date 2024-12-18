@@ -37,6 +37,7 @@ import android.window.ScreenCapture;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -470,6 +471,9 @@ public abstract class DisplayManagerInternal {
         // Set to PowerManager.BRIGHTNESS_INVALID if there's no override.
         public float screenBrightnessOverride;
 
+        // Tag used to identify the app window requesting the brightness override.
+        public CharSequence screenBrightnessOverrideTag;
+
         // An override of the screen auto-brightness adjustment factor in the range -1 (dimmer) to
         // 1 (brighter). Set to Float.NaN if there's no override.
         public float screenAutoBrightnessAdjustmentOverride;
@@ -498,6 +502,10 @@ public abstract class DisplayManagerInternal {
         // Overrides the policy for adjusting screen brightness and state while dozing.
         public int dozeScreenState;
         public float dozeScreenBrightness;
+        public int dozeScreenStateReason;
+
+        // Override that makes display use normal brightness while dozing.
+        public boolean useNormalBrightnessForDoze;
 
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
@@ -508,6 +516,7 @@ public abstract class DisplayManagerInternal {
             blockScreenOn = false;
             dozeScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             dozeScreenState = Display.STATE_UNKNOWN;
+            dozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
         }
 
         public DisplayPowerRequest(DisplayPowerRequest other) {
@@ -522,6 +531,7 @@ public abstract class DisplayManagerInternal {
             policy = other.policy;
             useProximitySensor = other.useProximitySensor;
             screenBrightnessOverride = other.screenBrightnessOverride;
+            screenBrightnessOverrideTag = other.screenBrightnessOverrideTag;
             screenAutoBrightnessAdjustmentOverride = other.screenAutoBrightnessAdjustmentOverride;
             screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             blockScreenOn = other.blockScreenOn;
@@ -529,6 +539,8 @@ public abstract class DisplayManagerInternal {
             boostScreenBrightness = other.boostScreenBrightness;
             dozeScreenBrightness = other.dozeScreenBrightness;
             dozeScreenState = other.dozeScreenState;
+            dozeScreenStateReason = other.dozeScreenStateReason;
+            useNormalBrightnessForDoze = other.useNormalBrightnessForDoze;
         }
 
         @Override
@@ -541,8 +553,9 @@ public abstract class DisplayManagerInternal {
             return other != null
                     && policy == other.policy
                     && useProximitySensor == other.useProximitySensor
-                    && floatEquals(screenBrightnessOverride,
-                            other.screenBrightnessOverride)
+                    && floatEquals(screenBrightnessOverride, other.screenBrightnessOverride)
+                    && Objects.equals(screenBrightnessOverrideTag,
+                            other.screenBrightnessOverrideTag)
                     && floatEquals(screenAutoBrightnessAdjustmentOverride,
                             other.screenAutoBrightnessAdjustmentOverride)
                     && screenLowPowerBrightnessFactor
@@ -551,7 +564,9 @@ public abstract class DisplayManagerInternal {
                     && lowPowerMode == other.lowPowerMode
                     && boostScreenBrightness == other.boostScreenBrightness
                     && floatEquals(dozeScreenBrightness, other.dozeScreenBrightness)
-                    && dozeScreenState == other.dozeScreenState;
+                    && dozeScreenState == other.dozeScreenState
+                    && dozeScreenStateReason == other.dozeScreenStateReason
+                    && useNormalBrightnessForDoze == other.useNormalBrightnessForDoze;
         }
 
         private boolean floatEquals(float f1, float f2) {
@@ -575,7 +590,10 @@ public abstract class DisplayManagerInternal {
                     + ", lowPowerMode=" + lowPowerMode
                     + ", boostScreenBrightness=" + boostScreenBrightness
                     + ", dozeScreenBrightness=" + dozeScreenBrightness
-                    + ", dozeScreenState=" + Display.stateToString(dozeScreenState);
+                    + ", dozeScreenState=" + Display.stateToString(dozeScreenState)
+                    + ", dozeScreenStateReason="
+                            + Display.stateReasonToString(dozeScreenStateReason)
+                    + ", useNormalBrightnessForDoze=" + useNormalBrightnessForDoze;
         }
 
         public static String policyToString(int policy) {
@@ -680,8 +698,12 @@ public abstract class DisplayManagerInternal {
         public RefreshRateRange range;
 
         public RefreshRateLimitation(@RefreshRateLimitType int type, float min, float max) {
+            this(type, new RefreshRateRange(min, max));
+        }
+
+        public RefreshRateLimitation(@RefreshRateLimitType int type, RefreshRateRange range) {
             this.type = type;
-            range = new RefreshRateRange(min, max);
+            this.range = range;
         }
 
         @Override
@@ -733,6 +755,15 @@ public abstract class DisplayManagerInternal {
          *                  on is done.
          */
         void onBlockingScreenOn(Runnable unblocker);
+
+        /**
+         * Called while display is turning to screen state other than state ON to notify that any
+         * pending work from the previous blockScreenOn call should have been cancelled.
+         */
+        void cancelBlockScreenOn();
+
+        /** Whether auto brightness update in doze is allowed */
+        boolean allowAutoBrightnessInDoze();
     }
 
     /** A session token that associates a internal display with a {@link DisplayOffloader}. */
@@ -742,6 +773,9 @@ public abstract class DisplayManagerInternal {
 
         /** Whether the session is active. */
         boolean isActive();
+
+        /** Whether auto brightness update in doze is allowed */
+        boolean allowAutoBrightnessInDoze();
 
         /**
          * Update the brightness from the offload chip.
@@ -762,6 +796,12 @@ public abstract class DisplayManagerInternal {
         boolean blockScreenOn(Runnable unblocker);
 
         /**
+         * Called while display is turning to screen state other than state ON to notify that any
+         * pending work from the previous blockScreenOn call should have been cancelled.
+         */
+        void cancelBlockScreenOn();
+
+        /**
          * Get the brightness levels used to determine automatic brightness based on lux levels.
          * @param mode The auto-brightness mode
          *             (AutomaticBrightnessController.AutomaticBrightnessMode)
@@ -777,6 +817,16 @@ public abstract class DisplayManagerInternal {
          * @return The lux levels for the specified mode
          */
         float[] getAutoBrightnessLuxLevels(int mode);
+
+        /**
+         * @return The current brightness setting
+         */
+        float getBrightness();
+
+        /**
+         * @return The brightness value that is used when the device is in doze
+         */
+        float getDozeBrightness();
 
         /** Returns whether displayoffload supports the given display state. */
         static boolean isSupportedOffloadState(int displayState) {

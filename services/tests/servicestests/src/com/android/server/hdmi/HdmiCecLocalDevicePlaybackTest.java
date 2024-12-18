@@ -21,11 +21,17 @@ import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_INVALID;
 import static com.android.server.hdmi.Constants.ADDR_TV;
+import static com.android.server.hdmi.HdmiCecLocalDevicePlayback.POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS;
+import static com.android.server.hdmi.HdmiCecLocalDevicePlayback.STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS;
+import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_BOOT_UP;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.PowerStatusMonitorActionFromPlayback.MONITORING_INTERVAL_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
@@ -58,7 +64,9 @@ import java.util.concurrent.TimeUnit;
 public class HdmiCecLocalDevicePlaybackTest {
     private static final int TIMEOUT_MS = HdmiConfig.TIMEOUT_MS + 1;
     private static final int HOTPLUG_INTERVAL =
-            HotplugDetectionAction.POLLING_INTERVAL_MS_FOR_PLAYBACK;
+            HotplugDetectionAction.POLLING_BATCH_INTERVAL_MS_FOR_PLAYBACK;
+    private static final long POLLING_DELAY =
+            HotplugDetectionAction.POLLING_MESSAGE_INTERVAL_MS_FOR_PLAYBACK;
 
     private static final int PORT_1 = 1;
     private static final HdmiDeviceInfo INFO_TV = HdmiDeviceInfo.cecDeviceBuilder()
@@ -86,6 +94,8 @@ public class HdmiCecLocalDevicePlaybackTest {
     private boolean mActiveMediaSessionsPaused;
     private FakePowerManagerInternalWrapper mPowerManagerInternal =
             new FakePowerManagerInternalWrapper();
+
+    private boolean mIsOnActiveSourceLostPopupActive;
 
     @Before
     public void setUp() {
@@ -131,6 +141,16 @@ public class HdmiCecLocalDevicePlaybackTest {
                     boolean canGoToStandby() {
                         return true;
                     }
+
+                    @Override
+                    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                        // do nothing
+                    }
+
+                    @Override
+                    protected boolean isHdmiControlEnhancedBehaviorFlagEnabled() {
+                        return true;
+                    }
                 };
 
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
@@ -141,6 +161,19 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
+        mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
+            @Override
+            void startHdmiCecActiveSourceLostActivity() {
+                mIsOnActiveSourceLostPopupActive = true;
+            }
+
+            @Override
+            void dismissUiOnActiveSourceStatusRecovered() {
+                mIsOnActiveSourceLostPopupActive = false;
+            }
+        };
+        mHdmiCecLocalDevicePlayback.init();
+        mPlaybackPhysicalAddress = 0x2000;
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
                 new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_OUTPUT, 0x0000)
@@ -150,22 +183,22 @@ public class HdmiCecLocalDevicePlaybackTest {
                         .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
+        mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mHdmiControlService.initService();
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
         mHdmiControlService.setPowerManagerInternal(mPowerManagerInternal);
-        mPlaybackPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPlaybackPhysicalAddress);
         mTestLooper.dispatchAll();
-        mHdmiCecLocalDevicePlayback = mHdmiControlService.playback();
         mLocalDevices.add(mHdmiCecLocalDevicePlayback);
-        mPlaybackLogicalAddress = mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
         mHdmiControlService.getHdmiCecNetwork().addCecDevice(INFO_TV);
         mNativeWrapper.clearResultMessages();
         mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
                 HdmiProperties.playback_device_action_on_routing_control_values.NONE;
         mHdmiControlService.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_BOOT_UP);
+        mTestLooper.dispatchAll();
+        mPlaybackLogicalAddress = mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
     }
 
     @Test
@@ -379,6 +412,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message))
                 .isEqualTo(Constants.HANDLED);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
@@ -387,6 +422,7 @@ public class HdmiCecLocalDevicePlaybackTest {
         int newPlaybackPhysicalAddress = 0x2100;
         int switchPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(newPlaybackPhysicalAddress);
+        mHdmiControlService.onHotplug(newPlaybackPhysicalAddress, true);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
         mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
@@ -420,6 +456,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(message))
                 .isEqualTo(Constants.HANDLED);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
@@ -578,6 +616,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleRoutingInformation(message))
                 .isEqualTo(Constants.HANDLED);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
@@ -681,6 +721,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         // See {@link HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation}.
         assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(
                 ADDR_INVALID);
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
@@ -1223,6 +1265,9 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message))
                 .isEqualTo(Constants.HANDLED);
         mTestLooper.dispatchAll();
+
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
     }
@@ -1297,6 +1342,8 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message2))
                 .isEqualTo(Constants.HANDLED);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
         mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
         // 3. DUT becomes <AS> again.
@@ -1657,6 +1704,9 @@ public class HdmiCecLocalDevicePlaybackTest {
         assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(message))
                 .isEqualTo(Constants.HANDLED);
         assertThat(mHdmiCecLocalDevicePlayback.isActiveSource()).isFalse();
+
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
         assertThat(mPowerManager.isInteractive()).isFalse();
     }
 
@@ -1867,9 +1917,14 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         mNativeWrapper.setPollAddressResponse(otherPlaybackLogicalAddress,
                 SendMessageResult.SUCCESS);
+        // Moving forward to skip hotplug interval for polling to start
         mTestLooper.moveTimeForward(HOTPLUG_INTERVAL);
         mTestLooper.dispatchAll();
-
+        // Skipping each polling delay and dispatch each polling message
+        for (int i = 0; i < 14; i++) {
+            mTestLooper.moveTimeForward(POLLING_DELAY);
+            mTestLooper.dispatchAll();
+        }
         // Check for <Give Physical Address> being sent to the newly discovered device.
         // This message is sent as part of the HotplugDetectionAction to available devices.
         HdmiCecMessage givePhysicalAddress = HdmiCecMessageBuilder.buildGivePhysicalAddress(
@@ -2248,6 +2303,159 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    public void onActiveSourceLostToTv_noInteractionWithDut_standbyAfterTimeout() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+
+        mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
+                mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(activeSourceFromTv))
+                .isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        // After 30s of device inactivity, device would go to sleep.
+        skipActiveSourceLostUi(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        assertThat(mPowerManager.isInteractive()).isFalse();
+    }
+
+    @Test
+    public void onActiveSourceLost_interactionWithDut_noStandbyAfterTimeout() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+        mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
+                mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(activeSourceFromTv))
+                .isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        // User interacted with the DUT, so the device will not go to standby.
+        skipActiveSourceLostUi(0);
+        assertThat(mIsOnActiveSourceLostPopupActive).isFalse();
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        assertThat(mNativeWrapper.getResultMessages().contains(activeSourceFromPlayback)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress)
+                .isEqualTo(mPlaybackLogicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().physicalAddress)
+                .isEqualTo(mPlaybackPhysicalAddress);
+    }
+
+    @Test
+    public void onActiveSourceLost_incomingSetStreamPathToDut_noStandbyAfterTimeout() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+        mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
+                mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+        HdmiCecMessage setStreamPathToPlayback = HdmiCecMessageBuilder.buildSetStreamPath(ADDR_TV,
+                mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(activeSourceFromTv))
+                .isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        // Pop-up is triggered.
+        mTestLooper.moveTimeForward(POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mIsOnActiveSourceLostPopupActive).isTrue();
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleSetStreamPath(setStreamPathToPlayback))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mIsOnActiveSourceLostPopupActive).isFalse();
+        assertThat(mNativeWrapper.getResultMessages().contains(activeSourceFromPlayback)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress)
+                .isEqualTo(mPlaybackLogicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().physicalAddress)
+                .isEqualTo(mPlaybackPhysicalAddress);
+        mTestLooper.moveTimeForward(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+    }
+
+    @Test
+    public void onActiveSourceLost_incomingRoutingChangeToDut_noStandbyAfterTimeout() {
+        mHdmiCecLocalDevicePlayback.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
+                HdmiControlManager.POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST_STANDBY_NOW);
+        mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
+                HdmiProperties
+                        .playback_device_action_on_routing_control_values
+                        .WAKE_UP_AND_SEND_ACTIVE_SOURCE;
+        mHdmiCecLocalDevicePlayback.setActiveSource(mPlaybackLogicalAddress,
+                mPlaybackPhysicalAddress, "HdmiCecLocalDevicePlaybackTest");
+        mPowerManager.setInteractive(true);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(mPlaybackLogicalAddress,
+                        mPlaybackPhysicalAddress);
+        HdmiCecMessage routingChangeToPlayback =
+                HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x0000,
+                        mPlaybackPhysicalAddress);
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(activeSourceFromTv))
+                .isEqualTo(Constants.HANDLED);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress).isEqualTo(ADDR_TV);
+        mTestLooper.dispatchAll();
+
+        // Pop-up is triggered.
+        mTestLooper.moveTimeForward(POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mIsOnActiveSourceLostPopupActive).isTrue();
+
+        assertThat(mHdmiCecLocalDevicePlayback.handleRoutingChange(routingChangeToPlayback))
+                .isEqualTo(Constants.HANDLED);
+        mTestLooper.dispatchAll();
+
+        assertThat(mIsOnActiveSourceLostPopupActive).isFalse();
+        assertThat(mNativeWrapper.getResultMessages().contains(activeSourceFromPlayback)).isTrue();
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().logicalAddress)
+                .isEqualTo(mPlaybackLogicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.getActiveSource().physicalAddress)
+                .isEqualTo(mPlaybackPhysicalAddress);
+        mTestLooper.moveTimeForward(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+    }
+
+    @Test
     public void handleRoutingChange_addressNotAllocated_removeActiveSourceAction() {
         long allocationDelay = TimeUnit.SECONDS.toMillis(60);
         mHdmiCecLocalDevicePlayback.mPlaybackDeviceActionOnRoutingControl =
@@ -2352,5 +2560,53 @@ public class HdmiCecLocalDevicePlaybackTest {
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDevicePlayback.getActions(ActiveSourceAction.class)).isEmpty();
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(unexpectedMessage);
+    }
+
+    @Test
+    public void powerStatusMonitorActionFromPlayback_TvReportPowerOff_goToSleep() {
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(
+                PowerStatusMonitorActionFromPlayback.class)).hasSize(1);
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(MONITORING_INTERVAL_MS);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage givePowerStatus =
+                HdmiCecMessageBuilder.buildGiveDevicePowerStatus(mPlaybackLogicalAddress,
+                        Constants.ADDR_TV);
+        HdmiCecMessage reportPowerStatusTvOn =
+                HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV, mPlaybackLogicalAddress,
+                        HdmiControlManager.POWER_STATUS_ON);
+        HdmiCecMessage reportPowerStatusTvStandby =
+                HdmiCecMessageBuilder.buildReportPowerStatus(ADDR_TV, mPlaybackLogicalAddress,
+                        HdmiControlManager.POWER_STATUS_STANDBY);
+
+        assertThat(mNativeWrapper.getResultMessages().contains(givePowerStatus)).isTrue();
+        mNativeWrapper.onCecMessage(reportPowerStatusTvOn);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isTrue();
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(MONITORING_INTERVAL_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages().contains(givePowerStatus)).isTrue();
+        mNativeWrapper.onCecMessage(reportPowerStatusTvStandby);
+        mTestLooper.dispatchAll();
+
+        assertThat(mPowerManager.isInteractive()).isFalse();
+    }
+
+    private void skipActiveSourceLostUi(long idleDuration) {
+        mTestLooper.moveTimeForward(POPUP_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mIsOnActiveSourceLostPopupActive).isTrue();
+
+        mPowerManagerInternal.setIdleDuration(idleDuration);
+        mTestLooper.moveTimeForward(STANDBY_AFTER_ACTIVE_SOURCE_LOST_DELAY_MS);
+        mTestLooper.dispatchAll();
     }
 }

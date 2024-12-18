@@ -518,18 +518,24 @@ public final class ExternalDisplayStatsService {
     private void logExternalDisplayIdleStarted() {
         synchronized (mExternalDisplayStates) {
             for (var i = 0; i < mExternalDisplayStates.size(); i++) {
-                mInjector.writeLog(FrameworkStatsLog.EXTERNAL_DISPLAY_STATE_CHANGED,
-                        KEYGUARD, i + 1, mIsExternalDisplayUsedForAudio);
-                if (DEBUG) {
-                    final int displayId = mExternalDisplayStates.keyAt(i);
-                    final int state = mExternalDisplayStates.get(displayId, DISCONNECTED_STATE);
-                    Slog.d(TAG, "logExternalDisplayIdleStarted"
-                                        + " displayId=" + displayId
-                                        + " currentState=" + state
-                                        + " countOfExternalDisplays=" + (i + 1)
-                                        + " state=" + KEYGUARD
-                                        + " mIsExternalDisplayUsedForAudio="
-                                        + mIsExternalDisplayUsedForAudio);
+                final int displayId = mExternalDisplayStates.keyAt(i);
+                final int state = mExternalDisplayStates.get(displayId, DISCONNECTED_STATE);
+                // Don't try to stop "connected" session by keyguard event.
+                // There is no purpose to measure how long keyguard is shown while external
+                // display is connected but not used for mirroring or extended display.
+                // Therefore there no need to log this event.
+                if (state != DISCONNECTED_STATE && state != CONNECTED_STATE) {
+                    mInjector.writeLog(FrameworkStatsLog.EXTERNAL_DISPLAY_STATE_CHANGED,
+                            KEYGUARD, i + 1, mIsExternalDisplayUsedForAudio);
+                    if (DEBUG) {
+                        Slog.d(TAG, "logExternalDisplayIdleStarted"
+                                            + " displayId=" + displayId
+                                            + " currentState=" + state
+                                            + " countOfExternalDisplays=" + (i + 1)
+                                            + " state=" + KEYGUARD
+                                            + " mIsExternalDisplayUsedForAudio="
+                                            + mIsExternalDisplayUsedForAudio);
+                    }
                 }
             }
         }
@@ -540,7 +546,11 @@ public final class ExternalDisplayStatsService {
             for (var i = 0; i < mExternalDisplayStates.size(); i++) {
                 final int displayId = mExternalDisplayStates.keyAt(i);
                 final int state = mExternalDisplayStates.get(displayId, DISCONNECTED_STATE);
-                if (state == DISCONNECTED_STATE) {
+                // No need to restart "connected" session after keyguard is stopped.
+                // This is because the connection is continuous even if keyguard is shown.
+                // In case in the future keyguard needs to be measured also while display
+                // is not used, then a 'keyguard finished' event needs to be emitted in this case.
+                if (state == DISCONNECTED_STATE || state == CONNECTED_STATE) {
                     return;
                 }
                 mInjector.writeLog(FrameworkStatsLog.EXTERNAL_DISPLAY_STATE_CHANGED,

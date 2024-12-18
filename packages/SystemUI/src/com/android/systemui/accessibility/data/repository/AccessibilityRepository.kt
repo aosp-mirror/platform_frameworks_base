@@ -18,10 +18,10 @@ package com.android.systemui.accessibility.data.repository
 
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.app.tracing.FlowTracing.tracedAwaitClose
+import com.android.app.tracing.FlowTracing.tracedConflatedCallbackFlow
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 interface AccessibilityRepository {
     /** @see [AccessibilityManager.isTouchExplorationEnabled] */
     val isTouchExplorationEnabled: Flow<Boolean>
+    /** @see [AccessibilityManager.isEnabled] */
+    val isEnabled: Flow<Boolean>
 
     companion object {
         operator fun invoke(a11yManager: AccessibilityManager): AccessibilityRepository =
@@ -36,15 +38,28 @@ interface AccessibilityRepository {
     }
 }
 
+private const val TAG = "AccessibilityRepository"
+
 private class AccessibilityRepositoryImpl(
     manager: AccessibilityManager,
 ) : AccessibilityRepository {
     override val isTouchExplorationEnabled: Flow<Boolean> =
-        conflatedCallbackFlow {
+        tracedConflatedCallbackFlow(TAG) {
                 val listener = TouchExplorationStateChangeListener(::trySend)
                 manager.addTouchExplorationStateChangeListener(listener)
                 trySend(manager.isTouchExplorationEnabled)
-                awaitClose { manager.removeTouchExplorationStateChangeListener(listener) }
+                tracedAwaitClose(TAG) {
+                    manager.removeTouchExplorationStateChangeListener(listener)
+                }
+            }
+            .distinctUntilChanged()
+
+    override val isEnabled: Flow<Boolean> =
+        tracedConflatedCallbackFlow(TAG) {
+                val listener = AccessibilityManager.AccessibilityStateChangeListener(::trySend)
+                manager.addAccessibilityStateChangeListener(listener)
+                trySend(manager.isEnabled)
+                tracedAwaitClose(TAG) { manager.removeAccessibilityStateChangeListener(listener) }
             }
             .distinctUntilChanged()
 }

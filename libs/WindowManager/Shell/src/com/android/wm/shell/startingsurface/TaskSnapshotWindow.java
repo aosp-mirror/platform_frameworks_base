@@ -23,12 +23,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -42,12 +41,14 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowRelayoutResult;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.SnapshotDrawerUtils;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.BaseIWindow;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -98,8 +99,6 @@ public class TaskSnapshotWindow {
             return null;
         }
 
-        final Point taskSize = snapshot.getTaskSize();
-        final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
         final int displayId = runningTaskInfo.displayId;
 
@@ -137,9 +136,10 @@ public class TaskSnapshotWindow {
         }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
+            final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(tmpFrames,
+                    tmpMergedConfiguration, surfaceControl, tmpInsetsState, tmpControls);
             session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
-                    tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                    tmpControls, new Bundle());
+                    outRelayoutResult);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
@@ -148,7 +148,7 @@ public class TaskSnapshotWindow {
         }
 
         SnapshotDrawerUtils.drawSnapshotOnSurface(info, layoutParams, surfaceControl, snapshot,
-                taskBounds, tmpFrames.frame, topWindowInsetsState, true /* releaseAfterDraw */);
+                info.taskBounds, topWindowInsetsState, true /* releaseAfterDraw */);
         snapshotSurface.mHasDrawn = true;
         snapshotSurface.reportDrawn();
 
@@ -214,7 +214,7 @@ public class TaskSnapshotWindow {
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int seqId,
-                boolean dragResizing) {
+                boolean dragResizing, @Nullable ActivityWindowInfo activityWindowInfo) {
             final TaskSnapshotWindow snapshot = mOuter.get();
             if (snapshot == null) {
                 return;

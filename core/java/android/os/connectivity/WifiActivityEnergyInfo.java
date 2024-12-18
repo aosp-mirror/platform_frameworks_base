@@ -37,8 +37,10 @@ import java.lang.annotation.RetentionPolicy;
  * real-time.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 @SystemApi
 public final class WifiActivityEnergyInfo implements Parcelable {
+    private static final long DEFERRED_ENERGY_ESTIMATE = -1;
     @ElapsedRealtimeLong
     private final long mTimeSinceBootMillis;
     @StackState
@@ -52,7 +54,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     @IntRange(from = 0)
     private final long mControllerIdleDurationMillis;
     @IntRange(from = 0)
-    private final long mControllerEnergyUsedMicroJoules;
+    private long mControllerEnergyUsedMicroJoules;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -99,9 +101,10 @@ public final class WifiActivityEnergyInfo implements Parcelable {
                 rxDurationMillis,
                 scanDurationMillis,
                 idleDurationMillis,
-                calculateEnergyMicroJoules(txDurationMillis, rxDurationMillis, idleDurationMillis));
+                DEFERRED_ENERGY_ESTIMATE);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     private static long calculateEnergyMicroJoules(
             long txDurationMillis, long rxDurationMillis, long idleDurationMillis) {
         final Context context = ActivityThread.currentActivityThread().getSystemContext();
@@ -123,6 +126,11 @@ public final class WifiActivityEnergyInfo implements Parcelable {
                 + rxDurationMillis * rxCurrent
                 + idleDurationMillis * idleCurrent)
                 * voltage);
+    }
+
+    private static long calculateEnergyMicroJoules$ravenwood(long txDurationMillis,
+            long rxDurationMillis, long idleDurationMillis) {
+        return 0;
     }
 
     /** @hide */
@@ -152,7 +160,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
                 + " mControllerRxDurationMillis=" + mControllerRxDurationMillis
                 + " mControllerScanDurationMillis=" + mControllerScanDurationMillis
                 + " mControllerIdleDurationMillis=" + mControllerIdleDurationMillis
-                + " mControllerEnergyUsedMicroJoules=" + mControllerEnergyUsedMicroJoules
+                + " mControllerEnergyUsedMicroJoules=" + getControllerEnergyUsedMicroJoules()
                 + " }";
     }
 
@@ -231,6 +239,11 @@ public final class WifiActivityEnergyInfo implements Parcelable {
     /** Get the energy consumed by Wifi, in microjoules. */
     @IntRange(from = 0)
     public long getControllerEnergyUsedMicroJoules() {
+        if (mControllerEnergyUsedMicroJoules == DEFERRED_ENERGY_ESTIMATE) {
+            mControllerEnergyUsedMicroJoules = calculateEnergyMicroJoules(
+                    mControllerTxDurationMillis, mControllerRxDurationMillis,
+                    mControllerIdleDurationMillis);
+        }
         return mControllerEnergyUsedMicroJoules;
     }
 

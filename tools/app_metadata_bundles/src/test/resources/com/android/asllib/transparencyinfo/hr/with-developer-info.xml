@@ -1,0 +1,22 @@
+
+<transparency-info>
+    <app-info
+        apsCompliant="false"
+        privacyPolicy="www.example.com" developerId="dev1" applicationId="app1">
+        <first-party-endpoints>
+            <item>url1</item>
+        </first-party-endpoints>
+        <service-provider-endpoints>
+            <item>url55</item>
+            <item>url56</item>
+        </service-provider-endpoints>
+    </app-info>
+    <developer-info
+        name="max"
+        email="max@example.com"
+        address="111 blah lane"
+        countryRegion="US"
+        relationship="aosp"
+        website="example.com"
+        registryId="registry_id" />
+</transparency-info>

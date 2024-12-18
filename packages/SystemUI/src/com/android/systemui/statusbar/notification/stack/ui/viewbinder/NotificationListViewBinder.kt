@@ -27,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
@@ -44,7 +45,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
-import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.statusbar.notification.ui.viewbinder.HeadsUpNotificationViewBinder
 import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.ui.isAnimating
@@ -71,7 +72,7 @@ constructor(
     private val hiderTracker: DisplaySwitchNotificationsHiderTracker,
     private val configuration: ConfigurationState,
     private val falsingManager: FalsingManager,
-    private val iconAreaController: NotificationIconAreaController,
+    private val hunBinder: HeadsUpNotificationViewBinder,
     private val loggerOptional: Optional<NotificationStatsLogger>,
     private val metricsLogger: MetricsLogger,
     private val nicBinder: NotificationIconContainerShelfViewBinder,
@@ -92,6 +93,9 @@ constructor(
 
         view.repeatWhenAttached {
             lifecycleScope.launch {
+                if (SceneContainerFlag.isEnabled) {
+                    launch { hunBinder.bindHeadsUpNotifications(view) }
+                }
                 launch { bindShelf(shelf) }
                 bindHideList(viewController, viewModel, hiderTracker)
 
@@ -122,7 +126,6 @@ constructor(
             viewModel.shelf,
             falsingManager,
             nicBinder,
-            iconAreaController,
         )
     }
 
@@ -167,7 +170,6 @@ constructor(
                 footerView,
                 footerViewModel,
                 clearAllNotifications = {
-                    metricsLogger.action(MetricsProto.MetricsEvent.ACTION_DISMISS_ALL_NOTES)
                     clearAllNotifications(
                         parentView,
                         // Hide the silent section header (if present) if there will be
@@ -178,21 +180,33 @@ constructor(
                 launchNotificationSettings = { view ->
                     notificationActivityStarter
                         .get()
-                        .startHistoryIntent(view, /* showHistory = */ false)
+                        .startHistoryIntent(view, /* showHistory= */ false)
                 },
                 launchNotificationHistory = { view ->
                     notificationActivityStarter
                         .get()
-                        .startHistoryIntent(view, /* showHistory = */ true)
+                        .startHistoryIntent(view, /* showHistory= */ true)
                 },
             )
-        launch {
-            viewModel.shouldShowFooterView.collect { animatedVisibility ->
-                footerView.setVisible(
-                    /* visible = */ animatedVisibility.value,
-                    /* animate = */ animatedVisibility.isAnimating,
-                )
+        if (SceneContainerFlag.isEnabled) {
+            launch {
+                viewModel.shouldShowFooterView.collect { animatedVisibility ->
+                    footerView.setVisible(
+                        /* visible = */ animatedVisibility.value,
+                        /* animate = */ animatedVisibility.isAnimating,
+                    )
+                }
             }
+        } else {
+            launch {
+                viewModel.shouldIncludeFooterView.collect { animatedVisibility ->
+                    footerView.setVisible(
+                        /* visible = */ animatedVisibility.value,
+                        /* animate = */ animatedVisibility.isAnimating,
+                    )
+                }
+            }
+            launch { viewModel.shouldHideFooterView.collect { footerView.setShouldBeHidden(it) } }
         }
         disposableHandle.awaitCancellationThenDispose()
     }

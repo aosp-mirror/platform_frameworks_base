@@ -19,7 +19,9 @@ package android.perftests.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Insets;
 import android.os.Bundle;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -42,6 +44,11 @@ public class PerfTestActivity extends Activity {
         if (getIntent().getBooleanExtra(INTENT_EXTRA_ADD_EDIT_TEXT, false)) {
             final LinearLayout layout = new LinearLayout(this);
             layout.setOrientation(LinearLayout.VERTICAL);
+            layout.setOnApplyWindowInsetsListener((v, w) -> {
+                final Insets insets = w.getSystemWindowInsets();
+                v.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return WindowInsets.CONSUMED;
+            });
 
             final EditText editText = new EditText(this);
             editText.setId(ID_EDITOR);

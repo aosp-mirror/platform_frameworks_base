@@ -41,8 +41,8 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test exiting Pip with orientation changes. To run this test: `atest
- * WMShellFlickerTests:SetRequestedOrientationWhilePinnedTest`
+ * Test exiting Pip with orientation changes. To run this test:
+ * `atest WMShellFlickerTestsPip1:SetRequestedOrientationWhilePinned`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
@@ -146,6 +146,12 @@ open class SetRequestedOrientationWhilePinned(flicker: LegacyFlickerTest) : PipT
     @FlakyTest(bugId = 264243884)
     @Test
     override fun entireScreenCovered() = super.entireScreenCovered()
+
+    @Postsubmit
+    @Test
+    override fun pipLayerHasCorrectCornersAtEnd() {
+        flicker.assertLayersEnd { hasNoRoundedCorners(pipApp) }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

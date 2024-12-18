@@ -16,124 +16,81 @@
 
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import android.content.res.mainResources
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
-import com.android.systemui.user.domain.UserDomainLayerModule
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.notification.icon.domain.interactor.alwaysOnDisplayNotificationIconsInteractor
+import com.android.systemui.statusbar.phone.dozeParameters
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                BiometricsDomainLayerModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent :
-        SysUITestComponent<NotificationIconContainerAlwaysOnDisplayViewModel> {
-
-        val deviceProvisioningRepository: FakeDeviceProvisioningRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val powerRepository: FakePowerRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                mocks: TestMocksModule,
-                featureFlags: FakeFeatureFlagsClassicModule,
-            ): TestComponent
+    private val kosmos =
+        testKosmos().apply {
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, value = false) }
         }
-    }
 
-    private val dozeParams: DozeParameters = mock()
-    private val screenOffAnimController: ScreenOffAnimationController = mock()
-
-    private val testComponent: TestComponent =
-        DaggerNotificationIconContainerAlwaysOnDisplayViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(Flags.FULL_SCREEN_USER_SWITCHER, value = false)
-                    },
-                mocks =
-                    TestMocksModule(
-                        dozeParameters = dozeParams,
-                        screenOffAnimationController = screenOffAnimController,
-                    ),
-            )
+    val underTest =
+        NotificationIconContainerAlwaysOnDisplayViewModel(
+            kosmos.testDispatcher,
+            kosmos.alwaysOnDisplayNotificationIconsInteractor,
+            kosmos.keyguardInteractor,
+            kosmos.keyguardTransitionInteractor,
+            kosmos.mainResources,
+            kosmos.shadeInteractor,
+        )
+    val testScope = kosmos.testScope
+    val keyguardRepository = kosmos.fakeKeyguardRepository
+    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val powerRepository = kosmos.fakePowerRepository
 
     @Before
     fun setup() {
-        testComponent.apply {
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            deviceProvisioningRepository.setFactoryResetProtectionActive(false)
-            powerRepository.updateWakefulness(
-                rawState = WakefulnessState.AWAKE,
-                lastWakeReason = WakeSleepReason.OTHER,
-                lastSleepReason = WakeSleepReason.OTHER,
-            )
-        }
+        keyguardRepository.setKeyguardShowing(true)
+        keyguardRepository.setKeyguardOccluded(false)
+        kosmos.fakePowerRepository.updateWakefulness(
+            rawState = WakefulnessState.AWAKE,
+            lastWakeReason = WakeSleepReason.OTHER,
+            lastSleepReason = WakeSleepReason.OTHER,
+        )
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
     }
 
     @Test
-    fun animationsEnabled_isFalse_whenFrpIsActive() =
-        testComponent.runTest {
-            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
-            runCurrent()
-            assertThat(animationsEnabled).isFalse()
-        }
-
-    @Test
     fun animationsEnabled_isFalse_whenDeviceAsleepAndNotPulsing() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.ASLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -156,7 +113,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isTrue_whenDeviceAsleepAndPulsing() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.ASLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -179,7 +136,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isFalse_whenStartingToSleepAndNotControlScreenOff() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -192,7 +149,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            whenever(dozeParams.shouldControlScreenOff()).thenReturn(false)
+            whenever(kosmos.dozeParameters.shouldControlScreenOff()).thenReturn(false)
             val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
             assertThat(animationsEnabled).isFalse()
@@ -200,7 +157,10 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isTrue_whenStartingToSleepAndControlScreenOff() =
-        testComponent.runTest {
+        testScope.runTest {
+            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
+            assertThat(animationsEnabled).isTrue()
+
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -213,15 +173,13 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            whenever(dozeParams.shouldControlScreenOff()).thenReturn(true)
-            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
-            runCurrent()
+            whenever(kosmos.dozeParameters.shouldControlScreenOff()).thenReturn(true)
             assertThat(animationsEnabled).isTrue()
         }
 
     @Test
     fun animationsEnabled_isTrue_whenNotAsleep() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -238,8 +196,9 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun animationsEnabled_isTrue_whenKeyguardIsShowing() =
-        testComponent.runTest {
+        testScope.runTest {
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     transitionState = TransitionState.STARTED,
@@ -268,7 +227,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun tintAlpha_isZero_whenNotOnAodOrDozing() =
-        testComponent.runTest {
+        testScope.runTest {
             val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
             keyguardTransitionRepository.sendTransitionSteps(
@@ -282,7 +241,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun tintAlpha_isOne_whenOnAod() =
-        testComponent.runTest {
+        testScope.runTest {
             val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
             keyguardTransitionRepository.sendTransitionSteps(
@@ -296,7 +255,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun tintAlpha_isOne_whenDozing() =
-        testComponent.runTest {
+        testScope.runTest {
             val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
             keyguardTransitionRepository.sendTransitionSteps(
@@ -309,7 +268,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun tintAlpha_isOne_whenTransitionFromAodToDoze() =
-        testComponent.runTest {
+        testScope.runTest {
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
                 to = KeyguardState.AOD,
@@ -343,7 +302,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun tintAlpha_isFraction_midTransitionToAod() =
-        testComponent.runTest {
+        testScope.runTest {
             val tintAlpha by collectLastValue(underTest.tintAlpha)
             runCurrent()
 
@@ -372,7 +331,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconAnimationsEnabled_whenOnLockScreen() =
-        testComponent.runTest {
+        testScope.runTest {
             val iconAnimationsEnabled by collectLastValue(underTest.areIconAnimationsEnabled)
             runCurrent()
 
@@ -387,7 +346,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconAnimationsDisabled_whenOnAod() =
-        testComponent.runTest {
+        testScope.runTest {
             val iconAnimationsEnabled by collectLastValue(underTest.areIconAnimationsEnabled)
             runCurrent()
 
@@ -402,7 +361,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconAnimationsDisabled_whenDozing() =
-        testComponent.runTest {
+        testScope.runTest {
             val iconAnimationsEnabled by collectLastValue(underTest.areIconAnimationsEnabled)
             runCurrent()
 

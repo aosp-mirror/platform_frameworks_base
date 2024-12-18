@@ -236,15 +236,21 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *
      * {@more} Note that the value of this flag is 0, so it is the default.
      */
-    public static final int OPEN_READWRITE = 0x00000000;          // update native code if changing
+    // LINT.IfChange
+    public static final int OPEN_READWRITE = 0x00000000;
+    // LINT.ThenChange(/core/jni/android_database_SQLiteConnection.cpp)
 
     /**
      * Open flag: Flag for {@link #openDatabase} to open the database for reading only.
      * This is the only reliable way to open a database if the disk may be full.
      */
-    public static final int OPEN_READONLY = 0x00000001;           // update native code if changing
+    // LINT.IfChange
+    public static final int OPEN_READONLY = 0x00000001;
+    // LINT.ThenChange(/core/jni/android_database_SQLiteConnection.cpp)
 
-    private static final int OPEN_READ_MASK = 0x00000001;         // update native code if changing
+    // LINT.IfChange
+    private static final int OPEN_READ_MASK = 0x00000001;
+    // LINT.ThenChange(/core/jni/android_database_SQLiteConnection.cpp)
 
     /**
      * Open flag: Flag for {@link #openDatabase} to open the database without support for
@@ -254,13 +260,31 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * You must be consistent when using this flag to use the setting the database was
      * created with.  If this is set, {@link #setLocale} will do nothing.
      */
-    public static final int NO_LOCALIZED_COLLATORS = 0x00000010;  // update native code if changing
+    // LINT.IfChange
+    public static final int NO_LOCALIZED_COLLATORS = 0x00000010;
+    // LINT.ThenChange(/core/jni/android_database_SQLiteConnection.cpp)
+
+    /**
+     * Open flag: Flag for {@link #openDatabase} to open a database, disallowing double-quoted
+     * strings.
+     *
+     * This causes sqlite to reject SQL statements with double-quoted string literals.  String
+     * literals must be enclosed in single quotes; double-quotes are reserved for identifiers like
+     * column names.
+     * See https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted
+     * @hide
+     */
+    // LINT.IfChange
+    public static final int NO_DOUBLE_QUOTED_STRS = 0x00000020;
+    // LINT.ThenChange(/core/jni/android_database_SQLiteConnection.cpp)
 
     /**
      * Open flag: Flag for {@link #openDatabase} to create the database file if it does not
      * already exist.
      */
-    public static final int CREATE_IF_NECESSARY = 0x10000000;     // update native code if changing
+    // LINT.IfChange
+    public static final int CREATE_IF_NECESSARY = 0x10000000;
+    // LINT.ThenChange(/core/jni/android_database_SQLiteConnection.cpp)
 
     /**
      * Open flag: Flag for {@link #openDatabase} to open the database file with
@@ -464,6 +488,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
             @Nullable CursorFactory cursorFactory, @Nullable DatabaseErrorHandler errorHandler,
             int lookasideSlotSize, int lookasideSlotCount, long idleConnectionTimeoutMs,
             @Nullable String journalMode, @Nullable String syncMode) {
+        mTrackClosure = true;
         mCursorFactory = cursorFactory;
         mErrorHandler = errorHandler != null ? errorHandler : new DefaultDatabaseErrorHandler();
         mConfigurationLocked = new SQLiteDatabaseConfiguration(path, openFlags);
@@ -489,6 +514,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
         mConfigurationLocked.idleConnectionTimeoutMs = effectiveTimeoutMs;
         if (SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled()) {
             mConfigurationLocked.openFlags |= ENABLE_LEGACY_COMPATIBILITY_WAL;
+        }
+        if (SQLiteDebug.NoPreloadHolder.NO_DOUBLE_QUOTED_STRS) {
+            mConfigurationLocked.openFlags |= NO_DOUBLE_QUOTED_STRS;
         }
         mConfigurationLocked.journalMode = journalMode;
         mConfigurationLocked.syncMode = syncMode;
@@ -683,7 +711,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * <p>
      * Read-only transactions may run concurrently with other read-only transactions, and if the
      * database is in WAL mode, they may also run concurrently with IMMEDIATE or EXCLUSIVE
-     * transactions.
+     * transactions. The {@code temp} schema may be modified during a read-only transaction;
+     * if the transaction is {@link #setTransactionSuccessful}, modifications to temp tables may
+     * be visible to some subsequent transactions.
      * <p>
      * Transactions can be nested.  However, the behavior of the transaction is not altered by
      * nested transactions.  A nested transaction may be any of the three transaction types but if
@@ -731,6 +761,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * commits, or is rolled back, either explicitly or by a call to
      * {@link #yieldIfContendedSafely}.
      */
+    @SuppressLint("ExecutorRegistration")
     public void beginTransactionWithListener(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, true);
@@ -760,6 +791,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            transaction begins, commits, or is rolled back, either
      *            explicitly or by a call to {@link #yieldIfContendedSafely}.
      */
+    @SuppressLint("ExecutorRegistration")
     public void beginTransactionWithListenerNonExclusive(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, false);
@@ -785,6 +817,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *   }
      * </pre>
      */
+    @SuppressLint("ExecutorRegistration")
     @FlaggedApi(Flags.FLAG_SQLITE_APIS_35)
     public void beginTransactionWithListenerReadOnly(
             @Nullable SQLiteTransactionListener transactionListener) {
@@ -3270,6 +3303,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
             OPEN_READONLY,
             CREATE_IF_NECESSARY,
             NO_LOCALIZED_COLLATORS,
+            NO_DOUBLE_QUOTED_STRS,
             ENABLE_WRITE_AHEAD_LOGGING
     })
     @Retention(RetentionPolicy.SOURCE)

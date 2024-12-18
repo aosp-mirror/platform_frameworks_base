@@ -10,6 +10,7 @@ flag {
 
 flag {
     name: "job_debug_info_apis"
+    is_exported: true
     namespace: "backstage_power"
     description: "Add APIs to let apps attach debug information to jobs"
     bug: "293491637"
@@ -17,7 +18,15 @@ flag {
 
 flag {
     name: "backup_jobs_exemption"
+    is_exported: true
     namespace: "backstage_power"
     description: "Introduce a new RUN_BACKUP_JOBS permission and exemption logic allowing for longer running jobs for apps whose primary purpose is to backup or sync content."
     bug: "318731461"
+}
+
+flag {
+   name: "cleanup_empty_jobs"
+   namespace: "backstage_power"
+   description: "Enables automatic cancellation of jobs due to leaked JobParameters, reducing unnecessary battery drain and improving system efficiency. This includes logging and traces for better issue diagnosis."
+   bug: "349688611"
 }

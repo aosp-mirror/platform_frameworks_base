@@ -20,6 +20,7 @@ import android.view.View
 import androidx.core.animation.Interpolator
 import androidx.core.animation.ValueAnimator
 import com.android.app.animation.InterpolatorsAndroidX
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment
 
 /**
  * A controller that keeps track of multiple sources applying alpha value changes to a view. It will
@@ -48,7 +49,7 @@ constructor(private val view: View, private val initialAlpha: Float = 1f) {
         sourceId: Int,
         duration: Long,
         interpolator: Interpolator = InterpolatorsAndroidX.ALPHA_IN,
-        startDelay: Long = 0
+        startDelay: Long = 0,
     ) {
         animators[sourceId]?.cancel()
         val animator = ValueAnimator.ofFloat(getMinAlpha(), alpha)
@@ -74,8 +75,10 @@ constructor(private val view: View, private val initialAlpha: Float = 1f) {
 
     private fun applyAlphaToView() {
         val minAlpha = getMinAlpha()
-        view.visibility = if (minAlpha != 0f) View.VISIBLE else View.INVISIBLE
-        view.alpha = minAlpha
+        if (!StatusBarSimpleFragment.isEnabled) {
+            view.visibility = if (minAlpha != 0f) View.VISIBLE else View.INVISIBLE
+            view.alpha = minAlpha
+        }
     }
 
     private fun getMinAlpha() = alphas.minOfOrNull { it.value } ?: initialAlpha

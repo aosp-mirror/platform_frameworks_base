@@ -125,6 +125,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             return Triple(true, false, null)
         }
         val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationExplanation()
+        viewModel?.onDeveloperCancellationReceivedForBiometricPrompt()
         Log.d(
             Constants.LOG_TAG, "Received UI cancellation intent. Should show cancellation" +
             " ui = $shouldShowCancellationUi")
@@ -208,18 +209,13 @@ class CredentialSelectorActivity : ComponentActivity() {
             android.credentials.selection.Constants.EXTRA_RESULT_RECEIVER,
             ResultReceiver::class.java
         )
-        val finalResponseResultReceiver = intent.getParcelableExtra(
-                android.credentials.selection.Constants.EXTRA_FINAL_RESPONSE_RECEIVER,
-                ResultReceiver::class.java
-        )
-
         val requestInfo = intent.extras?.getParcelable(
             RequestInfo.EXTRA_REQUEST_INFO,
             RequestInfo::class.java
         )
         CredentialManagerRepo.sendCancellationCode(
             BaseDialogResult.RESULT_CODE_DATA_PARSING_FAILURE,
-            requestInfo?.token, resultReceiver, finalResponseResultReceiver
+            requestInfo?.token, resultReceiver
         )
         this.finish()
     }

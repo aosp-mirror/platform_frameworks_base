@@ -25,13 +25,16 @@
 #include <SkColorSpace.h>
 #include <SkData.h>
 #include <SkImage.h>
+#ifdef __ANDROID__
 #include <SkImageAndroid.h>
+#else
+#include <SkImagePriv.h>
+#endif
 #include <SkPicture.h>
 #include <SkPixmap.h>
 #include <SkSerialProcs.h>
 #include <SkStream.h>
 #include <SkTypeface.h>
-#include <dlfcn.h>
 #include <gui/TraceUtils.h>
 #include <include/encode/SkPngEncoder.h>
 #include <inttypes.h>
@@ -39,8 +42,10 @@
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
 #include <nativehelper/JNIPlatformHelp.h>
+#ifdef __ANDROID__
 #include <pipeline/skia/ShaderCache.h>
 #include <private/EGL/cache.h>
+#endif
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
@@ -59,6 +64,7 @@
 #include "JvmErrorReporter.h"
 #include "android_graphics_HardwareRendererObserver.h"
 #include "utils/ForceDark.h"
+#include "utils/SharedLib.h"
 
 namespace android {
 
@@ -498,7 +504,11 @@ public:
                 return sk_ref_sp(img);
             }
             bm.setImmutable();
+#ifdef __ANDROID__
             return SkImages::PinnableRasterFromBitmap(bm);
+#else
+            return SkMakeImageFromRasterBitmap(bm, kNever_SkCopyPixelsMode);
+#endif
         }
         return sk_ref_sp(img);
     }
@@ -713,6 +723,7 @@ public:
 
 static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jint jwidth, jint jheight) {
+#ifdef __ANDROID__
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     if (jwidth <= 0 || jheight <= 0) {
         ALOGW("Invalid width %d or height %d", jwidth, jheight);
@@ -796,6 +807,9 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
+#else
+    return nullptr;
+#endif
 }
 
 static void android_view_ThreadedRenderer_disableVsync(JNIEnv*, jclass) {
@@ -860,7 +874,8 @@ static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, 
 static void android_view_ThreadedRenderer_initDisplayInfo(
         JNIEnv* env, jclass, jint physicalWidth, jint physicalHeight, jfloat refreshRate,
         jint wideColorDataspace, jlong appVsyncOffsetNanos, jlong presentationDeadlineNanos,
-        jboolean supportFp16ForHdr, jboolean supportMixedColorSpaces) {
+        jboolean supportFp16ForHdr, jboolean supportRgba10101010ForHdr,
+        jboolean supportMixedColorSpaces) {
     DeviceInfo::setWidth(physicalWidth);
     DeviceInfo::setHeight(physicalHeight);
     DeviceInfo::setRefreshRate(refreshRate);
@@ -868,6 +883,7 @@ static void android_view_ThreadedRenderer_initDisplayInfo(
     DeviceInfo::setAppVsyncOffsetNanos(appVsyncOffsetNanos);
     DeviceInfo::setPresentationDeadlineNanos(presentationDeadlineNanos);
     DeviceInfo::setSupportFp16ForHdr(supportFp16ForHdr);
+    DeviceInfo::setSupportRgba10101010ForHdr(supportRgba10101010ForHdr);
     DeviceInfo::setSupportMixedColorSpaces(supportMixedColorSpaces);
 }
 
@@ -907,6 +923,7 @@ static void android_view_ThreadedRenderer_removeObserver(JNIEnv* env, jclass cla
 
 static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
         jstring diskCachePath, jstring skiaDiskCachePath) {
+#ifdef __ANDROID__
     const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
     android::egl_set_cache_filename(cacheArray);
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
@@ -914,6 +931,7 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
     const char* skiaCacheArray = env->GetStringUTFChars(skiaDiskCachePath, NULL);
     uirenderer::skiapipeline::ShaderCache::get().setFilename(skiaCacheArray);
     env->ReleaseStringUTFChars(skiaDiskCachePath, skiaCacheArray);
+#endif
 }
 
 static jboolean android_view_ThreadedRenderer_isWebViewOverlaysEnabled(JNIEnv* env, jobject clazz) {
@@ -1020,7 +1038,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetForceDark", "(JI)V", (void*)android_view_ThreadedRenderer_setForceDark},
         {"nSetDisplayDensityDpi", "(I)V",
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
-        {"nInitDisplayInfo", "(IIFIJJZZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
+        {"nInitDisplayInfo", "(IIFIJJZZZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
         {"isWebViewOverlaysEnabled", "()Z",
          (void*)android_view_ThreadedRenderer_isWebViewOverlaysEnabled},
@@ -1090,8 +1108,12 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     gCopyRequest.getDestinationBitmap =
             GetMethodIDOrDie(env, copyRequest, "getDestinationBitmap", "(II)J");
 
-    void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
-    fromSurface = (ANW_fromSurface)dlsym(handle_, "ANativeWindow_fromSurface");
+#ifdef __ANDROID__
+    void* handle_ = SharedLib::openSharedLib("libandroid");
+#else
+    void* handle_ = SharedLib::openSharedLib("libandroid_runtime");
+#endif
+    fromSurface = (ANW_fromSurface)SharedLib::getSymbol(handle_, "ANativeWindow_fromSurface");
     LOG_ALWAYS_FATAL_IF(fromSurface == nullptr,
                         "Failed to find required symbol ANativeWindow_fromSurface!");
 

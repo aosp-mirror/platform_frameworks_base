@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,16 +30,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
-
 import android.app.Notification;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
@@ -72,6 +72,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.android.collect.Lists;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,10 +86,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
-import kotlinx.coroutines.test.TestScope;
-
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
 public class NotificationLoggerTest extends SysuiTestCase {
@@ -138,7 +138,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mPowerInteractor,
                 mActiveNotificationsInteractor,
-                mKosmos.getFakeSceneContainerFlags(),
                 () -> mKosmos.getSceneInteractor());
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 

@@ -55,7 +55,7 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
 
     @Override
     public void dump(PrintWriter pw, boolean skipEmptyComponents) {
-        mPowerComponents.dump(pw, skipEmptyComponents);
+        mPowerComponents.dump(pw, SCREEN_STATE_ANY, POWER_STATE_ANY, skipEmptyComponents);
     }
 
     @Override

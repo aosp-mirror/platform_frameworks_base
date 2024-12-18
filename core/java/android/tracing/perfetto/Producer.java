@@ -27,8 +27,8 @@ public class Producer {
      * @param args arguments on how to initialize the Perfetto producer.
      */
     public static void init(InitArguments args) {
-        nativePerfettoProducerInit(args.backends);
+        nativePerfettoProducerInit(args.backends, args.shmemSizeHintKb);
     }
 
-    private static native void nativePerfettoProducerInit(int backends);
+    private static native void nativePerfettoProducerInit(int backends, int shmemSizeHintKb);
 }

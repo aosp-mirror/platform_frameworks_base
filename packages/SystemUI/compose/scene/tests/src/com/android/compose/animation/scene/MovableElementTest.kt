@@ -43,9 +43,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.TestScenes.SceneB
+import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.google.common.truth.Truth.assertThat
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,7 +65,7 @@ class MovableElementTest {
     }
 
     @Composable
-    private fun SceneScope.MovableCounter(key: ElementKey, modifier: Modifier) {
+    private fun ContentScope.MovableCounter(key: MovableElementKey, modifier: Modifier) {
         MovableElement(key, modifier) { content { Counter() } }
     }
 
@@ -74,8 +77,8 @@ class MovableElementTest {
             },
             toSceneContent = { Box(Modifier.element(TestElements.Foo).size(100.dp)) { Counter() } },
             transition = { spec = tween(durationMillis = 16 * 4, easing = LinearEasing) },
-            fromScene = TestScenes.SceneA,
-            toScene = TestScenes.SceneB,
+            fromScene = SceneA,
+            toScene = SceneB,
         ) {
             before {
                 // Click 3 times on the counter.
@@ -103,7 +106,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneA))
+                            hasParent(isElement(TestElements.Foo, content = SceneA))
                     )
                     .assertExists()
                     .assertIsNotDisplayed()
@@ -111,7 +114,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 0") and
-                            hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneB))
+                            hasParent(isElement(TestElements.Foo, content = SceneB))
                     )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
@@ -148,38 +151,41 @@ class MovableElementTest {
     @Test
     fun movableElementIsMovedAndComposedOnlyOnce() {
         val key =
-            ElementKey(
+            MovableElementKey(
                 "Foo",
-                scenePicker =
-                    object : ElementScenePicker {
-                        override fun sceneDuringTransition(
+                contentPicker =
+                    object : StaticElementContentPicker {
+                        override val contents: Set<ContentKey> = setOf(SceneA, SceneB)
+
+                        override fun contentDuringTransition(
                             element: ElementKey,
                             transition: TransitionState.Transition,
-                            fromSceneZIndex: Float,
-                            toSceneZIndex: Float
-                        ): SceneKey {
-                            assertThat(transition.fromScene).isEqualTo(TestScenes.SceneA)
-                            assertThat(transition.toScene).isEqualTo(TestScenes.SceneB)
-                            assertThat(fromSceneZIndex).isEqualTo(0)
-                            assertThat(toSceneZIndex).isEqualTo(1)
+                            fromContentZIndex: Float,
+                            toContentZIndex: Float,
+                        ): ContentKey {
+                            transition as TransitionState.Transition.ChangeScene
+                            assertThat(transition).hasFromScene(SceneA)
+                            assertThat(transition).hasToScene(SceneB)
+                            assertThat(fromContentZIndex).isEqualTo(0)
+                            assertThat(toContentZIndex).isEqualTo(1)
 
                             // Compose Foo in Scene A if progress < 0.65f, otherwise compose it
                             // in Scene B.
                             return if (transition.progress < 0.65f) {
-                                TestScenes.SceneA
+                                SceneA
                             } else {
-                                TestScenes.SceneB
+                                SceneB
                             }
                         }
-                    }
+                    },
             )
 
         rule.testTransition(
             fromSceneContent = { MovableCounter(key, Modifier.size(50.dp)) },
             toSceneContent = { MovableCounter(key, Modifier.size(100.dp)) },
             transition = { spec = tween(durationMillis = 16 * 4, easing = LinearEasing) },
-            fromScene = TestScenes.SceneA,
-            toScene = TestScenes.SceneB,
+            fromScene = SceneA,
+            toScene = SceneB,
         ) {
             before {
                 // Click 3 times on the counter.
@@ -207,7 +213,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneA))
+                            hasParent(isElement(TestElements.Foo, content = SceneA))
                     )
                     .assertIsDisplayed()
                     .assertSizeIsEqualTo(75.dp, 75.dp)
@@ -228,7 +234,7 @@ class MovableElementTest {
                 rule
                     .onNode(
                         hasText("count: 3") and
-                            hasParent(isElement(TestElements.Foo, scene = TestScenes.SceneB))
+                            hasParent(isElement(TestElements.Foo, content = SceneB))
                     )
                     .assertIsDisplayed()
 
@@ -262,19 +268,20 @@ class MovableElementTest {
     }
 
     @Test
-    @Ignore("b/317972419#comment2")
     fun movableElementContentIsRecomposedIfContentParametersChange() {
+        val key = MovableElementKey("Foo", contents = setOf(SceneA, SceneB))
+
         @Composable
-        fun SceneScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
-            MovableElement(TestElements.Foo, modifier) { content { Text(text) } }
+        fun ContentScope.MovableFoo(text: String, modifier: Modifier = Modifier) {
+            MovableElement(key, modifier) { content { Text(text) } }
         }
 
         rule.testTransition(
             fromSceneContent = { MovableFoo(text = "fromScene") },
             toSceneContent = { MovableFoo(text = "toScene") },
             transition = { spec = tween(durationMillis = 16 * 4, easing = LinearEasing) },
-            fromScene = TestScenes.SceneA,
-            toScene = TestScenes.SceneB,
+            fromScene = SceneA,
+            toScene = SceneB,
         ) {
             // Before the transition, only fromScene is composed.
             before {
@@ -299,11 +306,13 @@ class MovableElementTest {
     @Test
     fun elementScopeExtendsBoxScope() {
         rule.setContent {
-            TestSceneScope {
+            TestContentScope {
                 Element(TestElements.Foo, Modifier.size(200.dp)) {
                     content {
-                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
-                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        Box {
+                            Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                            Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        }
                     }
                 }
             }
@@ -315,12 +324,15 @@ class MovableElementTest {
 
     @Test
     fun movableElementScopeExtendsBoxScope() {
+        val key = MovableElementKey("Foo", contents = setOf(SceneA))
         rule.setContent {
-            TestSceneScope {
-                MovableElement(TestElements.Foo, Modifier.size(200.dp)) {
+            TestContentScope(currentScene = SceneA) {
+                MovableElement(key, Modifier.size(200.dp)) {
                     content {
-                        Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
-                        Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        Box {
+                            Box(Modifier.testTag("bottomEnd").align(Alignment.BottomEnd))
+                            Box(Modifier.testTag("matchParentSize").matchParentSize())
+                        }
                     }
                 }
             }

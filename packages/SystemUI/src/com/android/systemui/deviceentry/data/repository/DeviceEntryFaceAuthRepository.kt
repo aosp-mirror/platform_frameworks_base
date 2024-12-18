@@ -40,31 +40,33 @@ import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationSta
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.BiometricType
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FaceAuthTableLog
 import com.android.systemui.keyguard.data.repository.FaceDetectTableLog
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.Scenes.Bouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
-import java.util.Arrays
-import java.util.stream.Collectors
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -150,16 +152,17 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundExecutor: Executor,
     private val sessionTracker: SessionTracker,
     private val uiEventsLogger: UiEventLogger,
     private val faceAuthLogger: FaceAuthenticationLogger,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
-    trustRepository: TrustRepository,
     private val keyguardRepository: KeyguardRepository,
     private val powerInteractor: PowerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val sceneInteractor: dagger.Lazy<SceneInteractor>,
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -168,7 +171,6 @@ constructor(
 ) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
     private var detectCancellationSignal: CancellationSignal? = null
-    private var faceAcquiredInfoIgnoreList: Set<Int>
     private var retryCount = 0
 
     private var pendingAuthenticateRequest = MutableStateFlow<AuthenticationRequest?>(null)
@@ -220,8 +222,7 @@ constructor(
                 trySendWithFailureLogging(it.bypassEnabled, TAG, "BypassStateChanged")
                 awaitClose { it.unregisterOnBypassStateChangedListener(callback) }
             }
-        }
-            ?: flowOf(false)
+        } ?: flowOf(false)
 
     override fun setLockedOut(isLockedOut: Boolean) {
         _isLockedOut.value = isLockedOut
@@ -235,22 +236,20 @@ constructor(
         }
 
     init {
-        faceManager?.addLockoutResetCallback(faceLockoutResetCallback)
-        faceAcquiredInfoIgnoreList =
-            Arrays.stream(
-                    context.resources.getIntArray(
-                        R.array.config_face_acquire_device_entry_ignorelist
-                    )
-                )
-                .boxed()
-                .collect(Collectors.toSet())
+        backgroundExecutor.execute {
+            faceManager?.addLockoutResetCallback(faceLockoutResetCallback)
+            faceAuthLogger.addLockoutResetCallbackDone()
+        }
         dumpManager.registerCriticalDumpable("DeviceEntryFaceAuthRepositoryImpl", this)
 
         canRunFaceAuth =
             listOf(
                     *gatingConditionsForAuthAndDetect(),
                     Pair(isLockedOut.isFalse(), "isNotInLockOutState"),
-                    Pair(trustRepository.isCurrentUserTrusted.isFalse(), "currentUserIsNotTrusted"),
+                    Pair(
+                        keyguardRepository.isKeyguardDismissible.isFalse(),
+                        "keyguardIsNotDismissible"
+                    ),
                     Pair(
                         biometricSettingsRepository.isFaceAuthCurrentlyAllowed,
                         "isFaceAuthCurrentlyAllowed"
@@ -273,7 +272,7 @@ constructor(
                     Pair(
                         biometricSettingsRepository.isFaceAuthCurrentlyAllowed
                             .isFalse()
-                            .or(trustRepository.isCurrentUserTrusted),
+                            .or(keyguardRepository.isKeyguardDismissible),
                         "faceAuthIsNotCurrentlyAllowedOrCurrentUserIsTrusted"
                     ),
                     // We don't want to run face detect if fingerprint can be used to unlock the
@@ -295,7 +294,11 @@ constructor(
     }
 
     private fun listenForSchedulingWatchdog() {
-        keyguardTransitionInteractor.anyStateToGoneTransition
+        keyguardTransitionInteractor
+            .transition(
+                edge = Edge.create(to = Scenes.Gone),
+                edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE),
+            )
             .filter { it.transitionState == TransitionState.FINISHED }
             .onEach {
                 // We deliberately want to run this in background because scheduleWatchdog does
@@ -313,10 +316,19 @@ constructor(
         // or device starts going to sleep.
         merge(
                 powerInteractor.isAsleep,
-                if (KeyguardWmStateRefactor.isEnabled) {
-                    keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
-                } else {
-                    keyguardRepository.keyguardDoneAnimationsFinished.map { true }
+                combine(
+                    keyguardTransitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = KeyguardState.GONE,
+                    ),
+                    keyguardInteractor.statusBarState,
+                ) { isFinishedInGoneState, statusBarState ->
+                    // When the user is dragging the primary bouncer in (up) by manually scrolling
+                    // up on the lockscreen, the device won't be irreversibly transitioned to GONE
+                    // until the statusBarState updates to SHADE, so we check that here.
+                    // Else, we could reset the face auth state too early and end up in a strange
+                    // state.
+                    isFinishedInGoneState && statusBarState == StatusBarState.SHADE
                 },
                 userRepository.selectedUser.map {
                     it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
@@ -377,10 +389,21 @@ constructor(
                 biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
                 "isFaceAuthEnrolledAndEnabled"
             ),
-            Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
+            Pair(
+                if (SceneContainerFlag.isEnabled) {
+                    sceneInteractor
+                        .get()
+                        .transitionState
+                        .map { it.isTransitioning(to = Scenes.Gone) || it.isIdle(Scenes.Gone) }
+                        .isFalse()
+                } else {
+                    keyguardRepository.isKeyguardGoingAway.isFalse()
+                },
+                "keyguardNotGoingAway"
+            ),
             Pair(
                 keyguardTransitionInteractor
-                    .isInTransitionToStateWhere(KeyguardState::deviceIsAsleepInState)
+                    .isInTransitionWhere(toStatePredicate = KeyguardState::deviceIsAsleepInState)
                     .isFalse(),
                 "deviceNotTransitioningToAsleepState"
             ),
@@ -389,7 +412,11 @@ constructor(
                     .isFalse()
                     .or(
                         alternateBouncerInteractor.isVisible.or(
-                            keyguardInteractor.primaryBouncerShowing
+                            if (SceneContainerFlag.isEnabled) {
+                                sceneInteractor.get().transitionState.map { it.isIdle(Bouncer) }
+                            } else {
+                                keyguardInteractor.primaryBouncerShowing
+                            }
                         )
                     ),
                 "secureCameraNotActiveOrAnyBouncerIsShowing"
@@ -465,10 +492,8 @@ constructor(
             }
 
             override fun onAuthenticationHelp(code: Int, helpStr: CharSequence?) {
-                if (faceAcquiredInfoIgnoreList.contains(code)) {
-                    return
-                }
-                _authenticationStatus.value = HelpFaceAuthenticationStatus(code, helpStr.toString())
+                _authenticationStatus.value =
+                    HelpFaceAuthenticationStatus(code, helpStr?.toString())
             }
 
             override fun onAuthenticationSucceeded(result: FaceManager.AuthenticationResult) {
@@ -508,9 +533,12 @@ constructor(
 
     private fun onFaceAuthRequestCompleted() {
         cancelNotReceivedHandlerJob?.cancel()
-        cancellationInProgress.value = false
         _isAuthRunning.value = false
         authCancellationSignal = null
+        // Updates to "cancellationInProgress" may re-trigger face auth
+        // (see processPendingAuthRequests()), so we must update this after setting _isAuthRunning
+        // to false.
+        cancellationInProgress.value = false
     }
 
     private val detectionCallback =
@@ -708,7 +736,6 @@ constructor(
         pw.println("  _pendingAuthenticateRequest: ${pendingAuthenticateRequest.value}")
         pw.println("  authCancellationSignal: $authCancellationSignal")
         pw.println("  detectCancellationSignal: $detectCancellationSignal")
-        pw.println("  faceAcquiredInfoIgnoreList: $faceAcquiredInfoIgnoreList")
         pw.println("  _authenticationStatus: ${_authenticationStatus.value}")
         pw.println("  _detectionStatus: ${_detectionStatus.value}")
         pw.println("  currentUserId: $currentUserId")
@@ -716,6 +743,7 @@ constructor(
         pw.println("  lockscreenBypassEnabled: ${keyguardBypassController?.bypassEnabled ?: false}")
     }
 }
+
 /** Combine two boolean flows by and-ing both of them */
 private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a && b }

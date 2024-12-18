@@ -44,6 +44,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -87,6 +88,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
     private final ShadeViewController mNotificationPanel;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final HeadsUpManager mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
@@ -108,6 +110,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     StatusBarNotificationPresenter(
             Context context,
             ShadeViewController panel,
+            PanelExpansionInteractor panelExpansionInteractor,
             QuickSettingsController quickSettingsController,
             HeadsUpManager headsUp,
             NotificationShadeWindowView statusBarWindow,
@@ -134,6 +137,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mActivityStarter = activityStarter;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mQsController = quickSettingsController;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
@@ -192,7 +196,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     /** Called when the shade has been emptied to attempt to close the shade */
     private void maybeClosePanelForShadeEmptied() {
         if (CLOSE_PANEL_WHEN_EMPTIED
-                && !mNotificationPanel.isTracking()
+                && !mPanelExpansionInteractor.isTracking()
                 && !mQsController.getExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                 && !isCollapsing()) {
@@ -202,7 +206,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
 
     @Override
     public boolean isCollapsing() {
-        return mNotificationPanel.isCollapsing()
+        return mPanelExpansionInteractor.isCollapsing()
                 || mNotificationShadeWindowController.isLaunchingActivity();
     }
 
@@ -232,7 +236,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
 
     @Override
     public boolean isPresenterFullyCollapsed() {
-        return mNotificationPanel.isFullyCollapsed();
+        return mPanelExpansionInteractor.isFullyCollapsed();
     }
 
     @Override
@@ -243,7 +247,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());
-            } else if (clickedEntry.isSensitive()
+            } else if (clickedEntry.isSensitive().getValue()
                     && mDynamicPrivacyController.isInLockedDownShade()) {
                 mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
                 mActivityStarter.dismissKeyguardThenExecute(() -> false /* dismissAction */

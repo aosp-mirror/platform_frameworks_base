@@ -16,6 +16,7 @@
 
 package com.android.server.stats.pull;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
@@ -125,6 +126,11 @@ class AggregatedMobileDataStatsPuller {
     @GuardedBy("mLock")
     private final Map<UidProcState, MobileDataStats> mUidStats;
 
+    // No reason to keep more dimensions than 3000. The 3000 is the hard top for the statsd metrics
+    // dimensions guardrail. It also will keep the result binder transaction size capped to
+    // approximately 220kB for 3000 atoms
+    private static final int UID_STATS_MAX_SIZE = 3000;
+
     private final SparseIntArray mUidPreviousState;
 
     private NetworkStats mLastMobileUidStats = new NetworkStats(0, -1);
@@ -135,7 +141,7 @@ class AggregatedMobileDataStatsPuller {
 
     private final RateLimiter mRateLimiter;
 
-    AggregatedMobileDataStatsPuller(NetworkStatsManager networkStatsManager) {
+    AggregatedMobileDataStatsPuller(@NonNull NetworkStatsManager networkStatsManager) {
         if (DEBUG) {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
@@ -188,14 +194,18 @@ class AggregatedMobileDataStatsPuller {
         }
 
         final UidProcState statsKey = new UidProcState(uid, previousState);
-        MobileDataStats stats;
         if (mUidStats.containsKey(statsKey)) {
-            stats = mUidStats.get(statsKey);
-        } else {
-            stats = new MobileDataStats();
-            mUidStats.put(statsKey, stats);
+            return mUidStats.get(statsKey);
         }
-        return stats;
+        if (mUidStats.size() < UID_STATS_MAX_SIZE) {
+            MobileDataStats stats = new MobileDataStats();
+            mUidStats.put(statsKey, stats);
+            return stats;
+        }
+        if (DEBUG) {
+            Slog.w(TAG, "getUidStatsForPreviousStateLocked() UID_STATS_MAX_SIZE reached");
+        }
+        return null;
     }
 
     private void noteUidProcessStateImpl(int uid, int state) {
@@ -252,10 +262,12 @@ class AggregatedMobileDataStatsPuller {
                     continue;
                 }
                 MobileDataStats stats = getUidStatsForPreviousStateLocked(entry.getUid());
-                stats.addTxBytes(entry.getTxBytes());
-                stats.addRxBytes(entry.getRxBytes());
-                stats.addTxPackets(entry.getTxPackets());
-                stats.addRxPackets(entry.getRxPackets());
+                if (stats != null) {
+                    stats.addTxBytes(entry.getTxBytes());
+                    stats.addRxBytes(entry.getRxBytes());
+                    stats.addTxPackets(entry.getTxPackets());
+                    stats.addRxPackets(entry.getRxPackets());
+                }
             }
         }
     }

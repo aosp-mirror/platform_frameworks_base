@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.hardware.SyncFence;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraExtensionCharacteristics;
@@ -59,6 +60,8 @@ import android.hardware.camera2.extension.Request;
 import android.hardware.camera2.extension.SizeList;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
+import android.hardware.camera2.params.ColorSpaceProfiles;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageReader;
@@ -76,8 +79,8 @@ import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import androidx.camera.extensions.impl.AutoImageCaptureExtenderImpl;
 import androidx.camera.extensions.impl.AutoPreviewExtenderImpl;
 import androidx.camera.extensions.impl.BeautyImageCaptureExtenderImpl;
@@ -169,7 +172,7 @@ public class CameraExtensionsProxyService extends Service {
             EXTENSIONS_VERSION.startsWith(LATENCY_VERSION_PREFIX) ||
             EXTENSIONS_VERSION.startsWith(EFV_VERSION_PREFIX));
 
-    private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
+    private static HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private CameraManager mCameraManager;
 
     private static boolean checkForLatencyAPI() {
@@ -526,167 +529,6 @@ public class CameraExtensionsProxyService extends Service {
      */
     public static Pair<PreviewExtenderImpl, ImageCaptureExtenderImpl> initializeExtension(
             int extensionType) {
-        if (Flags.concertMode()) {
-            if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
-                // Basic extensions are deprecated starting with extension version 1.5
-                return new Pair<>(new PreviewExtenderImpl() {
-                    @Override
-                    public boolean isExtensionAvailable(String cameraId,
-                            CameraCharacteristics cameraCharacteristics) {
-                        return false;
-                    }
-
-                    @Override
-                    public void init(String cameraId, CameraCharacteristics cameraCharacteristics) {
-
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl getCaptureStage() {
-                        return null;
-                    }
-
-                    @Override
-                    public ProcessorType getProcessorType() {
-                        return null;
-                    }
-
-                    @Override
-                    public ProcessorImpl getProcessor() {
-                        return null;
-                    }
-
-                    @Nullable
-                    @Override
-                    public List<Pair<Integer, Size[]>> getSupportedResolutions() {
-                        return null;
-                    }
-
-                    @Override
-                    public void onInit(String cameraId, CameraCharacteristics cameraCharacteristics,
-                            Context context) { }
-
-                    @Override
-                    public void onDeInit() { }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onPresetSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onEnableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onDisableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public int onSessionType() {
-                        return 0;
-                    }
-                }, new ImageCaptureExtenderImpl() {
-                    @Override
-                    public boolean isExtensionAvailable(String cameraId,
-                            CameraCharacteristics cameraCharacteristics) {
-                        return false;
-                    }
-
-                    @Override
-                    public void init(String cameraId,
-                            CameraCharacteristics cameraCharacteristics) { }
-
-                    @Override
-                    public CaptureProcessorImpl getCaptureProcessor() {
-                        return null;
-                    }
-
-                    @Override
-                    public
-                    List<androidx.camera.extensions.impl.CaptureStageImpl> getCaptureStages() {
-                        return null;
-                    }
-
-                    @Override
-                    public int getMaxCaptureStage() {
-                        return 0;
-                    }
-
-                    @Override
-                    public List<Pair<Integer, Size[]>> getSupportedResolutions() {
-                        return null;
-                    }
-
-                    @Override
-                    public List<Pair<Integer, Size[]>> getSupportedPostviewResolutions(
-                            Size captureSize) {
-                        return null;
-                    }
-
-                    @Override
-                    public Range<Long> getEstimatedCaptureLatencyRange(
-                            Size captureOutputSize) {
-                        return null;
-                    }
-
-                    @Override
-                    public List<CaptureRequest.Key> getAvailableCaptureRequestKeys() {
-                        return null;
-                    }
-
-                    @Override
-                    public List<CaptureResult.Key> getAvailableCaptureResultKeys() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isCaptureProcessProgressAvailable() {
-                        return false;
-                    }
-
-                    @Override
-                    public Pair<Long, Long> getRealtimeCaptureLatency() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isPostviewAvailable() {
-                        return false;
-                    }
-
-                    @Override
-                    public void onInit(String cameraId,
-                            CameraCharacteristics cameraCharacteristics, Context context) { }
-
-                    @Override
-                    public void onDeInit() { }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onPresetSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onEnableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public androidx.camera.extensions.impl.CaptureStageImpl onDisableSession() {
-                        return null;
-                    }
-
-                    @Override
-                    public int onSessionType() {
-                        return 0;
-                    }
-                });
-            }
-        }
-
         switch (extensionType) {
             case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
                 return new Pair<>(new AutoPreviewExtenderImpl(),
@@ -711,88 +553,6 @@ public class CameraExtensionsProxyService extends Service {
      * @hide
      */
     public static AdvancedExtenderImpl initializeAdvancedExtensionImpl(int extensionType) {
-        if (Flags.concertMode()) {
-            if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
-                if (EFV_SUPPORTED) {
-                    return new EyesFreeVideographyAdvancedExtenderImpl();
-                } else {
-                    return new AdvancedExtenderImpl() {
-                        @Override
-                        public boolean isExtensionAvailable(String cameraId,
-                                Map<String, CameraCharacteristics> characteristicsMap) {
-                            return false;
-                        }
-
-                        @Override
-                        public void init(String cameraId,
-                                Map<String, CameraCharacteristics> characteristicsMap) {
-
-                        }
-
-                        @Override
-                        public Range<Long> getEstimatedCaptureLatencyRange(String cameraId,
-                                Size captureOutputSize, int imageFormat) {
-                            return null;
-                        }
-
-                        @Override
-                        public Map<Integer, List<Size>> getSupportedPreviewOutputResolutions(
-                                String cameraId) {
-                            return null;
-                        }
-
-                        @Override
-                        public Map<Integer, List<Size>> getSupportedCaptureOutputResolutions(
-                                String cameraId) {
-                            return null;
-                        }
-
-                        @Override
-                        public Map<Integer, List<Size>> getSupportedPostviewResolutions(
-                                Size captureSize) {
-                            return null;
-                        }
-
-                        @Override
-                        public List<Size> getSupportedYuvAnalysisResolutions(String cameraId) {
-                            return null;
-                        }
-
-                        @Override
-                        public SessionProcessorImpl createSessionProcessor() {
-                            return null;
-                        }
-
-                        @Override
-                        public List<CaptureRequest.Key> getAvailableCaptureRequestKeys() {
-                            return null;
-                        }
-
-                        @Override
-                        public List<CaptureResult.Key> getAvailableCaptureResultKeys() {
-                            return null;
-                        }
-
-                        @Override
-                        public boolean isCaptureProcessProgressAvailable() {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isPostviewAvailable() {
-                            return false;
-                        }
-
-                        @Override
-                        public List<Pair<CameraCharacteristics.Key, Object>>
-                                getAvailableCharacteristicsKeyValues() {
-                            return Collections.emptyList();
-                        }
-                    };
-                }
-            }
-        }
-
         switch (extensionType) {
             case CameraExtensionCharacteristics.EXTENSION_AUTOMATIC:
                 return new AutoAdvancedExtenderImpl();
@@ -818,7 +578,7 @@ public class CameraExtensionsProxyService extends Service {
             mCameraManager = getSystemService(CameraManager.class);
 
             String [] cameraIds = mCameraManager.getCameraIdListNoLazy();
-            if (cameraIds != null) {
+            if (cameraIds != null && mMetadataVendorIdMap.isEmpty()) {
                 for (String cameraId : cameraIds) {
                     CameraCharacteristics chars = mCameraManager.getCameraCharacteristics(cameraId);
                     Object thisClass = CameraCharacteristics.Key.class;
@@ -1228,7 +988,6 @@ public class CameraExtensionsProxyService extends Service {
 
             return null;
         }
-
     }
 
     private class CaptureCallbackStub implements SessionProcessorImpl.CaptureCallback {
@@ -1278,14 +1037,12 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void onCaptureFailed(int captureSequenceId, int reason) {
-            if (Flags.concertMode()) {
-                if (mCaptureCallback != null) {
-                    try {
-                        mCaptureCallback.onCaptureProcessFailed(captureSequenceId, reason);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to notify capture failure due to remote " +
-                                "exception!");
-                    }
+            if (mCaptureCallback != null) {
+                try {
+                    mCaptureCallback.onCaptureProcessFailed(captureSequenceId, reason);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to notify capture failure due to remote " +
+                            "exception!");
                 }
             }
         }
@@ -1566,6 +1323,10 @@ public class CameraExtensionsProxyService extends Service {
         private String mCameraId = null;
         private IBinder mToken;
 
+        OutputSurfaceImplStub mOutputPreviewSurfaceImpl;
+        OutputSurfaceImplStub mOutputImageCaptureSurfaceImpl;
+        OutputSurfaceImplStub mOutputPostviewSurfaceImpl;
+
         public SessionProcessorImplStub(SessionProcessorImpl sessionProcessor) {
             mSessionProcessor = sessionProcessor;
         }
@@ -1574,21 +1335,20 @@ public class CameraExtensionsProxyService extends Service {
         public CameraSessionConfig initSession(IBinder token, String cameraId,
                 Map<String, CameraMetadataNative> charsMapNative, OutputSurface previewSurface,
                 OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
-            OutputSurfaceImplStub outputPreviewSurfaceImpl =
-                    new OutputSurfaceImplStub(previewSurface);
-            OutputSurfaceImplStub outputImageCaptureSurfaceImpl =
-                    new OutputSurfaceImplStub(imageCaptureSurface);
-            OutputSurfaceImplStub outputPostviewSurfaceImpl =
-                    new OutputSurfaceImplStub(postviewSurface);
+            mOutputPreviewSurfaceImpl = new OutputSurfaceImplStub(previewSurface);
+            mOutputImageCaptureSurfaceImpl = new OutputSurfaceImplStub(imageCaptureSurface);
+            mOutputPostviewSurfaceImpl = new OutputSurfaceImplStub(postviewSurface);
 
             Camera2SessionConfigImpl sessionConfig;
 
             if (LATENCY_IMPROVEMENTS_SUPPORTED) {
+                int outputsColorSpace = getColorSpaceFromOutputSurfaces(previewSurface,
+                        imageCaptureSurface, postviewSurface);
                 OutputSurfaceConfigurationImplStub outputSurfaceConfigs =
-                        new OutputSurfaceConfigurationImplStub(outputPreviewSurfaceImpl,
+                        new OutputSurfaceConfigurationImplStub(mOutputPreviewSurfaceImpl,
                         // Image Analysis Output is currently only supported in CameraX
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
-                        outputPostviewSurfaceImpl);
+                        mOutputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
+                        mOutputPostviewSurfaceImpl, outputsColorSpace);
 
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         getCharacteristicsMap(charsMapNative),
@@ -1596,8 +1356,8 @@ public class CameraExtensionsProxyService extends Service {
             } else {
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         getCharacteristicsMap(charsMapNative),
-                        getApplicationContext(), outputPreviewSurfaceImpl,
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+                        getApplicationContext(), mOutputPreviewSurfaceImpl,
+                        mOutputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
             }
 
             List<Camera2OutputConfigImpl> outputConfigs = sessionConfig.getOutputConfigs();
@@ -1614,6 +1374,11 @@ public class CameraExtensionsProxyService extends Service {
                     }
                 }
                 ret.outputConfigs.add(entry);
+            }
+            if (EFV_SUPPORTED) {
+                ret.colorSpace = sessionConfig.getColorSpace();
+            } else {
+                ret.colorSpace = ColorSpaceProfiles.UNSPECIFIED;
             }
             ret.sessionTemplateId = sessionConfig.getSessionTemplateId();
             ret.sessionType = -1;
@@ -1632,6 +1397,16 @@ public class CameraExtensionsProxyService extends Service {
         public void deInitSession(IBinder token) {
             CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mSessionProcessor.deInitSession();
+
+            if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
+                mOutputImageCaptureSurfaceImpl.mSurface.release();
+            }
+            if (mOutputPreviewSurfaceImpl.mSurface != null) {
+                mOutputPreviewSurfaceImpl.mSurface.release();
+            }
+            if (mOutputPostviewSurfaceImpl.mSurface != null) {
+                mOutputPostviewSurfaceImpl.mSurface.release();
+            }
         }
 
         @Override
@@ -1707,6 +1482,24 @@ public class CameraExtensionsProxyService extends Service {
         public void binderDied() {
             mSessionProcessor.deInitSession();
         }
+
+        // Get the color space of the output configurations. All of the OutputSurfaces
+        // can be assumed to have the same color space so return the color space
+        // of any non-null OutputSurface
+        private int getColorSpaceFromOutputSurfaces(OutputSurface previewSurface,
+                OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
+            int colorSpace = ColorSpaceProfiles.UNSPECIFIED;
+
+            if (previewSurface.surface != null) {
+                colorSpace = previewSurface.colorSpace;
+            } else if (imageCaptureSurface.surface != null) {
+                colorSpace = imageCaptureSurface.colorSpace;
+            } else if (postviewSurface.surface != null) {
+                colorSpace = postviewSurface.colorSpace;
+            }
+
+            return colorSpace;
+        }
     }
 
     private class OutputSurfaceConfigurationImplStub implements OutputSurfaceConfigurationImpl {
@@ -1714,6 +1507,17 @@ public class CameraExtensionsProxyService extends Service {
         private OutputSurfaceImpl mOutputImageCaptureSurfaceImpl;
         private OutputSurfaceImpl mOutputImageAnalysisSurfaceImpl;
         private OutputSurfaceImpl mOutputPostviewSurfaceImpl;
+        private int mColorSpace;
+
+        public OutputSurfaceConfigurationImplStub(OutputSurfaceImpl previewOutput,
+                OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput,
+                OutputSurfaceImpl postviewOutput, int colorSpace) {
+            mOutputPreviewSurfaceImpl = previewOutput;
+            mOutputImageCaptureSurfaceImpl = imageCaptureOutput;
+            mOutputImageAnalysisSurfaceImpl = imageAnalysisOutput;
+            mOutputPostviewSurfaceImpl = postviewOutput;
+            mColorSpace = colorSpace;
+        }
 
         public OutputSurfaceConfigurationImplStub(OutputSurfaceImpl previewOutput,
                 OutputSurfaceImpl imageCaptureOutput, OutputSurfaceImpl imageAnalysisOutput,
@@ -1722,6 +1526,7 @@ public class CameraExtensionsProxyService extends Service {
             mOutputImageCaptureSurfaceImpl = imageCaptureOutput;
             mOutputImageAnalysisSurfaceImpl = imageAnalysisOutput;
             mOutputPostviewSurfaceImpl = postviewOutput;
+            mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
         }
 
         @Override
@@ -1743,6 +1548,11 @@ public class CameraExtensionsProxyService extends Service {
         public OutputSurfaceImpl getPostviewOutputSurface() {
             return mOutputPostviewSurfaceImpl;
         }
+
+        @Override
+        public int getColorSpace() {
+            return mColorSpace;
+        }
     }
 
     private class OutputSurfaceImplStub implements OutputSurfaceImpl {
@@ -1751,11 +1561,10 @@ public class CameraExtensionsProxyService extends Service {
         private final int mImageFormat;
         private final int mDataspace;
         private final long mUsage;
+        private final long mDynamicRangeProfile;
 
         public OutputSurfaceImplStub(OutputSurface outputSurface) {
             mSurface = outputSurface.surface;
-            mSize = new Size(outputSurface.size.width, outputSurface.size.height);
-            mImageFormat = outputSurface.imageFormat;
             if (mSurface != null) {
                 mDataspace = SurfaceUtils.getSurfaceDataspace(mSurface);
                 mUsage = SurfaceUtils.getSurfaceUsage(mSurface);
@@ -1763,6 +1572,9 @@ public class CameraExtensionsProxyService extends Service {
                 mDataspace = -1;
                 mUsage = 0;
             }
+            mDynamicRangeProfile = outputSurface.dynamicRangeProfile;
+            mSize = new Size(outputSurface.size.width, outputSurface.size.height);
+            mImageFormat = outputSurface.imageFormat;
         }
 
         @Override
@@ -1789,6 +1601,12 @@ public class CameraExtensionsProxyService extends Service {
         public long getUsage() {
             return mUsage;
         }
+
+        @Override
+        public long getDynamicRangeProfile() {
+            return mDynamicRangeProfile;
+        }
+
     }
 
     private class PreviewExtenderImplStub extends IPreviewExtenderImpl.Stub implements
@@ -2461,6 +2279,19 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
+        public SyncFence getFence() {
+            if (mParcelImage.fence != null) {
+                try {
+                    return SyncFence.create(mParcelImage.fence.dup());
+                } catch (IOException e) {
+                    Log.e(TAG, "Failed to parcel buffer fence!");
+                }
+            }
+
+            return SyncFence.createEmpty();
+        }
+
+        @Override
         protected final void finalize() throws Throwable {
             try {
                 close();
@@ -2518,6 +2349,11 @@ public class CameraExtensionsProxyService extends Service {
 
     private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
         CameraOutputConfig ret = new CameraOutputConfig();
+        if (EFV_SUPPORTED) {
+            ret.dynamicRangeProfile = output.getDynamicRangeProfile();
+        } else {
+            ret.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        }
         ret.outputId = new OutputConfigId();
         ret.outputId.id = output.getId();
         ret.physicalCameraId = output.getPhysicalCameraId();
@@ -2536,11 +2372,7 @@ public class CameraExtensionsProxyService extends Service {
             ret.size.height = imageReaderOutputConfig.getSize().getHeight();
             ret.imageFormat = imageReaderOutputConfig.getImageFormat();
             ret.capacity = imageReaderOutputConfig.getMaxImages();
-            if (EFV_SUPPORTED) {
-                ret.usage = imageReaderOutputConfig.getUsage();
-            } else {
-                ret.usage = 0;
-            }
+            ret.usage = imageReaderOutputConfig.getUsage();
         } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
             MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
                     (MultiResolutionImageReaderOutputConfigImpl) output;

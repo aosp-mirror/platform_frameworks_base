@@ -37,9 +37,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     jni_libs: [
@@ -53,4 +53,14 @@ android_test {
         "device-tests",
         "automotive-tests",
     ],
+}
+
+test_module_config {
+    name: "RollbackPackageHealthObserverTests_server_rollback",
+    base: "RollbackPackageHealthObserverTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.rollback"],
 }

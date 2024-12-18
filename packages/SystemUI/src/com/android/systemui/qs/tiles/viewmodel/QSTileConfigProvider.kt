@@ -20,6 +20,7 @@ import com.android.internal.util.Preconditions
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import javax.inject.Inject
 
 interface QSTileConfigProvider {
@@ -73,6 +74,7 @@ constructor(
                     spec,
                     QSTileUIConfig.Empty,
                     qsEventLogger.getNewInstanceId(),
+                    category = TileCategory.PROVIDED_BY_APP,
                 )
             is TileSpec.Invalid ->
                 throw IllegalArgumentException("TileSpec.Invalid doesn't support configs")

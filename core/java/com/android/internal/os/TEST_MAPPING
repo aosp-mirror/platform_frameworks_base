@@ -14,13 +14,13 @@
         "Kernel[^/]*\\.java",
         "[^/]*Power[^/]*\\.java"
       ],
-      "name": "BatteryUsageStatsProtoTests"
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": [
         "BinderDeathDispatcher\\.java"
       ],
-      "name": "FrameworksCoreTests_internal_os_binder"
+      "name": "FrameworksCoreTests_all_binder"
     },
     {
       "file_patterns": [
@@ -49,12 +49,7 @@
   ],
   "postsubmit": [
     {
-      "name": "PowerStatsTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.power.stats.BstatsCpuTimesValidationTest"
-        }
-      ],
+      "name": "PowerStatsTests_stats_bstatscputimesvalidationtest",
       "file_patterns": [
         "Kernel[^/]*\\.java"
       ]

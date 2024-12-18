@@ -36,7 +36,6 @@ import android.util.SparseArray;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,11 +53,6 @@ import org.junit.runner.RunWith;
 public class UserRestrictionsUtilsTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
-    @Before
-    public void setUp() {
-        mSetFlagsRule.enableFlags(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED);
-    }
 
     @Test
     public void testNonNull() {
@@ -90,8 +84,6 @@ public class UserRestrictionsUtilsTest {
     public void testCanDeviceOwnerChange() {
         assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_RECORD_AUDIO));
         assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_WALLPAPER));
-        assertFalse(UserRestrictionsUtils.canDeviceOwnerChange(
-                UserManager.DISALLOW_ADD_PRIVATE_PROFILE));
         assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_ADD_USER));
         assertTrue(UserRestrictionsUtils.canDeviceOwnerChange(UserManager.DISALLOW_USER_SWITCH));
     }
@@ -108,10 +100,6 @@ public class UserRestrictionsUtilsTest {
                 false));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_USER_SWITCH,
-                true,
-                false));
-        assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
                 true,
                 false));
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
@@ -150,7 +138,6 @@ public class UserRestrictionsUtilsTest {
 
     @Test
     public void testCanProfileOwnerChange_restrictionRequiresOrgOwnedDevice_orgOwned() {
-        mSetFlagsRule.enableFlags(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED);
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_SIM_GLOBALLY,
                 false,
@@ -163,26 +150,11 @@ public class UserRestrictionsUtilsTest {
 
     @Test
     public void testCanProfileOwnerChange_restrictionRequiresOrgOwnedDevice_notOrgOwned() {
-        mSetFlagsRule.enableFlags(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED);
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_SIM_GLOBALLY,
                 false,
                 false));
         assertFalse(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_SIM_GLOBALLY,
-                true,
-                false));
-    }
-
-    @Test
-    public void
-            testCanProfileOwnerChange_disabled_restrictionRequiresOrgOwnedDevice_notOrgOwned() {
-        mSetFlagsRule.disableFlags(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED);
-        assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
-                UserManager.DISALLOW_SIM_GLOBALLY,
-                false,
-                false));
-        assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_SIM_GLOBALLY,
                 true,
                 false));
@@ -190,7 +162,6 @@ public class UserRestrictionsUtilsTest {
 
     @Test
     public void testCanProfileOwnerChange_restrictionNotRequiresOrgOwnedDevice_orgOwned() {
-        mSetFlagsRule.enableFlags(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED);
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_ADJUST_VOLUME,
                 false,
@@ -203,7 +174,6 @@ public class UserRestrictionsUtilsTest {
 
     @Test
     public void testCanProfileOwnerChange_restrictionNotRequiresOrgOwnedDevice_notOrgOwned() {
-        mSetFlagsRule.enableFlags(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED);
         assertTrue(UserRestrictionsUtils.canProfileOwnerChange(
                 UserManager.DISALLOW_ADJUST_VOLUME,
                 false,

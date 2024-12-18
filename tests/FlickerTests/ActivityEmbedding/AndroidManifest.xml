@@ -19,7 +19,7 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.android.server.wm.flicker">
 
-    <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29"/>
+    <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="35"/>
     <!-- Read and write traces from external storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -46,6 +46,8 @@
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
     <!-- Allow the test to connect to perfetto trace processor -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Allow to query for the Launcher TestInfo on SDK 30+ -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <!-- Allow the test to write directly to /sdcard/ and connect to trace processor -->
     <application android:requestLegacyExternalStorage="true"
                  android:networkSecurityConfig="@xml/network_security_config"

@@ -8,7 +8,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.unfold.TestUnfoldTransitionProvider
+import com.android.systemui.unfold.FakeUnfoldTransitionProvider
 import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.whenever
@@ -23,17 +23,14 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var windowManager: WindowManager
+    @Mock private lateinit var windowManager: WindowManager
 
-    @Mock
-    private lateinit var display: Display
+    @Mock private lateinit var display: Display
 
-    @Mock
-    private lateinit var currentActivityTypeProvider: CurrentActivityTypeProvider
+    @Mock private lateinit var currentActivityTypeProvider: CurrentActivityTypeProvider
 
     private val view: View = View(context)
-    private val progressProvider = TestUnfoldTransitionProvider()
+    private val progressProvider = FakeUnfoldTransitionProvider()
     private val scopedProvider = ScopedUnfoldTransitionProgressProvider(progressProvider)
 
     private lateinit var controller: StatusBarMoveFromCenterAnimationController

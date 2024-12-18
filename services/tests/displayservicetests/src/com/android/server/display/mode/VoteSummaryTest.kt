@@ -28,29 +28,29 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 class VoteSummaryTest {
 
-    enum class SupportedModesVoteTestCase(
-            val vsyncProximityVoteEnabled: Boolean,
-            internal val summarySupportedModes: List<SupportedModesVote.SupportedMode>?,
+    enum class SupportedRefreshRatesTestCase(
+            val supportedModesVoteEnabled: Boolean,
+            internal val summaryRefreshRates: List<SupportedRefreshRatesVote.RefreshRates>?,
             val modesToFilter: Array<Display.Mode>,
             val expectedModeIds: List<Int>
     ) {
         HAS_NO_MATCHING_VOTE(true,
-                listOf(SupportedModesVote.SupportedMode(60f, 60f)),
+                listOf(SupportedRefreshRatesVote.RefreshRates(60f, 60f)),
                 arrayOf(createMode(1, 90f, 90f),
                         createMode(2, 90f, 60f),
                         createMode(3, 60f, 90f)),
                 listOf()
         ),
         HAS_SINGLE_MATCHING_VOTE(true,
-                listOf(SupportedModesVote.SupportedMode(60f, 90f)),
+                listOf(SupportedRefreshRatesVote.RefreshRates(60f, 90f)),
                 arrayOf(createMode(1, 90f, 90f),
                         createMode(2, 90f, 60f),
                         createMode(3, 60f, 90f)),
                 listOf(3)
         ),
         HAS_MULTIPLE_MATCHING_VOTES(true,
-                listOf(SupportedModesVote.SupportedMode(60f, 90f),
-                        SupportedModesVote.SupportedMode(90f, 90f)),
+                listOf(SupportedRefreshRatesVote.RefreshRates(60f, 90f),
+                        SupportedRefreshRatesVote.RefreshRates(90f, 90f)),
                 arrayOf(createMode(1, 90f, 90f),
                         createMode(2, 90f, 60f),
                         createMode(3, 60f, 90f)),
@@ -70,7 +70,7 @@ class VoteSummaryTest {
                         createMode(3, 60f, 90f)),
                 listOf(1, 2, 3)
         ),
-        HAS_VSYNC_PROXIMITY_DISABLED(false,
+        HAS_SUPPORTED_MODES_VOTE_DISABLED(false,
                 listOf(),
                 arrayOf(createMode(1, 90f, 90f),
                         createMode(2, 90f, 60f),
@@ -80,24 +80,122 @@ class VoteSummaryTest {
     }
 
     @Test
-    fun `filters modes for summary supportedModes`(
-            @TestParameter testCase: SupportedModesVoteTestCase
+    fun testFiltersModes_supportedRefreshRates(
+            @TestParameter testCase: SupportedRefreshRatesTestCase
     ) {
-        val summary = createSummary(testCase.vsyncProximityVoteEnabled)
-        summary.supportedModes = testCase.summarySupportedModes
+        val summary = createSummary(testCase.supportedModesVoteEnabled)
+        summary.supportedRefreshRates = testCase.summaryRefreshRates
 
         val result = summary.filterModes(testCase.modesToFilter)
 
         assertThat(result.map { it.modeId }).containsExactlyElementsIn(testCase.expectedModeIds)
     }
+
+    enum class SupportedModesTestCase(
+            val supportedModesVoteEnabled: Boolean,
+            internal val summarySupportedModes: List<Int>?,
+            val modesToFilter: Array<Display.Mode>,
+            val expectedModeIds: List<Int>
+    ) {
+        HAS_NO_MATCHING_VOTE(true,
+                listOf(4, 5),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                listOf()
+        ),
+        HAS_SINGLE_MATCHING_VOTE(true,
+                listOf(3),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                listOf(3)
+        ),
+        HAS_MULTIPLE_MATCHING_VOTES(true,
+                listOf(1, 3),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                listOf(1, 3)
+        ),
+        HAS_NO_SUPPORTED_MODES(true,
+                listOf(),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                listOf()
+        ),
+        HAS_NULL_SUPPORTED_MODES(true,
+                null,
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                listOf(1, 2, 3)
+        ),
+        HAS_SUPPORTED_MODES_VOTE_DISABLED(false,
+                listOf(),
+                arrayOf(createMode(1, 90f, 90f),
+                        createMode(2, 90f, 60f),
+                        createMode(3, 60f, 90f)),
+                listOf(1, 2, 3)
+        ),
+    }
+
+    @Test
+    fun testFiltersModes_supportedModes(@TestParameter testCase: SupportedModesTestCase) {
+        val summary = createSummary(testCase.supportedModesVoteEnabled)
+        summary.supportedModeIds = testCase.summarySupportedModes
+
+        val result = summary.filterModes(testCase.modesToFilter)
+
+        assertThat(result.map { it.modeId }).containsExactlyElementsIn(testCase.expectedModeIds)
+    }
+
+    @Test
+    fun testInvalidSummary_requestedRefreshRateLessThanMinRenderRate() {
+        val summary = createSummary()
+        summary.requestedRefreshRates = setOf(30f, 90f)
+        summary.minRenderFrameRate = 60f
+        summary.maxRenderFrameRate = 120f
+
+        val result = summary.filterModes(arrayOf(createMode(1, 90f, 90f)))
+
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun testInvalidSummary_requestedRefreshRateMoreThanMaxRenderRate() {
+        val summary = createSummary()
+        summary.requestedRefreshRates = setOf(60f, 240f)
+        summary.minRenderFrameRate = 60f
+        summary.maxRenderFrameRate = 120f
+
+        val result = summary.filterModes(arrayOf(createMode(1, 90f, 90f)))
+
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun testValidSummary_requestedRefreshRatesWithingRenderRateLimits() {
+        val summary = createSummary()
+        summary.requestedRefreshRates = setOf(60f, 90f)
+        summary.minRenderFrameRate = 60f
+        summary.maxRenderFrameRate = 120f
+
+        val result = summary.filterModes(arrayOf(createMode(1, 90f, 90f)))
+
+        assertThat(result).hasSize(1)
+    }
 }
+
+
 private fun createMode(modeId: Int, refreshRate: Float, vsyncRate: Float): Display.Mode {
-    return Display.Mode(modeId, 600, 800, refreshRate, vsyncRate,
+    return Display.Mode(modeId, 600, 800, refreshRate, vsyncRate, false,
             FloatArray(0), IntArray(0))
 }
 
-private fun createSummary(vsyncVoteEnabled: Boolean): VoteSummary {
-    val summary = createVotesSummary(vsyncProximityVoteEnabled = vsyncVoteEnabled)
+private fun createSummary(supportedModesVoteEnabled: Boolean = false): VoteSummary {
+    val summary = createVotesSummary(supportedModesVoteEnabled = supportedModesVoteEnabled)
     summary.width = 600
     summary.height = 800
     summary.maxPhysicalRefreshRate = Float.POSITIVE_INFINITY

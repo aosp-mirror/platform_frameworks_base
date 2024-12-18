@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 
@@ -46,7 +46,7 @@ import java.util.Collection;
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class ByteBufferPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     public enum MyByteOrder {
         BIG(ByteOrder.BIG_ENDIAN),
@@ -121,7 +121,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getByte(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -136,7 +136,7 @@ public class ByteBufferPerfTest {
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
         byte[] dst = new byte[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(aligned ? 0 : 1);
@@ -150,7 +150,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getByte_indexed(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -164,7 +164,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getChar(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -180,7 +180,7 @@ public class ByteBufferPerfTest {
         CharBuffer src =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asCharBuffer();
         char[] dst = new char[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(0);
@@ -194,7 +194,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getChar_indexed(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -208,7 +208,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getDouble(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -224,7 +224,7 @@ public class ByteBufferPerfTest {
         DoubleBuffer src =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asDoubleBuffer();
         double[] dst = new double[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(0);
@@ -238,7 +238,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getFloat(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -254,7 +254,7 @@ public class ByteBufferPerfTest {
         FloatBuffer src =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asFloatBuffer();
         float[] dst = new float[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(0);
@@ -268,7 +268,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getInt(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -283,7 +283,7 @@ public class ByteBufferPerfTest {
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         IntBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asIntBuffer();
         int[] dst = new int[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(0);
@@ -297,7 +297,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getLong(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -313,7 +313,7 @@ public class ByteBufferPerfTest {
         LongBuffer src =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asLongBuffer();
         long[] dst = new long[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(0);
@@ -327,7 +327,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_getShort(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -343,7 +343,7 @@ public class ByteBufferPerfTest {
         ShortBuffer src =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asShortBuffer();
         short[] dst = new short[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 src.position(0);
@@ -361,7 +361,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putByte(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(0);
             for (int i = 0; i < 1024; ++i) {
@@ -376,7 +376,7 @@ public class ByteBufferPerfTest {
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer dst = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
         byte[] src = new byte[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(aligned ? 0 : 1);
@@ -390,7 +390,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putChar(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -406,7 +406,7 @@ public class ByteBufferPerfTest {
         CharBuffer dst =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asCharBuffer();
         char[] src = new char[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(0);
@@ -420,7 +420,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putDouble(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -436,7 +436,7 @@ public class ByteBufferPerfTest {
         DoubleBuffer dst =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asDoubleBuffer();
         double[] src = new double[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(0);
@@ -450,7 +450,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putFloat(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -466,7 +466,7 @@ public class ByteBufferPerfTest {
         FloatBuffer dst =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asFloatBuffer();
         float[] src = new float[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(0);
@@ -480,7 +480,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putInt(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -495,7 +495,7 @@ public class ByteBufferPerfTest {
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         IntBuffer dst = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asIntBuffer();
         int[] src = new int[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(0);
@@ -509,7 +509,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putLong(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -525,7 +525,7 @@ public class ByteBufferPerfTest {
         LongBuffer dst =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asLongBuffer();
         long[] src = new long[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(0);
@@ -539,7 +539,7 @@ public class ByteBufferPerfTest {
     public void timeByteBuffer_putShort(
             MyByteOrder byteOrder, boolean aligned, MyBufferType bufferType) throws Exception {
         ByteBuffer src = ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType);
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             src.position(aligned ? 0 : 1);
             for (int i = 0; i < 1024; ++i) {
@@ -555,7 +555,7 @@ public class ByteBufferPerfTest {
         ShortBuffer dst =
                 ByteBufferPerfTest.newBuffer(byteOrder, aligned, bufferType).asShortBuffer();
         short[] src = new short[1024];
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             for (int i = 0; i < 1024; ++i) {
                 dst.position(0);
@@ -565,18 +565,16 @@ public class ByteBufferPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
     public void time_new_byteArray() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             byte[] bs = new byte[8192];
         }
     }
 
     @Test
-    @Parameters(method = "getData")
     public void time_ByteBuffer_allocate() throws Exception {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             ByteBuffer bs = ByteBuffer.allocate(8192);
         }

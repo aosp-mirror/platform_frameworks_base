@@ -243,12 +243,6 @@ constructor(
         }
 
         // Authentication failed.
-
-        if (tryAutoConfirm) {
-            // Auto-confirm is active, the failed attempt should have no side-effects.
-            return AuthenticationResult.FAILED
-        }
-
         repository.reportAuthenticationAttempt(isSuccessful = false)
 
         if (authenticationResult.lockoutDurationMs > 0) {
@@ -294,9 +288,10 @@ constructor(
     private suspend fun getWipeTarget(): WipeTarget {
         // Check which profile has the strictest policy for failed authentication attempts.
         val userToBeWiped = repository.getProfileWithMinFailedUnlockAttemptsForWipe()
+        val primaryUser = selectedUserInteractor.getMainUserId() ?: UserHandle.USER_SYSTEM
         return when (userToBeWiped) {
             selectedUserInteractor.getSelectedUserId() ->
-                if (userToBeWiped == UserHandle.USER_SYSTEM) {
+                if (userToBeWiped == primaryUser) {
                     WipeTarget.WholeDevice
                 } else {
                     WipeTarget.User

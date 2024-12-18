@@ -32,7 +32,7 @@
 
     <!-- Usage graph dimens -->
     <dimen name="usage_graph_margin_top_bottom">9dp</dimen>
-    <dimen name="usage_graph_labels_width">56dp</dimen>
+    <dimen name="usage_graph_labels_width">60dp</dimen>
 
     <dimen name="usage_graph_divider_size">1dp</dimen>
 
@@ -82,14 +82,6 @@
     <dimen name="add_a_photo_circled_padding">6dp</dimen>
     <dimen name="user_photo_size_in_user_info_dialog">112dp</dimen>
     <dimen name="add_a_photo_icon_size_in_user_info_dialog">32dp</dimen>
-    <dimen name="user_name_height_in_user_info_dialog">48sp</dimen>
-
-    <integer name="avatar_picker_columns">3</integer>
-    <dimen name="avatar_size_in_picker">96dp</dimen>
-    <dimen name="avatar_picker_padding">6dp</dimen>
-    <dimen name="avatar_picker_margin">2dp</dimen>
-
-    <dimen name="avatar_picker_icon_inset">25dp</dimen>
 
     <!-- Minimum increment between density scales. -->
     <fraction name="display_density_min_scale_interval">9%</fraction>

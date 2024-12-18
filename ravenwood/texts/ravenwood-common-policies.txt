@@ -1,0 +1,20 @@
+# Ravenwood "policy" that should apply to all code.
+
+# Keep all AIDL interfaces
+class :aidl keepclass
+
+# Keep all feature flag implementations
+class :feature_flags keepclass
+
+# Keep all sysprops generated code implementations
+class :sysprops keepclass
+
+# Keep all resource R classes
+class :r keepclass
+
+# Support APIs not available in standard JRE
+class java.io.FileDescriptor keep
+    method getInt$ @com.android.ravenwood.RavenwoodJdkPatch.getInt$
+    method setInt$ @com.android.ravenwood.RavenwoodJdkPatch.setInt$
+class java.util.LinkedHashMap keep
+    method eldest @com.android.ravenwood.RavenwoodJdkPatch.eldest

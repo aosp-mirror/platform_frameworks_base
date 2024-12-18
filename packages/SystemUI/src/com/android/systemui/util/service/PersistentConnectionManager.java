@@ -27,6 +27,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.tracing.TraceStateLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
@@ -41,20 +42,21 @@ import javax.inject.Named;
 /**
  * The {@link PersistentConnectionManager} is responsible for maintaining a connection to a
  * {@link ObservableServiceConnection}.
+ *
  * @param <T> The transformed connection type handled by the service.
  */
 public class PersistentConnectionManager<T> implements Dumpable {
     private static final String TAG = "PersistentConnManager";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final SystemClock mSystemClock;
-    private final DelayableExecutor mMainExecutor;
+    private final DelayableExecutor mBgExecutor;
     private final int mBaseReconnectDelayMs;
     private final int mMaxReconnectAttempts;
     private final int mMinConnectionDuration;
     private final Observer mObserver;
     private final DumpManager mDumpManager;
     private final String mDumpsysName;
+    private final TraceStateLogger mConnectionReasonLogger;
 
     private int mReconnectAttempts = 0;
     private Runnable mCurrentReconnectCancelable;
@@ -64,43 +66,57 @@ public class PersistentConnectionManager<T> implements Dumpable {
     private final Runnable mConnectRunnable = new Runnable() {
         @Override
         public void run() {
+            mConnectionReasonLogger.log("ConnectionReasonRetry");
             mCurrentReconnectCancelable = null;
             mConnection.bind();
         }
     };
 
-    private final Observer.Callback mObserverCallback = () -> initiateConnectionAttempt();
+    private final Observer.Callback mObserverCallback = () -> initiateConnectionAttempt(
+            "ConnectionReasonObserver");
 
-    private final ObservableServiceConnection.Callback mConnectionCallback =
-            new ObservableServiceConnection.Callback() {
-        private long mStartTime;
+    private final ObservableServiceConnection.Callback<T> mConnectionCallback =
+            new ObservableServiceConnection.Callback<>() {
+                private long mStartTime = -1;
 
-        @Override
-        public void onConnected(ObservableServiceConnection connection, Object proxy) {
-            mStartTime = mSystemClock.currentTimeMillis();
-        }
+                @Override
+                public void onConnected(ObservableServiceConnection connection, Object proxy) {
+                    mStartTime = mSystemClock.currentTimeMillis();
+                }
 
-        @Override
-        public void onDisconnected(ObservableServiceConnection connection, int reason) {
-            // Do not attempt to reconnect if we were manually unbound
-            if (reason == ObservableServiceConnection.DISCONNECT_REASON_UNBIND) {
-                return;
-            }
+                @Override
+                public void onDisconnected(ObservableServiceConnection connection, int reason) {
+                    // Do not attempt to reconnect if we were manually unbound
+                    if (reason == ObservableServiceConnection.DISCONNECT_REASON_UNBIND) {
+                        return;
+                    }
 
-            if (mSystemClock.currentTimeMillis() - mStartTime > mMinConnectionDuration) {
-                initiateConnectionAttempt();
-            } else {
-                scheduleConnectionAttempt();
-            }
-        }
-    };
+                    if (mStartTime <= 0) {
+                        Log.e(TAG, "onDisconnected called with invalid connection start time: "
+                                + mStartTime);
+                        return;
+                    }
 
-    // TODO: b/326449074 - Ensure the DelayableExecutor is on the correct thread, and update the
-    //                     qualifier (to @Main) or name (to bgExecutor) to be consistent with that.
+                    final float connectionDuration = mSystemClock.currentTimeMillis() - mStartTime;
+                    // Reset the start time.
+                    mStartTime = -1;
+
+                    if (connectionDuration > mMinConnectionDuration) {
+                        Log.i(TAG, "immediately reconnecting since service was connected for "
+                                + connectionDuration
+                                + "ms which is longer than the min duration of "
+                                + mMinConnectionDuration + "ms");
+                        initiateConnectionAttempt("ConnectionReasonMinDurationMet");
+                    } else {
+                        scheduleConnectionAttempt();
+                    }
+                }
+            };
+
     @Inject
     public PersistentConnectionManager(
             SystemClock clock,
-            @Background DelayableExecutor mainExecutor,
+            @Background DelayableExecutor bgExecutor,
             DumpManager dumpManager,
             @Named(DUMPSYS_NAME) String dumpsysName,
             @Named(SERVICE_CONNECTION) ObservableServiceConnection<T> serviceConnection,
@@ -109,11 +125,12 @@ public class PersistentConnectionManager<T> implements Dumpable {
             @Named(MIN_CONNECTION_DURATION_MS) int minConnectionDurationMs,
             @Named(OBSERVER) Observer observer) {
         mSystemClock = clock;
-        mMainExecutor = mainExecutor;
+        mBgExecutor = bgExecutor;
         mConnection = serviceConnection;
         mObserver = observer;
         mDumpManager = dumpManager;
         mDumpsysName = TAG + "#" + dumpsysName;
+        mConnectionReasonLogger = new TraceStateLogger(mDumpsysName);
 
         mMaxReconnectAttempts = maxReconnectAttempts;
         mBaseReconnectDelayMs = baseReconnectDelayMs;
@@ -127,7 +144,7 @@ public class PersistentConnectionManager<T> implements Dumpable {
         mDumpManager.registerCriticalDumpable(mDumpsysName, this);
         mConnection.addCallback(mConnectionCallback);
         mObserver.addCallback(mObserverCallback);
-        initiateConnectionAttempt();
+        initiateConnectionAttempt("ConnectionReasonStart");
     }
 
     /**
@@ -142,6 +159,7 @@ public class PersistentConnectionManager<T> implements Dumpable {
 
     /**
      * Add a callback to the {@link ObservableServiceConnection}.
+     *
      * @param callback The callback to add.
      */
     public void addConnectionCallback(ObservableServiceConnection.Callback<T> callback) {
@@ -150,6 +168,7 @@ public class PersistentConnectionManager<T> implements Dumpable {
 
     /**
      * Remove a callback from the {@link ObservableServiceConnection}.
+     *
      * @param callback The callback to remove.
      */
     public void removeConnectionCallback(ObservableServiceConnection.Callback<T> callback) {
@@ -165,10 +184,10 @@ public class PersistentConnectionManager<T> implements Dumpable {
         mConnection.dump(pw);
     }
 
-    private void initiateConnectionAttempt() {
+    private void initiateConnectionAttempt(String reason) {
+        mConnectionReasonLogger.log(reason);
         // Reset attempts
         mReconnectAttempts = 0;
-
         // The first attempt is always a direct invocation rather than delayed.
         mConnection.bind();
     }
@@ -181,21 +200,16 @@ public class PersistentConnectionManager<T> implements Dumpable {
         }
 
         if (mReconnectAttempts >= mMaxReconnectAttempts) {
-            if (DEBUG) {
-                Log.d(TAG, "exceeded max connection attempts.");
-            }
+            Log.d(TAG, "exceeded max connection attempts.");
             return;
         }
 
         final long reconnectDelayMs =
                 (long) Math.scalb(mBaseReconnectDelayMs, mReconnectAttempts);
 
-        if (DEBUG) {
-            Log.d(TAG,
-                    "scheduling connection attempt in " + reconnectDelayMs + "milliseconds");
-        }
-
-        mCurrentReconnectCancelable = mMainExecutor.executeDelayed(mConnectRunnable,
+        Log.d(TAG,
+                "scheduling connection attempt in " + reconnectDelayMs + "milliseconds");
+        mCurrentReconnectCancelable = mBgExecutor.executeDelayed(mConnectRunnable,
                 reconnectDelayMs);
 
         mReconnectAttempts++;

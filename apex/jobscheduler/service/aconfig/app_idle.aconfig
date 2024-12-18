@@ -1,0 +1,14 @@
+package: "com.android.server.usage"
+container: "system"
+
+flag {
+    name: "avoid_idle_check"
+    namespace: "backstage_power"
+    description: "Postpone app idle check after boot completed"
+    is_fixed_read_only: true
+    bug: "337864590"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+

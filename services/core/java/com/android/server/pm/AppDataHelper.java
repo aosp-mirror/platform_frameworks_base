@@ -45,7 +45,6 @@ import android.util.TimingsTraceLog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemServerInitThreadPool;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -128,7 +127,7 @@ public class AppDataHelper {
         }
 
         // TODO(b/211761016): should we still create the profile dirs?
-        if (ps.getPkg() != null && !shouldHaveAppStorage(ps.getPkg())) {
+        if (!shouldHaveAppStorage(ps)) {
             Slog.w(TAG, "Skipping preparing app data for " + ps.getPackageName());
             return;
         }
@@ -173,19 +172,19 @@ public class AppDataHelper {
     }
 
     private void prepareAppDataAndMigrate(@NonNull Installer.Batch batch,
-            @NonNull AndroidPackage pkg, @UserIdInt int userId,
+            @NonNull PackageStateInternal psi, @UserIdInt int userId,
             @StorageManager.StorageFlags int flags, boolean maybeMigrateAppData) {
-        if (pkg == null) {
+        if (psi == null || psi.getPkg() == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        if (!shouldHaveAppStorage(pkg)) {
-            Slog.w(TAG, "Skipping preparing app data for " + pkg.getPackageName());
+        if (!shouldHaveAppStorage(psi)) {
+            Slog.w(TAG, "Skipping preparing app data for " + psi.getPackageName());
             return;
         }
         final PackageSetting ps;
         synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
+            ps = mPm.mSettings.getPackageLPr(psi.getPackageName());
         }
         prepareAppData(batch, ps, Process.INVALID_UID, userId, flags).thenRun(() -> {
             // Note: this code block is executed with the Installer lock
@@ -253,41 +252,6 @@ public class AppDataHelper {
                     logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
                 } catch (Installer.InstallerException e2) {
                     logCriticalInfo(Log.DEBUG, "Recovery failed!");
-                }
-            }
-
-            if (!DexOptHelper.useArtService()) { // ART Service handles this on demand instead.
-                // Prepare the application profiles only for upgrades and
-                // first boot (so that we don't repeat the same operation at
-                // each boot).
-                //
-                // We only have to cover the upgrade and first boot here
-                // because for app installs we prepare the profiles before
-                // invoking dexopt (in installPackageLI).
-                //
-                // We also have to cover non system users because we do not
-                // call the usual install package methods for them.
-                //
-                // NOTE: in order to speed up first boot time we only create
-                // the current profile and do not update the content of the
-                // reference profile. A system image should already be
-                // configured with the right profile keys and the profiles
-                // for the speed-profile prebuilds should already be copied.
-                // That's done in #performDexOptUpgrade.
-                //
-                // TODO(calin, mathieuc): We should use .dm files for
-                // prebuilds profiles instead of manually copying them in
-                // #performDexOptUpgrade. When we do that we should have a
-                // more granular check here and only update the existing
-                // profiles.
-                if (pkg != null && (mPm.isDeviceUpgrading() || mPm.isFirstBoot()
-                        || (userId != UserHandle.USER_SYSTEM))) {
-                    try {
-                        mArtManagerService.prepareAppProfiles(pkg, userId,
-                                /* updateReferenceProfileContent= */ false);
-                    } catch (LegacyDexoptDisabledException e2) {
-                        throw new RuntimeException(e2);
-                    }
                 }
             }
 
@@ -381,7 +345,7 @@ public class AppDataHelper {
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
-            synchronized (mPm.mInstallLock) {
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                 reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppsData);
             }
         }
@@ -485,7 +449,7 @@ public class AppDataHelper {
             }
 
             if (ps.getUserStateOrDefault(userId).isInstalled()) {
-                prepareAppDataAndMigrate(batch, ps.getPkg(), userId, flags, migrateAppData);
+                prepareAppDataAndMigrate(batch, ps, userId, flags, migrateAppData);
                 preparedCount++;
             }
         }
@@ -520,8 +484,7 @@ public class AppDataHelper {
                             + " or was deleted without DELETE_KEEP_DATA",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_NOT_INSTALLED_FOR_USER);
         }
-        if (packageState.getPkg() != null
-                && !shouldHaveAppStorage(packageState.getPkg())) {
+        if (!shouldHaveAppStorage(packageState)) {
             throw PackageManagerException.ofInternalError(
                     "Package " + packageName + " shouldn't have storage",
                     PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_SHOULD_NOT_HAVE_STORAGE);
@@ -541,8 +504,8 @@ public class AppDataHelper {
             storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         }
         final List<String> deferPackages;
-        synchronized (mPm.mInstallLock) {
-           deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
+        try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
+            deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
         }
@@ -571,13 +534,12 @@ public class AppDataHelper {
                 if (packageStateInternal != null
                         && packageStateInternal.getUserStateOrDefault(
                                 UserHandle.USER_SYSTEM).isInstalled()) {
-                    AndroidPackage pkg = packageStateInternal.getPkg();
-                    prepareAppDataAndMigrate(batch, pkg,
+                    prepareAppDataAndMigrate(batch, packageStateInternal,
                             UserHandle.USER_SYSTEM, storageFlags, true /* maybeMigrateAppData */);
                     count++;
                 }
             }
-            synchronized (mPm.mInstallLock) {
+            try (PackageManagerTracedLock installLock = mPm.mInstallLock.acquireLock()) {
                 executeBatchLI(batch);
             }
             traceLog.traceEnd();
@@ -618,15 +580,7 @@ public class AppDataHelper {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        if (DexOptHelper.useArtService()) {
-            destroyAppProfilesWithArtService(pkg.getPackageName());
-        } else {
-            try {
-                mArtManagerService.clearAppProfiles(pkg);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        destroyAppProfilesLIF(pkg.getPackageName());
     }
 
     public void destroyAppDataLIF(AndroidPackage pkg, int userId, int flags) {
@@ -660,20 +614,6 @@ public class AppDataHelper {
      * Destroy ART app profiles for the package.
      */
     void destroyAppProfilesLIF(String packageName) {
-        if (DexOptHelper.useArtService()) {
-            destroyAppProfilesWithArtService(packageName);
-        } else {
-            try {
-                mInstaller.destroyAppProfiles(packageName);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            } catch (Installer.InstallerException e) {
-                Slog.w(TAG, String.valueOf(e));
-            }
-        }
-    }
-
-    private void destroyAppProfilesWithArtService(String packageName) {
         if (!DexOptHelper.artManagerLocalIsInitialized()) {
             // This function may get called while PackageManagerService is constructed (via e.g.
             // InitAppsHelper.initSystemApps), and ART Service hasn't yet been started then (it
@@ -695,12 +635,16 @@ public class AppDataHelper {
     }
 
     /**
-     * Returns {@code true} if app's internal storage should be created for this {@code pkg}.
+     * Returns {@code true} if app's internal storage should be created for this {@code ps}.
      */
-    private boolean shouldHaveAppStorage(AndroidPackage pkg) {
+    private boolean shouldHaveAppStorage(PackageStateInternal ps) {
+        if (ps.getPkg() == null) {
+            // Keeps the legacy behavior
+            return true;
+        }
         PackageManager.Property noAppDataProp =
-                pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
-        return (noAppDataProp == null || !noAppDataProp.getBoolean()) && pkg.getUid() >= 0;
+                ps.getPkg().getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
+        return (noAppDataProp == null || !noAppDataProp.getBoolean()) && ps.getAppId() >= 0;
     }
 
     /**

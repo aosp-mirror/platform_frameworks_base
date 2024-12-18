@@ -26,16 +26,17 @@ import static junit.framework.Assert.fail;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginLifecycleManager;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.plugins.PluginWrapper;
+import com.android.systemui.plugins.TestPlugin;
 import com.android.systemui.plugins.annotations.Requires;
 
 import org.junit.Before;
@@ -46,8 +47,8 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 @SmallTest
@@ -60,7 +61,7 @@ public class PluginInstanceTest extends SysuiTestCase {
 
     private FakeListener mPluginListener;
     private VersionInfo mVersionInfo;
-    private VersionInfo.InvalidVersionException mVersionException;
+    private boolean mVersionCheckResult = true;
     private PluginInstance.VersionChecker mVersionChecker;
 
     private RefCounter mCounter;
@@ -83,14 +84,16 @@ public class PluginInstanceTest extends SysuiTestCase {
         mVersionInfo = new VersionInfo();
         mVersionChecker = new PluginInstance.VersionChecker() {
             @Override
-            public <T extends Plugin> VersionInfo checkVersion(
+            public <T extends Plugin> boolean checkVersion(
                     Class<T> instanceClass,
                     Class<T> pluginClass,
                     Plugin plugin
             ) {
-                if (mVersionException != null) {
-                    throw mVersionException;
-                }
+                return mVersionCheckResult;
+            }
+
+            @Override
+            public <T extends Plugin> VersionInfo getVersionInfo(Class<T> instanceClass) {
                 return mVersionInfo;
             }
         };
@@ -117,21 +120,29 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCorrectVersion() {
-        assertNotNull(mPluginInstance);
+    public void testCorrectVersion_onCreateBuildsPlugin() {
+        mVersionCheckResult = true;
+        assertFalse(mPluginInstance.hasError());
+
+        mPluginInstance.onCreate();
+        assertFalse(mPluginInstance.hasError());
+        assertNotNull(mPluginInstance.getPlugin());
     }
 
-    @Test(expected = VersionInfo.InvalidVersionException.class)
-    public void testIncorrectVersion() throws Exception {
+    @Test
+    public void testIncorrectVersion_destroysPluginInstance() throws Exception {
         ComponentName wrongVersionTestPluginComponentName =
                 new ComponentName(PRIVILEGED_PACKAGE, TestPlugin.class.getName());
 
-        mVersionException = new VersionInfo.InvalidVersionException("test", true);
+        mVersionCheckResult = false;
+        assertFalse(mPluginInstance.hasError());
 
         mPluginInstanceFactory.create(
                 mContext, mAppInfo, wrongVersionTestPluginComponentName,
                 TestPlugin.class, mPluginListener);
         mPluginInstance.onCreate();
+        assertTrue(mPluginInstance.hasError());
+        assertNull(mPluginInstance.getPlugin());
     }
 
     @Test
@@ -139,7 +150,7 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.onCreate();
         assertEquals(1, mPluginListener.mAttachedCount);
         assertEquals(1, mPluginListener.mLoadCount);
-        assertEquals(mPlugin.get(), mPluginInstance.getPlugin());
+        assertEquals(mPlugin.get(), unwrap(mPluginInstance.getPlugin()));
         assertInstances(1, 1);
     }
 
@@ -176,7 +187,18 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLoadUnloadSimultaneous_HoldsUnload() throws Exception {
+    public void testLinkageError_caughtAndPluginDestroyed() {
+        mPluginInstance.onCreate();
+        assertFalse(mPluginInstance.hasError());
+
+        Object result = mPluginInstance.getPlugin().methodThrowsError();
+        assertNotNull(result);  // Wrapper function should return non-null;
+        assertTrue(mPluginInstance.hasError());
+        assertNull(mPluginInstance.getPlugin());
+    }
+
+    @Test
+    public void testLoadUnloadSimultaneous_HoldsUnload() throws Throwable {
         final Semaphore loadLock = new Semaphore(1);
         final Semaphore unloadLock = new Semaphore(1);
 
@@ -189,16 +211,16 @@ public class PluginInstanceTest extends SysuiTestCase {
             Thread.yield();
             boolean isLocked = getLock(unloadLock, 1000);
 
-            // Ensure the bg thread failed to do delete the plugin
+            // Ensure the bg thread failed to delete the plugin
             assertNotNull(mPluginInstance.getPlugin());
             // We expect that bgThread deadlocked holding the semaphore
             assertFalse(isLocked);
         };
 
-        AtomicBoolean isBgThreadFailed = new AtomicBoolean(false);
+        AtomicReference<Throwable> bgFailure = new AtomicReference<Throwable>(null);
         Thread bgThread = new Thread(() -> {
             assertTrue(getLock(unloadLock, 10));
-            assertTrue(getLock(loadLock, 4000)); // Wait for the foreground thread
+            assertTrue(getLock(loadLock, 10000)); // Wait for the foreground thread
             assertNotNull(mPluginInstance.getPlugin());
             // Attempt to delete the plugin, this should block until the load completes
             mPluginInstance.unloadPlugin();
@@ -209,8 +231,9 @@ public class PluginInstanceTest extends SysuiTestCase {
 
         // This protects the test suite from crashing due to the uncaught exception.
         bgThread.setUncaughtExceptionHandler((Thread t, Throwable ex) -> {
-            Log.e("testLoadUnloadSimultaneous_HoldsUnload", "Exception from BG Thread", ex);
-            isBgThreadFailed.set(true);
+            Log.e("PluginInstanceTest#testLoadUnloadSimultaneous_HoldsUnload",
+                    "Exception from BG Thread", ex);
+            bgFailure.set(ex);
         });
 
         loadLock.acquire();
@@ -221,25 +244,32 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.loadPlugin();
 
         bgThread.join(5000);
-        assertFalse(isBgThreadFailed.get());
+
+        // Rethrow final background exception on test thread
+        Throwable bgEx = bgFailure.get();
+        if (bgEx != null) {
+            throw bgEx;
+        }
+
         assertNull(mPluginInstance.getPlugin());
+    }
+
+    private static <T> T unwrap(T plugin) {
+        if (plugin instanceof PluginWrapper) {
+            return ((PluginWrapper<T>) plugin).getPlugin();
+        }
+        return plugin;
     }
 
     private boolean getLock(Semaphore lock, long millis) {
         try {
             return lock.tryAcquire(millis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ex) {
+            Log.e("PluginInstanceTest#getLock",
+                    "Interrupted Exception getting lock", ex);
             fail();
             return false;
         }
-    }
-
-    // This target class doesn't matter, it just needs to have a Requires to hit the flow where
-    // the mock version info is called.
-    @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)
-    public interface TestPlugin extends Plugin {
-        int VERSION = 1;
-        String ACTION = "testAction";
     }
 
     private void assertInstances(int allocated, int created) {
@@ -291,6 +321,11 @@ public class PluginInstanceTest extends SysuiTestCase {
         public void onDestroy() {
             mCounter.mCreatedInstances.getAndDecrement();
         }
+
+        @Override
+        public Object methodThrowsError() {
+            throw new LinkageError();
+        }
     }
 
     public class FakeListener implements PluginListener<TestPlugin> {
@@ -328,7 +363,7 @@ public class PluginInstanceTest extends SysuiTestCase {
             mLoadCount++;
             TestPlugin expectedPlugin = PluginInstanceTest.this.mPlugin.get();
             if (expectedPlugin != null) {
-                assertEquals(expectedPlugin, plugin);
+                assertEquals(expectedPlugin, unwrap(plugin));
             }
             Context expectedContext = PluginInstanceTest.this.mPluginContext.get();
             if (expectedContext != null) {
@@ -348,7 +383,7 @@ public class PluginInstanceTest extends SysuiTestCase {
             mUnloadCount++;
             TestPlugin expectedPlugin = PluginInstanceTest.this.mPlugin.get();
             if (expectedPlugin != null) {
-                assertEquals(expectedPlugin, plugin);
+                assertEquals(expectedPlugin, unwrap(plugin));
             }
             assertEquals(PluginInstanceTest.this.mPluginInstance, manager);
             if (mOnUnload != null) {

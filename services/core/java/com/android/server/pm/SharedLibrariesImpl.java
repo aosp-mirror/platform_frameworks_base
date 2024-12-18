@@ -729,7 +729,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                     if (!pkgSetting.isSystem() || pkgSetting.isUpdatedSystemApp()) {
                         final int flags = pkgSetting.isUpdatedSystemApp()
                                 ? PackageManager.DELETE_KEEP_DATA : 0;
-                        synchronized (mPm.mInstallLock) {
+                        try (var installLock = mPm.mInstallLock.acquireLock()) {
                             mDeletePackageHelper.deletePackageLIF(pkg.getPackageName(), null, true,
                                     mPm.mUserManager.getUserIds(), flags, new PackageRemovedInfo(),
                                     true);

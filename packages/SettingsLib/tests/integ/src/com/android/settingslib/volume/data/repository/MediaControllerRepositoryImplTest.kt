@@ -22,13 +22,10 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.bluetooth.BluetoothCallback
 import com.android.settingslib.bluetooth.BluetoothEventManager
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.volume.shared.FakeAudioManagerEventsReceiver
-import com.android.settingslib.volume.shared.model.AudioManagerEvent
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -37,20 +34,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.any
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class MediaControllerRepositoryImplTest {
-
-    @Captor private lateinit var callbackCaptor: ArgumentCaptor<BluetoothCallback>
 
     @Mock private lateinit var mediaSessionManager: MediaSessionManager
     @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
@@ -103,7 +94,7 @@ class MediaControllerRepositoryImplTest {
     }
 
     @Test
-    fun playingMediaDevicesAvailable_sessionIsActive() {
+    fun mediaDevicesAvailable_returnsAllActiveOnes() {
         testScope.runTest {
             `when`(mediaSessionManager.getActiveSessions(any()))
                 .thenReturn(
@@ -112,51 +103,23 @@ class MediaControllerRepositoryImplTest {
                         statelessMediaController,
                         errorMediaController,
                         remoteMediaController,
-                        localMediaController
+                        localMediaController,
                     )
                 )
-            var mediaController: MediaController? = null
-            underTest.activeLocalMediaController
-                .onEach { mediaController = it }
-                .launchIn(backgroundScope)
+
+            var mediaControllers: Collection<MediaController>? = null
+            underTest.activeSessions.onEach { mediaControllers = it }.launchIn(backgroundScope)
             runCurrent()
 
-            eventsReceiver.triggerEvent(AudioManagerEvent.StreamDevicesChanged)
-            triggerOnAudioModeChanged()
-            runCurrent()
-
-            assertThat(mediaController).isSameInstanceAs(localMediaController)
-        }
-    }
-
-    @Test
-    fun noPlayingMediaDevicesAvailable_sessionIsInactive() {
-        testScope.runTest {
-            `when`(mediaSessionManager.getActiveSessions(any()))
-                .thenReturn(
-                    listOf(
-                        stoppedMediaController,
-                        statelessMediaController,
-                        errorMediaController,
-                    )
+            assertThat(mediaControllers)
+                .containsExactly(
+                    stoppedMediaController,
+                    statelessMediaController,
+                    errorMediaController,
+                    remoteMediaController,
+                    localMediaController,
                 )
-            var mediaController: MediaController? = null
-            underTest.activeLocalMediaController
-                .onEach { mediaController = it }
-                .launchIn(backgroundScope)
-            runCurrent()
-
-            eventsReceiver.triggerEvent(AudioManagerEvent.StreamDevicesChanged)
-            triggerOnAudioModeChanged()
-            runCurrent()
-
-            assertThat(mediaController).isNull()
         }
-    }
-
-    private fun triggerOnAudioModeChanged() {
-        verify(eventManager).registerCallback(callbackCaptor.capture())
-        callbackCaptor.value.onAudioModeChanged()
     }
 
     private companion object {

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
@@ -66,7 +67,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.lang.annotation.Retention;
 import java.util.List;
-import java.util.Set;
 
 /**
  * The guts of a notification revealed when performing a long press.
@@ -297,19 +297,18 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private void bindHeader() {
         // Package name
         mPkgIcon = null;
-        ApplicationInfo info;
-        try {
-            info = mPm.getApplicationInfo(
-                    mPackageName,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES
-                            | PackageManager.MATCH_DISABLED_COMPONENTS
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-            if (info != null) {
+        // filled in if missing during notification inflation, which must have happened if
+        // we have a notification to long press on
+        ApplicationInfo info =
+                mSbn.getNotification().extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO,
+                        ApplicationInfo.class);
+        if (info != null) {
+            try {
                 mAppName = String.valueOf(mPm.getApplicationLabel(info));
                 mPkgIcon = mPm.getApplicationIcon(info);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
+            } catch (Exception ignored) {}
+        }
+        if (mPkgIcon == null) {
             // app is gone, just show package name and generic icon
             mPkgIcon = mPm.getDefaultActivityIcon();
         }

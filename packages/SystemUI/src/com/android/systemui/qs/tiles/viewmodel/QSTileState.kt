@@ -29,10 +29,14 @@ import kotlin.reflect.KClass
  * [QSTileState.build] for better state creation experience and preset default values for certain
  * fields.
  *
+ * @param iconRes For when we want to have Loaded icon, but still keep a reference to the resource
+ *   id. A use case would be for tests that have to compare animated drawables.
+ *
  * // TODO(b/http://b/299909989): Clean up legacy mappings after the transition
  */
 data class QSTileState(
     val icon: () -> Icon?,
+    val iconRes: Int?,
     val label: CharSequence,
     val activationState: ActivationState,
     val secondaryLabel: CharSequence?,
@@ -50,18 +54,21 @@ data class QSTileState(
             resources: Resources,
             theme: Theme,
             config: QSTileUIConfig,
-            build: Builder.() -> Unit
+            builder: Builder.() -> Unit
         ): QSTileState {
             val iconDrawable = resources.getDrawable(config.iconRes, theme)
             return build(
                 { Icon.Loaded(iconDrawable, null) },
                 resources.getString(config.labelRes),
-                build,
+                builder,
             )
         }
 
-        fun build(icon: () -> Icon?, label: CharSequence, build: Builder.() -> Unit): QSTileState =
-            Builder(icon, label).apply(build).build()
+        fun build(
+            icon: () -> Icon?,
+            label: CharSequence,
+            builder: Builder.() -> Unit
+        ): QSTileState = Builder(icon, label).apply { builder() }.build()
     }
 
     enum class ActivationState(val legacyState: Int) {
@@ -98,12 +105,15 @@ data class QSTileState(
 
     enum class UserAction {
         CLICK,
+        TOGGLE_CLICK,
         LONG_CLICK,
     }
 
     sealed interface SideViewIcon {
         data class Custom(val icon: Icon) : SideViewIcon
+
         data object Chevron : SideViewIcon
+
         data object None : SideViewIcon
     }
 
@@ -111,6 +121,7 @@ data class QSTileState(
         var icon: () -> Icon?,
         var label: CharSequence,
     ) {
+        var iconRes: Int? = null
         var activationState: ActivationState = ActivationState.INACTIVE
         var secondaryLabel: CharSequence? = null
         var supportedActions: Set<UserAction> = setOf(UserAction.CLICK)
@@ -123,6 +134,7 @@ data class QSTileState(
         fun build(): QSTileState =
             QSTileState(
                 icon,
+                iconRes,
                 label,
                 activationState,
                 secondaryLabel,

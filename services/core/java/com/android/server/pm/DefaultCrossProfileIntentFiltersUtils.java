@@ -25,6 +25,7 @@ import static com.android.server.pm.CrossProfileIntentFilter.FLAG_IS_PACKAGE_FOR
 
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
+import android.nfc.NfcAdapter;
 import android.provider.AlarmClock;
 import android.provider.MediaStore;
 
@@ -361,6 +362,7 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addCategory(Intent.CATEGORY_DEFAULT)
                     .build();
 
+
     public static List<DefaultCrossProfileIntentFilter> getDefaultManagedProfileFilters() {
         List<DefaultCrossProfileIntentFilter> filters =
                 new ArrayList<DefaultCrossProfileIntentFilter>();
@@ -637,6 +639,33 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataType("video/*")
                     .build();
 
+    /** NFC TAG intent is always resolved by the primary user. */
+    static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_NFC_TAG_DISCOVERED =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */0,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(NfcAdapter.ACTION_TAG_DISCOVERED)
+                    .build();
+
+    /** NFC TAG intent is always resolved by the primary user. */
+    static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_NFC_TECH_DISCOVERED =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */0,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(NfcAdapter.ACTION_TECH_DISCOVERED)
+                    .build();
+
+    /** NFC TAG intent is always resolved by the primary user. */
+    static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_NFC_NDEF_DISCOVERED =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */0,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(NfcAdapter.ACTION_NDEF_DISCOVERED)
+                    .build();
+
     public static List<DefaultCrossProfileIntentFilter> getDefaultCloneProfileFilters() {
         return Arrays.asList(
                 PARENT_TO_CLONE_SEND_ACTION,
@@ -652,9 +681,35 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 CLONE_TO_PARENT_SMS_MMS,
                 CLONE_TO_PARENT_PHOTOPICKER_SELECTION,
                 CLONE_TO_PARENT_ACTION_PICK_IMAGES,
-                CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES
+                CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES,
+                PARENT_TO_CLONE_NFC_TAG_DISCOVERED,
+                PARENT_TO_CLONE_NFC_TECH_DISCOVERED,
+                PARENT_TO_CLONE_NFC_NDEF_DISCOVERED
         );
     }
+
+    /** Call intent should be handled by the main user. */
+    private static final DefaultCrossProfileIntentFilter CALL_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    SKIP_CURRENT_PROFILE,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_CALL)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addDataScheme("tel")
+                    .addDataScheme("sip")
+                    .addDataScheme("voicemail")
+                    .build();
+
+    /** Pressing the call button should be handled by the main user. */
+    private static final DefaultCrossProfileIntentFilter CALL_BUTTON_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_CALL_BUTTON)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
 
     /** Dial intent with mime type can be handled by either private profile or its parent user. */
     private static final DefaultCrossProfileIntentFilter DIAL_MIME_PRIVATE_PROFILE =
@@ -702,11 +757,11 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addCategory(Intent.CATEGORY_BROWSABLE)
                     .build();
 
-    /** SMS and MMS can be handled by the private profile or by the parent user. */
+    /** SMS and MMS are always handled in the main user. */
     private static final DefaultCrossProfileIntentFilter SMS_MMS_PRIVATE_PROFILE =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
-                    ONLY_IF_NO_MATCH_FOUND,
+                    SKIP_CURRENT_PROFILE,
                     /* letsPersonalDataIntoProfile= */ false)
                     .addAction(Intent.ACTION_VIEW)
                     .addAction(Intent.ACTION_SENDTO)
@@ -723,6 +778,10 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 DIAL_MIME_PRIVATE_PROFILE,
                 DIAL_DATA_PRIVATE_PROFILE,
                 DIAL_RAW_PRIVATE_PROFILE,
+                CALL_PRIVATE_PROFILE,
+                CALL_BUTTON_PRIVATE_PROFILE,
+                EMERGENCY_CALL_DATA,
+                EMERGENCY_CALL_MIME,
                 SMS_MMS_PRIVATE_PROFILE
         );
     }

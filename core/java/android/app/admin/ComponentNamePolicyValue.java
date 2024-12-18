@@ -16,8 +16,6 @@
 
 package android.app.admin;
 
-import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -32,9 +30,7 @@ public final class ComponentNamePolicyValue extends PolicyValue<ComponentName> {
 
     public ComponentNamePolicyValue(@NonNull ComponentName value) {
         super(value);
-        if (devicePolicySizeTrackingEnabled()) {
-            PolicySizeVerifier.enforceMaxComponentNameLength(value);
-        }
+        PolicySizeVerifier.enforceMaxComponentNameLength(value);
     }
 
     private ComponentNamePolicyValue(Parcel source) {

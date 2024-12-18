@@ -51,6 +51,9 @@ public class GlobalSettingsValidators {
     public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
 
     static {
+        VALIDATORS.put(Global.CONNECTED_APPS_ALLOWED_PACKAGES, new PackageNameListValidator((",")));
+        VALIDATORS.put(Global.CONNECTED_APPS_DISALLOWED_PACKAGES,
+                new PackageNameListValidator((",")));
         VALIDATORS.put(Global.APPLY_RAMPING_RINGER, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.BUGREPORT_IN_POWER_MENU, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
@@ -161,10 +164,6 @@ public class GlobalSettingsValidators {
                 Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.BLUETOOTH_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.CLOCKWORK_HOME_READY, ANY_STRING_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE,
-                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
-        VALIDATORS.put(Global.TARE_ALARM_MANAGER_CONSTANTS, ANY_STRING_VALIDATOR);
-        VALIDATORS.put(Global.TARE_JOB_SCHEDULER_CONSTANTS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.PRIVATE_DNS_MODE, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.PRIVATE_DNS_SPECIFIER, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.SOFT_AP_TIMEOUT_ENABLED, BOOLEAN_VALIDATOR);
@@ -341,7 +340,8 @@ public class GlobalSettingsValidators {
                         new String[] {
                             String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN),
                             String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_ANDROID),
-                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS)
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_NONE)
                         }));
         VALIDATORS.put(
                 Global.Wearable.COMPANION_BLE_ROLE,
@@ -419,6 +419,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_HARD_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.VIBRATE_FOR_ACTIVE_UNLOCK, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
@@ -445,13 +446,21 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_TETHERED),
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_RESTRICTED)
                         }));
-        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_SUPPORTED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WEAR_LAUNCHER_UI_MODE, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WEAR_POWER_ANOMALY_SERVICE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.CONNECTIVITY_KEEP_DATA_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.WRIST_DETECTION_AUTO_LOCKING_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Global.Wearable.CONSISTENT_NOTIFICATION_BLOCKING_ENABLED, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AUTO_BEDTIME_MODE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.FORCE_ENABLE_PSS_PROFILING, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.ADD_USERS_WHEN_LOCKED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.REMOVE_GUEST_ON_EXIT, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.USER_SWITCHER_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE,
+            new InclusiveIntegerRangeValidator(
+                Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_NONE,
+                Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_COMPANION
+        ));
     }
 }

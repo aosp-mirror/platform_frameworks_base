@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.ravenwood.annotation.RavenwoodReplace;
 import android.util.ArraySet;
 import android.util.EmptyArray;
 
@@ -39,6 +40,10 @@ import java.util.function.IntFunction;
 
 /**
  * Static utility methods for arrays that aren't already included in {@link java.util.Arrays}.
+ * <p>
+ * Test with:
+ * <code>atest FrameworksUtilTests:com.android.internal.util.ArrayUtilsTest</code>
+ * <code>atest FrameworksUtilTestsRavenwood:com.android.internal.util.ArrayUtilsTest</code>
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ArrayUtils {
@@ -49,79 +54,102 @@ public class ArrayUtils {
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     public static byte[] newUnpaddedByteArray(int minLen) {
         return (byte[])VMRuntime.getRuntime().newUnpaddedArray(byte.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     public static char[] newUnpaddedCharArray(int minLen) {
         return (char[])VMRuntime.getRuntime().newUnpaddedArray(char.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int[] newUnpaddedIntArray(int minLen) {
         return (int[])VMRuntime.getRuntime().newUnpaddedArray(int.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     public static boolean[] newUnpaddedBooleanArray(int minLen) {
         return (boolean[])VMRuntime.getRuntime().newUnpaddedArray(boolean.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     public static long[] newUnpaddedLongArray(int minLen) {
         return (long[])VMRuntime.getRuntime().newUnpaddedArray(long.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     public static float[] newUnpaddedFloatArray(int minLen) {
         return (float[])VMRuntime.getRuntime().newUnpaddedArray(float.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     public static Object[] newUnpaddedObjectArray(int minLen) {
         return (Object[])VMRuntime.getRuntime().newUnpaddedArray(Object.class, minLen);
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SuppressWarnings("unchecked")
     public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {
         return (T[])VMRuntime.getRuntime().newUnpaddedArray(clazz, minLen);
     }
 
-    public static byte[] newUnpaddedByteArray$ravenwood(int minLen) {
-        return new byte[minLen];
+    /**
+     * This is like <code>new byte[length]</code>, but it allocates the array as non-movable. This
+     * prevents copies of the data from being left on the Java heap as a result of heap compaction.
+     * Use this when the array will contain sensitive data such as a password or cryptographic key
+     * that needs to be wiped from memory when no longer needed. The owner of the array is still
+     * responsible for the zeroization; {@link #zeroize(byte[])} should be used to do so.
+     *
+     * @param length the length of the array to allocate
+     * @return the new array
+     */
+    public static byte[] newNonMovableByteArray(int length) {
+        return (byte[]) VMRuntime.getRuntime().newNonMovableArray(byte.class, length);
     }
 
-    public static char[] newUnpaddedCharArray$ravenwood(int minLen) {
-        return new char[minLen];
+    /**
+     * Like {@link #newNonMovableByteArray(int)}, but allocates a char array.
+     *
+     * @param length the length of the array to allocate
+     * @return the new array
+     */
+    public static char[] newNonMovableCharArray(int length) {
+        return (char[]) VMRuntime.getRuntime().newNonMovableArray(char.class, length);
     }
 
-    public static int[] newUnpaddedIntArray$ravenwood(int minLen) {
-        return new int[minLen];
+    /**
+     * Zeroizes a byte array as securely as possible. Use this when the array contains sensitive
+     * data such as a password or cryptographic key.
+     * <p>
+     * This zeroizes the array in a way that is guaranteed to not be optimized out by the compiler.
+     * If supported by the architecture, it zeroizes the data not just in the L1 data cache but also
+     * in other levels of the memory hierarchy up to and including main memory (but not above that).
+     * <p>
+     * This works on any <code>byte[]</code>, but to ensure that copies of the array aren't left on
+     * the Java heap the array should have been allocated with {@link #newNonMovableByteArray(int)}.
+     * Use on other arrays might also introduce performance anomalies.
+     *
+     * @param array the array to zeroize. If null, this method has no effect.
+     */
+    @RavenwoodReplace public static native void zeroize(byte[] array);
+
+    /**
+     * Replacement of the above method for host-side unit testing that doesn't support JNI yet.
+     */
+    public static void zeroize$ravenwood(byte[] array) {
+        if (array != null) {
+            Arrays.fill(array, (byte) 0);
+        }
     }
 
-    public static boolean[] newUnpaddedBooleanArray$ravenwood(int minLen) {
-        return new boolean[minLen];
-    }
+    /**
+     * Like {@link #zeroize(byte[])}, but for char arrays.
+     */
+    @RavenwoodReplace public static native void zeroize(char[] array);
 
-    public static long[] newUnpaddedLongArray$ravenwood(int minLen) {
-        return new long[minLen];
-    }
-
-    public static float[] newUnpaddedFloatArray$ravenwood(int minLen) {
-        return new float[minLen];
-    }
-
-    public static Object[] newUnpaddedObjectArray$ravenwood(int minLen) {
-        return new Object[minLen];
-    }
-
-    public static <T> T[] newUnpaddedArray$ravenwood(Class<T> clazz, int minLen) {
-        return (T[]) Array.newInstance(clazz, minLen);
+    /**
+     * Replacement of the above method for host-side unit testing that doesn't support JNI yet.
+     */
+    public static void zeroize$ravenwood(char[] array) {
+        if (array != null) {
+            Arrays.fill(array, (char) 0);
+        }
     }
 
     /**
@@ -620,10 +648,10 @@ public class ArrayUtils {
     }
 
     /**
-     * Adds value to given array if not already present, providing set-like
-     * behavior.
+     * Adds value to given array. The method allows duplicate values.
      */
-    public static boolean[] appendBoolean(@Nullable boolean[] cur, boolean val) {
+    public static boolean[] appendBooleanDuplicatesAllowed(@Nullable boolean[] cur,
+            boolean val) {
         if (cur == null) {
             return new boolean[] { val };
         }

@@ -85,6 +85,17 @@ final class HandwritingEventReceiverSurface {
         mIsIntercepting = true;
     }
 
+    void setNotTouchable(boolean notTouchable) {
+        if (notTouchable) {
+            mWindowHandle.inputConfig |= InputConfig.NOT_TOUCHABLE;
+        } else {
+            mWindowHandle.inputConfig &=  ~InputConfig.NOT_TOUCHABLE;
+        }
+        new SurfaceControl.Transaction()
+                .setInputWindowInfo(mInputSurface, mWindowHandle)
+                .apply();
+    }
+
     boolean isIntercepting() {
         return mIsIntercepting;
     }

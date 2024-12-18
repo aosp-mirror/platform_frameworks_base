@@ -50,10 +50,11 @@ constructor(
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_DARK_THEME_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

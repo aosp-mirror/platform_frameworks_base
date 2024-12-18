@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
@@ -25,10 +26,13 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
+import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
+import com.android.systemui.qs.tiles.impl.custom.di.QSTileConfigModule
+import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.di.QSTileComponent
-import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
+import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -47,7 +51,7 @@ sealed interface QSTileViewModelFactory<T> {
      * binding them together. This achieves a DI scope that lives along the instance of
      * [QSTileViewModelImpl].
      */
-    class Component<T>
+    class Component
     @Inject
     constructor(
         private val disabledByPolicyInteractor: DisabledByPolicyInteractor,
@@ -58,7 +62,9 @@ sealed interface QSTileViewModelFactory<T> {
         private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
-    ) : QSTileViewModelFactory<T> {
+        @UiBackground private val uiBackgroundDispatcher: CoroutineDispatcher,
+        private val customTileComponentBuilder: CustomTileComponent.Builder,
+    ) : QSTileViewModelFactory<CustomTileDataModel> {
 
         /**
          * Creates [QSTileViewModelImpl] based on the interactors obtained from [QSTileComponent].
@@ -66,10 +72,10 @@ sealed interface QSTileViewModelFactory<T> {
          */
         fun create(
             tileSpec: TileSpec,
-            componentFactory: (config: QSTileConfig) -> QSTileComponent<T>
-        ): QSTileViewModelImpl<T> {
+        ): QSTileViewModel {
             val config = qsTileConfigProvider.getConfig(tileSpec.spec)
-            val component = componentFactory(config)
+            val component =
+                customTileComponentBuilder.qsTileConfigModule(QSTileConfigModule(config)).build()
             return QSTileViewModelImpl(
                 config,
                 component::userActionInteractor,
@@ -82,6 +88,7 @@ sealed interface QSTileViewModelFactory<T> {
                 qsTileLogger,
                 systemClock,
                 backgroundDispatcher,
+                uiBackgroundDispatcher,
                 component.coroutineScope(),
             )
         }
@@ -102,6 +109,7 @@ sealed interface QSTileViewModelFactory<T> {
         private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
+        @UiBackground private val uiBackgroundDispatcher: CoroutineDispatcher,
         private val coroutineScopeFactory: QSTileCoroutineScopeFactory,
     ) : QSTileViewModelFactory<T> {
 
@@ -132,6 +140,7 @@ sealed interface QSTileViewModelFactory<T> {
                 qsTileLogger,
                 systemClock,
                 backgroundDispatcher,
+                uiBackgroundDispatcher,
                 coroutineScopeFactory.create(),
             )
     }

@@ -16,14 +16,19 @@
 
 package android.view;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.graphics.RenderNode;
+
+import androidx.annotation.NonNull;
 
 /**
  * Maps a View to a RenderNode's AnimationHost
  *
  * @hide
  */
-public class ViewAnimationHostBridge implements RenderNode.AnimationHost {
+public class ViewAnimationHostBridge extends AnimatorListenerAdapter
+        implements RenderNode.AnimationHost {
     private final View mView;
 
     /**
@@ -34,17 +39,35 @@ public class ViewAnimationHostBridge implements RenderNode.AnimationHost {
     }
 
     @Override
-    public void registerAnimatingRenderNode(RenderNode animator) {
-        mView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(animator);
+    public void registerAnimatingRenderNode(RenderNode renderNode, Animator animator) {
+        mView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(renderNode);
+        animator.addListener(this);
     }
 
     @Override
     public void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator) {
         mView.mAttachInfo.mViewRootImpl.registerVectorDrawableAnimator(animator);
+        animator.setThreadedRendererAnimatorListener(this);
     }
 
     @Override
     public boolean isAttached() {
         return mView.mAttachInfo != null;
+    }
+
+    @Override
+    public void onAnimationStart(@NonNull Animator animation) {
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.addThreadedRendererView(mView);
+        }
+    }
+
+    @Override
+    public void onAnimationEnd(@NonNull Animator animation) {
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        if (viewRoot != null) {
+            viewRoot.removeThreadedRendererView(mView);
+        }
     }
 }

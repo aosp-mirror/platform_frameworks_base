@@ -191,6 +191,8 @@ public class PackageArchiverTest {
         when(mContext.checkCallingOrSelfPermission(
                 eq(Manifest.permission.REQUEST_DELETE_PACKAGES))).thenReturn(
                 PackageManager.PERMISSION_DENIED);
+        when(mContext.createPackageContextAsUser(
+                eq(INSTALLER_PACKAGE), anyInt(), eq(UserHandle.CURRENT))).thenReturn(mContext);
 
         when(mAppOpsManager.checkOp(
                 eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
@@ -264,8 +266,8 @@ public class PackageArchiverTest {
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any(),
-                any(), any());
+        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(),
+                (Bundle) any(), any(), any());
         Intent value = intentCaptor.getValue();
         assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
         assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(
@@ -334,8 +336,8 @@ public class PackageArchiverTest {
         rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any(),
-                any(), any());
+        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(),
+                (Bundle) any(), any(), any());
         Intent value = intentCaptor.getValue();
         assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
         assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(

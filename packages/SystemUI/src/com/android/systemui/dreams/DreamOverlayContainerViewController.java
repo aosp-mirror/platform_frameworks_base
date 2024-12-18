@@ -16,14 +16,19 @@
 
 package com.android.systemui.dreams;
 
+import static android.service.dreams.Flags.dreamHandlesBeingObscured;
+
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
 import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.animation.Animator;
+import android.app.DreamManager;
 import android.content.res.Resources;
 import android.graphics.Region;
 import android.os.Handler;
@@ -33,17 +38,29 @@ import android.view.ViewGroup;
 
 import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
-import com.android.systemui.res.R;
+import com.android.systemui.ambient.statusbar.ui.AmbientStatusBarViewController;
+import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.complication.ComplicationHostViewController;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
-import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.ViewController;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.DisposableHandle;
+import kotlinx.coroutines.flow.FlowKt;
 
 import java.util.Arrays;
 
@@ -57,11 +74,16 @@ import javax.inject.Named;
 public class DreamOverlayContainerViewController extends
         ViewController<DreamOverlayContainerView> implements
         LowLightTransitionCoordinator.LowLightEnterListener {
-    private final DreamOverlayStatusBarViewController mStatusBarViewController;
+    private final AmbientStatusBarViewController mStatusBarViewController;
+    private final TouchInsetManager.TouchInsetSession mTouchInsetSession;
     private final BlurUtils mBlurUtils;
     private final DreamOverlayAnimationsController mDreamOverlayAnimationsController;
     private final DreamOverlayStateController mStateController;
+
     private final LowLightTransitionCoordinator mLowLightTransitionCoordinator;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final ShadeInteractor mShadeInteractor;
+    private final CommunalInteractor mCommunalInteractor;
 
     private final ComplicationHostViewController mComplicationHostViewController;
 
@@ -81,13 +103,16 @@ public class DreamOverlayContainerViewController extends
 
     // Main thread handler used to schedule periodic tasks (e.g. burn-in protection updates).
     private final Handler mHandler;
+    private final CoroutineDispatcher mBackgroundDispatcher;
     private final int mDreamOverlayMaxTranslationY;
     private final PrimaryBouncerCallbackInteractor mPrimaryBouncerCallbackInteractor;
+    private final DreamManager mDreamManager;
 
     private long mJitterStartTimeMillis;
 
     private boolean mBouncerAnimating;
     private boolean mWakingUpFromSwipe;
+    private boolean mAnyBouncerShowing;
 
     private final BouncerlessScrimController mBouncerlessScrimController;
 
@@ -161,15 +186,19 @@ public class DreamOverlayContainerViewController extends
                 }
             };
 
+    private DisposableHandle mFlowHandle;
+
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
             ComplicationHostViewController complicationHostViewController,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
-            DreamOverlayStatusBarViewController statusBarViewController,
+            AmbientStatusBarViewController statusBarViewController,
             LowLightTransitionCoordinator lowLightTransitionCoordinator,
+            TouchInsetManager.TouchInsetSession touchInsetSession,
             BlurUtils blurUtils,
             @Main Handler handler,
+            @Background CoroutineDispatcher backgroundDispatcher,
             @Main Resources resources,
             @Named(DreamOverlayModule.MAX_BURN_IN_OFFSET) int maxBurnInOffset,
             @Named(DreamOverlayModule.BURN_IN_PROTECTION_UPDATE_INTERVAL) long
@@ -178,17 +207,25 @@ public class DreamOverlayContainerViewController extends
             PrimaryBouncerCallbackInteractor primaryBouncerCallbackInteractor,
             DreamOverlayAnimationsController animationsController,
             DreamOverlayStateController stateController,
-            BouncerlessScrimController bouncerlessScrimController) {
+            BouncerlessScrimController bouncerlessScrimController,
+            KeyguardTransitionInteractor keyguardTransitionInteractor,
+            ShadeInteractor shadeInteractor,
+            CommunalInteractor communalInteractor,
+            DreamManager dreamManager) {
         super(containerView);
         mDreamOverlayContentView = contentView;
         mStatusBarViewController = statusBarViewController;
+        mTouchInsetSession = touchInsetSession;
         mBlurUtils = blurUtils;
         mDreamOverlayAnimationsController = animationsController;
         mStateController = stateController;
+        mCommunalInteractor = communalInteractor;
         mLowLightTransitionCoordinator = lowLightTransitionCoordinator;
 
         mBouncerlessScrimController = bouncerlessScrimController;
-        mBouncerlessScrimController.addCallback(mBouncerlessExpansionCallback);
+
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mShadeInteractor = shadeInteractor;
 
         mComplicationHostViewController = complicationHostViewController;
         mDreamOverlayMaxTranslationY = resources.getDimensionPixelSize(
@@ -200,10 +237,12 @@ public class DreamOverlayContainerViewController extends
                         ViewGroup.LayoutParams.MATCH_PARENT));
 
         mHandler = handler;
+        mBackgroundDispatcher = backgroundDispatcher;
         mMaxBurnInOffset = maxBurnInOffset;
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
         mMillisUntilFullJitter = millisUntilFullJitter;
         mPrimaryBouncerCallbackInteractor = primaryBouncerCallbackInteractor;
+        mDreamManager = dreamManager;
     }
 
     @Override
@@ -216,14 +255,48 @@ public class DreamOverlayContainerViewController extends
     }
 
     @Override
+    public void destroy() {
+        mStateController.removeCallback(mDreamOverlayStateCallback);
+        mStatusBarViewController.destroy();
+        mComplicationHostViewController.destroy();
+        mDreamOverlayAnimationsController.destroy();
+        mLowLightTransitionCoordinator.setLowLightEnterListener(null);
+
+        super.destroy();
+    }
+
+    @Override
     protected void onViewAttached() {
         mWakingUpFromSwipe = false;
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        mBouncerlessScrimController.addCallback(mBouncerlessExpansionCallback);
         final Region emptyRegion = Region.obtain();
         mView.getRootSurfaceControl().setTouchableRegion(emptyRegion);
         emptyRegion.recycle();
+
+        if (dreamHandlesBeingObscured()) {
+            mFlowHandle = collectFlow(
+                    mView,
+                    FlowKt.distinctUntilChanged(combineFlows(
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    Scenes.Bouncer, KeyguardState.PRIMARY_BOUNCER),
+                            mKeyguardTransitionInteractor.isFinishedIn(
+                                    KeyguardState.ALTERNATE_BOUNCER),
+                            mShadeInteractor.isAnyExpanded(),
+                            mCommunalInteractor.isCommunalShowing(),
+                            (primaryBouncerShowing,
+                                    alternateBouncerShowing,
+                                    shadeExpanded,
+                                    communalShowing) -> {
+                                mAnyBouncerShowing = primaryBouncerShowing
+                                        || alternateBouncerShowing;
+                                return mAnyBouncerShowing || shadeExpanded || communalShowing;
+                            })),
+                    mDreamManager::setDreamIsObscured,
+                    mBackgroundDispatcher);
+        }
 
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {
@@ -236,14 +309,24 @@ public class DreamOverlayContainerViewController extends
 
     @Override
     protected void onViewDetached() {
-        mHandler.removeCallbacks(this::updateBurnInOffsets);
+        if (mFlowHandle != null) {
+            mFlowHandle.dispose();
+            mFlowHandle = null;
+        }
+        mHandler.removeCallbacksAndMessages(null);
         mPrimaryBouncerCallbackInteractor.removeBouncerExpansionCallback(mBouncerExpansionCallback);
+        mBouncerlessScrimController.removeCallback(mBouncerlessExpansionCallback);
+        mTouchInsetSession.clear();
 
         mDreamOverlayAnimationsController.cancelAnimations();
     }
 
     View getContainerView() {
         return mView;
+    }
+
+    boolean isBouncerShowing() {
+        return mAnyBouncerShowing;
     }
 
     private void updateBurnInOffsets() {
@@ -298,16 +381,17 @@ public class DreamOverlayContainerViewController extends
     }
 
     /**
-     * Handle the dream waking up and run any necessary animations.
+     * Handle the dream waking up.
      */
-    public void wakeUp() {
+    public void onWakeUp() {
+        // TODO(b/361872929): clean up this bool as it doesn't do anything anymore
         // When swiping causes wakeup, do not run any animations as the dream should exit as soon
         // as possible.
         if (mWakingUpFromSwipe) {
             return;
         }
 
-        mDreamOverlayAnimationsController.wakeUp();
+        mDreamOverlayAnimationsController.onWakeUp();
     }
 
     @Override

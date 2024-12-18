@@ -18,7 +18,9 @@ package com.android.systemui.communal.domain.model
 
 import android.appwidget.AppWidgetProviderInfo
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
+import android.content.ComponentName
 import android.content.pm.ApplicationInfo
+import android.graphics.Bitmap
 import android.widget.RemoteViews
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
@@ -32,12 +34,18 @@ sealed interface CommunalContentModel {
     /** Size to be rendered in the grid. */
     val size: CommunalContentSize
 
+    /** The minimum size content can be resized to. */
+    val minSize: CommunalContentSize
+        get() = CommunalContentSize.HALF
+
     /**
      * A type of communal content is ongoing / live / ephemeral, and can be sized and ordered
      * dynamically.
      */
     sealed interface Ongoing : CommunalContentModel {
         override var size: CommunalContentSize
+        override val minSize
+            get() = CommunalContentSize.THIRD
 
         /** Timestamp in milliseconds of when the content was created. */
         val createdTimestampMillis: Long
@@ -45,14 +53,18 @@ sealed interface CommunalContentModel {
 
     sealed interface WidgetContent : CommunalContentModel {
         val appWidgetId: Int
-        val providerInfo: AppWidgetProviderInfo
+        val rank: Int
+        val componentName: ComponentName
 
         data class Widget(
             override val appWidgetId: Int,
-            override val providerInfo: AppWidgetProviderInfo,
+            override val rank: Int,
+            val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
+            val inQuietMode: Boolean,
         ) : WidgetContent {
             override val key = KEY.widget(appWidgetId)
+            override val componentName: ComponentName = providerInfo.provider
             // Widget size is always half.
             override val size = CommunalContentSize.HALF
 
@@ -65,14 +77,27 @@ sealed interface CommunalContentModel {
 
         data class DisabledWidget(
             override val appWidgetId: Int,
-            override val providerInfo: AppWidgetProviderInfo
+            override val rank: Int,
+            val providerInfo: AppWidgetProviderInfo,
         ) : WidgetContent {
             override val key = KEY.disabledWidget(appWidgetId)
+            override val componentName: ComponentName = providerInfo.provider
             // Widget size is always half.
             override val size = CommunalContentSize.HALF
 
             val appInfo: ApplicationInfo?
                 get() = providerInfo.providerInfo?.applicationInfo
+        }
+
+        data class PendingWidget(
+            override val appWidgetId: Int,
+            override val rank: Int,
+            override val componentName: ComponentName,
+            val icon: Bitmap? = null,
+        ) : WidgetContent {
+            override val key = KEY.pendingWidget(appWidgetId)
+            // Widget size is always half.
+            override val size = CommunalContentSize.HALF
         }
     }
 
@@ -90,17 +115,7 @@ sealed interface CommunalContentModel {
         override val size = CommunalContentSize.HALF
     }
 
-    /** A CTA tile in the glanceable hub edit model which remains visible in the grid. */
-    class CtaTileInEditMode : CommunalContentModel {
-        override val key: String = KEY.CTA_TILE_IN_EDIT_MODE_KEY
-        // Same as widget size.
-        override val size = CommunalContentSize.HALF
-    }
-
-    class Tutorial(
-        id: Int,
-        override var size: CommunalContentSize,
-    ) : CommunalContentModel {
+    class Tutorial(id: Int, override var size: CommunalContentSize) : CommunalContentModel {
         override val key = KEY.tutorial(id)
     }
 
@@ -116,6 +131,7 @@ sealed interface CommunalContentModel {
     class Umo(
         override val createdTimestampMillis: Long,
         override var size: CommunalContentSize = CommunalContentSize.HALF,
+        override var minSize: CommunalContentSize = CommunalContentSize.HALF,
     ) : Ongoing {
         override val key = KEY.umo()
     }
@@ -131,6 +147,10 @@ sealed interface CommunalContentModel {
 
             fun disabledWidget(id: Int): String {
                 return "disabled_widget_$id"
+            }
+
+            fun pendingWidget(id: Int): String {
+                return "pending_widget_$id"
             }
 
             fun widgetPlaceholder(): String {
@@ -152,4 +172,6 @@ sealed interface CommunalContentModel {
     }
 
     fun isWidgetContent() = this is WidgetContent
+
+    fun isLiveContent() = this is Smartspace || this is Umo
 }

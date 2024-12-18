@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Switch;
 
 import androidx.annotation.Nullable;
@@ -32,6 +31,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -47,6 +47,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.screenrecord.data.model.ScreenRecordModel;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -118,13 +119,13 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         if (mController.isStarting()) {
             cancelCountdown();
         } else if (mController.isRecording()) {
             stopRecording();
         } else {
-            mUiHandler.post(() -> showPrompt(view));
+            mUiHandler.post(() -> showPrompt(expandable));
         }
         refreshState();
     }
@@ -146,8 +147,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         if (isRecording) {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_stop);
         } else if (isStarting) {
-            // round, since the timer isn't exact
-            int countdown = (int) Math.floorDiv(mMillisUntilFinished + 500, 1000);
+            int countdown =
+                    (int) ScreenRecordModel.Starting.Companion.toCountdownSeconds(
+                            mMillisUntilFinished);
             state.secondaryLabel = String.format("%d...", countdown);
         } else {
             state.secondaryLabel = mContext.getString(R.string.quick_settings_screen_record_start);
@@ -174,10 +176,11 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         return mContext.getString(R.string.quick_settings_screen_record_label);
     }
 
-    private void showPrompt(@Nullable View view) {
+    private void showPrompt(@Nullable Expandable expandable) {
         // We animate from the touched view only if we are not on the keyguard, given that if we
         // are we will dismiss it which will also collapse the shade.
-        boolean shouldAnimateFromView = view != null && !mKeyguardStateController.isShowing();
+        boolean shouldAnimateFromExpandable =
+                expandable != null && !mKeyguardStateController.isShowing();
 
         // Create the recording dialog that will collapse the shade only if we start the recording.
         Runnable onStartRecordingClicked = () -> {
@@ -192,10 +195,17 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
                 mDialogTransitionAnimator, mActivityStarter, onStartRecordingClicked);
 
         ActivityStarter.OnDismissAction dismissAction = () -> {
-            if (shouldAnimateFromView) {
-                mDialogTransitionAnimator.showFromView(dialog, view, new DialogCuj(
-                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG),
-                        /* animateBackgroundBoundsChange= */ true);
+            if (shouldAnimateFromExpandable) {
+                DialogTransitionAnimator.Controller controller =
+                        expandable.dialogTransitionController(new DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG));
+                if (controller != null) {
+                    mDialogTransitionAnimator.show(dialog,
+                            controller, /* animateBackgroundBoundsChange= */ true);
+                } else {
+                    dialog.show();
+                }
             } else {
                 dialog.show();
             }

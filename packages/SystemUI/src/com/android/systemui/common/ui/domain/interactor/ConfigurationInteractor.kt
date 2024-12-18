@@ -25,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -48,6 +49,12 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
             }
         }
 
+    /** Returns the unadjusted screen size. */
+    val maxBounds: Flow<Rect> =
+        repository.configurationValues
+            .map { Rect(it.windowConfiguration.maxBounds) }
+            .distinctUntilChanged()
+
     /**
      * Returns screen size adjusted to rotation, so returned screen sizes are stable across all
      * rotations, could be useful if you need to react to screen resize (e.g. fold/unfold on
@@ -56,9 +63,23 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
     val naturalMaxBounds: Flow<Rect> =
         repository.configurationValues.map { it.naturalScreenBounds }.distinctUntilChanged()
 
+    /**
+     * The layout direction. Will be either `View#LAYOUT_DIRECTION_LTR` or
+     * `View#LAYOUT_DIRECTION_RTL`.
+     */
+    val layoutDirection: Flow<Int> =
+        repository.configurationValues.map { it.layoutDirection }.distinctUntilChanged()
+
     /** Given [resourceId], emit the dimension pixel size on config change */
     fun dimensionPixelSize(resourceId: Int): Flow<Int> {
         return onAnyConfigurationChange.mapLatest { repository.getDimensionPixelSize(resourceId) }
+    }
+
+    /** Emits the dimensional pixel size of the given resource, inverting it for RTL if necessary */
+    fun directionalDimensionPixelSize(originLayoutDirection: Int, resourceId: Int): Flow<Int> {
+        return dimensionPixelSize(resourceId).combine(layoutDirection) { size, direction ->
+            if (originLayoutDirection == direction) size else -size
+        }
     }
 
     /** Given a set of [resourceId]s, emit Map<ResourceId, DimensionPixelSize> on config change */

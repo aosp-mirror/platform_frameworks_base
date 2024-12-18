@@ -24,15 +24,16 @@ import android.window.IWindowContainerToken
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50
-import com.android.wm.shell.util.GroupedRecentTaskInfo
-import com.android.wm.shell.util.GroupedRecentTaskInfo.CREATOR
-import com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_FREEFORM
-import com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_SINGLE
-import com.android.wm.shell.util.GroupedRecentTaskInfo.TYPE_SPLIT
-import com.android.wm.shell.util.SplitBounds
+import com.android.wm.shell.shared.GroupedRecentTaskInfo
+import com.android.wm.shell.shared.GroupedRecentTaskInfo.CREATOR
+import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_FREEFORM
+import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SINGLE
+import com.android.wm.shell.shared.GroupedRecentTaskInfo.TYPE_SPLIT
+import com.android.wm.shell.shared.split.SplitBounds
+import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -86,16 +87,27 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
 
     @Test
     fun testFreeformTasks_hasCorrectType() {
-        assertThat(freeformTasksGroupInfo().type).isEqualTo(TYPE_FREEFORM)
+        assertThat(freeformTasksGroupInfo(freeformTaskIds = arrayOf(1)).type)
+            .isEqualTo(TYPE_FREEFORM)
     }
 
     @Test
-    fun testSplitTasks_taskInfoList_hasThreeTasks() {
-        val list = freeformTasksGroupInfo().taskInfoList
+    fun testCreateFreeformTasks_hasCorrectNumberOfTasks() {
+        val list = freeformTasksGroupInfo(freeformTaskIds = arrayOf(1, 2, 3)).taskInfoList
         assertThat(list).hasSize(3)
         assertThat(list[0].taskId).isEqualTo(1)
         assertThat(list[1].taskId).isEqualTo(2)
         assertThat(list[2].taskId).isEqualTo(3)
+    }
+
+    @Test
+    fun testCreateFreeformTasks_nonExistentMinimizedTaskId_throwsException() {
+        assertThrows(IllegalArgumentException::class.java) {
+            freeformTasksGroupInfo(
+                freeformTaskIds = arrayOf(1, 2, 3),
+                minimizedTaskIds = arrayOf(1, 4)
+            )
+        }
     }
 
     @Test
@@ -129,7 +141,7 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
 
     @Test
     fun testParcelling_freeformTasks() {
-        val recentTaskInfo = freeformTasksGroupInfo()
+        val recentTaskInfo = freeformTasksGroupInfo(freeformTaskIds = arrayOf(1, 2, 3))
         val parcel = Parcel.obtain()
         recentTaskInfo.writeToParcel(parcel, 0)
         parcel.setDataPosition(0)
@@ -143,6 +155,21 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         )
         assertThat(recentTaskInfoParcel.taskInfoList).comparingElementsUsing(taskIdComparator)
             .containsExactly(1, 2, 3)
+    }
+
+    @Test
+    fun testParcelling_freeformTasks_minimizedTasks() {
+        val recentTaskInfo = freeformTasksGroupInfo(
+            freeformTaskIds = arrayOf(1, 2, 3), minimizedTaskIds = arrayOf(2))
+
+        val parcel = Parcel.obtain()
+        recentTaskInfo.writeToParcel(parcel, 0)
+        parcel.setDataPosition(0)
+
+        // Read the object back from the parcel
+        val recentTaskInfoParcel = CREATOR.createFromParcel(parcel)
+        assertThat(recentTaskInfoParcel.type).isEqualTo(TYPE_FREEFORM)
+        assertThat(recentTaskInfoParcel.minimizedTaskIds).isEqualTo(arrayOf(2).toIntArray())
     }
 
     private fun createTaskInfo(id: Int) = ActivityManager.RecentTaskInfo().apply {
@@ -162,10 +189,12 @@ class GroupedRecentTaskInfoTest : ShellTestCase() {
         return GroupedRecentTaskInfo.forSplitTasks(task1, task2, splitBounds)
     }
 
-    private fun freeformTasksGroupInfo(): GroupedRecentTaskInfo {
-        val task1 = createTaskInfo(id = 1)
-        val task2 = createTaskInfo(id = 2)
-        val task3 = createTaskInfo(id = 3)
-        return GroupedRecentTaskInfo.forFreeformTasks(task1, task2, task3)
+    private fun freeformTasksGroupInfo(
+        freeformTaskIds: Array<Int>,
+        minimizedTaskIds: Array<Int> = emptyArray()
+    ): GroupedRecentTaskInfo {
+        return GroupedRecentTaskInfo.forFreeformTasks(
+            freeformTaskIds.map { createTaskInfo(it) }.toTypedArray(),
+            minimizedTaskIds.toSet())
     }
 }

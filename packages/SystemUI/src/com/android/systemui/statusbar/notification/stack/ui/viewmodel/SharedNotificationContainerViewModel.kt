@@ -19,61 +19,72 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.shared.model.NotificationContainerBounds
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
-import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
-import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
-import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
-import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.keyguard.ui.viewmodel.AodToOccludedTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DozingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DozingToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.GoneToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToAodTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -95,17 +106,22 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
-    communalInteractor: CommunalInteractor,
+    private val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
+    private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
+    dozingToGlanceableHubTransitionViewModel: DozingToGlanceableHubTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
+    private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
     private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
     private val goneToDreamingTransitionViewModel: GoneToDreamingTransitionViewModel,
+    private val goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
     private val lockscreenToGlanceableHubTransitionViewModel:
         LockscreenToGlanceableHubTransitionViewModel,
@@ -114,30 +130,32 @@ constructor(
         LockscreenToPrimaryBouncerTransitionViewModel,
     private val lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
+    private val occludedToGoneTransitionViewModel: OccludedToGoneTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    private val communalSceneInteractor: CommunalSceneInteractor,
+    unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
-    private val statesForConstrainedNotifications: Set<KeyguardState> =
-        setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
 
-    private val lockscreenToGlanceableHubRunning =
-        keyguardTransitionInteractor
-            .transition(LOCKSCREEN, GLANCEABLE_HUB)
-            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
-            .distinctUntilChanged()
-            .onStart { emit(false) }
-            .dumpWhileCollecting("lockscreenToGlanceableHubRunning")
-
-    private val glanceableHubToLockscreenRunning =
-        keyguardTransitionInteractor
-            .transition(GLANCEABLE_HUB, LOCKSCREEN)
-            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
-            .distinctUntilChanged()
-            .onStart { emit(false) }
-            .dumpWhileCollecting("glanceableHubToLockscreenRunning")
+    /**
+     * Is either shade/qs expanded? This intentionally does not use the [ShadeInteractor] version,
+     * as the legacy implementation has extra logic that produces incorrect results.
+     */
+    private val isAnyExpanded =
+        combine(
+                shadeInteractor.shadeExpansion.map { it > 0f },
+                shadeInteractor.qsExpansion.map { it > 0f },
+            ) { shadeExpansion, qsExpansion ->
+                shadeExpansion || qsExpansion
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
 
     /**
      * Shade locked is a legacy concept, but necessary to mimic current functionality. Listen for
@@ -145,36 +163,46 @@ constructor(
      * before the other.
      */
     private val isShadeLocked: Flow<Boolean> =
-        combine(
-                keyguardInteractor.statusBarState.map { it == SHADE_LOCKED },
-                shadeInteractor.qsExpansion.map { it > 0f },
-                shadeInteractor.shadeExpansion.map { it > 0f },
-            ) { isShadeLocked, isQsExpanded, isShadeExpanded ->
-                isShadeLocked && (isQsExpanded || isShadeExpanded)
+        combine(keyguardInteractor.statusBarState.map { it == SHADE_LOCKED }, isAnyExpanded) {
+                isShadeLocked,
+                isAnyExpanded ->
+                isShadeLocked && isAnyExpanded
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
             .dumpWhileCollecting("isShadeLocked")
 
-    private val shadeCollapseFadeInComplete = MutableStateFlow(false)
-            .dumpValue("shadeCollapseFadeInComplete")
+    @VisibleForTesting
+    val paddingTopDimen: Flow<Int> =
+        interactor.configurationBasedDimensions
+            .map {
+                when {
+                    it.useLargeScreenHeader -> it.marginTopLargeScreen
+                    else -> it.marginTop
+                }
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("paddingTopDimen")
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         interactor.configurationBasedDimensions
             .map {
                 val marginTop =
-                    if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop
+                    when {
+                        // y position of the NSSL in the window needs to be 0 under scene container
+                        SceneContainerFlag.isEnabled -> 0
+                        it.useLargeScreenHeader -> it.marginTopLargeScreen
+                        else -> it.marginTop
+                    }
                 ConfigurationBasedDimensions(
                     marginStart = if (it.useSplitShade) 0 else it.marginHorizontal,
                     marginEnd = it.marginHorizontal,
                     marginBottom = it.marginBottom,
                     marginTop = marginTop,
                     useSplitShade = it.useSplitShade,
-                    paddingTop =
-                        if (it.useSplitShade) {
-                            marginTop
-                        } else {
-                            0
-                        },
                 )
             }
             .distinctUntilChanged()
@@ -182,31 +210,27 @@ constructor(
 
     /** If the user is visually on one of the unoccluded lockscreen states. */
     val isOnLockscreen: Flow<Boolean> =
-        combine(
-                keyguardTransitionInteractor.finishedKeyguardState.map {
-                    statesForConstrainedNotifications.contains(it)
-                },
-                keyguardTransitionInteractor
-                    .transitionValue(LOCKSCREEN)
-                    .onStart { emit(0f) }
-                    .map { it > 0 }
-            ) { constrainedNotificationState, transitioningToOrFromLockscreen ->
-                constrainedNotificationState || transitioningToOrFromLockscreen
-            }
-            .distinctUntilChanged()
-            .dumpWhileCollecting("isOnLockscreen")
+        anyOf(
+                keyguardTransitionInteractor.isFinishedIn(AOD),
+                keyguardTransitionInteractor.isFinishedIn(DOZING),
+                keyguardTransitionInteractor.isFinishedIn(ALTERNATE_BOUNCER),
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Bouncer,
+                    stateWithoutSceneContainer = PRIMARY_BOUNCER,
+                ),
+                keyguardTransitionInteractor.transitionValue(LOCKSCREEN).map { it > 0f },
+            )
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+            .dumpValue("isOnLockscreen")
 
     /** Are we purely on the keyguard without the shade/qs? */
     val isOnLockscreenWithoutShade: Flow<Boolean> =
-        combine(
-                isOnLockscreen,
-                // Shade with notifications
-                shadeInteractor.shadeExpansion.map { it > 0f },
-                // Shade without notifications, quick settings only (pull down from very top on
-                // lockscreen)
-                shadeInteractor.qsExpansion.map { it > 0f },
-            ) { isKeyguard, isShadeVisible, qsExpansion ->
-                isKeyguard && !(isShadeVisible || qsExpansion)
+        combine(isOnLockscreen, isAnyExpanded) { isKeyguard, isAnyExpanded ->
+                isKeyguard && !isAnyExpanded
             }
             .stateIn(
                 scope = applicationScope,
@@ -215,24 +239,54 @@ constructor(
             )
             .dumpValue("isOnLockscreenWithoutShade")
 
+    /** If the user is visually on the glanceable hub or transitioning to/from it */
+    private val isOnGlanceableHub: Flow<Boolean> =
+        combine(
+                keyguardTransitionInteractor.isFinishedIn(
+                    scene = Scenes.Communal,
+                    stateWithoutSceneContainer = GLANCEABLE_HUB,
+                ),
+                anyOf(
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(to = Scenes.Communal),
+                        edgeWithoutSceneContainer = Edge.create(to = GLANCEABLE_HUB),
+                    ),
+                    keyguardTransitionInteractor.isInTransition(
+                        edge = Edge.create(from = Scenes.Communal),
+                        edgeWithoutSceneContainer = Edge.create(from = GLANCEABLE_HUB),
+                    ),
+                ),
+            ) { isOnGlanceableHub, transitioningToOrFromHub ->
+                isOnGlanceableHub || transitioningToOrFromHub
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("isOnGlanceableHub")
+
     /** Are we purely on the glanceable hub without the shade/qs? */
     val isOnGlanceableHubWithoutShade: Flow<Boolean> =
-        combine(
-                communalInteractor.isIdleOnCommunal,
-                // Shade with notifications
-                shadeInteractor.shadeExpansion.map { it > 0f },
-                // Shade without notifications, quick settings only (pull down from very top on
-                // lockscreen)
-                shadeInteractor.qsExpansion.map { it > 0f },
-            ) { isIdleOnCommunal, isShadeVisible, qsExpansion ->
-                isIdleOnCommunal && !(isShadeVisible || qsExpansion)
+        combine(isOnGlanceableHub, isAnyExpanded) { isGlanceableHub, isAnyExpanded ->
+                isGlanceableHub && !isAnyExpanded
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = false,
             )
-            .dumpWhileCollecting("isOnGlanceableHubWithoutShade")
+            .dumpValue("isOnGlanceableHubWithoutShade")
+
+    /** Are we on the dream without the shade/qs? */
+    private val isDreamingWithoutShade: Flow<Boolean> =
+        combine(keyguardTransitionInteractor.isFinishedIn(DREAMING), isAnyExpanded) {
+                isDreaming,
+                isAnyExpanded ->
+                isDreaming && !isAnyExpanded
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+            .dumpValue("isDreamingWithoutShade")
 
     /**
      * Fade in if the user swipes the shade back up, not if collapsed by going to AOD. This is
@@ -242,13 +296,10 @@ constructor(
         var aodTransitionIsComplete = true
         return combine(
                 isOnLockscreenWithoutShade,
-                keyguardTransitionInteractor
-                    .isInTransitionWhere(
-                        fromStatePredicate = { it == LOCKSCREEN },
-                        toStatePredicate = { it == AOD }
-                    )
-                    .onStart { emit(false) },
-                ::Pair
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = LOCKSCREEN, to = AOD)
+                ),
+                ::Pair,
             )
             .transformWhile { (isOnLockscreenWithoutShade, aodTransitionIsRunning) ->
                 // Wait until the AOD transition is complete before terminating
@@ -283,9 +334,6 @@ constructor(
                     awaitCollapse().collect { doFadeIn ->
                         if (doFadeIn) {
                             emit(true)
-                            // ... and then for the animation to complete
-                            shadeCollapseFadeInComplete.first { it }
-                            shadeCollapseFadeInComplete.value = false
                         }
                     }
                 }
@@ -295,7 +343,7 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = false,
             )
-            .dumpWhileCollecting("shadeCollapseFadeIn")
+            .dumpValue("shadeCollapseFadeIn")
 
     /**
      * The container occupies the entire screen, and must be positioned relative to other elements.
@@ -305,28 +353,26 @@ constructor(
      *
      * When the shade is expanding, the position is controlled by... the shade.
      */
-    val bounds: StateFlow<NotificationContainerBounds> =
+    val bounds: StateFlow<NotificationContainerBounds> by lazy {
+        SceneContainerFlag.assertInLegacyMode()
         combine(
                 isOnLockscreenWithoutShade,
                 keyguardInteractor.notificationContainerBounds,
-                configurationBasedDimensions,
+                paddingTopDimen,
                 interactor.topPosition
                     .sampleCombine(
-                        keyguardTransitionInteractor.isInTransitionToAnyState,
+                        keyguardTransitionInteractor.isInTransition,
                         shadeInteractor.qsExpansion,
                     )
-                    .onStart { emit(Triple(0f, false, 0f)) }
-            ) { onLockscreen, bounds, config, (top, isInTransitionToAnyState, qsExpansion) ->
+                    .onStart { emit(Triple(0f, false, 0f)) },
+            ) { onLockscreen, bounds, paddingTop, (top, isInTransitionToAnyState, qsExpansion) ->
                 if (onLockscreen) {
-                    bounds.copy(top = bounds.top - config.paddingTop)
+                    bounds.copy(top = bounds.top - paddingTop)
                 } else {
                     // When QS expansion > 0, it should directly set the top padding so do not
                     // animate it
                     val animate = qsExpansion == 0f && !isInTransitionToAnyState
-                    keyguardInteractor.notificationContainerBounds.value.copy(
-                        top = top,
-                        isAnimated = animate,
-                    )
+                    bounds.copy(top = top, isAnimated = animate)
                 }
             }
             .stateIn(
@@ -335,6 +381,7 @@ constructor(
                 initialValue = NotificationContainerBounds(),
             )
             .dumpValue("bounds")
+    }
 
     /**
      * Ensure view is visible when the shade/qs are expanded. Also, as QS is expanding, fade out
@@ -343,12 +390,14 @@ constructor(
     private val alphaForShadeAndQsExpansion: Flow<Float> =
         interactor.configurationBasedDimensions
             .flatMapLatest { configurationBasedDimensions ->
-                combineTransform(
-                    shadeInteractor.shadeExpansion,
-                    shadeInteractor.qsExpansion,
-                ) { shadeExpansion, qsExpansion ->
+                combineTransform(shadeInteractor.shadeExpansion, shadeInteractor.qsExpansion) {
+                    shadeExpansion,
+                    qsExpansion ->
                     if (shadeExpansion > 0f || qsExpansion > 0f) {
                         if (configurationBasedDimensions.useSplitShade) {
+                            emit(1f)
+                        } else if (qsExpansion == 1f) {
+                            // Ensure HUNs will be visible in QS shade (at least while unlocked)
                             emit(1f)
                         } else {
                             // Fade as QS shade expands
@@ -357,139 +406,180 @@ constructor(
                     }
                 }
             }
-            .onStart { emit(0f) }
+            .onStart { emit(1f) }
             .dumpWhileCollecting("alphaForShadeAndQsExpansion")
 
-    private val alphaWhenGoneAndShadeState: Flow<Float> =
-        combineTransform(
-            keyguardTransitionInteractor.transitions
-                .map { step -> step.to == GONE && step.transitionState == FINISHED }
-                .distinctUntilChanged(),
-            keyguardInteractor.statusBarState,
-        ) { isGoneTransitionFinished, statusBarState ->
-            if (isGoneTransitionFinished && statusBarState == SHADE) {
-                emit(1f)
-            }
-        }
-        .dumpWhileCollecting("alphaWhenGoneAndShadeState")
+    val panelAlpha = keyguardInteractor.panelAlpha
 
-    fun expansionAlpha(viewState: ViewStateAccessor): Flow<Float> {
-        // All transition view models are mututally exclusive, and safe to merge
-        val alphaTransitions =
-            merge(
-                alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
-                aodToLockscreenTransitionViewModel.notificationAlpha,
-                dozingToLockscreenTransitionViewModel.lockscreenAlpha,
-                dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
-                goneToAodTransitionViewModel.notificationAlpha,
-                goneToDreamingTransitionViewModel.lockscreenAlpha,
-                goneToDozingTransitionViewModel.lockscreenAlpha,
-                lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
-                lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
-                lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
-                lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
-                occludedToAodTransitionViewModel.lockscreenAlpha,
-                occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+    private fun bouncerToGoneNotificationAlpha(viewState: ViewStateAccessor): Flow<Float> =
+        merge(
                 primaryBouncerToGoneTransitionViewModel.notificationAlpha,
-                primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
+                alternateBouncerToGoneTransitionViewModel.notificationAlpha(viewState),
             )
+            .sample(communalSceneInteractor.isCommunalVisible) { alpha, isCommunalVisible ->
+                // when glanceable hub is visible, hide notifications during the transition to GONE
+                if (isCommunalVisible) 0f else alpha
+            }
+            .dumpWhileCollecting("bouncerToGoneNotificationAlpha")
 
+    private fun alphaForTransitions(viewState: ViewStateAccessor): Flow<Float> {
         return merge(
-                alphaTransitions,
-                // Sends a final alpha value of 1f when truly gone, to make sure HUNs appear
-                alphaWhenGoneAndShadeState,
-                // These remaining cases handle alpha changes within an existing state, such as
-                // shade expansion or swipe to dismiss
-                combineTransform(
-                    isOnLockscreenWithoutShade,
-                    shadeCollapseFadeIn,
-                    alphaForShadeAndQsExpansion,
-                    keyguardInteractor.dismissAlpha.dumpWhileCollecting(
-                        "keyguardInteractor.keyguardAlpha"
-                    ),
-                ) {
-                    isOnLockscreenWithoutShade,
-                    shadeCollapseFadeIn,
-                    alphaForShadeAndQsExpansion,
-                    dismissAlpha ->
-                    if (isOnLockscreenWithoutShade) {
-                        if (!shadeCollapseFadeIn && dismissAlpha != null) {
-                            emit(dismissAlpha)
-                        }
-                    } else {
-                        emit(alphaForShadeAndQsExpansion)
-                    }
-                },
-            )
+            keyguardInteractor.dismissAlpha.dumpWhileCollecting("keyguardInteractor.dismissAlpha"),
+            // All transition view models are mututally exclusive, and safe to merge
+            bouncerToGoneNotificationAlpha(viewState),
+            aodToGoneTransitionViewModel.notificationAlpha(viewState),
+            aodToLockscreenTransitionViewModel.notificationAlpha,
+            aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+            dozingToLockscreenTransitionViewModel.lockscreenAlpha,
+            dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+            dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
+            goneToAodTransitionViewModel.notificationAlpha,
+            goneToDreamingTransitionViewModel.lockscreenAlpha,
+            goneToDozingTransitionViewModel.notificationAlpha,
+            goneToLockscreenTransitionViewModel.lockscreenAlpha,
+            lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
+            lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
+            lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
+            lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+            occludedToAodTransitionViewModel.lockscreenAlpha,
+            occludedToGoneTransitionViewModel.notificationAlpha(viewState),
+            occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+            primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+            glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
+            lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,
+        )
+    }
+
+    fun keyguardAlpha(viewState: ViewStateAccessor, scope: CoroutineScope): Flow<Float> {
+        // Transitions are not (yet) authoritative for NSSL; they still rely on StatusBarState to
+        // help determine when the device has fully moved to GONE or OCCLUDED state. Once SHADE
+        // state has been set, let shade alpha take over
+        val isKeyguardNotVisible =
+            combine(
+                anyOf(
+                    keyguardTransitionInteractor.transitionValue(OCCLUDED).map { it == 1f },
+                    keyguardTransitionInteractor
+                        .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
+                        .map { it == 1f },
+                ),
+                keyguardInteractor.statusBarState,
+            ) { isKeyguardNotVisibleInState, statusBarState ->
+                isKeyguardNotVisibleInState && statusBarState == SHADE
+            }
+
+        // This needs to continue collecting the current value so that when it is selected in the
+        // flatMapLatest below, the last value gets emitted, to avoid the randomness of `merge`.
+        val alphaForTransitionsAndShade =
+            merge(alphaForTransitions(viewState), alphaForShadeAndQsExpansion)
+                .stateIn(
+                    // Use view-level scope instead of ApplicationScope, to prevent collection that
+                    // never stops
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = 1f,
+                )
+                .dumpValue("alphaForTransitionsAndShade")
+
+        return isKeyguardNotVisible
+            .flatMapLatest { isKeyguardNotVisible ->
+                if (isKeyguardNotVisible) {
+                    alphaForShadeAndQsExpansion
+                } else {
+                    alphaForTransitionsAndShade
+                }
+            }
             .distinctUntilChanged()
-            .dumpWhileCollecting("expansionAlpha")
+            .dumpWhileCollecting("keyguardAlpha")
     }
 
     /**
-     * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB transition
-     * or idle on the glanceable hub.
+     * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB or
+     * DREAMING<->GLANCEABLE_HUB transition or idle on the hub.
      *
      * Must return 1.0f when not controlling the alpha since notifications does a min of all the
      * alpha sources.
      */
     val glanceableHubAlpha: Flow<Float> =
-        isOnGlanceableHubWithoutShade.flatMapLatest { isOnGlanceableHubWithoutShade ->
-            combineTransform(
-                lockscreenToGlanceableHubRunning,
-                glanceableHubToLockscreenRunning,
+        combineTransform(
+                isOnGlanceableHubWithoutShade,
+                isOnLockscreen,
+                isDreamingWithoutShade,
                 merge(
-                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                )
-            ) { lockscreenToGlanceableHubRunning, glanceableHubToLockscreenRunning, alpha ->
-                if (isOnGlanceableHubWithoutShade) {
+                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                        dozingToGlanceableHubTransitionViewModel.notificationAlpha,
+                    )
+                    // Manually emit on start because [notificationAlpha] only starts emitting
+                    // when transitions start.
+                    .onStart { emit(1f) },
+            ) { isOnGlanceableHubWithoutShade, isOnLockscreen, isDreamingWithoutShade, alpha ->
+                if ((isOnGlanceableHubWithoutShade || isDreamingWithoutShade) && !isOnLockscreen) {
                     // Notifications should not be visible on the glanceable hub.
-                    // TODO(b/321075734): implement a way to actually set the notifications to gone
-                    //  while on the hub instead of just adjusting alpha
+                    // TODO(b/321075734): implement a way to actually set the notifications to
+                    // gone while on the hub instead of just adjusting alpha
                     emit(0f)
-                } else if (lockscreenToGlanceableHubRunning || glanceableHubToLockscreenRunning) {
+                } else if (isOnGlanceableHubWithoutShade) {
+                    // We are transitioning between hub and lockscreen, so set the alpha for the
+                    // transition animation.
                     emit(alpha)
                 } else {
-                    // Not on the hub and no transitions running, return full visibility so we don't
-                    // block the notifications from showing.
+                    // Not on the hub and no transitions running, return full visibility so we
+                    // don't block the notifications from showing.
                     emit(1f)
                 }
             }
-        }
-        .dumpWhileCollecting("glanceableHubAlpha")
+            .distinctUntilChanged()
+            .dumpWhileCollecting("glanceableHubAlpha")
 
     /**
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be
      * translated as the keyguard fades out.
      */
-    fun translationY(params: BurnInParameters): Flow<Float> {
-        return combine(
-            aodBurnInViewModel.translationY(params).onStart { emit(0f) },
-            isOnLockscreenWithoutShade,
-            merge(
-                keyguardInteractor.keyguardTranslationY,
-                occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
-            )
-        ) { burnInY, isOnLockscreenWithoutShade, translationY ->
-            if (isOnLockscreenWithoutShade) {
-                burnInY + translationY
-            } else {
-                0f
-            }
-        }
-        .dumpWhileCollecting("translationY")
-    }
+    val translationY: Flow<Float> =
+        combine(
+                aodBurnInViewModel.movement.map { it.translationY.toFloat() }.onStart { emit(0f) },
+                isOnLockscreenWithoutShade,
+                merge(
+                    keyguardInteractor.keyguardTranslationY,
+                    occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
+                ),
+            ) { burnInY, isOnLockscreenWithoutShade, translationY ->
+                // with SceneContainer, x translation is handled by views, y is handled by compose
+                SceneContainerFlag.assertInLegacyMode()
 
-    /**
-     * The container may need to be translated in the x direction as the keyguard fades out, such as
-     * when swiping open the glanceable hub from the lockscreen.
-     */
+                if (isOnLockscreenWithoutShade) {
+                    burnInY + translationY
+                } else {
+                    0f
+                }
+            }
+            .dumpWhileCollecting("translationY")
+
+    /** Horizontal translation to apply to the container. */
     val translationX: Flow<Float> =
         merge(
-            lockscreenToGlanceableHubTransitionViewModel.notificationTranslationX,
-            glanceableHubToLockscreenTransitionViewModel.notificationTranslationX,
-        )
-        .dumpWhileCollecting("translationX")
+                // The container may need to be translated along the X axis as the keyguard fades
+                // out, such as when swiping open the glanceable hub from the lockscreen.
+                lockscreenToGlanceableHubTransitionViewModel.notificationTranslationX,
+                glanceableHubToLockscreenTransitionViewModel.notificationTranslationX,
+                if (SceneContainerFlag.isEnabled) {
+                    // The container may need to be translated along the X axis as the unfolded
+                    // foldable is folded slightly.
+                    unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide = false)
+                } else {
+                    emptyFlow()
+                },
+            )
+            .dumpWhileCollecting("translationX")
+
+    private val availableHeight: Flow<Float> =
+        if (SceneContainerFlag.isEnabled) {
+                notificationStackAppearanceInteractor.constrainedAvailableSpace.map { it.toFloat() }
+            } else {
+                bounds.map { it.bottom - it.top }
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("availableHeight")
 
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could
@@ -504,27 +594,32 @@ constructor(
             combine(
                 isOnLockscreen,
                 keyguardInteractor.statusBarState,
-            ) { isOnLockscreen, statusBarState ->
-                statusBarState == SHADE_LOCKED || !isOnLockscreen
+                merge(
+                        primaryBouncerToGoneTransitionViewModel.showAllNotifications,
+                        alternateBouncerToGoneTransitionViewModel.showAllNotifications,
+                    )
+                    .onStart { emit(false) },
+            ) { isOnLockscreen, statusBarState, showAllNotifications ->
+                statusBarState == SHADE_LOCKED || !isOnLockscreen || showAllNotifications
             }
 
         return combineTransform(
                 showLimitedNotifications,
                 showUnlimitedNotifications,
                 shadeInteractor.isUserInteracting,
-                bounds,
-                interactor.notificationStackChanged.onStart { emit(Unit) },
+                availableHeight,
+                interactor.notificationStackChanged,
                 interactor.useExtraShelfSpace,
             ) { flows ->
                 val showLimitedNotifications = flows[0] as Boolean
                 val showUnlimitedNotifications = flows[1] as Boolean
                 val isUserInteracting = flows[2] as Boolean
-                val bounds = flows[3] as NotificationContainerBounds
+                val availableHeight = flows[3] as Float
                 val useExtraShelfSpace = flows[5] as Boolean
 
                 if (!isUserInteracting) {
                     if (showLimitedNotifications) {
-                        emit(calculateSpace(bounds.bottom - bounds.top, useExtraShelfSpace))
+                        emit(calculateSpace(availableHeight, useExtraShelfSpace))
                     } else if (showUnlimitedNotifications) {
                         emit(-1)
                     }
@@ -538,16 +633,11 @@ constructor(
         interactor.notificationStackChanged()
     }
 
-    fun setShadeCollapseFadeInComplete(complete: Boolean) {
-        shadeCollapseFadeInComplete.value = complete
-    }
-
     data class ConfigurationBasedDimensions(
         val marginStart: Int,
         val marginTop: Int,
         val marginEnd: Int,
         val marginBottom: Int,
         val useSplitShade: Boolean,
-        val paddingTop: Int,
     )
 }

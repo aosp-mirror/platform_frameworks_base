@@ -132,6 +132,7 @@
 
     <!-- Status bar -->
     <item type="id" name="status_bar_dot" />
+    <item type="id" name="ongoing_activity_chip_custom_icon" />
 
     <!-- Default display cutout on the physical top of screen -->
     <item type="id" name="display_cutout" />
@@ -186,6 +187,8 @@
     <item type="id" name="action_remove_menu"/>
     <item type="id" name="action_edit"/>
 
+    <item type="id" name="accessibility_action_open_communal_hub"/>
+
     <!-- rounded corner view id -->
     <item type="id" name="rounded_corner_top_left"/>
     <item type="id" name="rounded_corner_top_right"/>
@@ -231,6 +234,8 @@
     <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
     <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
+    <item type="id" name="weather_clock_bc_smartspace_bottom" />
+    <item type="id" name="accessibility_actions_view" />
 
     <!-- Privacy dialog -->
     <item type="id" name="privacy_dialog_close_app_button" />
@@ -256,9 +261,6 @@
     <!-- ID of the Scene Container root Composable view -->
     <item type='id' name="scene_container_root_composable" />
 
-    <!-- Tag set on the Compose implementation of the QS footer actions. -->
-    <item type="id" name="tag_compose_qs_footer_actions" />
-
     <!--
     Ids for the device entry icon.
         device_entry_icon_view: parent view of both device_entry_icon and device_entry_icon_bg
@@ -276,4 +278,12 @@
     <!-- Id for the udfps accessibility overlay -->
     <item type="id" name="udfps_accessibility_overlay" />
     <item type="id" name="udfps_accessibility_overlay_top_guideline" />
+
+    <!-- Ids for communal hub widgets -->
+    <item type="id" name="communal_widget_disposable_tag"/>
+
+    <!-- snapshot view-binding IDs -->
+    <item type="id" name="snapshot_view_binding" />
+    <item type="id" name="snapshot_view_binding_root" />
+
 </resources>

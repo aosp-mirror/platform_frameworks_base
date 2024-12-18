@@ -99,6 +99,9 @@ public class ParsedIntentInfoUtils {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
+            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
+                continue;
+            }
 
             final ParseResult result;
             String nodeName = parser.getName();
@@ -195,6 +198,9 @@ public class ParsedIntentInfoUtils {
                 && (type != XmlPullParser.END_TAG
                 || parser.getDepth() > depth)) {
             if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            if (ParsingPackageUtils.getAconfigFlags().skipCurrentElement(parser)) {
                 continue;
             }
 

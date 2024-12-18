@@ -18,12 +18,12 @@ package com.android.wm.shell.flicker.pip.apps
 
 import android.platform.test.annotations.Postsubmit
 import android.tools.Rotation
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.flicker.junit.FlickerBuilderProvider
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.traces.component.ComponentNameMatcher
 import com.android.wm.shell.flicker.pip.common.EnterPipTransition
 import org.junit.Test
 import org.junit.runners.Parameterized

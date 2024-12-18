@@ -40,12 +40,12 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.TypedValue
 import android.view.View
@@ -60,6 +60,7 @@ import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.media.utils.MediaConstants
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
@@ -68,6 +69,8 @@ import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -76,15 +79,15 @@ import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
+import com.android.systemui.media.controls.shared.model.MediaNotificationAction
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.binder.SeekBarObserver
 import com.android.systemui.media.controls.ui.view.GutsViewHolder
 import com.android.systemui.media.controls.ui.view.MediaViewHolder
 import com.android.systemui.media.controls.ui.view.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.viewmodel.SeekBarViewModel
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
-import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ActivityStarter
@@ -98,11 +101,6 @@ import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimat
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.KotlinArgumentCaptor
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -125,6 +123,9 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 
 private const val KEY = "TEST_KEY"
 private const val PACKAGE = "PKG"
@@ -139,8 +140,9 @@ private const val REC_APP_NAME = "REC APP NAME"
 private const val APP_NAME = "APP_NAME"
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@DisableSceneContainer
 public class MediaControlPanelTest : SysuiTestCase() {
     @get:Rule val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
 
@@ -160,7 +162,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var expandedSet: ConstraintSet
     @Mock private lateinit var collapsedSet: ConstraintSet
-    @Mock private lateinit var mediaOutputDialogFactory: MediaOutputDialogFactory
+    @Mock private lateinit var mediaOutputDialogManager: MediaOutputDialogManager
     @Mock private lateinit var mediaCarouselController: MediaCarouselController
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var transitionParent: ViewGroup
@@ -212,6 +214,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
     @Mock private lateinit var lockscreenUserManager: NotificationLockscreenUserManager
 
+    @Mock private lateinit var communalSceneInteractor: CommunalSceneInteractor
+
     @Mock private lateinit var recommendationViewHolder: RecommendationViewHolder
     @Mock private lateinit var smartspaceAction: SmartspaceAction
     private lateinit var smartspaceData: SmartspaceMediaData
@@ -231,9 +235,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recProgressBar1: SeekBar
     @Mock private lateinit var recProgressBar2: SeekBar
     @Mock private lateinit var recProgressBar3: SeekBar
-    private var shouldShowBroadcastButton: Boolean = false
     @Mock private lateinit var globalSettings: GlobalSettings
-    @Mock private lateinit var mediaFlags: MediaFlags
+
+    private val intent =
+        Intent().apply {
+            putExtras(Bundle().also { it.putString(KEY_SMARTSPACE_APP_NAME, REC_APP_NAME) })
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+    private val pendingIntent =
+        PendingIntent.getActivity(
+            mContext,
+            0,
+            intent.setPackage(mContext.packageName),
+            PendingIntent.FLAG_MUTABLE
+        )
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -247,13 +262,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Set up package manager mocks
         val icon = context.getDrawable(R.drawable.ic_android)
         whenever(packageManager.getApplicationIcon(anyString())).thenReturn(icon)
-        whenever(packageManager.getApplicationIcon(any(ApplicationInfo::class.java)))
-            .thenReturn(icon)
+        whenever(packageManager.getApplicationIcon(any<ApplicationInfo>())).thenReturn(icon)
         whenever(packageManager.getApplicationInfo(eq(PACKAGE), anyInt()))
             .thenReturn(applicationInfo)
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
-        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
 
         player =
             object :
@@ -266,17 +279,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     mediaViewController,
                     seekBarViewModel,
                     Lazy { mediaDataManager },
-                    mediaOutputDialogFactory,
+                    mediaOutputDialogManager,
                     mediaCarouselController,
                     falsingManager,
                     clock,
                     logger,
                     keyguardStateController,
                     activityIntentHelper,
+                    communalSceneInteractor,
                     lockscreenUserManager,
                     broadcastDialogController,
                     globalSettings,
-                    mediaFlags,
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -644,7 +657,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
 
-        verify(albumView).setImageDrawable(any(Drawable::class.java))
+        verify(albumView).setImageDrawable(any<Drawable>())
     }
 
     @Test
@@ -657,7 +670,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
 
-        verify(albumView).setImageDrawable(any(Drawable::class.java))
+        verify(albumView).setImageDrawable(any<Drawable>())
     }
 
     @Test
@@ -675,12 +688,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state0, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView).setImageDrawable(any(Drawable::class.java))
+        verify(albumView).setImageDrawable(any<Drawable>())
 
         // Run Metadata update so that later states don't update
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        captor.value.onAnimationEnd(mockAnimator)
+        captor.lastValue.onAnimationEnd(mockAnimator)
         assertThat(titleText.getText()).isEqualTo(TITLE)
         assertThat(artistText.getText()).isEqualTo(ARTIST)
 
@@ -696,13 +709,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(state2, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+        verify(albumView, times(2)).setImageDrawable(any<Drawable>())
 
         // Fourth binding to new image runs transition due to color scheme change
         player.bindPlayer(state3, PACKAGE)
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
-        verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(albumView, times(3)).setImageDrawable(any<Drawable>())
     }
 
     @Test
@@ -974,7 +987,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         val captor = argumentCaptor<SeekBarObserver>()
         verify(seekBarData).observeForever(captor.capture())
-        val seekBarObserver = captor.value!!
+        val seekBarObserver = captor.lastValue
 
         // Then the seekbar is set to animate
         assertThat(seekBarObserver.animationEnabled).isTrue()
@@ -990,14 +1003,13 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindNotificationActions() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
-        val bg = context.getDrawable(R.drawable.qs_media_round_button_background)
         val actions =
             listOf(
-                MediaAction(icon, Runnable {}, "previous", bg),
-                MediaAction(icon, Runnable {}, "play", bg),
-                MediaAction(icon, null, "next", bg),
-                MediaAction(icon, null, "custom 0", bg),
-                MediaAction(icon, Runnable {}, "custom 1", bg)
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "previous"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "play"),
+                MediaNotificationAction(true, actionIntent = null, icon, "next"),
+                MediaNotificationAction(true, actionIntent = null, icon, "custom 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, icon, "custom 1")
             )
         val state =
             mediaData.copy(
@@ -1086,27 +1098,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(mockAvd0.isRunning()).thenReturn(false)
         val captor = ArgumentCaptor.forClass(Animatable2.AnimationCallback::class.java)
         verify(mockAvd0, times(1)).registerAnimationCallback(captor.capture())
-        verify(mockAvd1, never())
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd2, never())
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd1, never()).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd2, never()).registerAnimationCallback(any<Animatable2.AnimationCallback>())
         captor.getValue().onAnimationEnd(mockAvd0)
 
         // Validate correct state was bound
         assertThat(actionPlayPause.contentDescription).isEqualTo("loading")
         assertThat(actionPlayPause.getBackground()).isNull()
-        verify(mockAvd0, times(1))
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd1, times(1))
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd2, times(1))
-            .registerAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd0, times(1))
-            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd1, times(1))
-            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
-        verify(mockAvd2, never())
-            .unregisterAnimationCallback(any(Animatable2.AnimationCallback::class.java))
+        verify(mockAvd0, times(1)).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd1, times(1)).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd2, times(1)).registerAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd0, times(1)).unregisterAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd1, times(1)).unregisterAnimationCallback(any<Animatable2.AnimationCallback>())
+        verify(mockAvd2, never()).unregisterAnimationCallback(any<Animatable2.AnimationCallback>())
     }
 
     @Test
@@ -1118,7 +1122,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Capture animation handler
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        val handler = captor.value
+        val handler = captor.lastValue
 
         // Validate text views unchanged but animation started
         assertThat(titleText.getText()).isEqualTo("")
@@ -1147,7 +1151,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Capture animation handler
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        val handler = captor.value
+        val handler = captor.lastValue
 
         // Validate text views unchanged but animation started
         assertThat(titleText.getText()).isEqualTo("")
@@ -1179,7 +1183,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // Capture animation handler
         val captor = argumentCaptor<Animator.AnimatorListener>()
         verify(mockAnimator, times(2)).addListener(captor.capture())
-        val handler = captor.value
+        val handler = captor.lastValue
 
         handler.onAnimationEnd(mockAnimator)
         assertThat(artistText.getText()).isEqualTo("ARTIST_0")
@@ -1344,7 +1348,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
         verify(logger).logLongPressDismiss(anyInt(), eq(PACKAGE), eq(instanceId))
-        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
+        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong(), eq(true))
     }
 
     @Test
@@ -1360,7 +1364,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun player_dismissButtonClick_notInManager() {
         val mediaKey = "key for dismissal"
-        whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong())).thenReturn(false)
+        whenever(mediaDataManager.dismissMediaData(eq(mediaKey), anyLong(), eq(true)))
+            .thenReturn(false)
 
         player.attachPlayer(viewHolder)
         val state = mediaData.copy(notificationKey = KEY)
@@ -1369,8 +1374,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(dismiss.isEnabled).isEqualTo(true)
         dismiss.callOnClick()
 
-        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong())
-        verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false))
+        verify(mediaDataManager).dismissMediaData(eq(mediaKey), anyLong(), eq(true))
+        verify(mediaCarouselController).removePlayer(eq(mediaKey), eq(false), eq(false), eq(true))
     }
 
     @Test
@@ -1692,11 +1697,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom2Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1711,11 +1716,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom3Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1730,11 +1735,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun actionCustom4Click_isLogged() {
         val actions =
             listOf(
-                MediaAction(null, Runnable {}, "action 0", null),
-                MediaAction(null, Runnable {}, "action 1", null),
-                MediaAction(null, Runnable {}, "action 2", null),
-                MediaAction(null, Runnable {}, "action 3", null),
-                MediaAction(null, Runnable {}, "action 4", null)
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 0"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 1"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 2"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 3"),
+                MediaNotificationAction(true, actionIntent = pendingIntent, null, "action 4")
             )
         val data = mediaData.copy(actions = actions)
 
@@ -1774,16 +1779,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.attachPlayer(viewHolder)
         player.bindPlayer(mediaData, KEY)
 
-        val callback: () -> Unit = {}
-        val captor = KotlinArgumentCaptor(callback::class.java)
+        val captor = argumentCaptor<() -> Unit>()
         verify(seekBarViewModel).logSeek = captor.capture()
-        captor.value.invoke()
+        captor.lastValue.invoke()
 
         verify(logger).logSeek(anyInt(), eq(PACKAGE), eq(instanceId))
     }
 
+    @EnableFlags(Flags.FLAG_MEDIA_LOCKSCREEN_LAUNCH_ANIMATION)
     @Test
-    fun tapContentView_showOverLockscreen_openActivity() {
+    fun tapContentView_showOverLockscreen_openActivity_withOriginAnimation() {
         // WHEN we are on lockscreen and this activity can show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
         whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
@@ -1800,7 +1805,39 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // THEN it sends the PendingIntent without dismissing keyguard first,
         // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(pendingIntent).send(any(Bundle::class.java))
+        verify(activityStarter)
+            .startPendingIntentMaybeDismissingKeyguard(
+                eq(pendingIntent),
+                eq(true),
+                eq(null),
+                any(),
+                eq(null),
+                eq(null),
+                eq(null),
+            )
+        verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
+    }
+
+    @DisableFlags(Flags.FLAG_MEDIA_LOCKSCREEN_LAUNCH_ANIMATION)
+    @Test
+    fun tapContentView_showOverLockscreen_openActivity_withoutOriginAnimation() {
+        // WHEN we are on lockscreen and this activity can show over lockscreen
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val clickIntent = mock(Intent::class.java)
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.intent).thenReturn(clickIntent)
+        val captor = ArgumentCaptor.forClass(View.OnClickListener::class.java)
+        val data = mediaData.copy(clickIntent = pendingIntent)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(data, KEY)
+        verify(viewHolder.player).setOnClickListener(captor.capture())
+
+        // THEN it sends the PendingIntent without dismissing keyguard first,
+        // and does not use the Intent directly (see b/271845008)
+        captor.value.onClick(viewHolder.player)
+        verify(pendingIntent).send(any<Bundle>())
         verify(pendingIntent, never()).getIntent()
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }
@@ -2218,8 +2255,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(recCardTitle).setTextColor(any<Int>())
-        verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
-        verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(recAppIconItem, times(3)).setImageDrawable(any<Drawable>())
+        verify(coverItem, times(3)).setImageDrawable(any<Drawable>())
         verify(coverItem, times(3)).imageMatrix = any()
     }
 
@@ -2546,7 +2583,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         seamless.callOnClick()
 
         // Then we send the pending intent as is, without modifying the original intent
-        verify(pendingIntent).send(any(Bundle::class.java))
+        verify(pendingIntent).send(any<Bundle>())
         verify(pendingIntent, never()).getIntent()
     }
 
@@ -2578,13 +2615,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
         return Icon.createWithBitmap(bmp)
     }
 
-    private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =
-        withArgCaptor {
-            verify(seekBarViewModel).setScrubbingChangeListener(capture())
-        }
+    private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener {
+        val captor = argumentCaptor<SeekBarViewModel.ScrubbingChangeListener>()
+        verify(seekBarViewModel).setScrubbingChangeListener(captor.capture())
+        return captor.lastValue
+    }
 
-    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener = withArgCaptor {
-        verify(seekBarViewModel).setEnabledChangeListener(capture())
+    private fun getEnabledChangeListener(): SeekBarViewModel.EnabledChangeListener {
+        val captor = argumentCaptor<SeekBarViewModel.EnabledChangeListener>()
+        verify(seekBarViewModel).setEnabledChangeListener(captor.capture())
+        return captor.lastValue
     }
 
     /**

@@ -31,7 +31,7 @@
     <item msgid="7852381437933824454">"Ажыратуда…"</item>
     <item msgid="5046795712175415059">"Ажыратылған"</item>
     <item msgid="2473654476624070462">"Сәтсіз"</item>
-    <item msgid="9146847076036105115">"Бөгелген"</item>
+    <item msgid="9146847076036105115">"Блокталған"</item>
     <item msgid="4543924085816294893">"Нашар байланысты уақытша қолданбау"</item>
   </string-array>
   <string-array name="wifi_status_with_ssid">
@@ -45,7 +45,7 @@
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> байланысынан ажыратылуда…"</item>
     <item msgid="699832486578171722">"Ажыратылған"</item>
     <item msgid="522383512264986901">"Сәтсіз"</item>
-    <item msgid="3602596701217484364">"Бөгелген"</item>
+    <item msgid="3602596701217484364">"Блокталған"</item>
     <item msgid="1999413958589971747">"Нашар байланысты уақытша қолданбау"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">

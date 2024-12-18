@@ -1,0 +1,14 @@
+aconfig_declarations {
+    name: "battery_saver_flag",
+    package: "com.android.server.power.batterysaver",
+    container: "system",
+    srcs: [
+        "*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "battery_saver_flag_lib",
+    aconfig_declarations: "battery_saver_flag",
+    sdk_version: "system_current",
+}

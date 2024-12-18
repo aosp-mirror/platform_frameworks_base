@@ -16,11 +16,10 @@
 
 package android.app.ondeviceintelligence;
 
-import android.app.ondeviceintelligence.IProcessingSignal;
 import android.os.PersistableBundle;
 
 /**
- * Interface for Download callback to passed onto service implementation,
+ * Interface for Download callback to be passed onto service implementation,
  *
  * @hide
  */

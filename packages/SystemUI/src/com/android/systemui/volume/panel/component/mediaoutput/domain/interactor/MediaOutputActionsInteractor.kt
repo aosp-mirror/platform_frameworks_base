@@ -16,15 +16,12 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 
-import android.content.Intent
-import android.provider.Settings
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.media.dialog.MediaOutputDialogFactory
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.media.dialog.MediaOutputDialogManager
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaOutputComponentModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 
@@ -32,34 +29,17 @@ import javax.inject.Inject
 @VolumePanelScope
 class MediaOutputActionsInteractor
 @Inject
-constructor(
-    private val mediaOutputDialogFactory: MediaOutputDialogFactory,
-    private val activityStarter: ActivityStarter,
-) {
+constructor(private val mediaOutputDialogManager: MediaOutputDialogManager) {
 
-    fun onDeviceClick(expandable: Expandable) {
-        activityStarter.startActivity(
-            Intent(Settings.ACTION_BLUETOOTH_SETTINGS),
-            true,
-            expandable.activityTransitionController(),
-        )
-    }
-
-    fun onBarClick(session: MediaDeviceSession, expandable: Expandable) {
-        when (session) {
-            is MediaDeviceSession.Active -> {
-                mediaOutputDialogFactory.createWithController(
-                    session.packageName,
-                    false,
-                    expandable.dialogController()
-                )
-            }
-            is MediaDeviceSession.Inactive -> {
-                mediaOutputDialogFactory.createDialogForSystemRouting(expandable.dialogController())
-            }
-            else -> {
-                /* do nothing */
-            }
+    fun onBarClick(model: MediaOutputComponentModel?, expandable: Expandable?) {
+        if (model is MediaOutputComponentModel.MediaSession) {
+            mediaOutputDialogManager.createAndShowWithController(
+                model.session.packageName,
+                false,
+                expandable?.dialogController()
+            )
+        } else {
+            mediaOutputDialogManager.createAndShowForSystemRouting(expandable?.dialogController())
         }
     }
 
@@ -68,7 +48,7 @@ constructor(
             cuj =
                 DialogCuj(
                     InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                    MediaOutputDialogFactory.INTERACTION_JANK_TAG
+                    MediaOutputDialogManager.INTERACTION_JANK_TAG
                 )
         )
     }

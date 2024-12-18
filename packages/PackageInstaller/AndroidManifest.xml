@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
 
     <uses-permission android:name="com.google.android.permission.INSTALL_WEARABLE_PACKAGES" />
 
@@ -145,17 +146,6 @@
         <activity android:name=".television.UninstallAppProgress"
                 android:configChanges="mnc|mnc|touchscreen|navigation|screenLayout|screenSize|smallestScreenSize|orientation|locale|keyboard|keyboardHidden|fontScale|uiMode|layoutDirection|density"
                 android:exported="false" />
-
-        <!-- Wearable Components -->
-        <service android:name=".wear.WearPackageInstallerService"
-                 android:permission="com.google.android.permission.INSTALL_WEARABLE_PACKAGES"
-                 android:foregroundServiceType="systemExempted"
-                 android:exported="true"/>
-
-        <provider android:name=".wear.WearPackageIconProvider"
-                  android:authorities="com.google.android.packageinstaller.wear.provider"
-                  android:grantUriPermissions="true"
-                  android:exported="false" />
 
         <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
             tools:node="remove" />

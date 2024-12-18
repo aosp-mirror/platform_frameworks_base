@@ -133,7 +133,7 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         pw.println("      --tag: Tag of the blob to delete.");
         pw.println("idle-maintenance");
         pw.println("    Run idle maintenance which takes care of removing stale data.");
-        pw.println("query-blob-existence [-b BLOB_ID]");
+        pw.println("query-blob-existence [-b BLOB_ID] [-u | --user USER_ID]");
         pw.println("    Prints 1 if blob exists, otherwise 0.");
         pw.println();
     }

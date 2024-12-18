@@ -28,7 +28,16 @@ import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSI
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED;
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TWOFINGER_DOUBLETAP;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -45,9 +54,10 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -59,6 +69,9 @@ import android.view.Display;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.util.test.FakeSettingsProvider;
 
 import org.junit.After;
@@ -67,6 +80,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Map;
+import java.util.Set;
 
 /** Tests for AccessibilityUserState */
 public class AccessibilityUserStateTest {
@@ -141,6 +157,7 @@ public class AccessibilityUserStateTest {
 
     @Test
     public void onSwitchToAnotherUser_userStateClearedNonDefaultValues() {
+        String componentNameString = COMPONENT_NAME.flattenToString();
         mUserState.getBoundServicesLocked().add(mMockConnection);
         mUserState.getBindingServicesLocked().add(COMPONENT_NAME);
         mUserState.setLastSentClientStateLocked(
@@ -151,9 +168,13 @@ public class AccessibilityUserStateTest {
         mUserState.setInteractiveUiTimeoutLocked(30);
         mUserState.mEnabledServices.add(COMPONENT_NAME);
         mUserState.mTouchExplorationGrantedServices.add(COMPONENT_NAME);
-        mUserState.mAccessibilityShortcutKeyTargets.add(COMPONENT_NAME.flattenToString());
-        mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
-        mUserState.setTargetAssignedToAccessibilityButton(COMPONENT_NAME.flattenToString());
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), HARDWARE);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), SOFTWARE);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), GESTURE);
+        mUserState.updateShortcutTargetsLocked(Set.of(componentNameString), QUICK_SETTINGS);
+        mUserState.updateA11yTilesInQsPanelLocked(
+                Set.of(AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME));
+        mUserState.setTargetAssignedToAccessibilityButton(componentNameString);
         mUserState.setTouchExplorationEnabledLocked(true);
         mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(true);
         mUserState.setMagnificationTwoFingerTripleTapEnabledLocked(true);
@@ -174,8 +195,11 @@ public class AccessibilityUserStateTest {
         assertEquals(0, mUserState.getInteractiveUiTimeoutLocked());
         assertTrue(mUserState.mEnabledServices.isEmpty());
         assertTrue(mUserState.mTouchExplorationGrantedServices.isEmpty());
-        assertTrue(mUserState.mAccessibilityShortcutKeyTargets.isEmpty());
-        assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(HARDWARE).isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(SOFTWARE).isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(GESTURE).isEmpty());
+        assertTrue(mUserState.getShortcutTargetsLocked(QUICK_SETTINGS).isEmpty());
+        assertTrue(mUserState.getA11yQsTilesInQsPanel().isEmpty());
         assertNull(mUserState.getTargetAssignedToAccessibilityButton());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
         assertFalse(mUserState.isMagnificationSingleFingerTripleTapEnabledLocked());
@@ -209,18 +233,6 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.getBoundServicesLocked().contains(mMockConnection));
         assertEquals(mMockConnection, mUserState.mComponentNameToServiceMap.get(COMPONENT_NAME));
         verify(mMockListener).onServiceInfoChangedLocked(eq(mUserState));
-    }
-
-    @Test
-    // addServiceLocked only calls addWindowTokensForAllDisplays when
-    // FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK is off, so skip the test if it is on.
-    @RequiresFlagsDisabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
-    public void addService_flagDisabled_addsWindowTokens() {
-        when(mMockConnection.getComponentName()).thenReturn(COMPONENT_NAME);
-
-        mUserState.addServiceLocked(mMockConnection);
-
-        verify(mMockConnection).addWindowTokensForAllDisplays();
     }
 
     @Test
@@ -431,7 +443,100 @@ public class AccessibilityUserStateTest {
 
         assertEquals(focusStrokeWidthValue, mUserState.getFocusStrokeWidthLocked());
         assertEquals(focusColorValue, mUserState.getFocusColorLocked());
+    }
 
+    @Test
+    public void updateShortcutTargetsLocked_quickSettings_valueUpdated() {
+        Set<String> newTargets = Set.of(
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString()
+        );
+
+        mUserState.updateShortcutTargetsLocked(newTargets, QUICK_SETTINGS);
+
+        assertThat(mUserState.getA11yQsTargets()).isEqualTo(newTargets);
+    }
+
+    @Test
+    public void getA11yQsTargets_returnsCopiedData() {
+        updateShortcutTargetsLocked_quickSettings_valueUpdated();
+
+        Set<String> targets = mUserState.getA11yQsTargets();
+        targets.clear();
+
+        assertThat(mUserState.getA11yQsTargets()).isNotEmpty();
+    }
+
+    @Test
+    public void updateA11yTilesInQsPanelLocked_valueUpdated() {
+        Set<ComponentName> newTargets = Set.of(
+                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME,
+                AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME
+        );
+
+        mUserState.updateA11yTilesInQsPanelLocked(newTargets);
+
+        assertThat(mUserState.getA11yQsTilesInQsPanel()).isEqualTo(newTargets);
+    }
+
+    @Test
+    public void getA11yQsTilesInQsPanel_returnsCopiedData() {
+        updateA11yTilesInQsPanelLocked_valueUpdated();
+
+        Set<ComponentName> targets = mUserState.getA11yQsTilesInQsPanel();
+        targets.clear();
+
+        assertThat(mUserState.getA11yQsTilesInQsPanel()).isNotEmpty();
+    }
+
+    @Test
+    public void getTileServiceToA11yServiceInfoMapLocked() {
+        final ComponentName tileComponent =
+                new ComponentName(COMPONENT_NAME.getPackageName(), "FakeTileService");
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = tileComponent.getPackageName();
+        serviceInfo.name = COMPONENT_NAME.getClassName();
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = serviceInfo;
+        when(mMockServiceInfo.getTileServiceName()).thenReturn(tileComponent.getClassName());
+        when(mMockServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
+        mUserState.mInstalledServices.add(mMockServiceInfo);
+        mUserState.updateTileServiceMapForAccessibilityServiceLocked();
+
+        Map<ComponentName, AccessibilityServiceInfo> actual =
+                mUserState.getTileServiceToA11yServiceInfoMapLocked();
+
+        assertThat(actual).containsExactly(tileComponent, mMockServiceInfo);
+    }
+
+    @Test
+    public void isShortcutMagnificationEnabledLocked_anyShortcutType_returnsTrue() {
+        // Clear every shortcut
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            setMagnificationForShortcutType(shortcutType, false);
+        }
+        // Check each shortcut individually
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            // Setup
+            setMagnificationForShortcutType(shortcutType, true);
+
+            // Checking
+            assertThat(mUserState.getShortcutTargetsLocked(shortcutType))
+                    .containsExactly(MAGNIFICATION_CONTROLLER_NAME);
+            assertThat(mUserState.isShortcutMagnificationEnabledLocked()).isTrue();
+
+            // Cleanup
+            setMagnificationForShortcutType(shortcutType, false);
+        }
+    }
+
+    @Test
+    public void isShortcutMagnificationEnabledLocked_noShortcutTypes_returnsFalse() {
+        // Clear every shortcut
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            setMagnificationForShortcutType(shortcutType, false);
+        }
+        assertThat(mUserState.isShortcutMagnificationEnabledLocked()).isFalse();
     }
 
     private int getSecureIntForUser(String key, int userId) {
@@ -440,5 +545,17 @@ public class AccessibilityUserStateTest {
 
     private void putSecureIntForUser(String key, int value, int userId) {
         Settings.Secure.putIntForUser(mMockResolver, key, value, userId);
+    }
+
+    private void setMagnificationForShortcutType(
+            @UserShortcutType int shortcutType, boolean enabled) {
+        if (shortcutType == TRIPLETAP) {
+            mUserState.setMagnificationSingleFingerTripleTapEnabledLocked(enabled);
+        } else if (shortcutType == TWOFINGER_DOUBLETAP) {
+            mUserState.setMagnificationTwoFingerTripleTapEnabledLocked(enabled);
+        } else {
+            mUserState.updateShortcutTargetsLocked(
+                    enabled ? Set.of(MAGNIFICATION_CONTROLLER_NAME) : Set.of(), shortcutType);
+        }
     }
 }

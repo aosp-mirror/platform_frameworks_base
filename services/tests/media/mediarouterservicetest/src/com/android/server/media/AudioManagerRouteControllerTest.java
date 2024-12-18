@@ -69,6 +69,13 @@ import java.util.Set;
 public class AudioManagerRouteControllerTest {
 
     private static final String FAKE_ROUTE_NAME = "fake name";
+
+    /**
+     * The number of milliseconds to wait for an asynchronous operation before failing an associated
+     * assertion.
+     */
+    private static final int ASYNC_CALL_TIMEOUTS_MS = 1000;
+
     private static final AudioDeviceInfo FAKE_AUDIO_DEVICE_INFO_BUILTIN_SPEAKER =
             createAudioDeviceInfo(
                     AudioSystem.DEVICE_OUT_SPEAKER, "name_builtin", /* address= */ null);
@@ -231,7 +238,7 @@ public class AudioManagerRouteControllerTest {
         MediaRoute2Info builtInSpeakerRoute =
                 getAvailableRouteWithType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER);
         mControllerUnderTest.transferTo(builtInSpeakerRoute.getId());
-        verify(mMockAudioManager)
+        verify(mMockAudioManager, Mockito.timeout(ASYNC_CALL_TIMEOUTS_MS))
                 .setPreferredDeviceForStrategy(
                         mMediaAudioProductStrategy,
                         createAudioDeviceAttribute(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER));
@@ -239,7 +246,7 @@ public class AudioManagerRouteControllerTest {
         MediaRoute2Info wiredHeadsetRoute =
                 getAvailableRouteWithType(MediaRoute2Info.TYPE_WIRED_HEADSET);
         mControllerUnderTest.transferTo(wiredHeadsetRoute.getId());
-        verify(mMockAudioManager)
+        verify(mMockAudioManager, Mockito.timeout(ASYNC_CALL_TIMEOUTS_MS))
                 .setPreferredDeviceForStrategy(
                         mMediaAudioProductStrategy,
                         createAudioDeviceAttribute(AudioDeviceInfo.TYPE_WIRED_HEADSET));
@@ -339,14 +346,16 @@ public class AudioManagerRouteControllerTest {
                 .thenReturn(mAvailableAudioDeviceInfos.toArray(new AudioDeviceInfo[0]));
     }
 
-    private static AudioDeviceAttributes createAudioDeviceAttribute(int type) {
+    private static AudioDeviceAttributes createAudioDeviceAttribute(
+            @AudioDeviceInfo.AudioDeviceType int type) {
         // Address is unused.
         return new AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT, type, /* address= */ "");
     }
 
     private static AudioDeviceInfo createAudioDeviceInfo(
-            int type, @NonNull String name, @NonNull String address) {
+            @AudioDeviceInfo.AudioDeviceType int type, @NonNull String name,
+            @NonNull String address) {
         return new AudioDeviceInfo(AudioDevicePort.createForTesting(type, name, address));
     }
 }

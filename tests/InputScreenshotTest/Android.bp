@@ -67,8 +67,8 @@ android_test {
         "truth",
     ],
     libs: [
-        "android.test.mock",
-        "android.test.base",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
     ],
     test_suites: ["device-tests"],
     compile_multilib: "both",

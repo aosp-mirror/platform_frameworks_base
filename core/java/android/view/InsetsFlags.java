@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -23,6 +25,7 @@ import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_B
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
@@ -64,7 +67,19 @@ public class InsetsFlags {
             @ViewDebug.FlagToString(
                     mask = APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS,
                     equals = APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS,
-                    name = "SEMI_TRANSPARENT_NAVIGATION_BARS")
+                    name = "SEMI_TRANSPARENT_NAVIGATION_BARS"),
+            @ViewDebug.FlagToString(
+                    mask = APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS,
+                    equals = APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS,
+                    name = "FORCE_LIGHT_NAVIGATION_BARS"),
+            @ViewDebug.FlagToString(
+                    mask = APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+                    equals = APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+                    name = "APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND"),
+            @ViewDebug.FlagToString(
+                    mask = APPEARANCE_LIGHT_CAPTION_BARS,
+                    equals = APPEARANCE_LIGHT_CAPTION_BARS,
+                    name = "APPEARANCE_LIGHT_CAPTION_BARS")
     })
     public @Appearance int appearance;
 

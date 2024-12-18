@@ -21,7 +21,6 @@ import android.content.Context
 import android.media.AudioManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.ContentDescription
@@ -31,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.RingerModeTracker
@@ -86,8 +86,8 @@ constructor(
                         audioManager.isVolumeFixed ->
                             ActivationState.NotSupported to R.string.volume_ringer_hint_mute
                         mode == AudioManager.RINGER_MODE_SILENT ->
-                            ActivationState.Active to R.string.volume_ringer_hint_mute
-                        else -> ActivationState.Inactive to R.string.volume_ringer_hint_unmute
+                            ActivationState.Active to R.string.volume_ringer_hint_unmute
+                        else -> ActivationState.Inactive to R.string.volume_ringer_hint_mute
                     }
 
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(

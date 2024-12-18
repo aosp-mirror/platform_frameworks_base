@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.fingerprint.FingerprintSensorConfigurations.remapFqName;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -42,7 +44,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
@@ -58,7 +59,6 @@ import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.StartUserClient;
 import com.android.server.biometrics.sensors.StopUserClient;
-import com.android.server.biometrics.sensors.UserAwareBiometricScheduler;
 import com.android.server.biometrics.sensors.UserSwitchProvider;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
@@ -110,13 +110,6 @@ public class Sensor {
     }
 
     Sensor(@NonNull FingerprintProvider provider, @NonNull Context context,
-            @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
-            @NonNull BiometricContext biometricContext) {
-        this(provider, context, handler, sensorProperties,
-                biometricContext, null);
-    }
-
-    Sensor(@NonNull FingerprintProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull SensorProps sensorProp,
             @NonNull BiometricContext biometricContext,
             @NonNull List<SensorLocationInternal> workaroundLocation,
@@ -131,13 +124,8 @@ public class Sensor {
      */
     public void init(@NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
-        if (Flags.deHidl()) {
-            setScheduler(getBiometricSchedulerForInit(gestureAvailabilityDispatcher,
-                    lockoutResetDispatcher));
-        } else {
-            setScheduler(getUserAwareBiometricSchedulerForInit(gestureAvailabilityDispatcher,
-                    lockoutResetDispatcher));
-        }
+        setScheduler(getBiometricSchedulerForInit(gestureAvailabilityDispatcher,
+                lockoutResetDispatcher));
         mLockoutTracker = new LockoutCache();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
     }
@@ -168,7 +156,7 @@ public class Sensor {
                         final AidlResponseHandler resultController = new AidlResponseHandler(
                                 mContext, mScheduler, sensorId, newUserId,
                                 mLockoutTracker, lockoutResetDispatcher,
-                                mBiometricContext.getAuthSessionCoordinator(), () -> {},
+                                mBiometricContext.getAuthSessionCoordinator(),
                                 new AidlResponseHandler.AidlResponseHandlerCallback() {
                                     @Override
                                     public void onEnrollSuccess() {
@@ -184,46 +172,7 @@ public class Sensor {
                                                 "Fingerprint sensor hardware unavailable.");
                                         mCurrentSession = null;
                                     }
-                                });
-
-                        return Sensor.this.getStartUserClient(resultController, sensorId,
-                                newUserId);
-                    }
-                });
-    }
-
-    private UserAwareBiometricScheduler<ISession, AidlSession>
-            getUserAwareBiometricSchedulerForInit(
-                    GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-                    LockoutResetDispatcher lockoutResetDispatcher) {
-        return new UserAwareBiometricScheduler<>(TAG,
-                BiometricScheduler.sensorTypeFromFingerprintProperties(mSensorProperties),
-                gestureAvailabilityDispatcher,
-                () -> mCurrentSession != null ? mCurrentSession.getUserId() : UserHandle.USER_NULL,
-                new UserAwareBiometricScheduler.UserSwitchCallback() {
-                    @NonNull
-                    @Override
-                    public StopUserClient<ISession> getStopUserClient(int userId) {
-                        return new FingerprintStopUserClient(mContext,
-                                () -> mLazySession.get().getSession(), mToken,
-                                userId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), mBiometricContext,
-                                () -> mCurrentSession = null);
-                    }
-
-                    @NonNull
-                    @Override
-                    public StartUserClient<IFingerprint, ISession> getStartUserClient(
-                            int newUserId) {
-                        final int sensorId = mSensorProperties.sensorId;
-
-                        final AidlResponseHandler resultController = new AidlResponseHandler(
-                                mContext, mScheduler, sensorId, newUserId,
-                                mLockoutTracker, lockoutResetDispatcher,
-                                mBiometricContext.getAuthSessionCoordinator(), () -> {
-                                    Slog.e(TAG, "Fingerprint hardware unavailable.");
-                                    mCurrentSession = null;
-                                });
+                                }, getFingerprintUtilsInstance());
 
                         return Sensor.this.getStartUserClient(resultController, sensorId,
                                 newUserId);
@@ -240,7 +189,7 @@ public class Sensor {
                             + halInterfaceVersion);
                     mCurrentSession = new AidlSession(halInterfaceVersion,
                             newSession, userIdStarted, resultController);
-                    if (FingerprintUtils.getInstance(sensorId)
+                    if (getFingerprintUtilsInstance()
                             .isInvalidationInProgress(mContext, userIdStarted)) {
                         Slog.w(TAG,
                                 "Scheduling unfinished invalidation request for "
@@ -295,6 +244,7 @@ public class Sensor {
     }
 
     @Nullable protected AidlSession getSessionForUser(int userId) {
+        Slog.d(TAG, "getSessionForUser: mCurrentSession: " + mCurrentSession);
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {
@@ -359,9 +309,8 @@ public class Sensor {
 
             final long userToken = proto.start(SensorStateProto.USER_STATES);
             proto.write(UserStateProto.USER_ID, userId);
-            proto.write(UserStateProto.NUM_ENROLLED,
-                    FingerprintUtils.getInstance(mSensorProperties.sensorId)
-                            .getBiometricsForUser(mContext, userId).size());
+            proto.write(UserStateProto.NUM_ENROLLED, getFingerprintUtilsInstance()
+                    .getBiometricsForUser(mContext, userId).size());
             proto.end(userToken);
         }
 
@@ -409,8 +358,8 @@ public class Sensor {
         if (mTestHalEnabled) {
             return true;
         }
-        return (ServiceManager.checkService(IFingerprint.DESCRIPTOR + "/" + halInstance)
-                != null);
+        return (ServiceManager.checkService(
+                remapFqName(IFingerprint.DESCRIPTOR + "/" + halInstance)) != null);
     }
 
     @NonNull protected BiometricContext getBiometricContext() {
@@ -437,5 +386,9 @@ public class Sensor {
 
     public FingerprintProvider getProvider() {
         return mProvider;
+    }
+
+    public FingerprintUtils getFingerprintUtilsInstance() {
+        return FingerprintUtils.getInstance(mSensorProperties.sensorId);
     }
 }

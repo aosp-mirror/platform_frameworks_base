@@ -20,13 +20,14 @@ import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.tableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -41,11 +42,11 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,12 +56,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -73,14 +72,15 @@ import org.mockito.MockitoAnnotations
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class MobileRepositorySwitcherTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var underTest: MobileRepositorySwitcher
     private lateinit var realRepo: MobileConnectionsRepositoryImpl
     private lateinit var demoRepo: DemoMobileConnectionsRepository
     private lateinit var mobileDataSource: DemoModeMobileConnectionDataSource
     private lateinit var wifiDataSource: DemoModeWifiDataSource
-    private lateinit var logFactory: TableLogBufferFactory
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var connectivityRepository: ConnectivityRepository
 
@@ -95,15 +95,11 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     private val mobileMappings = FakeMobileMappingsProxy()
     private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
 
-    private val testDispatcher = UnconfinedTestDispatcher()
     private val scope = CoroutineScope(IMMEDIATE)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        logFactory =
-            TableLogBufferFactory(dumpManager, FakeSystemClock(), mock(), testDispatcher, scope)
 
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
@@ -131,10 +127,12 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 mobileMappings,
                 fakeBroadcastDispatcher,
                 context,
-                IMMEDIATE,
+                /* bgDispatcher = */ IMMEDIATE,
                 scope,
+                /* mainDispatcher = */ IMMEDIATE,
                 FakeAirplaneModeRepository(),
                 wifiRepository,
+                mock(),
                 mock(),
                 mock(),
             )
@@ -145,7 +143,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 wifiDataSource = wifiDataSource,
                 scope = scope,
                 context = context,
-                logFactory = logFactory,
+                logFactory = kosmos.tableLogBufferFactory,
             )
 
         underTest =

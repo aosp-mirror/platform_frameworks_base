@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.phone
 
 import android.graphics.Color
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.view.WindowInsetsController
 import android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
@@ -36,7 +36,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
 

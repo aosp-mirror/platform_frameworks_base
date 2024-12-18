@@ -1523,7 +1523,7 @@ public class BinaryTransparencyService extends SystemService {
                 @Override
                 public void onApexStaged(ApexStagedEvent event) throws RemoteException {
                     Slog.d(TAG, "A new APEX has been staged for update. There are currently "
-                            + event.stagedApexModuleNames.length + " APEX(s) staged for update. "
+                            + event.stagedApexInfos.length + " APEX(s) staged for update. "
                             + "Scheduling measurement...");
                     UpdateMeasurementsJobService.scheduleBinaryMeasurements(mContext,
                             BinaryTransparencyService.this);

@@ -1,0 +1,116 @@
+//
+// Copyright (C) 2024 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+package {
+    default_team: "trendy_team_enigma",
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+filegroup {
+    name: "vcn-location-sources",
+    srcs: select(release_flag("RELEASE_MOVE_VCN_TO_MAINLINE"), {
+        true: [
+            "vcn-location-flag/module/com/android/server/vcn/VcnLocation.java",
+        ],
+        default: [
+            "vcn-location-flag/platform/com/android/server/vcn/VcnLocation.java",
+        ],
+    }),
+    visibility: ["//frameworks/base/services/core"],
+}
+
+// TODO: b/374174952 This library is only used in "service-connectivity-b-platform"
+// After VCN moves to Connectivity/ and the modularization is done, this lib and
+// "service-connectivity-b-platform" can both be removed
+java_library {
+    name: "connectivity-utils-service-vcn-internal",
+    sdk_version: "module_current",
+    min_sdk_version: "30",
+    srcs: [
+        ":framework-connectivity-shared-srcs",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "service-vcn-sources",
+    srcs: ["src/**/*.java"],
+    path: "src",
+    visibility: [
+        "//packages/modules/Connectivity/service-b",
+    ],
+}
+
+// This java_defaults will be used for "service-connectivity-b-platform" and
+// "service-connectivity-b-pre-jarjar"
+java_defaults {
+    name: "service-connectivity-b-pre-jarjar-defaults",
+    defaults: ["framework-system-server-module-defaults"], // This is a system server jar
+
+    srcs: [
+        ":service-vcn-sources",
+    ],
+
+    libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
+        "framework-annotations-lib",
+        "framework-connectivity-pre-jarjar",
+        "framework-connectivity-t-pre-jarjar",
+        "framework-connectivity-b-pre-jarjar",
+        "framework-wifi.stubs.module_lib",
+        "keepanno-annotations",
+        "modules-utils-statemachine",
+        "unsupportedappusage",
+    ],
+
+    // TODO: b/374174952 Dynamically include these libs when VCN
+    // modularization is released
+    static_libs: [
+        "net-utils-service-vcn",
+        "modules-utils-handlerexecutor",
+    ],
+
+    defaults_visibility: [
+        "//packages/modules/Connectivity/service-b",
+    ],
+}
+
+// This library is only used to be included into services.jar when the build system
+// flag RELEASE_MOVE_VCN_TO_MAINLINE is disabled. When the flag is enabled, a module
+// version of this library will be included in Tethering module
+java_library {
+    name: "service-connectivity-b-platform",
+    defaults: ["service-connectivity-b-pre-jarjar-defaults"],
+    static_libs: ["connectivity-utils-service-vcn-internal"],
+
+    sdk_version: "system_server_current",
+    min_sdk_version: "35",
+
+    // TODO (b/374174952 ): This file is for jarjaring files in
+    // "connectivity-utils-service-vcn-internal".
+    jarjar_rules: "service-vcn-platform-jarjar-rules.txt",
+
+    visibility: [
+        "//frameworks/base/services",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+    ],
+}

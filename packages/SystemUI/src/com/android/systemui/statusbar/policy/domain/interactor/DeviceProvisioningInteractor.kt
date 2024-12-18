@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.Flow
 class DeviceProvisioningInteractor
 @Inject
 constructor(
-    repository: DeviceProvisioningRepository,
+    private val repository: DeviceProvisioningRepository,
 ) {
     /**
      * Whether this device has been provisioned.
@@ -35,6 +35,7 @@ constructor(
      */
     val isDeviceProvisioned: Flow<Boolean> = repository.isDeviceProvisioned
 
-    /** Whether Factory Reset Protection (FRP) is currently active, locking the device. */
-    val isFactoryResetProtectionActive: Flow<Boolean> = repository.isFactoryResetProtectionActive
+    fun isDeviceProvisioned(): Boolean {
+        return repository.isDeviceProvisioned()
+    }
 }

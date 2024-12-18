@@ -37,16 +37,14 @@ import com.android.wm.shell.R;
  */
 public class BubbleBarHandleView extends View {
     private static final long COLOR_CHANGE_DURATION = 120;
-
-    // The handle view is currently rendered as 3 evenly spaced dots.
-    private int mDotSize;
-    private int mDotSpacing;
     // Path used to draw the dots
     private final Path mPath = new Path();
 
-    private @ColorInt int mHandleLightColor;
-    private @ColorInt int mHandleDarkColor;
-    private @Nullable ObjectAnimator mColorChangeAnim;
+    private final @ColorInt int mHandleLightColor;
+    private final @ColorInt int mHandleDarkColor;
+    private @ColorInt int mCurrentColor;
+    @Nullable
+    private ObjectAnimator mColorChangeAnim;
 
     public BubbleBarHandleView(Context context) {
         this(context, null /* attrs */);
@@ -63,10 +61,8 @@ public class BubbleBarHandleView extends View {
     public BubbleBarHandleView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mDotSize = getResources().getDimensionPixelSize(
-                R.dimen.bubble_bar_expanded_view_caption_dot_size);
-        mDotSpacing = getResources().getDimensionPixelSize(
-                R.dimen.bubble_bar_expanded_view_caption_dot_spacing);
+        final int handleHeight = getResources().getDimensionPixelSize(
+                R.dimen.bubble_bar_expanded_view_handle_height);
         mHandleLightColor = ContextCompat.getColor(getContext(),
                 R.color.bubble_bar_expanded_view_handle_light);
         mHandleDarkColor = ContextCompat.getColor(getContext(),
@@ -76,30 +72,17 @@ public class BubbleBarHandleView extends View {
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
-                final int handleCenterX = view.getWidth() / 2;
                 final int handleCenterY = view.getHeight() / 2;
-                final int handleTotalWidth = mDotSize * 3 + mDotSpacing * 2;
-                final int handleLeft = handleCenterX - handleTotalWidth / 2;
-                final int handleTop = handleCenterY - mDotSize / 2;
-                final int handleBottom = handleTop + mDotSize;
-                RectF dot1 = new RectF(
-                        handleLeft, handleTop,
-                        handleLeft + mDotSize, handleBottom);
-                RectF dot2 = new RectF(
-                        dot1.right + mDotSpacing, handleTop,
-                        dot1.right + mDotSpacing + mDotSize, handleBottom
-                );
-                RectF dot3 = new RectF(
-                        dot2.right + mDotSpacing, handleTop,
-                        dot2.right + mDotSpacing + mDotSize, handleBottom
-                );
+                final int handleTop = handleCenterY - handleHeight / 2;
+                final int handleBottom = handleTop + handleHeight;
+                final int radius = handleHeight / 2;
+                RectF handle = new RectF(/* left = */ 0, handleTop, view.getWidth(), handleBottom);
                 mPath.reset();
-                mPath.addOval(dot1, Path.Direction.CW);
-                mPath.addOval(dot2, Path.Direction.CW);
-                mPath.addOval(dot3, Path.Direction.CW);
+                mPath.addRoundRect(handle, radius, radius, Path.Direction.CW);
                 outline.setPath(mPath);
             }
         });
+        setContentDescription(getResources().getString(R.string.handle_text));
     }
 
     /**
@@ -107,13 +90,17 @@ public class BubbleBarHandleView extends View {
      *
      * @param isRegionDark Whether the background behind the handle is dark, and thus the handle
      *                     should be light (and vice versa).
-     * @param animated      Whether to animate the change, or apply it immediately.
+     * @param animated     Whether to animate the change, or apply it immediately.
      */
     public void updateHandleColor(boolean isRegionDark, boolean animated) {
         int newColor = isRegionDark ? mHandleLightColor : mHandleDarkColor;
+        if (newColor == mCurrentColor) {
+            return;
+        }
         if (mColorChangeAnim != null) {
             mColorChangeAnim.cancel();
         }
+        mCurrentColor = newColor;
         if (animated) {
             mColorChangeAnim = ObjectAnimator.ofArgb(this, "backgroundColor", newColor);
             mColorChangeAnim.addListener(new AnimatorListenerAdapter() {

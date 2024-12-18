@@ -24,7 +24,6 @@
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <binder/IPCThreadState.h>
 #include <cutils/compiler.h>
 #include <dirent.h>
 #include <jni.h>
@@ -34,7 +33,6 @@
 #include <meminfo/procmeminfo.h>
 #include <meminfo/sysmeminfo.h>
 #include <nativehelper/JNIHelp.h>
-#include <processgroup/processgroup.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/mman.h>
@@ -62,10 +60,6 @@ static const size_t kPageMask = ~(kPageSize - 1);
 
 using VmaToAdviseFunc = std::function<int(const Vma&)>;
 using android::base::unique_fd;
-
-#define SYNC_RECEIVED_WHILE_FROZEN (1)
-#define ASYNC_RECEIVED_WHILE_FROZEN (2)
-#define TXNS_PENDING_WHILE_FROZEN (4)
 
 #define MAX_RW_COUNT (INT_MAX & kPageMask)
 
@@ -527,58 +521,6 @@ static void com_android_server_am_CachedAppOptimizer_compactProcess(JNIEnv*, job
     compactProcessOrFallback(pid, compactionFlags);
 }
 
-static jint com_android_server_am_CachedAppOptimizer_freezeBinder(JNIEnv* env, jobject clazz,
-                                                                  jint pid, jboolean freeze,
-                                                                  jint timeout_ms) {
-    jint retVal = IPCThreadState::freeze(pid, freeze, timeout_ms);
-    if (retVal != 0 && retVal != -EAGAIN) {
-        jniThrowException(env, "java/lang/RuntimeException", "Unable to freeze/unfreeze binder");
-    }
-
-    return retVal;
-}
-
-static jint com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo(JNIEnv *env,
-        jobject clazz, jint pid) {
-    uint32_t syncReceived = 0, asyncReceived = 0;
-
-    int error = IPCThreadState::getProcessFreezeInfo(pid, &syncReceived, &asyncReceived);
-
-    if (error < 0) {
-        jniThrowException(env, "java/lang/RuntimeException", strerror(error));
-    }
-
-    jint retVal = 0;
-
-    // bit 0 of sync_recv goes to bit 0 of retVal
-    retVal |= syncReceived & SYNC_RECEIVED_WHILE_FROZEN;
-    // bit 0 of async_recv goes to bit 1 of retVal
-    retVal |= (asyncReceived << 1) & ASYNC_RECEIVED_WHILE_FROZEN;
-    // bit 1 of sync_recv goes to bit 2 of retVal
-    retVal |= (syncReceived << 1) & TXNS_PENDING_WHILE_FROZEN;
-
-    return retVal;
-}
-
-static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIEnv* env,
-                                                                            jobject clazz) {
-    std::string path;
-
-    if (!getAttributePathForTask("FreezerState", getpid(), &path)) {
-        path = "";
-    }
-
-    return env->NewStringUTF(path.c_str());
-}
-
-static jboolean com_android_server_am_CachedAppOptimizer_isFreezerProfileValid(JNIEnv* env) {
-    uid_t uid = getuid();
-    pid_t pid = getpid();
-
-    return isProfileValidForProcess("Frozen", uid, pid) &&
-            isProfileValidForProcess("Unfrozen", uid, pid);
-}
-
 static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
         {"cancelCompaction", "()V",
@@ -592,13 +534,7 @@ static const JNINativeMethod sMethods[] = {
          (void*)com_android_server_am_CachedAppOptimizer_getMemoryFreedCompaction},
         {"compactSystem", "()V", (void*)com_android_server_am_CachedAppOptimizer_compactSystem},
         {"compactProcess", "(II)V", (void*)com_android_server_am_CachedAppOptimizer_compactProcess},
-        {"freezeBinder", "(IZI)I", (void*)com_android_server_am_CachedAppOptimizer_freezeBinder},
-        {"getBinderFreezeInfo", "(I)I",
-         (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
-        {"getFreezerCheckPath", "()Ljava/lang/String;",
-         (void*)com_android_server_am_CachedAppOptimizer_getFreezerCheckPath},
-        {"isFreezerProfileValid", "()Z",
-         (void*)com_android_server_am_CachedAppOptimizer_isFreezerProfileValid}};
+};
 
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env)
 {

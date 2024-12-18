@@ -43,15 +43,17 @@ public:
     MouseCursorController(PointerControllerContext& context);
     ~MouseCursorController();
 
-    std::optional<FloatRect> getBounds() const;
     void move(float deltaX, float deltaY);
     void setPosition(float x, float y);
     FloatPoint getPosition() const;
-    int32_t getDisplayId() const;
+    ui::LogicalDisplayId getDisplayId() const;
     void fade(PointerControllerInterface::Transition transition);
     void unfade(PointerControllerInterface::Transition transition);
     void setDisplayViewport(const DisplayViewport& viewport, bool getAdditionalMouseResources);
     void setStylusHoverMode(bool stylusHoverMode);
+
+    // Set/Unset flag to hide the mouse cursor on the mirrored display
+    void setSkipScreenshot(bool skip);
 
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
@@ -63,6 +65,8 @@ public:
     bool doAnimations(nsecs_t timestamp);
 
     bool resourcesLoaded();
+
+    std::string dump() const;
 
 private:
     mutable std::mutex mLock;
@@ -94,11 +98,11 @@ private:
         PointerIconStyle requestedPointerType;
         PointerIconStyle resolvedPointerType;
 
+        bool skipScreenshot{false};
         bool animating{false};
 
     } mLocked GUARDED_BY(mLock);
 
-    std::optional<FloatRect> getBoundsLocked() const;
     void setPositionLocked(float x, float y);
 
     void updatePointerLocked();

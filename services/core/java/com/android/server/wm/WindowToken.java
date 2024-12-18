@@ -47,7 +47,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
 
-import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -563,9 +563,15 @@ class WindowToken extends WindowContainer<WindowState> {
         if (mTransitionController.isShellTransitionsEnabled()
                 && asActivityRecord() != null && isVisible()) {
             // Trigger an activity level rotation transition.
-            mTransitionController.requestTransitionIfNeeded(WindowManager.TRANSIT_CHANGE, this);
-            mTransitionController.collectVisibleChange(this);
-            mTransitionController.setReady(this);
+            Transition transition = mTransitionController.getCollectingTransition();
+            if (transition == null) {
+                transition = mTransitionController.requestStartTransition(
+                        mTransitionController.createTransition(WindowManager.TRANSIT_CHANGE),
+                        null /* trigger */, null /* remote */, null /* disp */);
+            }
+            transition.collect(this);
+            transition.collectVisibleChange(this);
+            transition.setReady(mDisplayContent, true);
         }
         final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());
@@ -692,8 +698,8 @@ class WindowToken extends WindowContainer<WindowState> {
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
-            @WindowTraceLogLevel int logLevel) {
-        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            @WindowTracingLogLevel int logLevel) {
+        if (logLevel == WindowTracingLogLevel.CRITICAL && !isVisible()) {
             return;
         }
 

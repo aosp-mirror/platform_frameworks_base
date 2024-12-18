@@ -22,8 +22,8 @@ android_test {
     // (e.g. VpnManager#prepareVpn()).
     certificate: "platform",
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: [
         "androidx.test.core",

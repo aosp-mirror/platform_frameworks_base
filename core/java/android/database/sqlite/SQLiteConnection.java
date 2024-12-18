@@ -34,17 +34,22 @@ import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.Printer;
+import com.android.internal.util.RingBuffer;
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
@@ -185,7 +190,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             SQLiteDatabaseConfiguration configuration,
             int connectionId, boolean primaryConnection) {
         mPool = pool;
-        mRecentOperations = new OperationLog(mPool);
+        mRecentOperations = new OperationLog();
         mConfiguration = new SQLiteDatabaseConfiguration(configuration);
         mConnectionId = connectionId;
         mIsPrimaryConnection = primaryConnection;
@@ -239,8 +244,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         } catch (SQLiteCantOpenDatabaseException e) {
-            final StringBuilder message = new StringBuilder("Cannot open database '")
-                    .append(file).append('\'')
+            final StringBuilder message = new StringBuilder(e.getMessage())
+                    .append(" '").append(file).append("'")
                     .append(" with flags 0x")
                     .append(Integer.toHexString(mConfiguration.openFlags));
 
@@ -265,12 +270,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                     message.append(": File ").append(path).append(" is not readable");
                 } else if (Files.isDirectory(path)) {
                     message.append(": Path ").append(path).append(" is a directory");
-                } else {
-                    message.append(": Unable to deduct failure reason");
                 }
             } catch (Throwable th) {
-                message.append(": Unable to deduct failure reason"
-                        + " because filesystem couldn't be examined: ").append(th.getMessage());
+                // Ignore any exceptions generated whilst attempting to create extended diagnostic
+                // messages.
             }
             throw new SQLiteCantOpenDatabaseException(message.toString(), e);
         } finally {
@@ -305,6 +308,16 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 mRecentOperations.endOperation(cookie);
             }
         }
+    }
+
+    /** Record the start of a transaction for logging and debugging. */
+    void recordBeginTransaction(String mode) {
+        mRecentOperations.beginTransaction(mode);
+    }
+
+    /** Record the end of a transaction for logging and debugging. */
+    void recordEndTransaction(boolean successful) {
+        mRecentOperations.endTransaction(successful);
     }
 
     private void setPageSize() {
@@ -1337,6 +1350,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
         printer.println("  isPrimaryConnection: " + mIsPrimaryConnection);
         printer.println("  onlyAllowReadOnlyOperations: " + mOnlyAllowReadOnlyOperations);
+        printer.println("  totalLongOperations: " + mRecentOperations.getTotalLongOperations());
 
         mRecentOperations.dump(printer);
 
@@ -1595,51 +1609,84 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         }
     }
 
-    private static final class OperationLog {
+    /**
+     * This class implements a leaky bucket strategy to rate-limit operations.  A client
+     * accumulates one credit every <n> milliseconds; a credit allows the client execute an
+     * operation (which then deducts the credit).  Credits accumulate up to a maximum amount after
+     * which they no longer accumulate.  The strategy allows a client to execute an operation
+     * every <n> milliseconds, or to execute a burst, after a period of no operations.
+     */
+    private static class RateLimiter {
+        // When the bucket was created, in ms.
+        private final long mCreationUptimeMs;
+        // The time required to accumulate a single credit.
+        private final long mMsPerCredit;
+        // The maximum number of credits the process can accumulate.
+        private final int mMaxCredits;
+        // Total credits consumed so far.
+        private long mSpent = 0;
+
+        RateLimiter(long msPerCredit, int maxCredits) {
+            mMsPerCredit = msPerCredit;
+            mMaxCredits = maxCredits;
+            mCreationUptimeMs = SystemClock.uptimeMillis() - (mMsPerCredit * mMaxCredits);
+        }
+
+        /** Return true if there is a credit available (and consume that credit). */
+        boolean tryAcquire() {
+            final long now = SystemClock.uptimeMillis();
+            long credits = (now - mCreationUptimeMs) / mMsPerCredit;
+
+            long available = credits - mSpent;
+            if (available > mMaxCredits) {
+                mSpent += available - mMaxCredits;
+                available = credits - mSpent;
+            }
+            if (available > 0) {
+                mSpent++;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private final class OperationLog {
         private static final int MAX_RECENT_OPERATIONS = 20;
         private static final int COOKIE_GENERATION_SHIFT = 8;
         private static final int COOKIE_INDEX_MASK = 0xff;
 
+        // Operations over 2s are long.  Save the last ten.
+        private static final long LONG_OPERATION_THRESHOLD_MS = 2_000;
+        private static final int MAX_LONG_OPERATIONS = 10;
+
         private final Operation[] mOperations = new Operation[MAX_RECENT_OPERATIONS];
-        private int mIndex;
-        private int mGeneration;
-        private final SQLiteConnectionPool mPool;
+        private int mIndex = -1;
+        private int mGeneration = 0;
+        private final Operation mTransaction = new Operation();
         private long mResultLong = Long.MIN_VALUE;
         private String mResultString;
 
-        OperationLog(SQLiteConnectionPool pool) {
-            mPool = pool;
-        }
+        private final RingBuffer<Operation> mLongOperations =
+                new RingBuffer<>(()->{return new Operation();},
+                        (n) ->{return new Operation[n];},
+                        MAX_LONG_OPERATIONS);
+        private int mTotalLongOperations = 0;
+
+        // Limit log messages to one every 5 minutes, except that a burst may be 10 messages long.
+        private final RateLimiter mLongLimiter = new RateLimiter(300_000, 10);
 
         public int beginOperation(String kind, String sql, Object[] bindArgs) {
             mResultLong = Long.MIN_VALUE;
             mResultString = null;
 
             synchronized (mOperations) {
-                final int index = (mIndex + 1) % MAX_RECENT_OPERATIONS;
-                Operation operation = mOperations[index];
-                if (operation == null) {
-                    operation = new Operation();
-                    mOperations[index] = operation;
-                } else {
-                    operation.mFinished = false;
-                    operation.mException = null;
-                    if (operation.mBindArgs != null) {
-                        operation.mBindArgs.clear();
-                    }
-                }
-                operation.mStartWallTime = System.currentTimeMillis();
-                operation.mStartTime = SystemClock.uptimeMillis();
+                Operation operation = newOperationLocked();
                 operation.mKind = kind;
                 operation.mSql = sql;
-                operation.mPath = mPool.getPath();
-                operation.mResultLong = Long.MIN_VALUE;
-                operation.mResultString = null;
                 if (bindArgs != null) {
                     if (operation.mBindArgs == null) {
                         operation.mBindArgs = new ArrayList<Object>();
-                    } else {
-                        operation.mBindArgs.clear();
                     }
                     for (int i = 0; i < bindArgs.length; i++) {
                         final Object arg = bindArgs[i];
@@ -1651,14 +1698,43 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                         }
                     }
                 }
-                operation.mCookie = newOperationCookieLocked(index);
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_DATABASE)) {
+                operation.mTraced = Trace.isTagEnabled(Trace.TRACE_TAG_DATABASE);
+                if (operation.mTraced) {
                     Trace.asyncTraceBegin(Trace.TRACE_TAG_DATABASE, operation.getTraceMethodName(),
                             operation.mCookie);
                 }
-                mIndex = index;
                 return operation.mCookie;
             }
+        }
+
+        public void beginTransaction(String kind) {
+            synchronized (mOperations) {
+                Operation operation = newOperationLocked();
+                operation.mKind = kind;
+                mTransaction.copyFrom(operation);
+
+                if (operation.mTraced) {
+                    Trace.asyncTraceBegin(Trace.TRACE_TAG_DATABASE, operation.getTraceMethodName(),
+                            operation.mCookie);
+                }
+            }
+        }
+
+        /**
+         * Fetch a new operation from the ring buffer.  The operation is properly initialized.
+         * This advances mIndex to point to the next element.
+         */
+        private Operation newOperationLocked() {
+            final int index = (mIndex + 1) % MAX_RECENT_OPERATIONS;
+            Operation operation = mOperations[index];
+            if (operation == null) {
+                mOperations[index] = new Operation();
+                operation = mOperations[index];
+            }
+            operation.start();
+            operation.mCookie = newOperationCookieLocked(index);
+            mIndex = index;
+            return operation;
         }
 
         public void failOperation(int cookie, Exception ex) {
@@ -1684,6 +1760,20 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             }
         }
 
+        public boolean endTransaction(boolean success) {
+            synchronized (mOperations) {
+                mTransaction.mResultLong = success ? 1 : 0;
+                final long execTime = finishOperationLocked(mTransaction);
+                final Operation operation = getOperationLocked(mTransaction.mCookie);
+                if (operation != null) {
+                    operation.copyFrom(mTransaction);
+                }
+                mTransaction.setEmpty();
+                return NoPreloadHolder.DEBUG_LOG_SLOW_QUERIES
+                        && SQLiteDebug.shouldLogSlowQuery(execTime);
+            }
+        }
+
         public void logOperation(int cookie, String detail) {
             synchronized (mOperations) {
                 logOperationLocked(cookie, detail);
@@ -1701,13 +1791,11 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         private boolean endOperationDeferLogLocked(int cookie) {
             final Operation operation = getOperationLocked(cookie);
             if (operation != null) {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_DATABASE)) {
+                if (operation.mTraced) {
                     Trace.asyncTraceEnd(Trace.TRACE_TAG_DATABASE, operation.getTraceMethodName(),
                             operation.mCookie);
                 }
-                operation.mEndTime = SystemClock.uptimeMillis();
-                operation.mFinished = true;
-                final long execTime = operation.mEndTime - operation.mStartTime;
+                final long execTime = finishOperationLocked(operation);
                 mPool.onStatementExecuted(execTime);
                 return NoPreloadHolder.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
                         execTime);
@@ -1732,10 +1820,25 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             return generation << COOKIE_GENERATION_SHIFT | index;
         }
 
+        /** Close out the operation and return the elapsed time. */
+        private long finishOperationLocked(Operation operation) {
+            operation.mEndTime = SystemClock.uptimeMillis();
+            operation.mFinished = true;
+            final long elapsed = operation.mEndTime - operation.mStartTime;
+            if (elapsed > LONG_OPERATION_THRESHOLD_MS) {
+                mLongOperations.getNextSlot().copyFrom(operation);
+                mTotalLongOperations++;
+                if (mLongLimiter.tryAcquire()) {
+                    Log.i(TAG, "Long db operation: " + mConfiguration.label);
+                }
+            }
+            return elapsed;
+        }
+
         private Operation getOperationLocked(int cookie) {
             final int index = cookie & COOKIE_INDEX_MASK;
             final Operation operation = mOperations[index];
-            return operation.mCookie == cookie ? operation : null;
+            return (operation != null && operation.mCookie == cookie) ? operation : null;
         }
 
         public String describeCurrentOperation() {
@@ -1750,47 +1853,86 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             }
         }
 
-        public void dump(Printer printer) {
+        /**
+         * Dump an Operation if it is not in the recent operations list.  Return 1 if the
+         * operation was dumped and 0 if not.
+         */
+        private int dumpIfNotRecentLocked(Printer pw, Operation op, int counter) {
+            if (op == null || op.isEmpty() || getOperationLocked(op.mCookie) != null) {
+                return 0;
+            }
+            pw.println(op.describe(counter));
+            return 1;
+        }
+
+        private void dumpRecentLocked(Printer printer) {
             synchronized (mOperations) {
                 printer.println("  Most recently executed operations:");
                 int index = mIndex;
-                Operation operation = mOperations[index];
-                if (operation != null) {
-                    // Note: SimpleDateFormat is not thread-safe, cannot be compile-time created,
-                    // and is relatively expensive to create during preloading. This method is only
-                    // used when dumping a connection, which is a rare (mainly error) case.
-                    SimpleDateFormat opDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    int n = 0;
-                    do {
-                        StringBuilder msg = new StringBuilder();
-                        msg.append("    ").append(n).append(": [");
-                        String formattedStartTime = opDF.format(new Date(operation.mStartWallTime));
-                        msg.append(formattedStartTime);
-                        msg.append("] ");
-                        operation.describe(msg, false); // Never dump bingargs in a bugreport
-                        printer.println(msg.toString());
-
-                        if (index > 0) {
-                            index -= 1;
-                        } else {
-                            index = MAX_RECENT_OPERATIONS - 1;
-                        }
-                        n += 1;
-                        operation = mOperations[index];
-                    } while (operation != null && n < MAX_RECENT_OPERATIONS);
-                } else {
+                if (index == 0) {
                     printer.println("    <none>");
+                    return;
                 }
+
+                // Operations are dumped in order of most recent first.
+                int counter = 0;
+                int n = 0;
+                Operation operation = mOperations[index];
+                do {
+                    printer.println(operation.describe(counter));
+
+                    if (index > 0) {
+                        index -= 1;
+                    } else {
+                        index = MAX_RECENT_OPERATIONS - 1;
+                    }
+                    n++;
+                    counter++;
+                    operation = mOperations[index];
+                } while (operation != null && n < MAX_RECENT_OPERATIONS);
+                counter += dumpIfNotRecentLocked(printer, mTransaction, counter);
+            }
+        }
+
+        private void dumpLongLocked(Printer printer) {
+            printer.println("  Operations exceeding " + LONG_OPERATION_THRESHOLD_MS + "ms:");
+            if (mLongOperations.isEmpty()) {
+                printer.println("    <none>");
+                return;
+            }
+            Operation[] longOps = mLongOperations.toArray();
+            for (int i = 0; i < longOps.length; i++) {
+                if (longOps[i] != null) {
+                    printer.println(longOps[i].describe(i));
+                }
+            }
+        }
+
+        public long getTotalLongOperations() {
+            return mTotalLongOperations;
+        }
+
+        public void dump(Printer printer) {
+            synchronized (mOperations) {
+                dumpRecentLocked(printer);
+                dumpLongLocked(printer);
             }
         }
     }
 
-    private static final class Operation {
+    private final class Operation {
         // Trim all SQL statements to 256 characters inside the trace marker.
         // This limit gives plenty of context while leaving space for other
         // entries in the trace buffer (and ensures atrace doesn't truncate the
         // marker for us, potentially losing metadata in the process).
         private static final int MAX_TRACE_METHOD_NAME_LEN = 256;
+
+        // The reserved start time that indicates the Operation is empty.
+        private static final long EMPTY_OPERATION = -1;
+
+        // The formatter for the timestamp.
+        private static final DateTimeFormatter sDateTime =
+                DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS", Locale.US);
 
         public long mStartWallTime; // in System.currentTimeMillis()
         public long mStartTime; // in SystemClock.uptimeMillis();
@@ -1801,16 +1943,61 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         public boolean mFinished;
         public Exception mException;
         public int mCookie;
-        public String mPath;
         public long mResultLong; // MIN_VALUE means "value not set".
         public String mResultString;
+        public boolean mTraced;
+
+        /** Reset the object to begin a new operation. */
+        void start() {
+            mStartWallTime = System.currentTimeMillis();
+            mStartTime = SystemClock.uptimeMillis();
+            mEndTime = Long.MIN_VALUE;
+            mKind = null;
+            mSql = null;
+            if (mBindArgs != null) mBindArgs.clear();
+            mFinished = false;
+            mException = null;
+            mCookie = -1;
+            mResultLong = Long.MIN_VALUE;
+            mResultString = null;
+            mTraced = false;
+        }
+
+        /**
+         * Initialize from the source object.  This is meant to clone the object for use in a
+         * transaction operation.  To that end, the local bind args are set to null.
+         */
+        void copyFrom(Operation r) {
+            mStartWallTime = r.mStartWallTime;
+            mStartTime = r.mStartTime;
+            mEndTime = r.mEndTime;
+            mKind = r.mKind;
+            mSql = r.mSql;
+            mBindArgs = null;
+            mFinished = r.mFinished;
+            mException = r.mException;
+            mCookie = r.mCookie;
+            mResultLong = r.mResultLong;
+            mResultString = r.mResultString;
+            mTraced = r.mTraced;
+        }
+
+        /** Mark the operation empty. */
+        void setEmpty() {
+            mStartWallTime = EMPTY_OPERATION;
+        }
+
+        /** Return true if the operation is empty. */
+        boolean isEmpty() {
+            return mStartWallTime == EMPTY_OPERATION;
+        }
 
         public void describe(StringBuilder msg, boolean allowDetailedLog) {
             msg.append(mKind);
             if (mFinished) {
                 msg.append(" took ").append(mEndTime - mStartTime).append("ms");
             } else {
-                msg.append(" started ").append(System.currentTimeMillis() - mStartWallTime)
+                msg.append(" started ").append(SystemClock.uptimeMillis() - mStartTime)
                         .append("ms ago");
             }
             msg.append(" - ").append(getStatus());
@@ -1839,7 +2026,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 }
                 msg.append("]");
             }
-            msg.append(", path=").append(mPath);
+            msg.append(", path=").append(mPool.getPath());
             if (mException != null) {
                 msg.append(", exception=\"").append(mException.getMessage()).append("\"");
             }
@@ -1849,6 +2036,21 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             if (mResultString != null) {
                 msg.append(", result=\"").append(mResultString).append("\"");
             }
+        }
+
+        /**
+         * Convert a wall-clock time in milliseconds to logcat format.
+         */
+        private String timeString(long millis) {
+            return sDateTime.withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(millis));
+        }
+
+        public String describe(int n) {
+            final StringBuilder msg = new StringBuilder();
+            final String start = timeString(mStartWallTime);
+            msg.append("    ").append(n).append(": [").append(start).append("] ");
+            describe(msg, false); // Never dump bindargs in a bugreport
+            return msg.toString();
         }
 
         private String getStatus() {
@@ -1864,7 +2066,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 return methodName.substring(0, MAX_TRACE_METHOD_NAME_LEN);
             return methodName;
         }
-
     }
 
     /**

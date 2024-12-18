@@ -16,7 +16,9 @@
 
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
-import android.platform.test.annotations.EnabledOnRavenwood
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.view.accessibility.Flags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -44,7 +46,6 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class ReduceBrightColorsAutoAddableTest : SysuiTestCase() {
 
@@ -67,12 +68,14 @@ class ReduceBrightColorsAutoAddableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
     fun available_strategyIfNotAdded() =
         testWithFeatureAvailability(available = true) {
             assertThat(underTest.autoAddTracking).isEqualTo(AutoAddTracking.IfNotAdded(SPEC))
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
     fun activated_addSignal() = testWithFeatureAvailability {
         val signal by collectLastValue(underTest.autoAddSignal(0))
         runCurrent()
@@ -85,6 +88,7 @@ class ReduceBrightColorsAutoAddableTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
     fun notActivated_noSignal() = testWithFeatureAvailability {
         val signal by collectLastValue(underTest.autoAddSignal(0))
         runCurrent()
@@ -95,6 +99,13 @@ class ReduceBrightColorsAutoAddableTest : SysuiTestCase() {
 
         assertThat(signal).isNull()
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_A11Y_QS_SHORTCUT)
+    fun available_a11yQsShortcutFlagEnabled_strategyDisabled() =
+        testWithFeatureAvailability(available = true) {
+            assertThat(underTest.autoAddTracking).isEqualTo(AutoAddTracking.Disabled)
+        }
 
     private fun testWithFeatureAvailability(
         available: Boolean = true,

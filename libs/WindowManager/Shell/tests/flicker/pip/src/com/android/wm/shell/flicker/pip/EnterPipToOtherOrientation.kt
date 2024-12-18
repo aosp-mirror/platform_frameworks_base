@@ -21,12 +21,12 @@ import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.Rotation
 import android.tools.flicker.assertions.FlickerTest
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip while changing orientation (from app in landscape to pip window in portrait)
  *
- * To run this test: `atest WMShellFlickerTests:EnterPipToOtherOrientationTest`
+ * To run this test: `atest WMShellFlickerTestsPip2:EnterPipToOtherOrientation`
  *
  * Actions:
  * ```
@@ -117,12 +117,10 @@ class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransition(fli
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
-     *
-     * TODO b/197726599 Prevents all states from being checked
      */
     @Presubmit
     @Test
-    fun entireScreenCoveredAtStartAndEnd() = flicker.entireScreenCovered(allStates = false)
+    fun entireScreenCoveredAtStartAndEnd() = flicker.entireScreenCovered()
 
     /** Checks [pipApp] window remains visible and on top throughout the transition */
     @Presubmit

@@ -160,7 +160,8 @@ interface IDevicePolicyManager {
     void setKeyguardDisabledFeatures(in ComponentName who, String callerPackageName, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
-    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
+    void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing,
+        int userHandle, String provisioningContext);
     boolean isAdminActive(in ComponentName policyReceiver, int userHandle);
     List<ComponentName> getActiveAdmins(int userHandle);
     @UnsupportedAppUsage
@@ -244,8 +245,8 @@ interface IDevicePolicyManager {
     void setDefaultSmsApplication(in ComponentName admin, String callerPackageName, String packageName, boolean parent);
     void setDefaultDialerApplication(String packageName);
 
-    void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings);
-    Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName);
+    void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings, in boolean parent);
+    Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in boolean parent);
     boolean setApplicationRestrictionsManagingPackage(in ComponentName admin, in String packageName);
     String getApplicationRestrictionsManagingPackage(in ComponentName admin);
     boolean isCallerApplicationRestrictionsManagingPackage(in String callerPackage);
@@ -254,6 +255,7 @@ interface IDevicePolicyManager {
     ComponentName getRestrictionsProvider(int userHandle);
 
     void setUserRestriction(in ComponentName who, in String callerPackage, in String key, boolean enable, boolean parent);
+    void setUserRestrictionForUser(in String systemEntity, in String key, boolean enable, int targetUser);
     void setUserRestrictionGlobally(in String callerPackage, in String key);
     Bundle getUserRestrictions(in ComponentName who, in String callerPackage, boolean parent);
     Bundle getUserRestrictionsGlobally(in String callerPackage);
@@ -301,7 +303,7 @@ interface IDevicePolicyManager {
     String[] getAccountTypesWithManagementDisabled(String callerPackageName);
     String[] getAccountTypesWithManagementDisabledAsUser(int userId, String callerPackageName, in boolean parent);
 
-    void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
+    void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled, in PersistableBundle options);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
     void setPreferentialNetworkServiceConfigs(
@@ -316,7 +318,7 @@ interface IDevicePolicyManager {
     int getLockTaskFeatures(in ComponentName who, String callerPackageName);
 
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
-    void setSystemSetting(in ComponentName who, in String setting, in String value);
+    void setSystemSetting(in ComponentName who, in String setting, in String value, boolean parent);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
     void setConfiguredNetworksLockdownState(in ComponentName who, String callerPackageName, boolean lockdown);
@@ -581,7 +583,7 @@ interface IDevicePolicyManager {
     void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
     WifiSsidPolicy getWifiSsidPolicy(String callerPackageName);
 
-    boolean isTheftDetectionTriggered(String callerPackageName);
+    boolean isDevicePotentiallyStolen(String callerPackageName);
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
@@ -619,10 +621,14 @@ interface IDevicePolicyManager {
     void calculateHasIncompatibleAccounts();
 
     void setContentProtectionPolicy(in ComponentName who, String callerPackageName, int policy);
-    int getContentProtectionPolicy(in ComponentName who, String callerPackageName);
+    int getContentProtectionPolicy(in ComponentName who, String callerPackageName, int userId);
 
     int[] getSubscriptionIds(String callerPackageName);
 
-    void setMaxPolicyStorageLimit(String packageName, int storageLimit);
-    int getMaxPolicyStorageLimit(String packageName);
+    void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit);
+    void forceSetMaxPolicyStorageLimit(String callerPackageName, int storageLimit);
+    int getMaxPolicyStorageLimit(String callerPackageName);
+    int getPolicySizeForAdmin(String callerPackageName, in EnforcingAdmin admin);
+
+    int getHeadlessDeviceOwnerMode(String callerPackageName);
 }

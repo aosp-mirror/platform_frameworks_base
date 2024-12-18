@@ -21,10 +21,12 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
+import com.android.systemui.common.ui.GlobalConfig;
 import com.android.systemui.dagger.qualifiers.PerUser;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.people.PeopleProvider;
+import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.NotificationInsetsModule;
 import com.android.systemui.statusbar.QsFrameTranslateModule;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -36,17 +38,18 @@ import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
-import com.android.wm.shell.transition.ShellTransitions;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Provider;
 
@@ -92,7 +95,7 @@ public interface SysUIComponent {
         Builder setTaskViewFactory(Optional<TaskViewFactory> t);
 
         @BindsInstance
-        Builder setTransitions(ShellTransitions t);
+        Builder setShellTransitions(ShellTransitions t);
 
         @BindsInstance
         Builder setKeyguardTransitions(KeyguardTransitions k);
@@ -125,6 +128,7 @@ public interface SysUIComponent {
      * Creates a ContextComponentHelper.
      */
     @SysUISingleton
+    @GlobalConfig
     ConfigurationController getConfigurationController();
 
     /**
@@ -158,6 +162,11 @@ public interface SysUIComponent {
      * Returns {@link CoreStartable}s that should be started for every user.
      */
     @PerUser Map<Class<?>, Provider<CoreStartable>> getPerUserStartables();
+
+    /**
+     * Returns {@link CoreStartable} dependencies if there are any.
+     */
+    @Dependencies Map<Class<?>, Set<Class<? extends CoreStartable>>> getStartableDependencies();
 
     /**
      * Member injection into the supplied argument.

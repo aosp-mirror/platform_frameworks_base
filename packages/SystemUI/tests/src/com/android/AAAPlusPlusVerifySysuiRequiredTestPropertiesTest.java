@@ -68,9 +68,9 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
             SmallTest.class,
             MediumTest.class,
             LargeTest.class,
-            android.test.suitebuilder.annotation.SmallTest.class,
-            android.test.suitebuilder.annotation.MediumTest.class,
-            android.test.suitebuilder.annotation.LargeTest.class,
+            androidx.test.filters.SmallTest.class,
+            androidx.test.filters.MediumTest.class,
+            androidx.test.filters.LargeTest.class,
     };
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.util.Log
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.core.LogLevel.INFO
@@ -24,11 +25,15 @@ import com.android.systemui.log.dagger.NotificationInterruptLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.logKey
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class VisualInterruptionDecisionLogger
 @Inject
 constructor(@NotificationInterruptLog val buffer: LogBuffer) {
+
+    val spew: Boolean = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE)
+
     fun logHeadsUpFeatureChanged(isEnabled: Boolean) {
         buffer.log(
             TAG,
@@ -86,6 +91,24 @@ constructor(@NotificationInterruptLog val buffer: LogBuffer) {
                     }
                 "FSI $outcome: $str1 (key=$str2)"
             }
+        )
+    }
+
+    fun logAvalancheAllow(info: String) {
+        buffer.log(
+            TAG,
+            INFO,
+            { str1 = info },
+            { "AvalancheSuppressor: $str1" }
+        )
+    }
+
+    fun logCooldownSetting(isEnabled: Boolean) {
+        buffer.log(
+            TAG,
+            INFO,
+            { bool1 = isEnabled },
+            { "Cooldown enabled: $bool1" }
         )
     }
 }

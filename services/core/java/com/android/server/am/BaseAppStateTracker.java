@@ -75,11 +75,11 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
     static final int STATE_TYPE_INDEX_PERMISSION = 4;
 
     protected final AppRestrictionController mAppRestrictionController;
-    protected final Injector<T> mInjector;
     protected final Context mContext;
     protected final Handler mBgHandler;
     protected final Object mLock;
     protected final ArrayList<StateListener> mStateListeners = new ArrayList<>();
+    final Injector<T> mInjector;
 
     interface StateListener {
         void onStateChange(int uid, String packageName, boolean start, long now, int stateType);
@@ -292,6 +292,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         RoleManager mRoleManager;
         NotificationManagerInternal mNotificationManagerInternal;
         IAppOpsService mIAppOpsService;
+        Context mContext;
 
         void setPolicy(T policy) {
             mAppStatePolicy = policy;
@@ -316,6 +317,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
                     NotificationManagerInternal.class);
             mIAppOpsService = IAppOpsService.Stub.asInterface(
                     ServiceManager.getService(Context.APP_OPS_SERVICE));
+            mContext = context;
 
             getPolicy().onSystemReady();
         }
@@ -389,6 +391,10 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
 
         IAppOpsService getIAppOpsService() {
             return mIAppOpsService;
+        }
+
+        int checkPermission(String perm, int pid, int uid) {
+            return mContext.checkPermission(perm, pid, uid);
         }
     }
 }

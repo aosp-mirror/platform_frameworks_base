@@ -16,8 +16,8 @@
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.Notification
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.SbnBuilder
@@ -45,7 +45,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class GroupWhenCoordinatorTest : SysuiTestCase() {
 

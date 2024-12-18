@@ -68,7 +68,9 @@ public abstract class StartingData {
      * window.
      * Note this isn't equal to transition playing, the period should be
      * Sync finishNow -> Start transaction apply.
+     * @deprecated TODO(b/362347290): cleanup after fix ramp up
      */
+    @Deprecated
     boolean mWaitForSyncTransactionCommit;
 
     /**
@@ -90,8 +92,7 @@ public abstract class StartingData {
     }
 
     /**
-     * Creates the actual starting window surface. DO NOT HOLD THE WINDOW MANAGER LOCK WHEN CALLING
-     * THIS METHOD.
+     * Creates the actual starting window surface.
      *
      * @param activity the app to add the starting window to
      * @return a class implementing {@link StartingSurface} for easy removal with

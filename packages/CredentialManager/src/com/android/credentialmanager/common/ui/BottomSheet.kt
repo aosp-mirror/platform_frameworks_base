@@ -20,7 +20,9 @@ import android.credentials.flags.Flags
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +40,6 @@ import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.ui.theme.EntryShape
 import kotlinx.coroutines.launch
-
 
 /** Draws a modal bottom sheet with the same styles and effects shared by various flows. */
 @Composable
@@ -70,10 +71,11 @@ fun ModalBottomSheet(
                 },
                 scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = .32f),
                 shape = EntryShape.TopRoundedCorner,
+                contentWindowInsets = { WindowInsets.navigationBars },
                 dragHandle = null,
                 // Never take over the full screen. We always want to leave some top scrim space
                 // for exiting and viewing the underlying app to help a user gain context.
-                modifier = Modifier.padding(top = 56.dp),
+                modifier = Modifier.padding(top = 72.dp),
         )
     } else {
         val scope = rememberCoroutineScope()

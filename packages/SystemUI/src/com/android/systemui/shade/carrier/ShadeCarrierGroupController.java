@@ -39,11 +39,11 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextManager;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
@@ -97,6 +97,8 @@ public class ShadeCarrierGroupController {
 
     private final SlotIndexResolver mSlotIndexResolver;
 
+    private final ShadeCarrierGroupControllerLogger mLogger;
+
     private final SignalCallback mSignalCallback = new SignalCallback() {
                 @Override
                 public void setMobileDataIndicators(@NonNull MobileDataIndicators indicators) {
@@ -148,6 +150,7 @@ public class ShadeCarrierGroupController {
             ActivityStarter activityStarter,
             @Background Handler bgHandler,
             @Main Looper mainLooper,
+            ShadeCarrierGroupControllerLogger logger,
             NetworkController networkController,
             CarrierTextManager.Builder carrierTextManagerBuilder,
             Context context,
@@ -160,6 +163,7 @@ public class ShadeCarrierGroupController {
         mContext = context;
         mActivityStarter = activityStarter;
         mBgHandler = bgHandler;
+        mLogger = logger;
         mNetworkController = networkController;
         mStatusBarPipelineFlags = statusBarPipelineFlags;
         mCarrierTextManager = carrierTextManagerBuilder
@@ -199,7 +203,7 @@ public class ShadeCarrierGroupController {
 
         for (int i = 0; i < SIM_SLOTS; i++) {
             mInfos[i] = new CellSignalState(
-                    true,
+                    false,
                     R.drawable.ic_shade_no_calling_sms,
                     context.getText(AccessibilityContentDescriptions.NO_CALLING).toString(),
                     "",
@@ -374,10 +378,16 @@ public class ShadeCarrierGroupController {
             return;
         }
 
+        mLogger.logHandleUpdateCarrierInfo(info);
+
         mNoSimTextView.setVisibility(View.GONE);
-        if (!info.airplaneMode && info.anySimReady) {
+        if (info.isInSatelliteMode) {
+            mLogger.logUsingSatelliteText(info.carrierText);
+            showSingleText(info.carrierText);
+        } else if (!info.airplaneMode && info.anySimReady) {
             boolean[] slotSeen = new boolean[SIM_SLOTS];
             if (info.listOfCarriers.length == info.subscriptionIds.length) {
+                mLogger.logUsingSimViews();
                 for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
                     int slot = getSlotIndex(info.subscriptionIds[i]);
                     if (slot >= SIM_SLOTS) {
@@ -405,22 +415,33 @@ public class ShadeCarrierGroupController {
                     }
                 }
             } else {
-                Log.e(TAG, "Carrier information arrays not of same length");
+                mLogger.logInvalidArrayLengths(
+                        info.listOfCarriers.length, info.subscriptionIds.length);
             }
         } else {
-            // No sims or airplane mode (but not WFC). Do not show ShadeCarrierGroup,
-            // instead just show info.carrierText in a different view.
-            for (int i = 0; i < SIM_SLOTS; i++) {
-                mInfos[i] = mInfos[i].changeVisibility(false);
-                mCarrierGroups[i].setCarrierText("");
-                mCarrierGroups[i].setVisibility(View.GONE);
-            }
-            mNoSimTextView.setText(info.carrierText);
-            if (!TextUtils.isEmpty(info.carrierText)) {
-                mNoSimTextView.setVisibility(View.VISIBLE);
-            }
+            // No sims or airplane mode (but not WFC), so just show the main carrier text.
+            mLogger.logUsingNoSimView(info.carrierText);
+            showSingleText(info.carrierText);
         }
         handleUpdateState(); // handleUpdateCarrierInfo is always called from main thread.
+    }
+
+    /**
+     * Shows only the given text in a single TextView and hides ShadeCarrierGroup (which would show
+     * individual SIM details).
+     */
+    private void showSingleText(CharSequence text) {
+        for (int i = 0; i < SIM_SLOTS; i++) {
+            mInfos[i] = mInfos[i].changeVisibility(false);
+            mCarrierGroups[i].setCarrierText("");
+            mCarrierGroups[i].setVisibility(View.GONE);
+        }
+        // TODO(b/341841138): Re-name this view now that it's being used for more than just the
+        //  no-SIM case.
+        mNoSimTextView.setText(text);
+        if (!TextUtils.isEmpty(text)) {
+            mNoSimTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     private static class H extends Handler {
@@ -458,6 +479,7 @@ public class ShadeCarrierGroupController {
         private final ActivityStarter mActivityStarter;
         private final Handler mHandler;
         private final Looper mLooper;
+        private final ShadeCarrierGroupControllerLogger mLogger;
         private final NetworkController mNetworkController;
         private final CarrierTextManager.Builder mCarrierTextControllerBuilder;
         private final Context mContext;
@@ -472,6 +494,7 @@ public class ShadeCarrierGroupController {
                 ActivityStarter activityStarter,
                 @Background Handler handler,
                 @Main Looper looper,
+                ShadeCarrierGroupControllerLogger logger,
                 NetworkController networkController,
                 CarrierTextManager.Builder carrierTextControllerBuilder,
                 Context context,
@@ -484,6 +507,7 @@ public class ShadeCarrierGroupController {
             mActivityStarter = activityStarter;
             mHandler = handler;
             mLooper = looper;
+            mLogger = logger;
             mNetworkController = networkController;
             mCarrierTextControllerBuilder = carrierTextControllerBuilder;
             mContext = context;
@@ -505,6 +529,7 @@ public class ShadeCarrierGroupController {
                     mActivityStarter,
                     mHandler,
                     mLooper,
+                    mLogger,
                     mNetworkController,
                     mCarrierTextControllerBuilder,
                     mContext,

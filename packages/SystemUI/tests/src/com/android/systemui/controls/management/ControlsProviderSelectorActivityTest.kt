@@ -23,10 +23,10 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import com.android.systemui.SysuiTestCase
@@ -65,7 +65,7 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class ControlsProviderSelectorActivityTest : SysuiTestCase() {
     @Main private val executor: Executor = MoreExecutors.directExecutor()

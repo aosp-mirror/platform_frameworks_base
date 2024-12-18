@@ -18,6 +18,8 @@ package com.android.systemui.unfold
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
 
-var Kosmos.unfoldTransitionProgressProvider by Fixture { mock<UnfoldTransitionProgressProvider>() }
+val Kosmos.fakeUnfoldTransitionProgressProvider by Fixture { FakeUnfoldTransitionProvider() }
+
+val Kosmos.unfoldTransitionProgressProvider by
+    Fixture<UnfoldTransitionProgressProvider> { fakeUnfoldTransitionProgressProvider }

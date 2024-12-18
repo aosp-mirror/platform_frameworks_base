@@ -21,7 +21,6 @@ import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
 import org.junit.Test
 
-@Suppress("UnstableApiUsage")
 class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
     override fun getDetector(): Detector = DumpableNotRegisteredDetector()
 
@@ -37,7 +36,8 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
 
                     class SomeClass() {
                     }
-                """.trimIndent()
+                """
+                        .trimIndent()
                 ),
                 *stubs,
             )
@@ -67,7 +67,8 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
                             pw.println("testDump");
                         }
                     }
-                """.trimIndent()
+                """
+                        .trimIndent()
                 ),
                 *stubs,
             )
@@ -97,7 +98,8 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
                             pw.println("testDump");
                         }
                     }
-                """.trimIndent()
+                """
+                        .trimIndent()
                 ),
                 *stubs,
             )
@@ -127,7 +129,8 @@ class DumpableNotRegisteredDetectorTest : SystemUILintDetectorTest() {
                             pw.println("testDump");
                         }
                     }
-                """.trimIndent()
+                """
+                        .trimIndent()
                 ),
                 *stubs,
             )

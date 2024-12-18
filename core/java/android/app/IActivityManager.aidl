@@ -196,7 +196,7 @@ interface IActivityManager {
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
     void attachApplication(in IApplicationThread app, long startSeq);
-    void finishAttachApplication(long startSeq);
+    void finishAttachApplication(long startSeq, long timestampApplicationOnCreateNs);
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
     @UnsupportedAppUsage
     void moveTaskToFront(in IApplicationThread caller, in String callingPackage, int task,
@@ -452,12 +452,14 @@ interface IActivityManager {
             in IBinder resultTo, in String resultWho, int requestCode, int flags,
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    int stopUser(int userid, boolean force, in IStopUserCallback callback);
+    int stopUser(int userid, boolean stopProfileRegardlessOfParent, in IStopUserCallback callback);
+    int stopUserWithCallback(int userid, in IStopUserCallback callback);
+    int stopUserExceptCertainProfiles(int userid, boolean stopProfileRegardlessOfParent, in IStopUserCallback callback);
     /**
-     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, boolean, IStopUserCallback)}
+     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, IStopUserCallback)}
      * for details.
      */
-    int stopUserWithDelayedLocking(int userid, boolean force, in IStopUserCallback callback);
+    int stopUserWithDelayedLocking(int userid, in IStopUserCallback callback);
 
     @UnsupportedAppUsage
     void registerUserSwitchObserver(in IUserSwitchObserver observer, in String name);
@@ -499,6 +501,7 @@ interface IActivityManager {
             in String shareDescription);
 
     void requestInteractiveBugReport();
+    void requestBugReportWithExtraAttachment(in Uri extraAttachment);
     void requestFullBugReport();
     void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();
@@ -754,6 +757,15 @@ interface IActivityManager {
     void addStartInfoTimestamp(int key, long timestampNs, int userId);
 
     /**
+    * Reports view related timestamps to be added to the calling apps most
+    * recent {@link ApplicationStartInfo}.
+    *
+    * @param renderThreadDrawStartTimeNs Clock monotonic time in nanoseconds of RenderThread draw start
+    * @param framePresentedTimeNs        Clock monotonic time in nanoseconds of frame presented
+    */
+    oneway void reportStartInfoViewTimestamps(long renderThreadDrawStartTimeNs, long framePresentedTimeNs);
+
+    /**
      * Return a list of {@link ApplicationExitInfo} records.
      *
      * <p class="note"> Note: System stores these historical information in a ring buffer, older
@@ -898,10 +910,6 @@ interface IActivityManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
     void forceDelayBroadcastDelivery(in String targetPackage, long delayedDurationMs);
 
-    /** Checks if the modern broadcast queue is enabled. */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
-    boolean isModernBroadcastQueueEnabled();
-
     /** Checks if the process represented by the given pid is frozen. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
     boolean isProcessFrozen(int pid);
@@ -966,4 +974,56 @@ interface IActivityManager {
      */
     oneway void frozenBinderTransactionDetected(int debugPid, int code, int flags, int err);
     int getBindingUidProcessState(int uid, in String callingPackage);
+
+    /**
+     * Return the timestampe (in the elapsed timebase) when the UID became idle from active
+     * last time (regardless of if the UID is still idle, or became active again).
+     * This is useful when trying to detect whether an UID has ever became idle since a certain
+     * time in the past.
+     */
+    long getUidLastIdleElapsedTime(int uid, in String callingPackage);
+
+    /**
+     * Adds permission to be overridden to the given state. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permission will be overridden
+     * @param permission The permission whose state will be overridden
+     * @param result The state to override the permission to
+     *
+     * @see PackageManager.PermissionResult
+     */
+    void addOverridePermissionState(int originatingUid, int uid, String permission, int result);
+
+    /**
+     * Removes overridden permission. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permission is overridden
+     * @param permission The permission whose state will no longer be overridden
+     */
+    void removeOverridePermissionState(int originatingUid, int uid, String permission);
+
+    /**
+     * Clears all overridden permissions for the given UID. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permissions will no longer be overridden
+     */
+    void clearOverridePermissionStates(int originatingUid, int uid);
+
+    /**
+     * Clears all overridden permissions on the device. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     */
+    void clearAllOverridePermissionStates(int originatingUid);
+
+    /**
+     * Request the system to log the reason for restricting / unrestricting an app.
+     * @see ActivityManager#noteAppRestrictionEnabled
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DEVICE_POWER)")
+    void noteAppRestrictionEnabled(in String packageName, int uid, int restrictionType,
+            boolean enabled, int reason, in String subReason, int source, long threshold);
 }

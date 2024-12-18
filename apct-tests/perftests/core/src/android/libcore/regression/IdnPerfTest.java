@@ -16,8 +16,8 @@
 
 package android.libcore.regression;
 
-import androidx.benchmark.BenchmarkState;
-import androidx.benchmark.junit4.BenchmarkRule;
+import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -31,11 +31,11 @@ import java.net.IDN;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class IdnPerfTest {
-    @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
+    @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void timeToUnicode() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             IDN.toASCII("fass.de");
             IDN.toASCII("faß.de");
@@ -51,7 +51,7 @@ public class IdnPerfTest {
 
     @Test
     public void timeToAscii() {
-        final BenchmarkState state = mBenchmarkRule.getState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             IDN.toUnicode("xn--fss-qla.de");
             IDN.toUnicode("xn--n00d.com");

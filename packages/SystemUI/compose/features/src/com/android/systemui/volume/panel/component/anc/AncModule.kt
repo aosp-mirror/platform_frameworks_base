@@ -17,15 +17,12 @@
 package com.android.systemui.volume.panel.component.anc
 
 import com.android.systemui.volume.panel.component.anc.domain.AncAvailabilityCriteria
-import com.android.systemui.volume.panel.component.anc.ui.composable.AncPopup
-import com.android.systemui.volume.panel.component.anc.ui.viewmodel.AncViewModel
-import com.android.systemui.volume.panel.component.button.ui.composable.ButtonComponent
+import com.android.systemui.volume.panel.component.anc.ui.composable.AncButtonComponent
 import com.android.systemui.volume.panel.component.shared.model.VolumePanelComponents
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
 import com.android.systemui.volume.panel.shared.model.VolumePanelUiComponent
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
@@ -40,14 +37,8 @@ interface AncModule {
         criteria: AncAvailabilityCriteria
     ): ComponentAvailabilityCriteria
 
-    companion object {
-
-        @Provides
-        @IntoMap
-        @StringKey(VolumePanelComponents.ANC)
-        fun provideVolumePanelUiComponent(
-            viewModel: AncViewModel,
-            popup: AncPopup,
-        ): VolumePanelUiComponent = ButtonComponent(viewModel.button, popup::show)
-    }
+    @Binds
+    @IntoMap
+    @StringKey(VolumePanelComponents.ANC)
+    fun bindVolumePanelUiComponent(component: AncButtonComponent): VolumePanelUiComponent
 }

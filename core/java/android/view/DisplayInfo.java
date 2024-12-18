@@ -24,6 +24,7 @@ import static android.view.DisplayInfoProto.FLAGS;
 import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
 import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
+import static android.view.DisplayInfoProto.TYPE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -211,6 +212,12 @@ public final class DisplayInfo implements Parcelable {
      */
     public Display.Mode[] supportedModes = Display.Mode.EMPTY_ARRAY;
 
+    /**
+     * The supported modes that will be exposed externally.
+     * Might have different set of modes than supportedModes for VRR displays
+     */
+    public Display.Mode[] appsSupportedModes = Display.Mode.EMPTY_ARRAY;
+
     /** The active color mode. */
     public int colorMode;
 
@@ -222,6 +229,9 @@ public final class DisplayInfo implements Parcelable {
 
     /** The formats disabled by user **/
     public int[] userDisabledHdrTypes = {};
+
+    /** When true, all HDR capabilities are disabled **/
+    public boolean isForceSdr;
 
     /**
      * Indicates whether the display can be switched into a mode with minimal post
@@ -429,9 +439,11 @@ public final class DisplayInfo implements Parcelable {
                 && defaultModeId == other.defaultModeId
                 && userPreferredModeId == other.userPreferredModeId
                 && Arrays.equals(supportedModes, other.supportedModes)
+                && Arrays.equals(appsSupportedModes, other.appsSupportedModes)
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
                 && Objects.equals(hdrCapabilities, other.hdrCapabilities)
+                && isForceSdr == other.isForceSdr
                 && Arrays.equals(userDisabledHdrTypes, other.userDisabledHdrTypes)
                 && minimalPostProcessingSupported == other.minimalPostProcessingSupported
                 && logicalDensityDpi == other.logicalDensityDpi
@@ -488,10 +500,13 @@ public final class DisplayInfo implements Parcelable {
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = Arrays.copyOf(other.supportedModes, other.supportedModes.length);
+        appsSupportedModes = Arrays.copyOf(
+                other.appsSupportedModes, other.appsSupportedModes.length);
         colorMode = other.colorMode;
         supportedColorModes = Arrays.copyOf(
                 other.supportedColorModes, other.supportedColorModes.length);
         hdrCapabilities = other.hdrCapabilities;
+        isForceSdr = other.isForceSdr;
         userDisabledHdrTypes = other.userDisabledHdrTypes;
         minimalPostProcessingSupported = other.minimalPostProcessingSupported;
         logicalDensityDpi = other.logicalDensityDpi;
@@ -545,6 +560,11 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < nModes; i++) {
             supportedModes[i] = Display.Mode.CREATOR.createFromParcel(source);
         }
+        int nAppModes = source.readInt();
+        appsSupportedModes = new Display.Mode[nAppModes];
+        for (int i = 0; i < nAppModes; i++) {
+            appsSupportedModes[i] = Display.Mode.CREATOR.createFromParcel(source);
+        }
         colorMode = source.readInt();
         int nColorModes = source.readInt();
         supportedColorModes = new int[nColorModes];
@@ -552,6 +572,7 @@ public final class DisplayInfo implements Parcelable {
             supportedColorModes[i] = source.readInt();
         }
         hdrCapabilities = source.readParcelable(null, android.view.Display.HdrCapabilities.class);
+        isForceSdr = source.readBoolean();
         minimalPostProcessingSupported = source.readBoolean();
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
@@ -611,12 +632,17 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < supportedModes.length; i++) {
             supportedModes[i].writeToParcel(dest, flags);
         }
+        dest.writeInt(appsSupportedModes.length);
+        for (int i = 0; i < appsSupportedModes.length; i++) {
+            appsSupportedModes[i].writeToParcel(dest, flags);
+        }
         dest.writeInt(colorMode);
         dest.writeInt(supportedColorModes.length);
         for (int i = 0; i < supportedColorModes.length; i++) {
             dest.writeInt(supportedColorModes[i]);
         }
         dest.writeParcelable(hdrCapabilities, flags);
+        dest.writeBoolean(isForceSdr);
         dest.writeBoolean(minimalPostProcessingSupported);
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
@@ -689,7 +715,7 @@ public final class DisplayInfo implements Parcelable {
      */
     @Nullable
     public Display.Mode findDefaultModeByRefreshRate(float refreshRate) {
-        Display.Mode[] modes = supportedModes;
+        Display.Mode[] modes = appsSupportedModes;
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].matches(
@@ -704,7 +730,7 @@ public final class DisplayInfo implements Parcelable {
      * Returns the list of supported refresh rates in the default mode.
      */
     public float[] getDefaultRefreshRates() {
-        Display.Mode[] modes = supportedModes;
+        Display.Mode[] modes = appsSupportedModes;
         ArraySet<Float> rates = new ArraySet<>();
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
@@ -849,10 +875,14 @@ public final class DisplayInfo implements Parcelable {
         sb.append(defaultModeId);
         sb.append(", userPreferredModeId ");
         sb.append(userPreferredModeId);
-        sb.append(", modes ");
+        sb.append(", supportedModes ");
         sb.append(Arrays.toString(supportedModes));
+        sb.append(", appsSupportedModes ");
+        sb.append(Arrays.toString(appsSupportedModes));
         sb.append(", hdrCapabilities ");
         sb.append(hdrCapabilities);
+        sb.append(", isForceSdr ");
+        sb.append(isForceSdr);
         sb.append(", userDisabledHdrTypes ");
         sb.append(Arrays.toString(userDisabledHdrTypes));
         sb.append(", minimalPostProcessingSupported ");
@@ -941,6 +971,7 @@ public final class DisplayInfo implements Parcelable {
         protoOutputStream.write(APP_HEIGHT, appHeight);
         protoOutputStream.write(NAME, name);
         protoOutputStream.write(FLAGS, flags);
+        protoOutputStream.write(TYPE, type);
         if (displayCutout != null) {
             displayCutout.dumpDebug(protoOutputStream, CUTOUT);
         }

@@ -21,7 +21,7 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shade.ShadeExpansionStateManager
@@ -30,7 +30,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /** Provides state from the main SystemUI process on behalf of the Screenshot process. */
-internal class ScreenshotProxyService
+class ScreenshotProxyService
 @Inject
 constructor(
     private val mExpansionMgr: ShadeExpansionStateManager,

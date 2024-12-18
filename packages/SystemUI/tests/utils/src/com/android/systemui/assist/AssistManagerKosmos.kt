@@ -19,4 +19,6 @@ package com.android.systemui.assist
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.assistManager by Kosmos.Fixture { mock<AssistManager>() }
+val Kosmos.mockAssistManager by Kosmos.Fixture { mock<AssistManager>() }
+
+var Kosmos.assistManager by Kosmos.Fixture { mockAssistManager }

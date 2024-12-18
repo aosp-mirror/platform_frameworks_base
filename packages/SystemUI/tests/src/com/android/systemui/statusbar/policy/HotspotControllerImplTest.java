@@ -33,14 +33,14 @@ import android.net.TetheringManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.UserManager;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
@@ -57,7 +57,7 @@ import java.util.Collections;
 import java.util.concurrent.Executor;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class HotspotControllerImplTest extends SysuiTestCase {
 

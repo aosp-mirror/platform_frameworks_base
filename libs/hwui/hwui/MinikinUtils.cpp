@@ -53,9 +53,7 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     if (familyVariant.has_value()) {
         minikinPaint.familyVariant = familyVariant.value();
     } else {
-        minikinPaint.familyVariant = text_feature::deprecate_ui_fonts()
-                                             ? minikin::FamilyVariant::ELEGANT
-                                             : minikin::FamilyVariant::DEFAULT;
+        minikinPaint.familyVariant = minikin::FamilyVariant::ELEGANT;
     }
     return minikinPaint;
 }

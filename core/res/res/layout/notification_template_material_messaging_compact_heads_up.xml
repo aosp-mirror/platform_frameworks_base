@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<com.android.internal.widget.CompactMessagingLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/status_bar_latest_event_content"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/notification_header_height"
+    android:clipChildren="false"
+    android:tag="compactMessagingHUN"
+    android:gravity="center_vertical"
+    android:theme="@style/Theme.DeviceDefault.Notification"
+    android:importantForAccessibility="no">
+    <com.android.internal.widget.NotificationRowIconView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/notification_icon_circle_size"
+        android:layout_height="@dimen/notification_icon_circle_size"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:background="@drawable/notification_icon_circle"
+        android:padding="@dimen/notification_icon_circle_padding"
+        android:maxDrawableWidth="@dimen/notification_icon_circle_size"
+        android:maxDrawableHeight="@dimen/notification_icon_circle_size"
+        />
+    <com.android.internal.widget.NotificationRowIconView
+        android:id="@+id/conversation_icon"
+        android:layout_width="@dimen/notification_icon_circle_size"
+        android:layout_height="@dimen/notification_icon_circle_size"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:maxDrawableWidth="@dimen/notification_icon_circle_size"
+        android:maxDrawableHeight="@dimen/notification_icon_circle_size"
+        android:scaleType="centerCrop"
+        android:importantForAccessibility="no"
+        />
+    <ViewStub
+        android:layout="@layout/conversation_face_pile_layout"
+        android:layout_gravity="center_vertical|start"
+        android:layout_width="@dimen/conversation_compact_face_pile_size"
+        android:layout_height="@dimen/conversation_compact_face_pile_size"
+        android:layout_marginStart="@dimen/notification_icon_circle_start"
+        android:id="@+id/conversation_face_pile"
+        />
+    <FrameLayout
+        android:id="@+id/alternate_expand_target"
+        android:layout_width="@dimen/notification_content_margin_start"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:importantForAccessibility="no"
+        android:focusable="false"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/notification_content_margin_start"
+        android:orientation="horizontal"
+        >
+        <NotificationTopLineView
+            android:id="@+id/notification_top_line"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_weight="1"
+            android:clipChildren="false"
+            android:gravity="center_vertical"
+            android:theme="@style/Theme.DeviceDefault.Notification"
+            >
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                android:ellipsize="end"
+                android:fadingEdge="horizontal"
+                android:singleLine="true"
+                android:textAlignment="viewStart"
+                android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
+                />
+            <include layout="@layout/notification_top_line_views" />
+        </NotificationTopLineView>
+        <FrameLayout
+            android:id="@+id/reply_action_container"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/notification_action_list_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+        <FrameLayout
+            android:id="@+id/expand_button_touch_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="@dimen/notification_content_margin_end"
+            >
+            <include layout="@layout/notification_expand_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                />
+        </FrameLayout>
+    </LinearLayout>
+</com.android.internal.widget.CompactMessagingLayout>

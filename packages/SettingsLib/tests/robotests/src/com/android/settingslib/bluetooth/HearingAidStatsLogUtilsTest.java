@@ -145,20 +145,29 @@ public class HearingAidStatsLogUtilsTest {
     }
 
     @Test
-    public void getUserCategory_hearingDevicesUser() {
-        prepareHearingDevicesUserHistory();
+    public void getUserCategory_hearableDevicesUser() {
+        prepareHearableDevicesUserHistory();
 
         assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
-                HearingAidStatsLogUtils.CATEGORY_HEARING_DEVICES);
+                HearingAidStatsLogUtils.CATEGORY_HEARABLE_DEVICES);
     }
 
     @Test
-    public void getUserCategory_newHearingDevicesUser() {
-        prepareHearingDevicesUserHistory();
+    public void getUserCategory_newHearableDevicesUser() {
+        prepareHearableDevicesUserHistory();
         prepareNewUserHistory();
 
         assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
-                HearingAidStatsLogUtils.CATEGORY_NEW_HEARING_DEVICES);
+                HearingAidStatsLogUtils.CATEGORY_NEW_HEARABLE_DEVICES);
+    }
+
+    @Test
+    public void getUserCategory_bothHearingAidsAndHearableDevicesUser_returnHearingAidsUser() {
+        prepareHearingAidsUserHistory();
+        prepareHearableDevicesUserHistory();
+
+        assertThat(HearingAidStatsLogUtils.getUserCategory(mContext)).isEqualTo(
+                HearingAidStatsLogUtils.CATEGORY_HEARING_AIDS);
     }
 
     private long convertToStartOfDayTime(long timestamp) {
@@ -176,12 +185,12 @@ public class HearingAidStatsLogUtilsTest {
         }
     }
 
-    private void prepareHearingDevicesUserHistory() {
+    private void prepareHearableDevicesUserHistory() {
         final long todayStartOfDay = convertToStartOfDayTime(System.currentTimeMillis());
         for (int i = CONNECTED_HISTORY_EXPIRED_DAY - 1; i >= 0; i--) {
             final long data = todayStartOfDay - TimeUnit.DAYS.toMillis(i);
             HearingAidStatsLogUtils.addToHistory(mContext,
-                    HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_CONNECTED, data);
+                    HearingAidStatsLogUtils.HistoryType.TYPE_HEARABLE_DEVICES_CONNECTED, data);
         }
     }
 
@@ -191,6 +200,6 @@ public class HearingAidStatsLogUtilsTest {
         HearingAidStatsLogUtils.addToHistory(mContext,
                 HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_PAIRED, data);
         HearingAidStatsLogUtils.addToHistory(mContext,
-                HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_PAIRED, data);
+                HearingAidStatsLogUtils.HistoryType.TYPE_HEARABLE_DEVICES_PAIRED, data);
     }
 }

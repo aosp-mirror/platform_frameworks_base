@@ -13,68 +13,103 @@
  */
 package com.android.systemui.statusbar.phone
 
+import android.app.Dialog
 import android.content.res.Configuration
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
-import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class SystemUIBottomSheetDialogTest : SysuiTestCase() {
 
+    private val kosmos = testKosmos()
     private val configurationController = mock<ConfigurationController>()
     private val config = mock<Configuration>()
+    private val delegate = mock<DialogDelegate<Dialog>>()
 
     private lateinit var dialog: SystemUIBottomSheetDialog
 
     @Before
     fun setup() {
-        dialog = SystemUIBottomSheetDialog(mContext, configurationController)
+        dialog =
+            with(kosmos) {
+                SystemUIBottomSheetDialog(
+                    context,
+                    testScope.backgroundScope,
+                    configurationController,
+                    delegate,
+                    TestLayout(),
+                    0,
+                )
+            }
     }
 
     @Test
     fun onStart_registersConfigCallback() {
-        dialog.show()
+        kosmos.testScope.runTest {
+            dialog.show()
+            runCurrent()
 
-        verify(configurationController).addCallback(any())
+            verify(configurationController).addCallback(any())
+        }
     }
 
     @Test
     fun onStop_unregisterConfigCallback() {
-        dialog.show()
-        dialog.dismiss()
+        kosmos.testScope.runTest {
+            dialog.show()
+            runCurrent()
+            dialog.dismiss()
+            runCurrent()
 
-        verify(configurationController).removeCallback(any())
+            verify(configurationController).removeCallback(any())
+        }
     }
 
     @Test
-    fun onConfigurationChanged_calledInSubclass() {
-        var onConfigChangedCalled = false
-        val subclass =
-            object : SystemUIBottomSheetDialog(mContext, configurationController) {
-                override fun onConfigurationChanged() {
-                    onConfigChangedCalled = true
-                }
-            }
+    fun onConfigurationChanged_calledInDelegate() {
+        kosmos.testScope.runTest {
+            dialog.show()
+            runCurrent()
+            val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
+            verify(configurationController).addCallback(capture(captor))
 
-        subclass.show()
+            captor.value.onConfigChanged(config)
+            runCurrent()
 
-        val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
-        verify(configurationController).addCallback(capture(captor))
-        captor.value.onConfigChanged(config)
+            verify(delegate).onConfigurationChanged(any(), any())
+        }
+    }
 
-        assertThat(onConfigChangedCalled).isTrue()
+    private class TestLayout : SystemUIBottomSheetDialog.WindowLayout {
+        override fun calculate(): Flow<SystemUIBottomSheetDialog.WindowLayout.Layout> {
+            return flowOf(
+                SystemUIBottomSheetDialog.WindowLayout.Layout(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                )
+            )
+        }
     }
 }

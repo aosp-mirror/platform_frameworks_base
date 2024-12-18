@@ -100,7 +100,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:transitionName="screenshot_preview_image"/>
 
-    <com.android.systemui.screenshot.CropView
+    <com.android.systemui.screenshot.scroll.CropView
         android:id="@+id/crop_view"
         android:layout_width="0px"
         android:layout_height="0px"
@@ -122,7 +122,7 @@
         tools:minHeight="100dp"
         tools:minWidth="100dp" />
 
-    <com.android.systemui.screenshot.MagnifierView
+    <com.android.systemui.screenshot.scroll.MagnifierView
         android:id="@+id/magnifier"
         android:visibility="invisible"
         android:layout_width="200dp"

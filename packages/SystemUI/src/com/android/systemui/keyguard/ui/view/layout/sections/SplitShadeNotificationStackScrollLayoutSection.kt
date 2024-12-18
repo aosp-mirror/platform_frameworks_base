@@ -23,51 +23,33 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.Flags.migrateClocksToBlueprint
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.statusbar.notification.stack.AmbientState
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 
 /** Large-screen format for notifications, shown as two columns on the device */
 class SplitShadeNotificationStackScrollLayoutSection
 @Inject
 constructor(
     context: Context,
-    sceneContainerFlags: SceneContainerFlags,
     notificationPanelView: NotificationPanelView,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
-    notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
-    ambientState: AmbientState,
-    controller: NotificationStackScrollLayoutController,
-    notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
-    @Main mainDispatcher: CoroutineDispatcher,
+    sharedNotificationContainerBinder: SharedNotificationContainerBinder,
 ) :
     NotificationStackScrollLayoutSection(
         context,
-        sceneContainerFlags,
         notificationPanelView,
         sharedNotificationContainer,
         sharedNotificationContainerViewModel,
-        notificationStackAppearanceViewModel,
-        ambientState,
-        controller,
-        notificationStackSizeCalculator,
-        mainDispatcher,
+        sharedNotificationContainerBinder,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
         constraintSet.apply {

@@ -1,0 +1,1 @@
+# Applying jarjar on framework-minux-apex is too slow, so we don't use jarjar for now. b/313930116

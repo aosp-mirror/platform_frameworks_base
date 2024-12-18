@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:MultiBubblesScreen`
+ * To run this test: `atest WMShellFlickerTestsBubbles:ChangeActiveActivityFromBubbleTest`
  *
  * Actions:
  * ```

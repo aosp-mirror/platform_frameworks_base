@@ -17,6 +17,7 @@
 package android.app.wearable;
 
 import android.app.PendingIntent;
+import android.app.wearable.IWearableSensingCallback;
 import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -30,9 +31,9 @@ import android.os.SharedMemory;
  */
 interface IWearableSensingManager {
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
-     void provideConnection(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
+     void provideConnection(in ParcelFileDescriptor parcelFileDescriptor, in IWearableSensingCallback wearableSensingCallback, in RemoteCallback statusCallback);
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
-     void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in RemoteCallback callback);
+     void provideDataStream(in ParcelFileDescriptor parcelFileDescriptor, in @nullable IWearableSensingCallback wearableSensingCallback, in RemoteCallback statusCallback);
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")
      void provideData(in PersistableBundle data, in SharedMemory sharedMemory, in RemoteCallback callback);
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)")

@@ -47,3 +47,10 @@ android_test {
     platform_apis: true,
     test_suites: ["device-tests"],
 }
+
+test_module_config {
+    name: "PackageManagerServiceUnitTests_verify_domain",
+    base: "PackageManagerServiceUnitTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.pm.test.verify.domain"],
+}

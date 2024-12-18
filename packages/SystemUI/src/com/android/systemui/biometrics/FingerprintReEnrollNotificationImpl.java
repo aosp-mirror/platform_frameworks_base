@@ -23,7 +23,13 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
  */
 public class FingerprintReEnrollNotificationImpl implements FingerprintReEnrollNotification{
     @Override
-    public boolean isFingerprintReEnrollRequired(int msgId) {
-        return msgId == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_RE_ENROLL;
+    public boolean isFingerprintReEnrollRequested(int msgId) {
+        return msgId == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_RE_ENROLL_OPTIONAL
+                || msgId == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_RE_ENROLL_FORCED;
+    }
+
+    @Override
+    public boolean isFingerprintReEnrollForced(int msgId) {
+        return msgId == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_RE_ENROLL_FORCED;
     }
 }

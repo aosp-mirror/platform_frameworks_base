@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexSessionInfo;
 import android.apex.ApexSessionParams;
@@ -38,7 +37,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
@@ -56,8 +54,8 @@ import com.android.server.SystemServiceManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
+import com.android.server.rollback.ApexdRevertLogger;
 import com.android.server.rollback.RollbackManagerInternal;
-import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -65,9 +63,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -764,7 +762,7 @@ public class StagingManager {
     private void logFailedApexSessionsIfNecessary() {
         synchronized (mFailedPackageNames) {
             if (!mFailedPackageNames.isEmpty()) {
-                WatchdogRollbackLogger.logApexdRevert(mContext,
+                ApexdRevertLogger.logApexdRevert(mContext,
                         mFailedPackageNames, mNativeFailureReason);
             }
         }
@@ -807,14 +805,13 @@ public class StagingManager {
     }
 
     /**
-     * Returns ApexInfo about APEX contained inside the session as a {@code Map<String, ApexInfo>},
-     * where the key of the map is the module name of the ApexInfo.
+     * Returns ApexInfo about APEX contained inside the session.
      *
-     * Returns an empty map if there is any error.
+     * Returns an empty list if there is any error.
      */
     @VisibleForTesting
     @NonNull
-    Map<String, ApexInfo> getStagedApexInfos(@NonNull StagedSession session) {
+    List<ApexInfo> getStagedApexInfos(@NonNull StagedSession session) {
         Preconditions.checkArgument(session != null, "Session is null");
         Preconditions.checkArgument(!session.hasParentSessionId(),
                 session.sessionId() + " session has parent session");
@@ -824,7 +821,7 @@ public class StagingManager {
         // Even if caller calls this method on ready session, the session could be abandoned
         // right after this method is called.
         if (!session.isSessionReady() || session.isDestroyed()) {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
 
         ApexSessionParams params = new ApexSessionParams();
@@ -838,20 +835,17 @@ public class StagingManager {
             }
         }
         params.childSessionIds = childSessionIds.toArray();
-
-        ApexInfo[] infos = mApexManager.getStagedApexInfos(params);
-        Map<String, ApexInfo> result = new ArrayMap<>();
-        for (ApexInfo info : infos) {
-            result.put(info.moduleName, info);
-        }
-        return result;
+        return Arrays.asList(mApexManager.getStagedApexInfos(params));
     }
 
     /**
-     * Returns apex module names of all packages that are staged ready
+     * Returns ApexInfo list about APEXes contained inside all staged sessions.
+     *
+     * Returns an empty list if there is any error.
      */
-    List<String> getStagedApexModuleNames() {
-        List<String> result = new ArrayList<>();
+    @NonNull
+    List<StagedApexInfo> getStagedApexInfos() {
+        List<StagedApexInfo> result = new ArrayList<>();
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final StagedSession session = mStagedSessions.valueAt(i);
@@ -859,26 +853,7 @@ public class StagingManager {
                         || session.hasParentSessionId() || !session.containsApexSession()) {
                     continue;
                 }
-                result.addAll(getStagedApexInfos(session).keySet());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Returns ApexInfo of the {@code moduleInfo} provided if it is staged, otherwise returns null.
-     */
-    @Nullable
-    StagedApexInfo getStagedApexInfo(String moduleName) {
-        synchronized (mStagedSessions) {
-            for (int i = 0; i < mStagedSessions.size(); i++) {
-                final StagedSession session = mStagedSessions.valueAt(i);
-                if (!session.isSessionReady() || session.isDestroyed()
-                        || session.hasParentSessionId() || !session.containsApexSession()) {
-                    continue;
-                }
-                ApexInfo ai = getStagedApexInfos(session).get(moduleName);
-                if (ai != null) {
+                getStagedApexInfos(session).stream().map(ai -> {
                     StagedApexInfo info = new StagedApexInfo();
                     info.moduleName = ai.moduleName;
                     info.diskImagePath = ai.modulePath;
@@ -886,17 +861,19 @@ public class StagingManager {
                     info.versionName = ai.versionName;
                     info.hasClassPathJars = ai.hasClassPathJars;
                     return info;
-                }
+                }).forEach(result::add);
             }
         }
-        return null;
+        return result;
     }
 
     private void notifyStagedApexObservers() {
         synchronized (mStagedApexObservers) {
+            List<StagedApexInfo> stagedApexInfos = getStagedApexInfos();
+            ApexStagedEvent event = new ApexStagedEvent();
+            event.stagedApexInfos =
+                    stagedApexInfos.toArray(new StagedApexInfo[stagedApexInfos.size()]);
             for (IStagedApexObserver observer : mStagedApexObservers) {
-                ApexStagedEvent event = new ApexStagedEvent();
-                event.stagedApexModuleNames = getStagedApexModuleNames().toArray(new String[0]);
                 try {
                     observer.onApexStaged(event);
                 } catch (RemoteException re) {

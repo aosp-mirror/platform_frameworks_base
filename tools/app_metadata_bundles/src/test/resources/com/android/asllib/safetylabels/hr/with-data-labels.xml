@@ -1,0 +1,7 @@
+<safety-labels>
+    <data-labels>
+        <data-shared dataType="location_data_type_approx_location"
+            isSharingOptional="false"
+            purposes="app_functionality" />
+    </data-labels>
+</safety-labels>

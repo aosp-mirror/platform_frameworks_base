@@ -22,19 +22,20 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.util.kotlin.DisposableHandles
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /**
  * Binds a keyguard indication area view to its view-model.
@@ -53,7 +54,15 @@ object KeyguardIndicationAreaBinder {
         viewModel: KeyguardIndicationAreaViewModel,
         indicationController: KeyguardIndicationController,
     ): DisposableHandle {
-        indicationController.setIndicationArea(view)
+        val disposables = DisposableHandles()
+
+        // As the indication controller is a singleton, reset the view back to the previous view
+        // once the current view is disposed.
+        val previous = indicationController.indicationArea
+        indicationController.indicationArea = view
+        disposables += DisposableHandle {
+            previous?.let { indicationController.indicationArea = it }
+        }
 
         val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
         val indicationTextBottom: TextView =
@@ -63,24 +72,27 @@ object KeyguardIndicationAreaBinder {
         view.clipToPadding = false
 
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
-        val disposableHandle =
+        disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
+                    launch("$TAG#viewModel.alpha") {
                         // Do not independently apply alpha, as [KeyguardRootViewModel] should work
                         // for this and all its children
-                        if (!(migrateClocksToBlueprint() || keyguardBottomAreaRefactor())) {
+                        if (
+                            !(MigrateClocksToBlueprint.isEnabled ||
+                                KeyguardBottomAreaRefactor.isEnabled)
+                        ) {
                             viewModel.alpha.collect { alpha -> view.alpha = alpha }
                         }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.indicationAreaTranslationX") {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
                             view.translationX = translationX
                         }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.isIndicationAreaPadded") {
                         combine(
                                 viewModel.isIndicationAreaPadded,
                                 configurationBasedDimensions.map { it.indicationAreaPaddingPx },
@@ -94,7 +106,7 @@ object KeyguardIndicationAreaBinder {
                             .collect { paddingPx -> view.setPadding(paddingPx, 0, paddingPx, 0) }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.indicationAreaTranslationY") {
                         configurationBasedDimensions
                             .map { it.defaultBurnInPreventionYOffsetPx }
                             .flatMapLatest { defaultBurnInOffsetY ->
@@ -103,7 +115,7 @@ object KeyguardIndicationAreaBinder {
                             .collect { translationY -> view.translationY = translationY }
                     }
 
-                    launch {
+                    launch("$TAG#indicationText.setTextSize") {
                         configurationBasedDimensions.collect { dimensions ->
                             indicationText.setTextSize(
                                 TypedValue.COMPLEX_UNIT_PX,
@@ -116,14 +128,20 @@ object KeyguardIndicationAreaBinder {
                         }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.configurationChange") {
                         viewModel.configurationChange.collect {
                             configurationBasedDimensions.value = loadFromResources(view)
                         }
                     }
+
+                    launch("$TAG#viewModel.visible") {
+                        viewModel.visible.collect { visible ->
+                            indicationController.setVisible(visible)
+                        }
+                    }
                 }
             }
-        return disposableHandle
+        return disposables
     }
 
     private fun loadFromResources(view: View): ConfigurationBasedDimensions {
@@ -144,4 +162,6 @@ object KeyguardIndicationAreaBinder {
         val indicationAreaPaddingPx: Int,
         val indicationTextSizePx: Int,
     )
+
+    private const val TAG = "KeyguardIndicationAreaBinder"
 }

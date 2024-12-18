@@ -23,10 +23,8 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -37,9 +35,12 @@ import androidx.annotation.Nullable;
  * Installation failed: Return status code to the caller or display failure UI to user
  */
 public class InstallFailed extends Activity {
+
     private static final String LOG_TAG = InstallFailed.class.getSimpleName();
 
-    /** Label of the app that failed to install */
+    /**
+     * Label of the app that failed to install
+     */
     private CharSequence mLabel;
 
     private AlertDialog mDialog;
@@ -80,29 +81,35 @@ public class InstallFailed extends Activity {
 
         setFinishOnTouchOutside(true);
 
-        int statusCode = getIntent().getIntExtra(PackageInstaller.EXTRA_STATUS,
-                PackageInstaller.STATUS_FAILURE);
+        Intent intent = getIntent();
+        int statusCode = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
+            PackageInstaller.STATUS_FAILURE);
+        boolean returnResult = intent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+        int legacyStatus = intent.getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS,
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
 
-        if (getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
-            int legacyStatus = getIntent().getIntExtra(PackageInstaller.EXTRA_LEGACY_STATUS,
-                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR);
+        // TODO (b/346655018): Use INSTALL_FAILED_ABORTED legacyCode in the condition
+        // statusCode can be STATUS_FAILURE_ABORTED if:
+        // 1. GPP blocks an install.
+        // 2. User denies ownership update explicitly.
+        // InstallFailed dialog must not be shown only when the user denies ownership update. We
+        // must show this dialog for all other install failures.
+        boolean userDenied = statusCode == PackageInstaller.STATUS_FAILURE_ABORTED
+                && legacyStatus != PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT
+                && legacyStatus != PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 
+        if (returnResult) {
             // Return result if requested
             Intent result = new Intent();
             result.putExtra(Intent.EXTRA_INSTALL_RESULT, legacyStatus);
             setResult(Activity.RESULT_FIRST_USER, result);
             finish();
+        } else if (userDenied) {
+            finish();
         } else {
-            Intent intent = getIntent();
-            ApplicationInfo appInfo = intent
-                    .getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
-            Uri packageURI = intent.getData();
-
             // Set header icon and title
-            PackageUtil.AppSnippet as;
-            PackageManager pm = getPackageManager();
-            as = intent.getParcelableExtra(PackageInstallerActivity.EXTRA_APP_SNIPPET,
-                    PackageUtil.AppSnippet.class);
+            PackageUtil.AppSnippet as = intent.getParcelableExtra(
+                PackageInstallerActivity.EXTRA_APP_SNIPPET, PackageUtil.AppSnippet.class);
 
             // Store label for dialog
             mLabel = as.label;
@@ -135,6 +142,7 @@ public class InstallFailed extends Activity {
      * "manage applications" settings page.
      */
     public static class OutOfSpaceDialog extends DialogFragment {
+
         private InstallFailed mActivity;
 
         @Override
@@ -147,16 +155,16 @@ public class InstallFailed extends Activity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return new AlertDialog.Builder(mActivity)
-                    .setTitle(R.string.out_of_space_dlg_title)
-                    .setMessage(getString(R.string.out_of_space_dlg_text, mActivity.mLabel))
-                    .setPositiveButton(R.string.manage_applications, (dialog, which) -> {
-                        // launch manage applications
-                        Intent intent = new Intent("android.intent.action.MANAGE_PACKAGE_STORAGE");
-                        startActivity(intent);
-                        mActivity.finish();
-                    })
-                    .setNegativeButton(R.string.cancel, (dialog, which) -> mActivity.finish())
-                    .create();
+                .setTitle(R.string.out_of_space_dlg_title)
+                .setMessage(getString(R.string.out_of_space_dlg_text, mActivity.mLabel))
+                .setPositiveButton(R.string.manage_applications, (dialog, which) -> {
+                    // launch manage applications
+                    Intent intent = new Intent("android.intent.action.MANAGE_PACKAGE_STORAGE");
+                    startActivity(intent);
+                    mActivity.finish();
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> mActivity.finish())
+                .create();
         }
 
         @Override

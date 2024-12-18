@@ -1104,6 +1104,10 @@ public final class LoadedApk {
             return true;
         }
 
+        if (mDataDir == null) {
+            return false;
+        }
+
         // Temporarily disable logging of disk reads on the Looper thread as this is necessary -
         // and the loader will access the directory anyway if we don't check it.
         StrictMode.ThreadPolicy oldThreadPolicy = allowThreadDiskReads();
@@ -1474,7 +1478,7 @@ public final class LoadedApk {
                         + " package " + mPackageName + ": " + e.toString(), e);
                 }
             }
-            mActivityThread.mAllApplications.add(app);
+            mActivityThread.addApplication(app);
             mApplication = app;
             if (!allowDuplicateInstances) {
                 synchronized (sApplications) {
