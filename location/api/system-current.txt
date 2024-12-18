@@ -1459,6 +1459,13 @@ package android.location.provider {
     field public static final String ACTION_GEOCODE_PROVIDER = "com.android.location.service.GeocodeProvider";
   }
 
+  @FlaggedApi("android.location.flags.gnss_assistance_interface") public abstract class GnssAssistanceProviderBase {
+    ctor public GnssAssistanceProviderBase(@NonNull android.content.Context, @NonNull String);
+    method @NonNull public final android.os.IBinder getBinder();
+    method public abstract void onRequest(@NonNull android.os.OutcomeReceiver<android.location.GnssAssistance,java.lang.Throwable>);
+    field public static final String ACTION_GNSS_ASSISTANCE_PROVIDER = "android.location.provider.action.GNSS_ASSISTANCE_PROVIDER";
+  }
+
   public abstract class LocationProviderBase {
     ctor public LocationProviderBase(@NonNull android.content.Context, @NonNull String, @NonNull android.location.provider.ProviderProperties);
     method @Nullable public final android.os.IBinder getBinder();
