@@ -3033,10 +3033,10 @@ public final class SystemServer implements Dumpable {
         if (com.android.ranging.flags.Flags.rangingStackEnabled()) {
             if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)
                     || context.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_WIFI_RTT)
+                            PackageManager.FEATURE_WIFI_AWARE)
                     || (com.android.ranging.flags.Flags.rangingCsEnabled()
                             && context.getPackageManager().hasSystemFeature(
-                                    PackageManager.FEATURE_BLUETOOTH_LE_CHANNEL_SOUNDING))) {
+                                    PackageManager.FEATURE_BLUETOOTH_LE))) {
                 t.traceBegin("RangingService");
                 // TODO: b/375264320 - Remove after RELEASE_RANGING_STACK is ramped to next.
                 try {
