@@ -347,8 +347,8 @@ public class PackageWatchdog {
      *                 and boot loops.
      * @param executor Executor for the thread on which observers would receive callbacks
      */
-    public void registerHealthObserver(@NonNull PackageHealthObserver observer,
-            @NonNull @CallbackExecutor Executor executor) {
+    public void registerHealthObserver(@NonNull @CallbackExecutor Executor executor,
+            @NonNull PackageHealthObserver observer) {
         synchronized (sLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -390,8 +390,8 @@ public class PackageWatchdog {
      *
      * @throws IllegalStateException if the observer was not previously registered
      */
-    public void startExplicitHealthCheck(@NonNull PackageHealthObserver observer,
-            @NonNull List<String> packageNames, long timeoutMs) {
+    public void startExplicitHealthCheck(@NonNull List<String> packageNames, long timeoutMs,
+            @NonNull PackageHealthObserver observer) {
         synchronized (sLock) {
             if (!mAllObservers.containsKey(observer.getUniqueIdentifier())) {
                 Slog.wtf(TAG, "No observer found, need to register the observer: "
