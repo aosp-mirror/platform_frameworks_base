@@ -881,6 +881,12 @@ class DesktopTasksController(
             applyFreeformDisplayChange(wct, task, displayId)
         }
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
+        if (Flags.enableDisplayFocusInShellTransitions()) {
+            // Bring the destination display to top with includingParents=true, so that the
+            // destination display gains the display focus, which makes the top task in the display
+            // gains the global focus.
+            wct.reorder(task.token, /* onTop= */ true, /* includingParents= */ true)
+        }
 
         if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
             performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)

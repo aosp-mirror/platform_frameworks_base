@@ -82,6 +82,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
+import com.android.window.flags.Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS
 import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
 import com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT
 import com.android.window.flags.Flags.FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY
@@ -1703,13 +1704,14 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         controller.moveToNextDisplay(task.taskId)
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            assertThat(hierarchyOps).hasSize(1)
-            assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
-            assertThat(hierarchyOps[0].isReparent).isTrue()
-            assertThat(hierarchyOps[0].newParent).isEqualTo(secondDisplayArea.token.asBinder())
-            assertThat(hierarchyOps[0].toTop).isTrue()
-        }
+
+        val taskChange =
+            getLatestWct(type = TRANSIT_CHANGE).hierarchyOps.find {
+                it.container == task.token.asBinder() && it.isReparent
+            }
+        assertNotNull(taskChange)
+        assertThat(taskChange.newParent).isEqualTo(secondDisplayArea.token.asBinder())
+        assertThat(taskChange.toTop).isTrue()
     }
 
     @Test
@@ -1725,13 +1727,13 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
         controller.moveToNextDisplay(task.taskId)
 
-        with(getLatestWct(type = TRANSIT_CHANGE)) {
-            assertThat(hierarchyOps).hasSize(1)
-            assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
-            assertThat(hierarchyOps[0].isReparent).isTrue()
-            assertThat(hierarchyOps[0].newParent).isEqualTo(defaultDisplayArea.token.asBinder())
-            assertThat(hierarchyOps[0].toTop).isTrue()
-        }
+        val taskChange =
+            getLatestWct(type = TRANSIT_CHANGE).hierarchyOps.find {
+                it.container == task.token.asBinder() && it.isReparent
+            }
+        assertNotNull(taskChange)
+        assertThat(taskChange.newParent).isEqualTo(defaultDisplayArea.token.asBinder())
+        assertThat(taskChange.toTop).isTrue()
     }
 
     @Test
@@ -1905,6 +1907,32 @@ class DesktopTasksControllerTest : ShellTestCase() {
             assertThat(taskChange.configuration.windowConfiguration.bounds.right).isAtMost(640)
             assertThat(taskChange.configuration.windowConfiguration.bounds.bottom).isAtMost(480)
         }
+    }
+
+    @Test
+    @EnableFlags(
+        FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS,
+        FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT,
+    )
+    fun moveToNextDisplay_destinationGainGlobalFocus() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+            .thenReturn(secondDisplayArea)
+
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+
+        val taskChange =
+            getLatestWct(type = TRANSIT_CHANGE).hierarchyOps.find {
+                it.container == task.token.asBinder() && it.type == HIERARCHY_OP_TYPE_REORDER
+            }
+        assertNotNull(taskChange)
+        assertThat(taskChange.toTop).isTrue()
+        assertThat(taskChange.includingParents()).isTrue()
     }
 
     @Test
