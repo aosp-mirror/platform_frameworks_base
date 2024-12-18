@@ -174,22 +174,58 @@ public class ResourcesManager {
     }
 
     /**
-     * Apply the registered library paths to the passed impl object
-     * @return the hash code for the current version of the registered paths
+     * Apply the registered library paths to the passed AssetManager. If may create a new
+     * AssetManager if any changes are needed and it isn't allowed to reuse the old one.
+     *
+     * @return new AssetManager and the hash code for the current version of the registered paths
      */
-    public int updateResourceImplWithRegisteredLibs(@NonNull ResourcesImpl impl) {
+    public @NonNull Pair<AssetManager, Integer> updateResourceImplAssetsWithRegisteredLibs(
+            @NonNull AssetManager assets, boolean reuseAssets) {
         if (!Flags.registerResourcePaths()) {
-            return 0;
+            return new Pair<>(assets, 0);
         }
 
-        final var collector = new PathCollector(null);
-        final int size = mSharedLibAssetsMap.size();
-        for (int i = 0; i < size; i++) {
-            final var libraryKey = mSharedLibAssetsMap.valueAt(i).getResourcesKey();
-            collector.appendKey(libraryKey);
+        final int size;
+        final PathCollector collector;
+
+        synchronized (mLock) {
+            size = mSharedLibAssetsMap.size();
+            if (assets == AssetManager.getSystem()) {
+                return new Pair<>(assets, size);
+            }
+            collector = new PathCollector(resourcesKeyFromAssets(assets));
+            for (int i = 0; i < size; i++) {
+                final var libraryKey = mSharedLibAssetsMap.valueAt(i).getResourcesKey();
+                collector.appendKey(libraryKey);
+            }
         }
-        impl.getAssets().addPresetApkKeys(extractApkKeys(collector.collectedKey()));
-        return size;
+        if (collector.isSameAsOriginal()) {
+            return new Pair<>(assets, size);
+        }
+        if (reuseAssets) {
+            assets.addPresetApkKeys(extractApkKeys(collector.collectedKey()));
+            return new Pair<>(assets, size);
+        }
+        final var newAssetsBuilder = new AssetManager.Builder().setNoInit();
+        for (final var asset : assets.getApkAssets()) {
+            // Skip everything that's either default, or will get added by the collector (builder
+            // doesn't check for duplicates at all).
+            if (asset.isSystem() || asset.isForLoader() || asset.isOverlay()
+                    || asset.isSharedLib()) {
+                continue;
+            }
+            newAssetsBuilder.addApkAssets(asset);
+        }
+        for (final var key : extractApkKeys(collector.collectedKey())) {
+            try {
+                final var asset = loadApkAssets(key);
+                newAssetsBuilder.addApkAssets(asset);
+            } catch (IOException e) {
+                Log.e(TAG, "Couldn't load assets for key " + key, e);
+            }
+        }
+        assets.getLoaders().forEach(newAssetsBuilder::addLoader);
+        return new Pair<>(newAssetsBuilder.build(), size);
     }
 
     public static class ApkKey {
@@ -621,6 +657,23 @@ public class ResourcesManager {
         return apkKeys;
     }
 
+    private ResourcesKey resourcesKeyFromAssets(@NonNull AssetManager assets) {
+        final var libs = new ArrayList<String>();
+        final var overlays = new ArrayList<String>();
+        for (final ApkAssets asset : assets.getApkAssets()) {
+            if (asset.isSystem() || asset.isForLoader()) {
+                continue;
+            }
+            if (asset.isOverlay()) {
+                overlays.add(asset.getAssetPath());
+            } else if (asset.isSharedLib()) {
+                libs.add(asset.getAssetPath());
+            }
+        }
+        return new ResourcesKey(null, null, overlays.toArray(new String[0]),
+                libs.toArray(new String[0]), 0, null, null);
+    }
+
     /**
      * Creates an AssetManager from the paths within the ResourcesKey.
      *
@@ -749,7 +802,7 @@ public class ResourcesManager {
 
         final Configuration config = generateConfig(key);
         final DisplayMetrics displayMetrics = getDisplayMetrics(generateDisplayId(key), daj);
-        final ResourcesImpl impl = new ResourcesImpl(assets, displayMetrics, config, daj);
+        final ResourcesImpl impl = new ResourcesImpl(assets, displayMetrics, config, daj, true);
 
         if (DEBUG) {
             Slog.d(TAG, "- creating impl=" + impl + " with key: " + key);
@@ -1832,31 +1885,32 @@ public class ResourcesManager {
         for (int i = 0; i < resourcesCount; i++) {
             final WeakReference<Resources> ref = mAllResourceReferences.get(i);
             final Resources r = ref != null ? ref.get() : null;
-            if (r != null) {
-                final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
-                if (key != null) {
-                    final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
-                    if (impl == null) {
-                        throw new Resources.NotFoundException("failed to redirect ResourcesImpl");
-                    }
-                    r.setImpl(impl);
-                } else {
-                    // ResourcesKey is null which means the ResourcesImpl could belong to a
-                    // Resources created by application through Resources constructor and was not
-                    // managed by ResourcesManager, so the ResourcesImpl needs to be recreated to
-                    // have shared library asset paths appended if there are any.
-                    if (r.getImpl() != null) {
-                        final ResourcesImpl oldImpl = r.getImpl();
-                        final AssetManager oldAssets = oldImpl.getAssets();
-                        // ResourcesImpl constructor will help to append shared library asset paths.
-                        if (oldAssets != AssetManager.getSystem() && oldAssets.isUpToDate()) {
-                            final ResourcesImpl newImpl = new ResourcesImpl(oldAssets,
-                                    oldImpl.getMetrics(), oldImpl.getConfiguration(),
-                                    oldImpl.getDisplayAdjustments());
+            if (r == null) {
+                continue;
+            }
+            final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
+            if (key != null) {
+                final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
+                if (impl == null) {
+                    throw new Resources.NotFoundException("failed to redirect ResourcesImpl");
+                }
+                r.setImpl(impl);
+            } else {
+                // ResourcesKey is null which means the ResourcesImpl could belong to a
+                // Resources created by application through Resources constructor and was not
+                // managed by ResourcesManager, so the ResourcesImpl needs to be recreated to
+                // have shared library asset paths appended if there are any.
+                final ResourcesImpl oldImpl = r.getImpl();
+                if (oldImpl != null) {
+                    final AssetManager oldAssets = oldImpl.getAssets();
+                    // ResourcesImpl constructor will help to append shared library asset paths.
+                    if (oldAssets != AssetManager.getSystem()) {
+                        if (oldAssets.isUpToDate()) {
+                            final ResourcesImpl newImpl = new ResourcesImpl(oldImpl);
                             r.setImpl(newImpl);
                         } else {
-                            Slog.w(TAG, "Skip appending shared library asset paths for the "
-                                    + "Resource as its assets are not up to date.");
+                            Slog.w(TAG, "Skip appending shared library asset paths for "
+                                    + "the Resources as its assets are not up to date.");
                         }
                     }
                 }
