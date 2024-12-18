@@ -28,6 +28,7 @@ import com.android.internal.R
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -63,7 +64,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     fun setUp() {
         context.orCreateTestableResources.apply {
             addOverride(MODES_DRAWABLE_ID, MODES_DRAWABLE)
-            addOverride(R.drawable.ic_zen_mode_type_bedtime, BEDTIME_DRAWABLE)
+            addOverride(BEDTIME_DRAWABLE_ID, BEDTIME_DRAWABLE)
         }
 
         val customPackageContext = SysuiTestableContext(context)
@@ -158,7 +159,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             zenModeRepository.addMode(
                 id = "Bedtime with default icon",
                 type = AutomaticZenRule.TYPE_BEDTIME,
-                active = true
+                active = true,
             )
             runCurrent()
             assertThat(tileData?.icon).isEqualTo(BEDTIME_ICON)
@@ -259,12 +260,14 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
         val MODES_DRAWABLE_ID = R.drawable.ic_zen_priority_modes
         const val CUSTOM_DRAWABLE_ID = 12345
 
+        val BEDTIME_DRAWABLE_ID = R.drawable.ic_zen_mode_type_bedtime
+
         val MODES_DRAWABLE = TestStubDrawable("modes_icon")
         val BEDTIME_DRAWABLE = TestStubDrawable("bedtime")
         val CUSTOM_DRAWABLE = TestStubDrawable("custom")
 
-        val MODES_ICON = MODES_DRAWABLE.asIcon()
-        val BEDTIME_ICON = BEDTIME_DRAWABLE.asIcon()
+        val MODES_ICON = Icon.Loaded(MODES_DRAWABLE, null, MODES_DRAWABLE_ID)
+        val BEDTIME_ICON = Icon.Loaded(BEDTIME_DRAWABLE, null, BEDTIME_DRAWABLE_ID)
         val CUSTOM_ICON = CUSTOM_DRAWABLE.asIcon()
     }
 }

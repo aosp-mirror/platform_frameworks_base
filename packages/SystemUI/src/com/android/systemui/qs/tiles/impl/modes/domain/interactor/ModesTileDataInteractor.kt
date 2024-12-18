@@ -79,7 +79,10 @@ constructor(
         } else {
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
-                icon = context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(),
+                icon =
+                    context
+                        .getDrawable(ModesTile.ICON_RES_ID)!!
+                        .asIcon(res = ModesTile.ICON_RES_ID),
                 iconResId = ModesTile.ICON_RES_ID,
                 activeModes = activeModes.modeNames,
             )
@@ -92,12 +95,18 @@ constructor(
         return if (activeMode != null) {
             // ZenIconKey.resPackage is null if its resId is a system icon.
             if (activeMode.icon.key.resPackage == null) {
-                TileIcon(activeMode.icon.drawable.asIcon(), activeMode.icon.key.resId)
+                TileIcon(
+                    activeMode.icon.drawable.asIcon(res = activeMode.icon.key.resId),
+                    activeMode.icon.key.resId,
+                )
             } else {
                 TileIcon(activeMode.icon.drawable.asIcon(), null)
             }
         } else {
-            TileIcon(context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(), ModesTile.ICON_RES_ID)
+            TileIcon(
+                context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(res = ModesTile.ICON_RES_ID),
+                ModesTile.ICON_RES_ID,
+            )
         }
     }
 

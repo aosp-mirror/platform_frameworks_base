@@ -22,16 +22,21 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 
 /**
  * Creates a [QSTile.Icon] from an [Icon].
- * * [Icon.Loaded] -> [QSTileImpl.DrawableIcon]
+ * * [Icon.Loaded] with null [res] -> [QSTileImpl.DrawableIcon]
+ * * [Icon.Loaded] & with non null [res] -> [QSTileImpl.DrawableIconWithRes]
  * * [Icon.Resource] -> [QSTileImpl.ResourceIcon]
  */
 fun Icon.asQSTileIcon(): QSTile.Icon {
     return when (this) {
         is Icon.Loaded -> {
-            QSTileImpl.DrawableIcon(this.drawable)
+            if (res == null) {
+                QSTileImpl.DrawableIcon(drawable)
+            } else {
+                QSTileImpl.DrawableIconWithRes(drawable, res)
+            }
         }
         is Icon.Resource -> {
-            QSTileImpl.ResourceIcon.get(this.res)
+            QSTileImpl.ResourceIcon.get(res)
         }
     }
 }
