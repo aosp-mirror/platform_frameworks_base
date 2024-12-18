@@ -23,12 +23,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.PointerInputModifierNode
-import androidx.compose.ui.node.TraversableNode
-import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.unit.IntSize
 import com.android.compose.animation.scene.content.Content
 
@@ -165,15 +162,11 @@ private class SwipeToSceneNode(
     private val nestedScrollHandlerImpl =
         NestedScrollHandlerImpl(
             draggableHandler = draggableHandler,
-            topOrLeftBehavior = NestedScrollBehavior.Default,
-            bottomOrRightBehavior = NestedScrollBehavior.Default,
-            isExternalOverscrollGesture = { false },
             pointersInfoOwner = { multiPointerDraggableNode.pointersInfo() },
         )
 
     init {
         delegate(nestedScrollModifierNode(nestedScrollHandlerImpl.connection, dispatcher))
-        delegate(ScrollBehaviorOwnerNode(draggableHandler.nestedScrollKey, nestedScrollHandlerImpl))
     }
 
     private fun onFirstPointerDown() {
@@ -197,41 +190,4 @@ private class SwipeToSceneNode(
     ) = multiPointerDraggableNode.onPointerEvent(pointerEvent, pass, bounds)
 
     override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
-}
-
-/** Find the [ScrollBehaviorOwner] for the current orientation. */
-internal fun DelegatableNode.findScrollBehaviorOwner(
-    draggableHandler: DraggableHandlerImpl
-): ScrollBehaviorOwner? {
-    // If there are no scenes in a particular orientation, the corresponding ScrollBehaviorOwnerNode
-    // is removed from the composition.
-    return findNearestAncestor(draggableHandler.nestedScrollKey) as? ScrollBehaviorOwner
-}
-
-internal fun interface ScrollBehaviorOwner {
-    fun updateScrollBehaviors(
-        topOrLeftBehavior: NestedScrollBehavior,
-        bottomOrRightBehavior: NestedScrollBehavior,
-        isExternalOverscrollGesture: () -> Boolean,
-    )
-}
-
-/**
- * We need a node that receives the desired behavior.
- *
- * TODO(b/353234530) move this logic into [SwipeToSceneNode]
- */
-private class ScrollBehaviorOwnerNode(
-    override val traverseKey: Any,
-    val nestedScrollHandlerImpl: NestedScrollHandlerImpl,
-) : Modifier.Node(), TraversableNode, ScrollBehaviorOwner {
-    override fun updateScrollBehaviors(
-        topOrLeftBehavior: NestedScrollBehavior,
-        bottomOrRightBehavior: NestedScrollBehavior,
-        isExternalOverscrollGesture: () -> Boolean,
-    ) {
-        nestedScrollHandlerImpl.topOrLeftBehavior = topOrLeftBehavior
-        nestedScrollHandlerImpl.bottomOrRightBehavior = bottomOrRightBehavior
-        nestedScrollHandlerImpl.isExternalOverscrollGesture = isExternalOverscrollGesture
-    }
 }

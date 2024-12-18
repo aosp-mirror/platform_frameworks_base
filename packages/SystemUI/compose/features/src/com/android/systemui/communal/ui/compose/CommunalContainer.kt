@@ -201,7 +201,6 @@ fun CommunalContainer(
                 colors = colors,
                 content = content,
                 viewModel = viewModel,
-                modifier = Modifier.horizontalNestedScrollToScene(),
             )
         }
     }

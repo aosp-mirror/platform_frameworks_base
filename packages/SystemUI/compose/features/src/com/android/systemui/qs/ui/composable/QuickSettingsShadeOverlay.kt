@@ -198,9 +198,7 @@ fun SceneScope.QuickSettingsLayout(
         )
         Box(
             modifier =
-                Modifier.requiredHeightIn(max = GridMaxHeight)
-                    .verticalNestedScrollToScene()
-                    .verticalScroll(rememberScrollState())
+                Modifier.requiredHeightIn(max = GridMaxHeight).verticalScroll(rememberScrollState())
         ) {
             GridAnchor()
             TileGrid(viewModel = viewModel.tileGridViewModel, modifier = Modifier.fillMaxWidth())

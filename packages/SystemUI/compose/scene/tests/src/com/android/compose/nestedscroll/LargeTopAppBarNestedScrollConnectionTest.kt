@@ -19,7 +19,6 @@ package com.android.compose.nestedscroll
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -47,15 +46,6 @@ class LargeTopAppBarNestedScrollConnectionTest(testCase: TestCase) {
             maxHeight = { heightRange.endInclusive },
             flingBehavior = customFlingBehavior,
         )
-
-    private fun NestedScrollConnection.scroll(
-        available: Offset,
-        consumedByScroll: Offset = Offset.Zero,
-    ) {
-        val consumedByPreScroll = onPreScroll(available = available, source = scrollSource)
-        val consumed = consumedByPreScroll + consumedByScroll
-        onPostScroll(consumed = consumed, available = available - consumed, source = scrollSource)
-    }
 
     @Test
     fun onScrollUp_consumeHeightFirst() {

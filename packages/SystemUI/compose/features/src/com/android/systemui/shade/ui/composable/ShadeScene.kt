@@ -65,7 +65,6 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
@@ -400,10 +399,6 @@ private fun SceneScope.SingleShade(
                     .height(navBarHeight)
                     // Intercepts touches, prevents the scrollable container behind from scrolling.
                     .clickable(interactionSource = null, indication = null) { /* do nothing */ }
-                    .verticalNestedScrollToScene(
-                        topBehavior = NestedScrollBehavior.EdgeAlways,
-                        isExternalOverscrollGesture = { false },
-                    )
         ) {
             NotificationStackCutoffGuideline(
                 stackScrollView = notificationStackScrollView,

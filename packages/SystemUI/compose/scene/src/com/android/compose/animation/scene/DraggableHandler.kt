@@ -76,8 +76,6 @@ internal class DraggableHandlerImpl(
     internal val layoutImpl: SceneTransitionLayoutImpl,
     internal val orientation: Orientation,
 ) : DraggableHandler {
-    internal val nestedScrollKey = Any()
-
     /** The [DraggableHandler] can only have one active [DragController] at a time. */
     private var dragController: DragControllerImpl? = null
 
@@ -452,41 +450,20 @@ internal class Swipes(val upOrLeft: Swipe.Resolved, val downOrRight: Swipe.Resol
 
 internal class NestedScrollHandlerImpl(
     private val draggableHandler: DraggableHandlerImpl,
-    internal var topOrLeftBehavior: NestedScrollBehavior,
-    internal var bottomOrRightBehavior: NestedScrollBehavior,
-    internal var isExternalOverscrollGesture: () -> Boolean,
     private val pointersInfoOwner: PointersInfoOwner,
 ) {
     val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
-        // If we performed a long gesture before entering priority mode, we would have to avoid
-        // moving on to the next scene.
-        var canChangeScene = false
-
         var lastPointersDown: PointersInfo.PointersDown? = null
-
-        fun shouldEnableSwipes(): Boolean {
-            return draggableHandler.layoutImpl
-                .contentForUserActions()
-                .shouldEnableSwipes(draggableHandler.orientation)
-        }
 
         return PriorityNestedScrollConnection(
             orientation = draggableHandler.orientation,
             canStartPreScroll = { _, _, _ -> false },
-            canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
-                val behavior: NestedScrollBehavior =
-                    when {
-                        offsetAvailable > 0f -> topOrLeftBehavior
-                        offsetAvailable < 0f -> bottomOrRightBehavior
-                        else -> return@PriorityNestedScrollConnection false
-                    }
+            canStartPostScroll = { offsetAvailable, _, _ ->
+                if (offsetAvailable == 0f) return@PriorityNestedScrollConnection false
 
-                val isZeroOffset =
-                    if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
-
-                val pointersDown: PointersInfo.PointersDown? =
+                lastPointersDown =
                     when (val info = pointersInfoOwner.pointersInfo()) {
                         PointersInfo.MouseWheel -> {
                             // Do not support mouse wheel interactions
@@ -496,24 +473,10 @@ internal class NestedScrollHandlerImpl(
                         is PointersInfo.PointersDown -> info
                         null -> null
                     }
-                lastPointersDown = pointersDown
 
-                when (behavior) {
-                    NestedScrollBehavior.EdgeNoPreview -> {
-                        canChangeScene = isZeroOffset
-                        isZeroOffset && shouldEnableSwipes()
-                    }
-
-                    NestedScrollBehavior.EdgeWithPreview -> {
-                        canChangeScene = isZeroOffset
-                        shouldEnableSwipes()
-                    }
-
-                    NestedScrollBehavior.EdgeAlways -> {
-                        canChangeScene = true
-                        shouldEnableSwipes()
-                    }
-                }
+                draggableHandler.layoutImpl
+                    .contentForUserActions()
+                    .shouldEnableSwipes(draggableHandler.orientation)
             },
             onStart = { firstScroll ->
                 scrollController(
@@ -522,7 +485,6 @@ internal class NestedScrollHandlerImpl(
                             pointersDown = lastPointersDown,
                             overSlop = firstScroll,
                         ),
-                    canChangeScene = canChangeScene,
                     pointersInfoOwner = pointersInfoOwner,
                 )
             },
@@ -532,7 +494,6 @@ internal class NestedScrollHandlerImpl(
 
 private fun scrollController(
     dragController: DragController,
-    canChangeScene: Boolean,
     pointersInfoOwner: PointersInfoOwner,
 ): ScrollController {
     return object : ScrollController {
@@ -546,14 +507,11 @@ private fun scrollController(
         }
 
         override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
-            return dragController.onStop(
-                velocity = initialVelocity,
-                canChangeContent = canChangeScene,
-            )
+            return dragController.onStop(velocity = initialVelocity, canChangeContent = true)
         }
 
         override fun onCancel() {
-            dragController.onCancel(canChangeScene)
+            dragController.onCancel(canChangeContent = true)
         }
 
         /**
