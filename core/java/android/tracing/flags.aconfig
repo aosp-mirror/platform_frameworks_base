@@ -70,3 +70,11 @@ flag {
     is_fixed_read_only: true
     bug: "352538294"
 }
+
+flag {
+    name: "system_server_large_perfetto_shmem_buffer"
+    namespace: "windowing_tools"
+    description: "Large perfetto shmem buffer"
+    is_fixed_read_only: true
+    bug: "382369925"
+}
