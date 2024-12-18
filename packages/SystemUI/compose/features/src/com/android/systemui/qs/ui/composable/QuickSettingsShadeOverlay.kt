@@ -99,7 +99,11 @@ constructor(
         val viewModel =
             rememberViewModel("QuickSettingsShadeOverlay") { contentViewModelFactory.create() }
 
-        OverlayShade(modifier = modifier, onScrimClicked = viewModel::onScrimClicked) {
+        OverlayShade(
+            panelAlignment = Alignment.TopEnd,
+            modifier = modifier,
+            onScrimClicked = viewModel::onScrimClicked,
+        ) {
             Column {
                 ExpandedShadeHeader(
                     viewModelFactory = viewModel.shadeHeaderViewModelFactory,

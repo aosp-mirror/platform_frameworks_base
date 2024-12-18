@@ -247,7 +247,7 @@ constructor(
                                 Split -> HorizontalPosition.MiddleToEdge(ratio = 0.5f)
                                 Dual ->
                                     if (isShadeLayoutWide) {
-                                        HorizontalPosition.FloatAtEnd(
+                                        HorizontalPosition.FloatAtStart(
                                             width = getDimensionPixelSize(R.dimen.shade_panel_width)
                                         )
                                     } else {
@@ -830,10 +830,10 @@ constructor(
         data class MiddleToEdge(val ratio: Float = 0.5f) : HorizontalPosition
 
         /**
-         * The container has a fixed [width] and is aligned to the end of the screen. In this
-         * layout, the start edge of the container is floating, i.e. unconstrained.
+         * The container has a fixed [width] and is aligned to the start of the screen. In this
+         * layout, the end edge of the container is floating, i.e. unconstrained.
          */
-        data class FloatAtEnd(val width: Int) : HorizontalPosition
+        data class FloatAtStart(val width: Int) : HorizontalPosition
     }
 
     /**

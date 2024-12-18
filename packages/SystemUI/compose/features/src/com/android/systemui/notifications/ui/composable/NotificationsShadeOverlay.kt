@@ -19,6 +19,7 @@ package com.android.systemui.notifications.ui.composable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layoutId
 import com.android.compose.animation.scene.ContentScope
@@ -84,7 +85,11 @@ constructor(
                 viewModel.notificationsPlaceholderViewModelFactory.create()
             }
 
-        OverlayShade(modifier = modifier, onScrimClicked = viewModel::onScrimClicked) {
+        OverlayShade(
+            panelAlignment = Alignment.TopStart,
+            modifier = modifier,
+            onScrimClicked = viewModel::onScrimClicked,
+        ) {
             Column {
                 if (viewModel.showHeader) {
                     val burnIn = rememberBurnIn(clockInteractor)
