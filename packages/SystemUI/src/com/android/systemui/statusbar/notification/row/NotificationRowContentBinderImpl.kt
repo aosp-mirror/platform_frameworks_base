@@ -718,6 +718,7 @@ constructor(
                         messagingStyle = messagingStyle,
                         builder = builder,
                         systemUiContext = systemUiContext,
+                        redactText = false,
                     )
                 } else null
 
@@ -727,10 +728,20 @@ constructor(
                         reInflateFlags and FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE != 0
                 ) {
                     logger.logAsyncTaskProgress(entry, "inflating public single line view model")
-                    SingleLineViewInflater.inflateRedactedSingleLineViewModel(
-                        systemUiContext,
-                        entry.ranking.isConversation,
-                    )
+                    if (bindParams.redactionType == REDACTION_TYPE_SENSITIVE_CONTENT) {
+                        SingleLineViewInflater.inflateSingleLineViewModel(
+                            notification = entry.sbn.notification,
+                            messagingStyle = messagingStyle,
+                            builder = builder,
+                            systemUiContext = systemUiContext,
+                            redactText = true,
+                        )
+                    } else {
+                        SingleLineViewInflater.inflateRedactedSingleLineViewModel(
+                            systemUiContext,
+                            entry.ranking.isConversation,
+                        )
+                    }
                 } else null
 
             val headsUpStatusBarModel =

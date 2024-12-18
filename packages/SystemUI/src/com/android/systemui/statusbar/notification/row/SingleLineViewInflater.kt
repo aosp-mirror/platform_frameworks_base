@@ -51,6 +51,7 @@ internal object SingleLineViewInflater {
      *   notification, not for legacy messaging notifications
      * @param builder the recovered Notification Builder
      * @param systemUiContext the context of Android System UI
+     * @param redactText indicates if the text needs to be redacted
      * @return the inflated SingleLineViewModel
      */
     @JvmStatic
@@ -59,13 +60,21 @@ internal object SingleLineViewInflater {
         messagingStyle: MessagingStyle?,
         builder: Notification.Builder,
         systemUiContext: Context,
+        redactText: Boolean,
     ): SingleLineViewModel {
         if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) {
             return SingleLineViewModel(null, null, null)
         }
         peopleHelper.init(systemUiContext)
         var titleText = HybridGroupManager.resolveTitle(notification)
-        var contentText = HybridGroupManager.resolveText(notification)
+        var contentText =
+            if (redactText) {
+                systemUiContext.getString(
+                    com.android.systemui.res.R.string.redacted_notification_single_line_text
+                )
+            } else {
+                HybridGroupManager.resolveText(notification)
+            }
 
         if (messagingStyle == null) {
             return SingleLineViewModel(
@@ -81,7 +90,7 @@ internal object SingleLineViewInflater {
         if (conversationTextData?.conversationTitle?.isNotEmpty() == true) {
             titleText = conversationTextData.conversationTitle
         }
-        if (conversationTextData?.conversationText?.isNotEmpty() == true) {
+        if (!redactText && conversationTextData?.conversationText?.isNotEmpty() == true) {
             contentText = conversationTextData.conversationText
         }
 

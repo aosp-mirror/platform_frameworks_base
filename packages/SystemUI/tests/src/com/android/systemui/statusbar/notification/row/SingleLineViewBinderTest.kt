@@ -89,6 +89,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 messagingStyle = null,
                 builder = notificationBuilder,
                 systemUiContext = context,
+                redactText = false,
             )
 
         // WHEN: binds the viewHolder
@@ -149,6 +150,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 messagingStyle = style,
                 builder = notificationBuilder,
                 systemUiContext = context,
+                redactText = false,
             )
         // WHEN: binds the view
         SingleLineViewBinder.bind(viewModel, view)
@@ -197,6 +199,7 @@ class SingleLineViewBinderTest : SysuiTestCase() {
                 messagingStyle = null,
                 builder = notificationBuilder,
                 systemUiContext = context,
+                redactText = false,
             )
         // WHEN: binds the view with the view model
         SingleLineViewBinder.bind(viewModel, view)

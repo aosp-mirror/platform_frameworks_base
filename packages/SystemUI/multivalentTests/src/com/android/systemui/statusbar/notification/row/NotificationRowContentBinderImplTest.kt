@@ -116,6 +116,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             }
         }
     private val promotedNotificationContentExtractor = FakePromotedNotificationContentExtractor()
+    private val conversationNotificationProcessor: ConversationNotificationProcessor = mock()
 
     @Before
     fun setUp() {
@@ -132,7 +133,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             NotificationRowContentBinderImpl(
                 cache,
                 mock(),
-                mock<ConversationNotificationProcessor>(),
+                conversationNotificationProcessor,
                 mock(),
                 smartReplyStateInflater,
                 layoutInflaterFactoryProvider,
@@ -462,12 +463,15 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @Test
     fun testInflatePublicSingleLineConversationView() {
         val testPerson = Person.Builder().setName("Person").build()
+        val style = Notification.MessagingStyle(testPerson)
         val messagingBuilder =
             Notification.Builder(mContext, "no-id")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
-                .setStyle(Notification.MessagingStyle(testPerson))
+                .setStyle(style)
+        whenever(conversationNotificationProcessor.processNotification(any(), any(), any()))
+            .thenReturn(style)
 
         val messagingRow = spy(testHelper.createRow(messagingBuilder.build()))
         messagingRow.publicLayout.removeAllViews()

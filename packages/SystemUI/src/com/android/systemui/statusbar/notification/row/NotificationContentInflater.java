@@ -203,18 +203,20 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         result = inflateSmartReplyViews(result, reInflateFlags, entry, row.getContext(),
                 packageContext, row.getExistingSmartReplyState(), smartRepliesInflater, mLogger);
         boolean isConversation = entry.getRanking().isConversation();
+        Notification.MessagingStyle messagingStyle = null;
+        if (isConversation && (AsyncHybridViewInflation.isEnabled()
+                || LockscreenOtpRedaction.isSingleLineViewEnabled())) {
+            messagingStyle = mConversationProcessor
+                    .processNotification(entry, builder, mLogger);
+        }
         if (AsyncHybridViewInflation.isEnabled()) {
-            Notification.MessagingStyle messagingStyle = null;
-            if (isConversation) {
-                messagingStyle = mConversationProcessor
-                        .processNotification(entry, builder, mLogger);
-            }
             SingleLineViewModel viewModel = SingleLineViewInflater
                     .inflateSingleLineViewModel(
                             entry.getSbn().getNotification(),
                             messagingStyle,
                             builder,
-                            row.getContext()
+                            row.getContext(),
+                            false
                     );
             // If the messagingStyle is null, we want to inflate the normal view
             isConversation = viewModel.isConversation();
@@ -228,11 +230,22 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                             mLogger
                     );
         }
-
         if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
-            result.mPublicInflatedSingleLineViewModel =
-                    SingleLineViewInflater.inflateRedactedSingleLineViewModel(row.getContext(),
-                            isConversation);
+            if (bindParams.redactionType == REDACTION_TYPE_SENSITIVE_CONTENT) {
+                result.mPublicInflatedSingleLineViewModel =
+                        SingleLineViewInflater.inflateSingleLineViewModel(
+                                entry.getSbn().getNotification(),
+                                messagingStyle,
+                                builder,
+                                row.getContext(),
+                                true);
+            } else {
+                result.mPublicInflatedSingleLineViewModel =
+                        SingleLineViewInflater.inflateRedactedSingleLineViewModel(
+                                row.getContext(),
+                                isConversation
+                        );
+            }
             result.mPublicInflatedSingleLineView =
                     SingleLineViewInflater.inflatePublicSingleLineView(
                             isConversation,
@@ -1300,7 +1313,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                                 mEntry.getSbn().getNotification(),
                                 messagingStyle,
                                 recoveredBuilder,
-                                mContext
+                                mContext,
+                                false
                         );
                 result.mInflatedSingleLineView =
                         SingleLineViewInflater.inflatePrivateSingleLineView(
@@ -1313,9 +1327,22 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             }
 
             if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
-                result.mPublicInflatedSingleLineViewModel =
-                        SingleLineViewInflater.inflateRedactedSingleLineViewModel(mContext,
-                                isConversation);
+                if (mBindParams.redactionType == REDACTION_TYPE_SENSITIVE_CONTENT) {
+                    result.mPublicInflatedSingleLineViewModel =
+                            SingleLineViewInflater.inflateSingleLineViewModel(
+                                    mEntry.getSbn().getNotification(),
+                                    messagingStyle,
+                                    recoveredBuilder,
+                                    mContext,
+                                    true
+                            );
+                } else {
+                    result.mPublicInflatedSingleLineViewModel =
+                            SingleLineViewInflater.inflateRedactedSingleLineViewModel(
+                                    mContext,
+                                    isConversation
+                            );
+                }
                 result.mPublicInflatedSingleLineView =
                         SingleLineViewInflater.inflatePublicSingleLineView(
                                 isConversation,
