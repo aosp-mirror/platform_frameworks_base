@@ -9142,9 +9142,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void handlePointerDownOutsideFocus(InputTarget t, InputTarget focusedInputTarget) {
         synchronized (mGlobalLock) {
-            if (mFocusedInputTarget != focusedInputTarget) {
-                // Skip if the mFocusedInputTarget is already changed. This is possible if the
-                // pointer-down-outside-focus event is delayed to be handled.
+            final WindowState w = t.getWindowState();
+            // Skip if the mFocusedInputTarget is already changed or the touched Activity is no
+            // longer visible. This is possible if the pointer-down-outside-focus event is
+            // delayed to be handled.
+            if (mFocusedInputTarget != focusedInputTarget || (w != null
+                    && w.getActivityRecord() != null
+                    && !w.getActivityRecord().isVisibleRequested())) {
                 ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
                         "Skip onPointerDownOutsideFocusLocked due to input target changed %s", t);
                 return;
@@ -9156,7 +9160,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             clearPointerDownOutsideFocusRunnable();
 
-            final WindowState w = t.getWindowState();
             if (w != null) {
                 final Task task = w.getTask();
                 if (task != null && w.mTransitionController.isTransientHide(task)) {
