@@ -55,6 +55,7 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_NONE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RECONFIGURATION;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_PROVIDER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_TASK;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
@@ -105,7 +106,6 @@ import static com.android.server.am.ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
 import static com.android.server.am.ProcessList.CACHED_APP_MAX_ADJ;
 import static com.android.server.am.ProcessList.CACHED_APP_MIN_ADJ;
 import static com.android.server.am.ProcessList.FOREGROUND_APP_ADJ;
-import static com.android.server.am.ProcessList.FREEZER_CUTOFF_ADJ;
 import static com.android.server.am.ProcessList.HEAVY_WEIGHT_APP_ADJ;
 import static com.android.server.am.ProcessList.HOME_APP_ADJ;
 import static com.android.server.am.ProcessList.INVALID_ADJ;
@@ -232,6 +232,8 @@ public class OomAdjuster {
                 return AppProtoEnums.OOM_ADJ_REASON_COMPONENT_DISABLED;
             case OOM_ADJ_REASON_FOLLOW_UP:
                 return AppProtoEnums.OOM_ADJ_REASON_FOLLOW_UP;
+            case OOM_ADJ_REASON_RECONFIGURATION:
+                return AppProtoEnums.OOM_ADJ_REASON_RECONFIGURATION;
             default:
                 return AppProtoEnums.OOM_ADJ_REASON_UNKNOWN_TO_PROTO;
         }
@@ -288,6 +290,8 @@ public class OomAdjuster {
                 return OOM_ADJ_REASON_METHOD + "_componentDisabled";
             case OOM_ADJ_REASON_FOLLOW_UP:
                 return OOM_ADJ_REASON_METHOD + "_followUp";
+            case OOM_ADJ_REASON_RECONFIGURATION:
+                return OOM_ADJ_REASON_METHOD + "_reconfiguration";
             default:
                 return "_unknown";
         }
@@ -4079,7 +4083,7 @@ public class OomAdjuster {
         }
 
         // Reasons to freeze:
-        if (proc.mState.getCurAdj() >= FREEZER_CUTOFF_ADJ) {
+        if (proc.mState.getCurAdj() >= mConstants.FREEZER_CUTOFF_ADJ) {
             // Oomscore is in a high enough state, it is safe to freeze.
             return true;
         }
@@ -4098,9 +4102,8 @@ public class OomAdjuster {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         final ProcessStateRecord state = app.mState;
         if (Flags.traceUpdateAppFreezeStateLsp()) {
-            final boolean oomAdjChanged =
-                    (state.getCurAdj() >= FREEZER_CUTOFF_ADJ ^ oldOomAdj >= FREEZER_CUTOFF_ADJ)
-                    || oldOomAdj == UNKNOWN_ADJ;
+            final boolean oomAdjChanged = (state.getCurAdj() >= mConstants.FREEZER_CUTOFF_ADJ
+                    ^ oldOomAdj >= mConstants.FREEZER_CUTOFF_ADJ) || oldOomAdj == UNKNOWN_ADJ;
             final boolean shouldNotFreezeChanged = opt.shouldNotFreezeAdjSeq() == mAdjSeq;
             final boolean hasCpuCapability =
                     (PROCESS_CAPABILITY_CPU_TIME & app.mState.getCurCapability())
