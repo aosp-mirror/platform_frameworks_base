@@ -19,7 +19,6 @@ package android.location;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.location.GnssAssistance.GnssSatelliteCorrections;
 import android.location.flags.Flags;
@@ -45,6 +44,9 @@ public final class GlonassAssistance implements Parcelable {
     /** The UTC model. */
     @Nullable private final UtcModel mUtcModel;
 
+    /** The auxiliary information. */
+    @Nullable private final AuxiliaryInformation mAuxiliaryInformation;
+
     /** The list of time models. */
     @NonNull private final List<TimeModel> mTimeModels;
 
@@ -57,6 +59,7 @@ public final class GlonassAssistance implements Parcelable {
     private GlonassAssistance(Builder builder) {
         mAlmanac = builder.mAlmanac;
         mUtcModel = builder.mUtcModel;
+        mAuxiliaryInformation = builder.mAuxiliaryInformation;
         if (builder.mTimeModels != null) {
             mTimeModels = Collections.unmodifiableList(new ArrayList<>(builder.mTimeModels));
         } else {
@@ -106,6 +109,12 @@ public final class GlonassAssistance implements Parcelable {
         return mSatelliteCorrections;
     }
 
+    /** Returns the auxiliary information. */
+    @Nullable
+    public AuxiliaryInformation getAuxiliaryInformation() {
+        return mAuxiliaryInformation;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -115,6 +124,7 @@ public final class GlonassAssistance implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedObject(mAlmanac, flags);
         dest.writeTypedObject(mUtcModel, flags);
+        dest.writeTypedObject(mAuxiliaryInformation, flags);
         dest.writeTypedList(mTimeModels);
         dest.writeTypedList(mSatelliteEphemeris);
         dest.writeTypedList(mSatelliteCorrections);
@@ -126,6 +136,7 @@ public final class GlonassAssistance implements Parcelable {
         StringBuilder builder = new StringBuilder("GlonassAssistance[");
         builder.append("almanac = ").append(mAlmanac);
         builder.append(", utcModel = ").append(mUtcModel);
+        builder.append(", auxiliaryInformation = ").append(mAuxiliaryInformation);
         builder.append(", timeModels = ").append(mTimeModels);
         builder.append(", satelliteEphemeris = ").append(mSatelliteEphemeris);
         builder.append(", satelliteCorrections = ").append(mSatelliteCorrections);
@@ -140,6 +151,8 @@ public final class GlonassAssistance implements Parcelable {
                     return new GlonassAssistance.Builder()
                             .setAlmanac(in.readTypedObject(GlonassAlmanac.CREATOR))
                             .setUtcModel(in.readTypedObject(UtcModel.CREATOR))
+                            .setAuxiliaryInformation(
+                                    in.readTypedObject(AuxiliaryInformation.CREATOR))
                             .setTimeModels(in.createTypedArrayList(TimeModel.CREATOR))
                             .setSatelliteEphemeris(
                                     in.createTypedArrayList(GlonassSatelliteEphemeris.CREATOR))
@@ -158,30 +171,36 @@ public final class GlonassAssistance implements Parcelable {
     public static final class Builder {
         private GlonassAlmanac mAlmanac;
         private UtcModel mUtcModel;
+        private AuxiliaryInformation mAuxiliaryInformation;
         private List<TimeModel> mTimeModels;
         private List<GlonassSatelliteEphemeris> mSatelliteEphemeris;
         private List<GnssSatelliteCorrections> mSatelliteCorrections;
 
         /** Sets the Glonass almanac. */
         @NonNull
-        public Builder setAlmanac(
-                @Nullable @SuppressLint("NullableCollection") GlonassAlmanac almanac) {
+        public Builder setAlmanac(@Nullable GlonassAlmanac almanac) {
             mAlmanac = almanac;
             return this;
         }
 
         /** Sets the UTC model. */
         @NonNull
-        public Builder setUtcModel(
-                @Nullable @SuppressLint("NullableCollection") UtcModel utcModel) {
+        public Builder setUtcModel(@Nullable UtcModel utcModel) {
             mUtcModel = utcModel;
+            return this;
+        }
+
+        /** Sets the auxiliary information. */
+        @NonNull
+        public Builder setAuxiliaryInformation(
+                @Nullable AuxiliaryInformation auxiliaryInformation) {
+            mAuxiliaryInformation = auxiliaryInformation;
             return this;
         }
 
         /** Sets the list of time models. */
         @NonNull
-        public Builder setTimeModels(
-                @Nullable @SuppressLint("NullableCollection") List<TimeModel> timeModels) {
+        public Builder setTimeModels(@NonNull List<TimeModel> timeModels) {
             mTimeModels = timeModels;
             return this;
         }
@@ -189,8 +208,7 @@ public final class GlonassAssistance implements Parcelable {
         /** Sets the list of Glonass satellite ephemeris. */
         @NonNull
         public Builder setSatelliteEphemeris(
-                @Nullable @SuppressLint("NullableCollection")
-                        List<GlonassSatelliteEphemeris> satelliteEphemeris) {
+                @NonNull List<GlonassSatelliteEphemeris> satelliteEphemeris) {
             mSatelliteEphemeris = satelliteEphemeris;
             return this;
         }
@@ -198,8 +216,7 @@ public final class GlonassAssistance implements Parcelable {
         /** Sets the list of Glonass satellite corrections. */
         @NonNull
         public Builder setSatelliteCorrections(
-                @Nullable @SuppressLint("NullableCollection")
-                        List<GnssSatelliteCorrections> satelliteCorrections) {
+                @NonNull List<GnssSatelliteCorrections> satelliteCorrections) {
             mSatelliteCorrections = satelliteCorrections;
             return this;
         }
