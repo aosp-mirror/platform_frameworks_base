@@ -40,6 +40,7 @@ import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -619,6 +620,11 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         return mTaskInfo;
     }
 
+    @VisibleForTesting
+    ActivityManager.RunningTaskInfo getPendingInfo() {
+        return mPendingInfo;
+    }
+
     /**
      * Indicates that the task was not found in the start animation for the transition.
      * In this case we should clean up the task if we have the pending info. If we don't
@@ -681,6 +687,10 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 wct);
     }
 
+    private TaskViewRepository.TaskViewState getState() {
+        return mTaskViewTransitions.getRepository().byTaskView(this);
+    }
+
     private void prepareOpenAnimationInternal(final boolean newTask,
             SurfaceControl.Transaction startTransaction,
             SurfaceControl.Transaction finishTransaction,
@@ -703,8 +713,16 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                         // TODO: maybe once b/280900002 is fixed this will be unnecessary
                         .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
             }
-            mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
-            mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
+            if (TaskViewTransitions.useRepo()) {
+                final TaskViewRepository.TaskViewState state = getState();
+                if (state != null) {
+                    state.mBounds.set(boundsOnScreen);
+                    state.mVisible = true;
+                }
+            } else {
+                mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
+                mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
+            }
             wct.setBounds(mTaskToken, boundsOnScreen);
             applyCaptionInsetsIfNeeded();
         } else {

@@ -198,6 +198,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewRepository;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -362,6 +363,7 @@ public class BubblesTest extends SysuiTestCase {
     private ShadeInteractor mShadeInteractor;
     private NotificationShadeWindowModel mNotificationShadeWindowModel;
     private ShellTaskOrganizer mShellTaskOrganizer;
+    private TaskViewRepository mTaskViewRepository;
     private TaskViewTransitions mTaskViewTransitions;
 
     private TestableBubblePositioner mPositioner;
@@ -398,7 +400,8 @@ public class BubblesTest extends SysuiTestCase {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             doReturn(true).when(mTransitions).isRegistered();
         }
-        mTaskViewTransitions = new TaskViewTransitions(mTransitions);
+        mTaskViewRepository = new TaskViewRepository();
+        mTaskViewTransitions = new TaskViewTransitions(mTransitions, mTaskViewRepository);
 
         mTestableLooper = TestableLooper.get(this);
 

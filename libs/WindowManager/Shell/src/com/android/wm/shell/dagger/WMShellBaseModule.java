@@ -124,6 +124,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.taskview.TaskViewFactoryController;
+import com.android.wm.shell.taskview.TaskViewRepository;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
@@ -772,8 +773,15 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static TaskViewTransitions provideTaskViewTransitions(Transitions transitions) {
-        return new TaskViewTransitions(transitions);
+    static TaskViewTransitions provideTaskViewTransitions(Transitions transitions,
+            TaskViewRepository repository) {
+        return new TaskViewTransitions(transitions, repository);
+    }
+
+    @WMSingleton
+    @Provides
+    static TaskViewRepository provideTaskViewRepository() {
+        return new TaskViewRepository();
     }
 
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
