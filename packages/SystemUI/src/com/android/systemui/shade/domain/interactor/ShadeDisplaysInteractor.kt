@@ -25,14 +25,13 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker
 import com.android.systemui.shade.ShadeTraceLogger.logMoveShadeWindowTo
 import com.android.systemui.shade.ShadeTraceLogger.traceReparenting
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
-import com.android.systemui.util.kotlin.getOrNull
-import java.util.Optional
+import com.android.window.flags.Flags
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -43,22 +42,12 @@ import kotlinx.coroutines.withContext
 class ShadeDisplaysInteractor
 @Inject
 constructor(
-    optionalShadeRootView: Optional<WindowRootView>,
     private val shadePositionRepository: ShadeDisplaysRepository,
     @ShadeDisplayAware private val shadeContext: WindowContext,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainThreadContext: CoroutineContext,
+    private val shadeDisplayChangeLatencyTracker: ShadeDisplayChangeLatencyTracker,
 ) : CoreStartable {
-
-    private val shadeRootView =
-        optionalShadeRootView.getOrNull()
-            ?: error(
-                """
-            ShadeRootView must be provided for this ShadeDisplayInteractor to work.
-            If it is not, it means this is being instantiated in a SystemUI variant that shouldn't.
-            """
-                    .trimIndent()
-            )
 
     override fun start() {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
@@ -87,13 +76,29 @@ constructor(
         }
         try {
             withContext(mainThreadContext) {
-                traceReparenting { reparentToDisplayId(id = destinationId) }
+                traceReparenting {
+                    shadeDisplayChangeLatencyTracker.onShadeDisplayChanging(destinationId)
+                    reparentToDisplayId(id = destinationId)
+                }
+                checkContextDisplayMatchesExpected(destinationId)
             }
         } catch (e: IllegalStateException) {
             Log.e(
                 TAG,
                 "Unable to move the shade window from display $currentId to $destinationId",
                 e,
+            )
+        }
+    }
+
+    private fun checkContextDisplayMatchesExpected(destinationId: Int) {
+        if (shadeContext.displayId != destinationId) {
+            Log.wtf(
+                TAG,
+                "Shade context display id doesn't match the expected one after the move. " +
+                    "actual=${shadeContext.displayId} expected=$destinationId. " +
+                    "This means something wrong happened while trying to move the shade. " +
+                    "Flag reparentWindowTokenApi=${Flags.reparentWindowTokenApi()}",
             )
         }
     }
