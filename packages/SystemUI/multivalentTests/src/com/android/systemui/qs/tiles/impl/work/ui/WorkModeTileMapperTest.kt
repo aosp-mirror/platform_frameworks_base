@@ -109,8 +109,7 @@ class WorkModeTileMapperTest : SysuiTestCase() {
         val label = testLabel
         val iconRes = com.android.internal.R.drawable.stat_sys_managed_profile_status
         return QSTileState(
-            icon = Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes = iconRes,
+            icon = Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label = label,
             activationState = activationState,
             secondaryLabel =

@@ -93,8 +93,8 @@ class QRCodeScannerTileMapperTest : SysuiTestCase() {
             Icon.Loaded(
                 context.getDrawable(com.android.systemui.res.R.drawable.ic_qr_code_scanner)!!,
                 null,
+                com.android.systemui.res.R.drawable.ic_qr_code_scanner,
             ),
-            com.android.systemui.res.R.drawable.ic_qr_code_scanner,
             label,
             activationState,
             secondaryLabel,

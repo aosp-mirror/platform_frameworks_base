@@ -35,13 +35,13 @@ constructor(@ShadeDisplayAware private val resources: Resources, private val the
 
     override fun map(config: QSTileConfig, data: LocationTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes =
+            val iconRes =
                 if (data.isEnabled) {
                     R.drawable.qs_location_icon_on
                 } else {
                     R.drawable.qs_location_icon_off
                 }
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
             label = resources.getString(R.string.quick_settings_location_label)
 

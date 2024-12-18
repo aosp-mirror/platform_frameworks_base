@@ -73,7 +73,6 @@ constructor(
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
                 icon = tileIcon.icon,
-                iconResId = tileIcon.resId,
                 activeModes = activeModes.modeNames,
             )
         } else {
@@ -83,7 +82,6 @@ constructor(
                     context
                         .getDrawable(ModesTile.ICON_RES_ID)!!
                         .asIcon(res = ModesTile.ICON_RES_ID),
-                iconResId = ModesTile.ICON_RES_ID,
                 activeModes = activeModes.modeNames,
             )
         }

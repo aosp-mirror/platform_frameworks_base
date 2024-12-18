@@ -146,8 +146,7 @@ class SensorPrivacyToggleTileMapperTest : SysuiTestCase() {
             else context.getString(R.string.quick_settings_mic_label)
 
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

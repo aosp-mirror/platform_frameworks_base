@@ -99,18 +99,11 @@ class ModesTileMapperTest : SysuiTestCase() {
 
     @Test
     fun state_modelHasIconResId_includesIconResId() {
-        val icon = TestStubDrawable("res123").asIcon()
-        val model =
-            ModesTileModel(
-                isActivated = false,
-                activeModes = emptyList(),
-                icon = icon,
-                iconResId = 123,
-            )
+        val icon = TestStubDrawable("res123").asIcon(res = 123)
+        val model = ModesTileModel(isActivated = false, activeModes = emptyList(), icon = icon)
 
         val state = underTest.map(config, model)
 
         assertThat(state.icon).isEqualTo(icon)
-        assertThat(state.iconRes).isEqualTo(123)
     }
 }
