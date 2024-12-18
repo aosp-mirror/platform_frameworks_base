@@ -973,8 +973,11 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
     val colors = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.height(hubDimensions.GridHeight).padding(contentPadding),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(3.adjustedDp, colors.secondary),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = colors.primary,
+                contentColor = colors.onPrimary,
+            ),
         shape = RoundedCornerShape(size = 80.adjustedDp),
     ) {
         Column(
@@ -988,20 +991,21 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 text = titleForEmptyStateCTA,
                 style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
-                color = colors.primary,
+                color = colors.onPrimary,
                 modifier =
                     Modifier.focusable().semantics(mergeDescendants = true) {
                         contentDescription = titleForEmptyStateCTA
                         heading()
                     },
             )
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(
                     modifier = Modifier.height(56.dp),
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor = colors.primary,
-                            contentColor = colors.onPrimary,
+                            containerColor = colors.primaryContainer,
+                            contentColor = colors.onPrimaryContainer,
                         ),
                     onClick = { viewModel.onOpenWidgetEditor(shouldOpenWidgetPickerOnStart = true) },
                 ) {
