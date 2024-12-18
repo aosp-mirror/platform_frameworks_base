@@ -19396,9 +19396,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     creatorPackage);
             if (creatorToken != null) {
                 extraIntent.setCreatorToken(creatorToken);
-                // TODO remove Slog.wtf once proven FrameworkStatsLog works. b/375396329
-                Slog.wtf(TAG, "A creator token is added to an intent. creatorPackage: "
-                        + creatorPackage + "; intent: " + extraIntent);
                 FrameworkStatsLog.write(INTENT_CREATOR_TOKEN_ADDED, creatorUid, false);
             }
         });
