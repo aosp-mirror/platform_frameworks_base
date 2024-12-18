@@ -56,32 +56,27 @@ private fun BackAction(contentDescription: String, onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier =
-        if (isSpaExpressiveEnabled)
-            Modifier
-                .padding(
-                    start = SettingsDimension.paddingLarge,
-                    end = SettingsDimension.paddingSmall,
-                    top = SettingsDimension.paddingExtraSmall,
-                    bottom = SettingsDimension.paddingExtraSmall,
-                )
-                .size(SettingsDimension.actionIconWidth, SettingsDimension.actionIconHeight)
-                .clip(SettingsShape.CornerExtraLarge)
-        else Modifier,
+            if (isSpaExpressiveEnabled)
+                Modifier.padding(
+                        start = SettingsDimension.paddingExtraSmall5,
+                        end = SettingsDimension.paddingSmall,
+                        top = SettingsDimension.paddingExtraSmall,
+                        bottom = SettingsDimension.paddingExtraSmall,
+                    )
+                    .size(SettingsDimension.actionIconSize)
+                    .clip(SettingsShape.CornerExtraLarge)
+            else Modifier,
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = contentDescription,
             modifier =
-            if (isSpaExpressiveEnabled)
-                Modifier
-                    .size(
-                        SettingsDimension.actionIconWidth,
-                        SettingsDimension.actionIconHeight,
-                    )
-                    .clip(SettingsShape.CornerExtraLarge)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .padding(SettingsDimension.actionIconPadding)
-            else Modifier,
+                if (isSpaExpressiveEnabled)
+                    Modifier.size(SettingsDimension.actionIconSize)
+                        .clip(SettingsShape.CornerExtraLarge)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                        .padding(SettingsDimension.actionIconPadding)
+                else Modifier,
         )
     }
 }
